@@ -1,0 +1,1375 @@
+\documentclass[10pt,a4paper,titlepage,final]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{ltablex}
+\usepackage[left=2.00cm,right=2.00cm,top=2.00cm,bottom=2.00cm]{geometry}
+\author{Eugeniu Costetchi}
+\title{DataSet Fingerprint Report}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\section{Difference between Corporate and Places}
+\subsection{Common parts}
+The table below represents the elements common to both datasets.
+\begin{longtable}{lll}
+\toprule
+            Subject &           Predicate &              Object \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+     ato:MappedCode &  ato:affected-table &          xsd:string \\
+     ato:MappedCode &     ato:legacy-code &          xsd:string \\
+     ato:MappedCode &           dc:source &          xsd:string \\
+     ato:MappedCode &            rdf:type &      ato:MappedCode \\
+       skos:Concept &  ato:authority-code &          xsd:string \\
+       skos:Concept &         ato:op-code &          xsd:string \\
+       skos:Concept &  ato:op-mapped-code &      ato:MappedCode \\
+       skos:Concept &         atr:op-code &          xsd:string \\
+       skos:Concept &       dc:identifier &          xsd:string \\
+       skos:Concept &            rdf:type &        skos:Concept \\
+       skos:Concept &      skos:prefLabel &      rdf:langString \\
+ skos:ConceptScheme &            rdf:type &  skos:ConceptScheme \\
+ skos:ConceptScheme &          rdfs:label &      rdf:langString \\
+\end{longtable}
+
+
+\subsection{Unique to Corporate}
+The table below represents the elements present in Corporate but missing in Places.
+\begin{longtable}{lll}
+\toprule
+             Subject &               Predicate &                                             Object \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+           dct:Agent &  atmdr:to\_reviewwebsite &                                                  * \\
+           dct:Agent &      ato:authority-code &                                         xsd:string \\
+           dct:Agent &             ato:op-code &                                         xsd:string \\
+           dct:Agent &      ato:op-mapped-code &                                     ato:MappedCode \\
+           dct:Agent &      ato:protocol-order &                                         xsd:string \\
+           dct:Agent &      ato:protocol.order &                                         xsd:string \\
+           dct:Agent &             atr:op-code &                                         xsd:string \\
+           dct:Agent &             dct:created &                                           xsd:date \\
+           dct:Agent &        dct:dateAccepted &                                           xsd:date \\
+           dct:Agent &       dct:dateSubmitted &                                           xsd:date \\
+           dct:Agent &        dct:isReplacedBy &  dct:Agent, skos:Concept, org:Organisation, foa... \\
+           dct:Agent &            dct:replaces &  dct:Agent, skos:Concept, org:Organisation, foa... \\
+           dct:Agent &                dct:type &                                       skos:Concept \\
+           dct:Agent &           euvoc:endDate &                                           xsd:date \\
+           dct:Agent &             euvoc:order &                                         xsd:string \\
+           dct:Agent &         euvoc:startDate &                                           xsd:date \\
+           dct:Agent &            euvoc:status &                  euvoc:ConceptStatus, skos:Concept \\
+           dct:Agent &      euvoc:xlChangeNote &                                       euvoc:XlNote \\
+           dct:Agent &      euvoc:xlDefinition &                                       euvoc:XlNote \\
+           dct:Agent &     euvoc:xlHistoryNote &                                       euvoc:XlNote \\
+           dct:Agent &        euvoc:xlNotation &                                   euvoc:XlNotation \\
+           dct:Agent &         geowgs:location &                                                  * \\
+           dct:Agent &           lemon:context &                                                  * \\
+           dct:Agent &         owl:versionInfo &                                         xsd:string \\
+           dct:Agent &                rdf:type &                                          dct:Agent \\
+           dct:Agent &            skos:broader &  dct:Agent, skos:Concept, org:Organisation, foa... \\
+           dct:Agent &         skos:changeNote &                                     rdf:langString \\
+           dct:Agent &         skos:definition &                                     rdf:langString \\
+           dct:Agent &         skos:exactMatch &                                                  * \\
+           dct:Agent &        skos:historyNote &                                     rdf:langString \\
+           dct:Agent &           skos:inScheme &                   owl:Ontology, skos:ConceptScheme \\
+           dct:Agent &       skos:newPropoerty &                                         xsd:string \\
+           dct:Agent &           skos:notation &  atdt:CONSIL, atdt:DEMED, atdt:OJ, atdt:WHOISWH... \\
+           dct:Agent &          skos:prefLabel &                                     rdf:langString \\
+           dct:Agent &       skos:topConceptOf &                   owl:Ontology, skos:ConceptScheme \\
+           dct:Agent &          skoxl:altLabel &                                        skoxl:Label \\
+           dct:Agent &         skoxl:prefLabel &                                        skoxl:Label \\
+ euvoc:ConceptStatus &      ato:authority-code &                                         xsd:string \\
+ euvoc:ConceptStatus &             ato:op-code &                                         xsd:string \\
+ euvoc:ConceptStatus &             atr:op-code &                                         xsd:string \\
+ euvoc:ConceptStatus &             dct:created &                                           xsd:date \\
+ euvoc:ConceptStatus &        dct:dateAccepted &                                           xsd:date \\
+ euvoc:ConceptStatus &       dct:dateSubmitted &                                           xsd:date \\
+ euvoc:ConceptStatus &         euvoc:startDate &                                           xsd:date \\
+ euvoc:ConceptStatus &            euvoc:status &                  euvoc:ConceptStatus, skos:Concept \\
+ euvoc:ConceptStatus &      euvoc:xlDefinition &                                       euvoc:XlNote \\
+ euvoc:ConceptStatus &         owl:versionInfo &                                         xsd:string \\
+ euvoc:ConceptStatus &                rdf:type &                                euvoc:ConceptStatus \\
+ euvoc:ConceptStatus &         skos:definition &                                     rdf:langString \\
+ euvoc:ConceptStatus &           skos:inScheme &                   owl:Ontology, skos:ConceptScheme \\
+ euvoc:ConceptStatus &          skos:prefLabel &                                     rdf:langString \\
+ euvoc:ConceptStatus &       skos:topConceptOf &                   owl:Ontology, skos:ConceptScheme \\
+ euvoc:ConceptStatus &         skoxl:prefLabel &                                        skoxl:Label \\
+     euvoc:LabelType &      ato:authority-code &                                         xsd:string \\
+     euvoc:LabelType &             ato:op-code &                                         xsd:string \\
+     euvoc:LabelType &             atr:op-code &                                         xsd:string \\
+     euvoc:LabelType &             dct:created &                                           xsd:date \\
+     euvoc:LabelType &        dct:dateAccepted &                                           xsd:date \\
+     euvoc:LabelType &       dct:dateSubmitted &                                           xsd:date \\
+     euvoc:LabelType &         euvoc:startDate &                                           xsd:date \\
+     euvoc:LabelType &            euvoc:status &                  euvoc:ConceptStatus, skos:Concept \\
+     euvoc:LabelType &         owl:versionInfo &                                         xsd:string \\
+     euvoc:LabelType &                rdf:type &                                    euvoc:LabelType \\
+     euvoc:LabelType &           skos:inScheme &                   owl:Ontology, skos:ConceptScheme \\
+     euvoc:LabelType &             skos:newRel &                                         xsd:string \\
+     euvoc:LabelType &          skos:prefLabel &                                     rdf:langString \\
+     euvoc:LabelType &       skos:topConceptOf &                   owl:Ontology, skos:ConceptScheme \\
+     euvoc:LabelType &         skoxl:prefLabel &                                        skoxl:Label \\
+    euvoc:XlNotation &             dct:created &                                           xsd:date \\
+    euvoc:XlNotation &                dct:type &                                                  * \\
+    euvoc:XlNotation &           euvoc:endDate &                                           xsd:date \\
+    euvoc:XlNotation &         euvoc:startDate &                                           xsd:date \\
+    euvoc:XlNotation &            euvoc:status &                  euvoc:ConceptStatus, skos:Concept \\
+    euvoc:XlNotation &    euvoc:xlCodification &                                         xsd:string \\
+    euvoc:XlNotation &                rdf:type &                                   euvoc:XlNotation \\
+        euvoc:XlNote &              dct:source &                                     rdf:langString \\
+        euvoc:XlNote &         euvoc:startDate &                                           xsd:date \\
+        euvoc:XlNote &            euvoc:xlNote &                                     rdf:langString \\
+        euvoc:XlNote &                rdf:type &                                       euvoc:XlNote \\
+          foaf:Agent &  atmdr:to\_reviewwebsite &                                                  * \\
+          foaf:Agent &      ato:authority-code &                                         xsd:string \\
+          foaf:Agent &             ato:op-code &                                         xsd:string \\
+          foaf:Agent &      ato:op-mapped-code &                                     ato:MappedCode \\
+          foaf:Agent &      ato:protocol-order &                                         xsd:string \\
+          foaf:Agent &      ato:protocol.order &                                         xsd:string \\
+          foaf:Agent &             atr:op-code &                                         xsd:string \\
+          foaf:Agent &             dct:created &                                           xsd:date \\
+          foaf:Agent &        dct:dateAccepted &                                           xsd:date \\
+          foaf:Agent &       dct:dateSubmitted &                                           xsd:date \\
+          foaf:Agent &        dct:isReplacedBy &  dct:Agent, skos:Concept, org:Organisation, foa... \\
+          foaf:Agent &            dct:replaces &  dct:Agent, skos:Concept, org:Organisation, foa... \\
+          foaf:Agent &                dct:type &                                       skos:Concept \\
+          foaf:Agent &           euvoc:endDate &                                           xsd:date \\
+          foaf:Agent &             euvoc:order &                                         xsd:string \\
+          foaf:Agent &         euvoc:startDate &                                           xsd:date \\
+          foaf:Agent &            euvoc:status &                  euvoc:ConceptStatus, skos:Concept \\
+          foaf:Agent &      euvoc:xlChangeNote &                                       euvoc:XlNote \\
+          foaf:Agent &      euvoc:xlDefinition &                                       euvoc:XlNote \\
+          foaf:Agent &     euvoc:xlHistoryNote &                                       euvoc:XlNote \\
+          foaf:Agent &        euvoc:xlNotation &                                   euvoc:XlNotation \\
+          foaf:Agent &         geowgs:location &                                                  * \\
+          foaf:Agent &           lemon:context &                                                  * \\
+          foaf:Agent &         owl:versionInfo &                                         xsd:string \\
+          foaf:Agent &                rdf:type &                                         foaf:Agent \\
+          foaf:Agent &            skos:broader &  dct:Agent, skos:Concept, org:Organisation, foa... \\
+          foaf:Agent &         skos:changeNote &                                     rdf:langString \\
+          foaf:Agent &         skos:definition &                                     rdf:langString \\
+          foaf:Agent &         skos:exactMatch &                                                  * \\
+          foaf:Agent &        skos:historyNote &                                     rdf:langString \\
+          foaf:Agent &           skos:inScheme &                   owl:Ontology, skos:ConceptScheme \\
+          foaf:Agent &       skos:newPropoerty &                                         xsd:string \\
+          foaf:Agent &           skos:notation &  atdt:CONSIL, atdt:DEMED, atdt:OJ, atdt:WHOISWH... \\
+          foaf:Agent &          skos:prefLabel &                                     rdf:langString \\
+          foaf:Agent &       skos:topConceptOf &                   owl:Ontology, skos:ConceptScheme \\
+          foaf:Agent &          skoxl:altLabel &                                        skoxl:Label \\
+          foaf:Agent &         skoxl:prefLabel &                                        skoxl:Label \\
+    org:Organisation &  atmdr:to\_reviewwebsite &                                                  * \\
+    org:Organisation &      ato:authority-code &                                         xsd:string \\
+    org:Organisation &             ato:op-code &                                         xsd:string \\
+    org:Organisation &      ato:op-mapped-code &                                     ato:MappedCode \\
+    org:Organisation &      ato:protocol-order &                                         xsd:string \\
+    org:Organisation &      ato:protocol.order &                                         xsd:string \\
+    org:Organisation &             atr:op-code &                                         xsd:string \\
+    org:Organisation &             dct:created &                                           xsd:date \\
+    org:Organisation &        dct:dateAccepted &                                           xsd:date \\
+    org:Organisation &       dct:dateSubmitted &                                           xsd:date \\
+    org:Organisation &        dct:isReplacedBy &  dct:Agent, skos:Concept, org:Organisation, foa... \\
+    org:Organisation &            dct:replaces &  dct:Agent, skos:Concept, org:Organisation, foa... \\
+    org:Organisation &                dct:type &                                       skos:Concept \\
+    org:Organisation &           euvoc:endDate &                                           xsd:date \\
+    org:Organisation &             euvoc:order &                                         xsd:string \\
+    org:Organisation &         euvoc:startDate &                                           xsd:date \\
+    org:Organisation &            euvoc:status &                  euvoc:ConceptStatus, skos:Concept \\
+    org:Organisation &      euvoc:xlChangeNote &                                       euvoc:XlNote \\
+    org:Organisation &      euvoc:xlDefinition &                                       euvoc:XlNote \\
+    org:Organisation &     euvoc:xlHistoryNote &                                       euvoc:XlNote \\
+    org:Organisation &        euvoc:xlNotation &                                   euvoc:XlNotation \\
+    org:Organisation &         geowgs:location &                                                  * \\
+    org:Organisation &           lemon:context &                                                  * \\
+    org:Organisation &         owl:versionInfo &                                         xsd:string \\
+    org:Organisation &                rdf:type &                                   org:Organisation \\
+    org:Organisation &            skos:broader &  dct:Agent, skos:Concept, org:Organisation, foa... \\
+    org:Organisation &         skos:changeNote &                                     rdf:langString \\
+    org:Organisation &         skos:definition &                                     rdf:langString \\
+    org:Organisation &         skos:exactMatch &                                                  * \\
+    org:Organisation &        skos:historyNote &                                     rdf:langString \\
+    org:Organisation &           skos:inScheme &                   owl:Ontology, skos:ConceptScheme \\
+    org:Organisation &       skos:newPropoerty &                                         xsd:string \\
+    org:Organisation &           skos:notation &  atdt:CONSIL, atdt:DEMED, atdt:OJ, atdt:WHOISWH... \\
+    org:Organisation &          skos:prefLabel &                                     rdf:langString \\
+    org:Organisation &       skos:topConceptOf &                   owl:Ontology, skos:ConceptScheme \\
+    org:Organisation &          skoxl:altLabel &                                        skoxl:Label \\
+    org:Organisation &         skoxl:prefLabel &                                        skoxl:Label \\
+        owl:Ontology &          dct:identifier &                                         xsd:string \\
+        owl:Ontology &             owl:imports &                                                  * \\
+        owl:Ontology &          owl:versionIRI &                                                  * \\
+        owl:Ontology &         owl:versionInfo &                                         xsd:string \\
+        owl:Ontology &                rdf:type &                                       owl:Ontology \\
+        owl:Ontology &            rdfs:comment &                                       rdfs:Literal \\
+        owl:Ontology &              rdfs:label &                                     rdf:langString \\
+        owl:Ontology &          skos:prefLabel &                                     rdf:langString \\
+        owl:Ontology &         skoxl:prefLabel &                                        skoxl:Label \\
+        skos:Concept &  atmdr:to\_reviewwebsite &                                                  * \\
+        skos:Concept &      ato:protocol-order &                                         xsd:string \\
+        skos:Concept &      ato:protocol.order &                                         xsd:string \\
+        skos:Concept &             dct:created &                                           xsd:date \\
+        skos:Concept &        dct:dateAccepted &                                           xsd:date \\
+        skos:Concept &       dct:dateSubmitted &                                           xsd:date \\
+        skos:Concept &        dct:isReplacedBy &  dct:Agent, skos:Concept, org:Organisation, foa... \\
+        skos:Concept &            dct:replaces &  dct:Agent, skos:Concept, org:Organisation, foa... \\
+        skos:Concept &                dct:type &                                       skos:Concept \\
+        skos:Concept &           euvoc:endDate &                                           xsd:date \\
+        skos:Concept &             euvoc:order &                                         xsd:string \\
+        skos:Concept &         euvoc:startDate &                                           xsd:date \\
+        skos:Concept &            euvoc:status &                  euvoc:ConceptStatus, skos:Concept \\
+        skos:Concept &      euvoc:xlChangeNote &                                       euvoc:XlNote \\
+        skos:Concept &      euvoc:xlDefinition &                                       euvoc:XlNote \\
+        skos:Concept &     euvoc:xlHistoryNote &                                       euvoc:XlNote \\
+        skos:Concept &        euvoc:xlNotation &                                   euvoc:XlNotation \\
+        skos:Concept &         geowgs:location &                                                  * \\
+        skos:Concept &           lemon:context &                                                  * \\
+        skos:Concept &         owl:versionInfo &                                         xsd:string \\
+        skos:Concept &            skos:broader &  dct:Agent, skos:Concept, org:Organisation, foa... \\
+        skos:Concept &         skos:changeNote &                                     rdf:langString \\
+        skos:Concept &         skos:definition &                                     rdf:langString \\
+        skos:Concept &         skos:exactMatch &                                                  * \\
+        skos:Concept &        skos:historyNote &                                     rdf:langString \\
+        skos:Concept &           skos:inScheme &                   owl:Ontology, skos:ConceptScheme \\
+        skos:Concept &       skos:newPropoerty &                                         xsd:string \\
+        skos:Concept &             skos:newRel &                                         xsd:string \\
+        skos:Concept &           skos:notation &  atdt:CONSIL, atdt:DEMED, atdt:OJ, atdt:WHOISWH... \\
+        skos:Concept &       skos:topConceptOf &                   owl:Ontology, skos:ConceptScheme \\
+        skos:Concept &          skoxl:altLabel &                                        skoxl:Label \\
+        skos:Concept &         skoxl:prefLabel &                                        skoxl:Label \\
+  skos:ConceptScheme &          dct:identifier &                                         xsd:string \\
+  skos:ConceptScheme &             owl:imports &                                                  * \\
+  skos:ConceptScheme &          owl:versionIRI &                                                  * \\
+  skos:ConceptScheme &         owl:versionInfo &                                         xsd:string \\
+  skos:ConceptScheme &            rdfs:comment &                                       rdfs:Literal \\
+  skos:ConceptScheme &          skos:prefLabel &                                     rdf:langString \\
+  skos:ConceptScheme &         skoxl:prefLabel &                                        skoxl:Label \\
+         skoxl:Label &             dct:created &                                           xsd:date \\
+         skoxl:Label &                dct:type &                      euvoc:LabelType, skos:Concept \\
+         skoxl:Label &           euvoc:endDate &                                           xsd:date \\
+         skoxl:Label &         euvoc:startDate &                                           xsd:date \\
+         skoxl:Label &            euvoc:status &                  euvoc:ConceptStatus, skos:Concept \\
+         skoxl:Label &            lexvo:gender &                                                  * \\
+         skoxl:Label &                rdf:type &                                        skoxl:Label \\
+         skoxl:Label &              rdfs:label &                                     rdf:langString \\
+         skoxl:Label &       skoxl:literalForm &                                     rdf:langString \\
+\end{longtable}
+
+
+\subsection{Unique to Places}
+The table below represents the elements present in Places but missing in Corporate.
+\begin{longtable}{lll}
+\toprule
+             Subject &                 Predicate &               Object \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+ geowgs:SpatialThing &                geowgs:lat &            xsd:float \\
+ geowgs:SpatialThing &               geowgs:long &            xsd:float \\
+ geowgs:SpatialThing &                  rdf:type &  geowgs:SpatialThing \\
+ geowgs:SpatialThing &                rdfs:label &       rdf:langString \\
+        skos:Concept &            ato:deprecated &           xsd:string \\
+        skos:Concept &               ato:end.use &           xsd:string \\
+        skos:Concept &             ato:start.use &           xsd:string \\
+        skos:Concept &                owl:sameAs &  geowgs:SpatialThing \\
+        skos:Concept &          skos:hiddenLabel &           xsd:string \\
+        skos:Concept &             skos:inScheme &   skos:ConceptScheme \\
+  skos:ConceptScheme &             ato:prefLabel &       rdf:langString \\
+  skos:ConceptScheme &              ato:table.id &           xsd:string \\
+  skos:ConceptScheme &  ato:table.version.number &           xsd:string \\
+\end{longtable}
+
+
+\section{What do data say about Corporate}
+\subsection{Class instantiation overview for Corporate}
+The table below describes how are classes instantiated. Please note that the instance countsare different from total number of unique instances in the data{-}set. When an individualinstantiates multiple classes, then it is counted once for each class it instantiates. The relativenumber of instances is scaled to the total number of unique instances per class.
+\begin{longtable}{lrr}
+\toprule
+               Class &  Unique instances &  \% unique instance sum \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+         skoxl:Label &             41099 &                  80.71 \\
+    euvoc:XlNotation &              3244 &                   6.37 \\
+      ato:MappedCode &              1340 &                   2.63 \\
+        skos:Concept &              1176 &                   2.31 \\
+           dct:Agent &              1139 &                   2.24 \\
+    org:Organisation &              1139 &                   2.24 \\
+          foaf:Agent &              1139 &                   2.24 \\
+        euvoc:XlNote &               618 &                   1.21 \\
+     euvoc:LabelType &                11 &                   0.02 \\
+ euvoc:ConceptStatus &                 9 &                   0.02 \\
+        owl:Ontology &                 4 &                   0.01 \\
+  skos:ConceptScheme &                 4 &                   0.01 \\
+\end{longtable}
+
+
+\subsection{Application profile reconstruction for Corporate}
+This section attempts at reconstructing the profiled shapes for each class. The profile is deduced based on descriptive statistics presented elsewhere. The tables below contain the following columns: Property name, Cardinality, Property Type, Property Range and Confidence. \\\\ Confidence is a categorial value derived from the property usage relative to the total number of unique individuals instantiating this class.Property range is a list of distinct encountered object types. In case of higher number of object type the list is non{-}exhaustive. Cardinality of the property is expressed in terms of minimum and maximum occurrences of the property. The minimum value varies from zero (0) meaning that the property is optional to one (1) meaning that the property is mandatory while the maximum value variesfrom one (1) meaning that the property is sufficient to star (*) meaning that the property is maximally unbound. Finally the type indicates whether the property rangeis whether a data type or an individual URI.
+\subsubsection{Estimated Application Profile for ato:MappedCode class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+           Property & Cardinality &    Type &           Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+           rdf:type &      1 .. 1 &  object &  ato:MappedCode &    certain \\
+          dc:source &      1 .. 1 &    data &      xsd:string &    certain \\
+    ato:legacy-code &      1 .. 1 &    data &      xsd:string &    certain \\
+ ato:affected-table &      0 .. * &    data &      xsd:string &   possible \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for dct:Agent class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+               Property & Cardinality &    Type &                                              Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+               rdf:type &      4 .. * &  object &                                          dct:Agent &    certain \\
+      skos:topConceptOf &      1 .. 1 &  object &                   owl:Ontology, skos:ConceptScheme &    certain \\
+          skos:inScheme &      1 .. 1 &  object &                   owl:Ontology, skos:ConceptScheme &    certain \\
+        owl:versionInfo &      1 .. 1 &    data &                                         xsd:string &    certain \\
+           euvoc:status &      1 .. 1 &  object &                  euvoc:ConceptStatus, skos:Concept &    certain \\
+        euvoc:startDate &      1 .. 1 &    data &                                           xsd:date &    certain \\
+            dct:created &      1 .. 1 &    data &                                           xsd:date &    certain \\
+            atr:op-code &      1 .. 1 &    data &                                         xsd:string &    certain \\
+            ato:op-code &      1 .. 1 &    data &                                         xsd:string &    certain \\
+     ato:authority-code &      1 .. 1 &    data &                                         xsd:string &    certain \\
+        skoxl:prefLabel &      1 .. * &  object &                                        skoxl:Label &    certain \\
+         skos:prefLabel &      1 .. * &    data &                                     rdf:langString &    certain \\
+               dct:type &      1 .. 1 &  object &                                       skos:Concept &    certain \\
+      dct:dateSubmitted &      1 .. 1 &    data &                                           xsd:date &    certain \\
+       dct:dateAccepted &      1 .. 1 &    data &                                           xsd:date &    certain \\
+          lemon:context &      1 .. * &    data &                                                  * &    certain \\
+        geowgs:location &      1 .. * &    data &                                                  * &     likely \\
+           skos:broader &      0 .. * &  object &  dct:Agent, skos:Concept, org:Organisation, foa... &   possible \\
+          skos:notation &      0 .. * &    data &  atdt:CONSIL, atdt:DEMED, atdt:OJ, atdt:WHOISWH... &   possible \\
+       euvoc:xlNotation &      0 .. * &  object &                                   euvoc:XlNotation &   possible \\
+     ato:op-mapped-code &      0 .. * &  object &                                     ato:MappedCode &   possible \\
+         skoxl:altLabel &      0 .. * &  object &                                        skoxl:Label &   possible \\
+          euvoc:endDate &      0 .. * &    data &                                           xsd:date &   unlikely \\
+        skos:definition &      0 .. * &    data &                                     rdf:langString &   unlikely \\
+     euvoc:xlDefinition &      0 .. * &  object &                                       euvoc:XlNote &   unlikely \\
+           dct:replaces &      0 .. * &  object &  dct:Agent, skos:Concept, org:Organisation, foa... &   unlikely \\
+       dct:isReplacedBy &      0 .. * &  object &  dct:Agent, skos:Concept, org:Organisation, foa... &   unlikely \\
+        skos:exactMatch &      0 .. * &    data &                                                  * &   unlikely \\
+ atmdr:to\_reviewwebsite &      0 .. * &    data &                                                  * &       rare \\
+        skos:changeNote &      0 .. * &    data &                                     rdf:langString &       rare \\
+     euvoc:xlChangeNote &      0 .. * &  object &                                       euvoc:XlNote &       rare \\
+       skos:historyNote &      0 .. * &    data &                                     rdf:langString &  very rare \\
+    euvoc:xlHistoryNote &      0 .. * &  object &                                       euvoc:XlNote &  very rare \\
+            euvoc:order &      0 .. * &    data &                                         xsd:string &  very rare \\
+     ato:protocol.order &      0 .. * &    data &                                         xsd:string &  very rare \\
+     ato:protocol-order &      0 .. * &    data &                                         xsd:string &  very rare \\
+      skos:newPropoerty &      0 .. * &    data &                                         xsd:string &  very rare \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for euvoc:ConceptStatus class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+           Property & Cardinality &    Type &                              Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+    skos:definition &      2 .. * &    data &                     rdf:langString &    certain \\
+           rdf:type &      2 .. * &  object &                euvoc:ConceptStatus &    certain \\
+ euvoc:xlDefinition &      2 .. * &  object &                       euvoc:XlNote &    certain \\
+    skoxl:prefLabel &      1 .. 1 &  object &                        skoxl:Label &    certain \\
+  skos:topConceptOf &      1 .. 1 &  object &   owl:Ontology, skos:ConceptScheme &    certain \\
+     skos:prefLabel &      1 .. 1 &    data &                     rdf:langString &    certain \\
+      skos:inScheme &      1 .. 1 &  object &   owl:Ontology, skos:ConceptScheme &    certain \\
+    owl:versionInfo &      1 .. 1 &    data &                         xsd:string &    certain \\
+       euvoc:status &      1 .. 1 &  object &  euvoc:ConceptStatus, skos:Concept &    certain \\
+    euvoc:startDate &      1 .. 1 &    data &                           xsd:date &    certain \\
+        dct:created &      1 .. 1 &    data &                           xsd:date &    certain \\
+        atr:op-code &      1 .. 1 &    data &                         xsd:string &    certain \\
+        ato:op-code &      1 .. 1 &    data &                         xsd:string &    certain \\
+ ato:authority-code &      1 .. 1 &    data &                         xsd:string &    certain \\
+  dct:dateSubmitted &      0 .. * &    data &                           xsd:date &   unlikely \\
+   dct:dateAccepted &      0 .. * &    data &                           xsd:date &   unlikely \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for euvoc:LabelType class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+           Property & Cardinality &    Type &                              Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+           rdf:type &      2 .. * &  object &                    euvoc:LabelType &    certain \\
+    skoxl:prefLabel &      1 .. 1 &  object &                        skoxl:Label &    certain \\
+  skos:topConceptOf &      1 .. 1 &  object &   owl:Ontology, skos:ConceptScheme &    certain \\
+     skos:prefLabel &      1 .. 1 &    data &                     rdf:langString &    certain \\
+      skos:inScheme &      1 .. 1 &  object &   owl:Ontology, skos:ConceptScheme &    certain \\
+    owl:versionInfo &      1 .. 1 &    data &                         xsd:string &    certain \\
+       euvoc:status &      1 .. 1 &  object &  euvoc:ConceptStatus, skos:Concept &    certain \\
+    euvoc:startDate &      1 .. 1 &    data &                           xsd:date &    certain \\
+        dct:created &      1 .. 1 &    data &                           xsd:date &    certain \\
+        atr:op-code &      1 .. 1 &    data &                         xsd:string &    certain \\
+        ato:op-code &      1 .. 1 &    data &                         xsd:string &    certain \\
+ ato:authority-code &      1 .. 1 &    data &                         xsd:string &    certain \\
+  dct:dateSubmitted &      0 .. * &    data &                           xsd:date &   unlikely \\
+   dct:dateAccepted &      0 .. * &    data &                           xsd:date &   unlikely \\
+        skos:newRel &      0 .. * &    data &                         xsd:string &       rare \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for euvoc:XlNotation class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+             Property & Cardinality &    Type &                              Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+             rdf:type &      1 .. 1 &  object &                   euvoc:XlNotation &    certain \\
+ euvoc:xlCodification &      1 .. 1 &    data &                         xsd:string &    certain \\
+             dct:type &      1 .. 1 &    data &                                  * &    certain \\
+         euvoc:status &      1 .. 1 &  object &  euvoc:ConceptStatus, skos:Concept &    certain \\
+      euvoc:startDate &      1 .. 1 &    data &                           xsd:date &    certain \\
+          dct:created &      1 .. 1 &    data &                           xsd:date &    certain \\
+        euvoc:endDate &      0 .. * &    data &                           xsd:date &   unlikely \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for euvoc:XlNote class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+        Property & Cardinality &    Type &           Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+        rdf:type &      1 .. 1 &  object &    euvoc:XlNote &    certain \\
+    euvoc:xlNote &      1 .. 1 &    data &  rdf:langString &    certain \\
+ euvoc:startDate &      0 .. * &    data &        xsd:date &   possible \\
+      dct:source &      0 .. * &    data &  rdf:langString &   possible \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for foaf:Agent class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+               Property & Cardinality &    Type &                                              Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+               rdf:type &      4 .. * &  object &                                         foaf:Agent &    certain \\
+      skos:topConceptOf &      1 .. 1 &  object &                   owl:Ontology, skos:ConceptScheme &    certain \\
+          skos:inScheme &      1 .. 1 &  object &                   owl:Ontology, skos:ConceptScheme &    certain \\
+        owl:versionInfo &      1 .. 1 &    data &                                         xsd:string &    certain \\
+           euvoc:status &      1 .. 1 &  object &                  euvoc:ConceptStatus, skos:Concept &    certain \\
+        euvoc:startDate &      1 .. 1 &    data &                                           xsd:date &    certain \\
+            dct:created &      1 .. 1 &    data &                                           xsd:date &    certain \\
+            atr:op-code &      1 .. 1 &    data &                                         xsd:string &    certain \\
+            ato:op-code &      1 .. 1 &    data &                                         xsd:string &    certain \\
+     ato:authority-code &      1 .. 1 &    data &                                         xsd:string &    certain \\
+        skoxl:prefLabel &      1 .. * &  object &                                        skoxl:Label &    certain \\
+         skos:prefLabel &      1 .. * &    data &                                     rdf:langString &    certain \\
+               dct:type &      1 .. 1 &  object &                                       skos:Concept &    certain \\
+      dct:dateSubmitted &      1 .. 1 &    data &                                           xsd:date &    certain \\
+       dct:dateAccepted &      1 .. 1 &    data &                                           xsd:date &    certain \\
+          lemon:context &      1 .. * &    data &                                                  * &    certain \\
+        geowgs:location &      1 .. * &    data &                                                  * &     likely \\
+           skos:broader &      0 .. * &  object &  dct:Agent, skos:Concept, org:Organisation, foa... &   possible \\
+          skos:notation &      0 .. * &    data &  atdt:CONSIL, atdt:DEMED, atdt:OJ, atdt:WHOISWH... &   possible \\
+       euvoc:xlNotation &      0 .. * &  object &                                   euvoc:XlNotation &   possible \\
+     ato:op-mapped-code &      0 .. * &  object &                                     ato:MappedCode &   possible \\
+         skoxl:altLabel &      0 .. * &  object &                                        skoxl:Label &   possible \\
+          euvoc:endDate &      0 .. * &    data &                                           xsd:date &   unlikely \\
+        skos:definition &      0 .. * &    data &                                     rdf:langString &   unlikely \\
+     euvoc:xlDefinition &      0 .. * &  object &                                       euvoc:XlNote &   unlikely \\
+           dct:replaces &      0 .. * &  object &  dct:Agent, skos:Concept, org:Organisation, foa... &   unlikely \\
+       dct:isReplacedBy &      0 .. * &  object &  dct:Agent, skos:Concept, org:Organisation, foa... &   unlikely \\
+        skos:exactMatch &      0 .. * &    data &                                                  * &   unlikely \\
+ atmdr:to\_reviewwebsite &      0 .. * &    data &                                                  * &       rare \\
+        skos:changeNote &      0 .. * &    data &                                     rdf:langString &       rare \\
+     euvoc:xlChangeNote &      0 .. * &  object &                                       euvoc:XlNote &       rare \\
+       skos:historyNote &      0 .. * &    data &                                     rdf:langString &  very rare \\
+    euvoc:xlHistoryNote &      0 .. * &  object &                                       euvoc:XlNote &  very rare \\
+            euvoc:order &      0 .. * &    data &                                         xsd:string &  very rare \\
+     ato:protocol.order &      0 .. * &    data &                                         xsd:string &  very rare \\
+     ato:protocol-order &      0 .. * &    data &                                         xsd:string &  very rare \\
+      skos:newPropoerty &      0 .. * &    data &                                         xsd:string &  very rare \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for org:Organisation class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+               Property & Cardinality &    Type &                                              Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+               rdf:type &      4 .. * &  object &                                   org:Organisation &    certain \\
+      skos:topConceptOf &      1 .. 1 &  object &                   owl:Ontology, skos:ConceptScheme &    certain \\
+          skos:inScheme &      1 .. 1 &  object &                   owl:Ontology, skos:ConceptScheme &    certain \\
+        owl:versionInfo &      1 .. 1 &    data &                                         xsd:string &    certain \\
+           euvoc:status &      1 .. 1 &  object &                  euvoc:ConceptStatus, skos:Concept &    certain \\
+        euvoc:startDate &      1 .. 1 &    data &                                           xsd:date &    certain \\
+            dct:created &      1 .. 1 &    data &                                           xsd:date &    certain \\
+            atr:op-code &      1 .. 1 &    data &                                         xsd:string &    certain \\
+            ato:op-code &      1 .. 1 &    data &                                         xsd:string &    certain \\
+     ato:authority-code &      1 .. 1 &    data &                                         xsd:string &    certain \\
+        skoxl:prefLabel &      1 .. * &  object &                                        skoxl:Label &    certain \\
+         skos:prefLabel &      1 .. * &    data &                                     rdf:langString &    certain \\
+               dct:type &      1 .. 1 &  object &                                       skos:Concept &    certain \\
+      dct:dateSubmitted &      1 .. 1 &    data &                                           xsd:date &    certain \\
+       dct:dateAccepted &      1 .. 1 &    data &                                           xsd:date &    certain \\
+          lemon:context &      1 .. * &    data &                                                  * &    certain \\
+        geowgs:location &      1 .. * &    data &                                                  * &     likely \\
+           skos:broader &      0 .. * &  object &  dct:Agent, skos:Concept, org:Organisation, foa... &   possible \\
+          skos:notation &      0 .. * &    data &  atdt:CONSIL, atdt:DEMED, atdt:OJ, atdt:WHOISWH... &   possible \\
+       euvoc:xlNotation &      0 .. * &  object &                                   euvoc:XlNotation &   possible \\
+     ato:op-mapped-code &      0 .. * &  object &                                     ato:MappedCode &   possible \\
+         skoxl:altLabel &      0 .. * &  object &                                        skoxl:Label &   possible \\
+          euvoc:endDate &      0 .. * &    data &                                           xsd:date &   unlikely \\
+        skos:definition &      0 .. * &    data &                                     rdf:langString &   unlikely \\
+     euvoc:xlDefinition &      0 .. * &  object &                                       euvoc:XlNote &   unlikely \\
+           dct:replaces &      0 .. * &  object &  dct:Agent, skos:Concept, org:Organisation, foa... &   unlikely \\
+       dct:isReplacedBy &      0 .. * &  object &  dct:Agent, skos:Concept, org:Organisation, foa... &   unlikely \\
+        skos:exactMatch &      0 .. * &    data &                                                  * &   unlikely \\
+ atmdr:to\_reviewwebsite &      0 .. * &    data &                                                  * &       rare \\
+        skos:changeNote &      0 .. * &    data &                                     rdf:langString &       rare \\
+     euvoc:xlChangeNote &      0 .. * &  object &                                       euvoc:XlNote &       rare \\
+       skos:historyNote &      0 .. * &    data &                                     rdf:langString &  very rare \\
+    euvoc:xlHistoryNote &      0 .. * &  object &                                       euvoc:XlNote &  very rare \\
+            euvoc:order &      0 .. * &    data &                                         xsd:string &  very rare \\
+     ato:protocol.order &      0 .. * &    data &                                         xsd:string &  very rare \\
+     ato:protocol-order &      0 .. * &    data &                                         xsd:string &  very rare \\
+      skos:newPropoerty &      0 .. * &    data &                                         xsd:string &  very rare \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for owl:Ontology class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+        Property & Cardinality &    Type &           Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+        rdf:type &      2 .. * &  object &    owl:Ontology &    certain \\
+ skoxl:prefLabel &      1 .. 1 &  object &     skoxl:Label &    certain \\
+  skos:prefLabel &      1 .. 1 &    data &  rdf:langString &    certain \\
+      rdfs:label &      1 .. 1 &    data &  rdf:langString &    certain \\
+    rdfs:comment &      1 .. 1 &    data &    rdfs:Literal &    certain \\
+ owl:versionInfo &      1 .. 1 &    data &      xsd:string &    certain \\
+  owl:versionIRI &      1 .. 1 &    data &               * &    certain \\
+     owl:imports &      1 .. 1 &    data &               * &    certain \\
+  dct:identifier &      1 .. 1 &    data &      xsd:string &    certain \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for skos:Concept class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+               Property & Cardinality &    Type &                                              Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+          skos:inScheme &      1 .. 1 &  object &                   owl:Ontology, skos:ConceptScheme &    certain \\
+            atr:op-code &      1 .. 1 &    data &                                         xsd:string &    certain \\
+            ato:op-code &      1 .. 1 &    data &                                         xsd:string &    certain \\
+         skos:prefLabel &      1 .. * &    data &                                     rdf:langString &    certain \\
+               rdf:type &      1 .. * &  object &                                       skos:Concept &    certain \\
+      skos:topConceptOf &      1 .. 1 &  object &                   owl:Ontology, skos:ConceptScheme &    certain \\
+        owl:versionInfo &      1 .. 1 &    data &                                         xsd:string &    certain \\
+           euvoc:status &      1 .. 1 &  object &                  euvoc:ConceptStatus, skos:Concept &    certain \\
+        euvoc:startDate &      1 .. 1 &    data &                                           xsd:date &    certain \\
+            dct:created &      1 .. 1 &    data &                                           xsd:date &    certain \\
+     ato:authority-code &      1 .. 1 &    data &                                         xsd:string &    certain \\
+        skoxl:prefLabel &      1 .. * &  object &                                        skoxl:Label &    certain \\
+      dct:dateSubmitted &      1 .. 1 &    data &                                           xsd:date &    certain \\
+       dct:dateAccepted &      1 .. 1 &    data &                                           xsd:date &    certain \\
+               dct:type &      1 .. 1 &  object &                                       skos:Concept &    certain \\
+          lemon:context &      1 .. * &    data &                                                  * &    certain \\
+        geowgs:location &      0 .. * &    data &                                                  * &   possible \\
+           skos:broader &      0 .. * &  object &  dct:Agent, skos:Concept, org:Organisation, foa... &   possible \\
+          skos:notation &      0 .. * &    data &  atdt:CONSIL, atdt:DEMED, atdt:OJ, atdt:WHOISWH... &   possible \\
+       euvoc:xlNotation &      0 .. * &  object &                                   euvoc:XlNotation &   possible \\
+     ato:op-mapped-code &      0 .. * &  object &                                     ato:MappedCode &   possible \\
+         skoxl:altLabel &      0 .. * &  object &                                        skoxl:Label &   possible \\
+          euvoc:endDate &      0 .. * &    data &                                           xsd:date &   unlikely \\
+        skos:definition &      0 .. * &    data &                                     rdf:langString &   unlikely \\
+     euvoc:xlDefinition &      0 .. * &  object &                                       euvoc:XlNote &   unlikely \\
+           dct:replaces &      0 .. * &  object &  dct:Agent, skos:Concept, org:Organisation, foa... &   unlikely \\
+       dct:isReplacedBy &      0 .. * &  object &  dct:Agent, skos:Concept, org:Organisation, foa... &   unlikely \\
+        skos:exactMatch &      0 .. * &    data &                                                  * &   unlikely \\
+        skos:changeNote &      0 .. * &    data &                                     rdf:langString &       rare \\
+     euvoc:xlChangeNote &      0 .. * &  object &                                       euvoc:XlNote &       rare \\
+ atmdr:to\_reviewwebsite &      0 .. * &    data &                                                  * &       rare \\
+       skos:historyNote &      0 .. * &    data &                                     rdf:langString &  very rare \\
+    euvoc:xlHistoryNote &      0 .. * &  object &                                       euvoc:XlNote &  very rare \\
+            euvoc:order &      0 .. * &    data &                                         xsd:string &  very rare \\
+     ato:protocol.order &      0 .. * &    data &                                         xsd:string &  very rare \\
+     ato:protocol-order &      0 .. * &    data &                                         xsd:string &  very rare \\
+            skos:newRel &      0 .. * &    data &                                         xsd:string &  very rare \\
+      skos:newPropoerty &      0 .. * &    data &                                         xsd:string &  very rare \\
+          dc:identifier &      0 .. * &    data &                                         xsd:string &  very rare \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for skos:ConceptScheme class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+        Property & Cardinality &    Type &               Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+        rdf:type &      2 .. * &  object &  skos:ConceptScheme &    certain \\
+ skoxl:prefLabel &      1 .. 1 &  object &         skoxl:Label &    certain \\
+  skos:prefLabel &      1 .. 1 &    data &      rdf:langString &    certain \\
+      rdfs:label &      1 .. 1 &    data &      rdf:langString &    certain \\
+    rdfs:comment &      1 .. 1 &    data &        rdfs:Literal &    certain \\
+ owl:versionInfo &      1 .. 1 &    data &          xsd:string &    certain \\
+  owl:versionIRI &      1 .. 1 &    data &                   * &    certain \\
+     owl:imports &      1 .. 1 &    data &                   * &    certain \\
+  dct:identifier &      1 .. 1 &    data &          xsd:string &    certain \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for skoxl:Label class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+          Property & Cardinality &    Type &                              Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+ skoxl:literalForm &      1 .. 1 &    data &                     rdf:langString &    certain \\
+        rdfs:label &      1 .. 1 &    data &                     rdf:langString &    certain \\
+          rdf:type &      1 .. 1 &  object &                        skoxl:Label &    certain \\
+          dct:type &      1 .. 1 &  object &      euvoc:LabelType, skos:Concept &    certain \\
+      euvoc:status &      1 .. 1 &  object &  euvoc:ConceptStatus, skos:Concept &     likely \\
+   euvoc:startDate &      1 .. 1 &    data &                           xsd:date &     likely \\
+       dct:created &      1 .. 1 &    data &                           xsd:date &     likely \\
+     euvoc:endDate &      0 .. * &    data &                           xsd:date &   unlikely \\
+      lexvo:gender &      0 .. * &    data &                                  * &  very rare \\
+\end{tabularx}
+
+
+\subsection{Property usage statistics for Corporate}
+This section provides descriptive statistical indicators for each class.The tables below contain the following columns: property name, absolute normalised usage (Norm usg/a), absolute actual usage(Usage/a), normalised minimum (Min), normalised maximum (Max), normalised average (Avg), relative normalised usage (Norm usg/r), relative actual usage (Usage/r).\\\\The normalization mentioned above refers to counting out of all classindividuals how many are actually using the property at least once whilethe actual property usage refers to counting all occurrences for a given class.The rdf:type property plays a special role because it indicates the numberof unique class instances and in case of multiple class instantiation the number is scaled by the  number of distinct parent classes. \\\\The relative actual usage (Usage/r) is calculated with respect to a sibling property that maximally occurs in all class instances. Therefore there is no standard propertyto be chosen as reference like in the case of rdf:type but it varies from case to case.
+\subsubsection{Propoerty statistics for ato:MappedCode class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+           Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+           rdf:type &        1340 &     1340 &    1 &    1 &    1 &         100 &      100 \\
+          dc:source &        1340 &     1340 &    1 &    1 &    1 &         100 &      100 \\
+    ato:legacy-code &        1340 &     1340 &    1 &    1 &    1 &         100 &      100 \\
+ ato:affected-table &        1053 &     1053 &    1 &    1 &    1 &          78 &       78 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for dct:Agent class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+               Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+        skoxl:prefLabel &        1139 &    28778 &    1 &  216 &   35 &         100 &      100 \\
+         skos:prefLabel &        1139 &    24486 &    1 &   27 &   23 &         100 &       85 \\
+               rdf:type &        1139 &     4556 &    4 &    4 &    4 &         100 &       15 \\
+      skos:topConceptOf &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+          skos:inScheme &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+        owl:versionInfo &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+           euvoc:status &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+        euvoc:startDate &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+            dct:created &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+            atr:op-code &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+            ato:op-code &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+     ato:authority-code &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+          lemon:context &        1138 &     2281 &    1 &    6 &    2 &          99 &        7 \\
+               dct:type &        1138 &     1138 &    1 &    1 &    1 &          99 &        3 \\
+      dct:dateSubmitted &        1138 &     1138 &    1 &    1 &    1 &          99 &        3 \\
+       dct:dateAccepted &        1138 &     1138 &    1 &    1 &    1 &          99 &        3 \\
+        geowgs:location &         998 &     1023 &    1 &   12 &    1 &          87 &        3 \\
+           skos:broader &         897 &      898 &    1 &    2 &    1 &          78 &        3 \\
+          skos:notation &         841 &     1018 &    1 &   38 &    5 &          73 &        3 \\
+       euvoc:xlNotation &         723 &     3244 &    1 &   69 &    9 &          63 &       11 \\
+     ato:op-mapped-code &         676 &     1340 &    1 &   38 &    4 &          59 &        4 \\
+         skoxl:altLabel &         563 &    12284 &    1 &  138 &   41 &          49 &       42 \\
+          euvoc:endDate &         367 &      367 &    1 &    1 &    1 &          32 &        1 \\
+     euvoc:xlDefinition &         339 &      467 &    1 &    4 &    1 &          29 &        1 \\
+        skos:definition &         339 &      451 &    1 &    2 &    1 &          29 &        1 \\
+       dct:isReplacedBy &         215 &      236 &    1 &    4 &    1 &          18 &        0 \\
+           dct:replaces &         213 &      236 &    1 &    4 &    1 &          18 &        0 \\
+        skos:exactMatch &         191 &      191 &    1 &    1 &    1 &          16 &        0 \\
+ atmdr:to\_reviewwebsite &          92 &       92 &    1 &    1 &    1 &           8 &        0 \\
+        skos:changeNote &          84 &       96 &    1 &    2 &    1 &           7 &        0 \\
+     euvoc:xlChangeNote &          84 &       96 &    1 &    2 &    1 &           7 &        0 \\
+       skos:historyNote &          22 &       24 &    1 &    2 &    1 &           1 &        0 \\
+    euvoc:xlHistoryNote &          22 &       24 &    1 &    2 &    1 &           1 &        0 \\
+            euvoc:order &          17 &       17 &    1 &    1 &    1 &           1 &        0 \\
+     ato:protocol.order &          17 &       17 &    1 &    1 &    1 &           1 &        0 \\
+     ato:protocol-order &          17 &       17 &    1 &    1 &    1 &           1 &        0 \\
+      skos:newPropoerty &           1 &        1 &    1 &    1 &    1 &           0 &        0 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for euvoc:ConceptStatus class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+           Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+    skos:definition &           9 &       18 &    2 &    2 &    2 &         100 &      100 \\
+           rdf:type &           9 &       18 &    2 &    2 &    2 &         100 &      100 \\
+ euvoc:xlDefinition &           9 &       18 &    2 &    2 &    2 &         100 &      100 \\
+    skoxl:prefLabel &           9 &        9 &    1 &    1 &    1 &         100 &       50 \\
+  skos:topConceptOf &           9 &        9 &    1 &    1 &    1 &         100 &       50 \\
+     skos:prefLabel &           9 &        9 &    1 &    1 &    1 &         100 &       50 \\
+      skos:inScheme &           9 &        9 &    1 &    1 &    1 &         100 &       50 \\
+    owl:versionInfo &           9 &        9 &    1 &    1 &    1 &         100 &       50 \\
+       euvoc:status &           9 &        9 &    1 &    1 &    1 &         100 &       50 \\
+    euvoc:startDate &           9 &        9 &    1 &    1 &    1 &         100 &       50 \\
+        dct:created &           9 &        9 &    1 &    1 &    1 &         100 &       50 \\
+        atr:op-code &           9 &        9 &    1 &    1 &    1 &         100 &       50 \\
+        ato:op-code &           9 &        9 &    1 &    1 &    1 &         100 &       50 \\
+ ato:authority-code &           9 &        9 &    1 &    1 &    1 &         100 &       50 \\
+  dct:dateSubmitted &           4 &        4 &    1 &    1 &    1 &          44 &       22 \\
+   dct:dateAccepted &           4 &        4 &    1 &    1 &    1 &          44 &       22 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for euvoc:LabelType class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+           Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+           rdf:type &          11 &       22 &    2 &    2 &    2 &         100 &      100 \\
+    skoxl:prefLabel &          11 &       11 &    1 &    1 &    1 &         100 &       50 \\
+  skos:topConceptOf &          11 &       11 &    1 &    1 &    1 &         100 &       50 \\
+     skos:prefLabel &          11 &       11 &    1 &    1 &    1 &         100 &       50 \\
+      skos:inScheme &          11 &       11 &    1 &    1 &    1 &         100 &       50 \\
+    owl:versionInfo &          11 &       11 &    1 &    1 &    1 &         100 &       50 \\
+       euvoc:status &          11 &       11 &    1 &    1 &    1 &         100 &       50 \\
+    euvoc:startDate &          11 &       11 &    1 &    1 &    1 &         100 &       50 \\
+        dct:created &          11 &       11 &    1 &    1 &    1 &         100 &       50 \\
+        atr:op-code &          11 &       11 &    1 &    1 &    1 &         100 &       50 \\
+        ato:op-code &          11 &       11 &    1 &    1 &    1 &         100 &       50 \\
+ ato:authority-code &          11 &       11 &    1 &    1 &    1 &         100 &       50 \\
+  dct:dateSubmitted &           3 &        3 &    1 &    1 &    1 &          27 &       13 \\
+   dct:dateAccepted &           3 &        3 &    1 &    1 &    1 &          27 &       13 \\
+        skos:newRel &           1 &        1 &    1 &    1 &    1 &           9 &        4 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for euvoc:XlNotation class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+             Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+             rdf:type &        3244 &     3244 &    1 &    1 &    1 &         100 &      100 \\
+ euvoc:xlCodification &        3244 &     3244 &    1 &    1 &    1 &         100 &      100 \\
+             dct:type &        3244 &     3244 &    1 &    1 &    1 &         100 &      100 \\
+         euvoc:status &        3239 &     3239 &    1 &    1 &    1 &          99 &       99 \\
+      euvoc:startDate &        3239 &     3239 &    1 &    1 &    1 &          99 &       99 \\
+          dct:created &        3239 &     3239 &    1 &    1 &    1 &          99 &       99 \\
+        euvoc:endDate &         873 &      873 &    1 &    1 &    1 &          26 &       26 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for euvoc:XlNote class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+        Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+        rdf:type &         618 &      618 &    1 &    1 &    1 &         100 &      100 \\
+    euvoc:xlNote &         618 &      618 &    1 &    1 &    1 &         100 &      100 \\
+      dct:source &         498 &      498 &    1 &    1 &    1 &          80 &       80 \\
+ euvoc:startDate &         497 &      497 &    1 &    1 &    1 &          80 &       80 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for foaf:Agent class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+               Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+        skoxl:prefLabel &        1139 &    28778 &    1 &  216 &   35 &         100 &      100 \\
+         skos:prefLabel &        1139 &    24486 &    1 &   27 &   23 &         100 &       85 \\
+               rdf:type &        1139 &     4556 &    4 &    4 &    4 &         100 &       15 \\
+      skos:topConceptOf &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+          skos:inScheme &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+        owl:versionInfo &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+           euvoc:status &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+        euvoc:startDate &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+            dct:created &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+            atr:op-code &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+            ato:op-code &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+     ato:authority-code &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+          lemon:context &        1138 &     2281 &    1 &    6 &    2 &          99 &        7 \\
+               dct:type &        1138 &     1138 &    1 &    1 &    1 &          99 &        3 \\
+      dct:dateSubmitted &        1138 &     1138 &    1 &    1 &    1 &          99 &        3 \\
+       dct:dateAccepted &        1138 &     1138 &    1 &    1 &    1 &          99 &        3 \\
+        geowgs:location &         998 &     1023 &    1 &   12 &    1 &          87 &        3 \\
+           skos:broader &         897 &      898 &    1 &    2 &    1 &          78 &        3 \\
+          skos:notation &         841 &     1018 &    1 &   38 &    5 &          73 &        3 \\
+       euvoc:xlNotation &         723 &     3244 &    1 &   69 &    9 &          63 &       11 \\
+     ato:op-mapped-code &         676 &     1340 &    1 &   38 &    4 &          59 &        4 \\
+         skoxl:altLabel &         563 &    12284 &    1 &  138 &   41 &          49 &       42 \\
+          euvoc:endDate &         367 &      367 &    1 &    1 &    1 &          32 &        1 \\
+     euvoc:xlDefinition &         339 &      467 &    1 &    4 &    1 &          29 &        1 \\
+        skos:definition &         339 &      451 &    1 &    2 &    1 &          29 &        1 \\
+       dct:isReplacedBy &         215 &      236 &    1 &    4 &    1 &          18 &        0 \\
+           dct:replaces &         213 &      236 &    1 &    4 &    1 &          18 &        0 \\
+        skos:exactMatch &         191 &      191 &    1 &    1 &    1 &          16 &        0 \\
+ atmdr:to\_reviewwebsite &          92 &       92 &    1 &    1 &    1 &           8 &        0 \\
+        skos:changeNote &          84 &       96 &    1 &    2 &    1 &           7 &        0 \\
+     euvoc:xlChangeNote &          84 &       96 &    1 &    2 &    1 &           7 &        0 \\
+       skos:historyNote &          22 &       24 &    1 &    2 &    1 &           1 &        0 \\
+    euvoc:xlHistoryNote &          22 &       24 &    1 &    2 &    1 &           1 &        0 \\
+            euvoc:order &          17 &       17 &    1 &    1 &    1 &           1 &        0 \\
+     ato:protocol.order &          17 &       17 &    1 &    1 &    1 &           1 &        0 \\
+     ato:protocol-order &          17 &       17 &    1 &    1 &    1 &           1 &        0 \\
+      skos:newPropoerty &           1 &        1 &    1 &    1 &    1 &           0 &        0 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for org:Organisation class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+               Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+        skoxl:prefLabel &        1139 &    28778 &    1 &  216 &   35 &         100 &      100 \\
+         skos:prefLabel &        1139 &    24486 &    1 &   27 &   23 &         100 &       85 \\
+               rdf:type &        1139 &     4556 &    4 &    4 &    4 &         100 &       15 \\
+      skos:topConceptOf &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+          skos:inScheme &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+        owl:versionInfo &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+           euvoc:status &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+        euvoc:startDate &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+            dct:created &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+            atr:op-code &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+            ato:op-code &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+     ato:authority-code &        1139 &     1139 &    1 &    1 &    1 &         100 &        3 \\
+          lemon:context &        1138 &     2281 &    1 &    6 &    2 &          99 &        7 \\
+               dct:type &        1138 &     1138 &    1 &    1 &    1 &          99 &        3 \\
+      dct:dateSubmitted &        1138 &     1138 &    1 &    1 &    1 &          99 &        3 \\
+       dct:dateAccepted &        1138 &     1138 &    1 &    1 &    1 &          99 &        3 \\
+        geowgs:location &         998 &     1023 &    1 &   12 &    1 &          87 &        3 \\
+           skos:broader &         897 &      898 &    1 &    2 &    1 &          78 &        3 \\
+          skos:notation &         841 &     1018 &    1 &   38 &    5 &          73 &        3 \\
+       euvoc:xlNotation &         723 &     3244 &    1 &   69 &    9 &          63 &       11 \\
+     ato:op-mapped-code &         676 &     1340 &    1 &   38 &    4 &          59 &        4 \\
+         skoxl:altLabel &         563 &    12284 &    1 &  138 &   41 &          49 &       42 \\
+          euvoc:endDate &         367 &      367 &    1 &    1 &    1 &          32 &        1 \\
+     euvoc:xlDefinition &         339 &      467 &    1 &    4 &    1 &          29 &        1 \\
+        skos:definition &         339 &      451 &    1 &    2 &    1 &          29 &        1 \\
+       dct:isReplacedBy &         215 &      236 &    1 &    4 &    1 &          18 &        0 \\
+           dct:replaces &         213 &      236 &    1 &    4 &    1 &          18 &        0 \\
+        skos:exactMatch &         191 &      191 &    1 &    1 &    1 &          16 &        0 \\
+ atmdr:to\_reviewwebsite &          92 &       92 &    1 &    1 &    1 &           8 &        0 \\
+        skos:changeNote &          84 &       96 &    1 &    2 &    1 &           7 &        0 \\
+     euvoc:xlChangeNote &          84 &       96 &    1 &    2 &    1 &           7 &        0 \\
+       skos:historyNote &          22 &       24 &    1 &    2 &    1 &           1 &        0 \\
+    euvoc:xlHistoryNote &          22 &       24 &    1 &    2 &    1 &           1 &        0 \\
+            euvoc:order &          17 &       17 &    1 &    1 &    1 &           1 &        0 \\
+     ato:protocol.order &          17 &       17 &    1 &    1 &    1 &           1 &        0 \\
+     ato:protocol-order &          17 &       17 &    1 &    1 &    1 &           1 &        0 \\
+      skos:newPropoerty &           1 &        1 &    1 &    1 &    1 &           0 &        0 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for owl:Ontology class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+        Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+        rdf:type &           4 &        8 &    2 &    2 &    2 &         100 &      100 \\
+ skoxl:prefLabel &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+  skos:prefLabel &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+      rdfs:label &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+    rdfs:comment &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+ owl:versionInfo &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+  owl:versionIRI &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+     owl:imports &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+  dct:identifier &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for skos:Concept class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+               Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+         skos:prefLabel &        1176 &    24615 &    1 &   27 &   23 &         100 &       85 \\
+               rdf:type &        1176 &     4613 &    1 &    4 &    3 &         100 &       16 \\
+          skos:inScheme &        1176 &     1176 &    1 &    1 &    1 &         100 &        4 \\
+            atr:op-code &        1176 &     1176 &    1 &    1 &    1 &         100 &        4 \\
+            ato:op-code &        1176 &     1176 &    1 &    1 &    1 &         100 &        4 \\
+        skoxl:prefLabel &        1172 &    28811 &    1 &  216 &   35 &          99 &      100 \\
+      skos:topConceptOf &        1172 &     1172 &    1 &    1 &    1 &          99 &        4 \\
+        owl:versionInfo &        1172 &     1172 &    1 &    1 &    1 &          99 &        4 \\
+           euvoc:status &        1172 &     1172 &    1 &    1 &    1 &          99 &        4 \\
+        euvoc:startDate &        1172 &     1172 &    1 &    1 &    1 &          99 &        4 \\
+            dct:created &        1172 &     1172 &    1 &    1 &    1 &          99 &        4 \\
+     ato:authority-code &        1172 &     1172 &    1 &    1 &    1 &          99 &        4 \\
+      dct:dateSubmitted &        1158 &     1158 &    1 &    1 &    1 &          98 &        4 \\
+       dct:dateAccepted &        1158 &     1158 &    1 &    1 &    1 &          98 &        4 \\
+          lemon:context &        1138 &     2281 &    1 &    6 &    2 &          96 &        7 \\
+               dct:type &        1138 &     1138 &    1 &    1 &    1 &          96 &        3 \\
+        geowgs:location &         998 &     1023 &    1 &   12 &    1 &          84 &        3 \\
+           skos:broader &         897 &      898 &    1 &    2 &    1 &          76 &        3 \\
+          skos:notation &         841 &     1018 &    1 &   38 &    5 &          71 &        3 \\
+       euvoc:xlNotation &         723 &     3244 &    1 &   69 &    9 &          61 &       11 \\
+     ato:op-mapped-code &         676 &     1340 &    1 &   38 &    4 &          57 &        4 \\
+         skoxl:altLabel &         563 &    12284 &    1 &  138 &   41 &          47 &       42 \\
+          euvoc:endDate &         367 &      367 &    1 &    1 &    1 &          31 &        1 \\
+     euvoc:xlDefinition &         361 &      498 &    1 &    4 &    1 &          30 &        1 \\
+        skos:definition &         361 &      482 &    1 &    2 &    1 &          30 &        1 \\
+       dct:isReplacedBy &         215 &      236 &    1 &    4 &    1 &          18 &        0 \\
+           dct:replaces &         213 &      236 &    1 &    4 &    1 &          18 &        0 \\
+        skos:exactMatch &         191 &      191 &    1 &    1 &    1 &          16 &        0 \\
+ atmdr:to\_reviewwebsite &          92 &       92 &    1 &    1 &    1 &           7 &        0 \\
+        skos:changeNote &          84 &       96 &    1 &    2 &    1 &           7 &        0 \\
+     euvoc:xlChangeNote &          84 &       96 &    1 &    2 &    1 &           7 &        0 \\
+       skos:historyNote &          22 &       24 &    1 &    2 &    1 &           1 &        0 \\
+    euvoc:xlHistoryNote &          22 &       24 &    1 &    2 &    1 &           1 &        0 \\
+            euvoc:order &          17 &       17 &    1 &    1 &    1 &           1 &        0 \\
+     ato:protocol.order &          17 &       17 &    1 &    1 &    1 &           1 &        0 \\
+     ato:protocol-order &          17 &       17 &    1 &    1 &    1 &           1 &        0 \\
+          dc:identifier &           4 &        4 &    1 &    1 &    1 &           0 &        0 \\
+            skos:newRel &           1 &        1 &    1 &    1 &    1 &           0 &        0 \\
+      skos:newPropoerty &           1 &        1 &    1 &    1 &    1 &           0 &        0 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for skos:ConceptScheme class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+        Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+        rdf:type &           4 &        8 &    2 &    2 &    2 &         100 &      100 \\
+ skoxl:prefLabel &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+  skos:prefLabel &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+      rdfs:label &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+    rdfs:comment &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+ owl:versionInfo &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+  owl:versionIRI &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+     owl:imports &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+  dct:identifier &           4 &        4 &    1 &    1 &    1 &         100 &       50 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for skoxl:Label class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+          Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+ skoxl:literalForm &       41099 &    41099 &    1 &    1 &    1 &         100 &      100 \\
+        rdfs:label &       41099 &    41099 &    1 &    1 &    1 &         100 &      100 \\
+          rdf:type &       41099 &    41099 &    1 &    1 &    1 &         100 &      100 \\
+          dct:type &       41099 &    41099 &    1 &    1 &    1 &         100 &      100 \\
+      euvoc:status &       35594 &    35594 &    1 &    1 &    1 &          86 &       86 \\
+   euvoc:startDate &       35594 &    35594 &    1 &    1 &    1 &          86 &       86 \\
+       dct:created &       35594 &    35594 &    1 &    1 &    1 &          86 &       86 \\
+     euvoc:endDate &       15233 &    15233 &    1 &    1 &    1 &          37 &       37 \\
+      lexvo:gender &          50 &       50 &    1 &    1 &    1 &           0 &        0 \\
+\end{longtable}
+
+
+\section{What do data say about Places}
+\subsection{Class instantiation overview for Places}
+The table below describes how are classes instantiated. Please note that the instance countsare different from total number of unique instances in the data{-}set. When an individualinstantiates multiple classes, then it is counted once for each class it instantiates. The relativenumber of instances is scaled to the total number of unique instances per class.
+\begin{longtable}{lrr}
+\toprule
+               Class &  Unique instances &  \% unique instance sum \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+        skos:Concept &              1580 &                  60.77 \\
+      ato:MappedCode &               655 &                  25.19 \\
+ geowgs:SpatialThing &               364 &                  14.00 \\
+  skos:ConceptScheme &                 1 &                   0.04 \\
+\end{longtable}
+
+
+\subsection{Application profile reconstruction for Places}
+This section attempts at reconstructing the profiled shapes for each class. The profile is deduced based on descriptive statistics presented elsewhere. The tables below contain the following columns: Property name, Cardinality, Property Type, Property Range and Confidence. \\\\ Confidence is a categorial value derived from the property usage relative to the total number of unique individuals instantiating this class.Property range is a list of distinct encountered object types. In case of higher number of object type the list is non{-}exhaustive. Cardinality of the property is expressed in terms of minimum and maximum occurrences of the property. The minimum value varies from zero (0) meaning that the property is optional to one (1) meaning that the property is mandatory while the maximum value variesfrom one (1) meaning that the property is sufficient to star (*) meaning that the property is maximally unbound. Finally the type indicates whether the property rangeis whether a data type or an individual URI.
+\subsubsection{Estimated Application Profile for ato:MappedCode class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+           Property & Cardinality &    Type &           Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+           rdf:type &      1 .. 1 &  object &  ato:MappedCode &    certain \\
+          dc:source &      1 .. 1 &    data &      xsd:string &    certain \\
+    ato:legacy-code &      1 .. 1 &    data &      xsd:string &    certain \\
+ ato:affected-table &      0 .. * &    data &      xsd:string &   unlikely \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for geowgs:SpatialThing class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+    Property & Cardinality &    Type &                Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+  rdfs:label &      1 .. 1 &    data &       rdf:langString &    certain \\
+    rdf:type &      1 .. 1 &  object &  geowgs:SpatialThing &    certain \\
+ geowgs:long &      1 .. * &    data &            xsd:float &    certain \\
+  geowgs:lat &      1 .. * &    data &            xsd:float &    certain \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for skos:Concept class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+           Property & Cardinality &    Type &                Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+      skos:inScheme &      1 .. 1 &  object &   skos:ConceptScheme &    certain \\
+           rdf:type &      1 .. 1 &  object &         skos:Concept &    certain \\
+      dc:identifier &      1 .. 1 &    data &           xsd:string &    certain \\
+        atr:op-code &      1 .. 1 &    data &           xsd:string &    certain \\
+        ato:op-code &      1 .. 1 &    data &           xsd:string &    certain \\
+     skos:prefLabel &      1 .. * &    data &       rdf:langString &    certain \\
+      ato:start.use &      1 .. 1 &    data &           xsd:string &    certain \\
+     ato:deprecated &      1 .. 1 &    data &           xsd:string &    certain \\
+ ato:authority-code &      1 .. 1 &    data &           xsd:string &    certain \\
+ ato:op-mapped-code &      0 .. * &  object &       ato:MappedCode &   unlikely \\
+         owl:sameAs &      0 .. * &  object &  geowgs:SpatialThing &   unlikely \\
+   skos:hiddenLabel &      0 .. * &    data &           xsd:string &  very rare \\
+        ato:end.use &      0 .. * &    data &           xsd:string &  very rare \\
+\end{tabularx}
+
+
+\subsubsection{Estimated Application Profile for skos:ConceptScheme class}
+\begin{tabularx}{\textwidth}{lllXr}
+\toprule
+                 Property & Cardinality &    Type &               Range & Confidence \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+               rdfs:label &      1 .. 1 &    data &      rdf:langString &    certain \\
+                 rdf:type &      1 .. 1 &  object &  skos:ConceptScheme &    certain \\
+ ato:table.version.number &      1 .. 1 &    data &          xsd:string &    certain \\
+             ato:table.id &      1 .. 1 &    data &          xsd:string &    certain \\
+            ato:prefLabel &      1 .. 1 &    data &      rdf:langString &    certain \\
+\end{tabularx}
+
+
+\subsection{Property usage statistics for Places}
+This section provides descriptive statistical indicators for each class.The tables below contain the following columns: property name, absolute normalised usage (Norm usg/a), absolute actual usage(Usage/a), normalised minimum (Min), normalised maximum (Max), normalised average (Avg), relative normalised usage (Norm usg/r), relative actual usage (Usage/r).\\\\The normalization mentioned above refers to counting out of all classindividuals how many are actually using the property at least once whilethe actual property usage refers to counting all occurrences for a given class.The rdf:type property plays a special role because it indicates the numberof unique class instances and in case of multiple class instantiation the number is scaled by the  number of distinct parent classes. \\\\The relative actual usage (Usage/r) is calculated with respect to a sibling property that maximally occurs in all class instances. Therefore there is no standard propertyto be chosen as reference like in the case of rdf:type but it varies from case to case.
+\subsubsection{Propoerty statistics for ato:MappedCode class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+           Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+           rdf:type &         655 &      655 &    1 &    1 &    1 &         100 &      100 \\
+          dc:source &         655 &      655 &    1 &    1 &    1 &         100 &      100 \\
+    ato:legacy-code &         655 &      655 &    1 &    1 &    1 &         100 &      100 \\
+ ato:affected-table &         209 &      209 &    1 &    1 &    1 &          31 &       31 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for geowgs:SpatialThing class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+    Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+ geowgs:long &         364 &      390 &    1 &    2 &    1 &         100 &      100 \\
+  geowgs:lat &         364 &      388 &    1 &    2 &    1 &         100 &       99 \\
+  rdfs:label &         364 &      364 &    1 &    1 &    1 &         100 &       93 \\
+    rdf:type &         364 &      364 &    1 &    1 &    1 &         100 &       93 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for skos:Concept class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+           Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+     skos:prefLabel &        1580 &    24861 &    1 &   29 &   19 &         100 &      100 \\
+      skos:inScheme &        1580 &     1580 &    1 &    1 &    1 &         100 &        6 \\
+           rdf:type &        1580 &     1580 &    1 &    1 &    1 &         100 &        6 \\
+      dc:identifier &        1580 &     1580 &    1 &    1 &    1 &         100 &        6 \\
+        atr:op-code &        1580 &     1580 &    1 &    1 &    1 &         100 &        6 \\
+        ato:op-code &        1580 &     1580 &    1 &    1 &    1 &         100 &        6 \\
+      ato:start.use &        1579 &     1579 &    1 &    1 &    1 &          99 &        6 \\
+     ato:deprecated &        1579 &     1579 &    1 &    1 &    1 &          99 &        6 \\
+ ato:authority-code &        1579 &     1579 &    1 &    1 &    1 &          99 &        6 \\
+ ato:op-mapped-code &         517 &      655 &    1 &    4 &    1 &          32 &        2 \\
+         owl:sameAs &         366 &      366 &    1 &    1 &    1 &          23 &        1 \\
+        ato:end.use &           5 &        5 &    1 &    1 &    1 &           0 &        0 \\
+   skos:hiddenLabel &           1 &        1 &    1 &    1 &    1 &           0 &        0 \\
+\end{longtable}
+
+
+\subsubsection{Propoerty statistics for skos:ConceptScheme class}
+\begin{longtable}{lrrrrrrr}
+\toprule
+                 Property &  Norm usg/a &  Usage/a &  Min &  Max &  Avg &  Norm usg/r &  Usage/r \\
+\midrule
+\endhead
+\midrule
+\multicolumn{3}{r}{{Continued on next page}} \\
+\midrule
+\endfoot
+
+\bottomrule
+\endlastfoot
+               rdfs:label &           1 &        1 &    1 &    1 &    1 &         100 &      100 \\
+                 rdf:type &           1 &        1 &    1 &    1 &    1 &         100 &      100 \\
+ ato:table.version.number &           1 &        1 &    1 &    1 &    1 &         100 &      100 \\
+             ato:table.id &           1 &        1 &    1 &    1 &    1 &         100 &      100 \\
+            ato:prefLabel &           1 &        1 &    1 &    1 &    1 &         100 &      100 \\
+\end{longtable}
+
+
+\end{document}

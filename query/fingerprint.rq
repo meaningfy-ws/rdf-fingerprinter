@@ -1,0 +1,25 @@
+######################################################################3
+# countins SPV plus , the most informative query so far,
+# counting prop types as well for spo types
+##########################################################################
+select distinct ?stype ?p ?ootype ?propType (count(distinct ?s) as ?scnt) (count(distinct ?o) as ?ocnt) (count(*) as ?cnt) (min(?sp_star) as ?min_sp) (max(?sp_star) as ?max_sp) (avg(?sp_star) as ?avg_sp)
+where
+{
+
+  ?s ?p ?o .
+  ?s a ?stype .
+  optional {
+    ?o a ?otype .
+  }
+  {
+    select distinct ?s ?p (count(*)as ?sp_star)
+              {
+                ?s ?p [].
+              } group by ?s ?p
+  }
+  bind( if(?p=rdf:type, ?stype, if(bound(?otype),?otype, datatype(?o) )) as ?ootype )
+  bind( if(?p=rdf:type,"object", if(bound(?otype),"object","data")) as ?propType)
+}
+group by ?stype ?p ?ootype ?propType
+order by ?stype ?p ?ootype ?propType
+

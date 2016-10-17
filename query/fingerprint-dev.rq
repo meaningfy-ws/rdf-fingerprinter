@@ -1,0 +1,28 @@
+# this query seems to be the correct one
+# the sum of all distinct s from the q result is to be considered as the reference i.e. the total # of instances
+select distinct ?stype ?p ?ootype (count(distinct ?s) as ?scnt) (count(distinct ?o) as ?ocnt) (count(*) as ?cnt)
+where
+{
+
+  ?s ?p ?o .
+  ?s a ?stype .
+  optional {
+    ?o a ?otype .
+  }
+  bind( if( ?p=rdf:type, ?stype, if(bound(?otype),?otype, datatype(?o) )) as ?ootype )
+
+}
+group by ?stype ?p ?ootype
+order by ?stype ?p ?ootype
+
+# if the types replace the instance uris then the uri are unpacked into multiple triples, more than originally .
+# the above query is not so useful because it offers object type variation multiplied to the number of predicate occurences, which is not needed. The object variation should not affect counting . The next query is more useful because it selects only the subject type and predicate
+
+# counting SPs
+select distinct ?stype ?p (count(distinct ?s) as ?scnt) (count(distinct *) as ?cnt)
+{
+  ?s a ?stype.
+  ?s ?p [] .
+}
+group by ?stype ?p
+order by ?stype ?p

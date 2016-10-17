@@ -1,0 +1,254 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://eurovoc.europa.eu/schema#PreferredTerm> a <http://eurovoc.europa.eu/schema#PreferredTerm> .
+
+<http://www.w3.org/2008/05/skos-xl#Label> a <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://eurovoc.europa.eu/schema#PreferredTerm> <http://eurovoc.europa.eu/schema#termReleasedWithVersion> xsd:string .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://eurovoc.europa.eu/schema#termReleasedWithVersion> xsd:string .
+
+<http://eurovoc.europa.eu/schema#PreferredTerm> <http://www.w3.org/2008/05/skos-xl#literalForm> rdf:langString .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://www.w3.org/2008/05/skos-xl#literalForm> rdf:langString .
+
+<http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> a <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> ;
+	<http://eurovoc.europa.eu/schema#termReleasedWithVersion> xsd:string ;
+	<http://www.w3.org/2008/05/skos-xl#literalForm> rdf:langString .
+
+<http://eurovoc.europa.eu/schema#EquivalenceRelationship> a <http://eurovoc.europa.eu/schema#EquivalenceRelationship> ;
+	<http://eurovoc.europa.eu/schema#UF> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> ;
+	<http://eurovoc.europa.eu/schema#USE> <http://eurovoc.europa.eu/schema#PreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> <http://eurovoc.europa.eu/schema#fullName> <http://eurovoc.europa.eu/schema#PreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://eurovoc.europa.eu/schema#fullName> <http://eurovoc.europa.eu/schema#PreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> <http://www.w3.org/2008/05/skos-xl#labelRelation> <http://eurovoc.europa.eu/schema#PreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://www.w3.org/2008/05/skos-xl#labelRelation> <http://eurovoc.europa.eu/schema#PreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://eurovoc.europa.eu/schema#PreferredTerm> <http://eurovoc.europa.eu/schema#acronym> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://eurovoc.europa.eu/schema#acronym> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://eurovoc.europa.eu/schema#PreferredTerm> <http://www.w3.org/2008/05/skos-xl#labelRelation> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://www.w3.org/2008/05/skos-xl#labelRelation> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> a <http://eurovoc.europa.eu/schema#ThesaurusConcept> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> a <http://www.w3.org/2004/02/skos/core#Concept> .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2004/02/skos/core#related> <http://eurovoc.europa.eu/schema#ThesaurusConcept> , <http://www.w3.org/2004/02/skos/core#Concept> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2004/02/skos/core#related> <http://eurovoc.europa.eu/schema#ThesaurusConcept> , <http://www.w3.org/2004/02/skos/core#Concept> .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2008/05/skos-xl#prefLabel> <http://eurovoc.europa.eu/schema#PreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2008/05/skos-xl#prefLabel> <http://eurovoc.europa.eu/schema#PreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2004/02/skos/core#broader> <http://eurovoc.europa.eu/schema#ThesaurusConcept> , <http://www.w3.org/2004/02/skos/core#Concept> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2004/02/skos/core#broader> <http://eurovoc.europa.eu/schema#ThesaurusConcept> , <http://www.w3.org/2004/02/skos/core#Concept> .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2004/02/skos/core#inScheme> <http://eurovoc.europa.eu/schema#MicroThesaurus> , <http://www.w3.org/2004/02/skos/core#ConceptScheme> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2004/02/skos/core#inScheme> <http://eurovoc.europa.eu/schema#MicroThesaurus> , <http://www.w3.org/2004/02/skos/core#ConceptScheme> .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2004/02/skos/core#inScheme> <http://eurovoc.europa.eu/schema#Thesaurus> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2004/02/skos/core#inScheme> <http://eurovoc.europa.eu/schema#Thesaurus> .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://purl.org/dc/elements/1.1/identifier> xsd:string .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://purl.org/dc/elements/1.1/identifier> xsd:string .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2004/02/skos/core#prefLabel> rdf:langString .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2004/02/skos/core#prefLabel> rdf:langString .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2004/02/skos/core#broaderTransitive> <http://eurovoc.europa.eu/schema#ThesaurusConcept> , <http://www.w3.org/2004/02/skos/core#Concept> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2004/02/skos/core#broaderTransitive> <http://eurovoc.europa.eu/schema#ThesaurusConcept> , <http://www.w3.org/2004/02/skos/core#Concept> .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2008/05/skos-xl#altLabel> <http://www.w3.org/2008/05/skos-xl#Label> , <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2008/05/skos-xl#altLabel> <http://www.w3.org/2008/05/skos-xl#Label> , <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2004/02/skos/core#altLabel> rdf:langString .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2004/02/skos/core#altLabel> rdf:langString .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2004/02/skos/core#topConceptOf> <http://eurovoc.europa.eu/schema#MicroThesaurus> , <http://www.w3.org/2004/02/skos/core#ConceptScheme> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2004/02/skos/core#topConceptOf> <http://eurovoc.europa.eu/schema#MicroThesaurus> , <http://www.w3.org/2004/02/skos/core#ConceptScheme> .
+
+<http://eurovoc.europa.eu/schema#MicroThesaurus> a <http://eurovoc.europa.eu/schema#MicroThesaurus> .
+
+<http://www.w3.org/2004/02/skos/core#ConceptScheme> a <http://www.w3.org/2004/02/skos/core#ConceptScheme> .
+
+<http://eurovoc.europa.eu/schema#MicroThesaurus> <http://purl.org/dc/elements/1.1/identifier> xsd:string .
+
+<http://www.w3.org/2004/02/skos/core#ConceptScheme> <http://purl.org/dc/elements/1.1/identifier> xsd:string .
+
+<http://eurovoc.europa.eu/schema#MicroThesaurus> <http://eurovoc.europa.eu/schema#toBeTranslated> xsd:string .
+
+<http://www.w3.org/2004/02/skos/core#ConceptScheme> <http://eurovoc.europa.eu/schema#toBeTranslated> xsd:string .
+
+<http://eurovoc.europa.eu/schema#MicroThesaurus> <http://www.w3.org/2004/02/skos/core#prefLabel> rdf:langString .
+
+<http://www.w3.org/2004/02/skos/core#ConceptScheme> <http://www.w3.org/2004/02/skos/core#prefLabel> rdf:langString .
+
+<http://eurovoc.europa.eu/schema#MicroThesaurus> <http://www.w3.org/2004/02/skos/core#hasTopConcept> <http://eurovoc.europa.eu/schema#ThesaurusConcept> , <http://www.w3.org/2004/02/skos/core#Concept> .
+
+<http://www.w3.org/2004/02/skos/core#ConceptScheme> <http://www.w3.org/2004/02/skos/core#hasTopConcept> <http://eurovoc.europa.eu/schema#ThesaurusConcept> , <http://www.w3.org/2004/02/skos/core#Concept> .
+
+<http://eurovoc.europa.eu/schema#MicroThesaurus> <http://eurovoc.europa.eu/schema#domain> <http://eurovoc.europa.eu/schema#Domain> .
+
+<http://www.w3.org/2004/02/skos/core#ConceptScheme> <http://eurovoc.europa.eu/schema#domain> <http://eurovoc.europa.eu/schema#Domain> .
+
+<http://eurovoc.europa.eu/schema#PreferredTerm> <http://eurovoc.europa.eu/schema#toBeTranslated> xsd:string .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://eurovoc.europa.eu/schema#toBeTranslated> xsd:string .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://purl.org/dc/terms/created> xsd:dateTime .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://purl.org/dc/terms/created> xsd:dateTime .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://purl.org/dc/terms/modified> xsd:dateTime .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://purl.org/dc/terms/modified> xsd:dateTime .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://eurovoc.europa.eu/schema#approvedForRelease> xsd:string .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://eurovoc.europa.eu/schema#approvedForRelease> xsd:string .
+
+<http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> <http://eurovoc.europa.eu/schema#acronym> <http://www.w3.org/2008/05/skos-xl#Label> , <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> ;
+	<http://www.w3.org/2008/05/skos-xl#labelRelation> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> ;
+	<http://eurovoc.europa.eu/schema#fullName> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://eurovoc.europa.eu/schema#fullName> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> .
+
+<http://eurovoc.europa.eu/schema#PreferredTerm> <http://eurovoc.europa.eu/schema#translationOf> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://eurovoc.europa.eu/schema#translationOf> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://eurovoc.europa.eu/schema#Country> a <http://eurovoc.europa.eu/schema#Country> ;
+	<http://www.w3.org/2008/05/skos-xl#prefLabel> <http://eurovoc.europa.eu/schema#PreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> ;
+	<http://www.w3.org/2004/02/skos/core#broader> <http://eurovoc.europa.eu/schema#ThesaurusConcept> , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://www.w3.org/2004/02/skos/core#inScheme> <http://www.w3.org/2004/02/skos/core#ConceptScheme> , <http://eurovoc.europa.eu/schema#MicroThesaurus> , <http://eurovoc.europa.eu/schema#Thesaurus> ;
+	<http://purl.org/dc/elements/1.1/identifier> xsd:string ;
+	<http://eurovoc.europa.eu/schema#isoCountryCode> xsd:string .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://eurovoc.europa.eu/schema#isoCountryCode> xsd:string .
+
+<http://eurovoc.europa.eu/schema#Country> <http://www.w3.org/2004/02/skos/core#prefLabel> rdf:langString ;
+	<http://www.w3.org/2004/02/skos/core#broaderTransitive> <http://eurovoc.europa.eu/schema#ThesaurusConcept> , <http://www.w3.org/2004/02/skos/core#Concept> ;
+	<http://www.w3.org/2008/05/skos-xl#altLabel> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> ;
+	<http://www.w3.org/2004/02/skos/core#altLabel> xsd:string .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2004/02/skos/core#altLabel> xsd:string .
+
+<http://eurovoc.europa.eu/schema#Country> <http://www.w3.org/2004/02/skos/core#altLabel> rdf:langString ;
+	<http://www.w3.org/2004/02/skos/core#related> <http://eurovoc.europa.eu/schema#ThesaurusConcept> , <http://www.w3.org/2004/02/skos/core#Concept> .
+
+<http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> <http://eurovoc.europa.eu/schema#acronym> <http://eurovoc.europa.eu/schema#PreferredTerm> .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://eurovoc.europa.eu/schema#acronym> <http://eurovoc.europa.eu/schema#PreferredTerm> .
+
+<http://eurovoc.europa.eu/schema#PreferredTerm> <http://eurovoc.europa.eu/schema#shortName> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://eurovoc.europa.eu/schema#shortName> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://eurovoc.europa.eu/schema#PreferredTerm> <http://eurovoc.europa.eu/schema#fullName> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://eurovoc.europa.eu/schema#useInstead> <http://www.w3.org/2004/02/skos/core#Concept> , <http://eurovoc.europa.eu/schema#ThesaurusConcept> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://eurovoc.europa.eu/schema#useInstead> <http://www.w3.org/2004/02/skos/core#Concept> , <http://eurovoc.europa.eu/schema#ThesaurusConcept> .
+
+<http://eurovoc.europa.eu/schema#MicroThesaurus> <http://eurovoc.europa.eu/schema#hasPolyHierarchy> xsd:boolean .
+
+<http://www.w3.org/2004/02/skos/core#ConceptScheme> <http://eurovoc.europa.eu/schema#hasPolyHierarchy> xsd:boolean .
+
+<http://eurovoc.europa.eu/schema#PreferredTerm> <http://purl.org/dc/terms/created> xsd:dateTime .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://purl.org/dc/terms/created> xsd:dateTime .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2004/02/skos/core#related> <http://eurovoc.europa.eu/schema#Country> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2004/02/skos/core#related> <http://eurovoc.europa.eu/schema#Country> .
+
+<http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> <http://eurovoc.europa.eu/schema#shortName> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://eurovoc.europa.eu/schema#Country> <http://www.w3.org/2004/02/skos/core#related> <http://eurovoc.europa.eu/schema#Country> .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2004/02/skos/core#broader> <http://eurovoc.europa.eu/schema#Country> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2004/02/skos/core#broader> <http://eurovoc.europa.eu/schema#Country> .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://eurovoc.europa.eu/schema#useInstead> <http://eurovoc.europa.eu/schema#Country> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://eurovoc.europa.eu/schema#useInstead> <http://eurovoc.europa.eu/schema#Country> .
+
+<http://eurovoc.europa.eu/schema#Country> <http://purl.org/dc/terms/created> xsd:dateTime ;
+	<http://eurovoc.europa.eu/schema#approvedForRelease> xsd:string .
+
+<http://eurovoc.europa.eu/schema#PreferredTerm> <http://purl.org/dc/terms/modified> xsd:dateTime .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://purl.org/dc/terms/modified> xsd:dateTime .
+
+<http://eurovoc.europa.eu/schema#ThesaurusConcept> <http://www.w3.org/2008/05/skos-xl#altLabel> <http://eurovoc.europa.eu/schema#CompoundNonPreferredTerm> .
+
+<http://www.w3.org/2004/02/skos/core#Concept> <http://www.w3.org/2008/05/skos-xl#altLabel> <http://eurovoc.europa.eu/schema#CompoundNonPreferredTerm> .
+
+<http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> <http://eurovoc.europa.eu/schema#shortName> <http://eurovoc.europa.eu/schema#PreferredTerm> .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://eurovoc.europa.eu/schema#shortName> <http://eurovoc.europa.eu/schema#PreferredTerm> .
+
+<http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> <http://eurovoc.europa.eu/schema#translationOf> <http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> , <http://eurovoc.europa.eu/schema#PreferredTerm> .
+
+<http://www.w3.org/2008/05/skos-xl#Label> <http://eurovoc.europa.eu/schema#translationOf> <http://eurovoc.europa.eu/schema#PreferredTerm> .
+
+<http://eurovoc.europa.eu/schema#CompoundEquivalence> a <http://eurovoc.europa.eu/schema#CompoundEquivalence> ;
+	<http://eurovoc.europa.eu/schema#compoundNonPreferredTerm> <http://www.w3.org/2008/05/skos-xl#Label> , <http://eurovoc.europa.eu/schema#CompoundNonPreferredTerm> ;
+	<http://eurovoc.europa.eu/schema#preferredTermComponent> <http://eurovoc.europa.eu/schema#PreferredTerm> , <http://www.w3.org/2008/05/skos-xl#Label> .
+
+<http://eurovoc.europa.eu/schema#CompoundNonPreferredTerm> a <http://eurovoc.europa.eu/schema#CompoundNonPreferredTerm> ;
+	<http://eurovoc.europa.eu/schema#termReleasedWithVersion> xsd:string ;
+	<http://www.w3.org/2008/05/skos-xl#literalForm> rdf:langString ;
+	<http://purl.org/dc/terms/created> xsd:dateTime .
+
+<http://eurovoc.europa.eu/schema#Thesaurus> a <http://eurovoc.europa.eu/schema#Thesaurus> ;
+	<http://eurovoc.europa.eu/schema#supportedLanguage> <http://eurovoc.europa.eu/schema#Language> .
+
+<http://www.w3.org/2004/02/skos/core#ConceptScheme> <http://eurovoc.europa.eu/schema#supportedLanguage> <http://eurovoc.europa.eu/schema#Language> .
+
+<http://eurovoc.europa.eu/schema#Thesaurus> <http://www.w3.org/2004/02/skos/core#prefLabel> xsd:string .
+
+<http://www.w3.org/2004/02/skos/core#ConceptScheme> <http://www.w3.org/2004/02/skos/core#prefLabel> xsd:string .
+
+<http://eurovoc.europa.eu/schema#Thesaurus> <http://www.w3.org/2004/02/skos/core#prefLabel> rdf:langString .
+
+<http://eurovoc.europa.eu/schema#Language> a <http://eurovoc.europa.eu/schema#Language> ;
+	<http://eurovoc.europa.eu/schema#language> xsd:string ;
+	rdfs:label rdf:langString .
+
+<http://eurovoc.europa.eu/schema#Export> a <http://eurovoc.europa.eu/schema#Export> ;
+	<http://eurovoc.europa.eu/schema#exportDate> xsd:dateTime ;
+	<http://eurovoc.europa.eu/schema#exportVersion> rdf:langString ;
+	<http://eurovoc.europa.eu/schema#exportedThesaurus> <http://www.w3.org/2004/02/skos/core#ConceptScheme> , <http://eurovoc.europa.eu/schema#Thesaurus> ;
+	<http://eurovoc.europa.eu/schema#intermediateRelease> xsd:boolean .
+
+<http://eurovoc.europa.eu/schema#SimpleNonPreferredTerm> <http://purl.org/dc/terms/created> xsd:dateTime .
+
+<http://eurovoc.europa.eu/schema#Country> <http://purl.org/dc/terms/modified> xsd:dateTime .
+
+<http://eurovoc.europa.eu/schema#Domain> a <http://eurovoc.europa.eu/schema#Domain> ;
+	<http://purl.org/dc/elements/1.1/identifier> xsd:string ;
+	<http://eurovoc.europa.eu/schema#toBeTranslated> xsd:string ;
+	<http://www.w3.org/2004/02/skos/core#prefLabel> rdf:langString ;
+	<http://eurovoc.europa.eu/schema#hasPolyHierarchy> xsd:boolean .
