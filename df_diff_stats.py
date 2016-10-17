@@ -30,6 +30,7 @@ import pandas as pd
 from pylatex import NoEscape, Section, Subsection
 
 from df_desc_stats import df_prop_stats
+from df_tex_utils import transform_into_tabularx
 
 
 def df_to_set_of_tuples(df, structural_columns=["stype", "p", "ootype"]):
@@ -92,22 +93,30 @@ def diff_to_latex_section(tex_doc, alpha, alpha_description, beta, beta_descript
         # tex_doc.append(beta_description)
         with tex_doc.create(Subsection("Common parts")) as subsec:
             subsec.append("The table below represents the elements common to both datasets.")
-            # with tex_doc.create(Table(position='H')) as tbl:
-            tex_doc.append(NoEscape(cmn_df.to_latex(longtable=True, index=False, na_rep="*")))
+
+            # tex_doc.append(NoEscape(cmn_df.to_latex(longtable=True, index=False, na_rep="*")))
+            tex_doc.append(NoEscape(transform_into_tabularx(
+                    cmn_df.to_latex(longtable=True, index=False, float_format="%.2f", na_rep="*",
+                                        column_format="llX"))))
+
+
 
         with tex_doc.create(Subsection("Unique to " + ref_alpha)) as subsec:
             subsec.append(
                 "The table below represents the elements present in " + ref_alpha + " but missing in " + ref_beta + ".")
-            # with tex_doc.create(Table(position='H')) as tbl:
-            tex_doc.append(NoEscape(adb_df.to_latex(longtable=True, index=False, na_rep="*")))
+            # tex_doc.append(NoEscape(adb_df.to_latex(longtable=True, index=False, na_rep="*")))
+            tex_doc.append(NoEscape(transform_into_tabularx(
+                    adb_df.to_latex(longtable=True, index=False, float_format="%.2f", na_rep="*",
+                                        column_format="llX"))))
 
         with tex_doc.create(Subsection("Unique to " + ref_beta)) as subsec:
             subsec.append(
                 "The table below represents the elements present in " + ref_beta + " but missing in " + ref_alpha + ".")
-            # with tex_doc.create(Table(position='H')) as tbl:
-            tex_doc.append(NoEscape(bda_df.to_latex(longtable=True, index=False, na_rep="*")))
+            # tex_doc.append(NoEscape(bda_df.to_latex(longtable=True, index=False, na_rep="*")))
+            tex_doc.append(NoEscape(transform_into_tabularx(
+                    bda_df.to_latex(longtable=True, index=False, float_format="%.2f", na_rep="*",
+                                        column_format="llX"))))
 
-            # diff_to_latex_table(fp1, "Bla Bla", fp2, "Blu blu")
 
 
 if __name__ == "__main__":

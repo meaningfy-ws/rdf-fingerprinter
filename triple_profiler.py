@@ -13,16 +13,16 @@ from df_io import read_prefixes, read_fp_spo_count, replace_ns, compile_tex_file
 
 configuration_dict = {
     "author": "Eugeniu Costetchi",
-    "title": "DataSet Fingerprint Report",
+    "title": "EuroVoc Fingerprint Report - From Old to New and Back",
     "type": "difference between two dataset fingerprints",
     "ns_file": "resources/prefix.csv",
-    "alpha": {"title": "Corporate",
-              "filename": "resources/spo_fingerprint_cob.csv",
-              "desc": "Corporate 4.4 was released a long time ago using EuroVoc Ontology"},
-    "beta": {"title": "Places",
-             "filename": "resources/spo_fingerprint_places1.csv",
-             "desc": "Places 4.5 was released in July 2016 with SKOS-AP-EU and then converted "
-                     "to fit also the old EuroVoc Ontology."},
+    "alpha": {"title": "EuroVoc 4.4",
+              "filename": "resources/fingerprint.rq_eurovoc44.log",
+              "desc": "EuroVoc 4.4 was released a long time ago using EuroVoc Ontology."},
+    "beta": {"title": "EuroVoc 4.5(bc)",
+             "filename": "resources/fingerprint.rq_EV45OLD.log",
+             "desc": "EuroVoc 4.5 backward compatible (bc) was released in July 2016 with "
+                     "SKOS-AP-EU and then converted to fit also the old profile of EuroVoc Ontology."},
 }
 
 
