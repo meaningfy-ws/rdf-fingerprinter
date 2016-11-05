@@ -3,6 +3,7 @@
 # author:   Eugeniu Costetchi
 import os
 import pandas as pd
+import json
 
 
 def read_prefixes(filename):
@@ -32,6 +33,11 @@ def replace_ns(triples, ns_dataframe):
     return triples.replace(d, regex=True)
 
 
+def read_config(configfile):
+    with open(configfile, 'r') as f:
+        return json.load(f)
+
+
 def compile_tex_file_multipass(filename):
     """
     runs several times the latex command to simulate the multiple passes
@@ -46,5 +52,7 @@ def compile_tex_file_multipass(filename):
     os.system("pdflatex -interaction=nonstopmode " + fn + ".tex")
     os.chdir(here)
 
+
 if __name__ == "__main__":
+    # print(read_config("../config.json"))
     pass

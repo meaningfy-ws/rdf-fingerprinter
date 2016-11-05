@@ -42,7 +42,7 @@
 import pandas as pd
 from pylatex import NoEscape, Section, Subsection, Subsubsection
 
-from df_tex_utils import transform_into_tabularx
+from fingerprint.df_tex_utils import transform_into_tabularx
 
 
 def df_class_stats(df):
@@ -75,7 +75,7 @@ def df_class_stats_to_latex(tex_doc, df, description):
                        'are different from total number of unique instances in the data-set. When an individual'
                        'instantiates multiple classes, then it is counted once for each class it instantiates. The relative'
                        'number of instances is scaled to the total number of unique instances per class.')
-        tex_doc.append(NoEscape(df.to_latex(longtable=True, index=False, float_format="%.2f")))
+        tex_doc.append(NoEscape(df.to_latex(longtable=True, index=False, float_format=lambda x: "%.2f" % x)))
 
 
 confidence = {"certain": 93, "likely": 86, "possible": 47, "unlikely": 12, "rare": 5, "very rare": -1}
@@ -209,7 +209,7 @@ def df_prop_stats_to_latex(tex_doc, df, description):
                                       "cnt/type-cnt": 'Usage/r',  # relative usage
                                       },
                              inplace=True)
-                tex_doc.append(NoEscape(group.to_latex(longtable=True, index=False, float_format="%.2f")))
+                tex_doc.append(NoEscape(group.to_latex(longtable=True, index=False, float_format=lambda x: "%.2f" % x)))
 
 
 def df_ap_guess_to_latex(tex_doc, df, description):
@@ -267,7 +267,7 @@ def df_ap_guess_to_latex(tex_doc, df, description):
                                       },
                              inplace=True)
                 tex_doc.append(NoEscape(transform_into_tabularx(
-                    group.to_latex(longtable=True, index=False, float_format="%.2f", na_rep="*",
+                    group.to_latex(longtable=True, index=False, float_format=lambda x: "%.2f" % x, na_rep="*",
                                    column_format="lllXr"))))
 
 
@@ -280,7 +280,7 @@ def generate_missing_ns(df, structural_columns=['stype', 'p', 'ootype']):
     unique_uris = set()
     for col in structural_columns:
         unique_uris = unique_uris.union(set(df[col]))
-    print unique_uris
+    print(unique_uris)
 
 
 def df_stats_to_latex(tex_doc, df, description):

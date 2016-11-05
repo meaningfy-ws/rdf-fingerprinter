@@ -1,0 +1,16 @@
+{
+  "title": "EuroVoc Fingerprint Report - From Old to New and Back",
+  "type": "difference between two dataset fingerprints",
+  "author": "Eugeniu Costetchi",
+  "ns_file": "./resources/prefix.csv",
+  "alpha": {
+    "filename": "./resources/fingerprint.rq_eurovoc44.log",
+    "title": "EuroVoc 4.4",
+    "desc": "EuroVoc 4.4 was released a long time ago using EuroVoc Ontology."
+  },
+  "beta": {
+    "filename": "./resources/fingerprint.rq_EV45OLD.log",
+    "title": "EuroVoc 4.5(bc)",
+    "desc": "EuroVoc 4.5 backward compatible (bc) was released in July 2016 with SKOS-AP-EU and then converted to fit also the old profile of EuroVoc Ontology."
+  }
+}

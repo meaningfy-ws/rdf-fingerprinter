@@ -1,6 +1,6 @@
 import unittest
 
-from df_tex_utils import url_local_split
+from fingerprint.df_tex_utils import url_local_split
 
 
 class MyTestCase(unittest.TestCase):
