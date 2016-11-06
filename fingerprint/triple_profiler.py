@@ -4,20 +4,23 @@
 
 from __future__ import division
 
+import os
+
 from pylatex import Document, Package, Command
 from pylatex.utils import NoEscape
 
-from fingerprint.df_desc_stats import df_stats_to_latex
+from fingerprint.df_desc_stats import df_stats_to_latex, confidence_category
 from fingerprint.df_diff_stats import diff_to_latex_section
 from fingerprint.df_io import read_prefixes, read_fp_spo_count, replace_ns, compile_tex_file_multipass, read_config
 
-import json
-import click
+# import json
+# import click
 
 configuration_dict = {
-    "author": "Eugeniu Costetchi",
-    "title": "EuroVoc Fingerprint Report - From Old to New and Back",
-    "type": "difference between two dataset fingerprints",
+    "author": "Generated with RDF Fingerprinter (by Eugeniu Costetchi)",
+    "title-stats": "Data-set Fingerprint Report - Application Profile and descriptive statistics",
+    "title-diff": "Data-set Fingerprint Diff Report - Application Profile Diffs and descriptive statistics",
+    # "type": "difference between two dataset fingerprints",
     "ns_file": "resources/prefix.csv",
     "alpha": {"title": "EuroVoc 4.4",
               "filename": "resources/fingerprint.rq_eurovoc44.log",
@@ -29,28 +32,33 @@ configuration_dict = {
 }
 
 
-@click.group()
-def cli():
-    pass
+# @click.group()
+# def cli():
+#     pass
+
+def generate_stats(output, alpha_filename, config=configuration_dict):
+    ns = read_prefixes(config["ns_file"])
+    fp_sp = read_fp_spo_count(alpha_filename)
+    fp_sp = replace_ns(fp_sp, ns)
+    fp_sp.to_csv(output)
 
 
-@cli.command("stats")
-@click.argument('filename', type=click.Path(exists=False))
-@click.argument('cfile', type=click.Path(exists=True))
-def generate_stats_document(filename, cfile):
+# @cli.command("stats")
+# @click.argument('filename', type=click.Path(exists=False))
+# @click.argument('cfile', type=click.Path(exists=True))
+def generate_stats_document(output_fn, alpha_filename, alpha_description, config=configuration_dict):
     """
-    :param filename: path to the output TEX file
-    :param cfFile: path to configuration JSON file
+    :param alpha_description:
+    :param alpha_filename:
+    :param output_fn: path to the output TEX file
+    :param config: configuration json
     :return: None
     """
 
-    geometry_options = {
-        "head": "40pt",
-        "margin": "0.5in",
-        "bottom": "0.6in",
-        "includeheadfoot": True
-    }
-    config = read_config(cfile)
+    config['alpha'] = {}
+    config['alpha']['title'] = os.path.basename(alpha_filename) + ' dataset'
+    config['alpha']['filename'] = alpha_filename
+    config['alpha']['desc'] = alpha_description
 
     doc = Document(documentclass=Command(command="documentclass", arguments=["article"],
                                          options=["10pt", "a4paper", "titlepage", "final"]))
@@ -62,32 +70,46 @@ def generate_stats_document(filename, cfile):
     doc.packages.append(Package('geometry', options=["left=2.00cm", "right=2.00cm", "top=2.00cm", "bottom=2.00cm"]))
 
     doc.preamble.append(NoEscape("\\author{" + config["author"] + "}"))
-    doc.preamble.append(NoEscape("\\title{" + config["title"] + "}"))
+    doc.preamble.append(NoEscape("\\title{" + config["title-stats"] + "}"))
     doc.append(Command(command="maketitle"))
     doc.append(Command(command="tableofcontents"))
     doc.append(Command(command="newpage"))
     # headder end
 
     ns = read_prefixes(config["ns_file"])
-    fp_sp = read_fp_spo_count(config["alpha"]["filename"])
+    fp_sp = read_fp_spo_count(alpha_filename)
     fp_sp = replace_ns(fp_sp, ns)
 
     # df_stats_to_latex(doc, fp_sp, config["alpha"])
     df_stats_to_latex(doc, fp_sp, config["alpha"])
 
-    doc.generate_tex(filepath=filename)
-    compile_tex_file_multipass(filename)
+    doc.generate_tex(filepath=output_fn)
+    compile_tex_file_multipass(output_fn)
 
-@cli.command("diff")
-@click.argument('filename', type=click.Path(exists=False))
-@click.argument('cfile', type=click.Path(exists=True))
-def generate_diff_document(filename, cfile):
+
+# @cli.command("diff")
+# @click.argument('filename', type=click.Path(exists=False))
+# @click.argument('cfile', type=click.Path(exists=True))
+def generate_diff_document(output_fn, alpha_filename, alpha_description, beta_filename, beta_description,
+                           config=configuration_dict):
     """
-    :param filename: filename for the tex document
-    :param cfile:
+    :param beta_description:
+    :param beta_filename:
+    :param alpha_description:
+    :param alpha_filename:
+    :param config:
+    :param output_fn: filename for the tex document
     :return: None
     """
-    config = read_config(cfile)
+    config['alpha'] = {}
+    config['alpha']['title'] = os.path.basename(alpha_filename) + ' dataset'
+    config['alpha']['filename'] = alpha_filename
+    config['alpha']['desc'] = alpha_description
+
+    config['beta'] = {}
+    config['beta']['title'] = os.path.basename(beta_filename) + ' dataset'
+    config['beta']['filename'] = beta_filename
+    config['beta']['desc'] = beta_description
 
     doc = Document(documentclass=Command(command="documentclass", arguments=["article"],
                                          options=["10pt", "a4paper", "titlepage", "final"]))
@@ -97,7 +119,7 @@ def generate_diff_document(filename, cfile):
     doc.packages.append(Package('ltablex'))
     doc.packages.append(Package('geometry', options=["left=2.00cm", "right=2.00cm", "top=2.00cm", "bottom=2.00cm"]))
     doc.preamble.append(NoEscape("\\author{" + config["author"] + "}"))
-    doc.preamble.append(NoEscape("\\title{" + config["title"] + "}"))
+    doc.preamble.append(NoEscape("\\title{" + config["title-diff"] + "}"))
     doc.append(Command(command="maketitle"))
     doc.append(Command(command="tableofcontents"))
 
@@ -115,11 +137,18 @@ def generate_diff_document(filename, cfile):
     df_stats_to_latex(doc, alpha_spo, config["alpha"])
     df_stats_to_latex(doc, beta_spo, config["beta"])
 
-    doc.generate_tex(filepath=filename)
-    compile_tex_file_multipass(filename)
+    doc.generate_tex(filepath=output_fn)
+    compile_tex_file_multipass(output_fn)
 
 
 if __name__ == "__main__":
-    # TODO: implement http://click.pocoo.org/5/ CLI
-    #generate_diff_document("temp/diff_report", "config.json")
-    cli()
+    # generate_diff_document("temp/diff_report", )
+    # generate_stats_document(output_fn='temp/stats',  alpha_filename='resources/fingerprint.rq_eurovoc44.log',
+    #                         alpha_description="Some dataset")
+
+    # generate_diff_document(output_fn='temp/stats',  alpha_filename='resources/fingerprint.rq_eurovoc44.log',
+    #                         alpha_description="Some dataset", beta_filename='resources/fingerprint.rq_EV45OLD.log',
+    #                        beta_description="Some other dataset")
+    # generate_stats('temp/stats.csv',  'resources/fingerprint.rq_eurovoc44.log')
+    pass
+    # cli()

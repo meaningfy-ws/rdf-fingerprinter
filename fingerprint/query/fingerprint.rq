@@ -2,7 +2,13 @@
 # countins SPV plus , the most informative query so far,
 # counting prop types as well for spo types
 ##########################################################################
-select distinct ?stype ?p ?ootype ?propType (count(distinct ?s) as ?scnt) (count(distinct ?o) as ?ocnt) (count(*) as ?cnt) (min(?sp_star) as ?min_sp) (max(?sp_star) as ?max_sp) (avg(?sp_star) as ?avg_sp)
+select distinct ?stype ?p ?ootype ?propType
+                (count(distinct ?s) as ?scnt)
+                (count(distinct ?o) as ?ocnt)
+                (count(*) as ?cnt)
+                (min(?sp_star) as ?min_sp)
+                (max(?sp_star) as ?max_sp)
+                (avg(?sp_star) as ?avg_sp)
 where
 {
 
