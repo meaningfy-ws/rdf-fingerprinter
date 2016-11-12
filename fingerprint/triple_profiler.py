@@ -140,7 +140,6 @@ def generate_diff_document(output_fn, alpha_filename, alpha_description, beta_fi
     doc.generate_tex(filepath=output_fn)
     compile_tex_file_multipass(output_fn)
 
-
 if __name__ == "__main__":
     # generate_diff_document("temp/diff_report", )
     # generate_stats_document(output_fn='temp/stats',  alpha_filename='resources/fingerprint.rq_eurovoc44.log',
