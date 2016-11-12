@@ -13,9 +13,7 @@ from fingerprint.df_desc_stats import df_stats_to_latex, confidence_category
 from fingerprint.df_diff_stats import diff_to_latex_section
 from fingerprint.df_io import read_prefixes, read_fp_spo_count, replace_ns, compile_tex_file_multipass, read_config
 
-import json
-
-# import click
+import click
 
 configuration_dict = {
     "author": "Generated with RDF Fingerprinter (by Eugeniu Costetchi)",
@@ -33,9 +31,9 @@ configuration_dict = {
 }
 
 
-# @click.group()
-# def cli():
-#     pass
+@click.group()
+def cli():
+    pass
 
 def generate_stats_csv(output, alpha_filename, config=configuration_dict):
     ns = read_prefixes(config["ns_file"])
@@ -44,9 +42,8 @@ def generate_stats_csv(output, alpha_filename, config=configuration_dict):
     fp_sp.to_csv(output)
 
 
-# @cli.command("stats")
-# @click.argument('filename', type=click.Path(exists=False))
-# @click.argument('cfile', type=click.Path(exists=True))
+@cli.command("stats")
+@click.argument('config_fn', type=click.Path(exists=True))
 def generate_stats_document(config_fn):
     """
     Generates the PDF report using parameters from from config_fn JSON file
@@ -146,6 +143,5 @@ if __name__ == "__main__":
     #                        beta_description="Some other dataset")
     # generate_stats('temp/stats.csv',  'resources/fingerprint.rq_eurovoc44.log')
 
-    pass
+    cli()
     # generate_stats_document('./resources/config_37cd5ef2-2a98-4974-87ab-92823d5c33ed.json')
-    # cli()
