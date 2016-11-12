@@ -13,7 +13,8 @@ from fingerprint.df_desc_stats import df_stats_to_latex, confidence_category
 from fingerprint.df_diff_stats import diff_to_latex_section
 from fingerprint.df_io import read_prefixes, read_fp_spo_count, replace_ns, compile_tex_file_multipass, read_config
 
-# import json
+import json
+
 # import click
 
 configuration_dict = {
@@ -36,7 +37,7 @@ configuration_dict = {
 # def cli():
 #     pass
 
-def generate_stats(output, alpha_filename, config=configuration_dict):
+def generate_stats_csv(output, alpha_filename, config=configuration_dict):
     ns = read_prefixes(config["ns_file"])
     fp_sp = read_fp_spo_count(alpha_filename)
     fp_sp = replace_ns(fp_sp, ns)
@@ -46,19 +47,13 @@ def generate_stats(output, alpha_filename, config=configuration_dict):
 # @cli.command("stats")
 # @click.argument('filename', type=click.Path(exists=False))
 # @click.argument('cfile', type=click.Path(exists=True))
-def generate_stats_document(output_fn, alpha_filename, alpha_description, config=configuration_dict):
+def generate_stats_document(config_fn):
     """
-    :param alpha_description:
-    :param alpha_filename:
-    :param output_fn: path to the output TEX file
-    :param config: configuration json
+    Generates the PDF report using parameters from from config_fn JSON file
+    :param config_fn: a file containing the script configuration parameters
     :return: None
     """
-
-    config['alpha'] = {}
-    config['alpha']['title'] = os.path.basename(alpha_filename) + ' dataset'
-    config['alpha']['filename'] = alpha_filename
-    config['alpha']['desc'] = alpha_description
+    config = read_config(config_fn)
 
     doc = Document(documentclass=Command(command="documentclass", arguments=["article"],
                                          options=["10pt", "a4paper", "titlepage", "final"]))
@@ -70,21 +65,20 @@ def generate_stats_document(output_fn, alpha_filename, alpha_description, config
     doc.packages.append(Package('geometry', options=["left=2.00cm", "right=2.00cm", "top=2.00cm", "bottom=2.00cm"]))
 
     doc.preamble.append(NoEscape("\\author{" + config["author"] + "}"))
-    doc.preamble.append(NoEscape("\\title{" + config["title-stats"] + "}"))
+    doc.preamble.append(NoEscape("\\title{" + config["title"] + "}"))
     doc.append(Command(command="maketitle"))
     doc.append(Command(command="tableofcontents"))
     doc.append(Command(command="newpage"))
-    # headder end
+    # header end
 
     ns = read_prefixes(config["ns_file"])
-    fp_sp = read_fp_spo_count(alpha_filename)
+    fp_sp = read_fp_spo_count(config["alpha"]["file"]["path"])
     fp_sp = replace_ns(fp_sp, ns)
 
-    # df_stats_to_latex(doc, fp_sp, config["alpha"])
     df_stats_to_latex(doc, fp_sp, config["alpha"])
 
-    doc.generate_tex(filepath=output_fn)
-    compile_tex_file_multipass(output_fn)
+    doc.generate_tex(filepath=config["output"])
+    compile_tex_file_multipass(config["output"])
 
 
 # @cli.command("diff")
@@ -140,6 +134,7 @@ def generate_diff_document(output_fn, alpha_filename, alpha_description, beta_fi
     doc.generate_tex(filepath=output_fn)
     compile_tex_file_multipass(output_fn)
 
+
 if __name__ == "__main__":
     # generate_diff_document("temp/diff_report", )
     # generate_stats_document(output_fn='temp/stats',  alpha_filename='resources/fingerprint.rq_eurovoc44.log',
@@ -149,5 +144,7 @@ if __name__ == "__main__":
     #                         alpha_description="Some dataset", beta_filename='resources/fingerprint.rq_EV45OLD.log',
     #                        beta_description="Some other dataset")
     # generate_stats('temp/stats.csv',  'resources/fingerprint.rq_eurovoc44.log')
+
     pass
+    # generate_stats_document('./resources/config_37cd5ef2-2a98-4974-87ab-92823d5c33ed.json')
     # cli()
