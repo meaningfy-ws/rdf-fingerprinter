@@ -54,6 +54,7 @@ def generate_stats_document(config_fn):
     :return: None
     """
     config = read_config(config_fn)
+    print("Starting generation of " + config["output"])
 
     doc = Document(documentclass=Command(command="documentclass", arguments=["article"],
                                          options=["10pt", "a4paper", "titlepage", "final"]))
@@ -79,7 +80,7 @@ def generate_stats_document(config_fn):
 
     doc.generate_tex(filepath=config["output"])
     compile_tex_file_multipass(config["output"])
-
+    print("" + config["output"] + " successfully generated")
 
 # @cli.command("diff")
 # @click.argument('filename', type=click.Path(exists=False))

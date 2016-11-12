@@ -89,6 +89,6 @@ ENV/
 .ropeproject
 
 test/
-.ipubnb_checkpoints
-.idea
+.ipubnb_checkpoints/
+.idea/
 temp/
