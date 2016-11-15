@@ -35,11 +35,22 @@ configuration_dict = {
 def cli():
     pass
 
-def generate_stats_csv(output, alpha_filename, config=configuration_dict):
+
+@cli.command("csv")
+@click.argument('config_fn', type=click.Path(exists=True))
+def generate_stats_csv(config_fn):
+    """
+    Generate the CSV file containing the processed statistics for AP generator
+    :param config_fn:
+    :return:
+    """
+    config = read_config(config_fn)
+    print("Starting generation of CSV " + config["output"] + ".csv")
     ns = read_prefixes(config["ns_file"])
-    fp_sp = read_fp_spo_count(alpha_filename)
+    fp_sp = read_fp_spo_count(config["alpha"]["file"]["path"])
     fp_sp = replace_ns(fp_sp, ns)
-    fp_sp.to_csv(output)
+    fp_sp.to_csv(config["output"] + ".csv")
+    print("Starting generation of " + config["output"])
 
 
 @cli.command("stats")
@@ -77,31 +88,19 @@ def generate_stats_document(config_fn):
 
     doc.generate_tex(filepath=config["output"])
     compile_tex_file_multipass(config["output"])
-    print("" + config["output"] + " successfully generated")
+    print("" + config["output"] + " successfully generated.")
 
-# @cli.command("diff")
-# @click.argument('filename', type=click.Path(exists=False))
-# @click.argument('cfile', type=click.Path(exists=True))
-def generate_diff_document(output_fn, alpha_filename, alpha_description, beta_filename, beta_description,
-                           config=configuration_dict):
+
+@cli.command("diff")
+@click.argument('config_fn', type=click.Path(exists=True))
+def generate_diff_document(config_fn):
     """
-    :param beta_description:
-    :param beta_filename:
-    :param alpha_description:
-    :param alpha_filename:
-    :param config:
-    :param output_fn: filename for the tex document
+    Generates the diff PDF report using parameters from from config_fn JSON file
+    :param config_fn: a file containing the script configuration parameters
     :return: None
     """
-    config['alpha'] = {}
-    config['alpha']['title'] = os.path.basename(alpha_filename) + ' dataset'
-    config['alpha']['filename'] = alpha_filename
-    config['alpha']['desc'] = alpha_description
-
-    config['beta'] = {}
-    config['beta']['title'] = os.path.basename(beta_filename) + ' dataset'
-    config['beta']['filename'] = beta_filename
-    config['beta']['desc'] = beta_description
+    config = read_config(config_fn)
+    print("Starting generation of " + config["output"])
 
     doc = Document(documentclass=Command(command="documentclass", arguments=["article"],
                                          options=["10pt", "a4paper", "titlepage", "final"]))
@@ -111,7 +110,7 @@ def generate_diff_document(output_fn, alpha_filename, alpha_description, beta_fi
     doc.packages.append(Package('ltablex'))
     doc.packages.append(Package('geometry', options=["left=2.00cm", "right=2.00cm", "top=2.00cm", "bottom=2.00cm"]))
     doc.preamble.append(NoEscape("\\author{" + config["author"] + "}"))
-    doc.preamble.append(NoEscape("\\title{" + config["title-diff"] + "}"))
+    doc.preamble.append(NoEscape("\\title{" + config["title"] + "}"))
     doc.append(Command(command="maketitle"))
     doc.append(Command(command="tableofcontents"))
 
@@ -119,29 +118,20 @@ def generate_diff_document(output_fn, alpha_filename, alpha_description, beta_fi
     # headder end
 
     ns = read_prefixes(config["ns_file"])
-    alpha_spo = read_fp_spo_count(config["alpha"]["filename"])
+    alpha_spo = read_fp_spo_count(config["alpha"]["file"]["path"])
     alpha_spo = replace_ns(alpha_spo, ns)
 
-    beta_spo = read_fp_spo_count(config["beta"]["filename"])
+    beta_spo = read_fp_spo_count(config["beta"]["file"]["path"])
     beta_spo = replace_ns(beta_spo, ns)
 
     diff_to_latex_section(doc, alpha_spo, config["alpha"], beta_spo, config["beta"])
     df_stats_to_latex(doc, alpha_spo, config["alpha"])
     df_stats_to_latex(doc, beta_spo, config["beta"])
 
-    doc.generate_tex(filepath=output_fn)
-    compile_tex_file_multipass(output_fn)
+    doc.generate_tex(filepath=config["output"])
+    compile_tex_file_multipass(config["output"])
+    print("" + config["output"] + " successfully generated.")
 
 
 if __name__ == "__main__":
-    # generate_diff_document("temp/diff_report", )
-    # generate_stats_document(output_fn='temp/stats',  alpha_filename='resources/fingerprint.rq_eurovoc44.log',
-    #                         alpha_description="Some dataset")
-
-    # generate_diff_document(output_fn='temp/stats',  alpha_filename='resources/fingerprint.rq_eurovoc44.log',
-    #                         alpha_description="Some dataset", beta_filename='resources/fingerprint.rq_EV45OLD.log',
-    #                        beta_description="Some other dataset")
-    # generate_stats('temp/stats.csv',  'resources/fingerprint.rq_eurovoc44.log')
-
     cli()
-    # generate_stats_document('./resources/config_37cd5ef2-2a98-4974-87ab-92823d5c33ed.json')
