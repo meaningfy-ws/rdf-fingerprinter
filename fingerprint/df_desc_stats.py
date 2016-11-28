@@ -111,14 +111,14 @@ def df_prop_stats(df, conf=confidence):
         if len(group) > 1:
             if len(group[group['propType'] == 'data']['propType']) > 0:
                 # process data rows
-                aggregated = {'stype': name[0], 'p': name[1], 'propType': 'data',}
+                aggregated = {'stype': name[0], 'p': name[1], 'propType': 'data', }
                 aggregated['scnt'] = [group['scnt'].sum()]
                 aggregated['ocnt'] = [group['ocnt'].sum()]
                 aggregated['cnt'] = [group['cnt'].sum()]
                 aggregated['min_sp'] = [group['min_sp'].min()]
                 aggregated['max_sp'] = [group['max_sp'].max()]
                 aggregated['avg_sp'] = [group['avg_sp'].mean()]
-                aggregated['ootype'] = ", ".join(group['ootype'])
+                aggregated['ootype'] = ", ".join(group['ootype'].astype(str))
                 df_reduced = df_reduced.append(pd.DataFrame(aggregated, columns=df.columns))
             elif len(group[group['propType'] == 'object']['propType']) > 0:
                 # process object rows
@@ -140,12 +140,12 @@ def df_prop_stats(df, conf=confidence):
     # calculating the averages and relatives per class for each property
     # iterate over the groups of ['stype']
     for name, group in df_reduced.groupby(['stype']):
+        if not group.index.is_unique:
+            group.reset_index(inplace=True)
         type_scnt = group[group['p'] == 'rdf:type']['scnt'].iloc[0]
         type_cnt = group[group['p'] == 'rdf:type']['cnt'].iloc[0]
         group["scnt/type-scnt"] = group['scnt'] / type_scnt * 100
-
         group["cnt/type-cnt"] = group['cnt'] / max(group['cnt']) * 100
-
         group['min_ap'] = group[group['scnt/type-scnt'] > conf['likely']]['min_sp'].astype(int).astype(str)
         group['min_ap'].fillna(0, inplace=True)
         group['max_ap'] = group[(group['scnt/type-scnt'] > conf['likely']) & (group['max_sp'] == 1)][
