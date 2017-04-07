@@ -15,6 +15,16 @@ from fingerprint.df_io import read_prefixes, read_fp_spo_count, replace_ns, comp
 
 import click
 
+class Config(object):
+    """util class to pass the arguments from cli group to cli commands"""
+
+    def __init__(self):
+        self.verbose = False
+
+# making the decorator that instantiates the config object at the group
+# level and passes it as argument to the commands decorated with it
+pass_config = click.make_pass_decorator(Config, ensure=True)
+
 configuration_dict = {
     "author": "Generated with RDF Fingerprinter (by Eugeniu Costetchi)",
     "title-stats": "Data-set Fingerprint Report - Application Profile and descriptive statistics",
@@ -32,12 +42,17 @@ configuration_dict = {
 
 
 @click.group()
+# @click.option("--verbose", is_flag=True)
+# @click.option("--format", default="HTML", help="The output format of the parse results.")
+# @click.option("--stanfordHome", help="The path to stanford parser home folder.")
+# @pass_config
 def cli():
     pass
 
 
 @cli.command("csv")
 @click.argument('config_fn', type=click.Path(exists=True))
+# @pass_config
 def generate_stats_csv(config_fn):
     """
     Generate the CSV file containing the processed statistics for AP generator
@@ -47,7 +62,7 @@ def generate_stats_csv(config_fn):
     config = read_config(config_fn)
     print("Starting generation of CSV " + config["output"] + ".csv")
     ns = read_prefixes(config["ns_file"])
-    fp_sp = read_fp_spo_count(config["alpha"]["file"]["path"])
+    fp_sp = read_fp_spo_count(config["alpha"]["file"])
     fp_sp = replace_ns(fp_sp, ns)
     fp_sp.to_csv(config["output"] + ".csv")
     print("Starting generation of " + config["output"])
@@ -55,6 +70,7 @@ def generate_stats_csv(config_fn):
 
 @cli.command("stats")
 @click.argument('config_fn', type=click.Path(exists=True))
+# @pass_config
 def generate_stats_document(config_fn):
     """
     Generates the PDF report using parameters from from config_fn JSON file
@@ -81,7 +97,7 @@ def generate_stats_document(config_fn):
     # header end
 
     ns = read_prefixes(config["ns_file"])
-    fp_sp = read_fp_spo_count(config["alpha"]["file"]["path"])
+    fp_sp = read_fp_spo_count(config["alpha"]["file"])
     fp_sp = replace_ns(fp_sp, ns)
 
     df_stats_to_latex(doc, fp_sp, config["alpha"])
@@ -93,6 +109,7 @@ def generate_stats_document(config_fn):
 
 @cli.command("diff")
 @click.argument('config_fn', type=click.Path(exists=True))
+# @pass_config
 def generate_diff_document(config_fn):
     """
     Generates the diff PDF report using parameters from from config_fn JSON file
@@ -118,10 +135,10 @@ def generate_diff_document(config_fn):
     # headder end
 
     ns = read_prefixes(config["ns_file"])
-    alpha_spo = read_fp_spo_count(config["alpha"]["file"]["path"])
+    alpha_spo = read_fp_spo_count(config["alpha"]["file"])
     alpha_spo = replace_ns(alpha_spo, ns)
 
-    beta_spo = read_fp_spo_count(config["beta"]["file"]["path"])
+    beta_spo = read_fp_spo_count(config["beta"]["file"])
     beta_spo = replace_ns(beta_spo, ns)
 
     diff_to_latex_section(doc, alpha_spo, config["alpha"], beta_spo, config["beta"])
@@ -132,6 +149,5 @@ def generate_diff_document(config_fn):
     compile_tex_file_multipass(config["output"])
     print("" + config["output"] + " successfully generated.")
 
-
-if __name__ == "__main__":
-    cli()
+# if __name__ == "__main__":
+#     cli()

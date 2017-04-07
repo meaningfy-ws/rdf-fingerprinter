@@ -50,4 +50,5 @@ def url_local_split(url_string):
 
 
 if __name__ == "__main__":
-    print(url_local_split("http"))
+    # print(url_local_split("http"))
+    pass
