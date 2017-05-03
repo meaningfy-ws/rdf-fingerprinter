@@ -8,4 +8,3 @@ This project offers means to fingerprint and RDF repository and reconstruct the 
 
 - latex executable
  
-docker image: cf65829e989b
