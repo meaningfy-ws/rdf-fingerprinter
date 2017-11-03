@@ -7,4 +7,10 @@ This project offers means to fingerprint and RDF repository and reconstruct the 
 - pandas
 
 - latex executable
+
+# Build the Docker Container
+execute in terminal 
+```
+docker-publish.sh
+``` 
  
