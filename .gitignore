@@ -92,3 +92,8 @@ test/
 .ipubnb_checkpoints/
 .idea/
 temp/
+
+*.toc
+*.tex
+*.aux
+*.pdf

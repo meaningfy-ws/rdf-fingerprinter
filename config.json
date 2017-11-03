@@ -1,13 +1,13 @@
 {
-  "title": "EuroVoc Fingerprint Report - From Old to New and Back",
-  "type": "difference between two dataset fingerprints",
+  "title": "EuroVoc 4.5 BWC-ACT Fingerprint Report",
+  "type": "Dataset fingerprint",
   "author": "Eugeniu Costetchi",
   "ns_file": "./resources/prefix.csv",
   "output" : "./out",
   "alpha": {
-    "file": "./resources/fingerprint.rq_eurovoc44.log",
-    "title": "EuroVoc 4.4",
-    "desc": "EuroVoc 4.4 was released a long time ago using EuroVoc Ontology."
+    "file": "./resources/ev45act.csv",
+    "title": "EuroVoc 4.5",
+    "desc": "EuroVoc 4.5 was released summer 2016 using SKOS-AP-EU."
   },
   "beta": {
     "file": "./resources/fingerprint.rq_EV45OLD.log",
