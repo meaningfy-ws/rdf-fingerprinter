@@ -1,0 +1,12 @@
+############################################################
+# Select the base namespace 
+############################################################
+
+select distinct ?baseSubject ?predicate ?basePredicate ?baseObject
+{
+  ?subject ?predicate ?object
+  bind(replace(str(?subject),"(^.*[\\/#])(.*)$","$1") as ?baseSubject)
+  bind(replace(str(?predicate),"(^.*[\\/#])(.*)$","$1") as ?basePredicate)
+  bind(replace(str(?object),"(^.*[\\/#])(.*)$","$1") as ?baseObject)           
+  FILTER (ISIRI(?object) && ISIRI(?subject) && ISIRI(?predicate))
+}
