@@ -19,7 +19,7 @@ setup(
     description='generates report representing the fingerprint of a RDF dataset'
                 'and eventually '
                 'offers a diff to another fingerprint',
-    install_requires=['pylatex', 'Click'],   # pandas assumed to be installed already 'pandas>=0.17.1',
+    install_requires=['pylatex', 'Click', 'pandas'],   # pandas assumed to be installed already 'pandas>=0.17.1',
     zip_safe=False,
     classifiers=[
         'Development Status :: 3 - Alpha',
