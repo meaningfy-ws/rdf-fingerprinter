@@ -27,7 +27,8 @@ group by ?stype ?p ?ootype ?propType
 order by ?stype ?p ?ootype ?propType
 """
 import pandas as pd
-from df_desc_stats import df_prop_stats
+
+from fingerprint.df_desc_stats import df_prop_stats
 from pylatex import NoEscape, Section, Subsection
 
 from fingerprint.df_tex_utils import transform_into_tabularx
@@ -70,7 +71,7 @@ def diff_to_latex_section(tex_doc, alpha, alpha_description, beta, beta_descript
     beta = df_prop_stats(beta)
     cmn_s, adb_s, bda_s = df_diff(alpha, beta, structural_columns=['stype', 'p', 'ootype'])
 
-    cols = ["Subject", "Predicate", "Object"] # list of columns for recreating dataframes from list of tuples
+    cols = ["Subject", "Predicate", "Object"]  # list of columns for recreating dataframes from list of tuples
     cmn_df = pd.DataFrame(list(cmn_s), columns=cols, )
     cmn_df.sort_values(by=cols, inplace=True)
 
@@ -96,27 +97,24 @@ def diff_to_latex_section(tex_doc, alpha, alpha_description, beta, beta_descript
 
             # tex_doc.append(NoEscape(cmn_df.to_latex(longtable=True, index=False, na_rep="*")))
             tex_doc.append(NoEscape(transform_into_tabularx(
-                    cmn_df.to_latex(longtable=True, index=False, float_format="%.2f", na_rep="*",
-                                        column_format="llX"))))
-
-
+                cmn_df.to_latex(longtable=True, index=False, float_format="%.2f", na_rep="*",
+                                column_format="llX"))))
 
         with tex_doc.create(Subsection("Unique to " + ref_alpha)) as subsec:
             subsec.append(
                 "The table below represents the elements present in " + ref_alpha + " but missing in " + ref_beta + ".")
             # tex_doc.append(NoEscape(adb_df.to_latex(longtable=True, index=False, na_rep="*")))
             tex_doc.append(NoEscape(transform_into_tabularx(
-                    adb_df.to_latex(longtable=True, index=False, float_format="%.2f", na_rep="*",
-                                        column_format="llX"))))
+                adb_df.to_latex(longtable=True, index=False, float_format="%.2f", na_rep="*",
+                                column_format="llX"))))
 
         with tex_doc.create(Subsection("Unique to " + ref_beta)) as subsec:
             subsec.append(
                 "The table below represents the elements present in " + ref_beta + " but missing in " + ref_alpha + ".")
             # tex_doc.append(NoEscape(bda_df.to_latex(longtable=True, index=False, na_rep="*")))
             tex_doc.append(NoEscape(transform_into_tabularx(
-                    bda_df.to_latex(longtable=True, index=False, float_format="%.2f", na_rep="*",
-                                        column_format="llX"))))
-
+                bda_df.to_latex(longtable=True, index=False, float_format="%.2f", na_rep="*",
+                                column_format="llX"))))
 
 
 if __name__ == "__main__":

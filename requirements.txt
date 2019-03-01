@@ -1,0 +1,6 @@
+pandas
+Click
+pylatex
+pymustache
+rdflib
+pathlib
