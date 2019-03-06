@@ -1,0 +1,68 @@
+{% extends "doc.html" %}
+{% import "fragment_utils.html" as fragment %}
+
+{% block main %}
+    <h1>Class instantiation</h1>
+    <section>
+        <p>The table below describes how are classes instantiated in <strong>{{ general.alpha.title }} </strong>
+            dataset. Please note that the instance counts are different
+            from total number of unique instances in the data-set. When an individual instantiates multiple classes,
+            then it is counted once for each class it instantiates. The relative number of instances is scaled to the
+            total number of unique instances per class.</p>
+        <p>
+            {{ fragment.pandas_table("Instantiation statistics for " + general.alpha.title + " dataset",class_overview) }}
+        </p>
+    </section>
+
+    <h1>Class application profiles</h1>
+    <section>
+        <p>This section attempts at reconstructing the profiled shapes for each class. The profile is deduced based on
+            descriptive statistics presented elsewhere. The tables below contain the following columns: Property name,
+            Cardinality, Property Type, Property Range and Confidence.</p>
+        <p>
+            Confidence is a categorial value derived from the property usage relative to the total number of unique
+            individuals instantiating this class.Property range is a list of distinct encountered object types. In case
+            of higher number of object type the list is non-exhaustive. Cardinality of the property is expressed in
+            terms of minimum and maximum occurrences of the property. The minimum value varies from zero (0) meaning
+            that the property is optional to one (1) meaning that the property is mandatory while the maximum value
+            varies from one (1) meaning that the property is sufficient to star (*) meaning that the property is
+            maximally unbound. Finally the type indicates whether the property range is whether a data type or an
+            individual URI.
+        </p>
+        {% for class_uri, profile in application_profiles %}
+            {% if class_uri is defined and profile is defined %}
+                {#            <h2>Estimated application profile for {{ class_uri }}</h2>#}
+                {{ fragment.pandas_table( "Estimated application profile for the class  " + class_uri, profile) }}
+            {% else %}
+                <p> Estimated class profile was supposed to be here but isn't.</p>
+            {% endif %}
+        {% endfor %}
+    </section>
+
+    <h1>Property usage statistics</h1>
+    <section>
+        <p>This section provides descriptive statistical indicators for each class. The tables below contain the
+            following columns: property name, absolute normalised usage (Norm usg/a), absolute actual usage(Usage/a),
+            normalised minimum (Min), normalised maximum (Max), normalised average (Avg), relative normalised usage
+            (Norm usg/r), relative actual usage (Usage/r).</p>
+        <p>The normalization mentioned above refers to counting out of all class individuals how many are actually using
+            the property at least once while the actual property usage refers to counting all occurrences for a given
+            class. The rdf:type property plays a special role because it indicates the number of unique class instances
+            and in case of multiple class instantiation the number is scaled by the number of distinct parent
+            classes. </p>
+        <p>The relative actual usage (Usage/r) is calculated with respect to a sibling property that maximally occurs in
+            all class instances. Therefore there is no standard property to be chosen as reference like in the case of
+            rdf:type but it varies from case to case.</p>
+
+        {% for class_uri, profile in property_usage %}
+            {% if class_uri is defined and profile is defined %}
+                {#            <h2>Estimated application profile for {{ class_uri }}</h2>#}
+                {{ fragment.pandas_table( "Propoerty usage statistics for the class " + class_uri, profile) }}
+            {% else %}
+                <p> Property usage statistics were supposed to be here but aren't.</p>
+            {% endif %}
+        {% endfor %}
+
+    </section>
+
+{% endblock %}

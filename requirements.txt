@@ -1,6 +1,7 @@
 pandas
 Click
 pylatex
-pymustache
-rdflib
 pathlib
+jinja2
+rdflib
+sparqlwrapper
