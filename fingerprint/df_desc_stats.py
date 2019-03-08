@@ -1,6 +1,7 @@
 # file:     df_stats
 # created:  11/10/16
 # author:   Eugeniu Costetchi
+# TODO: work towards refactoring of this file
 """
     this module generates descriptive statistics based on the spo query below
     data fingerprint work columns are:

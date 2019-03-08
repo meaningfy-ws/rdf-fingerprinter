@@ -1,6 +1,7 @@
 # file:     df_diff_stats
 # created:  11/10/16
 # author:   Eugeniu Costetchi
+# TODO: work towards refactoring of this file
 """
 this module generated descriptive statistics derived from the following spo query
 

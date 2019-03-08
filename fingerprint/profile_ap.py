@@ -1,12 +1,15 @@
 """
-file:     profile_ap
-created:  06/03/19
-author:   Eugeniu Costetchi
-email: costezki.eugen@gmail.com
+  profile_ap
+Created:  06/03/19
+Author:   Eugeniu Costetchi
+Email: costezki.eugen@gmail.com
 
     This module generates descriptive statistics based on the spo query below.
     The assumption is that the SPARQL query is executed at an endpoint and the
     result is available as an CSV file.
+
+    The aim is to populate build a context object that can further be used to
+    populate a document template.
 
     The work columns are:
         "stype",
@@ -47,3 +50,5 @@ email: costezki.eugen@gmail.com
 """
 
 # TODO put here the code that generated the content dictionary for the JINJA template
+
+#

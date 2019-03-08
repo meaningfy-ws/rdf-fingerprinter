@@ -1,6 +1,7 @@
 # file:     df_tex_utils
 # created:  13/10/16
 # author:   Eugeniu Costetchi
+# TODO: work towards deprecation of this file
 
 from pylatex import Package
 from pylatex.base_classes import Environment

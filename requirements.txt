@@ -5,3 +5,4 @@ pathlib
 jinja2
 rdflib
 sparqlwrapper
+dataclasses-json

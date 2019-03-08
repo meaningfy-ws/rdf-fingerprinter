@@ -1,0 +1,113 @@
+{
+    "@type": "Report",
+    "title": "Title of the Report",
+    "author": "Eugeniu Costetchi",
+    "ns_file": "./resources/prefix.csv",
+    "output": "./output",
+    "data": [
+        {
+            "@type": "Dataset",
+            "@id": "alpha",
+            "title": "Alpha Dataset",
+            "description": "Alpha dataset description",
+            "source": {
+                "@type": "File",
+                "path": "./resources/dataset.rdf"
+            }
+        },
+        {
+            "@type": "Dataset",
+            "@id": "beta",
+            "title": "Beta Dataset",
+            "description": "Beta dataset description",
+            "source": {
+                "@type": "Endpoint",
+                "url": "http://publications.europa.eu/webapi/rdf/sparql",
+                "graph_uri": "http://publications.europa.eu/resource/authority/country"
+            }
+        },
+        {
+            "@type": "Dataset",
+            "@id": "gamma",
+            "title": "Gamma Dataset query result",
+            "description": "Gamma dataset query result",
+            "source": {
+                "@type": "Endpoint",
+                "url": "http://publications.europa.eu/webapi/rdf/sparql",
+                "graph_uri": "http://publications.europa.eu/resource/authority/human-sex"
+            }
+        }
+    ],
+    "queries": [
+        {
+            "@type": "Query",
+            "@id": "fingerprint",
+            "query_text": "here goes the escaped SPARQL query",
+            "query_file": "./query/fingerprint.rq"
+        },
+        {
+            "@type": "Query",
+            "@id": "cascade1",
+            "bound_constant": {
+                "s": "<http://publications.europa.eu/resource/authority/human-sex>"
+            },
+            "query_text": "select distinct ?class_p \\r\\nwhere {\\r\\n   ?s a ?class_p\\r\\n} \\r\\n",
+            "cascade_query": [
+                {
+                    "@type": "Query",
+                    "@id": "cascade2",
+                    "query_text": "select distinct ?class_c ?label ?description\\r\\nwhere {\\r\\n   ?class_c rdfs:label|skos:prefLabel ?label .\\r\\n   ?class_c rdfs:comment|skos:definition ?description .\\r\\n   filter (lang(?label)=?lang && lang(?description)=?lang )\\r\\n} \\r\\n",
+                    "bound_varaibles": {
+                        "class_c": "class_p"
+                    },
+                    "bound_constant": {
+                        "lang": "\"en\""
+                    }
+                }
+            ]
+        }
+    ],
+    "results": [
+        {
+            "@type": "QueryResult",
+            "@id": "qr1",
+            "query_id": "cascade1",
+            "bindings": {
+                "s": "<http://publications.europa.eu/resource/authority/human-sex>"
+            },
+            "result_set": "pandas object with the query results {?class_c : [1,2,3]}",
+            "cascade_result": [
+                {
+                    "@type": "QueryResult",
+                    "@id": "qr1",
+                    "query_id": "cascade2",
+                    "bindings": {
+                        "lang": "\"en\"",
+                        "class_c": "1"
+                    },
+                    "result_set": "pandas object with the query results {?class_c : [1,1], ?label : [\"label class1\",\"label2 class 1\"], ?description : [\"descr 1 cl 1\",\"descr 2 cl 1\"] }"
+                },
+                {
+                    "@type": "QueryResult",
+                    "@id": "qr1",
+                    "query_id": "cascade2",
+                    "bindings": {
+                        "lang": "\"en\"",
+                        "class_c": "2"
+                    },
+                    "result_set": "pandas object with the query results {?class_c : [2,2], ?label : [\"label class2\",\"label2 class 2\"], ?description : [\"descr 1 cl 2\",\"descr 2 cl 2\"] }"
+                },
+                {
+                    "@type": "QueryResult",
+                    "@id": "qr1",
+                    "query_id": "cascade2",
+                    "bindings": {
+                        "lang": "\"en\"",
+                        "class_c": "3"
+                    },
+                    "result_set": "pandas object with the query results {?class_c : [3,3], ?label : [\"label class3\",\"label2 class 3\"], ?description : [\"descr 1 cl 3\",\"descr 2 cl 3\"] }"
+                }
+            ]
+        }
+    ]
+}
