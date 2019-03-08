@@ -4,7 +4,7 @@ Created:  08/03/2019
 Author: Eugeniu Costetchi
 Email: costezki.eugen@gmail.com
 
-This module implements the abstract/generic data source and a few specific ones
+This module implements the abstract/generic data source and ways to access them.
 
 """
 from abc import ABC, abstractmethod
@@ -22,6 +22,7 @@ class DataSource(ABC):
     @abstractmethod
     def header(self):
         pass
+
 
 class CSVSource(DataSource):
     def __init__(self, file_path, configuration=None):
@@ -58,23 +59,3 @@ class EndpointSource(DataSource):
     def header(self):
         # TODO implement and test
         pass
-
-# class CSVAggregatedSource(DataSource):
-#     def __init__(self, file_path, aggregator, configuration=None):
-#         """
-#             A Data source from a CSV file that shall be read with the given configuration parameters.
-#             The configuration parameters are the same as those of the Pandas.read_csv() available
-#             here https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html.
-#             The aggregator parameter provides rules for how the dataset shall be aggregated i.e.
-#             it specifies which column(s) act as an aggregator.
-#
-#         :param file_path: path to the file
-#         :param aggregator: list of labels corresponding to the columns in the CSV
-#         :param configuration: a dictionary that is forwarded as pandas.read_csv parameters
-#         """
-#         self.file_path = file_path
-#         self.configuration = configuration
-#
-#     def read(self):
-#         # TODO implement and test
-#         pass

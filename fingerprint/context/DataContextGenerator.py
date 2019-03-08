@@ -4,7 +4,7 @@ Created:  08/03/2019
 Author: Eugeniu Costetchi
 Email: costezki.eugen@gmail.com
 
-This module implements a generic ContextData generator and a few specific ones.
+This module implements context data object generation functionality.
 
 """
 
