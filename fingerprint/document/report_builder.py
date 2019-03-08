@@ -7,10 +7,17 @@ Email: costezki.eugen@gmail.com
 this module implements the report generation functionality.
 """
 
-
 from abc import ABC, abstractmethod
+
 
 class ReportBuilder(ABC):
     """
-    generic report generator
+        generic report builder
     """
+
+    @abstractmethod
+    def makeReport(self):
+        pass
+
+
+# class HTMLReportBuilder(ReportBuilder):
