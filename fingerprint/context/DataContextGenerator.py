@@ -26,7 +26,7 @@ class DataContextGenerator(ABC):
 
 
 class CSVContextGenerator(DataContextGenerator):
-    def __init__(self, source ):
+    def __init__(self, source):
         self.source = source
 
     def generate(self):

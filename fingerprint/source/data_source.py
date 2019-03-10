@@ -8,24 +8,22 @@ This module implements the abstract/generic data source and ways to access them.
 
 """
 from abc import ABC, abstractmethod
+import pandas as pd
+from SPARQLWrapper import SPARQLWrapper, CSV
 
 
-class DataSource(ABC):
+class TabularDataSource(ABC):
     """
-    generic data source providing a tabular structure
+    generic data source providing a tabular structure such as pandas data frame
     """
 
     @abstractmethod
     def read(self):
         pass
 
-    @abstractmethod
-    def header(self):
-        pass
 
-
-class CSVSource(DataSource):
-    def __init__(self, file_path, configuration=None):
+class CSVSourceTabular(TabularDataSource):
+    def __init__(self, file_path, configuration={}):
         """
             A Data source from a CSV file that shall be read with the given configuration parameters.
             The configuration parameters are the same as those of the Pandas.read_csv() available
@@ -38,24 +36,17 @@ class CSVSource(DataSource):
         self.configuration = configuration
 
     def read(self):
-        # TODO implement and test
-        pass
-
-    def header(self):
-        # TODO implement and test
-        pass
+        return pd.read_csv(self.file_path, **self.configuration)
 
 
-class EndpointSource(DataSource):
+class EndpointSourceTabular(TabularDataSource):
     def __init__(self, url, query, graph=None):
-        self.url = url
-        self.query = query
-        self.graph = graph
+        self.endpoint = SPARQLWrapper(url)
+        if graph:
+            self.endpoint.addDefaultGraph(graph)
+        self.endpoint.setQuery(query)
+        self.endpoint.setReturnFormat(CSV)
 
     def read(self):
-        # TODO implement and test
-        pass
-
-    def header(self):
-        # TODO implement and test
-        pass
+        tabular = self.endpoint.queryAndConvert()
+        return pd.read_csv(pd.compat.StringIO(str(tabular, "utf-8")))
