@@ -25,16 +25,15 @@ class DataContextGenerator(ABC):
         pass
 
 
-class CSVContextGenerator(DataContextGenerator):
-    def __init__(self, source):
+class TabularContextGenerator(DataContextGenerator):
+    def __init__(self, source, ):
         self.source = source
 
     def generate(self):
-        # TODO implement and test
-        pass
+        return {"data": self.source.read()}
 
 
-class CSVAggregateContextGenerator(DataContextGenerator):
+class AggregateTabularContextGenerator(DataContextGenerator):
     def __init__(self, source, aggregator):
         """
 
@@ -47,5 +46,7 @@ class CSVAggregateContextGenerator(DataContextGenerator):
         pass
 
     def generate(self):
-        # TODO implement and test
-        pass
+        src = self.source.read()
+        groups = src.groupby(by=self.aggregator)
+        results = [{name: group} for name, group in groups]
+        return {"data": results}
