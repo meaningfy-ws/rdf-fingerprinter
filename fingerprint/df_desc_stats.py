@@ -41,6 +41,7 @@
 """
 
 import pandas as pd
+from deprecated import deprecated
 from pylatex import NoEscape, Section, Subsection, Subsubsection
 
 from fingerprint.df_tex_utils import transform_into_tabularx
@@ -272,6 +273,7 @@ def df_ap_guess_to_latex(tex_doc, df, description):
                                    column_format="lllXr"))))
 
 
+@deprecated
 def generate_missing_ns(df, structural_columns=['stype', 'p', 'ootype']):
     """
     given a dataframe detect unique namespaces

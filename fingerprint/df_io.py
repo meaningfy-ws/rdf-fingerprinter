@@ -7,6 +7,8 @@ import pandas as pd
 import json
 import re
 
+from deprecated import deprecated
+
 
 def read_prefixes(filename):
     """
@@ -25,6 +27,7 @@ def read_fp_spo_count(filename):
                        names=["stype", "p", "ootype", "propType", "scnt", "ocnt", "cnt", "min_sp", "max_sp", "avg_sp"])
 
 
+@deprecated
 def generate_and_merge_namespace_definitions(spo_dataframe, ns_dataframe):
     known = dict(zip(ns_dataframe.uri, ns_dataframe.ns))
     bucket = set()
@@ -41,6 +44,7 @@ def generate_and_merge_namespace_definitions(spo_dataframe, ns_dataframe):
     return ns_map
 
 
+@deprecated
 def replace_ns(triples, ns_dataframe, generate_unknown_prefixes=True):
     """
     :param generate_unknown_prefixes: create namespace definitions for URIs
@@ -75,6 +79,7 @@ def compile_tex_file_multipass(filename):
     os.chdir(here)
 
 
+@deprecated
 def cut_last_ns_segment(s):
     # return re.sub(r'[/#][^/#]*$', "", s)
     return re.sub(r'[^/#]*$', "", s)

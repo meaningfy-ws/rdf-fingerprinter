@@ -50,5 +50,3 @@ class EndpointSourceTabular(TabularDataSource):
     def read(self):
         tabular = self.endpoint.queryAndConvert()
         return pd.read_csv(pd.compat.StringIO(str(tabular, "utf-8")))
-
-# todo implement, type cast, column rename , sort, column format

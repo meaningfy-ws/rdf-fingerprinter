@@ -17,6 +17,9 @@ class MyTestCase(unittest.TestCase):
     def setUp(self):
         self.file_name = pathlib.Path(__file__).resolve().parents[
                              1] / "resources" / "samples" / "fingerprint.rq_eurovoc44.log.csv"
+        self.url = "http://publications.europa.eu/webapi/rdf/sparql"
+        self.graph = "http://publications.europa.eu/resource/authority/human-sex"
+        self.query = "select * where {<http://publications.europa.eu/resource/authority/human-sex> ?p ?o} limit 100"
 
     def test_CSV_source(self):
         ds = CSVSourceTabular(str(self.file_name))
@@ -25,11 +28,8 @@ class MyTestCase(unittest.TestCase):
         assert len(df) > 0
         assert len(df.columns) > 0
 
-    def test_Endpoint_source(self):
-        url = "http://publications.europa.eu/webapi/rdf/sparql"
-        graph = "http://publications.europa.eu/resource/authority/human-sex"
-        query = "select * where {<http://publications.europa.eu/resource/authority/human-sex> ?p ?o} limit 100"
-        ds = EndpointSourceTabular(url=url, query=query, graph=graph)
+    def test_endpoint_source(self):
+        ds = EndpointSourceTabular(url=self.url, query=self.query, graph=self.graph)
         df = ds.read()
         assert isinstance(df, pd.DataFrame)
         assert len(df) > 0

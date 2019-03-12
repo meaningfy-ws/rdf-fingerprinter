@@ -16,37 +16,38 @@ class DataContextGenerator(ABC):
     generic data context generator
     """
 
+    def __init__(self, tabular):
+        self.tabular = tabular
+
     @abstractmethod
     def generate(self):
         """
-        Generates the data context object from the Data Source
-        :return: DataContext object
+        Generates the data context object from a tabular data source
+        :return: DataContext or dict
         """
-        pass
 
 
 class TabularContextGenerator(DataContextGenerator):
-    def __init__(self, source, ):
-        self.source = source
+    def __init__(self, tabular):
+        super(TabularContextGenerator, self).__init__(tabular=tabular)
 
     def generate(self):
-        return {"data": self.source.read()}
+        return {"tabular": self.tabular}
 
 
 class AggregateTabularContextGenerator(DataContextGenerator):
-    def __init__(self, source, aggregator):
+    def __init__(self, tabular, aggregator):
         """
 
-        :param source: DataSource object
+        :param source: data frame object
         :param aggregator: provides rules for how the dataset shall be aggregated i.e.
                             it specifies which column(s) act as an aggregator.
         """
-        self.source = source
+        super(AggregateTabularContextGenerator, self).__init__(tabular=tabular)
         self.aggregator = aggregator
-        pass
 
     def generate(self):
-        src = self.source.read()
-        groups = src.groupby(by=self.aggregator)
-        results = [{name: group} for name, group in groups]
-        return {"data": results}
+        groups = self.tabular.groupby(by=self.aggregator)
+        results = [{"group_name": name, "group_data_frame": group} for name, group in groups]
+        return {"aggregator": self.aggregator,
+                "groups": results}
