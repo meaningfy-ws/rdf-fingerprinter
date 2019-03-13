@@ -1,15 +1,15 @@
 import pathlib
 import unittest
 
-from fingerprint.context.data_transformer import ColumnRenamer, StringReplacer, NamespaceReducer
-from fingerprint.context.iri_utils import discover_base_uris
+from fingerprint.context.data_transformer import ColumnRenamer, StringReplacer
+from fingerprint.context.iri_utils import discover_base_uris, NamespaceReducer
 from fingerprint.source.data_source import CSVSourceTabular
 
 
 class MyTestCase(unittest.TestCase):
     def setUp(self):
         self.file_name = pathlib.Path(__file__).resolve().parents[
-                             1] / "resources" / "samples" / "fingerprint.rq_eurovoc44.log.csv"
+                             1] / "resources" / "samples" / "test.csv"
         self.sample_tabular = CSVSourceTabular(str(self.file_name)).read()
         self.aggregator = ['stype', 'p']
         self.prefixes = {"http://eurovoc.europa.eu/schema#": "evo:",
@@ -50,11 +50,26 @@ class MyTestCase(unittest.TestCase):
         assert True in new_df[self.aggregator[1]].isin(
             ["evo:", "skos:"]), "the namespace skos: has been identified and replaced"
 
-    def test_namespace_replacer(self):
+    def test_namespace_discoverer(self):
         x = discover_base_uris(self.sample_tabular)
-        # todo: continue here
-        print (x)
+        assert "http://www.w3.org/2000/01/rdf-schema#" in x.keys(), "RDFS namespace is discovered"
+        assert "ns0" in x.values(), "namespaces are numbered"
 
+        y = discover_base_uris(self.sample_tabular,
+                               known_uris={"http://www.w3.org/2000/01/rdf-schema#": "the great RDF schema"})
+        assert "http://www.w3.org/2000/01/rdf-schema#" in y.keys(), "RDFS namespace is discovered"
+        assert "the great RDF schema" in y.values(), "prefixes known a priori"
+
+    def test_namespace_replacer(self):
+        ns = discover_base_uris(self.sample_tabular,
+                                known_uris={'http://www.w3.org/2000/01/rdf-schema#': 'rdfs:'})
+        print(ns)
+        # todo, continue here
+        rd = NamespaceReducer(self.sample_tabular,
+                              target_columns=self.aggregator,
+                              namespace_mapping_dict=ns)
+        df = rd.transform()
+        assert df["p"].isin("rdfs:label"), "RDFS label is in p column"
 
 
 if __name__ == '__main__':

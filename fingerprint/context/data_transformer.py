@@ -97,23 +97,6 @@ class StringReplacer(DataTransformer):
         return self.data_frame
 
 
-class NamespaceReducer(DataTransformer):
-    def __init__(self, data_frame, target_columns, namespace_mapping_dict):
-        """
-
-        :param data_frame:
-        :param target_columns:
-        :param namespace_mapping_dict:
-        """
-        super(StringReplacer, self).__init__(data_frame)
-        self.target_columns = target_columns
-        self.namespace_mapping_dict = namespace_mapping_dict
-
-    def transform(self):
-        # todo: continue here
-        pass
-
-
 class TypeCaster(DataTransformer):
     def __init__(self, data_frame, column_type_dict):
         super(TypeCaster, self).__init__(data_frame)
