@@ -16,7 +16,7 @@ class ReportBuilder(ABC):
     """
 
     @abstractmethod
-    def makeReport(self):
+    def make_document(self):
         pass
 
 

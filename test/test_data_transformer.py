@@ -2,7 +2,7 @@ import pathlib
 import unittest
 
 from fingerprint.context.data_transformer import ColumnRenamer, StringReplacer
-from fingerprint.context.iri_utils import discover_base_uris, NamespaceReducer
+from fingerprint.context.iri_utils import discover_base_uris, NamespaceReducer, normalise_namespace_mapping_dict
 from fingerprint.source.data_source import CSVSourceTabular
 
 
@@ -62,14 +62,14 @@ class MyTestCase(unittest.TestCase):
 
     def test_namespace_replacer(self):
         ns = discover_base_uris(self.sample_tabular,
-                                known_uris={'http://www.w3.org/2000/01/rdf-schema#': 'rdfs:'})
-        print(ns)
-        # todo, continue here
+                                known_uris={'http://www.w3.org/2000/01/rdf-schema#': 'rdfs:',
+                                            "http://www.w3.org/2008/05/skos-xl#": "skosxl"})
         rd = NamespaceReducer(self.sample_tabular,
                               target_columns=self.aggregator,
                               namespace_mapping_dict=ns)
         df = rd.transform()
-        assert df["p"].isin("rdfs:label"), "RDFS label is in p column"
+        assert True in df["p"].isin(["rdfs:label", "skosxl:literalForm"]), \
+            "RDFS label and skosxl literal form is in p column"
 
 
 if __name__ == '__main__':

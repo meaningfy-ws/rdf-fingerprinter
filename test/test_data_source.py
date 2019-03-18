@@ -9,7 +9,7 @@ import unittest
 
 import pandas as pd
 
-from fingerprint.source.data_source import CSVSourceTabular, EndpointSourceTabular
+from fingerprint.source.data_source import CSVSourceTabular, EndpointSourceTabular, JSONDataSource
 
 
 class MyTestCase(unittest.TestCase):
@@ -17,6 +17,8 @@ class MyTestCase(unittest.TestCase):
     def setUp(self):
         self.file_name = pathlib.Path(__file__).resolve().parents[
                              1] / "resources" / "samples" / "fingerprint.rq_eurovoc44.log.csv"
+        self.json_file_name = pathlib.Path(__file__).resolve().parents[
+                                  1] / "resources" / "defaultValues.json"
         self.url = "http://publications.europa.eu/webapi/rdf/sparql"
         self.graph = "http://publications.europa.eu/resource/authority/human-sex"
         self.query = "select * where {<http://publications.europa.eu/resource/authority/human-sex> ?p ?o} limit 100"
@@ -35,6 +37,13 @@ class MyTestCase(unittest.TestCase):
         assert len(df) > 0
         assert len(df) < 101
         assert len(df.columns) > 0
+
+    def test_json_source(self):
+        ds = JSONDataSource(self.json_file_name)
+        data = ds.read()
+        assert "title" in data, "there is a title in the config file"
+        assert "type" in data, "there is a type in the config file"
+        assert "output" in data, "there is a output in the config file"
 
 
 if __name__ == '__main__':
