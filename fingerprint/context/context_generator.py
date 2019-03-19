@@ -16,9 +16,6 @@ class DataContextGenerator(ABC):
     generic data context generator
     """
 
-    def __init__(self, tabular):
-        self.tabular = tabular
-
     @abstractmethod
     def generate(self):
         """
@@ -29,7 +26,7 @@ class DataContextGenerator(ABC):
 
 class TabularContextGenerator(DataContextGenerator):
     def __init__(self, tabular):
-        super(TabularContextGenerator, self).__init__(tabular=tabular)
+        self.tabular = tabular
 
     def generate(self):
         return {"tabular": self.tabular}
@@ -43,7 +40,7 @@ class AggregateTabularContextGenerator(DataContextGenerator):
         :param aggregator: provides rules for how the dataset shall be aggregated i.e.
                             it specifies which column(s) act as an aggregator.
         """
-        super(AggregateTabularContextGenerator, self).__init__(tabular=tabular)
+        self.tabular = tabular
         self.aggregator = aggregator
 
     def generate(self):

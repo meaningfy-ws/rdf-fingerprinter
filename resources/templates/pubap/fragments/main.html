@@ -4,13 +4,13 @@
 {% block main %}
     <h1>Class instantiation</h1>
     <section>
-        <p>The table below describes how are classes instantiated in <strong>{{ general.alpha.title }} </strong>
+        <p>The table below describes how are classes instantiated in <strong>{{ configuration.alpha.title }} </strong>
             dataset. Please note that the instance counts are different
             from total number of unique instances in the data-set. When an individual instantiates multiple classes,
             then it is counted once for each class it instantiates. The relative number of instances is scaled to the
             total number of unique instances per class.</p>
         <p>
-            {{ fragment.pandas_table("Instantiation statistics for " + general.alpha.title + " dataset",class_overview) }}
+            {{ fragment.pandas_table("Instantiation statistics for " + configuration.alpha.title + " dataset",class_overview) }}
         </p>
     </section>
 
