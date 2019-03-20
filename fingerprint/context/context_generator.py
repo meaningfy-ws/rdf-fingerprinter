@@ -48,3 +48,4 @@ class AggregateTabularContextGenerator(DataContextGenerator):
         results = [{"group_name": name, "group_data_frame": group} for name, group in groups]
         return {"aggregator": self.aggregator,
                 "groups": results}
+

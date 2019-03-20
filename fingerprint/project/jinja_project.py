@@ -5,9 +5,11 @@ Author: Eugeniu Costetchi
 Email: costezki.eugen@gmail.com
 """
 import pathlib
+import shutil
 from abc import abstractmethod
 
 from fingerprint.context.context_generator import TabularContextGenerator
+from fingerprint.context.fingerprint_generator import ApplicationProfileContextGenerator
 from fingerprint.context.iri_utils import NamespaceMappingCSV
 from fingerprint.document.jinja_builder import JinjaBuilder
 from fingerprint.source.data_source import JSONDataSource, build_data_source
@@ -90,6 +92,7 @@ class FolderBasedProject(object):
         """
         pass
 
+
 class FingerprinterProject(FolderBasedProject):
     def __init__(self, absolute_path_to_project):
         """
@@ -100,12 +103,18 @@ class FingerprinterProject(FolderBasedProject):
         super(FingerprinterProject, self).__init__(absolute_path_to_project=absolute_path_to_project)
         # resolving relative paths
         self.resolve_paths()
+        # resolving the main document template
+        self.resolve_main_document_name()
 
         # reading the prefix mappings
         self.namespace_mapping_dict = NamespaceMappingCSV(self.configuration["ns_file"]).to_dict()
 
         # data sets alpha beta gamma
         self.alpha, self.beta, self.gamma = None, None, None
+
+        # helper properties, not really needed
+        self.data_context = None
+        self.document_content = None
 
         if "alpha" in self.configuration:
             self.alpha = build_data_source(self.configuration["alpha"]).read()
@@ -138,13 +147,43 @@ class FingerprinterProject(FolderBasedProject):
             self.configuration["gamma"]["file"] = str(
                 self.path_to_project / pathlib.Path(self.configuration["gamma"]["file"]))
 
+    def resolve_main_document_name(self):
+        """
+            In case not specified, resolves the template name by search for standard
+            filenames such as
+            - index.html
+            - main.html
+
+            The main document template must be a file name located within the /fragments folder
+        :return:
+        """
+        if "document_template" not in self.configuration:
+            # main_template_name = self.configuration["document_template"]
+            if (self.path_to_template_fragments / "index.html").exists():
+                self.configuration["document_template"] = "index.html"
+            elif (self.path_to_template_fragments / "main.html").exists():
+                self.configuration["document_template"] = "main.html"
+        return self.configuration["document_template"]
+
     def make_data_context(self):
-        results = {"alpha": TabularContextGenerator(self.alpha).generate()}
-        if self.beta is not None:
-            results["beta"] = TabularContextGenerator(self.beta).generate()
-        if self.gamma is not None:
-            results["gamma"] = TabularContextGenerator(self.gamma).generate()
-        return results
+        if self.data_context is None:
+            self.data_context = self.get_data_content_builder().generate()
+        # results = {"alpha": TabularContextGenerator(self.alpha).generate()}
+        # if self.beta is not None:
+        #     results["beta"] = TabularContextGenerator(self.beta).generate()
+        # if self.gamma is not None:
+        #     results["gamma"] = TabularContextGenerator(self.gamma).generate()
+        return self.data_context
+
+    def get_document_builder(self):
+        """
+            returns a document builder. by default it is a JINJA document duilder. in the future more shall follow such as Latex, Mustache, etc
+        :return:
+        """
+        return JinjaBuilder(data_context=self.make_data_context(),
+                            config_context=self.configuration,
+                            template_folder=self.path_to_template_fragments,
+                            main_template_name=self.resolve_main_document_name())
 
     def make_document(self):
         """
@@ -153,19 +192,29 @@ class FingerprinterProject(FolderBasedProject):
 
             :return: the string of the entire document ready to be writen into the output folder
         """
-        # todo: delegate to the jinja builder
-        # call document builder
-        if "document_template" in self.configuration:
-            main_template_name = self.configuration["document_template"]
-        elif (self.path_to_template_fragments / "index.html").exists():
-            main_template_name = "index.html"
-        elif (self.path_to_template_fragments / "main.html").exists():
-            main_template_name = "main.html"
+        if self.document_content is None:
+            self.document_content = self.get_document_builder().make_document()
+        return self.document_content
 
-        builder = JinjaBuilder(data_context=self.make_data_context(),
-                               config_context=self.configuration,
-                               template_folder=self.path_to_template_fragments,
-                               main_template_name=main_template_name)
-        return builder.make_document()
+    def get_data_content_builder(self):
+        """
+        Return a data context builder depending on the parameters.
+        At the moment only the FingerprinterContext builder is available
 
+        :return:
+        """
+        return ApplicationProfileContextGenerator(alpha=self.alpha,
+                                                  beta=self.beta,
+                                                  namespace_mapping_dict=self.namespace_mapping_dict)
 
+    def make_project(self):
+        output_folder = pathlib.Path(self.configuration["output"])
+        output_folder.mkdir(parents=True, exist_ok=True)
+        output_file_path = output_folder / self.resolve_main_document_name()
+
+        with output_file_path.open("w", encoding="utf-8") as f:
+            f.write(self.make_document())
+
+        # todo: implement the diff statistics into the report
+        # todo: work on copying the right files into the right place :)
+        shutil.copytree(str(self.path_to_static_resources), str(output_folder))

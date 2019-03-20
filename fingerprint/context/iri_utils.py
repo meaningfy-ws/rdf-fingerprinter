@@ -52,7 +52,7 @@ def cut_last_ns_segment(s):
 
 
 class NamespaceReducer(DataTransformer):
-    def __init__(self, data_frame, target_columns, namespace_mapping_dict):
+    def __init__(self, data_frame, namespace_mapping_dict, target_columns=None):
         """
 
         :param data_frame:
@@ -96,7 +96,7 @@ class NamespaceMappingCSV(CSVSourceTabular):
         :return: the mapping dictionary
         """
         data = self.read()  # super(NamespaceMappingCSV, self).read()
-        return normalise_namespace_mapping_dict(dict(zip(data.uri, data.prefix)))
+        return normalise_namespace_mapping_dict(dict(zip(data["uri"], data["prefix"])))
 
 
 # TODO: Soon to be removed functions

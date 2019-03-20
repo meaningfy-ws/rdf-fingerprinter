@@ -29,14 +29,37 @@
             maximally unbound. Finally the type indicates whether the property range is whether a data type or an
             individual URI.
         </p>
-        {% for class_uri, profile in application_profiles %}
-            {% if class_uri is defined and profile is defined %}
-                {#            <h2>Estimated application profile for {{ class_uri }}</h2>#}
-                {{ fragment.pandas_table( "Estimated application profile for the class  " + class_uri, profile) }}
-            {% else %}
-                <p> Estimated class profile was supposed to be here but isn't.</p>
-            {% endif %}
-        {% endfor %}
+
+        {# showing alpha data context  #}
+        {% if data.alpha.application_profiles is defined %}
+            <h2>Class application profiles for {{ configuration.alpha.title }} dataset</h2>
+            {% for class_uri, profile in  data.alpha.application_profiles %}
+                {% if class_uri is defined and profile is defined %}
+                    {#            <h2>Estimated application profile for {{ class_uri }}</h2>#}
+                    {{ fragment.pandas_table( "Estimated application profile for the class  " + class_uri, profile) }}
+                {% else %}
+                    <p> Estimated class profile was supposed to be here but isn't.</p>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p>Alpha dataset application profile (key: data.alpha.application_profiles) was expected but not found.</p>
+        {% endif %}
+
+        {# showing beta data context  #}
+        {% if data.beta.application_profiles is defined %}
+            <h2>Class application profiles for {{ configuration.beta.title }} dataset</h2>
+            {% for class_uri, profile in  data.beta.application_profiles %}
+                {% if class_uri is defined and profile is defined %}
+                    {#            <h2>Estimated application profile for {{ class_uri }}</h2>#}
+                    {{ fragment.pandas_table( "Estimated application profile for the class  " + class_uri, profile) }}
+                {% else %}
+                    <p> Estimated class profile was supposed to be here but isn't.</p>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p>Beta dataset application profile (key: data.beta.application_profiles) was expected but not found.</p>
+        {% endif %}
+
     </section>
 
     <h1>Property usage statistics</h1>
@@ -54,7 +77,10 @@
             all class instances. Therefore there is no standard property to be chosen as reference like in the case of
             rdf:type but it varies from case to case.</p>
 
-        {% for class_uri, profile in property_usage %}
+        {# showing alpha propeorty usage #}
+        {% if data.alpha.property_usages is defined %}
+            <h2>Class property usage for {{ configuration.alpha.title }} dataset</h2>
+        {% for class_uri, profile in data.alpha.property_usages %}
             {% if class_uri is defined and profile is defined %}
                 {#            <h2>Estimated application profile for {{ class_uri }}</h2>#}
                 {{ fragment.pandas_table( "Propoerty usage statistics for the class " + class_uri, profile) }}
@@ -62,7 +88,24 @@
                 <p> Property usage statistics were supposed to be here but aren't.</p>
             {% endif %}
         {% endfor %}
+         {% else %}
+            <p>Alpha dataset property usage (key: data.alpha.property_usages) was expected but not found.</p>
+        {% endif %}
 
+        {# showing beta propeorty usage #}
+        {% if data.beta.property_usages is defined %}
+            <h2>Class property usage for {{ configuration.beta.title }} dataset</h2>
+        {% for class_uri, profile in data.beta.property_usages %}
+            {% if class_uri is defined and profile is defined %}
+                {#            <h2>Estimated application profile for {{ class_uri }}</h2>#}
+                {{ fragment.pandas_table( "Propoerty usage statistics for the class " + class_uri, profile) }}
+            {% else %}
+                <p> Property usage statistics were supposed to be here but aren't.</p>
+            {% endif %}
+        {% endfor %}
+         {% else %}
+            <p>Beta dataset property usage (key: data.beta.property_usages) was expected but not found.</p>
+        {% endif %}
     </section>
 
 {% endblock %}

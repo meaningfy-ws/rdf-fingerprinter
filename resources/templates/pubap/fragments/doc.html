@@ -9,10 +9,10 @@
 
 
 
-    {% if general.title is undefined %}
+    {% if configuration.title is undefined %}
         <title>Document generated with RDF Fingerprinter </title>
     {% else %}
-        <title>{{ general.title }}</title>
+        <title>{{ configuration.title }}</title>
     {% endif %}
 </head>
 
@@ -20,8 +20,8 @@
 <body>
 <header class="counter-skip">
 
-    <h1 class="title">{{ general.title }}</h1>
-    <h2>[{{ general.type }}]</h2>
+    <h1 class="title">{{ configuration.title }}</h1>
+    <h2>[{{ configuration.type }}]</h2>
     <!-- hardcoded author -->
     <div class="authors col-span">
         <div class="author">
@@ -41,8 +41,8 @@
     <div class="abstract counter-skip">
         <h1>Abstract</h1>
         <p>This paper provides an automatically generated overview on the structure of
-            <strong> {{ general.alpha.title }} </strong> dataset and more. It is described as fllows</p>
-        <p>{{ general.alpha.description }}</p>
+            <strong> {{ configuration.alpha.title }} </strong> dataset and more. It is described as fllows</p>
+        <p>{{ configuration.alpha.description }}</p>
 
         <h2>Keywords</h2>
         <em>application profile, lexicalisation measures, structure measures</em>
