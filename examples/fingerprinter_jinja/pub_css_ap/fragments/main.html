@@ -2,7 +2,6 @@
 {% import "fragment_utils.html" as fragment %}
 
 {% block main %}
-    <p>
     <h1>Class instantiation</h1>
     <section>
         <p>The table below describes how are classes instantiated in <strong>{{ configuration.alpha.title }} </strong>
@@ -64,10 +63,8 @@
             <p>Beta dataset application profile (key: data.beta.application_profiles) was expected but not found.</p>
         {% endif %}
     </section>
-    </p>
 
     {% if data.diff is defined %}
-        <p>
         <h1>Differences between {{ configuration.alpha.title }} and {{ configuration.beta.title }} datasets</h1>
         <section>
             <p>
@@ -106,10 +103,8 @@
                 <p> Dataset unique part was supposed to be here but isn't. </p>
             {% endif %}
         </section>
-        </p>
     {% endif %}
 
-    <p>
     <h1>Property usage statistics</h1>
     <section>
         <p>This section provides descriptive statistical indicators for each class. The tables below contain the
@@ -155,5 +150,4 @@
             <p>Beta dataset property usage (key: data.beta.property_usages) was expected but not found.</p>
         {% endif %}
     </section>
-    </p>
 {% endblock %}
