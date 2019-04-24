@@ -50,5 +50,4 @@ Email: costezki.eugen@gmail.com
 """
 
 # TODO put here the code that generated the content dictionary for the JINJA template
-
 #

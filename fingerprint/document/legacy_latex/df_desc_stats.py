@@ -44,7 +44,7 @@ import pandas as pd
 from deprecated import deprecated
 from pylatex import NoEscape, Section, Subsection, Subsubsection
 
-from fingerprint.df_tex_utils import transform_into_tabularx
+from fingerprint.document.legacy_latex.df_tex_utils import transform_into_tabularx
 
 
 def df_class_stats(df):

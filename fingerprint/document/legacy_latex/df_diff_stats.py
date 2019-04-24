@@ -29,10 +29,10 @@ order by ?stype ?p ?ootype ?propType
 """
 import pandas as pd
 
-from fingerprint.df_desc_stats import df_prop_stats
+from fingerprint.document.legacy_latex.df_desc_stats import df_prop_stats
 from pylatex import NoEscape, Section, Subsection
 
-from fingerprint.df_tex_utils import transform_into_tabularx
+from fingerprint.document.legacy_latex.df_tex_utils import transform_into_tabularx
 
 
 def df_to_set_of_tuples(df, structural_columns=["stype", "p", "ootype"]):

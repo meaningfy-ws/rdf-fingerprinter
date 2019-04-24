@@ -5,14 +5,12 @@
 
 from __future__ import division
 
-import os
-
 from pylatex import Document, Package, Command
 from pylatex.utils import NoEscape
 
-from fingerprint.df_desc_stats import df_stats_to_latex, confidence_category
-from fingerprint.df_diff_stats import diff_to_latex_section
-from fingerprint.df_io import read_prefixes, read_fp_spo_count, replace_ns, compile_tex_file_multipass, read_config
+from fingerprint.document.legacy_latex.df_desc_stats import df_stats_to_latex
+from fingerprint.document.legacy_latex.df_diff_stats import diff_to_latex_section
+from fingerprint.document.legacy_latex.df_io import read_prefixes, read_fp_spo_count, replace_ns, compile_tex_file_multipass, read_config
 
 import click
 

@@ -3,8 +3,8 @@ import pandas as pd
 
 import jinja2
 
-from fingerprint.df_desc_stats import df_prop_stats, custom_type_cast, df_class_stats
-from fingerprint.df_io import read_config, read_prefixes, read_fp_spo_count, replace_ns
+from fingerprint.document.legacy_latex.df_desc_stats import df_prop_stats, custom_type_cast, df_class_stats
+from fingerprint.document.legacy_latex.df_io import read_prefixes, read_fp_spo_count, replace_ns
 
 
 def spo_to_profiles(alpha_spo):
