@@ -9,7 +9,7 @@ from fingerprint.project.fingerprinter_project import FingerprinterProject
 class MyTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.resources_folder = pathlib.Path(__file__).parents[1] / "resources" / "templates" / "pubap"
+        self.resources_folder = pathlib.Path(__file__).parents[1] / "resources" / "samples" / "pub_css_ap"
 
     def test_jinja_project(self):
         project = FingerprinterProject(str(self.resources_folder))
@@ -18,8 +18,6 @@ class MyTestCase(unittest.TestCase):
 
         assert len(project.namespace_mapping_dict) > 0, "the prefixes have not been resolved"
         assert project.alpha is not None, "is no alpha data source available"
-
-        # print(project.configuration)
 
         assert isinstance(project.get_document_builder(), ReportBuilder), "not a report builder"
 

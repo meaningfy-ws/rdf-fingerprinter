@@ -137,8 +137,10 @@ class FingerprinterProject(FolderBasedProject):
         :return:
         """
         # attempts relative and absolute paths
-        if not self.configuration["output"] and not pathlib.Path(self.configuration["output"]).exists():
+        if "output" not in self.configuration or len(self.configuration["output"]) == 0:
             self.configuration["output"] = str(pathlib.Path.home() / "temp" / "rdf-fingerprinter")
+        elif not self.configuration["output"] and not pathlib.Path(self.configuration["output"]).exists():
+            str(self.path_to_project / pathlib.Path(self.configuration["output"]))
 
         if not pathlib.Path(self.configuration["ns_file"]).exists():
             self.configuration["ns_file"] = str(self.path_to_project / pathlib.Path(self.configuration["ns_file"]))
@@ -239,5 +241,3 @@ class FingerprinterProject(FolderBasedProject):
 
         # todo: implement the diff statistics into the report
         # todo: work on copying the right files into the right place :)
-
-
