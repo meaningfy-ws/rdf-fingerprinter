@@ -51,11 +51,14 @@ Email: costezki.eugen@gmail.com
 
 """
 
+import pandas as pd
+from deprecated import deprecated
+
 # todo: write the fingerprint data context generaor
 from fingerprint.context.context_generator import DataContextGenerator
 from fingerprint.context.iri_utils import NamespaceReducer
-import pandas as pd
-from deprecated import deprecated
+
+pd.options.display.float_format = '{:,.2f}'.format
 
 
 class ApplicationProfileContextGenerator(DataContextGenerator):
@@ -128,8 +131,6 @@ class ApplicationProfileContextGenerator(DataContextGenerator):
             beta_application_profiles = spo_to_profiles(beta_per_class_profile)
             result["beta"]["application_profiles"] = beta_application_profiles
 
-        # todo: implement the diff statistics into the data context
-
         return result
 
     def reduce_namespaces(self):
@@ -143,12 +144,48 @@ class ApplicationProfileContextGenerator(DataContextGenerator):
             self.beta = NamespaceReducer(data_frame=self.beta,
                                          namespace_mapping_dict=self.namespace_mapping_dict).transform()
 
-    def generate_dataset_diff(self):
+
+class DiffContextGenerator(DataContextGenerator):
+
+    def __init__(self, alpha, beta=None, structural_columns=None, column_titles=None):  # ["stype", "p", "ootype"]
         """
-            if beta is available, generate the diff between the application profiles
-        :return:
+
+        :param alpha:
+        :param beta:
+        :param structural_columns:
         """
-        pass
+        self.alpha = alpha
+        self.beta = beta
+        self.structural_columns = structural_columns
+        self.column_titles = column_titles
+
+        if not self.structural_columns:
+            self.structural_columns = list(set(self.alpha.columns).intersection(self.beta.columns))
+
+        if not self.column_titles:
+            self.column_titles = self.structural_columns
+
+    def generate(self):
+        # preparing the ingredients
+
+        alpha_set = set([tuple(line) for line in self.alpha[self.structural_columns].values.tolist()])
+        beta_set = set([tuple(line) for line in self.beta[self.structural_columns].values.tolist()])
+
+        # creating the pandas frames with diff components,
+        # using column titles (basically renaming the structural columns)
+        ab_intersection = pd.DataFrame(alpha_set.intersection(beta_set), columns=self.column_titles)
+        ab_difference = pd.DataFrame(alpha_set.difference(beta_set), columns=self.column_titles)
+        ba_difference = pd.DataFrame(beta_set.difference(alpha_set), columns=self.column_titles)
+        # a bit of sorting
+        ab_intersection.sort_values(by=self.column_titles, inplace=True)
+        ab_difference.sort_values(by=self.column_titles, inplace=True)
+        ba_difference.sort_values(by=self.column_titles, inplace=True)
+
+        return {"diff": {
+            "ab_intersection": ab_intersection,
+            "ab_difference": ab_difference,
+            "ba_difference": ba_difference
+        }}
 
 
 class LexicalisationProfileContextGenerator(DataContextGenerator):
@@ -180,6 +217,7 @@ confidence = {"certain": 93, "likely": 86, "possible": 47, "unlikely": 12, "rare
 
 # silence the warnings about chained assignments
 pd.options.mode.chained_assignment = None  # default='warn'
+
 
 @deprecated
 def confidence_category(r, conf=confidence):

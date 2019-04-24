@@ -7,8 +7,6 @@
     <link rel="stylesheet" media="screen" href="screen.css">
     <link rel="stylesheet" media="print" href="print.css">
 
-
-
     {% if configuration.title is undefined %}
         <title>Document generated with RDF Fingerprinter </title>
     {% else %}
@@ -40,12 +38,16 @@
 
     <div class="abstract counter-skip">
         <h1>Abstract</h1>
-        <p>This paper provides an automatically generated overview on the structure of
-            <strong> {{ configuration.alpha.title }} </strong> dataset and more. It is described as fllows</p>
-        <p>{{ configuration.alpha.description }}</p>
-
+        <p>This document provides an automatically generated summary of <em> {{ configuration.alpha.title }} </em> {% if configuration.beta.title is defined%} and <em> {{ configuration.beta.title }} </em> datasets. {% else %}dataset.{% endif %}
+        </p>
+        {% if configuration.alpha.description is defined%}
+            <p>{{ configuration.alpha.title }} is described as follows. {{ configuration.alpha.description }}</p>
+        {% endif %}
+        {% if configuration.beta.description is defined%}
+            <p>{{ configuration.beta.title }} is described as follows. {{ configuration.beta.description }}</p>
+        {% endif %}
         <h2>Keywords</h2>
-        <em>application profile, lexicalisation measures, structure measures</em>
+        <em>application profile, structural metrics, lexicalisation metrics</em>
     </div>
 
     {% block main %}
@@ -72,7 +74,7 @@
 
 <!-- some more scripts before the end of the document -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 </body>
 </html>

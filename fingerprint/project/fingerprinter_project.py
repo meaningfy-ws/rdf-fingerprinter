@@ -8,8 +8,8 @@ import pathlib
 import shutil
 from abc import abstractmethod
 
-from fingerprint.context.context_generator import TabularContextGenerator
-from fingerprint.context.fingerprint_generator import ApplicationProfileContextGenerator
+from fingerprint.context.context_generator import DataContextGenerator
+from fingerprint.context.fingerprint_generator import ApplicationProfileContextGenerator, DiffContextGenerator
 from fingerprint.context.iri_utils import NamespaceMappingCSV
 from fingerprint.document.jinja_builder import JinjaBuilder
 from fingerprint.source.data_source import JSONDataSource, build_data_source
@@ -115,6 +115,8 @@ class FingerprinterProject(FolderBasedProject):
         # helper properties, not really needed
         self.data_context = None
         self.document_content = None
+        self.structural_columns = None
+        self.diff_column_titles = None
 
         if "alpha" in self.configuration:
             self.alpha = build_data_source(self.configuration["alpha"]).read()
@@ -123,14 +125,20 @@ class FingerprinterProject(FolderBasedProject):
         if "gamma" in self.configuration:
             self.gamma = build_data_source(self.configuration["gamma"]).read()
 
+        if "diff" in self.configuration:
+            if "structural_columns" in self.configuration["diff"]:
+                self.structural_columns = self.configuration["diff"]["structural_columns"]
+            if "column_titles" in self.configuration["diff"]:
+                self.diff_column_titles = self.configuration["diff"]["column_titles"]
+
     def resolve_paths(self):
         """
             turns the relative paths provided in the configuration file into absolute paths
         :return:
         """
         # attempts relative and absolute paths
-        if not pathlib.Path(self.configuration["output"]).exists():
-            self.configuration["output"] = str(self.path_to_project / pathlib.Path(self.configuration["output"]))
+        if not self.configuration["output"] and not pathlib.Path(self.configuration["output"]).exists():
+            self.configuration["output"] = str(pathlib.Path.home() / "temp" / "rdf-fingerprinter")
 
         if not pathlib.Path(self.configuration["ns_file"]).exists():
             self.configuration["ns_file"] = str(self.path_to_project / pathlib.Path(self.configuration["ns_file"]))
@@ -167,12 +175,15 @@ class FingerprinterProject(FolderBasedProject):
 
     def make_data_context(self):
         if self.data_context is None:
-            self.data_context = self.get_data_content_builder().generate()
-        # results = {"alpha": TabularContextGenerator(self.alpha).generate()}
-        # if self.beta is not None:
-        #     results["beta"] = TabularContextGenerator(self.beta).generate()
-        # if self.gamma is not None:
-        #     results["gamma"] = TabularContextGenerator(self.gamma).generate()
+            if isinstance(self.get_data_content_builder(), DataContextGenerator):
+                self.data_context = self.get_data_content_builder().generate()
+            elif isinstance(self.get_data_content_builder(), list):
+                self.data_context = {}
+                for cg in self.get_data_content_builder():
+                    self.data_context.update(cg.generate())
+            else:
+                raise Exception(
+                    "Unknown data context builder. Can handle one or a list of DataContextGenerator instances.")
         return self.data_context
 
     def get_document_builder(self):
@@ -203,13 +214,24 @@ class FingerprinterProject(FolderBasedProject):
 
         :return:
         """
-        return ApplicationProfileContextGenerator(alpha=self.alpha,
-                                                  beta=self.beta,
-                                                  namespace_mapping_dict=self.namespace_mapping_dict)
+        return [ApplicationProfileContextGenerator(alpha=self.alpha,
+                                                   beta=self.beta,
+                                                   namespace_mapping_dict=self.namespace_mapping_dict, ),
+                DiffContextGenerator(alpha=self.alpha,
+                                     beta=self.beta,
+                                     structural_columns=self.structural_columns,
+                                     column_titles=self.diff_column_titles
+                                     ),
+                ]
 
     def make_project(self):
         output_folder = pathlib.Path(self.configuration["output"])
-        output_folder.mkdir(parents=True, exist_ok=True)
+        shutil.rmtree(str(output_folder), ignore_errors=True)
+        shutil.copytree(str(self.path_to_static_resources), str(output_folder), copy_function=shutil.copy)
+
+        # os.makedirs(str(output_folder))
+        # .mkdir(parents=True, exist_ok=True)
+
         output_file_path = output_folder / self.resolve_main_document_name()
 
         with output_file_path.open("w", encoding="utf-8") as f:
@@ -217,4 +239,5 @@ class FingerprinterProject(FolderBasedProject):
 
         # todo: implement the diff statistics into the report
         # todo: work on copying the right files into the right place :)
-        shutil.copytree(str(self.path_to_static_resources), str(output_folder))
+
+
