@@ -1,0 +1,32 @@
+{% macro pandas_table(caption, df) -%}
+    {% if df is undefined %}
+        <p><em>A table was supposed to be here but it isn't</em></p>
+    {% else %}
+        <table>
+            <tr>
+                {% for column in df.columns %}
+                    <th>{{ column }}</th>
+                {% endfor %}
+            </tr>
+            {% for idx, row in df.iterrows() %}
+                <tr>
+                    {% for colname in df.columns %}
+                        <td>{{ row[colname] }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        <caption>{{ caption }}</caption>
+        </table>
+    {% endif %}
+{%- endmacro %}
+
+{% macro class_profile(class_uri, profile) -%}
+    <article>
+        {% if class_uri is defined and  profile is defined %}
+{#            <h2>Estimated application profile for {{ class_uri }}</h2>#}
+            {{ pandas_table( "Estimated application profile for the class " + class_uri, profile) }}
+        {% else %}
+            <p> An estimated class profile was supposed to be here but it isn't.</p>
+        {% endif %}
+    </article>
+{%- endmacro %}

@@ -1,0 +1,21 @@
+{
+    "title": "Dataset Fingerprint Report ",
+    "type": "report",
+    "author": "Eugeniu Costetchi",
+    "ns_file": "data/prefix.csv",
+    "output" : "",
+    "alpha": {
+      "file": "data/fingerprint.rq_eurovoc44.log.csv",
+      "title": "EuroVoc 4.4",
+      "description": "EuroVoc 4.4 was released a long time ago using EuroVoc Ontology."
+    },
+    "beta": {
+      "file": "data/fingerprint.rq_EV45OLD.log.csv",
+      "title": "EuroVoc 4.5(bc)",
+      "description": "EuroVoc 4.5 backward compatible (bc) was released in July 2016 with SKOS-AP-EU and then converted to fit also the old profile of EuroVoc Ontology."
+    },
+    "diff": {
+        "structural_columns" : ["stype", "p", "ootype"],
+        "column_titles" : ["Domain", "Property", "Range"]
+    }
+}

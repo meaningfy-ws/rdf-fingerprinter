@@ -1,0 +1,154 @@
+{% extends "doc.html" %}
+{% import "fragment_utils.html" as fragment %}
+
+{% block main %}
+    <h1>Class instantiation</h1>
+{#    <section>#}
+        <p>The table below describes how are classes instantiated in <strong>{{ configuration.alpha.title }} </strong>
+            dataset. Please note that the instance counts are different
+            from total number of unique instances in the data-set. When an individual instantiates multiple classes,
+            then it is counted once for each class it instantiates. The relative number of instances is scaled to the
+            total number of unique instances per class.</p>
+
+        {{ fragment.pandas_table("Instantiation statistics for " + configuration.alpha.title + " dataset",data.alpha.class_statistics) }}
+
+        {% if data.beta is defined %}
+            {{ fragment.pandas_table("Instantiation statistics for " + configuration.beta.title + " dataset",data.beta.class_statistics) }}
+        {% endif %}
+{#    </section>#}
+
+    <h1>Class application profiles</h1>
+{#    <section>#}
+        <p>This section attempts at reconstructing the profiled shapes for each class. The profile is deduced based on
+            descriptive statistics presented elsewhere. The tables below contain the following columns: Property name,
+            Cardinality, Property Type, Property Range and Confidence.</p>
+        <p>
+            Confidence is a categorial value derived from the property usage relative to the total number of unique
+            individuals instantiating this class.Property range is a list of distinct encountered object types. In case
+            of higher number of object type the list is non-exhaustive. Cardinality of the property is expressed in
+            terms of minimum and maximum occurrences of the property. The minimum value varies from zero (0) meaning
+            that the property is optional to one (1) meaning that the property is mandatory while the maximum value
+            varies from one (1) meaning that the property is sufficient to star (*) meaning that the property is
+            maximally unbound. Finally the type indicates whether the property range is whether a data type or an
+            individual URI.
+        </p>
+
+        {# showing alpha data context  #}
+        {% if data.alpha.application_profiles is defined %}
+            <h2>Class application profiles for {{ configuration.alpha.title }} dataset</h2>
+            {% for class_uri, profile in  data.alpha.application_profiles %}
+                {% if class_uri is defined and profile is defined %}
+                    {#            <h2>Estimated application profile for {{ class_uri }}</h2>#}
+                    {{ fragment.pandas_table( "Estimated application profile for the class  " + class_uri, profile) }}
+                {% else %}
+                    <p> Estimated class profile was supposed to be here but isn't.</p>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p>Alpha dataset application profile (key: data.alpha.application_profiles) was expected but not found.</p>
+        {% endif %}
+
+        {# showing beta data context  #}
+        {% if data.beta.application_profiles is defined %}
+            <h2>Class application profiles for {{ configuration.beta.title }} dataset</h2>
+            {% for class_uri, profile in  data.beta.application_profiles %}
+                {% if class_uri is defined and profile is defined %}
+                    {#            <h2>Estimated application profile for {{ class_uri }}</h2>#}
+                    {{ fragment.pandas_table( "Estimated application profile for the class  " + class_uri, profile) }}
+                {% else %}
+                    <p> Estimated class profile was supposed to be here but isn't.</p>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p>Beta dataset application profile (key: data.beta.application_profiles) was expected but not found.</p>
+        {% endif %}
+{#    </section>#}
+
+    {% if data.diff is defined %}
+        <h1>Differences between {{ configuration.alpha.title }} and {{ configuration.beta.title }} datasets</h1>
+{#        <section>#}
+            <p>
+                This section provides a report on the commonalities and differences between
+                between {{ configuration.alpha.title }} and {{ configuration.beta.title }} datasets. The scope of this
+                exercise is established based on "structural columns", if any are provided in the configuration, or the
+                columns common to both {{ configuration.alpha.title }} and {{ configuration.beta.title }} datasets.
+                First
+                the intersection of the datasets is provided, followed by a presentation of the elements present
+                in {{ configuration.alpha.title }} and missing from {{ configuration.beta.title }} and finally the
+                elements
+                unique to {{ configuration.beta.title }} dataset are laid out.
+            </p>
+
+            <h2>Elements common to both {{ configuration.alpha.title }} and {{ configuration.beta.title }} datasets</h2>
+            {% if data.diff.ab_intersection is defined %}
+                {{ fragment.pandas_table( "The elements common to " + configuration.alpha.title +" and "
+            + configuration.beta.title +" datasets", data.diff.ab_intersection) }}
+            {% else %}
+                <p> Dataset common part was supposed to be here but isn't.</p>
+            {% endif %}
+
+            <h2>Elements unique to {{ configuration.alpha.title }} dataset</h2>
+            {% if data.diff.ab_difference is defined %}
+                {{ fragment.pandas_table( "The elements unique in " + configuration.alpha.title +" that are not found in "
+            + configuration.beta.title +" dataset", data.diff.ab_difference) }}
+            {% else %}
+                <p> Dataset unique part was supposed to be here but isn't. </p>
+            {% endif %}
+
+            <h2>Elements unique to {{ configuration.beta.title }} dataset</h2>
+            {% if data.diff.ab_difference is defined %}
+                {{ fragment.pandas_table( "The elements unique in " + configuration.beta.title +" that are not found in "
+            + configuration.alpha.title +" dataset", data.diff.ba_difference) }}
+            {% else %}
+                <p> Dataset unique part was supposed to be here but isn't. </p>
+            {% endif %}
+{#        </section>#}
+    {% endif %}
+
+    <h1>Property usage statistics</h1>
+{#    <section>#}
+        <p>This section provides descriptive statistical indicators for each class. The tables below contain the
+            following columns: property name, absolute normalised usage (Norm usg/a), absolute actual usage(Usage/a),
+            normalised minimum (Min), normalised maximum (Max), normalised average (Avg), relative normalised usage
+            (Norm usg/r), relative actual usage (Usage/r).</p>
+        <p>The normalization mentioned above refers to counting out of all class individuals how many are actually using
+            the property at least once while the actual property usage refers to counting all occurrences for a given
+            class. The rdf:type property plays a special role because it indicates the number of unique class instances
+            and in case of multiple class instantiation the number is scaled by the number of distinct parent
+            classes. </p>
+        <p>The relative actual usage (Usage/r) is calculated with respect to a sibling property that maximally occurs in
+            all class instances. Therefore there is no standard property to be chosen as reference like in the case of
+            rdf:type but it varies from case to case.</p>
+
+        {# showing alpha propeorty usage #}
+        {% if data.alpha.property_usages is defined %}
+            <h2>Class property usage for {{ configuration.alpha.title }} dataset</h2>
+            {% for class_uri, profile in data.alpha.property_usages %}
+                {% if class_uri is defined and profile is defined %}
+                    {#            <h2>Estimated application profile for {{ class_uri }}</h2>#}
+                    {{ fragment.pandas_table( "Propoerty usage statistics for the class " + class_uri, profile) }}
+                {% else %}
+                    <p> Property usage statistics were supposed to be here but aren't.</p>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p>Alpha dataset property usage (key: data.alpha.property_usages) was expected but not found.</p>
+        {% endif %}
+
+        {# showing beta propeorty usage #}
+        {% if data.beta.property_usages is defined %}
+            <h2>Class property usage for {{ configuration.beta.title }} dataset</h2>
+            {% for class_uri, profile in data.beta.property_usages %}
+                {% if class_uri is defined and profile is defined %}
+                    {#            <h2>Estimated application profile for {{ class_uri }}</h2>#}
+                    {{ fragment.pandas_table( "Propoerty usage statistics for the class " + class_uri, profile) }}
+                {% else %}
+                    <p> Property usage statistics were supposed to be here but aren't.</p>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <p>Beta dataset property usage (key: data.beta.property_usages) was expected but not found.</p>
+        {% endif %}
+{#    </section>#}
+
+{% endblock %}
