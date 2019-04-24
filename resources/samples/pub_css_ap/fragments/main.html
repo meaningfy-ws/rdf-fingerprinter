@@ -3,7 +3,7 @@
 
 {% block main %}
     <h1>Class instantiation</h1>
-{#    <section>#}
+    <section>
         <p>The table below describes how are classes instantiated in <strong>{{ configuration.alpha.title }} </strong>
             dataset. Please note that the instance counts are different
             from total number of unique instances in the data-set. When an individual instantiates multiple classes,
@@ -15,10 +15,10 @@
         {% if data.beta is defined %}
             {{ fragment.pandas_table("Instantiation statistics for " + configuration.beta.title + " dataset",data.beta.class_statistics) }}
         {% endif %}
-{#    </section>#}
+    </section>
 
     <h1>Class application profiles</h1>
-{#    <section>#}
+    <section>
         <p>This section attempts at reconstructing the profiled shapes for each class. The profile is deduced based on
             descriptive statistics presented elsewhere. The tables below contain the following columns: Property name,
             Cardinality, Property Type, Property Range and Confidence.</p>
@@ -62,11 +62,11 @@
         {% else %}
             <p>Beta dataset application profile (key: data.beta.application_profiles) was expected but not found.</p>
         {% endif %}
-{#    </section>#}
+    </section>
 
     {% if data.diff is defined %}
         <h1>Differences between {{ configuration.alpha.title }} and {{ configuration.beta.title }} datasets</h1>
-{#        <section>#}
+        <section>
             <p>
                 This section provides a report on the commonalities and differences between
                 between {{ configuration.alpha.title }} and {{ configuration.beta.title }} datasets. The scope of this
@@ -102,11 +102,11 @@
             {% else %}
                 <p> Dataset unique part was supposed to be here but isn't. </p>
             {% endif %}
-{#        </section>#}
+        </section>
     {% endif %}
 
     <h1>Property usage statistics</h1>
-{#    <section>#}
+    <section>
         <p>This section provides descriptive statistical indicators for each class. The tables below contain the
             following columns: property name, absolute normalised usage (Norm usg/a), absolute actual usage(Usage/a),
             normalised minimum (Min), normalised maximum (Max), normalised average (Avg), relative normalised usage
@@ -149,6 +149,5 @@
         {% else %}
             <p>Beta dataset property usage (key: data.beta.property_usages) was expected but not found.</p>
         {% endif %}
-{#    </section>#}
-
+    </section>
 {% endblock %}
