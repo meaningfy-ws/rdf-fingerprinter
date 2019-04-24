@@ -3,7 +3,7 @@ import unittest
 
 from fingerprint.context.context_generator import DataContextGenerator
 from fingerprint.document.report_builder import ReportBuilder
-from fingerprint.project.jinja_project import FingerprinterProject
+from fingerprint.project.fingerprinter_project import FingerprinterProject
 
 
 class MyTestCase(unittest.TestCase):
@@ -22,14 +22,16 @@ class MyTestCase(unittest.TestCase):
         # print(project.configuration)
 
         assert isinstance(project.get_document_builder(), ReportBuilder), "not a report builder"
-        assert isinstance(project.get_data_content_builder(), DataContextGenerator), "not a data context generator"
+
+        data_context_builder = project.get_data_content_builder()
+
+        assert isinstance(data_context_builder, DataContextGenerator) or isinstance(data_context_builder,
+                                                                                    list), "not a data context generator"
 
         assert isinstance(project.make_data_context(), dict), "the data context is not a dictionary object"
 
-        # print(project.make_data_context())
-
         assert project.make_document() is not None, "no document is built"
-        assert "<body>" in project.make_document(), "no html body available, something is not right"
+        assert "<body" in project.make_document(), "no html body available, something is not right"
 
         project.make_project()
         # todo: implement the diff statistics into the data context
