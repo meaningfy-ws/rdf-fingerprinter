@@ -19,7 +19,17 @@ setup(
     description='generates report representing the fingerprint of a RDF dataset'
                 'and eventually '
                 'offers a diff to another fingerprint',
-    install_requires=['pylatex', 'Click', 'pandas'],   # pandas assumed to be installed already 'pandas>=0.17.1',
+    install_requires=["numpy",
+                      "pandas",
+                      "Click",
+                      "pylatex",
+                      "pathlib",
+                      "jinja2",
+                      "rdflib",
+                      "sparqlwrapper",
+                      "dataclasses-json",
+                      "Deprecated",
+                      ],
     zip_safe=False,
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -36,6 +46,6 @@ setup(
     long_description=readme(),
     entry_points="""
         [console_scripts]
-        fingerprint=fingerprint.triple_profiler:cli
+        fingerprint=fingerprint.triple_profiler:make_project
     """
 )

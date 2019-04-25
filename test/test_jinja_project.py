@@ -32,7 +32,6 @@ class MyTestCase(unittest.TestCase):
         assert "<body" in project.make_document(), "no html body available, something is not right"
 
         project.make_project()
-        # todo: implement the diff statistics into the data context
 
 
 if __name__ == '__main__':

@@ -48,6 +48,16 @@ Email: costezki.eugen@gmail.com
     order by ?stype ?p ?ootype ?propType
     ---
 """
-
 # TODO put here the code that generated the content dictionary for the JINJA template
-#
+
+import click
+import pathlib
+
+from fingerprint.project.fingerprinter_project import FingerprinterProject
+
+
+@click.command()
+@click.option('--path', default="./", help="path to the project folder", show_default=True)
+def make_project(path):
+    project = FingerprinterProject(pathlib.Path(path).resolve())
+    project.make_project()
