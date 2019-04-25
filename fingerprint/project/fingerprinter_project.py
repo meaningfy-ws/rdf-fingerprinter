@@ -231,13 +231,7 @@ class FingerprinterProject(FolderBasedProject):
         shutil.rmtree(str(output_folder), ignore_errors=True)
         shutil.copytree(str(self.path_to_static_resources), str(output_folder), copy_function=shutil.copy)
 
-        # os.makedirs(str(output_folder))
-        # .mkdir(parents=True, exist_ok=True)
-
         output_file_path = output_folder / self.resolve_main_document_name()
 
         with output_file_path.open("w", encoding="utf-8") as f:
             f.write(self.make_document())
-
-        # todo: implement the diff statistics into the report
-        # todo: work on copying the right files into the right place :)
