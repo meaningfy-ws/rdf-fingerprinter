@@ -159,6 +159,7 @@ class DiffContextGenerator(DataContextGenerator):
         self.structural_columns = structural_columns
         self.column_titles = column_titles
 
+    def _resolve_columns(self):
         if not self.structural_columns:
             self.structural_columns = list(set(self.alpha.columns).intersection(self.beta.columns))
 
@@ -166,8 +167,13 @@ class DiffContextGenerator(DataContextGenerator):
             self.column_titles = self.structural_columns
 
     def generate(self):
-        # preparing the ingredients
+        # if there is no beta then do nothing
+        if not self.beta:
+            return {}
 
+        self._resolve_columns()
+
+        # preparing the ingredients
         alpha_set = set([tuple(line) for line in self.alpha[self.structural_columns].values.tolist()])
         beta_set = set([tuple(line) for line in self.beta[self.structural_columns].values.tolist()])
 
