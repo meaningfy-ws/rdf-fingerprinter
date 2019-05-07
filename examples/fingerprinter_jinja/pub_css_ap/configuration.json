@@ -1,0 +1,21 @@
+{
+    "title": "Dataset Fingerprint Report (Diff)",
+    "type": "report",
+    "author": "Eugeniu Costetchi",
+    "ns_file": "data/prefix.csv",
+    "output" : "output",
+    "alpha": {
+      "file": "data/bud-2016.csv",
+      "title": "Eu Budget Dataset 2017",
+      "description": "Eu Budget Dataset 2017"
+    },
+    "beta": {
+      "file": "data/bud-2017.csv",
+      "title": "Eu Budget Dataset 2017",
+      "description": "Eu Budget Dataset 2017"
+    },
+    "diff": {
+        "structural_columns" : ["stype", "p", "ootype"],
+        "column_titles" : ["Domain", "Property", "Range"]
+    }
+}
