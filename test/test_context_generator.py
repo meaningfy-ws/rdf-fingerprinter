@@ -9,7 +9,7 @@ import pathlib
 import unittest
 
 from fingerprint.context.context_generator import TabularContextGenerator, AggregateTabularContextGenerator
-from fingerprint.context.fingerprint_generator import ApplicationProfileContextGenerator
+from fingerprint.context.fingerprint_generator import ApplicationProfileContextGenerator, confidence_category
 from fingerprint.context.iri_utils import NamespaceMappingCSV
 from fingerprint.source.data_source import CSVSourceTabular
 import pandas as pd
@@ -58,6 +58,15 @@ class MyTestCase(unittest.TestCase):
         assert dc["beta"]["class_statistics"] is not None, "there is no class statistics"
         assert dc["beta"]["property_usages"] is not None, "there is no propeorty usage statistics"
 
+    def test_confidence_category(self):
+        """
+
+        :return:
+        """
+        cc = {"certain": 93, "likely": 86, "possible": 47, "unlikely": 12, "rare": 5, "very rare": -1000000}
+        assert confidence_category(95,cc) == "certain"
+        assert confidence_category(50, cc) == "possible"
+        assert confidence_category(-20, cc) == "very rare"
 
 if __name__ == '__main__':
     unittest.main()

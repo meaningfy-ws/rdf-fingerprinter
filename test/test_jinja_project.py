@@ -9,7 +9,8 @@ from fingerprint.project.fingerprinter_project import FingerprinterProject
 class MyTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.resources_folder = pathlib.Path(__file__).parents[1] / "resources" / "samples" / "pub_css_ap"
+        self.resources_folder = pathlib.Path(__file__).parents[1] / "examples" / "fingerprinter_jinja" / "pub_css_ap"
+        # self.resources_folder = pathlib.Path(__file__).parents[1] / "resources" / "samples" / "pub_css_ap"
 
     def test_jinja_project(self):
         project = FingerprinterProject(str(self.resources_folder))

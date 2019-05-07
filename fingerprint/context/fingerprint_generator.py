@@ -168,7 +168,7 @@ class DiffContextGenerator(DataContextGenerator):
 
     def generate(self):
         # if there is no beta then do nothing
-        if not self.beta:
+        if self.beta is None:
             return {}
 
         self._resolve_columns()
@@ -226,14 +226,19 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 
 @deprecated
-def confidence_category(r, conf=confidence):
+def confidence_category(r, conf):
     """
     :param r: target relative number , expected between 0 and 100
-    :param confidence: category definitions
+    :param conf: category definitions
     :return: the category given a target number
     """
-    confidence_inv = {v: k for k, v in confidence.items()}
-    return confidence_inv[max([x for x in confidence_inv.keys() if r >= x])]
+    confidence_inv = {v: k for k, v in conf.items()}
+    max_conf = max([x for x in confidence_inv.keys()])
+    conf_r = [x for x in confidence_inv.keys() if r >= x]
+
+    if conf_r:
+        return confidence_inv[max(conf_r)]
+    return confidence_inv[max_conf]
 
 
 @deprecated
@@ -300,7 +305,7 @@ def df_prop_stats(df, conf=confidence):
         group['max_ap'].fillna("*", inplace=True)
 
         group["card"] = group['min_ap'].astype(str) + " .. " + group['max_ap']
-        group["conf"] = group['scnt/type-scnt'].apply(confidence_category, confidence)
+        group["conf"] = group['scnt/type-scnt'].apply(confidence_category, conf=conf)
         if df_stats is None:
             df_stats = pd.DataFrame(columns=group.columns)
         df_stats = df_stats.append(group)
@@ -309,6 +314,7 @@ def df_prop_stats(df, conf=confidence):
 
 @deprecated
 def custom_type_cast(group):
+    group.fillna(0, inplace=True)
     group['cnt'] = group['cnt'].astype(int)
     group['scnt'] = group['scnt'].astype(int)
     group['min_sp'] = group['min_sp'].astype(int)
