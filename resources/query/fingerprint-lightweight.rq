@@ -1,0 +1,13 @@
+SELECT DISTINCT ?ts ?p ?to ?to2 (count(?p) AS ?number)
+WHERE
+{
+	{
+		?s ?p ?o .
+		?s a ?ts .
+		OPTIONAL
+		{
+			?o a ?to .
+		}
+		BIND( str( datatype(?o) ) AS ?to2 )
+	}
+} GROUP BY ?ts ?p ?to ?to2
