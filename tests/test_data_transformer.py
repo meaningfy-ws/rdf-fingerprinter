@@ -9,7 +9,7 @@ from fingerprint.source.data_source import CSVSourceTabular
 class MyTestCase(unittest.TestCase):
     def setUp(self):
         self.file_name = pathlib.Path(__file__).resolve().parents[
-                             1] / "resources" / "samples" / "test.csv"
+                             1] / "resources" / "samples" / "tests.csv"
         self.sample_tabular = CSVSourceTabular(str(self.file_name)).read()
         self.aggregator = ['stype', 'p']
         self.prefixes = {"http://eurovoc.europa.eu/schema#": "evo:",
