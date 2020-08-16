@@ -1,0 +1,32 @@
+{% import "macros.html" as mc %}
+
+<h1 class="ui header">Namespace inventory</h1>
+<section class="ui basic segment">
+    {% set labels = {"base_namespace": "Base namespace",} %}
+    {% set select_query ="""
+select DISTINCT ?base_namespace
+{
+  {
+   ?subject ?predicate ?object
+    bind(replace(str(?subject),'^(.*[/#])(.*)$','$1') as ?base_namespace)
+  } UNION
+  {
+    ?subject ?predicate ?object
+    bind(replace(str(?predicate),'^(.*[/#])(.*)$','$1') as ?base_namespace)
+  } UNION
+  {
+    [] ?predicate ?object
+    bind(replace(str(?object),'^(.*[/#])(.*)$','$1') as ?base_namespace)
+    FILTER ( strStarts(STR(?object),'http') && !isLiteral(?object) )
+  }
+}
+order by ?base_namespace
+""" %}
+    {% set content, error = from_endpoint(configuration.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% call mc.render_fetch_results(content, error) %}
+        {{ mc.pandas_table(content, "Namespace inventory", column_labels=labels) }}
+    {% endcall %}
+</section>
+
+
+

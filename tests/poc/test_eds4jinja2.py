@@ -9,6 +9,7 @@
 
 import jinja2
 import pytest
+import pandas as pd
 from eds4jinja2.builders.jinja_builder import build_eds_environment, inject_environment_globals
 
 from tests.poc import TEMPLATE_FOLDER, TEST_CONFIGURATION, TEMPLATE_SPARQL_FETCH_TREE

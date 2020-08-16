@@ -25,18 +25,27 @@
 {%- endmacro %}
 
 
-{% macro pandas_table(df, caption) -%}
+{% macro pandas_table(df, caption, column_labels={}) -%}
     {% if (df is defined) and (df is not none) %}
         <table class="ui celled table">
             <thead class="center aligned collapsing">
             {% for column in df.columns %}
-                <th>{{ column }}</th>
+                {% if column in column_labels %}
+                    <th>{{ column_labels[column] }}</th>
+                {% else %}
+                    <th>{{ column }}</th>
+                {% endif %}
             {% endfor %}
             </thead>
             {% for idx, row in df.iterrows() %}
                 <tr class="left aligned collapsing">
                     {% for colname in df.columns %}
-                        <td>{{ row[colname] }}</td>
+                        {# handle decimal format: float, float64, float32 #}
+                        {% if 'float' in (df.dtypes[colname] | string) %}
+                            <td>{{ row[colname] | round(precision=2) }}</td>
+                        {% else %}
+                            <td>{{ row[colname] }}</td>
+                        {% endif %}
                     {% endfor %}
                 </tr>
             {% endfor %}
