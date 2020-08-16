@@ -35,6 +35,10 @@
             <h1 class="ui center aligned header">Cellar SPARQL endpoint fragment</h1>
             
     
+    
+    
+
+    
 
 <h1 class="ui header">Class instantiation</h1>
 <section class="ui basic segment">
@@ -44,6 +48,7 @@
         then it is counted once for each class it instantiates. The relative number of instances is scaled to the
         total number of unique instances per class.
     </p>
+    
     
     
     
@@ -69,7 +74,7 @@
                     
                         
                         
-                            <td>http://www.w3.org/2008/05/skos-xl#Label</td>
+                            <td>skosxl:Label</td>
                         
                     
                         
@@ -83,7 +88,7 @@
                     
                         
                         
-                            <td>http://publications.europa.eu/ontology/euvoc#XlNotation</td>
+                            <td>euvoc:XlNotation</td>
                         
                     
                         
@@ -97,7 +102,7 @@
                     
                         
                         
-                            <td>http://www.w3.org/2004/02/skos/core#Concept</td>
+                            <td>skos:Concept</td>
                         
                     
                         
@@ -111,7 +116,7 @@
                     
                         
                         
-                            <td>http://publications.europa.eu/ontology/euvoc#Court</td>
+                            <td>euvoc:Court</td>
                         
                     
                         
@@ -125,7 +130,7 @@
                     
                         
                         
-                            <td>http://www.w3.org/2006/vcard/ns#Address</td>
+                            <td>vcard:Address</td>
                         
                     
                         
@@ -139,7 +144,7 @@
                     
                         
                         
-                            <td>http://publications.europa.eu/ontology/euvoc#XlNote</td>
+                            <td>euvoc:XlNote</td>
                         
                     
                         
@@ -153,7 +158,7 @@
                     
                         
                         
-                            <td>http://publications.europa.eu/ontology/euvoc#FileType</td>
+                            <td>euvoc:FileType</td>
                         
                     
                         
@@ -167,7 +172,7 @@
                     
                         
                         
-                            <td>http://publications.europa.eu/ontology/euvoc#Treaty</td>
+                            <td>euvoc:Treaty</td>
                         
                     
                         
@@ -181,7 +186,7 @@
                     
                         
                         
-                            <td>http://publications.europa.eu/ontology/euvoc#Continent</td>
+                            <td>euvoc:Continent</td>
                         
                     
                         
@@ -195,7 +200,7 @@
                     
                         
                         
-                            <td>http://www.w3.org/2002/07/owl#Ontology</td>
+                            <td>owl:Ontology</td>
                         
                     
                         
@@ -209,7 +214,7 @@
                     
                         
                         
-                            <td>http://www.w3.org/2004/02/skos/core#ConceptScheme</td>
+                            <td>skos:ConceptScheme</td>
                         
                     
                         
@@ -235,10 +240,145 @@
 
         
 
+
+
 <h1 class="ui header">Namespace inventory</h1>
 <section class="ui basic segment">
+
+
+
     
     
+    
+    
+    
+    
+    
+        
+            
+        
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                
+                    <th>Base namespace</th>
+                
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        
+                        
+                            <td>eli:</td>
+                        
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        
+                        
+                            <td>lemon:</td>
+                        
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        
+                        
+                            <td>lvont:</td>
+                        
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        
+                        
+                            <td>euvoc:</td>
+                        
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        
+                        
+                            <td>dct:</td>
+                        
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        
+                        
+                            <td>rdf:</td>
+                        
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        
+                        
+                            <td>rdfs:</td>
+                        
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        
+                        
+                            <td>owl:</td>
+                        
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        
+                        
+                            <td>skos:</td>
+                        
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        
+                        
+                            <td>vcard:</td>
+                        
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        
+                        
+                            <td>skosxl:</td>
+                        
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        
+                        
+                            <td>foaf:</td>
+                        
+                    
+                </tr>
+            
+            <caption>Known namespaces</caption>
+        </table>
+    
+    
+        
     
     
         
@@ -284,15 +424,6 @@
                     
                         
                         
-                            <td>http://data.europa.eu/eli/ontology#</td>
-                        
-                    
-                </tr>
-            
-                <tr class="left aligned collapsing">
-                    
-                        
-                        
                             <td>http://dijon.tribunal-administratif.fr/</td>
                         
                     
@@ -312,24 +443,6 @@
                         
                         
                             <td>http://economie.fgov.be/</td>
-                        
-                    
-                </tr>
-            
-                <tr class="left aligned collapsing">
-                    
-                        
-                        
-                            <td>http://lemon-model.net/lemon#</td>
-                        
-                    
-                </tr>
-            
-                <tr class="left aligned collapsing">
-                    
-                        
-                        
-                            <td>http://lexvo.org/ontology#</td>
                         
                     
                 </tr>
@@ -393,15 +506,6 @@
                         
                         
                             <td>http://publications.europa.eu/ontology/</td>
-                        
-                    
-                </tr>
-            
-                <tr class="left aligned collapsing">
-                    
-                        
-                        
-                            <td>http://publications.europa.eu/ontology/euvoc#</td>
                         
                     
                 </tr>
@@ -1166,15 +1270,6 @@
                     
                         
                         
-                            <td>http://purl.org/dc/terms/</td>
-                        
-                    
-                </tr>
-            
-                <tr class="left aligned collapsing">
-                    
-                        
-                        
                             <td>http://versailles.cour-administrative-appel.fr/ta-caa/</td>
                         
                     
@@ -1414,70 +1509,7 @@
                     
                 </tr>
             
-                <tr class="left aligned collapsing">
-                    
-                        
-                        
-                            <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#</td>
-                        
-                    
-                </tr>
-            
-                <tr class="left aligned collapsing">
-                    
-                        
-                        
-                            <td>http://www.w3.org/2000/01/rdf-schema#</td>
-                        
-                    
-                </tr>
-            
-                <tr class="left aligned collapsing">
-                    
-                        
-                        
-                            <td>http://www.w3.org/2002/07/owl#</td>
-                        
-                    
-                </tr>
-            
-                <tr class="left aligned collapsing">
-                    
-                        
-                        
-                            <td>http://www.w3.org/2004/02/skos/core#</td>
-                        
-                    
-                </tr>
-            
-                <tr class="left aligned collapsing">
-                    
-                        
-                        
-                            <td>http://www.w3.org/2006/vcard/ns#</td>
-                        
-                    
-                </tr>
-            
-                <tr class="left aligned collapsing">
-                    
-                        
-                        
-                            <td>http://www.w3.org/2008/05/skos-xl#</td>
-                        
-                    
-                </tr>
-            
-                <tr class="left aligned collapsing">
-                    
-                        
-                        
-                            <td>http://xmlns.com/foaf/0.1/</td>
-                        
-                    
-                </tr>
-            
-            <caption>Namespace inventory</caption>
+            <caption>Unknown namespaces</caption>
         </table>
     
     
