@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% import "macros.html" as mc %}
+
+{% block content %}
+    {% include "sections/class_instantiation.html" %}
+
+    {% include "sections/selected_class_profiles.html" %}
+
+{#    {% set content, error = from_endpoint(configuration.default_endpoint).with_query(configuration.default_query).fetch_tabular() %}#}
+{#    {{ mc.pandas_table(content, "Table: results") }}#}
+{##}
+{#    {% set content, error = from_endpoint("").with_query(configuration.default_query).fetch_tabular() %}#}
+{#    {{ mc.pandas_table(content, "Table: results") }}#}
+{##}
+{#    {% call mc.render_fetch_results(content, error) %}#}
+{#        {{ mc.pandas_table(content, "Table: results") }}#}
+{#    {% endcall %}#}
+
+{% endblock %}

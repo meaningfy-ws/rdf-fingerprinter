@@ -1,0 +1,2508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Proof of Concept Report</title>
+
+    <meta name="description" content="">
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- build:css styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
+    <!-- endbower -->
+    <!-- endbuild -->
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700,300&subset=latin,vietnamese' rel='stylesheet'
+          type='text/css'>
+
+    <!-- build:css styles/main.css -->
+    
+    <!-- endbuild -->
+
+</head>
+
+<body>
+<nav class="ui fixed menu inverted navbar">
+    <a href="" class="brand item">RDF Fingerprinter proof of concept</a>
+</nav> <!-- end nav -->
+
+<main class="ui page grid">
+    <div class="row"></div>
+    <div class="row">
+        <div class="starter column">
+            <h1 class="ui center aligned header">Cellar SPARQL endpoint fragment</h1>
+            
+    
+
+<h1 class="ui header">Class instantiation</h1>
+<section class="ui basic segment">
+    <p>The table below describes how are classes instantiated in <strong>DUMMY DATASET CALLED ALPHA </strong>
+        dataset. Please note that the instance counts are different
+        from total number of unique instances in the data-set. When an individual instantiates multiple classes,
+        then it is counted once for each class it instantiates. The relative number of instances is scaled to the
+        total number of unique instances per class.
+    </p>
+    
+    
+    
+        
+            
+        
+        
+        
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                <th>class</th>
+            
+                <th>instances</th>
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#Label</td>
+                    
+                        <td>8402</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNotation</td>
+                    
+                        <td>3403</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#Concept</td>
+                    
+                        <td>2507</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#Court</td>
+                    
+                        <td>2255</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#Address</td>
+                    
+                        <td>2155</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNote</td>
+                    
+                        <td>374</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#FileType</td>
+                    
+                        <td>142</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#Treaty</td>
+                    
+                        <td>104</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#Continent</td>
+                    
+                        <td>6</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2002/07/owl#Ontology</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#ConceptScheme</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+            <caption>Class instantiation overview</caption>
+        </table>
+    
+    
+        
+    
+
+
+    
+    
+
+</section>
+
+    
+
+<h1 class="ui header">Class instantiation shapes</h1>
+<section class="ui basic segment">
+    <p>This section attempts at reconstructing the profiled shapes for each class. The profile is deduced based on
+        descriptive statistics presented elsewhere. The tables below contain the following columns: Property name,
+        Cardinality, Property Type, Property Range and Confidence.</p>
+
+
+    
+    
+    
+        
+            
+        
+            
+
+
+
+
+
+
+        
+            
+    
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                <th>property</th>
+            
+                <th>object_type</th>
+            
+                <th>property_type</th>
+            
+                <th>count</th>
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#status</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>8402</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>8402</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>8402</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://lexvo.org/ontology#script</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>398</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#literalForm</td>
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#langString</td>
+                    
+                        <td>data</td>
+                    
+                        <td>8402</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#startDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>7952</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/created</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>7952</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#endDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>1673</td>
+                    
+                </tr>
+            
+            <caption>Shape of http://www.w3.org/2008/05/skos-xl#Label class</caption>
+        </table>
+    
+
+        
+    
+        
+            
+
+
+
+
+
+
+        
+            
+    
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                <th>property</th>
+            
+                <th>object_type</th>
+            
+                <th>property_type</th>
+            
+                <th>count</th>
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>5014</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://lemon-model.net/lemon#context</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2876</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#status</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2507</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#inScheme</td>
+                    
+                        <td>http://www.w3.org/2002/07/owl#Ontology</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2507</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#inScheme</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#ConceptScheme</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2507</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#topConceptOf</td>
+                    
+                        <td>http://www.w3.org/2002/07/owl#Ontology</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2507</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#topConceptOf</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#ConceptScheme</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2507</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#countryCode</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2255</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>104</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#signatureLocation</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>76</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#hasEmail</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>52</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/isReplacedBy</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#Treaty</td>
+                    
+                        <td>object</td>
+                    
+                        <td>22</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/isReplacedBy</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#Concept</td>
+                    
+                        <td>object</td>
+                    
+                        <td>22</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/replaces</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#Treaty</td>
+                    
+                        <td>object</td>
+                    
+                        <td>22</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/replaces</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#Concept</td>
+                    
+                        <td>object</td>
+                    
+                        <td>22</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#prefLabel</td>
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#Label</td>
+                    
+                        <td>data</td>
+                    
+                        <td>6216</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#hasTelephone</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>data</td>
+                    
+                        <td>3443</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlNotation</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNotation</td>
+                    
+                        <td>data</td>
+                    
+                        <td>3403</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#startDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2507</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/created</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2507</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#altLabel</td>
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#Label</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2182</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#hasAddress</td>
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#Address</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2155</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#value</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>450</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#editorialNote</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>450</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#endDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>289</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/dateSubmitted</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>243</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/dateAccepted</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>207</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlDefinition</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNote</td>
+                    
+                        <td>data</td>
+                    
+                        <td>152</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlChangeNote</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNote</td>
+                    
+                        <td>data</td>
+                    
+                        <td>148</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#officialJournalDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>92</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#officialJournalNumber</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>92</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#officialJournalSeries</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>92</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://data.europa.eu/eli/ontology#date_document</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>83</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://data.europa.eu/eli/ontology#first_date_entry_in_force</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>82</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlHistoryNote</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNote</td>
+                    
+                        <td>data</td>
+                    
+                        <td>74</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#isTextual</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#boolean</td>
+                    
+                        <td>data</td>
+                    
+                        <td>43</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#order</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#integer</td>
+                    
+                        <td>data</td>
+                    
+                        <td>43</td>
+                    
+                </tr>
+            
+            <caption>Shape of http://www.w3.org/2004/02/skos/core#Concept class</caption>
+        </table>
+    
+
+        
+    
+        
+            
+
+
+
+
+
+
+        
+            
+    
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                <th>property</th>
+            
+                <th>object_type</th>
+            
+                <th>property_type</th>
+            
+                <th>count</th>
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>4510</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://lemon-model.net/lemon#context</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2255</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#countryCode</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2255</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#status</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2255</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#inScheme</td>
+                    
+                        <td>http://www.w3.org/2002/07/owl#Ontology</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2255</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#inScheme</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#ConceptScheme</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2255</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#topConceptOf</td>
+                    
+                        <td>http://www.w3.org/2002/07/owl#Ontology</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2255</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#topConceptOf</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#ConceptScheme</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2255</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#hasEmail</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>52</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#hasTelephone</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>data</td>
+                    
+                        <td>3443</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#prefLabel</td>
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#Label</td>
+                    
+                        <td>data</td>
+                    
+                        <td>3441</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlNotation</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNotation</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2399</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#startDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2255</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/created</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2255</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#hasAddress</td>
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#Address</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2155</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#value</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>450</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#editorialNote</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>450</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#endDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>265</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlChangeNote</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNote</td>
+                    
+                        <td>data</td>
+                    
+                        <td>99</td>
+                    
+                </tr>
+            
+            <caption>Shape of http://publications.europa.eu/ontology/euvoc#Court class</caption>
+        </table>
+    
+
+        
+    
+        
+            
+
+
+
+
+
+
+        
+            
+    
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                <th>property</th>
+            
+                <th>object_type</th>
+            
+                <th>property_type</th>
+            
+                <th>count</th>
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>3403</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>3403</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#status</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2560</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#value</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>3403</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#startDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2560</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/created</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2560</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#endDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>323</td>
+                    
+                </tr>
+            
+            <caption>Shape of http://publications.europa.eu/ontology/euvoc#XlNotation class</caption>
+        </table>
+    
+
+        
+    
+        
+            
+
+
+
+
+
+
+        
+            
+    
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                <th>property</th>
+            
+                <th>object_type</th>
+            
+                <th>property_type</th>
+            
+                <th>count</th>
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2155</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2155</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#localityCode</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>2151</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://xmlns.com/foaf/0.1/homepage</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>45</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#locality</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2154</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#postal-code</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2020</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#street-address</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>1967</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/relation</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>1589</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2006/vcard/ns#post-office-box</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>1185</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#value</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>898</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#editorialNote</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>898</td>
+                    
+                </tr>
+            
+            <caption>Shape of http://www.w3.org/2006/vcard/ns#Address class</caption>
+        </table>
+    
+
+        
+    
+        
+            
+
+
+
+
+
+
+        
+            
+    
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                <th>property</th>
+            
+                <th>object_type</th>
+            
+                <th>property_type</th>
+            
+                <th>count</th>
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>8</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2002/07/owl#imports</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>6</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#status</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#startDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/created</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/identifier</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#comment</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Literal</td>
+                    
+                        <td>data</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#prefLabel</td>
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#Label</td>
+                    
+                        <td>data</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+            <caption>Shape of http://www.w3.org/2002/07/owl#Ontology class</caption>
+        </table>
+    
+
+        
+    
+        
+            
+
+
+
+
+
+
+        
+            
+    
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                <th>property</th>
+            
+                <th>object_type</th>
+            
+                <th>property_type</th>
+            
+                <th>count</th>
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://lemon-model.net/lemon#context</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>416</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>284</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#status</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>142</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#inScheme</td>
+                    
+                        <td>http://www.w3.org/2002/07/owl#Ontology</td>
+                    
+                        <td>object</td>
+                    
+                        <td>142</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#inScheme</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#ConceptScheme</td>
+                    
+                        <td>object</td>
+                    
+                        <td>142</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#topConceptOf</td>
+                    
+                        <td>http://www.w3.org/2002/07/owl#Ontology</td>
+                    
+                        <td>object</td>
+                    
+                        <td>142</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#topConceptOf</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#ConceptScheme</td>
+                    
+                        <td>object</td>
+                    
+                        <td>142</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlNotation</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNotation</td>
+                    
+                        <td>data</td>
+                    
+                        <td>641</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#startDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>142</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlDefinition</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNote</td>
+                    
+                        <td>data</td>
+                    
+                        <td>142</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/created</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>142</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#altLabel</td>
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#Label</td>
+                    
+                        <td>data</td>
+                    
+                        <td>142</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#prefLabel</td>
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#Label</td>
+                    
+                        <td>data</td>
+                    
+                        <td>142</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/dateSubmitted</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>139</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/dateAccepted</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>103</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlHistoryNote</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNote</td>
+                    
+                        <td>data</td>
+                    
+                        <td>73</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlChangeNote</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNote</td>
+                    
+                        <td>data</td>
+                    
+                        <td>48</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#isTextual</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#boolean</td>
+                    
+                        <td>data</td>
+                    
+                        <td>43</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#order</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#integer</td>
+                    
+                        <td>data</td>
+                    
+                        <td>43</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#endDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2</td>
+                    
+                </tr>
+            
+            <caption>Shape of http://publications.europa.eu/ontology/euvoc#FileType class</caption>
+        </table>
+    
+
+        
+    
+        
+            
+
+
+
+
+
+
+        
+            
+    
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                <th>property</th>
+            
+                <th>object_type</th>
+            
+                <th>property_type</th>
+            
+                <th>count</th>
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>8</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2002/07/owl#imports</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>6</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#status</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#startDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/created</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/identifier</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#comment</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Literal</td>
+                    
+                        <td>data</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#prefLabel</td>
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#Label</td>
+                    
+                        <td>data</td>
+                    
+                        <td>4</td>
+                    
+                </tr>
+            
+            <caption>Shape of http://www.w3.org/2004/02/skos/core#ConceptScheme class</caption>
+        </table>
+    
+
+        
+    
+        
+            
+
+
+
+
+
+
+        
+            
+    
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                <th>property</th>
+            
+                <th>object_type</th>
+            
+                <th>property_type</th>
+            
+                <th>count</th>
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>12</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#status</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>6</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#inScheme</td>
+                    
+                        <td>http://www.w3.org/2002/07/owl#Ontology</td>
+                    
+                        <td>object</td>
+                    
+                        <td>6</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#inScheme</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#ConceptScheme</td>
+                    
+                        <td>object</td>
+                    
+                        <td>6</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#topConceptOf</td>
+                    
+                        <td>http://www.w3.org/2002/07/owl#Ontology</td>
+                    
+                        <td>object</td>
+                    
+                        <td>6</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#topConceptOf</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#ConceptScheme</td>
+                    
+                        <td>object</td>
+                    
+                        <td>6</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#prefLabel</td>
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#Label</td>
+                    
+                        <td>data</td>
+                    
+                        <td>144</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#startDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>6</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlNotation</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNotation</td>
+                    
+                        <td>data</td>
+                    
+                        <td>6</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/created</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>6</td>
+                    
+                </tr>
+            
+            <caption>Shape of http://publications.europa.eu/ontology/euvoc#Continent class</caption>
+        </table>
+    
+
+        
+    
+        
+            
+
+
+
+
+
+
+        
+            
+    
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                <th>property</th>
+            
+                <th>object_type</th>
+            
+                <th>property_type</th>
+            
+                <th>count</th>
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>208</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://lemon-model.net/lemon#context</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>205</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#status</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>104</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>104</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#inScheme</td>
+                    
+                        <td>http://www.w3.org/2002/07/owl#Ontology</td>
+                    
+                        <td>object</td>
+                    
+                        <td>104</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#inScheme</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#ConceptScheme</td>
+                    
+                        <td>object</td>
+                    
+                        <td>104</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#topConceptOf</td>
+                    
+                        <td>http://www.w3.org/2002/07/owl#Ontology</td>
+                    
+                        <td>object</td>
+                    
+                        <td>104</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#topConceptOf</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#ConceptScheme</td>
+                    
+                        <td>object</td>
+                    
+                        <td>104</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#signatureLocation</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>76</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/isReplacedBy</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#Treaty</td>
+                    
+                        <td>object</td>
+                    
+                        <td>22</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/isReplacedBy</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#Concept</td>
+                    
+                        <td>object</td>
+                    
+                        <td>22</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/replaces</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#Treaty</td>
+                    
+                        <td>object</td>
+                    
+                        <td>22</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/replaces</td>
+                    
+                        <td>http://www.w3.org/2004/02/skos/core#Concept</td>
+                    
+                        <td>object</td>
+                    
+                        <td>22</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#prefLabel</td>
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#Label</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2489</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#altLabel</td>
+                    
+                        <td>http://www.w3.org/2008/05/skos-xl#Label</td>
+                    
+                        <td>data</td>
+                    
+                        <td>2040</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlNotation</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNotation</td>
+                    
+                        <td>data</td>
+                    
+                        <td>357</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#startDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>104</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/created</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>104</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/dateAccepted</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>104</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/dateSubmitted</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>104</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#officialJournalDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>92</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#officialJournalNumber</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>92</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#officialJournalSeries</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#string</td>
+                    
+                        <td>data</td>
+                    
+                        <td>92</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://data.europa.eu/eli/ontology#date_document</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>83</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://data.europa.eu/eli/ontology#first_date_entry_in_force</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>82</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#endDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>22</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlDefinition</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNote</td>
+                    
+                        <td>data</td>
+                    
+                        <td>10</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlChangeNote</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNote</td>
+                    
+                        <td>data</td>
+                    
+                        <td>1</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#xlHistoryNote</td>
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#XlNote</td>
+                    
+                        <td>data</td>
+                    
+                        <td>1</td>
+                    
+                </tr>
+            
+            <caption>Shape of http://publications.europa.eu/ontology/euvoc#Treaty class</caption>
+        </table>
+    
+
+        
+    
+        
+            
+
+
+
+
+
+
+        
+            
+    
+        <table class="ui celled table">
+            <thead class="center aligned collapsing">
+            
+                <th>property</th>
+            
+                <th>object_type</th>
+            
+                <th>property_type</th>
+            
+                <th>count</th>
+            
+            </thead>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#status</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>374</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#type</td>
+                    
+                        <td>http://www.w3.org/2000/01/rdf-schema#Resource</td>
+                    
+                        <td>object</td>
+                    
+                        <td>374</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#startDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>374</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#value</td>
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#langString</td>
+                    
+                        <td>data</td>
+                    
+                        <td>374</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/created</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>154</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://purl.org/dc/terms/source</td>
+                    
+                        <td>http://www.w3.org/1999/02/22-rdf-syntax-ns#langString</td>
+                    
+                        <td>data</td>
+                    
+                        <td>152</td>
+                    
+                </tr>
+            
+                <tr class="left aligned collapsing">
+                    
+                        <td>http://publications.europa.eu/ontology/euvoc#endDate</td>
+                    
+                        <td>http://www.w3.org/2001/XMLSchema#date</td>
+                    
+                        <td>data</td>
+                    
+                        <td>86</td>
+                    
+                </tr>
+            
+            <caption>Shape of http://publications.europa.eu/ontology/euvoc#XlNote class</caption>
+        </table>
+    
+
+        
+    
+        
+    
+        
+    
+
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+        </div>
+    </div>
+</main>
+
+
+<!-- build:js scripts/vendor.js -->
+<!-- bower:js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+<!-- endbower -->
+<!-- endbuild -->
+</body>
+</html>

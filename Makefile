@@ -20,7 +20,7 @@ lint:
 
 test:
 	@ echo "$(BUILD_PRINT)Running the tests"
-	@ pytest || true
+	@ pytest
 
 #-----------------------------------------------------------------------------
 # Gherkin feature and acceptance tests generation commands
@@ -51,6 +51,37 @@ publish-pipy:
 	@ twine check dist/*
 	@ echo "$(BUILD_PRINT)Uploading the distribution"
 	@ twine upload --skip-existing dist/*
+
+
+#-----------------------------------------------------------------------------
+# Fuseki related commands
+#-----------------------------------------------------------------------------
+
+start-fuseki:
+	@ echo "$(BUILD_PRINT)Starting Fuseki on port $(if $(FUSEKI_PORT),$(FUSEKI_PORT),'default port')"
+	@ docker-compose --file docker-compose.yml --env-file .env-dev up -d fuseki
+
+stop-fuseki:
+	@ echo "$(BUILD_PRINT)Stopping Fuseki"
+	@ docker-compose --file docker-compose.yml --env-file .env-dev down
+
+fuseki-create-test-dbs:
+	@ echo "$(BUILD_PRINT)Building dummy "dev" dataset at http://localhost:$(if $(FUSEKI_PORT),$(FUSEKI_PORT),unknown port)/$$/datasets"
+	@ sleep 2
+	@ curl --anyauth --user 'admin:admin' -d 'dbType=mem&dbName=dev'  'http://localhost:$(FUSEKI_PORT)/$$/datasets'
+
+#fuseki-upload:
+#	@ curl -X POST --anyauth --user 'admin:admin' -d 'Content-Type:text/turtle;charset=utf-8' -T ./resources/samples/rdf/continents-source-ap.rdf  http://localhost:3030/dev/upload
+
+
+clean-data:
+	@ echo "$(BUILD_PRINT)Deleting the $(DATA_FOLDER)"
+	@ sudo rm -rf $(DATA_FOLDER)
+
+start-service: start-fuseki fuseki-create-test-dbs
+
+stop-service: stop-fuseki clean-data
+
 
 #-----------------------------------------------------------------------------
 # Default
