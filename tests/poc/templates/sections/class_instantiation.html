@@ -16,14 +16,14 @@
     order by desc(?instances)
     limit 200" %}
     {% set content, error = from_endpoint(configuration.default_endpoint).with_query(select_query).fetch_tabular() %}
-    {% set substituted_content = replace_strings_in_tabular(content,
+    {% call mc.render_fetch_results(content, error) %}
+        {% set substituted_content = replace_strings_in_tabular(content,
                                         target_columns=['class'],
                                         value_mapping_dict=inverted_prefixes,
                                         mark_touched_rows=False ) %}
-    {% call mc.render_fetch_results(substituted_content, error) %}
         {# TODO: need a function that adds a relative count column, so that we can see the percentage of classes #}
         {# {{ content["percentage"] = content["instances"]  / content["instances"].sum() }}#}
-        {{ mc.pandas_table(substituted_content, "Class instantiation overview") }}
+        {{ mc.pandas_table(content, "Class instantiation overview") }}
     {% endcall %}
 
 

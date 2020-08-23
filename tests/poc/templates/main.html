@@ -8,7 +8,7 @@
     {% set inverted_prefixes = invert_dict(prefixes) %}
 
     {% include "sections/class_instantiation.html" with context %}
-{#    {% include "sections/selected_class_profiles.html" %}#}
-{#    {% include "sections/namespace_fingerprint.html" %}#}
-        {% include "sections/namespace_inventory.html" with context %}
+    {% include "sections/selected_class_profiles.html" with context %}
+    {% include "sections/namespace_fingerprint.html" with context %}
+    {% include "sections/namespace_inventory.html" with context %}
 {% endblock %}

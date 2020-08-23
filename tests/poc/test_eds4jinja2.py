@@ -16,7 +16,7 @@ from eds4jinja2.builders.jinja_builder import build_eds_environment, inject_envi
 
 from tests.poc import TEMPLATE_FOLDER, TEST_CONFIGURATION, TEMPLATE_SPARQL_FETCH_TREE
 
-
+# ported into edf4jinja2
 def invert_dict(my_map, reduce_values=True):
     """
         Invert the dictionary.
