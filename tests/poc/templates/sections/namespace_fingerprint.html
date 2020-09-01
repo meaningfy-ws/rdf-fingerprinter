@@ -1,0 +1,44 @@
+{% import "macros.html" as mc %}
+
+<h1 class="ui header">Namespace shapes</h1>
+<section class="ui basic segment">
+    {% set labels = {"property": "Property name",
+"object_type": "Object class",
+"property_type": "Property type",
+"subject_cnt": "Distinct Subjects",
+"object_cnt": "Distinct Objects",
+"pattern_cnt": "Occurences",
+"min": "Min",
+"max": "Max",
+"avg": "Avg",} %}
+    {% set select_query ="""
+select distinct ?baseSubject ?predicate ?basePredicate ?baseObject
+				(count(distinct ?baseSubject) as ?subject_cnt)
+                (count(distinct ?baseObject) as ?object_cnt)
+                (count(*) as ?pattern_cnt)
+                (min(?sp_star) as ?min)
+                (max(?sp_star) as ?max)
+                (avg(?sp_star) as ?avg)
+{
+  ?subject ?predicate ?object
+  bind(replace(str(?subject),'^(http.*[/#])(.*)$','$1') as ?baseSubject)
+  bind(replace(str(?predicate),'^(http.*[/#])(.*)$','$1') as ?basePredicate)
+  bind(replace(str(?object),'^(http.*[/#])(.*)$','$1') as ?baseObject)
+
+  FILTER ( strStarts(STR(?object),'http')  && ISIRI(?subject) && ISIRI(?predicate))
+  {
+  	select distinct ?subject ?predicate (count(*)as ?sp_star)
+    {?subject ?predicate [] }
+    group by ?subject ?predicate
+  }
+} group by ?baseSubject ?predicate ?basePredicate ?baseObject
+order by ?baseSubject ?basePredicate ?predicate ?baseObject
+""" %}
+    {% set content, error = from_endpoint(configuration.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% call mc.render_fetch_results(content, error) %}
+        {{ mc.pandas_table(content, "Namespace shapes", column_labels=labels) }}
+    {% endcall %}
+</section>
+
+
+

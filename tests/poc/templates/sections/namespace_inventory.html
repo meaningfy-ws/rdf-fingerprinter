@@ -1,0 +1,46 @@
+{% import "macros.html" as mc %}
+
+{# Expecting the prefixes and inverted_prefixes #}
+
+<h1 class="ui header">Namespace inventory</h1>
+<section class="ui basic segment">
+
+
+
+    {% set labels = {"base_namespace": "Base namespace",} %}
+    {% set select_query ="""
+select DISTINCT ?base_namespace
+{
+  {
+   ?subject ?predicate ?object
+    bind(replace(str(?subject),'^(.*[/#])(.*)$','$1') as ?base_namespace)
+  } UNION
+  {
+    ?subject ?predicate ?object
+    bind(replace(str(?predicate),'^(.*[/#])(.*)$','$1') as ?base_namespace)
+  } UNION
+  {
+    [] ?predicate ?object
+    bind(replace(str(?object),'^(.*[/#])(.*)$','$1') as ?base_namespace)
+    FILTER ( strStarts(STR(?object),'http') && !isLiteral(?object) )
+  }
+}
+order by ?base_namespace
+""" %}
+    {% set content, error = from_endpoint(configuration.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% set substituted_content = replace_strings_in_tabular(content,
+                                        target_columns=['base_namespace'],
+                                        value_mapping_dict=inverted_prefixes,
+                                        mark_touched_rows=True ) %}
+    {% set known_namespaces  = substituted_content[['base_namespace']][substituted_content["_touched_"]] %}
+    {% set unknown_namespaces  = substituted_content[['base_namespace']][substituted_content["_touched_"]==False] %}
+    {% call mc.render_fetch_results(content, error) %}
+        {{ mc.pandas_table( known_namespaces   , "Known namespaces", column_labels=labels) }}
+    {% endcall %}
+    {% call mc.render_fetch_results(content, error) %}
+        {{ mc.pandas_table( unknown_namespaces   , "Unknown namespaces", column_labels=labels) }}
+    {% endcall %}
+</section>
+
+
+

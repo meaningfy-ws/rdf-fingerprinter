@@ -1,0 +1,45 @@
+{% import "macros.html" as mc %}
+
+{# expecting the class URI to be available in the context #}
+
+{# class shape #}
+{% set labels = {"property": "Property name",
+"object_type": "Object class",
+"property_type": "Property type",
+"subject_cnt": "Distinct Subjects",
+"object_cnt": "Distinct Objects",
+"pattern_cnt": "Occurences",
+"min": "Min",
+"max": "Max",
+"avg": "Avg",} %}
+{% set select_query =
+    "
+SELECT DISTINCT (?p as ?property) (?tto as ?object_type) (?tp as ?property_type)
+				(count(distinct ?s) as ?subject_cnt)
+                (count(distinct ?o) as ?object_cnt)
+                (count(*) as ?pattern_cnt)
+                (min(?sp_star) as ?min)
+                (max(?sp_star) as ?max)
+                (avg(?sp_star) as ?avg)
+WHERE
+{
+  values ?ts {<"~class~">}
+  ?s a ?ts .
+  ?s ?p ?o .
+  OPTIONAL {?o a ?to .}
+  BIND( datatype(?o) as ?dto )
+  BIND(IF(BOUND(?to),?to, IF (bound(?dto), ?dto, <http://www.w3.org/2000/01/rdf-schema#Resource>) ) as ?tto )
+  BIND( IF( isURI(?o),'object' , 'data') as ?tp )
+  {
+    select distinct ?s ?p (count(*)as ?sp_star)
+    {
+      ?s ?p [].
+    } group by ?s ?p
+  }
+} GROUP BY ?ts ?p ?tto ?tp
+ORDER BY ?subject_type desc(?property_type) desc(?count) ?property ?object_type
+" %}
+{% set content, error = from_endpoint(configuration.default_endpoint).with_query(select_query).fetch_tabular() %}
+{% call mc.render_fetch_results(content, error) %}
+    {{ mc.pandas_table(content, "Shape of "~class~" class", column_labels=labels) }}
+{% endcall %}
