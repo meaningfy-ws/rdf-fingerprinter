@@ -8,3 +8,6 @@ rdflib
 sparqlwrapper
 dataclasses-json
 Deprecated
+
+# new development
+eds4jinja2
