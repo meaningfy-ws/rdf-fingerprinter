@@ -1,0 +1,76 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:dc="http://www.omg.org/spec/UML/20131001/UMLDC"
+    xmlns:epo="http://data.europa.eu/a4g/ontology#"
+    xmlns:reg2015="http://data.europa.eu/a4g/extension/ontology/#"
+    xmlns:base="http://data.europa.eu/a4g/ontology/core"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:dct="http://purl.org/dc/terms/"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:org="http://www.w3.org/ns/org#"
+    xmlns:vann="http://purl.org/vocab/vann/"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <epo:Channel rdf:about="http://data.europa.eu/a4g/ontology#Channelad342e4a-4a91-4114-bd2b-ee34bdcb2dcf">
+    <epo:hasURL>http://www.promitheus.gov.gr</epo:hasURL>
+  </epo:Channel>
+  <reg2015:Procedure rdf:about="http://data.europa.eu/a4g/extension/ontology/#Procedure71b5f3df-0de2-4382-88e2-14d902997f22">
+    <reg2015:applies>
+      <epo:SubmissionTerm rdf:about="http://data.europa.eu/a4g/ontology#SubmissionTerm93bb9d7a-a1f5-4860-b4b8-fd8be6bb5e09">
+        <epo:isAppliedBy rdf:resource="http://data.europa.eu/a4g/extension/ontology/#Procedure71b5f3df-0de2-4382-88e2-14d902997f22"/>
+      </epo:SubmissionTerm>
+    </reg2015:applies>
+  </reg2015:Procedure>
+  <epo:Buyer rdf:about="http://data.europa.eu/a4g/ontology#Buyerbeb652ff-aa82-4cdb-8d3f-6b75fae22388">
+    <epo:hasBuyerLegalType>
+      <skos:Concept rdf:about="http://publications.europa.eu/resource/authority/buyer-legal-type/REGIONAL_AUTHORITY"/>
+    </epo:hasBuyerLegalType>
+    <epo:isRoleOf>
+      <epo:Organisation rdf:about="http://data.europa.eu/a4g/ontology#Organisation21d7ef22-c563-4781-92d4-8e22b9861404">
+        <epo:hasLocation>
+          <epo:Location rdf:about="http://data.europa.eu/a4g/ontology#Locatione39da943-468b-407e-8289-ea27e79ea785">
+            <epo:hasPostalAddress>
+              <epo:Address rdf:about="http://data.europa.eu/a4g/ontology#Address58e6ea21-866e-4ace-ad5b-d7f69e6722f9">
+                <epo:hasCountryCode>
+                  <skos:Concept rdf:about="http://publications.europa.eu/resource/authority/country/GR"/>
+                </epo:hasCountryCode>
+                <epo:hasCountrySubentityCode>
+                  <skos:Concept rdf:about="http://data.europa.eu/nuts/code/EL302"/>
+                </epo:hasCountrySubentityCode>
+                <epo:hasPostalZone>121 35</epo:hasPostalZone>
+                <epo:hasStreetName xml:lang="el">Αγ. Βασιλείου 62</epo:hasStreetName>
+                <epo:hasCityName xml:lang="el">Περιστέρι Αττικής</epo:hasCityName>
+              </epo:Address>
+            </epo:hasPostalAddress>
+          </epo:Location>
+        </epo:hasLocation>
+        <epo:hasName xml:lang="el">Δήμος Περιστερίου - Διεύθυνση Περιβάλλοντος και Ποιότητας Ζωής</epo:hasName>
+      </epo:Organisation>
+    </epo:isRoleOf>
+    <epo:isResponsibleFor>
+      <epo:Procedure rdf:about="http://data.europa.eu/a4g/ontology#Procedureaca3fa10-8a47-4489-9573-512706528f7c">
+        <epo:isResponsiblityOf rdf:resource="http://data.europa.eu/a4g/ontology#Buyerbeb652ff-aa82-4cdb-8d3f-6b75fae22388"/>
+        <epo:applies>
+          <epo:AccessTerms rdf:about="http://data.europa.eu/a4g/ontology#AccessTerms75f3f8f2-1f5b-49bd-889c-4603963902d0">
+            <epo:hasSomeProcurementDocumentRestricted>false</epo:hasSomeProcurementDocumentRestricted>
+            <epo:hasProcurementDocumentLandingPage>http://www.promitheus.gov.gr</epo:hasProcurementDocumentLandingPage>
+          </epo:AccessTerms>
+        </epo:applies>
+      </epo:Procedure>
+    </epo:isResponsibleFor>
+    <epo:has>
+      <epo:ContactPoint rdf:about="http://data.europa.eu/a4g/ontology#ContactPointf3316fb0-355d-43ef-b8cf-64dbbe16448a">
+        <epo:hasFax>+30 210-5764960</epo:hasFax>
+        <epo:hasInternetAddress>http://www.peristeri.gr</epo:hasInternetAddress>
+        <epo:hasDescription>Δήμος Περιστερίου - Διεύθυνση Περιβάλλοντος και Ποιότητας Ζωής (κος. Βασίλειος Αγγελόπουλος)</epo:hasDescription>
+        <epo:hasEmail>tdso@peristeri.gr</epo:hasEmail>
+        <epo:hasTelephone>+30 210-5701606</epo:hasTelephone>
+      </epo:ContactPoint>
+    </epo:has>
+    <reg2015:providesAdditionalInformationAboutProcurementProcedure rdf:resource="http://data.europa.eu/a4g/extension/ontology/#Procedure71b5f3df-0de2-4382-88e2-14d902997f22"/>
+    <reg2015:receivesRequestsToParticipate rdf:resource="http://data.europa.eu/a4g/extension/ontology/#Procedure71b5f3df-0de2-4382-88e2-14d902997f22"/>
+    <reg2015:receivesTenders rdf:resource="http://data.europa.eu/a4g/extension/ontology/#Procedure71b5f3df-0de2-4382-88e2-14d902997f22"/>
+    <epo:hasActivityDescription xml:lang="el">Ο.Τ.Α.</epo:hasActivityDescription>
+  </epo:Buyer>
+</rdf:RDF>

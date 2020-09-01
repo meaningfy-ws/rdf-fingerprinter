@@ -1,0 +1,114 @@
+stype	p	ootype	propType	scnt	ocnt	cnt	min_sp	max_sp	avg_sp
+reg2015:Procedure	reg2015:applies	epo:SubmissionTerm	object	1	1	1	1	1	1.0
+reg2015:Procedure	rdf:type	reg2015:Procedure	object	1	1	1	1	1	1.0
+epo:AccessTerms	epo:hasProcurementDocumentLandingPage	xsd:string	data	1	1	1	1	1	1.0
+epo:AccessTerms	epo:hasSomeProcurementDocumentRestricted	xsd:string	data	1	1	1	1	1	1.0
+epo:AccessTerms	rdf:type	epo:AccessTerms	object	1	1	1	1	1	1.0
+epo:Address	epo:hasCityName	rdf:langString	data	1	1	1	1	1	1.0
+epo:Address	epo:hasCountryCode	skos:Concept	object	1	1	1	1	1	1.0
+epo:Address	epo:hasCountrySubentityCode	skos:Concept	object	1	1	1	1	1	1.0
+epo:Address	epo:hasPostalZone	xsd:string	data	1	1	1	1	1	1.0
+epo:Address	epo:hasStreetName	rdf:langString	data	1	1	1	1	1	1.0
+epo:Address	rdf:type	epo:Address	object	1	1	1	1	1	1.0
+epo:Buyer	reg2015:providesAdditionalInformationAboutProcurementProcedure	reg2015:Procedure	object	1	1	1	1	1	1.0
+epo:Buyer	reg2015:receivesRequestsToParticipate	reg2015:Procedure	object	1	1	1	1	1	1.0
+epo:Buyer	reg2015:receivesTenders	reg2015:Procedure	object	1	1	1	1	1	1.0
+epo:Buyer	epo:has	epo:ContactPoint	object	1	1	1	1	1	1.0
+epo:Buyer	epo:hasActivityDescription	rdf:langString	data	1	1	1	1	1	1.0
+epo:Buyer	epo:hasBuyerLegalType	skos:Concept	object	1	1	1	1	1	1.0
+epo:Buyer	epo:isResponsibleFor	epo:Procedure	object	1	1	1	1	1	1.0
+epo:Buyer	epo:isRoleOf	epo:Organisation	object	1	1	1	1	1	1.0
+epo:Buyer	rdf:type	epo:Buyer	object	1	1	1	1	1	1.0
+epo:Channel	epo:hasURL	xsd:string	data	1	1	1	1	1	1.0
+epo:Channel	rdf:type	epo:Channel	object	1	1	1	1	1	1.0
+epo:ContactPoint	epo:hasDescription	xsd:string	data	1	1	1	1	1	1.0
+epo:ContactPoint	epo:hasEmail	xsd:string	data	1	1	1	1	1	1.0
+epo:ContactPoint	epo:hasFax	xsd:string	data	1	1	1	1	1	1.0
+epo:ContactPoint	epo:hasInternetAddress	xsd:string	data	1	1	1	1	1	1.0
+epo:ContactPoint	epo:hasTelephone	xsd:string	data	1	1	1	1	1	1.0
+epo:ContactPoint	rdf:type	epo:ContactPoint	object	1	1	1	1	1	1.0
+epo:Location	epo:hasPostalAddress	epo:Address	object	1	1	1	1	1	1.0
+epo:Location	rdf:type	epo:Location	object	1	1	1	1	1	1.0
+epo:Organisation	epo:hasLocation	epo:Location	object	1	1	1	1	1	1.0
+epo:Organisation	epo:hasName	rdf:langString	data	1	1	1	1	1	1.0
+epo:Organisation	rdf:type	epo:Organisation	object	1	1	1	1	1	1.0
+epo:Procedure	epo:applies	epo:AccessTerms	object	1	1	1	1	1	1.0
+epo:Procedure	epo:isResponsiblityOf	epo:Buyer	object	1	1	1	1	1	1.0
+epo:Procedure	rdf:type	epo:Procedure	object	1	1	1	1	1	1.0
+epo:SubmissionTerm	epo:isAppliedBy	reg2015:Procedure	object	1	1	1	1	1	1.0
+epo:SubmissionTerm	rdf:type	epo:SubmissionTerm	object	1	1	1	1	1	1.0
+rdf:List	rdf:type	rdf:List	object	1	1	1	1	1	1.0
+rdf:List	rdfs:comment	xsd:string	data	1	1	1	1	1	1.0
+rdf:List	rdfs:isDefinedBy		data	1	1	1	1	1	1.0
+rdf:List	rdfs:label	xsd:string	data	1	1	1	1	1	1.0
+rdf:Property	rdf:type	rdf:Property	object	66	3	76	1	2	1.263157894736842105263157
+rdf:Property	rdfs:comment	xsd:string	data	66	66	66	1	1	1.0
+rdf:Property	rdfs:domain	rdfs:Class	object	54	11	54	1	1	1.0
+rdf:Property	rdfs:domain	owl:Class	object	2	1	2	1	1	1.0
+rdf:Property	rdfs:isDefinedBy		data	56	3	56	1	1	1.0
+rdf:Property	rdfs:label	xsd:string	data	66	66	66	1	1	1.0
+rdf:Property	rdfs:range	rdfs:Class	object	50	8	50	1	1	1.0
+rdf:Property	rdfs:range	rdfs:Datatype	object	12	2	12	1	1	1.0
+rdf:Property	rdfs:range	owl:Class	object	4	1	4	1	1	1.0
+rdf:Property	rdfs:seeAlso		data	10	10	10	1	1	1.0
+rdf:Property	rdfs:subPropertyOf	rdf:Property	object	1	1	1	1	1	1.0
+rdf:Property	rdfs:subPropertyOf	owl:AnnotationProperty	object	1	1	1	1	1	1.0
+rdfs:Class	rdf:type	rdfs:Class	object	36	1	36	1	1	1.0
+rdfs:Class	rdfs:comment	xsd:string	data	36	36	36	1	1	1.0
+rdfs:Class	rdfs:isDefinedBy		data	36	3	36	1	1	1.0
+rdfs:Class	rdfs:label	xsd:string	data	36	35	36	1	1	1.0
+rdfs:Class	rdfs:subClassOf	rdfs:Class	object	34	7	34	1	1	1.0
+rdfs:Class	rdfs:subClassOf	owl:Class	object	1	1	1	1	1	1.0
+rdfs:Datatype	rdf:type	rdfs:Datatype	object	46	1	46	1	1	1.0
+rdfs:Datatype	rdfs:comment	xsd:string	data	1	1	1	1	1	1.0
+rdfs:Datatype	rdfs:isDefinedBy		data	1	1	1	1	1	1.0
+rdfs:Datatype	rdfs:label	xsd:string	data	46	46	46	1	1	1.0
+rdfs:Datatype	rdfs:subClassOf	rdfs:Class	object	46	2	46	1	1	1.0
+owl:AnnotationProperty	rdf:type	owl:AnnotationProperty	object	9	3	16	1	2	1.875
+owl:AnnotationProperty	rdfs:comment	xsd:string	data	9	9	9	1	1	1.0
+owl:AnnotationProperty	rdfs:domain	rdfs:Class	object	9	2	9	1	1	1.0
+owl:AnnotationProperty	rdfs:isDefinedBy		data	9	2	9	1	1	1.0
+owl:AnnotationProperty	rdfs:label	xsd:string	data	9	9	9	1	1	1.0
+owl:AnnotationProperty	rdfs:range	rdfs:Class	object	7	3	7	1	1	1.0
+owl:AnnotationProperty	rdfs:range	rdfs:Datatype	object	1	1	1	1	1	1.0
+owl:AnnotationProperty	rdfs:subPropertyOf	rdf:Property	object	1	1	1	1	1	1.0
+owl:AnnotationProperty	rdfs:subPropertyOf	owl:AnnotationProperty	object	1	1	1	1	1	1.0
+owl:Class	rdf:type	owl:Class	object	2	1	2	1	1	1.0
+owl:Class	rdfs:comment	xsd:string	data	2	2	2	1	1	1.0
+owl:Class	rdfs:isDefinedBy		data	2	1	2	1	1	1.0
+owl:Class	rdfs:label	xsd:string	data	2	2	2	1	1	1.0
+owl:Class	rdfs:subClassOf	rdfs:Class	object	1	1	1	1	1	1.0
+owl:Class	rdfs:subClassOf	owl:Class	object	1	1	1	1	1	1.0
+owl:DatatypeProperty	rdf:type	owl:DatatypeProperty	object	2	1	2	1	1	1.0
+owl:DatatypeProperty	rdfs:comment	xsd:string	data	2	2	2	1	1	1.0
+owl:DatatypeProperty	rdfs:domain	owl:Class	object	2	1	2	1	1	1.0
+owl:DatatypeProperty	rdfs:isDefinedBy		data	2	1	2	1	1	1.0
+owl:DatatypeProperty	rdfs:label	xsd:string	data	2	2	2	1	1	1.0
+owl:DatatypeProperty	rdfs:range	rdfs:Class	object	2	1	2	1	1	1.0
+owl:ObjectProperty	rdf:type	owl:ObjectProperty	object	2	1	2	1	1	1.0
+owl:ObjectProperty	rdfs:comment	xsd:string	data	2	2	2	1	1	1.0
+owl:ObjectProperty	rdfs:domain	owl:Class	object	2	1	2	1	1	1.0
+owl:ObjectProperty	rdfs:isDefinedBy		data	2	1	2	1	1	1.0
+owl:ObjectProperty	rdfs:label	xsd:string	data	2	2	2	1	1	1.0
+owl:ObjectProperty	rdfs:range	owl:Class	object	2	1	2	1	1	1.0
+owl:Ontology	rdf:type	owl:Ontology	object	1	1	1	1	1	1.0
+owl:Ontology	rdfs:comment	xsd:string	data	1	1	1	1	1	1.0
+owl:Ontology	rdfs:isDefinedBy		data	1	3	3	3	3	3.0
+owl:Ontology	rdfs:seeAlso		data	1	2	2	2	2	2.0
+owl:Ontology	owl:versionIRI	owl:Ontology	object	1	1	1	1	1	1.0
+owl:Ontology	owl:versionInfo	xsd:string	data	1	1	1	1	1	1.0
+owl:OntologyProperty	rdf:type	owl:OntologyProperty	object	5	2	8	1	2	1.75
+owl:OntologyProperty	rdfs:comment	xsd:string	data	5	5	5	1	1	1.0
+owl:OntologyProperty	rdfs:domain	rdfs:Class	object	5	1	5	1	1	1.0
+owl:OntologyProperty	rdfs:isDefinedBy		data	5	1	5	1	1	1.0
+owl:OntologyProperty	rdfs:label	xsd:string	data	5	5	5	1	1	1.0
+owl:OntologyProperty	rdfs:range	rdfs:Class	object	5	1	5	1	1	1.0
+owl:SymmetricProperty	rdf:type	owl:SymmetricProperty	object	6	2	12	2	2	2.0
+owl:SymmetricProperty	rdfs:comment	xsd:string	data	6	6	6	1	1	1.0
+owl:SymmetricProperty	rdfs:domain	rdfs:Class	object	4	4	4	1	1	1.0
+owl:SymmetricProperty	rdfs:domain	owl:Class	object	2	1	2	1	1	1.0
+owl:SymmetricProperty	rdfs:isDefinedBy		data	6	1	6	1	1	1.0
+owl:SymmetricProperty	rdfs:label	xsd:string	data	6	6	6	1	1	1.0
+owl:SymmetricProperty	rdfs:range	rdfs:Class	object	4	4	4	1	1	1.0
+owl:SymmetricProperty	rdfs:range	owl:Class	object	2	1	2	1	1	1.0
+skos:Concept	rdf:type	skos:Concept	object	3	1	3	1	1	1.0

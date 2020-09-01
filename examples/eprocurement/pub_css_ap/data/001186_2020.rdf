@@ -1,0 +1,78 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:dc="http://www.omg.org/spec/UML/20131001/UMLDC"
+    xmlns:epo="http://data.europa.eu/a4g/ontology#"
+    xmlns:reg2015="http://data.europa.eu/a4g/extension/ontology/#"
+    xmlns:base="http://data.europa.eu/a4g/ontology/core"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:dct="http://purl.org/dc/terms/"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:org="http://www.w3.org/ns/org#"
+    xmlns:vann="http://purl.org/vocab/vann/"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <epo:Channel rdf:about="http://data.europa.eu/a4g/ontology#Channele8fe874f-64f0-4a21-b370-6cd1d315ed77">
+    <epo:hasURL>http://www.marches-securises.fr</epo:hasURL>
+  </epo:Channel>
+  <reg2015:Procedure rdf:about="http://data.europa.eu/a4g/extension/ontology/#Procedure224bdd03-4680-4388-b170-be4f129be255">
+    <reg2015:applies>
+      <epo:SubmissionTerm rdf:about="http://data.europa.eu/a4g/ontology#SubmissionTermf4103a2c-370e-4f0b-88b9-7e6b1a90a2e8">
+        <epo:isAppliedBy rdf:resource="http://data.europa.eu/a4g/extension/ontology/#Procedure224bdd03-4680-4388-b170-be4f129be255"/>
+        <epo:hasTenderSubmissionCommunicationMeans>
+          <epo:Channel rdf:about="http://data.europa.eu/a4g/ontology#Channel627650f6-3198-4556-aa44-045209804c8b">
+            <epo:hasURL>http://www.marches-securises.fr</epo:hasURL>
+          </epo:Channel>
+        </epo:hasTenderSubmissionCommunicationMeans>
+      </epo:SubmissionTerm>
+    </reg2015:applies>
+  </reg2015:Procedure>
+  <epo:Buyer rdf:about="http://data.europa.eu/a4g/ontology#Buyer789d4aeb-a9f6-47cf-9950-afb5ba31e35b">
+    <epo:isResponsibleFor>
+      <epo:Procedure rdf:about="http://data.europa.eu/a4g/ontology#Procedure4cf4efaa-2c26-4dcd-a7e9-a88830c35e33">
+        <epo:isResponsiblityOf rdf:resource="http://data.europa.eu/a4g/ontology#Buyer789d4aeb-a9f6-47cf-9950-afb5ba31e35b"/>
+        <epo:applies>
+          <epo:AccessTerms rdf:about="http://data.europa.eu/a4g/ontology#AccessTerms4ce6413b-f952-4a4d-a546-5d28084ba9d3">
+            <epo:hasProcurementDocumentLandingPage>http://www.marches-securises.fr</epo:hasProcurementDocumentLandingPage>
+            <epo:hasSomeProcurementDocumentRestricted>false</epo:hasSomeProcurementDocumentRestricted>
+          </epo:AccessTerms>
+        </epo:applies>
+      </epo:Procedure>
+    </epo:isResponsibleFor>
+    <epo:isRoleOf>
+      <epo:Organisation rdf:about="http://data.europa.eu/a4g/ontology#Organisationf5237859-6a6e-451f-ad64-863368a21401">
+        <epo:hasLocation>
+          <epo:Location rdf:about="http://data.europa.eu/a4g/ontology#Locationcd0148c9-d836-44df-88c2-3ee6a9ab687d">
+            <epo:hasPostalAddress>
+              <epo:Address rdf:about="http://data.europa.eu/a4g/ontology#Addressa9cf0121-7957-42d4-b2c1-d66faf2299ea">
+                <epo:hasCountryCode>
+                  <skos:Concept rdf:about="http://publications.europa.eu/resource/authority/country/FR"/>
+                </epo:hasCountryCode>
+                <epo:hasCountrySubentityCode>
+                  <skos:Concept rdf:about="http://data.europa.eu/nuts/code/FRC21"/>
+                </epo:hasCountrySubentityCode>
+                <epo:hasPostalZone>25000</epo:hasPostalZone>
+                <epo:hasCityName xml:lang="fr">Besançon</epo:hasCityName>
+              </epo:Address>
+            </epo:hasPostalAddress>
+          </epo:Location>
+        </epo:hasLocation>
+        <epo:hasName xml:lang="fr">Grand Besançon Métropole</epo:hasName>
+      </epo:Organisation>
+    </epo:isRoleOf>
+    <epo:has>
+      <epo:ContactPoint rdf:about="http://data.europa.eu/a4g/ontology#ContactPoint847c359d-5c36-4083-b333-3696280e07d3">
+        <epo:hasDescription>Jean-Louis Fousseret</epo:hasDescription>
+        <epo:hasInternetAddress>http://www.marches.grandbesancon.fr</epo:hasInternetAddress>
+        <epo:hasEmail>voirie@grandbesancon.fr</epo:hasEmail>
+      </epo:ContactPoint>
+    </epo:has>
+    <epo:hasMainActivityType>
+      <skos:Concept rdf:about="http://publications.europa.eu/resource/authority/buyer-legal-type/genpub"/>
+    </epo:hasMainActivityType>
+    <epo:hasBuyerLegalType>
+      <skos:Concept rdf:about="http://publications.europa.eu/resource/authority/buyer-legal-type/REGIONAL_AUTHORITY"/>
+    </epo:hasBuyerLegalType>
+    <reg2015:providesAdditionalInformationAboutProcurementProcedure rdf:resource="http://data.europa.eu/a4g/extension/ontology/#Procedure224bdd03-4680-4388-b170-be4f129be255"/>
+  </epo:Buyer>
+</rdf:RDF>

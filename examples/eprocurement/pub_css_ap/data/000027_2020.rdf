@@ -1,0 +1,86 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:dc="http://www.omg.org/spec/UML/20131001/UMLDC"
+    xmlns:epo="http://data.europa.eu/a4g/ontology#"
+    xmlns:reg2015="http://data.europa.eu/a4g/extension/ontology/#"
+    xmlns:base="http://data.europa.eu/a4g/ontology/core"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:dct="http://purl.org/dc/terms/"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:cc="http://creativecommons.org/ns#"
+    xmlns:org="http://www.w3.org/ns/org#"
+    xmlns:vann="http://purl.org/vocab/vann/"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/">
+  <epo:CentralPurchasingBody rdf:about="http://data.europa.eu/a4g/ontology#CentralPurchasingBody9ec3e588-6820-4cc8-aa51-08aae2887583">
+    <epo:hasCentralPurchasingBodyType>
+      <skos:Concept rdf:about="http://data.europa.eu/a4g/ontology#Cpbawa"/>
+    </epo:hasCentralPurchasingBodyType>
+    <reg2015:isInvolvedIn>
+      <reg2015:Procedure rdf:about="http://data.europa.eu/a4g/extension/ontology/#Procedureffe57b4b-32bd-4d76-8586-7377a0da53b2">
+        <reg2015:applies>
+          <epo:SubmissionTerm rdf:about="http://data.europa.eu/a4g/ontology#SubmissionTerm0ea816ca-b38c-44ef-bdff-a4ee965006cd">
+            <epo:isAppliedBy rdf:resource="http://data.europa.eu/a4g/extension/ontology/#Procedureffe57b4b-32bd-4d76-8586-7377a0da53b2"/>
+            <epo:hasTenderSubmissionCommunicationMeans>
+              <epo:Channel rdf:about="http://data.europa.eu/a4g/ontology#Channel3980d9ce-4582-466b-a81d-3f7462848d83">
+                <epo:hasURL>https://www.evergabe-online.de/tenderdetails.html?id=300468</epo:hasURL>
+              </epo:Channel>
+            </epo:hasTenderSubmissionCommunicationMeans>
+          </epo:SubmissionTerm>
+        </reg2015:applies>
+      </reg2015:Procedure>
+    </reg2015:isInvolvedIn>
+  </epo:CentralPurchasingBody>
+  <epo:Buyer rdf:about="http://data.europa.eu/a4g/ontology#Buyer3fe6cd7c-d375-4483-beea-3409ae35eba7">
+    <epo:has>
+      <epo:ContactPoint rdf:about="http://data.europa.eu/a4g/ontology#ContactPoint3c3f8999-b82a-45b1-a849-62208b10f1e0">
+        <epo:hasTelephone>+49 391-5810</epo:hasTelephone>
+        <epo:hasInternetAddress>https://lhw.sachsen-anhalt.de/</epo:hasInternetAddress>
+        <epo:hasEmail>vergabestelle.nord@lhw.mlu.sachsen-anhalt.de</epo:hasEmail>
+        <epo:hasDescription>Vergabestelle Nord</epo:hasDescription>
+        <epo:hasFax>+49 391-5811226</epo:hasFax>
+      </epo:ContactPoint>
+    </epo:has>
+    <epo:isResponsibleFor>
+      <epo:Procedure rdf:about="http://data.europa.eu/a4g/ontology#Procedure4d1f5a9d-c34c-499b-a64b-0010ba4ab67b">
+        <epo:isResponsiblityOf rdf:resource="http://data.europa.eu/a4g/ontology#Buyer3fe6cd7c-d375-4483-beea-3409ae35eba7"/>
+        <epo:applies>
+          <epo:AccessTerm rdf:about="http://data.europa.eu/a4g/ontology#AccessTermed788c59-4bd4-4b96-a0ac-e07fc22100f3">
+            <epo:hasRestrictedAccessAddress>
+              <epo:Channel rdf:about="http://data.europa.eu/a4g/ontology#Channele915f6fd-67b7-4b73-b560-9d96e67d7b1a">
+                <epo:hasURL>https://www.evergabe-online.de/tenderdetails.html?id=300468</epo:hasURL>
+              </epo:Channel>
+            </epo:hasRestrictedAccessAddress>
+            <epo:hasSomeProcurementDocumentRestricted>true</epo:hasSomeProcurementDocumentRestricted>
+          </epo:AccessTerm>
+        </epo:applies>
+      </epo:Procedure>
+    </epo:isResponsibleFor>
+    <reg2015:providesAdditionalInformationAboutProcurementProcedure rdf:resource="http://data.europa.eu/a4g/extension/ontology/#Procedureffe57b4b-32bd-4d76-8586-7377a0da53b2"/>
+    <epo:isRoleOf>
+      <epo:Organisation rdf:about="http://data.europa.eu/a4g/ontology#Organisationb110a232-7879-4e73-9fc3-c09beb8634e5">
+        <epo:hasLocation>
+          <epo:Location rdf:about="http://data.europa.eu/a4g/ontology#Location926e3c82-098f-4e73-b7e4-9044ec3e70e1">
+            <epo:hasPostalAddress>
+              <epo:Address rdf:about="http://data.europa.eu/a4g/ontology#Address6845730e-c582-4189-b58e-dd6e2c6d7784">
+                <epo:hasCountryCode>
+                  <skos:Concept rdf:about="http://publications.europa.eu/resource/authority/country/DE"/>
+                </epo:hasCountryCode>
+                <epo:hasCountrySubentityCode>
+                  <skos:Concept rdf:about="http://data.europa.eu/nuts/code/DEE03"/>
+                </epo:hasCountrySubentityCode>
+                <epo:hasStreetName xml:lang="de">Otto-von-Guericke-Straße 5</epo:hasStreetName>
+                <epo:hasPostalZone>39104</epo:hasPostalZone>
+                <epo:hasCityName xml:lang="de">Magdeburg</epo:hasCityName>
+              </epo:Address>
+            </epo:hasPostalAddress>
+          </epo:Location>
+        </epo:hasLocation>
+        <epo:hasName xml:lang="de">Landesbetrieb für Hochwasserschutz und Wasserwirtschaft
+                        Sachsen-Anhalt</epo:hasName>
+      </epo:Organisation>
+    </epo:isRoleOf>
+    <epo:hasActivityDescription xml:lang="de">Hochwasserschutz und Wasserwirtschaft</epo:hasActivityDescription>
+    <epo:hasBuyerLegalTypeDescription xml:lang="de">Landesbetrieb</epo:hasBuyerLegalTypeDescription>
+  </epo:Buyer>
+</rdf:RDF>

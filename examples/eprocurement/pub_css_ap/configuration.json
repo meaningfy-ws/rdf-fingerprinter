@@ -1,0 +1,13 @@
+{
+    "title": "Dataset Fingerprint Report",
+    "type": "report",
+    "author": "Eugeniu Costetchi",
+    "ns_file": "data/prefix.csv",
+    "output" : "temp",
+    "alpha": {
+      "file": "data/001003_2020.csv",
+      "title": "ePO sample data 001003_2020",
+      "description": "eProcurement sample RDF data generated from the XML notices"
+    }
+
+}
