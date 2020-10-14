@@ -1,11 +1,11 @@
 # Q1: what propertyies are used on instances of a given class; and what patterns are used
 # Q2: what is the type of the objects used (datatype or object) for instances of a given class
 # Q3: what is the range of property used (in terms of datatypes or class types the property values instantiate) for instances of a given class
-# Q4: what is the tottal number of occurences for this propoerty among instancess of a given class
-# Q5: what distinct object values are use among all occurences of a property used by instances of a given class
+# Q4: what is the total number of occurrences for this property among instances of a given class
+# Q5: what distinct object values are used among all occurrences of a property used by instances of a given class
 # Q6: how many minimal occurences are found for instances of a given class
 # Q7: how many maximal occurences are found for instances of a given class
-# Q8: what is teh average number of occurences for a property used by instances of a given class
+# Q8: what is the average number of occurrences for a property used by instances of a given class
 
 SELECT DISTINCT (?p as ?property)
     # if there are multiple ranges, merge them in a comma separated list
@@ -50,4 +50,3 @@ WHERE {
 }
 GROUP BY ?ts ?p ?total_distinct_s # ?tto ?tp
 ORDER BY ?subject_type desc(?property_type) desc(?count) ?property ?object_type
-
