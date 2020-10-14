@@ -20,7 +20,7 @@ where
   {
     select distinct ?s ?p (count(*)as ?sp_star)
               {
-                ?s ?p [] .
+                ?s ?p [].
               } group by ?s ?p
   }
   bind( if(?p=rdf:type, ?stype, if(bound(?otype),?otype, datatype(?o) )) as ?ootype )
