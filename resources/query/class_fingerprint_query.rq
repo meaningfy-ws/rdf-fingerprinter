@@ -1,0 +1,53 @@
+# Q1: what propertyies are used on instances of a given class; and what patterns are used
+# Q2: what is the type of the objects used (datatype or object) for instances of a given class
+# Q3: what is the range of property used (in terms of datatypes or class types the property values instantiate) for instances of a given class
+# Q4: what is the tottal number of occurences for this propoerty among instancess of a given class
+# Q5: what distinct object values are use among all occurences of a property used by instances of a given class
+# Q6: how many minimal occurences are found for instances of a given class
+# Q7: how many maximal occurences are found for instances of a given class
+# Q8: what is teh average number of occurences for a property used by instances of a given class
+
+SELECT DISTINCT (?p as ?property)
+    # if there are multiple ranges, merge them in a comma separated list
+    (GROUP_CONCAT(distinct ?tto; separator=", ") as ?object_type)
+    # if there are multiple property types, merge them in a comma separated list
+    (GROUP_CONCAT(distinct ?tp; separator=", ") as ?property_type)
+    (count(distinct ?s) as ?subject_cnt)
+    (count(distinct ?o) as ?object_cnt)
+    (count(*) as ?pattern_cnt)
+    # if '?s ?p' is not used it is not counted; therefore
+    # min needs to be externally checked
+    (if(?subject_cnt < ?total_distinct_s, 0, min(?sp_star)) as ?min)
+    # max is fine coz it is taken from among the occurences
+    (max(?sp_star) as ?max)
+    # the average too, but it needs to be normalised to the real subject max
+    (avg(?sp_star) * ?subject_cnt/?total_distinct_s as ?avg)
+WHERE {
+    values ?ts { <http://www.w3.org/2004/02/skos/core#Concept>}
+    ?s a ?ts .
+    ?s ?p ?o .
+    OPTIONAL { ?o a ?to . }
+    BIND(datatype(?o) as ?dto)
+    BIND(IF(BOUND(?to),?to, IF (bound(?dto), ?dto, <http://www.w3.org/2000/01/rdf-schema#Resource>) ) as ?tto)
+    BIND(IF(isURI(?o),'object' , 'data') as ?tp)
+    {
+        # this counts occurences of subjects for each property
+        select ?s ?p (count(*) as ?sp_star)
+        {
+            ?s ?p [] .
+        }
+        group by ?s ?p
+    }
+    {
+        # this is an auxiliary query that gives the total number of distinct subjects
+        # this could be optimised, by moving somewhere else or employed as an external UNION
+        select ?ts (count(distinct ?i) as ?total_distinct_s)
+        {
+            ?i a ?ts
+        }
+        group by ?ts
+    }
+}
+GROUP BY ?ts ?p ?total_distinct_s # ?tto ?tp
+ORDER BY ?subject_type desc(?property_type) desc(?count) ?property ?object_type
+
