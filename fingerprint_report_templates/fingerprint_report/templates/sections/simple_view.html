@@ -1,0 +1,58 @@
+{% import "macros.html" as mc %}
+
+<h2 class="ui header">Validation issues</h2>
+<section class="ui basic segment">
+    <p>The table below lists the <strong>validation errors</strong>
+    </p>
+    {% set select_query =
+    "
+prefix dash: <http://datashapes.org/dash#>
+prefix sh: <http://www.w3.org/ns/shacl#>
+prefix message: <http://www.w3.org/ns/shacl#message>
+ SELECT ?focusNode ?message ?resultPath ?resultSeverity ?sourceConstraintComponent ?sourceShape ?value #?sourceConstraint
+WHERE
+{
+ 	?vr a sh:ValidationResult .
+ 	?vr sh:focusNode ?focusNode .
+ 	OPTIONAL {
+ 		?vr sh:message ?message .
+ 	}
+ 	OPTIONAL {
+ 		?vr sh:resultPath ?resultPath .
+ 	}
+ 	OPTIONAL {
+ 		?vr sh:resultSeverity ?resultSeverity .
+ 	}
+ 	OPTIONAL {
+ 		?vr sh:sourceConstraint ?sourceConstraint .
+ 	}
+ 	OPTIONAL {
+ 		?vr sh:sourceConstraintComponent ?sourceConstraintComponent .
+ 	}
+ 	OPTIONAL {
+ 		?vr sh:sourceShape ?sourceShape .
+ 	}
+ 	OPTIONAL {
+ 		?vr sh:value ?value.
+ 	}
+ }
+ ORDER BY ?focusNode ?resultSeverity
+" %}
+    {% set content, error = from_rdf_file(conf.report_data_file).with_query(select_query).fetch_tabular() %}
+
+    {% call mc.render_fetch_results(content, error) %}
+{#        {% set substituted_content = replace_strings_in_tabular(content,#}
+{#                                    target_columns=['focusNode','resultPath','sourceShape', 'resultSeverity',#}
+{#                                    'sourceConstraintComponent','value', 'message'],#}
+{#                                    value_mapping_dict=inverted_prefixes,#}
+{#                                    mark_touched_rows=False ) %}#}
+        {# TODO: need a function that adds a relative count column, so that we can see the percentage of classes #}
+        {# {{ content["percentage"] = content["instances"]  / content["instances"].sum() }}#}
+        {{ mc.pandas_table(content, "") }}
+    {% endcall %}
+
+
+    {# TODO: class instiatiation overlaps and # shared instances   #}
+    {# TODO: need for an agregation function over selected columns in a dataframe #}
+
+</section>

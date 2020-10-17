@@ -1,0 +1,11 @@
+{
+    "template": "main.html",
+    "conf":
+    {
+        "title": "Structural fingerprint",
+        "type": "report",
+        "author": "Meaningfy",
+        "ns_file": "data/prefix.csv",
+        "report_data_file": "../../tests/test_data/treaties-source-ap.rdf"
+    }
+}
