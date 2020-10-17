@@ -1,0 +1,62 @@
+{% import "macros.html" as mc %}
+
+{# expecting the class URI to be available in the context #}
+
+{# class shape #}
+{% set labels = {"property": "Property name",
+"object_type": "Object class",
+"property_type": "Property type",
+"subject_cnt": "Distinct Subjects",
+"object_cnt": "Distinct Objects",
+"pattern_cnt": "Occurences",
+"min": "Min",
+"max": "Max",
+"avg": "Avg",} %}
+
+
+
+{% set select_query =
+    "SELECT DISTINCT (?p as ?property)
+    (GROUP_CONCAT(distinct ?tto; separator=', ') as ?object_type)
+    (GROUP_CONCAT(distinct ?tp; separator=', ') as ?property_type)
+    (count(distinct ?s) as ?subject_cnt)
+    (count(distinct ?o) as ?object_cnt)
+    (count(*) as ?pattern_cnt)
+    (if(?subject_cnt < ?total_distinct_s, 0, min(?sp_star)) as ?min)
+    (max(?sp_star) as ?max)
+    (avg(?sp_star) * ?subject_cnt/?total_distinct_s as ?avg)
+WHERE {
+    values ?ts {<"~class+">}
+    ?s a ?ts .
+    ?s ?p ?o .
+    OPTIONAL { ?o a ?to . }
+    BIND(datatype(?o) as ?dto)
+    BIND(IF(BOUND(?to),?to, IF (bound(?dto), ?dto, <http://www.w3.org/2000/01/rdf-schema#Resource>) ) as ?tto)
+    BIND(IF(isURI(?o),'object' , 'data') as ?tp)
+    {
+        select ?s ?p (count(*) as ?sp_star)
+        {
+            ?s ?p [] .
+        }
+        group by ?s ?p
+    }
+    {
+        select ?ts (count(distinct ?i) as ?total_distinct_s)
+        {
+            ?i a ?ts
+        }
+        group by ?ts
+    }
+}
+GROUP BY ?ts ?p ?total_distinct_s
+ORDER BY ?subject_type desc(?property_type) desc(?count) ?property ?object_type
+" %}
+
+{% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+{% call mc.render_fetch_results(content, error) %}
+    {% set substituted_content = replace_strings_in_tabular(content,
+                                    target_columns=['property','object_type','property_type'],
+                                    value_mapping_dict=inverted_prefixes,
+                                    mark_touched_rows=False ) %}
+    {{ mc.pandas_table(content, "Shape of "~class~" class", column_labels=labels) }}
+{% endcall %}

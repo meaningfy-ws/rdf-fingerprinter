@@ -3,35 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-
+    <meta name="description" content="">
+    <meta name="mobile-web-app-capable" content="yes">
 
     <title> {{ conf.title }} </title>
 
-    <meta name="description" content="">
-    <meta name=viewport content="width=device-width, initial-scale=1">
-    <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- build:css styles/vendor.css -->
-    <!-- bower:css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
-    <!-- endbower -->
-    <!-- endbuild -->
-    <link href='//fonts.googleapis.com/css?family=Open+Sans:400,700,300&subset=latin,vietnamese' rel='stylesheet'
-          type='text/css'>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/stylesheets/jquery.tocify.min.css"
-          rel="stylesheet"
-          type="text/css">
-    {#    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"#}
-    {#          rel="stylesheet"#}
-    {#          type="text/css">#}
 
-    {#    <link href="https://code.jquery.com/ui/1.11.4/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css">#}
+    {#    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/stylesheets/jquery.tocify.min.css"#}
+    {#          rel="stylesheet" type="text/css">#}
+    {#    <link href="https://cdn.datatables.net/1.10.22/css/dataTables.jqueryui.min.css" rel="stylesheet" type="text/css">#}
+    <link href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css">
 
-    <link href="//cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css">
 
-    <!-- build:css styles/main.css -->
-    {#    <link rel="stylesheet" href="main.css">#}
-    <!-- endbuild -->
 </head>
 
 <body>
@@ -64,39 +49,30 @@
     </div>
 </footer>
 
-<!-- build:js scripts/vendor.js -->
-<!-- bower:js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
-<!-- endbower -->
-<!-- endbuild -->
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-{#<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>#}
-{#<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>#}
 
-{#<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>#}
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
 
-<script src="//cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
-
-
-<script>
+<script type="text/javascript">
     $(document).ready(function () {
-        $('.table').DataTable();
+        $('table.display').DataTable();
+
+        $(function () {
+            $("#toc").tocify({
+                selectors: "h1,h2",
+                theme: "jqueryui",
+                hashGenerator: "pretty",
+                ignoreSelector: "#skip-toc",
+                highlightOnScroll: "true",
+                highlightDefault: "true"
+            });
+        });
     });
 </script>
-
-
-{#<script>#}
-{#    $(function () {#}
-{#        $("#toc").tocify({#}
-{#            selectors: "h1,h2",#}
-{#            theme: "jqueryui",#}
-{#            hashGenerator: "pretty",#}
-{#            ignoreSelector: "#skip-toc",#}
-{#            highlightOnScroll: "true",#}
-{#            highlightDefault: "true"#}
-{#        });#}
-{#    });#}
-{#</script>#}
 </body>
 </html>
+

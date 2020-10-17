@@ -1,0 +1,22 @@
+{% import "macros.html" as mc %}
+
+<h1 class="ui header">Class instantiation shapes</h1>
+<section class="ui basic segment">
+    <p>This section provides an account of the data shape profiles for each class. Each profile is inductively
+        constructed from descriptive statistics. </p>
+
+    {% set select_query =
+    "SELECT DISTINCT ?classes
+    WHERE
+    {[] a ?classes}" %}
+    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% call mc.render_fetch_results(content, error) %}
+        {% for class in content['classes'] %}
+            {% include "sections/single_class_profile.html" with context %}
+        {% else %}
+            {{ mc.render_error("Did not select any class and some were expected") }}
+        {% endfor %}
+    {% endcall %}
+
+
+</section>
