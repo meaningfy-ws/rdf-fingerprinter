@@ -10,7 +10,6 @@ import json
 import shutil
 from pathlib import Path
 
-import fingerprint
 from fingerprint.service_layer.handlers import generate_report_builder_config, generate_endpoint_fingerprint_report
 
 try:
@@ -21,10 +20,10 @@ except ImportError:
 import fingerprint_report_templates
 
 TEST_ENDPOINT = "http://localhost:3030/dev/query"
-OUTPUT_LOCATION = "./temp"
+OUTPUT_LOCATION = "./output"
 
 
-def test_Accessing_templates():
+def test_accessing_templates():
     with pkg_resources.path(fingerprint_report_templates, "fingerprint_report") as resource_path:
         assert "fingerprint_report" in str(resource_path)
 
