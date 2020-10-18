@@ -137,6 +137,4 @@ junit_report.xml
 *.ldb
 /fuseki-fingerprinter-volume/fuseki/
 /output/
-/tests/unit/output/output/
-/tests/unit/output/templates/
 /tests/unit/output/
