@@ -19,7 +19,7 @@ except ImportError:
 
 import fingerprint_report_templates
 
-TEST_ENDPOINT = "http://localhost:3030/dev/query"
+TEST_ENDPOINT = "http://localhost:3020/dev/query"
 OUTPUT_LOCATION = "./output"
 
 
@@ -50,6 +50,7 @@ def test_generate_endpoint_fingerprint_report():
     """
     output_location = Path(OUTPUT_LOCATION)
     shutil.rmtree(output_location, ignore_errors=True)
+    output_location.mkdir(parents=True, exist_ok=True)
     output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url=TEST_ENDPOINT,
                                                        output_location=OUTPUT_LOCATION)
-    print("x" * 50, output_file)
+    assert output_file.exists()

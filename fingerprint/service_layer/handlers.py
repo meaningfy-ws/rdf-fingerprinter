@@ -33,31 +33,18 @@ def generate_endpoint_fingerprint_report(sparql_endpoint_url: str, output_locati
     :param graph: a valid URI
     :param sparql_endpoint_url:
     :param output_location:
-    :return:
+    :return: path to the main report document
     """
-    temp_dir = Path(output_location)
-    temp_dir.mkdir(parents=True, exist_ok=True)
+    location = Path(output_location)
+    if not location.exists() or not location.is_dir():
+        raise NotADirectoryError("The output location must be a folder")
+
     with pkg_resources.path(fingerprint_report_templates, "fingerprint_report") as template_location:
-        copytree(template_location, temp_dir, dirs_exist_ok=True)
-    config_content = generate_report_builder_config(sparql_endpoint_url, graph)
-    with open(Path(temp_dir) / 'config.json', 'w') as config_file:
-        config_file.write(json.dumps(config_content))
-    report_builder = ReportBuilder(target_path=temp_dir)
-    report_builder.make_document()
-
-    return Path(str(temp_dir)) / 'output' / str(config_content["template"])
-
-
-# with tempfile.TemporaryDirectory() as temp_dir:
-#     template_location = Path(__file__).parents[3] / 'resources/eds_templates/diff_report'
-#     copytree(template_location, temp_dir, dirs_exist_ok=True)
-#
-#     with open(Path(temp_dir) / 'config.json', 'w') as config_file:
-#         config_content = generate_report_builder_config(dataset)
-#         config_file.write(dumps(config_content))
-#
-#     report_builder = ReportBuilder(target_path=temp_dir)
-#     report_builder.make_document()
+        updated_config_content = generate_report_builder_config(sparql_endpoint_url, graph)
+        report_builder = ReportBuilder(target_path=template_location, additional_config=updated_config_content,
+                                       output_path=location)
+        report_builder.make_document()
+        return location / updated_config_content["template"]
 
 
 def generate_report_builder_config(sparql_endpoint_url, graph=""):
