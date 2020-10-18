@@ -20,6 +20,11 @@ jobs:
     - name: Check out
       uses: actions/checkout@v2
 
+    - name: Set up Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+
     - name: Install dependencies
       run: |
         make install
