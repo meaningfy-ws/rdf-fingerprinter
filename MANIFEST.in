@@ -1,0 +1,3 @@
+recursive-include fingerprint_report_templates/ *
+graft fingerprint_report_templates
+global-exclude *.pyc *$py.class

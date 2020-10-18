@@ -64,3 +64,11 @@ publish-pipy:
 	@ twine check dist/*
 	@ echo "$(BUILD_PRINT)Uploading the distribution"
 	@ twine upload --skip-existing dist/*
+
+publish-pipy:
+	@ echo "$(BUILD_PRINT)Creating the source distribution"
+	@ python3 setup.py sdist bdist_wheel
+	@ echo "$(BUILD_PRINT)Checking the distribution"
+	@ twine check dist/*
+	@ echo "$(BUILD_PRINT)Uploading the distribution"
+	@ twine upload --skip-existing dist/*

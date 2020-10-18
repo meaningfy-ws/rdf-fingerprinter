@@ -1,15 +1,11 @@
-# This is a basic workflow to help you get started with Actions
+name: publish
 
-name: test
-
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
 on:
-  push:
-    branches: [ master, feature/* ]
+  release:
+    types: [published]
 
 jobs:
-  main:
+  MAIN:
     name: main
     runs-on: ${{ matrix.os }}
     strategy:
@@ -20,20 +16,29 @@ jobs:
     - name: Check out
       uses: actions/checkout@v2
 
+    - name: Set up Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+
     - name: Install dependencies
       run: |
-        make install-dev
+        make install
 
-    - name: Test with pytest
-      run: |
-        make test
+    - name: Run tests
+      run: make test
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: coverage.xml
-        flags: unittests
         env_vars: OS,PYTHON
         name: codecov-umbrella
         fail_ci_if_error: true
+
+    - name: Publish on PiPy
+      env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PIPY_USER_TOKEN }}
+      run: make publish-pipy
