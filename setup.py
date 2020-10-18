@@ -67,8 +67,7 @@ setup(
         "Natural Language :: English",
     ],
     python_requires='>=3.7',
-    # entry_points="""
-    #     [console_scripts]
-    #     fingerprint=fingerprint.triple_profiler:make_project
-    # """
+    entry_points={
+        "console_scripts": ["fingerprint=fingerprint.entrypoints.cli.main:fingerprint_endpoint"]
+    }
 )

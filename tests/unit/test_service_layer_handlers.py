@@ -10,7 +10,6 @@ import json
 import shutil
 from pathlib import Path
 
-import fingerprint
 from fingerprint.service_layer.handlers import generate_report_builder_config, generate_endpoint_fingerprint_report
 
 try:
@@ -20,11 +19,11 @@ except ImportError:
 
 import fingerprint_report_templates
 
-TEST_ENDPOINT = "http://localhost:3030/dev/query"
-OUTPUT_LOCATION = "./temp"
+TEST_ENDPOINT = "http://localhost:3020/dev/query"
+OUTPUT_LOCATION = "./output"
 
 
-def test_Accessing_templates():
+def test_accessing_templates():
     with pkg_resources.path(fingerprint_report_templates, "fingerprint_report") as resource_path:
         assert "fingerprint_report" in str(resource_path)
 
@@ -51,6 +50,7 @@ def test_generate_endpoint_fingerprint_report():
     """
     output_location = Path(OUTPUT_LOCATION)
     shutil.rmtree(output_location, ignore_errors=True)
+    output_location.mkdir(parents=True, exist_ok=True)
     output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url=TEST_ENDPOINT,
                                                        output_location=OUTPUT_LOCATION)
-    print("x" * 50, output_file)
+    assert output_file.exists()
