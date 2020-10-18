@@ -130,6 +130,7 @@ dmypy.json
 .idea/
 data-dev/
 build/
+temp/
 
 # projest related
 cucumber_report.json

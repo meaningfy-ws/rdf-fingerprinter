@@ -1,0 +1,11 @@
+{
+  "template": "main.html",
+  "conf": {
+    "title": "Structural fingerprint",
+    "type": "report",
+    "author": "Meaningfy",
+    "ns_file": "data/prefix.csv",
+    "default_endpoint": "http://localhost:3030/dataset",
+    "default_graph": ""
+  }
+}

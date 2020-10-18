@@ -69,21 +69,19 @@ fuseki-create-test-dbs:
 	@ echo "$(BUILD_PRINT)Building dummy "dev" dataset at http://localhost:$(if $(FUSEKI_PORT),$(FUSEKI_PORT),unknown port)/$$/datasets"
 	@ sleep 2
 	@ curl --anyauth --user 'admin:admin' -d 'dbType=mem&dbName=dev'  'http://localhost:$(FUSEKI_PORT)/$$/datasets'
+	@ curl -X POST -H content-type:application/rdf+xml -T ./tests/test_data/treaties-source-ap.rdf -G http://localhost:3030/dev/data
 
 #fuseki-upload:
 #	@ curl -X POST --anyauth --user 'admin:admin' -d 'Content-Type:text/turtle;charset=utf-8' -T ./resources/samples/rdf/continents-source-ap.rdf  http://localhost:3030/dev/upload
 
-
-clean-data:
-	@ echo "$(BUILD_PRINT)Deleting the $(DATA_FOLDER)"
-	@ sudo rm -rf $(DATA_FOLDER)
-
-start-service: start-fuseki fuseki-create-test-dbs
-
-stop-service: stop-fuseki clean-data
-
+#clean-data:
+#	@ echo "$(BUILD_PRINT)Deleting the $(DATA_FOLDER)"
+#	@ sudo rm -rf $(DATA_FOLDER)
+#start-service: start-fuseki fuseki-create-test-dbs
+#
+#stop-service: stop-fuseki clean-data
 
 #-----------------------------------------------------------------------------
 # Default
 #-----------------------------------------------------------------------------
-all: install test
+#all: install test
