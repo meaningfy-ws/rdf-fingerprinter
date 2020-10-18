@@ -102,7 +102,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -136,3 +135,4 @@ temp/
 cucumber_report.json
 junit_report.xml
 *.ldb
+/fuseki-fingerprinter-volume/fuseki/

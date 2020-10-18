@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  fuseki:
+    container_name: fuseki-fingerprinter
+    image: meaningfy/fuseki:latest
+    env_file:
+      - .env
+    environment:
+      - ADMIN_PASSWORD=${RDF_FINGERPRINTER_FUSEKI_ADMIN_PASSWORD}
+      - JVM_ARGS=${RDF_FINGERPRINTER_FUSEKI_JVM_ARGS}
+    ports:
+      - ${RDF_FINGERPRINTER_FUSEKI_PORT}:3030
+    volumes:
+      - ${PWD}/${RDF_FINGERPRINTER_FUSEKI_DATA_FOLDER}/fuseki:/fuseki
+    networks:
+      - mydefault
+
+networks:
+  mydefault:
+    name: globalnet
