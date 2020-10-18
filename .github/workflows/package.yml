@@ -1,0 +1,44 @@
+name: publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  MAIN:
+    name: main
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+
+    steps:
+    - name: Check out
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.8
+
+    - name: Install dependencies
+      run: |
+        make install
+
+    - name: Run tests
+      run: make test
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: coverage.xml
+        env_vars: OS,PYTHON
+        name: codecov-umbrella
+        fail_ci_if_error: true
+
+    - name: Publish on PiPy
+      env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PIPY_USER_TOKEN }}
+      run: make publish-pipy

@@ -1,6 +1,4 @@
-.PHONY: test install lint generate-tests-from-features
-
-include .env-dev
+include docker/.env
 
 BUILD_PRINT = \e[1;34mSTEP: \e[0m
 
@@ -14,13 +12,28 @@ install:
 	@ pip install -r requirements.txt
 	@ pip install -r requirements-dev.txt
 
-lint:
-	@ echo "$(BUILD_PRINT)Linting the code"
-	@ flake8 || true
-
 test:
 	@ echo "$(BUILD_PRINT)Running the tests"
 	@ pytest
+
+#-----------------------------------------------------------------------------
+# Fuseki related commands
+#-----------------------------------------------------------------------------
+
+start-fuseki:
+	@ echo "$(BUILD_PRINT)Starting Fuseki on port $(if $(RDF_FINGERPRINTER_FUSEKI_PORT),$(RDF_FINGERPRINTER_FUSEKI_PORT),'default port')"
+	@ docker-compose --file docker/docker-compose.yml --env-file docker/.env up -d fuseki
+
+stop-fuseki:
+	@ echo "$(BUILD_PRINT)Stopping Fuseki"
+	@ docker-compose --file docker/docker-compose.yml --env-file docker/.env down
+
+fuseki-create-test-dbs:
+	@ echo "$(BUILD_PRINT)Building dummy 'dev' dataset at http://localhost:$(if $(RDF_FINGERPRINTER_FUSEKI_PORT),$(RDF_FINGERPRINTER_FUSEKI_PORT),unknown port)/$$/datasets"
+	@ sleep 2
+	@ curl --anyauth --user 'admin:$(RDF_FINGERPRINTER_FUSEKI_ADMIN_PASSWORD)' -d 'dbType=mem&dbName=dev'  'http://localhost:$(RDF_FINGERPRINTER_FUSEKI_PORT)/$$/datasets'
+	@ curl -X POST -H content-type:application/rdf+xml -T ./tests/test_data/treaties-source-ap.rdf -G http://localhost:$(RDF_FINGERPRINTER_FUSEKI_PORT)/dev/data
+
 
 #-----------------------------------------------------------------------------
 # Gherkin feature and acceptance tests generation commands
@@ -52,36 +65,10 @@ publish-pipy:
 	@ echo "$(BUILD_PRINT)Uploading the distribution"
 	@ twine upload --skip-existing dist/*
 
-
-#-----------------------------------------------------------------------------
-# Fuseki related commands
-#-----------------------------------------------------------------------------
-
-start-fuseki:
-	@ echo "$(BUILD_PRINT)Starting Fuseki on port $(if $(FUSEKI_PORT),$(FUSEKI_PORT),'default port')"
-	@ docker-compose --file docker-compose.yml --env-file .env-dev up -d fuseki
-
-stop-fuseki:
-	@ echo "$(BUILD_PRINT)Stopping Fuseki"
-	@ docker-compose --file docker-compose.yml --env-file .env-dev down
-
-fuseki-create-test-dbs:
-	@ echo "$(BUILD_PRINT)Building dummy "dev" dataset at http://localhost:$(if $(FUSEKI_PORT),$(FUSEKI_PORT),unknown port)/$$/datasets"
-	@ sleep 2
-	@ curl --anyauth --user 'admin:admin' -d 'dbType=mem&dbName=dev'  'http://localhost:$(FUSEKI_PORT)/$$/datasets'
-	@ curl -X POST -H content-type:application/rdf+xml -T ./tests/test_data/treaties-source-ap.rdf -G http://localhost:3030/dev/data
-
-#fuseki-upload:
-#	@ curl -X POST --anyauth --user 'admin:admin' -d 'Content-Type:text/turtle;charset=utf-8' -T ./resources/samples/rdf/continents-source-ap.rdf  http://localhost:3030/dev/upload
-
-#clean-data:
-#	@ echo "$(BUILD_PRINT)Deleting the $(DATA_FOLDER)"
-#	@ sudo rm -rf $(DATA_FOLDER)
-#start-service: start-fuseki fuseki-create-test-dbs
-#
-#stop-service: stop-fuseki clean-data
-
-#-----------------------------------------------------------------------------
-# Default
-#-----------------------------------------------------------------------------
-#all: install test
+publish-pipy:
+	@ echo "$(BUILD_PRINT)Creating the source distribution"
+	@ python3 setup.py sdist bdist_wheel
+	@ echo "$(BUILD_PRINT)Checking the distribution"
+	@ twine check dist/*
+	@ echo "$(BUILD_PRINT)Uploading the distribution"
+	@ twine upload --skip-existing dist/*
