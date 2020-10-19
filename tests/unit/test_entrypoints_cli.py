@@ -16,6 +16,7 @@ TEST_ENDPOINT = "http://localhost:3030/dev/query"
 
 def test_fingerprint_endpoint():
     runner = CliRunner()
+    Path("./output").mkdir(parents=True,exist_ok=True)
     result = runner.invoke(fingerprint_endpoint, ['-e', TEST_ENDPOINT])
     assert result.exit_code == 0
     assert Path("./output").exists()
