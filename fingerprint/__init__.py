@@ -9,7 +9,7 @@ import logging
 
 __docformat__ = "restructuredtext en"
 
-__version__ = "0.2.1-alpha.1"
+__version__ = "0.2.2-alpha"
 __date__ = "2020-10-20"
 
 # hard coding the log level and format
