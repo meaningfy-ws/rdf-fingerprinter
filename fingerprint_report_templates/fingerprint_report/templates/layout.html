@@ -9,70 +9,126 @@
     <title> {{ conf.title }} </title>
 
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css">
-
-    {#    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/stylesheets/jquery.tocify.min.css"#}
-    {#          rel="stylesheet" type="text/css">#}
-    {#    <link href="https://cdn.datatables.net/1.10.22/css/dataTables.jqueryui.min.css" rel="stylesheet" type="text/css">#}
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.7/semantic.min.css">
     <link href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css">
 
+    <style>
+        table {
+            table-layout: fixed;
+            width: 100%;
+        }
+
+        table td {
+            word-wrap: break-word !important;
+            overflow-wrap: break-word !important;
+        }
+
+        table tr {
+            word-wrap: break-word !important;
+            overflow-wrap: break-word !important;
+        }
+
+        .buttons-print {
+            margin-bottom: 0.5em !important;
+        }
+
+        section {
+            margin-bottom: 5em !important;
+        }
+
+        .reportTitle {
+            margin-top: 1em !important;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        footer div {
+            background: #bdbdbd;
+        }
+
+        .footerText {
+
+            margin: revert !important;
+        }
+
+        .dataTables_wrapper {
+            margin-bottom: 5em;
+        }
+
+
+        @media print {
+
+            footer {
+                display: none;
+
+            }
+        }
+    </style>
 
 </head>
 
 <body>
-<!--
-<nav class="ui fixed menu inverted navbar">
-    <a href="" class="brand item">RDF Diff proof of concept</a>
-</nav>
--->
-{#<br>#}
-{#<div id="toc"></div>#}
-<main class="ui grid">
-    {#    <br>#}
-    {#style="width:90vw;overflow-x: scroll;"#}
-    <div class="row">
-        <div class="one wide column"></div>
-        <div class="ten wide column">
-            <h1 class="ui center aligned header" id="skip-toc">{{ conf.title }}</h1>
-            {% block content %}
-                < empty >
-            {% endblock %}
-        </div>
-        <div class="one wide column"></div>
+
+<main class="ui grid container">
+    <div id="print-container" class="column">
+        <h1 class="ui header center aligned reportTitle" id="skip-toc">{{ conf.title }}</h1>
+        {% block content %}
+        < empty >
+        {% endblock %}
     </div>
 </main>
+
 <footer>
-    <div class="ui container footer center aligned">
-        <div class="row" style="text-align: center; padding: 2em;">
-            <p>Powered by Meaningfy</p>
+    <div class="ui center aligned grid">
+        <div class="row">
+            <div class="column">
+                <p class="footerText">Powered by
+                    <a href="https://github.com/meaningfy-ws">Meaningfy</a></p>
+            </div>
         </div>
     </div>
 </footer>
-
-
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
-
-<script type="text/javascript">
-    $(document).ready(function () {
-        $('table.display').DataTable();
-
-        $(function () {
-            $("#toc").tocify({
-                selectors: "h1,h2",
-                theme: "jqueryui",
-                hashGenerator: "pretty",
-                ignoreSelector: "#skip-toc",
-                highlightOnScroll: "true",
-                highlightDefault: "true"
-            });
-        });
-    });
-</script>
 </body>
 </html>
 
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.7/semantic.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.print.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("table.display").DataTable({
+            dom: 'B<"clear">lfrtip',
+            buttons: [
+                'print'
+            ],
+            "lengthMenu": [[5, 15, 30, -1], [5, 15, 30, "All"]],
+            responsive: {
+                        details: true,
+                breakpoints: [
+                    {name: 'bigdesktop', width: Infinity},
+                    {name: 'meddesktop', width: 1480},
+                    {name: 'smalldesktop', width: 1280},
+                    {name: 'medium', width: 1188},
+                    {name: 'tabletl', width: 1024},
+                    {name: 'btwtabllandp', width: 848},
+                    {name: 'tabletp', width: 768},
+                    {name: 'mobilel', width: 480},
+                    {name: 'mobilep', width: 320}
+                ]
+            }
+        });
+    });
+</script>
