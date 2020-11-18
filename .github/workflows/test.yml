@@ -6,7 +6,9 @@ name: test
 # events but only for the master branch
 on:
   push:
-    branches: [ master, feature/* ]
+    branches:
+      - master
+      - 'feature/**'
 
 jobs:
   main:
