@@ -27,6 +27,10 @@ jobs:
       with:
         python-version: 3.8
 
+    - name: Run additional services (Fuseki)
+        run: |
+          make fuseki-create-test-dbs
+
     - name: Install dependencies
       run: |
         make install

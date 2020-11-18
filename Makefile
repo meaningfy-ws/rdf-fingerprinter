@@ -28,11 +28,11 @@ stop-fuseki:
 	@ echo "$(BUILD_PRINT)Stopping Fuseki"
 	@ docker-compose --file docker/docker-compose.yml --env-file docker/.env down
 
-fuseki-create-test-dbs:
+fuseki-create-test-dbs: | start-fuseki
 	@ echo "$(BUILD_PRINT)Building dummy 'dev' dataset at http://localhost:$(if $(RDF_FINGERPRINTER_FUSEKI_PORT),$(RDF_FINGERPRINTER_FUSEKI_PORT),unknown port)/$$/datasets"
-	@ sleep 2
+	@ sleep 5
 	@ curl --anyauth --user 'admin:$(RDF_FINGERPRINTER_FUSEKI_ADMIN_PASSWORD)' -d 'dbType=mem&dbName=dev'  'http://localhost:$(RDF_FINGERPRINTER_FUSEKI_PORT)/$$/datasets'
-	@ curl -X POST -H content-type:application/rdf+xml -T ./tests/test_data/treaties-source-ap.rdf -G http://localhost:$(RDF_FINGERPRINTER_FUSEKI_PORT)/dev/data
+	@ curl -X POST -H content-type:application/rdf+xml -T ./tests/test_data/continents-source-ap.rdf -G http://localhost:$(RDF_FINGERPRINTER_FUSEKI_PORT)/dev/data
 
 
 #-----------------------------------------------------------------------------
