@@ -9,10 +9,8 @@
 
 import json
 import logging
-import tempfile
 from pathlib import Path
-from shutil import copytree
-from typing import Union, List
+from typing import Union
 
 from eds4jinja2.builders.report_builder import ReportBuilder
 
@@ -26,25 +24,28 @@ logger = logging.getLogger(__name__)
 
 
 def generate_endpoint_fingerprint_report(sparql_endpoint_url: str, output_location: Union[str, Path],
-                                         graph: str = "") -> str:
+                                         graph: str = "", external_template_location=None) -> str:
     """
         Calculate the fingerprint of a given endpoint and write the report in the output location.
         Optionally the fingerprint calculation could be restricted to a particular named graph.
+    :param sparql_endpoint_url: URL to fingerprint
+    :param output_location: location of where to generate the report
     :param graph: a valid URI
-    :param sparql_endpoint_url:
-    :param output_location:
+    :param external_template_location: location of custom template (if None -> use the default template)
     :return: path to the main report document
     """
     location = Path(output_location)
     if not location.exists() or not location.is_dir():
         raise NotADirectoryError("The output location must be a folder")
 
-    with pkg_resources.path(fingerprint_report_templates, "fingerprint_report") as template_location:
-        updated_config_content = generate_report_builder_config(sparql_endpoint_url, graph)
-        report_builder = ReportBuilder(target_path=template_location, additional_config=updated_config_content,
-                                       output_path=location)
-        report_builder.make_document()
-        return location / updated_config_content["template"]
+    template_location = external_template_location if external_template_location else \
+        pkg_resources.path(fingerprint_report_templates, "fingerprint_report").__enter__()
+
+    updated_config_content = generate_report_builder_config(sparql_endpoint_url, graph)
+    report_builder = ReportBuilder(target_path=template_location, additional_config=updated_config_content,
+                                   output_path=location)
+    report_builder.make_document()
+    return location / updated_config_content["template"]
 
 
 def generate_report_builder_config(sparql_endpoint_url, graph=""):
