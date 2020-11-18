@@ -136,5 +136,4 @@ cucumber_report.json
 junit_report.xml
 *.ldb
 /fuseki-fingerprinter-volume/fuseki/
-/output/
 /tests/unit/output/

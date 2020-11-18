@@ -1,0 +1,9 @@
+{
+  "template": "main.html",
+  "conf": {
+    "title": "Test structural fingerprint",
+    "type": "report",
+    "default_endpoint": "http://localhost:3030/dev",
+    "default_graph": ""
+  }
+}
