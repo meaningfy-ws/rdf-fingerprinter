@@ -66,11 +66,8 @@ def test_generate_endpoint_fingerprint_report_default_template(tmpdir):
     classes_list = ['owl#Ontology', 'core#ConceptScheme', 'skos-xl#Label',
                     'core#Concept', 'euvoc#Continent', 'euvoc#XlNotation']
 
-    def check_if_class_in_report(class_name, table_list):
-        return any(class_name in table.text for table in table_list)
-
     for class_name in classes_list:
-        assert check_if_class_in_report(class_name, tables)
+        assert any(class_name in table.text for table in tables)
 
 
 def test_generate_endpoint_fingerprint_report_custom_template(tmpdir):
