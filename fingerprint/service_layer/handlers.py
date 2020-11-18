@@ -51,9 +51,9 @@ def generate_endpoint_fingerprint_report(sparql_endpoint_url: str, output_locati
 def generate_report_builder_config(sparql_endpoint_url, graph, external_template_location):
     """
         Read the default config json from the fingerprint_report and set the endpoint and the graph uri if necessary
-    :param sparql_endpoint_url:
-    :param graph:
-    :param external_template_location:
+    :param sparql_endpoint_url: URL to fingerprint
+    :param graph: a valid URI
+    :param external_template_location: location of custom template
     :return: the new configuration
     """
     template_location = external_template_location if external_template_location else \
