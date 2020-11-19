@@ -59,7 +59,7 @@ def generate_report_builder_config(sparql_endpoint_url, graph, external_template
     template_location = external_template_location if external_template_location else \
         pkg_resources.path(fingerprint_report_templates, "fingerprint_report").__enter__()
 
-    config_dict = json.loads((template_location / "config.json").read_bytes())
+    config_dict = json.loads((Path(template_location) / "config.json").read_bytes())
     config_dict["conf"]["default_endpoint"] = sparql_endpoint_url
     config_dict["conf"]["default_graph"] = graph
     return config_dict
