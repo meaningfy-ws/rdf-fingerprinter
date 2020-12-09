@@ -12,6 +12,7 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 from fingerprint.service_layer.handlers import generate_report_builder_config, generate_endpoint_fingerprint_report
+from tests import LOCAL_ENDPOINT
 
 try:
     import importlib.resources as pkg_resources
@@ -48,7 +49,7 @@ def test_generate_endpoint_fingerprint_report_default_template(tmpdir):
     """
     output_path = tmpdir.mkdir("/output")
 
-    output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url='http://localhost:3030/dev/query',
+    output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url=LOCAL_ENDPOINT,
                                                        output_location=str(output_path))
 
     with open(output_file, 'r') as file:
@@ -74,7 +75,7 @@ def test_generate_endpoint_fingerprint_report_custom_template(tmpdir):
     output_path = tmpdir.mkdir("/output")
 
     custom_template_location = Path(__file__).parents[1] / 'test_data/custom_template'
-    output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url='http://localhost:3030/dev/query',
+    output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url=LOCAL_ENDPOINT,
                                                        output_location=str(output_path),
                                                        external_template_location=custom_template_location)
 
