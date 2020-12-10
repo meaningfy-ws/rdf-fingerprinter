@@ -28,8 +28,9 @@ stop-fuseki:
 	@ echo "$(BUILD_PRINT)Stopping Fuseki"
 	@ docker-compose --file docker/docker-compose.yml --env-file docker/.env down
 
-fuseki-create-test-dbs:
+fuseki-create-test-dbs: start-fuseki
 	@ echo "$(BUILD_PRINT) Uploading the datasets"
+	@ sleep 3
 	@ curl -X DELETE --anyauth --user 'admin:admin' http://localhost:$(RDF_FINGERPRINTER_FUSEKI_PORT)/dev/data
 	@ curl --anyauth --user 'admin:admin' -d 'dbType=tdb&dbName=dev'  http://localhost:$(RDF_FINGERPRINTER_FUSEKI_PORT)/$$/datasets
 	@ curl -X POST -H content-type:application/rdf+xml -T tests/test_data/continents-source-ap.rdf -G http://localhost:$(RDF_FINGERPRINTER_FUSEKI_PORT)/dev/data --data-urlencode 'graph=http://publications.europa.eu/resources/authority/continents'
