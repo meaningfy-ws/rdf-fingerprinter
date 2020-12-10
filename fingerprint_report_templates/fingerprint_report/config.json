@@ -3,7 +3,7 @@
   "conf": {
     "title": "Structural fingerprint",
     "type": "report",
-    "author": "Meaningfy",
+    "author": "Meaningfy.ws",
     "ns_file": "data/prefix.csv",
     "default_endpoint": "http://localhost:3030/dev",
     "default_graph": ""

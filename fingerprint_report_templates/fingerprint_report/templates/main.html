@@ -6,5 +6,22 @@
     {% set prefixes, error = from_file(conf.template_path+'/prefixes.json').fetch_tree() %}
     {% set inverted_prefixes = invert_dict(prefixes) %}
 
-    {% include "sections/class_profiles.html" with context %}
+    <h1>Class application profiles</h1>
+    <section>
+        <p>This section attempts at reconstructing the profiled shapes for each class. The profile is deduced based on
+            descriptive statistics presented elsewhere. The tables below contain the following columns: Property name,
+            Cardinality, Property Type, Property Range and Confidence.</p>
+        <p>
+            Confidence is a categorial value derived from the property usage relative to the total number of unique
+            individuals instantiating this class.Property range is a list of distinct encountered object types. In case
+            of higher number of object type the list is non-exhaustive. Cardinality of the property is expressed in
+            terms of minimum and maximum occurrences of the property. The minimum value varies from zero (0) meaning
+            that the property is optional to one (1) meaning that the property is mandatory while the maximum value
+            varies from one (1) meaning that the property is sufficient to star (*) meaning that the property is
+            maximally unbound. Finally the type indicates whether the property range is whether a data type or an
+            individual URI.
+        </p>
+    {{ mc.build_default_endpoint_fingerprint(inverted_prefixes) }}
+    </section>
+
 {% endblock %}

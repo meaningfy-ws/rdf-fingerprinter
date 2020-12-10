@@ -24,19 +24,19 @@
     {% endif %}
 {%- endmacro %}
 
-
+{# draw a generic pandas table#}
 {% macro pandas_table(df, caption, column_labels={}) -%}
     {% if (df is defined) and (df is not none) %}
         <table class="display">
             <thead class="center aligned">
             <tr>
-            {% for column in df.columns %}
-                {% if column in column_labels %}
-                    <th>{{ column_labels[column] }}</th>
-                {% else %}
-                    <th>{{ column }}</th>
-                {% endif %}
-            {% endfor %}
+                {% for column in df.columns %}
+                    {% if column in column_labels %}
+                        <th>{{ column_labels[column] }}</th>
+                    {% else %}
+                        <th>{{ column }}</th>
+                    {% endif %}
+                {% endfor %}
             </tr>
             </thead>
             <tbody>
@@ -58,4 +58,129 @@
     {% else %}
         {{ render_error("How did you get here? did you forget to use 'render_fetch_results' macro?") }}
     {% endif %}
+{%- endmacro %}
+
+{############################################}
+{# fingerpritinging macros #}
+{############################################}
+
+{# select all the graphs is the default endpoint #}
+{% macro select_graphs() -%}
+    {% set select_query =
+    """select distinct ?graph
+    {graph ?graph {?s ?p []}}""" %}
+    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {# caller_ is a workaround necessary to handle two levels of callers #}
+    {% set caller_ = caller %}
+    {# Fingerpring the gefault graph before going to named graphs #}
+    {{ caller_(None) }}
+    {% call render_fetch_results(content, error) %}
+        {% if not content.empty %}
+            {% for row in content.itertuples() %}
+                {{ caller_(row.graph) }}
+            {% endfor %}
+        {% endif %}
+    {% endcall %}
+{%- endmacro %}
+
+{# select all the classes is the given graph #}
+{% macro select_classes_in_graph(graph=None) -%}
+    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set select_query =
+    "SELECT DISTINCT ?cls \n"~from_statement~"
+    WHERE {[] a ?cls}" %}
+    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% set caller_ = caller %}
+    {% call render_fetch_results(content, error) %}
+        {% if not content.empty %}
+            {% for row in content.itertuples() %}
+                {{ caller_(row.cls) }}
+            {% endfor %}
+        {% endif %}
+    {% endcall %}
+{%- endmacro %}
+
+
+{# fingerprint a given class in a given graph #}
+{% macro fingerprint_class_in_graph(class, graph=None) -%}
+    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set select_query =
+    "SELECT DISTINCT (?p as ?property)
+        (GROUP_CONCAT(distinct ?tto; separator=', ') as ?object_type)
+        (GROUP_CONCAT(distinct ?tp; separator=', ') as ?property_type)
+        (count(distinct ?s) as ?subject_cnt)
+        (count(distinct ?o) as ?object_cnt)
+        (count(*) as ?pattern_cnt)
+        (if(?subject_cnt < ?total_distinct_s, 0, min(?sp_star)) as ?min)
+        (max(?sp_star) as ?max)
+        (avg(?sp_star) * ?subject_cnt/?total_distinct_s as ?avg)
+    "~from_statement~"
+    WHERE {
+        values ?ts {<"~class+">}
+        ?s a ?ts .
+        ?s ?p ?o .
+        OPTIONAL { ?o a ?to . }
+        BIND(datatype(?o) as ?dto)
+        BIND(IF(BOUND(?to),?to, IF (bound(?dto), ?dto, <http://www.w3.org/2000/01/rdf-schema#Resource>) ) as ?tto)
+        BIND(IF(isURI(?o),'object' , 'data') as ?tp)
+        {
+            select ?s ?p (count(*) as ?sp_star)
+            {
+                ?s ?p [] .
+            }
+            group by ?s ?p
+        }
+        {
+            select ?ts (count(distinct ?i) as ?total_distinct_s)
+            {
+                ?i a ?ts
+            }
+            group by ?ts
+        }
+    }
+    GROUP BY ?ts ?p ?total_distinct_s
+    ORDER BY ?subject_type desc(?property_type) desc(?count) ?property ?object_type" %}
+    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% set caller_ = caller %}
+    {% call render_fetch_results(content, error) %}
+        {% if not content.empty %}
+            {{ caller_(content) }}
+        {% endif %}
+    {% endcall %}
+{%- endmacro %}
+
+
+{# render a class fingerprint #}
+{% macro render_class_fingerprint(content, class_uri, graph_uri, inverted_prefixes) -%}
+    {# fingerprint resultset signature #}
+    {% set labels = {"property": "Property name",
+    "object_type": "Object class",
+    "property_type": "Property type",
+    "subject_cnt": "Distinct Subjects",
+    "object_cnt": "Distinct Objects",
+    "pattern_cnt": "Occurences",
+    "min": "Min",
+    "max": "Max",
+    "avg": "Avg",} %}
+
+    {% set substituted_content = replace_strings_in_tabular(content,
+                                    target_columns=['property','object_type','property_type'],
+                                    value_mapping_dict=inverted_prefixes,
+                                    mark_touched_rows=True ) %}
+    {% set table_title = "The shape of <" + class_uri | safe + "> class instances" %}
+    {{ pandas_table(content, table_title, column_labels=labels) }}
+{%- endmacro %}
+
+{# build fingerpring for each class in every graph from the endpoint #}
+{% macro build_default_endpoint_fingerprint(inverted_prefixes=None) -%}
+    {% call(graph) select_graphs() %}
+        <h2>{{ 'Named graph ' + graph|safe + " fingerprints" if graph else "Default graph fingerprints" }}</h2>
+        <section>
+            {% call(class) select_classes_in_graph(graph) %}
+                {% call(fingerprint_content) fingerprint_class_in_graph(class) %}
+                    {{ render_class_fingerprint(fingerprint_content, class, graph, inverted_prefixes) }}
+                {% endcall %}
+            {% endcall %}
+        </section>
+    {% endcall %}
 {%- endmacro %}
