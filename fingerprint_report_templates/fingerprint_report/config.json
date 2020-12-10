@@ -5,7 +5,7 @@
     "type": "report",
     "author": "Meaningfy",
     "ns_file": "data/prefix.csv",
-    "default_endpoint": "http://localhost:3020/dev",
+    "default_endpoint": "http://localhost:3030/dev",
     "default_graph": ""
   }
 }
