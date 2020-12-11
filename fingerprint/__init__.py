@@ -9,8 +9,8 @@ import logging
 
 __docformat__ = "restructuredtext en"
 
-__version__ = "0.2.4"
-__date__ = "2020-11-18"
+__version__ = "0.2.5"
+__date__ = "2020-12-11"
 
 # hard coding the log level and format
 logger = logging.getLogger()
