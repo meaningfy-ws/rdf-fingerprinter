@@ -66,21 +66,36 @@
 
 {# select all the graphs is the default endpoint #}
 {% macro select_graphs() -%}
-    {% set select_query =
-    """select distinct ?graph
-    {graph ?graph {?s ?p []}}""" %}
-    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
     {# caller_ is a workaround necessary to handle two levels of callers #}
     {% set caller_ = caller %}
-    {# Fingerpring the gefault graph before going to named graphs #}
-    {{ caller_(None) }}
-    {% call render_fetch_results(content, error) %}
-        {% if not content.empty %}
-            {% for row in content.itertuples() %}
-                {{ caller_(row.graph) }}
-            {% endfor %}
-        {% endif %}
-    {% endcall %}
+    {# if there are some graphs defined in the configuration, then select those #}
+    {% if conf.selected_graphs %}
+        {% for graph in conf.selected_graphs | unique | list %}
+            {% if graph %}
+                {{ caller_(graph) }}
+            {% else %}
+                {{ caller_(None) }}
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        {# if no graphs are defined in the configurations, then select all the graphs in the endpoint #}
+        {% set select_query =
+            """select distinct ?graph
+            {graph ?graph {?s ?p []}}""" %}
+        {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+        {# Fingerpring the gefault graph before going to named graphs #}
+        {{ caller_(None) }}
+        {% call render_fetch_results(content, error) %}
+            {% if not content.empty %}
+                {% for row in content.itertuples() %}
+                    {{ caller_(row.graph) }}
+                {% endfor %}
+            {% endif %}
+        {% endcall %}
+
+    {% endif %}
+
+
 {%- endmacro %}
 
 {# select all the classes is the given graph #}
@@ -166,7 +181,7 @@
     {% set substituted_content = replace_strings_in_tabular(content,
                                     target_columns=['property','object_type','property_type'],
                                     value_mapping_dict=inverted_prefixes,
-                                    mark_touched_rows=True ) %}
+                                    mark_touched_rows=False ) %}
     {% set table_title = "The shape of <" + class_uri | safe + "> class instances" %}
     {{ pandas_table(content, table_title, column_labels=labels) }}
 {%- endmacro %}
