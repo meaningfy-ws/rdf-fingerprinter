@@ -14,7 +14,7 @@ import click
 
 from fingerprint.service_layer.handlers import generate_endpoint_fingerprint_report
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('default')
 
 
 @click.command()

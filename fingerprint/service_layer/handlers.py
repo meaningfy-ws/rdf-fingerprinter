@@ -20,7 +20,7 @@ except ImportError:
     import importlib_resources as pkg_resources
 import fingerprint_report_templates
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('default')
 
 
 def generate_endpoint_fingerprint_report(sparql_endpoint_url: str, output_location: Union[str, Path],
