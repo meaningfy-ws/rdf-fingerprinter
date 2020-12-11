@@ -8,9 +8,16 @@
 
     <title> {{ conf.title }} </title>
 
+    {#    <link rel="stylesheet" type="text/css"#}
+    {#          href="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.7/semantic.min.css">#}
 
-    <link rel="stylesheet" type="text/css"
-          href="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.7/semantic.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/stylesheets/jquery.tocify.min.css"
+          rel="stylesheet"
+          type="text/css">
+    <link href="https://code.jquery.com/ui/1.11.4/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css">
+
     <link href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css">
 
     <style>
@@ -41,11 +48,6 @@
             margin-top: 1em !important;
         }
 
-        body {
-            display: flex;
-            min-height: 100vh;
-            flex-direction: column;
-        }
 
         main {
             flex: 1 0 auto;
@@ -64,9 +66,44 @@
             margin-bottom: 5em;
         }
 
+        body {
+            font-family: "Roboto", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+            font-size: 14px !important;
+            line-height: 1.42857143;
+
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        #toc {
+            width: 15%;
+            margin-top: 2.5em;
+            padding: 0.1em;
+        }
+
+        .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
+            border: 1px solid #79b7e7;
+            background: #f5f5f5 !important;
+            font-weight: normal;
+            color: black !important;
+        }
+
+        .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+            background: #888f9e !important;
+            color: #fff !important;
+            font-weight: normal;
+        }
+
+        .tocify {
+            border-radius: 0 !important;
+        }
+
+        .tocify li:not(:last-child) li:not(:first-child) {
+            border-bottom: 1px solid #888f9e47 !important;
+        }
 
         @media print {
-
             footer {
                 display: none;
 
@@ -78,12 +115,44 @@
 
 <body>
 
-<main class="ui grid container">
-    <div id="print-container" class="column">
-        <h1 class="ui header center aligned reportTitle" id="skip-toc">{{ conf.title }}</h1>
-        {% block content %}
-        < empty >
-        {% endblock %}
+<main>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3">
+                <div id="toc"></div>
+            </div>
+            <div id="print-container" class="col-md-9">
+                <h1 class="text-center" id="skip-toc">{{ conf.title }}</h1>
+                <h3 class="text-center" id="skip-toc">[<em>{{ conf.type }}</em>]</h3>
+
+                <div class="">
+                    <h2 class="">Abstract</h2>
+                    <p> This document represents an automatically generated account of the class instantiation
+                        patterns. </p>
+                    <p> The datasource endpoint: <em>{{ conf.default_endpoint |e }}</em></p>
+                    {% if conf.selected_graphs %}
+                        <p> The fingerprinting is not applied to the entire endpoint but is limited to a set of graphs.
+                            The
+                            selected graphs to fingerprint are: </p>
+                        <ul>
+                            {% for gr in conf.selected_graphs | unique | list %}
+                                {% if gr %}
+                                    <li><em>{{ gr|e }}</em></li>
+                                {% else %}
+                                    <li><em>default graph</em></li>
+                                {% endif %}
+
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <h2 class="">Keywords</h2>
+                    <em>application profile, structural metrics, data shapes, class instantiation patterns</em>
+                </div>
+                {% block content %}
+                    < empty >
+                {% endblock %}
+            </div>
+        </div>
     </div>
 </main>
 
@@ -100,14 +169,38 @@
 </body>
 </html>
 
+{#<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>#}
+{#<script src="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.7/semantic.min.js"></script>#}
+
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.7/semantic.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
+
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/dataTables.buttons.min.js"></script>
 <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.print.min.js"></script>
 
 <script type="text/javascript">
     $(document).ready(function () {
+
+        $(function () {
+            $("#toc").tocify({
+                selectors: "h1,h2,h3,h4,h5,h6,h7,h8",
+                theme: "jqueryui",
+                hashGenerator: "pretty",
+                ignoreSelector: "#skip-toc",
+                highlightOnScroll: "true",
+                highlightDefault: "true"
+            });
+        });
 
         $("table.display").DataTable({
             dom: 'B<"clear">lfrtip',
@@ -116,7 +209,7 @@
             ],
             "lengthMenu": [[5, 15, 30, -1], [5, 15, 30, "All"]],
             responsive: {
-                        details: true,
+                details: true,
                 breakpoints: [
                     {name: 'bigdesktop', width: Infinity},
                     {name: 'meddesktop', width: 1480},

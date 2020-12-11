@@ -58,5 +58,7 @@ ORDER BY ?subject_type desc(?property_type) desc(?count) ?property ?object_type
                                     target_columns=['property','object_type','property_type'],
                                     value_mapping_dict=inverted_prefixes,
                                     mark_touched_rows=False ) %}
-    {{ mc.pandas_table(content, "Shape of "~class~" class", column_labels=labels) }}
+    {{ mc.pandas_table(content, "The shape of <"~class~"> class instances", column_labels=labels) }}
 {% endcall %}
+
+

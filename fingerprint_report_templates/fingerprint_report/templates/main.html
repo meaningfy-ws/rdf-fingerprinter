@@ -6,5 +6,23 @@
     {% set prefixes, error = from_file(conf.template_path+'/prefixes.json').fetch_tree() %}
     {% set inverted_prefixes = invert_dict(prefixes) %}
 
-    {% include "sections/class_profiles.html" with context %}
+    <h1>Class application profiles</h1>
+    <section>
+        <p>This section attempts at reconstructing the profiled shapes for each class. The profile is deduced based
+            on structural patterns for a selected class and their descriptive statistics aggregated by distinct
+            properties.
+        <p>
+            The structural pattern is a triple pattern of the type <em>(subject,predicate,object)</em>, which selects
+            subjects that are instances of a given class and on that collection of individuals identifies all unique
+            predicates used, then for each of those predicate identifies the type of the values used with it (i.e.
+            either the class or the data type). The pattern can be summarised as this: <em>(ClassOfSubjects,
+            distinctPredicate, ClassOfObject)</em>.
+
+            The descriptive statistics account for (a) the number of unique subjects, (b) the number of unique objects
+            (c) number of total occurrences of the pattern (d) minimal, (e) maximal and (f) average number of
+            occurences.
+        </p>
+        {{ mc.build_default_endpoint_fingerprint(inverted_prefixes) }}
+    </section>
+
 {% endblock %}

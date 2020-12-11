@@ -3,9 +3,15 @@
   "conf": {
     "title": "Structural fingerprint",
     "type": "report",
-    "author": "Meaningfy",
-    "ns_file": "data/prefix.csv",
-    "default_endpoint": "http://localhost:3020/dev",
-    "default_graph": ""
+    "author": "Meaningfy.ws",
+    "ns_file": "prefixes.json",
+    "default_endpoint": "http://localhost:3030/dev",
+    "selected_graphs": [
+      "",
+      "http://publications.europa.eu/resources/authority/treaties",
+      "http://publications.europa.eu/resources/authority/treaties",
+      "http://publications.europa.eu/resources/authority/treaties",
+      "http://publications.europa.eu/resources/authority/treaties"
+    ]
   }
 }

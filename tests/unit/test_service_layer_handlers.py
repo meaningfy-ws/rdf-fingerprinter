@@ -12,6 +12,7 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 from fingerprint.service_layer.handlers import generate_report_builder_config, generate_endpoint_fingerprint_report
+from tests import LOCAL_ENDPOINT
 
 try:
     import importlib.resources as pkg_resources
@@ -48,20 +49,17 @@ def test_generate_endpoint_fingerprint_report_default_template(tmpdir):
     """
     output_path = tmpdir.mkdir("/output")
 
-    output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url='http://localhost:3030/dev/query',
+    output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url=LOCAL_ENDPOINT,
                                                        output_location=str(output_path))
 
     with open(output_file, 'r') as file:
         soup = BeautifulSoup(file.read(), 'html.parser')
 
-    main_title = soup.find('h1', attrs={'class': 'ui header center aligned reportTitle'}).text
+    main_title = soup.find('h1', attrs={'id': 'skip-toc'}).text
     assert main_title == 'Structural fingerprint'
 
-    class_instantiation_title = soup.find('h1', attrs={'class': 'ui header'}).text
-    assert class_instantiation_title == 'Class instantiation shapes'
-
     tables = soup.find_all('table')
-    assert len(tables) == 6
+    assert len(tables) == 11
 
     classes_list = ['owl#Ontology', 'core#ConceptScheme', 'skos-xl#Label',
                     'core#Concept', 'euvoc#Continent', 'euvoc#XlNotation']
@@ -74,7 +72,7 @@ def test_generate_endpoint_fingerprint_report_custom_template(tmpdir):
     output_path = tmpdir.mkdir("/output")
 
     custom_template_location = Path(__file__).parents[1] / 'test_data/custom_template'
-    output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url='http://localhost:3030/dev/query',
+    output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url=LOCAL_ENDPOINT,
                                                        output_location=str(output_path),
                                                        external_template_location=custom_template_location)
 
