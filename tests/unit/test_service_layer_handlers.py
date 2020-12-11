@@ -35,9 +35,9 @@ def test_reading_template_config_json_file():
 
 
 def test_generate_report_builder_config():
-    d = generate_report_builder_config(sparql_endpoint_url="url", graph="graph", external_template_location=None)
+    d = generate_report_builder_config(sparql_endpoint_url="url", selected_graphs=["graph"], external_template_location=None)
     assert "url" == d["conf"]["default_endpoint"]
-    assert "graph" == d["conf"]["default_graph"]
+    assert "graph" in d["conf"]["selected_graphs"]
 
 
 def test_generate_endpoint_fingerprint_report_default_template(tmpdir):
@@ -59,7 +59,7 @@ def test_generate_endpoint_fingerprint_report_default_template(tmpdir):
     assert main_title == 'Structural fingerprint'
 
     tables = soup.find_all('table')
-    assert len(tables) == 11
+    assert len(tables) == 6
 
     classes_list = ['owl#Ontology', 'core#ConceptScheme', 'skos-xl#Label',
                     'core#Concept', 'euvoc#Continent', 'euvoc#XlNotation']
