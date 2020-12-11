@@ -55,14 +55,11 @@ def test_generate_endpoint_fingerprint_report_default_template(tmpdir):
     with open(output_file, 'r') as file:
         soup = BeautifulSoup(file.read(), 'html.parser')
 
-    main_title = soup.find('h1', attrs={'class': 'ui header center aligned reportTitle'}).text
+    main_title = soup.find('h1', attrs={'id': 'skip-toc'}).text
     assert main_title == 'Structural fingerprint'
 
-    class_instantiation_title = soup.find('h1', attrs={'class': 'ui header'}).text
-    assert class_instantiation_title == 'Class instantiation shapes'
-
     tables = soup.find_all('table')
-    assert len(tables) == 6
+    assert len(tables) == 11
 
     classes_list = ['owl#Ontology', 'core#ConceptScheme', 'skos-xl#Label',
                     'core#Concept', 'euvoc#Continent', 'euvoc#XlNotation']

@@ -25,7 +25,7 @@
 {%- endmacro %}
 
 {# draw a generic pandas table#}
-{% macro pandas_table(df, caption, column_labels={}) -%}
+{% macro render_pandas_table(df, caption, column_labels={}) -%}
     {% if (df is defined) and (df is not none) %}
         <table class="display">
             <thead class="center aligned">
@@ -64,7 +64,7 @@
 {# fingerpritinging macros #}
 {############################################}
 
-{# select all the graphs is the default endpoint #}
+{# select the graphs to fingerprint: either the ones grom the config file or all from the endpoint #}
 {% macro select_graphs() -%}
     {# caller_ is a workaround necessary to handle two levels of callers #}
     {% set caller_ = caller %}
@@ -99,7 +99,7 @@
 {%- endmacro %}
 
 {# select all the classes is the given graph #}
-{% macro select_classes_in_graph(graph=None) -%}
+{% macro select_distinct_classes(graph=None) -%}
     {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
     {% set select_query =
     "SELECT DISTINCT ?cls \n"~from_statement~"
@@ -117,7 +117,7 @@
 
 
 {# fingerprint a given class in a given graph #}
-{% macro fingerprint_class_in_graph(class, graph=None) -%}
+{% macro fingerprint_class(class, graph=None) -%}
     {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
     {% set select_query =
     "SELECT DISTINCT (?p as ?property)
@@ -131,7 +131,7 @@
         (avg(?sp_star) * ?subject_cnt/?total_distinct_s as ?avg)
     "~from_statement~"
     WHERE {
-        values ?ts {<"~class+">}
+        values ?ts {<"~class~">}
         ?s a ?ts .
         ?s ?p ?o .
         OPTIONAL { ?o a ?to . }
@@ -183,7 +183,7 @@
                                     value_mapping_dict=inverted_prefixes,
                                     mark_touched_rows=False ) %}
     {% set table_title = "The shape of <" + class_uri | safe + "> class instances" %}
-    {{ pandas_table(content, table_title, column_labels=labels) }}
+    {{ render_pandas_table(content, table_title, column_labels=labels) }}
 {%- endmacro %}
 
 {# build fingerpring for each class in every graph from the endpoint #}
@@ -191,8 +191,8 @@
     {% call(graph) select_graphs() %}
         <h2>{{ 'Named graph ' + graph|safe + " fingerprints" if graph else "Default graph fingerprints" }}</h2>
         <section>
-            {% call(class) select_classes_in_graph(graph) %}
-                {% call(fingerprint_content) fingerprint_class_in_graph(class) %}
+            {% call(class) select_distinct_classes(graph) %}
+                {% call(fingerprint_content) fingerprint_class(class) %}
                     {{ render_class_fingerprint(fingerprint_content, class, graph, inverted_prefixes) }}
                 {% endcall %}
             {% endcall %}
