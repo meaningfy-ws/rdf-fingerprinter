@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_endpoint_fingerprint_report(sparql_endpoint_url: str, output_location: Union[str, Path],
-                                         selected_graphs: List[str] = [""],
+                                         selected_graphs: List[str] = None,
                                          external_template_location: Union[str, Path] = None) -> str:
     """
         Calculate the fingerprint of a given endpoint and write the report in the output location.
@@ -36,6 +36,9 @@ def generate_endpoint_fingerprint_report(sparql_endpoint_url: str, output_locati
     :return: path to the main report document
     """
     logger.debug('start generating fingerprinting report from endpoint')
+    if not selected_graphs:
+        selected_graphs = ['']
+
     location = Path(output_location)
     if not location.exists() or not location.is_dir():
         raise NotADirectoryError("The output location must be a folder")
