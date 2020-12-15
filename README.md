@@ -1,3 +1,4 @@
+# RDF fingerprinter
 
 **Understand** the structure of your RDF data at a glance using automatically built **application profiles** and spot differences between dataset structures. 
 
@@ -15,6 +16,10 @@ _Fingerprinting_ is the action of generating, or rather, guessing, the applicati
 ![PyPI - License](https://img.shields.io/pypi/l/rdf-fingerprinter?color=green)
 ![PyPI - Wheel](https://img.shields.io/pypi/wheel/rdf-fingerprinter)
 
+Contents
+--------
+* [API Reference](api_ref.md)
+
 # Installation
 RDF fingerprinter may be installed with pip as follows. 
  
@@ -23,9 +28,20 @@ pip install rdf-fingerprinter
 ```
 Nore that Python version 3.7 or later is required.  
 
-# Getting started
+# Usage
 
+The easiest way to build a fingerprint of a SPARQL endpoint is by calling the fingeprinting CLI command and write the report in an output folder.
+ 
+```shell script
+fingerprint -e http://my.sparql.endpoint.com -o my/output/folder
+``` 
 
+To use the fingerprinter programmatically please refer to the [API Reference](api_ref.md). 
 
-# Licence 
-_RDF Fingerprinter_ is freely distributable under the terms of the [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
+# Contributing
+You are more than welcome to help expand and mature this project. We adhere to [Apache code of conduct](https://www.apache.org/foundation/policies/conduct), please follow it in all your interactions on the project.   
+
+When contributing to this repository, please first discuss the change you wish to make via issue, email, or any other method with the maintainers of this repository before making a change.
+
+## Licence 
+This project is licensed under [GNU GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html) licence. v3](https://www.gnu.org/licenses/gpl-3.0.en.html)

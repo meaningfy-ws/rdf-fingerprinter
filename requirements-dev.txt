@@ -9,9 +9,8 @@ beautifulsoup4==4.9.3  # https://www.crummy.com/software/BeautifulSoup/bs4/doc/
 flake8
 
 # Documentation Dependencies
-myst-parser
 sphinx
-sphinxcontrib-apidoc
+recommonmark
 
 # pipy publishing
 twine
