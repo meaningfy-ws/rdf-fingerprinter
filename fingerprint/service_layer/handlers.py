@@ -8,7 +8,7 @@
 """ """
 
 import json
-import logging
+import logging.config
 from pathlib import Path
 from typing import Union, List, Dict
 
@@ -20,7 +20,7 @@ except ImportError:
     import importlib_resources as pkg_resources
 import fingerprint_report_templates
 
-logger = logging.getLogger('default')
+logger = logging.getLogger('fingerprinter')
 
 
 def generate_endpoint_fingerprint_report(sparql_endpoint_url: str, output_location: Union[str, Path],
