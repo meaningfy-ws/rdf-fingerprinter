@@ -7,22 +7,14 @@
 
 """ """
 
-import pathlib
-from distutils.dir_util import copy_tree
-from eds4jinja2.builders.report_builder import ReportBuilder
-import click
 import logging
+import pathlib
+
+import click
 
 from fingerprint.service_layer.handlers import generate_endpoint_fingerprint_report
 
-__logger = logging.getLogger(__name__)
-
-
-# def copy_static_content(from_path, to_path):
-#     if pathlib.Path(from_path).is_dir():
-#         copy_tree(from_path, to_path)
-#     else:
-#         __logger.warning(from_path + " is not a directory !")
+logger = logging.getLogger('fingerprinter')
 
 
 @click.command()
@@ -35,9 +27,11 @@ def fingerprint_endpoint(sparql_endpoint_url: str, output: str):
     :param output:
     :return:
     """
+    logger.debug('start fingerprinting endpoint')
     output_location = pathlib.Path(output)
     output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url=sparql_endpoint_url,
                                                        output_location=output_location)
+    logger.debug('end fingerprinting endpoint')
 
 
 if __name__ == "__main__":
