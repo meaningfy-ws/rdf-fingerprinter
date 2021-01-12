@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% import "macros.html" as mc %}
+{% import "macros/builders.html" as builders %}
 
 {% block content %}
     {# Read the and invert the namespace/prefix definitions for substitution #}
@@ -22,7 +22,7 @@
             (c) number of total occurrences of the pattern (d) minimal, (e) maximal and (f) average number of
             occurences.
         </p>
-        {{ mc.build_default_endpoint_fingerprint(inverted_prefixes) }}
+        {{ builders.build_default_endpoint_fingerprint(inverted_prefixes) }}
     </section>
 
 {% endblock %}

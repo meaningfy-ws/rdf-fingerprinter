@@ -1,0 +1,16 @@
+{% import "macros/selectors.html" as selectors %}
+{% import "macros/renderers.html" as renderers %}
+
+{% macro build_default_endpoint_fingerprint(inverted_prefixes=None) -%}
+    {% call(graph) selectors.select_graphs() %}
+        <h2>{{ 'Named graph ' + graph|safe + " fingerprints" if graph else "Default graph fingerprints" }}</h2>
+        <section>
+            {% call(class) selectors.select_distinct_classes(graph) %}
+                <h3>{{ class }}</h3>
+                {% call(class_stats_content) selectors.fetch_class_property_stats(class, graph) %}
+                    {{ renderers.render_pandas_table(class_stats_content, "Basic signature") }}
+                {% endcall %}
+            {% endcall %}
+        </section>
+    {% endcall %}
+{%- endmacro %}
