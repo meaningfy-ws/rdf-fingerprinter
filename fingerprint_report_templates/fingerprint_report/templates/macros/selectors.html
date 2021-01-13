@@ -68,106 +68,6 @@
     {% endcall %}
 {%- endmacro %}
 
-{# select all the distinct (subject type, property) pairs in a given graph #}
-{#{% macro select_distinct_subject_property(graph=None) -%}#}
-{#    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}#}
-{#    {% set select_query =#}
-{#    "SELECT DISTINCT ?class ?property \n"~from_statement~"#}
-{#    WHERE {[] a ?class ; ?property [] .}#}
-{#    ORDER BY ?class ?property#}
-{#    " %}#}
-{#    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}#}
-{#    {% set caller_ = caller %}#}
-{#    {% call renderers.render_fetch_results(content, error) %}#}
-{#        {% if not content.empty %}#}
-{#            {% for row in content.itertuples() %}#}
-{#                {{ caller_(row.class, row.property) }}#}
-{#            {% endfor %}#}
-{#        {% endif %}#}
-{#    {% endcall %}#}
-{#{%- endmacro %}#}
-
-{##}
-{# fetch the basic stats and pattern signature #}
-{#{% macro fetch_pattern_stats(class, property, graph=None) -%}#}
-{#    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}#}
-{#    {% set select_query =#}
-{#    "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>#}
-{#    PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>#}
-{#    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>#}
-{#    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>#}
-{#    PREFIX owl: <http://www.w3.org/2002/07/owl#>#}
-{##}
-{#    # get signature and stats of the class and property pattern#}
-{#    SELECT ?subject_class ?property#}
-{#            (GROUP_CONCAT(distinct ?object_type; separator=', ') as ?object_types)#}
-{#            (GROUP_CONCAT(distinct ?property_type; separator=', ') as ?property_types)#}
-{#            (count(?subject) as ?class_prop_occurences)#}
-{#            (count(distinct ?subject) as ?subj_distinct_count)#}
-{#            (count(distinct ?object) as ?obj_distinct_count)#}
-{#    "~from_statement~"#}
-{#    WHERE#}
-{#    {#}
-{#        VALUES  (?subject_class ?property) {( skos:Concept skosxl:altLabel )}#}
-{##}
-{#        ?subject a ?subject_class; ?property ?object .#}
-{#        OPTIONAL { ?object  a ?object_class . }#}
-{##}
-{#        # binding the Object and property types#}
-{#        BIND(datatype(?object) as ?data_type)#}
-{#        BIND(IF(BOUND(?object_class),?object_class, IF (bound(?data_type), ?data_type, rdfs:Resource) ) as ?object_type)#}
-{#        BIND(IF( isURI(?object) || isBlank( ?object ),owl:ObjectProperty , owl:DatatypeProperty) as ?property_type)#}
-{#    }#}
-{#    GROUP BY ?subject_class ?property#}
-{#    " %}#}
-{#    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}#}
-{#    {% set caller_ = caller %}#}
-{#    {% call renderers.render_fetch_results(content, error) %}#}
-{#        {{ caller_(content) }}#}
-{#    {% endcall %}#}
-{#{%- endmacro %}#}
-{##}
-{#TODO mark as fast but #}
-{# fetch light class fingerprint #}
-{#{% macro fetch_pattern_stats(class, graph=None) -%}#}
-{#    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}#}
-{#    {% set select_query =#}
-{#    "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>#}
-{#    PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>#}
-{#    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>#}
-{#    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>#}
-{#    PREFIX owl: <http://www.w3.org/2002/07/owl#>#}
-{##}
-{#    # get signature and stats of the class and property pattern#}
-{#    SELECT ?subject_class ?property#}
-{#            (GROUP_CONCAT(distinct ?object_type; separator=', ') as ?object_types)#}
-{#            (GROUP_CONCAT(distinct ?property_type; separator=', ') as ?property_types)#}
-{#            (count(?subject) as ?class_prop_occurences)#}
-{#            (count(distinct ?subject) as ?subj_distinct_count)#}
-{#            (count(distinct ?object) as ?obj_distinct_count)#}
-{#    "~from_statement~"#}
-{#    WHERE#}
-{#    {#}
-{#        VALUES  ?subject_class { <"~class~"> }#}
-{##}
-{#        ?subject a ?subject_class; ?property ?object .#}
-{#        OPTIONAL { ?object  a ?object_class . }#}
-{##}
-{#        # binding the Object and property types#}
-{#        BIND(datatype(?object) as ?data_type)#}
-{#        BIND(IF(BOUND(?object_class),?object_class, IF (bound(?data_type), ?data_type, rdfs:Resource) ) as ?object_type)#}
-{#        BIND(IF( isURI(?object) || isBlank( ?object ),owl:ObjectProperty , owl:DatatypeProperty) as ?property_type)#}
-{#    }#}
-{#    GROUP BY ?subject_class ?property#}
-{#    ORDER BY ?subject_class ?property#}
-{#    " %}#}
-{#    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}#}
-{#    {% set caller_ = caller %}#}
-{#    {% call renderers.render_fetch_results(content, error) %}#}
-{#        {{ caller_(content) }}#}
-{#    {% endcall %}#}
-{#{%- endmacro %}#}
-
 {# fingerprint a given class propeorty pattern in a given graph. If the class of the propoerty
 is not provided the fingerprint will be provided for the propoerty with all classes or for the
 class with all properties #}
@@ -234,5 +134,68 @@ class with all properties #}
         {% if not content.empty %}
             {{ caller_(content) }}
         {% endif %}
+    {% endcall %}
+{%- endmacro %}
+
+{#-----------------------------------------------------#}
+{# more granular fetchers, possibly useful for heavy queries #}
+{#-----------------------------------------------------#}
+
+{# select all the distinct (subject type, property) pairs in a given graph #}
+{% macro select_distinct_subject_property(graph=None) -%}
+    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set select_query =
+    "SELECT DISTINCT ?class ?property \n"~from_statement~"
+    WHERE {[] a ?class ; ?property [] .}
+    ORDER BY ?class ?property
+    " %}
+    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% set caller_ = caller %}
+    {% call renderers.render_fetch_results(content, error) %}
+        {% if not content.empty %}
+            {% for row in content.itertuples() %}
+                {{ caller_(row.class, row.property) }}
+            {% endfor %}
+        {% endif %}
+    {% endcall %}
+{%- endmacro %}
+
+
+{# fetch the basic stats and pattern signature #}
+{% macro fetch_pattern_stats(class, property, graph=None) -%}
+    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set select_query =
+    "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+    PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+    # get signature and stats of the class and property pattern
+    SELECT ?subject_class ?property
+            (GROUP_CONCAT(distinct ?object_type; separator=', ') as ?object_types)
+            (GROUP_CONCAT(distinct ?property_type; separator=', ') as ?property_types)
+            (count(?subject) as ?class_prop_occurences)
+            (count(distinct ?subject) as ?subj_distinct_count)
+            (count(distinct ?object) as ?obj_distinct_count)
+    "~from_statement~"
+    WHERE
+    {
+        VALUES  (?subject_class ?property) {( skos:Concept skosxl:altLabel )}
+
+        ?subject a ?subject_class; ?property ?object .
+        OPTIONAL { ?object  a ?object_class . }
+
+        # binding the Object and property types
+        BIND(datatype(?object) as ?data_type)
+        BIND(IF(BOUND(?object_class),?object_class, IF (bound(?data_type), ?data_type, rdfs:Resource) ) as ?object_type)
+        BIND(IF( isURI(?object) || isBlank( ?object ),owl:ObjectProperty , owl:DatatypeProperty) as ?property_type)
+    }
+    GROUP BY ?subject_class ?property
+    " %}
+    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% set caller_ = caller %}
+    {% call renderers.render_fetch_results(content, error) %}
+        {{ caller_(content) }}
     {% endcall %}
 {%- endmacro %}
