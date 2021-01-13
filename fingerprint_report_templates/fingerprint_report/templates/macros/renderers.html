@@ -59,3 +59,27 @@
         {{ render_error("How did you get here? did you forget to use 'render_fetch_results' macro?") }}
     {% endif %}
 {%- endmacro %}
+
+
+{% macro render_class_fingerprint(content, class_uri, graph_uri, inverted_prefixes) -%}
+    {# fingerprint resultset signature #}
+    {% set labels =
+    {
+    "subject_class" : "Subject class",
+    "subject_count": "Subjects using property",
+    "object_count": "Distinct values used",
+    "property": "Property URI",
+    "property_types": "Property kind",
+    "object_types": "Value type",
+    "min": "Min",
+    "max": "Max",
+    "avg": "Avg",} %}
+
+    {% set substituted_content = replace_strings_in_tabular(content,
+                                    target_columns=['property','property_types','object_types','subject_class'],
+                                    value_mapping_dict=inverted_prefixes,
+                                    mark_touched_rows=False ) %}
+
+    {% set table_title = "The shape of " + class_uri|safe + " class instances" %}
+    {{ render_pandas_table(content[["property","subject_count","min", "max", "avg", "property_types", "object_count","object_types"]], table_title, column_labels=labels) }}
+{%- endmacro %}

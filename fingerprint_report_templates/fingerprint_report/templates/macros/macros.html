@@ -1,205 +1,7 @@
-{# Default way of showing errors #}
-{% macro render_error(message) -%}
-    <div class="ui icon message error">
-        <i class="times circle icon"></i>
-        <div class="content">
-            <div class="header">
-                Error
-            </div>
-            <p>{{ message }}</p>
-        </div>
-    </div>
-{%- endmacro %}
+{# TODO: OLD set of macros to be removed #}
 
-{# Default macro for showing/wrapping the fetch results #}
-{% macro render_fetch_results(content, error) -%}
-    {% if error %}
-        {{ render_error(error) }}
-    {% else %}
-        {% if content is undefined %}
-            {{ render_error("Some content expected but none was found.") }}
-        {% else %}
-            {{ caller() }}
-        {% endif %}
-    {% endif %}
-{%- endmacro %}
-
-{# draw a generic pandas table#}
-{% macro render_pandas_table(df, caption, column_labels={}) -%}
-    {% if (df is defined) and (df is not none) %}
-        <table class="display">
-            <thead class="center aligned">
-            <tr>
-                {% for column in df.columns %}
-                    {% if column in column_labels %}
-                        <th>{{ column_labels[column] }}</th>
-                    {% else %}
-                        <th>{{ column }}</th>
-                    {% endif %}
-                {% endfor %}
-            </tr>
-            </thead>
-            <tbody>
-            {% for idx, row in df.iterrows() %}
-                <tr>
-                    {% for colname in df.columns %}
-                        {# handle decimal format: float, float64, float32 #}
-                        {% if 'float' in (df.dtypes[colname] | string) %}
-                            <td class="center aligned collapsing">{{ row[colname] | round(precision=2) }}</td>
-                        {% else %}
-                            <td class="center aligned collapsing">{{ row[colname]|e }}</td>
-                        {% endif %}
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-            </tbody>
-            <caption>{{ caption }}</caption>
-        </table>
-    {% else %}
-        {{ render_error("How did you get here? did you forget to use 'render_fetch_results' macro?") }}
-    {% endif %}
-{%- endmacro %}
-
-{############################################}
-{# fingerpritinging macros #}
-{############################################}
-
-{# select the graphs to fingerprint: either the ones grom the config file or all from the endpoint #}
-{% macro select_graphs() -%}
-    {# caller_ is a workaround necessary to handle two levels of callers #}
-    {% set caller_ = caller %}
-    {# if there are some graphs defined in the configuration, then select those #}
-    {% if conf.selected_graphs %}
-        {% for graph in conf.selected_graphs | unique | list %}
-            {% if graph %}
-                {{ caller_(graph) }}
-            {% else %}
-                {{ caller_(None) }}
-            {% endif %}
-        {% endfor %}
-    {% else %}
-        {# if no graphs are defined in the configurations, then select all the graphs in the endpoint #}
-        {% set select_query =
-            "select distinct ?graph
-            {graph ?graph {?s ?p []}} ORDER BY ?graph" %}
-        {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
-        {# Fingerpring the gefault graph before going to named graphs #}
-        {{ caller_(None) }}
-        {% call render_fetch_results(content, error) %}
-            {% if not content.empty %}
-                {% for row in content.itertuples() %}
-                    {{ caller_(row.graph) }}
-                {% endfor %}
-            {% endif %}
-        {% endcall %}
-    {% endif %}
-{%- endmacro %}
-
-{# select distinct classes is the given graph #}
-{% macro select_distinct_classes(graph=None) -%}
-    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
-    {% set select_query =
-    "SELECT DISTINCT ?cls \n"~from_statement~"
-    WHERE {[] a ?cls} ORDER BY ?cls" %}
-    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
-    {% set caller_ = caller %}
-    {% call render_fetch_results(content, error) %}
-        {% if not content.empty %}
-            {% for row in content.itertuples() %}
-                {{ caller_(row.cls) }}
-            {% endfor %}
-        {% endif %}
-    {% endcall %}
-{%- endmacro %}
-
-{# select distinct property given a class and graph #}
-{% macro select_distinct_property(class, graph=None) -%}
-    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
-    {% set select_query =
-    "SELECT DISTINCT ?property \n"~from_statement~"
-    WHERE{
-        VALUES  ?subject_class  { <"~class~"> }
-        ?subject a ?subject_class; ?property ?object .
-    } ORDER BY ?property" %}
-    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
-    {% set caller_ = caller %}
-    {% call render_fetch_results(content, error) %}
-        {% if not content.empty %}
-            {% for row in content.itertuples() %}
-                {{ caller_(row.property) }}
-            {% endfor %}
-        {% endif %}
-    {% endcall %}
-{%- endmacro %}
-
-{# select all the distinct (subject type, property) pairs in a given graph #}
-{% macro select_distinct_subject_property(graph=None) -%}
-    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
-    {% set select_query =
-    "SELECT DISTINCT ?class ?property \n"~from_statement~"
-    WHERE {[] a ?class ; ?property [] .}
-    ORDER BY ?class ?property
-    " %}
-    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
-    {% set caller_ = caller %}
-    {% call render_fetch_results(content, error) %}
-        {% if not content.empty %}
-            {% for row in content.itertuples() %}
-                {{ caller_(row.class, row.property) }}
-            {% endfor %}
-        {% endif %}
-    {% endcall %}
-{%- endmacro %}
-
-
-{# fetch the basic stats and pattern signature #}
-{% macro fetch_pattern_stats(class, property, graph=None) -%}
-    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
-    {% set select_query =
-    "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-    PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>
-    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    PREFIX owl: <http://www.w3.org/2002/07/owl#>
-
-    # get signature and stats of the class and property pattern
-    SELECT ?subject_class ?property
-            (GROUP_CONCAT(distinct ?object_type; separator=', ') as ?object_types)
-            (GROUP_CONCAT(distinct ?property_type; separator=', ') as ?property_types)
-            (count(?subject) as ?class_prop_occurences)
-            (count(distinct ?subject) as ?subj_distinct_count)
-            (count(distinct ?object) as ?obj_distinct_count)
-    "~from_statement~"
-    WHERE
-    {
-        VALUES  (?subject_class ?property) {( skos:Concept skosxl:altLabel )}
-
-        ?subject a ?subject_class; ?property ?object .
-        OPTIONAL { ?object  a ?object_class . }
-
-        # binding the Object and property types
-        BIND(datatype(?object) as ?data_type)
-        BIND(IF(BOUND(?object_class),?object_class, IF (bound(?data_type), ?data_type, rdfs:Resource) ) as ?object_type)
-        BIND(IF( isURI(?object) || isBlank( ?object ),owl:ObjectProperty , owl:DatatypeProperty) as ?property_type)
-    }
-    GROUP BY ?subject_class ?property
-    " %}
-    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
-    {% set caller_ = caller %}
-    {% call render_fetch_results(content, error) %}
-        {{ caller_(content) }}
-    {% endcall %}
-{%- endmacro %}
-
-
-
-{############################################}
-{# fingerpritinging old inefficient macros #}
-{############################################}
-
-{# TODO: mark as `unified slow query fingerprinter` #}
 {# fingerprint a given class in a given graph #}
-{% macro fingerprint_class(class, graph=None) -%}
+{% macro fingerprint_class_old(class, graph=None) -%}
     {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
     {% set select_query =
     "SELECT DISTINCT (?p as ?property)
@@ -248,9 +50,8 @@
 {%- endmacro %}
 
 
-{# TODO: shalle volve or disappear #}
 {# render a class fingerprint #}
-{% macro render_class_fingerprint(content, class_uri, graph_uri, inverted_prefixes) -%}
+{% macro render_class_fingerprint_old(content, class_uri, graph_uri, inverted_prefixes) -%}
     {# fingerprint resultset signature #}
     {% set labels = {"property": "Property name",
     "object_type": "Object class",
@@ -270,11 +71,11 @@
     {{ render_pandas_table(content, table_title, column_labels=labels) }}
 {%- endmacro %}
 
-{# TODO: shall evolve or disappear #}
 {# build fingerpring for each class in every graph from the endpoint #}
 {% macro build_default_endpoint_fingerprint(inverted_prefixes=None) -%}
     {% call(graph) select_graphs() %}
-        <h2>{{ 'Named graph ' + graph|safe + " fingerprints" if graph else "Default graph fingerprints" }}</h2>
+        {% set graph_title = str(graph)[:10] %}
+        <h2>{{ 'Named graph <...' + graph_title|safe + "> fingerprints" if graph else "Default graph fingerprints" }}</h2>
         <section>
             {% call(class) select_distinct_classes(graph) %}
                 {% call(fingerprint_content) fingerprint_class(class) %}
