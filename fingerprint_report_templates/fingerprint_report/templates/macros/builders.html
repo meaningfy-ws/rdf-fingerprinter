@@ -1,0 +1,19 @@
+{% import "macros/selectors.html" as selectors %}
+{% import "macros/renderers.html" as renderers %}
+
+{% macro build_default_endpoint_fingerprint(inverted_prefixes=None) -%}
+    {% call(graph) selectors.select_graphs() %}
+        <h2>{{ 'Named graph ' + graph|safe + " fingerprints" if graph else "Default graph fingerprints" }}</h2>
+        <section>
+            {% call(class) selectors.select_distinct_classes(graph) %}
+                <h3>Class {{ class|safe }}</h3>
+                {% call(class_fingerprint) selectors.fingerprint_pattern(graph=graph, class=class, property=None) %}
+                    {{ renderers.render_class_fingerprint(content=class_fingerprint,
+                                                            class_uri=class,
+                                                            graph_uri=graph,
+                                                            inverted_prefixes=inverted_prefixes) }}
+                {% endcall %}
+            {% endcall %}
+        </section>
+    {% endcall %}
+{%- endmacro %}

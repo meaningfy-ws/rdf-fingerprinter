@@ -1,0 +1,201 @@
+{% import "macros/renderers.html" as renderers %}
+
+{# select the graphs to fingerprint: either the ones grom the config file or all from the endpoint #}
+{% macro select_graphs() -%}
+    {# caller_ is a workaround necessary to handle two levels of callers #}
+    {% set caller_ = caller %}
+    {# if there are some graphs defined in the configuration, then select those #}
+    {% if conf.selected_graphs %}
+        {% for graph in conf.selected_graphs | unique | list %}
+            {% if graph %}
+                {{ caller_(graph) }}
+            {% else %}
+                {{ caller_(None) }}
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        {# if no graphs are defined in the configurations, then select all the graphs in the endpoint #}
+        {% set select_query =
+            "select distinct ?graph
+            {graph ?graph {?s ?p []}} ORDER BY ?graph" %}
+        {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+        {# Fingerpring the gefault graph before going to named graphs #}
+        {{ caller_(None) }}
+        {% call renderers.render_fetch_results(content, error) %}
+            {% if not content.empty %}
+                {% for row in content.itertuples() %}
+                    {{ caller_(row.graph) }}
+                {% endfor %}
+            {% endif %}
+        {% endcall %}
+    {% endif %}
+{%- endmacro %}
+
+{# select distinct classes is the given graph #}
+{% macro select_distinct_classes(graph=None) -%}
+    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set select_query =
+    "SELECT DISTINCT ?cls \n"~from_statement~"
+    WHERE {[] a ?cls} ORDER BY ?cls" %}
+    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% set caller_ = caller %}
+    {% call renderers.render_fetch_results(content, error) %}
+        {% if not content.empty %}
+            {% for row in content.itertuples() %}
+                {{ caller_(row.cls) }}
+            {% endfor %}
+        {% endif %}
+    {% endcall %}
+{%- endmacro %}
+
+{# select distinct property given a class and graph #}
+{% macro select_distinct_property(class, graph=None) -%}
+    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set select_query =
+    "SELECT DISTINCT ?property \n"~from_statement~"
+    WHERE{
+        VALUES  ?subject_class  { <"~class~"> }
+        ?subject a ?subject_class; ?property ?object .
+    } ORDER BY ?property" %}
+    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% set caller_ = caller %}
+    {% call renderers.render_fetch_results(content, error) %}
+        {% if not content.empty %}
+            {% for row in content.itertuples() %}
+                {{ caller_(row.property) }}
+            {% endfor %}
+        {% endif %}
+    {% endcall %}
+{%- endmacro %}
+
+{# fingerprint a given class propeorty pattern in a given graph. If the class of the propoerty
+is not provided the fingerprint will be provided for the propoerty with all classes or for the
+class with all properties #}
+{% macro fingerprint_pattern(graph=None, class=None, property=None) -%}
+    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set property_statement = '<'~property~'>' if property else 'undef' %}
+    {% set class_statement = '<'~class~'>' if class else 'undef' %}
+    {% set select_query =
+    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+    # get signature and stats of the class and property pattern
+    SELECT DISTINCT ?subject_class ?property
+            ?subject_count
+            ?class_instance_count
+            ?object_count
+            (if(?subject_count < ?class_instance_count, 0, min(?property_occurences)) as ?min)
+            (max(?property_occurences) as ?max)
+            (avg(?property_occurences) * ?subject_count/?class_instance_count as ?avg)
+            ?property_types
+            ?object_types
+    "~from_statement~"
+    WHERE
+    {
+        VALUES  (?subject_class ?property) {( "~class_statement~" "~property_statement~" )}
+        # getting the number of property occurences with each subject
+        {
+            SELECT DISTINCT ?subject_class ?subject ?property (count(*) as ?property_occurences)
+            { ?subject a ?subject_class; ?property [] . }
+            GROUP BY ?subject_class ?subject ?property
+        }
+        # getting the number of distinct subjects using the property
+        {
+            SELECT DISTINCT ?subject_class ?property (count(distinct ?subject) AS ?subject_count)
+            { ?subject a ?subject_class; ?property [] . }
+            GROUP BY ?subject_class ?property
+        }
+        # getting the total number of individuals instanciating the class
+        {
+            select ?subject_class  (count(distinct ?i) as ?class_instance_count)
+            { ?i a ?subject_class } GROUP BY ?subject_class
+        }
+        # getting the object type(s)
+        {
+            SELECT ?subject_class ?property
+                (GROUP_CONCAT(distinct ?object_type; separator=', ') as ?object_types)
+                (GROUP_CONCAT(distinct ?property_type; separator=', ') as ?property_types)
+                (count(distinct ?object) as ?object_count)
+            {
+                ?subject a ?subject_class; ?property ?object .
+                OPTIONAL { ?object  a ?object_class . }
+                # binding the Object and property types
+                BIND(datatype(?object) as ?data_type)
+                BIND(IF(BOUND(?object_class),?object_class, IF (bound(?data_type), ?data_type, rdfs:Resource) ) as ?object_type)
+                BIND(IF( isURI(?object) || isBlank( ?object ),owl:ObjectProperty , owl:DatatypeProperty) as ?property_type)
+            } GROUP BY ?subject_class ?property
+        }
+    } GROUP BY ?subject_class ?property ?subject_count ?class_instance_count ?object_types ?property_types ?object_count
+    " %}
+    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% set caller_ = caller %}
+    {% call renderers.render_fetch_results(content, error) %}
+        {% if not content.empty %}
+            {{ caller_(content) }}
+        {% endif %}
+    {% endcall %}
+{%- endmacro %}
+
+{#-----------------------------------------------------#}
+{# more granular fetchers, possibly useful for heavy queries #}
+{#-----------------------------------------------------#}
+
+{# select all the distinct (subject type, property) pairs in a given graph #}
+{% macro select_distinct_subject_property(graph=None) -%}
+    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set select_query =
+    "SELECT DISTINCT ?class ?property \n"~from_statement~"
+    WHERE {[] a ?class ; ?property [] .}
+    ORDER BY ?class ?property
+    " %}
+    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% set caller_ = caller %}
+    {% call renderers.render_fetch_results(content, error) %}
+        {% if not content.empty %}
+            {% for row in content.itertuples() %}
+                {{ caller_(row.class, row.property) }}
+            {% endfor %}
+        {% endif %}
+    {% endcall %}
+{%- endmacro %}
+
+
+{# fetch the basic stats and pattern signature #}
+{% macro fetch_pattern_stats(class, property, graph=None) -%}
+    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set select_query =
+    "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+    PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
+    # get signature and stats of the class and property pattern
+    SELECT ?subject_class ?property
+            (GROUP_CONCAT(distinct ?object_type; separator=', ') as ?object_types)
+            (GROUP_CONCAT(distinct ?property_type; separator=', ') as ?property_types)
+            (count(?subject) as ?class_prop_occurences)
+            (count(distinct ?subject) as ?subj_distinct_count)
+            (count(distinct ?object) as ?obj_distinct_count)
+    "~from_statement~"
+    WHERE
+    {
+        VALUES  (?subject_class ?property) {( skos:Concept skosxl:altLabel )}
+
+        ?subject a ?subject_class; ?property ?object .
+        OPTIONAL { ?object  a ?object_class . }
+
+        # binding the Object and property types
+        BIND(datatype(?object) as ?data_type)
+        BIND(IF(BOUND(?object_class),?object_class, IF (bound(?data_type), ?data_type, rdfs:Resource) ) as ?object_type)
+        BIND(IF( isURI(?object) || isBlank( ?object ),owl:ObjectProperty , owl:DatatypeProperty) as ?property_type)
+    }
+    GROUP BY ?subject_class ?property
+    " %}
+    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% set caller_ = caller %}
+    {% call renderers.render_fetch_results(content, error) %}
+        {{ caller_(content) }}
+    {% endcall %}
+{%- endmacro %}
