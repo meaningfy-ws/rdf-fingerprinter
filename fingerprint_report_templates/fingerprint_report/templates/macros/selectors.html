@@ -96,14 +96,14 @@ class with all properties #}
         VALUES  (?subject_class ?property) {( "~class_statement~" "~property_statement~" )}
         # getting the number of property occurences with each subject
         {
-            SELECT DISTINCT ?subject_class ?subject ?property (count(*) as ?property_occurences)
-            { ?subject a ?subject_class; ?property [] . }
-            GROUP BY ?subject_class ?subject ?property
+            SELECT DISTINCT ?subject_class ?subject1 ?property (count(*) as ?property_occurences)
+            { ?subject1 a ?subject_class; ?property [] . }
+            GROUP BY ?subject_class ?subject1 ?property
         }
         # getting the number of distinct subjects using the property
         {
-            SELECT DISTINCT ?subject_class ?property (count(distinct ?subject) AS ?subject_count)
-            { ?subject a ?subject_class; ?property [] . }
+            SELECT DISTINCT ?subject_class ?property (count(distinct ?subject2) AS ?subject_count)
+            { ?subject2 a ?subject_class; ?property [] . }
             GROUP BY ?subject_class ?property
         }
         # getting the total number of individuals instanciating the class
@@ -118,7 +118,7 @@ class with all properties #}
                 (GROUP_CONCAT(distinct ?property_type; separator=', ') as ?property_types)
                 (count(distinct ?object) as ?object_count)
             {
-                ?subject a ?subject_class; ?property ?object .
+                ?subject3 a ?subject_class; ?property ?object .
                 OPTIONAL { ?object  a ?object_class . }
                 # binding the Object and property types
                 BIND(datatype(?object) as ?data_type)
