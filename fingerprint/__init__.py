@@ -9,7 +9,7 @@ import logging.config
 
 __docformat__ = "restructuredtext en"
 
-__version__ = "0.2.7"
-__date__ = "2021-01-13"
+__version__ = "0.2.9"
+__date__ = "2021-01-21"
 
 logging.config.fileConfig('logging.conf')
