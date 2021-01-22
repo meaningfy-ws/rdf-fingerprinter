@@ -11,8 +11,8 @@
     {#    <link rel="stylesheet" type="text/css"#}
     {#          href="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.7/semantic.min.css">#}
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.7/semantic.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/stylesheets/jquery.tocify.min.css"
           rel="stylesheet"
           type="text/css">
@@ -48,17 +48,21 @@
             margin-top: 1em !important;
         }
 
-
         main {
             flex: 1 0 auto;
         }
 
-        footer div {
+        footer {
             background: #bdbdbd;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 50px;
+            margin: 0;
         }
 
         .footerText {
-
             margin: revert !important;
         }
 
@@ -74,6 +78,11 @@
             display: flex;
             min-height: 100vh;
             flex-direction: column;
+        }
+
+        .content {
+            margin-top: 2.5em;
+            padding: 0.1em;
         }
 
         #toc {
@@ -106,7 +115,6 @@
         @media print {
             footer {
                 display: none;
-
             }
         }
     </style>
@@ -115,55 +123,47 @@
 
 <body>
 
-<main>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-3">
-                <div id="toc"></div>
-            </div>
-            <div id="print-container" class="col-md-9">
-                <h1 class="text-center" id="skip-toc">{{ conf.title }}</h1>
-                <h3 class="text-center" id="skip-toc">[<em>{{ conf.type }}</em>]</h3>
+<main class="ui grid">
+    <div class="three wide column">
+        <div id="toc"></div>
+    </div>
+    <div id="print-container" class="ten wide column content">
+        <h1 class="text-center" id="skip-toc">{{ conf.title }}</h1>
+        <h3 class="text-center" id="skip-toc">[<em>{{ conf.type }}</em>]</h3>
 
-                <div class="">
-                    <h2 class="">Abstract</h2>
-                    <p> This document represents an automatically generated account of the class instantiation
-                        patterns. </p>
-                    <p> The datasource endpoint: <em>{{ conf.default_endpoint |e }}</em></p>
-                    {% if conf.selected_graphs %}
-                        <p> The fingerprinting is not applied to the entire endpoint but is limited to a set of graphs.
-                            The
-                            selected graphs to fingerprint are: </p>
-                        <ul>
-                            {% for gr in conf.selected_graphs | unique | list %}
-                                {% if gr %}
-                                    <li><em>{{ gr|e }}</em></li>
-                                {% else %}
-                                    <li><em>default graph</em></li>
-                                {% endif %}
+        <div>
+            <h2 class="">Abstract</h2>
+            <p> This document represents an automatically generated account of the class instantiation
+                patterns. </p>
+            <p> The datasource endpoint: <em>{{ conf.default_endpoint |e }}</em></p>
+            {% if conf.selected_graphs %}
+                <p> The fingerprinting is not applied to the entire endpoint but is limited to a set of graphs.
+                    The
+                    selected graphs to fingerprint are: </p>
+                <ul>
+                    {% for gr in conf.selected_graphs | unique | list %}
+                        {% if gr %}
+                            <li><em>{{ gr|e }}</em></li>
+                        {% else %}
+                            <li><em>default graph</em></li>
+                        {% endif %}
 
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                    <h2 class="">Keywords</h2>
-                    <em>application profile, structural metrics, data shapes, class instantiation patterns</em>
-                </div>
-                {% block content %}
-                    < empty >
-                {% endblock %}
-            </div>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <h2 class="">Keywords</h2>
+            <em>application profile, structural metrics, data shapes, class instantiation patterns</em>
         </div>
+        {% block content %}
+            < empty >
+        {% endblock %}
     </div>
 </main>
 
 <footer>
-    <div class="ui center aligned grid">
-        <div class="row">
-            <div class="column">
-                <p class="footerText">Powered by
-                    <a href="https://github.com/meaningfy-ws">Meaningfy</a></p>
-            </div>
-        </div>
+    <div class="ui container center aligned">
+        <p class="footerText">Powered by
+            <a href="https://github.com/meaningfy-ws">Meaningfy</a></p>
     </div>
 </footer>
 </body>
@@ -176,9 +176,6 @@
 <script src="https://code.jquery.com/jquery-migrate-1.4.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
         integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
 <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
 
