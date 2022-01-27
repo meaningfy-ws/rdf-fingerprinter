@@ -4,3 +4,4 @@ pathlib
 rdflib
 sparqlwrapper
 
+importlib-resources==5.4.0
