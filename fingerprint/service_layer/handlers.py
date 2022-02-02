@@ -25,7 +25,8 @@ logger = logging.getLogger('fingerprinter')
 
 def generate_endpoint_fingerprint_report(sparql_endpoint_url: str, output_location: Union[str, Path],
                                          selected_graphs: List[str] = None,
-                                         external_template_location: Union[str, Path] = None) -> str:
+                                         external_template_location: Union[str, Path] = None,
+                                         additional_config: dict = None) -> str:
     """
         Calculate the fingerprint of a given endpoint and write the report in the output location.
         Optionally the fingerprint calculation could be restricted to a particular named graph.
@@ -33,6 +34,7 @@ def generate_endpoint_fingerprint_report(sparql_endpoint_url: str, output_locati
     :param output_location: location of where to generate the report
     :param selected_graphs: a list of valid graph URIs or empty string for the default graph
     :param external_template_location: location of custom template (if None -> use the default template)
+    :param additional_config: a dictionary with additional configuration parameters (usually for storing constants)
     :return: path to the main report document
     """
     logger.debug('start generating fingerprinting report from endpoint')
@@ -48,6 +50,9 @@ def generate_endpoint_fingerprint_report(sparql_endpoint_url: str, output_locati
 
     updated_config_content = generate_report_builder_config(sparql_endpoint_url, selected_graphs,
                                                             external_template_location)
+    if additional_config:
+        updated_config_content["conf"].update(additional_config)
+
     report_builder = ReportBuilder(target_path=template_location, additional_config=updated_config_content,
                                    output_path=location)
     report_builder.make_document()
