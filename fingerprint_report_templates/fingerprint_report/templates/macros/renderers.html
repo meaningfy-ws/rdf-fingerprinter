@@ -75,11 +75,6 @@
     "max": "Max",
     "avg": "Avg",} %}
 
-{#    {% set substituted_content = replace_strings_in_tabular(content,#}
-{#                                    target_columns=['property','property_types','object_types','subject_class'],#}
-{#                                    value_mapping_dict=namespaces,#}
-{#                                    mark_touched_rows=False ) %}#}
-
     {% set compress_uris = simplify_uri_columns_in_tabular(data_frame=content,namespace_inventory=namespaces,error_fail=False) %}
 
     {% set table_title = "The shape of " + class_uri|safe + " class instances" %}

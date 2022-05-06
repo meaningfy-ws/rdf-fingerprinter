@@ -49,8 +49,6 @@ def test_generate_endpoint_fingerprint_report_default_template(tmpdir):
     :return:
     """
     output_path = tmpdir.mkdir("/output")
-    # output_path = pathlib.Path("./output").resolve()
-    # print(output_path)
 
     output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url=LOCAL_ENDPOINT,
                                                        output_location=str(output_path))
