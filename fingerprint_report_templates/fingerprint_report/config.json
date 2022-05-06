@@ -6,6 +6,8 @@
     "author": "Meaningfy.ws",
     "ns_file": "prefixes.json",
     "default_endpoint": "http://srv.meaningfy.ws:3030/test_bulk",
-    "selected_graphs": ["http://srv.meaningfy.ws:3030/test_bulk/data/abc"]
+    "selected_graphs": ["http://srv.meaningfy.ws:3030/test_bulk/data/abc"],
+    "default_file_path": "/home/lps/work/workspace-charm/rdf-fingerprinter/tests/test_data/treaties-source-ap.rdf",
+    "is_data_from_file": false
   }
 }

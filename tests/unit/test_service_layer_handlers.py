@@ -7,6 +7,7 @@
 
 """ """
 import json
+import pathlib
 from pathlib import Path
 
 from bs4 import BeautifulSoup
@@ -48,6 +49,8 @@ def test_generate_endpoint_fingerprint_report_default_template(tmpdir):
     :return:
     """
     output_path = tmpdir.mkdir("/output")
+    # output_path = pathlib.Path("./output").resolve()
+    # print(output_path)
 
     output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url=LOCAL_ENDPOINT,
                                                        output_location=str(output_path))
@@ -59,7 +62,7 @@ def test_generate_endpoint_fingerprint_report_default_template(tmpdir):
     assert main_title == 'Structural fingerprint'
 
     tables = soup.find_all('table')
-    assert len(tables) == 6
+    assert len(tables) == 7
 
     classes_list = ['owl#Ontology', 'core#ConceptScheme', 'skos-xl#Label',
                     'core#Concept', 'euvoc#Continent', 'euvoc#XlNotation']

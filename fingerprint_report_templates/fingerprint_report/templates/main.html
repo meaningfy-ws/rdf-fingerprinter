@@ -1,10 +1,9 @@
 {% extends "layout.html" %}
 {% import "macros/builders.html" as builders %}
+{% import "macros/renderers.html" as renderers %}
 
 {% block content %}
-    {# Read the and invert the namespace/prefix definitions for substitution #}
-    {% set prefixes, error = from_file(conf.template_path+'/prefixes.json').fetch_tree() %}
-    {% set inverted_prefixes = invert_dict(prefixes) %}
+    {% set namespaces = namespace_inventory({}) %}
 
     <h1>Class application profiles</h1>
     <section>
@@ -22,7 +21,16 @@
             (c) number of total occurrences of the pattern (d) minimal, (e) maximal and (f) average number of
             occurences.
         </p>
-        {{ builders.build_default_endpoint_fingerprint(inverted_prefixes) }}
+
+        {% if conf.is_data_from_file %}
+            {{ builders.build_default_file_fingerprint(namespaces) }}
+        {% else %}
+            {{ builders.build_default_endpoint_fingerprint(namespaces) }}
+        {% endif %}
     </section>
 
+    <h1>Prefixes</h1>
+    <section class="ui basic segment">
+        {{ renderers.render_namespaces(namespaces.namespaces_as_dict()) }}
+    </section>
 {% endblock %}

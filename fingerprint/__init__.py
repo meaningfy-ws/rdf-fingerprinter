@@ -12,4 +12,4 @@ __docformat__ = "restructuredtext en"
 __version__ = "0.2.11"
 __date__ = "2022-02-02"
 
-logging.config.fileConfig('logging.conf')
+# logging.config.fileConfig('logging.conf')
