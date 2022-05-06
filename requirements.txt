@@ -2,4 +2,4 @@ eds4jinja2~=0.1.36
 click~=8.0
 rdflib==5.0
 sparqlwrapper
-importlib-resources==5.7.1
+importlib-resources
