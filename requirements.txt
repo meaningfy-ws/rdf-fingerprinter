@@ -1,4 +1,4 @@
-eds4jinja2~=0.1.35
+eds4jinja2~=0.1.36
 click~=8.0
 rdflib~=6.1.1
 sparqlwrapper~=2.0.0
