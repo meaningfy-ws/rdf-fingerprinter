@@ -9,6 +9,7 @@ BUILD_PRINT = \e[1;34mSTEP: \e[0m
 install:
 	@ echo "$(BUILD_PRINT)Installing the requirements"
 	@ pip install --upgrade pip
+	@ pip install update
 	@ pip install -r requirements.txt
 	@ pip install -r requirements-dev.txt
 
