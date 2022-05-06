@@ -1,7 +1,5 @@
-eds4jinja2
-Click
-pathlib
-rdflib
+eds4jinja2~=0.1.36
+click~=8.0
+rdflib==5.0
 sparqlwrapper
-
-importlib-resources==5.4.0
+importlib-resources

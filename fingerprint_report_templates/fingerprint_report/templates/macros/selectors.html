@@ -18,7 +18,13 @@
         {% set select_query =
             "select distinct ?graph
             {graph ?graph {?s ?p []}} ORDER BY ?graph" %}
-        {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+
+        {%  if conf.is_data_from_file or false %}
+            {% set content, error = from_rdf_file(conf.default_file_path).with_query(select_query).fetch_tabular() %}
+        {% else %}
+            {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+        {% endif %}
+
         {# Fingerpring the gefault graph before going to named graphs #}
         {{ caller_(None) }}
         {% call renderers.render_fetch_results(content, error) %}
@@ -31,15 +37,25 @@
     {% endif %}
 {%- endmacro %}
 
+
 {# select distinct classes is the given graph #}
 {% macro select_distinct_classes(graph=None) -%}
-    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set from_statement = 'FROM <'~graph~'>' if graph and not conf.is_data_from_file else '' %}
     {% set select_query =
-    "SELECT DISTINCT ?cls \n"~from_statement~"
-    WHERE {[] a ?cls} ORDER BY ?cls" %}
-    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    "SELECT DISTINCT ?cls "~from_statement~"
+    WHERE {?c a ?cls} ORDER BY ?cls" %}
+
+    {%  if conf.is_data_from_file or false %}
+        <p>true</p>
+        {% set content, error = from_rdf_file(conf.default_file_path).with_query(select_query).fetch_tabular() %}
+        <p>erer</p>
+    {% else %}
+        {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% endif %}
+
     {% set caller_ = caller %}
     {% call renderers.render_fetch_results(content, error) %}
+
         {% if not content.empty %}
             {% for row in content.itertuples() %}
                 {{ caller_(row.cls) }}
@@ -50,14 +66,20 @@
 
 {# select distinct property given a class and graph #}
 {% macro select_distinct_property(class, graph=None) -%}
-    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set from_statement = 'FROM <'~graph~'>' if graph and not conf.is_data_from_file else '' %}
     {% set select_query =
     "SELECT DISTINCT ?property \n"~from_statement~"
     WHERE{
         VALUES  ?subject_class  { <"~class~"> }
         ?subject a ?subject_class; ?property ?object .
     } ORDER BY ?property" %}
-    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+
+    {%  if conf.is_data_from_file or false %}
+        {% set content, error = from_rdf_file(conf.default_file_path).with_query(select_query).fetch_tabular() %}
+    {% else %}
+        {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% endif %}
+
     {% set caller_ = caller %}
     {% call renderers.render_fetch_results(content, error) %}
         {% if not content.empty %}
@@ -72,7 +94,7 @@
 is not provided the fingerprint will be provided for the propoerty with all classes or for the
 class with all properties #}
 {% macro fingerprint_pattern(graph=None, class=None, property=None) -%}
-    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set from_statement = 'FROM <'~graph~'>' if graph and not conf.is_data_from_file else '' %}
     {% set property_statement = '<'~property~'>' if property else 'undef' %}
     {% set class_statement = '<'~class~'>' if class else 'undef' %}
     {% set select_query =
@@ -128,7 +150,14 @@ class with all properties #}
         }
     } GROUP BY ?subject_class ?property ?subject_count ?class_instance_count ?object_types ?property_types ?object_count
     " %}
-    {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+
+
+    {%  if conf.is_data_from_file or false %}
+        {% set content, error = from_rdf_file(conf.default_file_path).with_query(select_query).fetch_tabular() %}
+    {% else %}
+        {% set content, error = from_endpoint(conf.default_endpoint).with_query(select_query).fetch_tabular() %}
+    {% endif %}
+
     {% set caller_ = caller %}
     {% call renderers.render_fetch_results(content, error) %}
         {% if not content.empty %}
@@ -143,7 +172,7 @@ class with all properties #}
 
 {# select all the distinct (subject type, property) pairs in a given graph #}
 {% macro select_distinct_subject_property(graph=None) -%}
-    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set from_statement = 'FROM <'~graph~'>' if graph and not conf.is_data_from_file else '' %}
     {% set select_query =
     "SELECT DISTINCT ?class ?property \n"~from_statement~"
     WHERE {[] a ?class ; ?property [] .}
@@ -163,7 +192,7 @@ class with all properties #}
 
 {# fetch the basic stats and pattern signature #}
 {% macro fetch_pattern_stats(class, property, graph=None) -%}
-    {% set from_statement = 'FROM <'~graph~'>' if graph else '' %}
+    {% set from_statement = 'FROM <'~graph~'>' if graph and not conf.is_data_from_file else '' %}
     {% set select_query =
     "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
     PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>

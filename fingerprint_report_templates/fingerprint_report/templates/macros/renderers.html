@@ -61,7 +61,7 @@
 {%- endmacro %}
 
 
-{% macro render_class_fingerprint(content, class_uri, graph_uri, inverted_prefixes) -%}
+{% macro render_class_fingerprint(content, class_uri, graph_uri, namespaces) -%}
     {# fingerprint resultset signature #}
     {% set labels =
     {
@@ -75,11 +75,29 @@
     "max": "Max",
     "avg": "Avg",} %}
 
-    {% set substituted_content = replace_strings_in_tabular(content,
-                                    target_columns=['property','property_types','object_types','subject_class'],
-                                    value_mapping_dict=inverted_prefixes,
-                                    mark_touched_rows=False ) %}
+    {% set compress_uris = simplify_uri_columns_in_tabular(data_frame=content,namespace_inventory=namespaces,error_fail=False) %}
 
     {% set table_title = "The shape of " + class_uri|safe + " class instances" %}
-    {{ render_pandas_table(content[["property","subject_count","min", "max", "avg", "property_types", "object_count","object_types"]], table_title, column_labels=labels) }}
+    {{ render_pandas_table(compress_uris[["property","subject_count","min", "max", "avg", "property_types", "object_count","object_types"]], table_title, column_labels=labels) }}
 {%- endmacro %}
+
+
+{% macro render_namespaces(namesapces_dist) %}
+    <table class="display">
+        <thead class="center aligned">
+        <tr>
+            <th>Namespace</th>
+            <th>URI</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for prefix, uri in namesapces_dist|dictsort %}
+            <tr>
+                <td>{{ prefix }}</td>
+                <td>{{ uri }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <caption>Prefixes</caption>
+    </table>
+{% endmacro %}

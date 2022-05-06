@@ -7,6 +7,7 @@
 
 """ """
 import json
+import pathlib
 from pathlib import Path
 
 from bs4 import BeautifulSoup
@@ -59,7 +60,7 @@ def test_generate_endpoint_fingerprint_report_default_template(tmpdir):
     assert main_title == 'Structural fingerprint'
 
     tables = soup.find_all('table')
-    assert len(tables) == 6
+    assert len(tables) == 7
 
     classes_list = ['owl#Ontology', 'core#ConceptScheme', 'skos-xl#Label',
                     'core#Concept', 'euvoc#Continent', 'euvoc#XlNotation']
