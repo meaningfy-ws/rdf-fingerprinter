@@ -1,19 +1,18 @@
 # Testing Dependencies
-pytest
-coverage
-pytest-cov
-pytest-bdd==4.1.0
-beautifulsoup4==4.9.3  # https://www.crummy.com/software/BeautifulSoup/bs4/doc/
+pytest~=7.4.2
+coverage~=7.3.2
+pytest-cov~=4.1.0
+pytest-bdd~=7.0.0
+beautifulsoup4~=4.12.2
 
 # Linting dependencies
-flake8
+flake8~=6.1.0
 
 # Documentation Dependencies
-sphinx
-recommonmark
+sphinx~=7.1.2
+recommonmark~=0.7.1
 
 # pipy publishing
-twine
-setuptools
-wheel
-
+twine~=4.0.2
+setuptools~=68.2.2
+wheel~=0.41.2

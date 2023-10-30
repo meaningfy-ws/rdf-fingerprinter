@@ -48,15 +48,14 @@ setup(
     keywords='rdf, application profile, data shape, statistics, fingerprint, sparql, linked-data',
     packages=packages,
     # exclude=["tests", "test_*"],
+    license='Apache License 2.0'
     classifiers=[
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Environment :: Console",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
         "Topic :: Utilities",
         "Topic :: Scientific/Engineering :: Information Analysis",
