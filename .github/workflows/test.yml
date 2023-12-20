@@ -40,6 +40,11 @@ jobs:
       run: |
         make test
 
+    - name: Test packaging
+      run: |
+        python setup.py sdist bdist_wheel
+        twine check dist/*
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
