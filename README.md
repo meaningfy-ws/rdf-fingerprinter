@@ -26,7 +26,7 @@ RDF fingerprinter may be installed with pip as follows.
 ```
 pip install rdf-fingerprinter
 ```
-Nore that Python version 3.7 or later is required.  
+Note that Python version 3.8 or later is required.
 
 # Usage
 
