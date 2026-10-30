@@ -5,11 +5,9 @@
 # Author: Eugeniu Costetchi
 # Email: costezki.eugen@gmail.com
 
-import logging.config
+from importlib.metadata import version
 
 __docformat__ = "restructuredtext en"
 
-__version__ = "0.3.1"
-__date__ = "2024-02-01"
-
-logging.config.fileConfig('logging.conf')
+# The version lives in pyproject.toml only (DEC-2).
+__version__ = version("rdf-fingerprinter")
