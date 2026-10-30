@@ -1,0 +1,17 @@
+# Ruff — formatter + linter (replaces flake8, DEC-3). Same rule set as eds4jinja2.
+line-length = 127
+target-version = "py312"
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "W",   # pycodestyle warnings
+    "I",   # import sorting
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+]
+
+[format]
+quote-style = "double"
+indent-style = "space"

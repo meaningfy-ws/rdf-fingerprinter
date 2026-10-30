@@ -1,0 +1,62 @@
+name: docs
+
+# Build the AsciiDoc/Antora site on every PR (validation), and deploy it to GitHub Pages
+# on merge to master or when run by hand from master (Actions → docs → Run workflow).
+# GitHub Pages is the sole published site; its environment accepts master only.
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+    paths:
+      - 'docs/**'
+      - 'package.json'
+      - '.github/workflows/docs.yml'
+      - 'README.md'
+  pull_request:
+    branches: [ master ]
+    paths:
+      - 'docs/**'
+      - 'package.json'
+      - '.github/workflows/docs.yml'
+      - 'README.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Antora site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build the docs
+        run: make build-docs
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/build/site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,64 @@
+# Minimal pyproject.toml — Meaningfy standard (no-src, config-in-root).
+# Only [project], [dependency-groups], [tool.poetry], [build-system] live here; every tool is
+# configured in its own root file: ruff.toml · mypy.ini · pytest.ini · .coveragerc · .importlinter
+
+[project]
+name = "rdf-fingerprinter"
+version = "1.0.0"
+description = "Find out kind of data shapes your RDF dataset instantiates."
+readme = "README.md"
+requires-python = ">=3.12,<4.0"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Eugeniu Costetchi", email = "costezki.eugen@gmail.com" }]
+maintainers = [{ name = "Eugeniu Costetchi", email = "costezki.eugen@gmail.com" }]
+keywords = ["rdf", "application profile", "data shape", "statistics", "fingerprint", "sparql", "linked-data"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Environment :: Console",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Topic :: Utilities",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+]
+# Only what the code imports directly; eds4jinja2 brings pandas, SPARQLWrapper, rdflib (DEC-12).
+dependencies = [
+    "eds4jinja2>=2.0.0,<3",
+    "click>=8.5.0,<9",
+]
+
+[project.urls]
+Homepage = "https://github.com/meaningfy-ws/rdf-fingerprinter"
+Documentation = "https://meaningfy-ws.github.io/rdf-fingerprinter/"
+
+[project.scripts]
+fingerprint = "fingerprint.entrypoints.cli.main:fingerprint_endpoint"
+
+[dependency-groups]
+test = [
+    "beautifulsoup4==4.15.0",
+    "pytest==9.1.1",
+    "pytest-cov==7.1.0",
+]
+lint = [
+    "ruff==0.17.3",
+    "mypy==2.4.1",
+    "import-linter==2.15",
+]
+
+[tool.poetry]
+# No-src layout: include the top-level packages directly; templates ship as package data.
+packages = [{ include = "fingerprint" }, { include = "fingerprint_report_templates" }]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

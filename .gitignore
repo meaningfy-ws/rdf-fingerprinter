@@ -137,3 +137,8 @@ junit_report.xml
 *.ldb
 /fuseki-fingerprinter-volume/fuseki/
 /tests/unit/output/
+
+# Antora
+docs/build/
+node_modules/
+package-lock.json

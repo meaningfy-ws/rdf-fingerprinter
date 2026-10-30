@@ -114,8 +114,8 @@ class with all properties #}
         # getting the object type(s)
         {
             SELECT ?subject_class ?property
-                (GROUP_CONCAT(distinct ?object_type; separator=', ') as ?object_types)
-                (GROUP_CONCAT(distinct ?property_type; separator=', ') as ?property_types)
+                (GROUP_CONCAT(distinct STR(?object_type); separator=', ') as ?object_types)
+                (GROUP_CONCAT(distinct STR(?property_type); separator=', ') as ?property_types)
                 (count(distinct ?object) as ?object_count)
             {
                 ?subject3 a ?subject_class; ?property ?object .
@@ -173,8 +173,8 @@ class with all properties #}
 
     # get signature and stats of the class and property pattern
     SELECT ?subject_class ?property
-            (GROUP_CONCAT(distinct ?object_type; separator=', ') as ?object_types)
-            (GROUP_CONCAT(distinct ?property_type; separator=', ') as ?property_types)
+            (GROUP_CONCAT(distinct STR(?object_type); separator=', ') as ?object_types)
+            (GROUP_CONCAT(distinct STR(?property_type); separator=', ') as ?property_types)
             (count(?subject) as ?class_prop_occurences)
             (count(distinct ?subject) as ?subj_distinct_count)
             (count(distinct ?object) as ?obj_distinct_count)

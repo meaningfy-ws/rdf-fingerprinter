@@ -3,7 +3,7 @@
 # main.py
 # Date:  18/10/2020
 # Author: Eugeniu Costetchi
-# Email: costezki.eugen@gmail.com 
+# Email: costezki.eugen@gmail.com
 
 """ """
 
@@ -14,7 +14,7 @@ import click
 
 from fingerprint.service_layer.handlers import generate_endpoint_fingerprint_report
 
-logger = logging.getLogger('fingerprinter')
+logger = logging.getLogger(__name__)
 
 
 @click.command()
@@ -27,11 +27,14 @@ def fingerprint_endpoint(sparql_endpoint_url: str, output: str):
     :param output:
     :return:
     """
-    logger.debug('start fingerprinting endpoint')
+    # the application, not the library, configures logging (DEC-9)
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)5s %(name)s: %(message)s")
+    logger.debug("start fingerprinting endpoint")
     output_location = pathlib.Path(output)
-    output_file = generate_endpoint_fingerprint_report(sparql_endpoint_url=sparql_endpoint_url,
-                                                       output_location=output_location)
-    logger.debug('end fingerprinting endpoint')
+    output_file = generate_endpoint_fingerprint_report(
+        sparql_endpoint_url=sparql_endpoint_url, output_location=output_location
+    )
+    logger.info("fingerprint report written to %s", output_file)
 
 
 if __name__ == "__main__":

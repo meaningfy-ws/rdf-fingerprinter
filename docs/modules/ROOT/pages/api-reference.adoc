@@ -1,0 +1,73 @@
+= API Reference
+
+The library has one entry point, in `fingerprint.service_layer.handlers`.
+
+== generate_endpoint_fingerprint_report
+
+[source,python]
+----
+from pathlib import Path
+from fingerprint.service_layer.handlers import generate_endpoint_fingerprint_report
+
+report = generate_endpoint_fingerprint_report(
+    sparql_endpoint_url="https://my.endpoint/sparql",
+    output_location=Path("report"),
+    selected_graphs=["http://example.org/graph/a", "http://example.org/graph/b"],
+)
+print(report)  # report/main.html
+----
+
+[cols="2,2,4"]
+|===
+| Parameter | Type | Meaning
+
+| `sparql_endpoint_url` | `str` | The SPARQL query endpoint.
+| `output_location` | `str \| Path` | An existing folder; `NotADirectoryError` otherwise.
+| `selected_graphs` | `list[str] \| None` | Named graph IRIs to fingerprint, one section each; `""` is the default graph. `None` means the default graph only.
+| `external_template_location` | `str \| Path \| None` | A custom template folder (below); `None` uses the packaged template.
+| `additional_config` | `dict \| None` | Extra values merged into the template's `conf` (for example `title`).
+|===
+
+Returns the `Path` of the main report document.
+
+== generate_report_builder_config
+
+[source,python]
+----
+generate_report_builder_config(sparql_endpoint_url, selected_graphs, external_template_location) -> dict
+----
+
+Reads the template's `config.json` and sets `conf.default_endpoint` and `conf.selected_graphs`.
+`generate_endpoint_fingerprint_report` calls it; use it to inspect the configuration a report
+will get.
+
+[#custom-templates]
+== Custom templates
+
+A template folder holds a `config.json` and a `templates/` folder of
+https://github.com/meaningfy-ws/eds4jinja2[eds4jinja2] Jinja templates:
+
+----
+my_template/
+├── config.json
+└── templates/
+    └── main.html
+----
+
+[source,json]
+----
+{
+  "template": "main.html",
+  "conf": { "title": "My structural fingerprint", "type": "report" }
+}
+----
+
+The templates read `conf.default_endpoint` and `conf.selected_graphs` and fetch data with
+eds4jinja2 (`from_endpoint(...).with_query(...).fetch_tabular()`). Start from the packaged
+template in `fingerprint_report_templates/fingerprint_report/`; its macros in
+`templates/macros/` hold the SPARQL queries.
+
+== Logging
+
+Modules log through `logging.getLogger(__name__)` (`fingerprint.service_layer.handlers`, ...)
+and configure nothing; configure logging in your application.
