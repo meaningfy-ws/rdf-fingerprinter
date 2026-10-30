@@ -1,0 +1,29 @@
+= RDF Fingerprinter
+
+*Understand the structure of your RDF data at a glance.* RDF Fingerprinter queries a SPARQL
+endpoint and writes an HTML report of the data shapes the dataset instantiates: for each class,
+which properties its instances use, how often, and with what kind of values.
+
+An https://en.wikipedia.org/wiki/Application_profile[_application profile_] is the set of
+https://www.w3.org/2014/data-shapes/wiki/Main_Page[_data shapes_] designed for a particular
+purpose, acting as constraints on how the data is instantiated. _Fingerprinting_ guesses the
+application profile a dataset actually follows: it reconstructs, inductively, the shape of every
+class instantiated in the data. Comparing two fingerprints shows how two datasets differ in
+structure.
+
+[cols="1,3"]
+|===
+| Install | `pip install rdf-fingerprinter` (Python 3.12+)
+| Run | `fingerprint -e https://my.endpoint/sparql -o report/`
+| Library | `generate_endpoint_fingerprint_report(...)` — see xref:api-reference.adoc[]
+| Source | https://github.com/meaningfy-ws/rdf-fingerprinter
+| Package | https://pypi.org/project/rdf-fingerprinter/
+| Licence | Apache 2.0
+|===
+
+The report is rendered with https://github.com/meaningfy-ws/eds4jinja2[eds4jinja2] templates
+that embed their SPARQL queries; the default template ships with the package and can be replaced
+by your own (xref:api-reference.adoc#custom-templates[custom templates]).
+
+NOTE: The https://github.com/meaningfy-ws/rdf-fingerprinter-ws[rdf-fingerprinter-ws] service
+builds an API and UI on top of this library.

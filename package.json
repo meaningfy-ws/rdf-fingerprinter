@@ -1,0 +1,14 @@
+{
+  "name": "rdf-fingerprinter-docs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Antora documentation build for rdf-fingerprinter",
+  "scripts": {
+    "build": "antora docs/antora-playbook.yml"
+  },
+  "devDependencies": {
+    "@antora/cli": "^3.1.0",
+    "@antora/site-generator": "^3.1.0",
+    "@antora/lunr-extension": "^1.0.0-alpha.13"
+  }
+}

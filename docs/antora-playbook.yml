@@ -1,0 +1,28 @@
+# Builds the site from this checkout (CI and local); published to GitHub Pages by docs.yml.
+site:
+  title: RDF Fingerprinter Documentation
+  url: https://meaningfy-ws.github.io/rdf-fingerprinter
+  start_page: rdf-fingerprinter::index.adoc
+
+content:
+  sources:
+    - url: ./..
+      start_path: docs
+      branches: [HEAD]
+      edit_url: false
+
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+
+asciidoc:
+  attributes:
+    idprefix: ''
+    idseparator: '-'
+    page-pagination: ''
+
+antora:
+  extensions:
+    - require: '@antora/lunr-extension'
+      snippet_length: 250

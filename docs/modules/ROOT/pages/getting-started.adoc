@@ -1,0 +1,41 @@
+= Getting Started
+
+== Install
+
+[source,shell]
+----
+pip install rdf-fingerprinter
+----
+
+Python 3.12 or later is required (tested on 3.12, 3.13 and 3.14).
+
+== Fingerprint an endpoint
+
+Point the `fingerprint` command at a SPARQL query endpoint and an *existing* output folder:
+
+[source,shell]
+----
+mkdir -p report
+fingerprint -e https://my.endpoint/sparql -o report
+----
+
+[cols="1,1,3"]
+|===
+| Option | Default | Meaning
+
+| `-e`, `--sparql_endpoint_url` | (required) | The SPARQL query endpoint to fingerprint.
+| `-o`, `--output` | `./output` | Folder the report is written to; it must exist.
+|===
+
+The command writes `main.html` into the folder and logs its progress (one line per query) to
+stderr. The report covers the default graph; to fingerprint named graphs, or to use your own
+template, call the library (xref:api-reference.adoc[]).
+
+TIP: Any SPARQL 1.1 store works. The templates are tested against
+https://github.com/oxigraph/oxigraph[Oxigraph] and Apache Jena Fuseki.
+
+== Upgrading from 0.3
+
+1.0 needs Python 3.12+, runs on eds4jinja2 2 (pandas 3 / numpy 2), and no longer configures
+logging when imported: configure logging in your application. The full list is in the
+https://github.com/meaningfy-ws/rdf-fingerprinter/blob/master/CHANGELOG.md[CHANGELOG].

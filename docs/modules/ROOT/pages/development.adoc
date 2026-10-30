@@ -1,0 +1,51 @@
+= Development
+
+Requires Poetry, Docker, and Node.js (for `make check-spec` and the docs).
+
+[source,shell]
+----
+make install                    # Poetry env with the test and lint groups
+make check-all                  # lint, types, layers, OpenSpec, unit tests — the gate CI runs
+make oxigraph-load-test-data    # in-memory Oxigraph on :7878 with the test graphs
+make test-e2e                   # end-to-end tests against it (local only)
+make build                      # sdist + wheel, checks the templates are in the wheel
+make preview-docs               # build this site and serve it on :8088
+----
+
+== Tests
+
+[cols="1,3"]
+|===
+| Suite | Runs
+
+| `tests/unit` | Without a SPARQL store; in `make check-all` and in CI.
+| `tests/e2e` | Against the store at `RDF_FINGERPRINTER_TEST_ENDPOINT` (default
+`http://localhost:7878/query`, the Oxigraph from `make oxigraph-load-test-data`). Local only:
+run them before a release.
+|===
+
+Point `RDF_FINGERPRINTER_TEST_ENDPOINT` at any other store loaded with `tests/test_data` to
+check the templates there.
+
+== Layout
+
+[cols="1,3"]
+|===
+| Path | Holds
+
+| `fingerprint/service_layer/handlers.py` | Report generation (the API).
+| `fingerprint/entrypoints/cli/main.py` | The `fingerprint` CLI (click).
+| `fingerprint_report_templates/fingerprint_report/` | The packaged template: `config.json`, Jinja templates, SPARQL macros, `prefixes.json`.
+| `openspec/` | Specifications and changes (the spine).
+|===
+
+Layers are enforced by import-linter: `entrypoints` may import `service_layer`, never the reverse.
+
+== Releasing
+
+. Update `version` in `pyproject.toml` and the `CHANGELOG.md`.
+. Run `make check-all` and `make test-e2e`.
+. Publish a GitHub Release tagged `vX.Y.Z`. The `publish` workflow runs the gate, builds, and
+uploads to PyPI with Trusted Publishing (no token).
+
+Docs deploy to GitHub Pages on every merge to `master` that touches `docs/`.

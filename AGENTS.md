@@ -95,10 +95,11 @@ artifacts above; do not reintroduce parallel epic files under `.claude/`.
   eds4jinja2 report templates + SPARQL queries). No `/src`.
 - **Modules:** `fingerprint/service_layer/handlers.py` (report generation),
   `fingerprint/entrypoints/cli/main.py` (click CLI).
-- **External systems:** any SPARQL endpoint; tests use a local Fuseki (`make start-fuseki`,
-  `make fuseki-create-test-dbs`, config in `docker/`).
+- **External systems:** any SPARQL endpoint; tests use a local Oxigraph
+  (`make oxigraph-load-test-data`, config in `docker/`) for the local-only `tests/e2e`; the
+  endpoint comes from `RDF_FINGERPRINTER_TEST_ENDPOINT`. `tests/unit` need no store.
 - **Deployable?** no — released as a Python package.
-- **Make targets:** `make install`, `make test`, `make start-fuseki` / `stop-fuseki`,
-  `make fuseki-create-test-dbs`, `make publish-pipy`. Tooling is still pip + setup.py; the move to
-  the Meaningfy standard is tracked in `openspec/changes/`.
+- **Make targets:** `make install` (Poetry), `make check-all` (the gate), `make test`, `make build`,
+  `make test-e2e`, `make oxigraph-load-test-data`, `make build-docs`. Releases publish from a
+  GitHub Release via Trusted Publishing (`publish.yml`); docs deploy to GitHub Pages (`docs.yml`).
 - **GitNexus repo name:** rdf-fingerprinter
