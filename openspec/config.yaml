@@ -1,0 +1,31 @@
+schema: meaningfy
+
+# Project context — injected (wrapped in <context>) into every artifact's instructions.
+# This is OpenSpec's native project-context sink. The durable truth is openspec/specs/;
+# this string is the orientation index. If a generated index is ever wanted, regenerate it
+# deterministically into this field (like codegen, with a CI sync-check) — do NOT hand-curate
+# a parallel MEMORY.md.
+context: |
+  Repo: RDF Fingerprinter (rdf-fingerprinter).
+  Purpose: a library + `fingerprint` CLI that runs SPARQL queries against an endpoint and
+  renders an HTML report of the data shapes (classes/properties) the RDF dataset instantiates.
+  Archetype: library, published to PyPI as `rdf-fingerprinter`.
+  Current layout: fingerprint/service_layer (handlers), fingerprint/entrypoints/cli (click);
+  report templates in fingerprint_report_templates/ (eds4jinja2). No domain/adapters layer yet;
+  target is cosmic-python layering enforced by .importlinter (not yet present).
+  Tests need a local Fuseki (`make fuseki-create-test-dbs`, docker-compose in docker/).
+  Top-level package: fingerprint (no /src). Default branch: master.
+  Commits: Conventional Commits (imperative, no trailing punctuation).
+  Artifact vocabulary: EPIC ≡ proposal.md (Shape-Up work shape);
+  PLAN ≡ design.md + tasks.md (clarity gate scores the pair ≥9/10);
+  normative requirements ≡ specs/ deltas (RFC-2119 SHALL + Given/When/Then, no EARS).
+
+# Per-artifact rules — THIN by design. Only the 3 hard rules; rich per-artifact rules are
+# deferred. Additive to the schema's built-in instructions.
+rules:
+  proposal:
+    - The EPIC MUST state an Appetite and a No-gos section (an EPIC without no-gos is unshaped).
+  specs:
+    - Use RFC-2119 SHALL/MUST; every requirement MUST have at least one #### Scenario (WHEN/THEN). No EARS.
+  tasks:
+    - The PLAN MUST cite its parent EPIC id on the first line (golden thread — cite your parent).
