@@ -1,0 +1,13 @@
+# Coverage is reported, not gated — a floor is a later change.
+[run]
+relative_files = True
+# sys.monitoring tracer: the default tracer makes the pandas-heavy report runs ~12x slower
+core = sysmon
+source = fingerprint
+omit = */__init__.py
+
+[report]
+show_missing = true
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:

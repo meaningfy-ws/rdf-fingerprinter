@@ -1,0 +1,10 @@
+[importlinter]
+root_package = fingerprint
+
+# Today's layers only; the domain/adapters split waits for a real need (DEC-4).
+[importlinter:contract:layers]
+name = fingerprint layers
+type = layers
+layers =
+    fingerprint.entrypoints
+    fingerprint.service_layer
