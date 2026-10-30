@@ -1,0 +1,77 @@
+# Publish to PyPI on a GitHub Release, via Trusted Publishing (OIDC — no API token, DEC-5).
+#
+# One-time setup on PyPI: register a Trusted Publisher for this project pointing at
+#   owner/repo:   meaningfy-ws/rdf-fingerprinter
+#   workflow:     publish.yml
+#   environment:  release
+# See https://docs.pypi.org/trusted-publishers/ . Until that is configured the publish job
+# fails (by design — no token fallback). Run `make test-e2e` locally before publishing a release.
+name: publish
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: check-all (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Poetry
+        run: pipx install "poetry>=2.0.0,<3.0.0"
+      - name: Install dependencies
+        run: |
+          poetry env use python
+          make install
+      - name: Gate (lint, types, architecture, spec, unit tests)
+        run: make check-all
+
+  build:
+    name: Build distribution
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install Poetry
+        run: pipx install "poetry>=2.0.0,<3.0.0"
+      - name: Build sdist and wheel
+        run: |
+          make build
+          pipx run twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  pypi:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write   # mint the OIDC token for Trusted Publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          attestations: true   # PEP 740 provenance attestations, signed via OIDC
