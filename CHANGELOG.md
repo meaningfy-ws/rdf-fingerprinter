@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
-## [1.0.0] - unreleased
+## [1.0.0] - 2026-10-31
 
 Modernisation release (OpenSpec change `adopt-meaningfy-tooling`). The public API is unchanged;
 the breaking changes below are bundled into the first stable release.

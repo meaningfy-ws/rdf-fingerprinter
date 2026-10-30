@@ -102,4 +102,12 @@ artifacts above; do not reintroduce parallel epic files under `.claude/`.
 - **Make targets:** `make install` (Poetry), `make check-all` (the gate), `make test`, `make build`,
   `make test-e2e`, `make oxigraph-load-test-data`, `make build-docs`. Releases publish from a
   GitHub Release via Trusted Publishing (`publish.yml`); docs deploy to GitHub Pages (`docs.yml`).
+- **Release authority (developer, 2026-10-31):** an agent MAY merge a PR to `master` and publish a
+  release without asking again, when all of these hold: the PR's CI checks are green; `make
+  check-all` and `make test-e2e` (against `make oxigraph-load-test-data`) pass locally; the version
+  in `pyproject.toml` is bumped per SemVer and `CHANGELOG.md` has its entry. A release is a
+  `vX.Y.Z` tag plus a published GitHub Release (`gh release create`); `publish.yml` uploads to PyPI
+  with Trusted Publishing — no token exists or is needed. Report the release URL afterwards.
+  Changing repository or environment settings still needs the developer's go-ahead.
+- **Commits and PRs carry no AI attribution** (no `Co-Authored-By`, no "Generated with" line).
 - **GitNexus repo name:** rdf-fingerprinter
