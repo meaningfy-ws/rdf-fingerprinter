@@ -106,7 +106,8 @@ artifacts above; do not reintroduce parallel epic files under `.claude/`.
   release without asking again, when all of these hold: the PR's CI checks are green; `make
   check-all` and `make test-e2e` (against `make oxigraph-load-test-data`) pass locally; the version
   in `pyproject.toml` is bumped per SemVer and `CHANGELOG.md` has its entry. A release is a
-  `vX.Y.Z` tag plus a published GitHub Release (`gh release create`); `publish.yml` uploads to PyPI
+  bare `X.Y.Z` tag (no `v`; the `release` environment accepts only `[0-9]*.[0-9]*.[0-9]*`) plus a
+  published GitHub Release (`gh release create`); `publish.yml` uploads to PyPI
   with Trusted Publishing — no token exists or is needed. Report the release URL afterwards.
   Changing repository or environment settings still needs the developer's go-ahead.
 - **Commits and PRs carry no AI attribution** (no `Co-Authored-By`, no "Generated with" line).

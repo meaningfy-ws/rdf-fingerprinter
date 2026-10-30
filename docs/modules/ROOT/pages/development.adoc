@@ -45,7 +45,7 @@ Layers are enforced by import-linter: `entrypoints` may import `service_layer`, 
 
 . Update `version` in `pyproject.toml` and the `CHANGELOG.md`.
 . Run `make check-all` and `make test-e2e`.
-. Publish a GitHub Release tagged `vX.Y.Z`. The `publish` workflow runs the gate, builds, and
+. Publish a GitHub Release tagged `X.Y.Z` (no `v` prefix). The `publish` workflow runs the gate, builds, and
 uploads to PyPI with Trusted Publishing (no token).
 
 Docs deploy to GitHub Pages on every merge to `master` that touches `docs/`.
