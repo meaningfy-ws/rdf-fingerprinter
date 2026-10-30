@@ -8,9 +8,9 @@ cheap, breaking changes are not a problem"; extended the same day: release as **
 on GitHub Pages, eds4jinja2's CI/CD minus e2e in GitHub). The public Python API and the report
 output stay. Hardening is the next EPIC.
 
-**Status: IN REVIEW** — all tasks done and verified locally; PR
-[#36](https://github.com/meaningfy-ws/rdf-fingerprinter/pull/36) to `master` (2026-10-31).
-eds4jinja2 2.0.0 is on PyPI and measured (DEC-8, `inputs/eds4jinja2-findings.md`).
+**Status: DONE** — merged in PR [#36](https://github.com/meaningfy-ws/rdf-fingerprinter/pull/36)
+and released as **1.0.0** on 2026-10-31 (GitHub Release `1.0.0`, published to PyPI by
+`publish.yml` via Trusted Publishing; docs live at https://meaningfy-ws.github.io/rdf-fingerprinter/).
 
 ## Why
 
