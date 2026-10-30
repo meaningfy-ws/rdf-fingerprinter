@@ -1,8 +1,10 @@
 name: docs
 
 # Build the AsciiDoc/Antora site on every PR (validation), and deploy it to GitHub Pages
-# on merge to master. GitHub Pages is the sole published site.
+# on merge to master or when run by hand from master (Actions → docs → Run workflow).
+# GitHub Pages is the sole published site; its environment accepts master only.
 on:
+  workflow_dispatch:
   push:
     branches: [ master ]
     paths:
@@ -38,14 +40,14 @@ jobs:
       - name: Build the docs
         run: make build-docs
       - name: Upload Pages artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/build/site
 
   deploy:
     name: Deploy to GitHub Pages
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     needs: build
     runs-on: ubuntu-latest
     permissions:
