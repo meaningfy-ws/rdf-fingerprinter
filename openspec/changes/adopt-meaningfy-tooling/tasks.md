@@ -1,9 +1,14 @@
 > Derives from: EPIC adopt-meaningfy-tooling (proposal.md)
 
+## 0. Prerequisite (blocked)
+
+- [ ] 0.1 eds4jinja2 released with loosened numpy/pandas pins and installable on 3.12–3.14 (DEC-8; done upstream by the developer)
+
 ## 1. Packaging
 
 - [ ] 1.1 Add Poetry `pyproject.toml` (DEC-2, DEC-7) and `poetry.lock`; remove setup.py, setup.cfg, requirements*.txt, MANIFEST.in
-- [ ] 1.2 Verify the wheel ships `fingerprint_report_templates` and the `fingerprint` script works (Requirement: Tokenless release)
+- [ ] 1.2 Upgrade eds4jinja2 to the 0.1 release and move the `ReportBuilder` import to `eds4jinja2.services.report_builder`; Fuseki suites green (DEC-8)
+- [ ] 1.3 Verify the wheel ships `fingerprint_report_templates` and the `fingerprint` script works (Requirement: Tokenless release)
 
 ## 2. Quality gates
 
@@ -19,7 +24,7 @@
 
 ## Roadmap
 
-- [ ] 1.1 · [ ] 1.2 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3
+- [ ] 0.1 · [ ] 1.1 · [ ] 1.2 · [ ] 1.3 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3
 
 ## Verification
 

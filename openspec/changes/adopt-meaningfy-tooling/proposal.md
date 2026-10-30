@@ -4,6 +4,9 @@
 
 SMALL — tooling and packaging only; the library's behaviour and public API stay as they are.
 
+**Status: BLOCKED** on an upstream eds4jinja2 release with loosened numpy/pandas pins (DEC-8,
+`inputs/eds4jinja2-findings.md`). Resume at task 0.1 once it is on PyPI.
+
 ## Why
 
 The library is still on `setup.py` + `requirements.txt`, runs no lint/type/architecture checks,
@@ -28,14 +31,20 @@ PyPI Trusted Publishing. Gaps and the reasons for each item are in `inputs/gap-r
   domain/adapters split waits for a real need; rejected: scaffolding empty layer packages now.
 - **DEC-5**: Trusted Publishing (OIDC) from a `release.yaml`; rejected: `PIPY_USER_TOKEN` secret.
 - **DEC-6**: Keep Sphinx/Read the Docs for now; rejected: Antora migration in this change.
-- **DEC-7**: Minimum Python **3.12** (developer decision, 2026-10-30; matches the local toolchain, 3.12–3.14); rejected: 3.8/3.9 (EOL), 3.10/3.11 (developer chose the newer floor).
+- **DEC-7**: Minimum Python **3.12** (developer decision, 2026-10-30), supported 3.12–3.14 once
+  DEC-8's upstream release lands; rejected: 3.8/3.9 (EOL), 3.10/3.11 (developer chose the newer floor).
+- **DEC-8**: Keep **eds4jinja2** and fix it upstream: release it with loosened pins
+  (`numpy>=1.26,<3`, `pandas>=2.2,<3`), then depend on that release here; rejected: dropping it
+  (templates are built on pandas DataFrames, a rewrite changes report output and forks shared
+  logic), staying on 1.0.4 (numpy~=1.26 caps us at 3.12). Evidence: `inputs/eds4jinja2-findings.md`.
 
 ## Rabbit-holes
 
 - Lint debt: run `ruff --fix` once in its own commit; do not hand-polish legacy code.
 - Coverage: both suites need Fuseki, so the threshold is measured with Fuseki up in CI; do not
   build mocks to chase a number in this change.
-- `eds4jinja2` pins old transitive dependencies; if resolution fails on 3.12+, stop and park it.
+- `eds4jinja2` 1.x moved `ReportBuilder` to `eds4jinja2.services.report_builder`; change the one
+  import, do not chase other 1.x features here. Speed work on eds4jinja2 is out of scope (measure first).
 
 ## No-gos
 
@@ -51,6 +60,7 @@ PyPI Trusted Publishing. Gaps and the reasons for each item are in `inputs/gap-r
 - Add `pyproject.toml` (Poetry) and `poetry.lock`; remove `setup.py`, `setup.cfg`,
   `requirements.txt`, `requirements-dev.txt`, `MANIFEST.in`.
 - **BREAKING**: drop Python 3.8–3.11 support (DEC-7).
+- Upgrade `eds4jinja2` 0.2 → the upstream release from DEC-8; update the `ReportBuilder` import.
 - Add `ruff.toml`, `mypy.ini`, `pytest.ini`, `.coveragerc`, `.importlinter`.
 - Makefile: `install` via Poetry; add `lint`, `format`, `typecheck`, `check-architecture`,
   `validate-specs`, `check-all`; `build` replaces `publish-pipy`.
