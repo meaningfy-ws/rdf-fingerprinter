@@ -11,9 +11,11 @@ context: |
   renders an HTML report of the data shapes (classes/properties) the RDF dataset instantiates.
   Archetype: library, published to PyPI as `rdf-fingerprinter`.
   Current layout: fingerprint/service_layer (handlers), fingerprint/entrypoints/cli (click);
-  report templates in fingerprint_report_templates/ (eds4jinja2). No domain/adapters layer yet;
-  target is cosmic-python layering enforced by .importlinter (not yet present).
-  Tests need a local Fuseki (`make fuseki-create-test-dbs`, docker-compose in docker/).
+  report templates in fingerprint_report_templates/ (eds4jinja2 2.x). No domain/adapters layer yet;
+  layers enforced by .importlinter (`make check-architecture`). Poetry; Python 3.12–3.14.
+  Gate: `make check-all` (unit tests, no store; what CI runs). tests/e2e need a SPARQL store:
+  Oxigraph (`make oxigraph-load-test-data`, then `make test-e2e`), local only; endpoint from
+  RDF_FINGERPRINTER_TEST_ENDPOINT. Docs: Antora in docs/, GitHub Pages (`make build-docs`).
   Top-level package: fingerprint (no /src). Default branch: master.
   Commits: Conventional Commits (imperative, no trailing punctuation).
   Artifact vocabulary: EPIC ≡ proposal.md (Shape-Up work shape);

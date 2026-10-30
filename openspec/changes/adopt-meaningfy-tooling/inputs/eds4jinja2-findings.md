@@ -30,3 +30,46 @@ Measured in a throwaway Python 3.12 venv against the current `requirements.txt`.
 Keep eds4jinja2 (developer, 2026-10-30). The developer first releases an eds4jinja2 with loosened
 pins (target `numpy>=1.26,<3`, `pandas>=2.2,<3`, so 3.12–3.14 install); this change resumes on that
 release. Performance work on eds4jinja2 is a separate, measurement-led effort.
+
+## Update: eds4jinja2 2.0.0 measured (2026-10-30)
+
+The developer released **eds4jinja2 2.0.0** on PyPI instead of a pin-loosening 1.x. Its
+`pyproject.toml`: `requires-python >=3.12,<4.0` (classifiers 3.12–3.14), major-version ranges
+`pandas>=3.1,<4`, `numpy>=2.5.4,<3`, `rdflib>=7.6,<8`, `click>=8.5,<9`, `SPARQLWrapper>=2.0,<3`,
+`Jinja2>=3.1.6,<4`, plus `pydantic`, `requests`, `PyYAML`, `python-calamine`; optional `oxigraph`
+extra. It no longer installs `xlrd`, `openpyxl`, `toml`, `py-singleton`, `beautifulsoup4`.
+
+Measured in throwaway uv venvs, the code with only the `ReportBuilder` import moved to
+`eds4jinja2.services.report_builder`, against a local Fuseki loaded with `tests/test_data`
+(continents + treaties graphs and the default graph):
+
+| Run | Python | eds4jinja2 / pandas / numpy | `pytest tests` | report all graphs | report treaties graph |
+|---|---|---|---|---|---|
+| baseline | 3.11 | 0.2.x / 2.0.3 / 1.x | 6 passed | 5.4 s | 13.3 s |
+| upgrade | 3.12 | 2.0.0 / 3.1.0 / 2.5.4 | 6 passed | 5.9 s | 14.5 s |
+| upgrade | 3.13 | 2.0.0 / 3.1.0 / 2.5.4 | 6 passed | — | — |
+| upgrade | 3.14 | 2.0.0 / 3.1.0 / 2.5.4 | 6 passed | 5.8 s | 15.6 s |
+
+- **Report output is byte-identical** (`main.html` md5 equal across baseline, 3.12 and 3.14 for
+  both runs), so the report-output No-go holds. The `float` branch in `macros/renderers.html` is
+  exercised (rounded decimals appear); pandas 3 `str` dtype changes nothing visible.
+- **Speed**: single runs, about 8–17 % slower, within noise of SPARQL latency; not a blocker.
+  Performance work stays a separate, measurement-led effort.
+- `beautifulsoup4` is only a test dependency here, already declared in `requirements-dev.txt`;
+  it moves to the Poetry test group.
+- Effective lower bounds rise through eds4jinja2 (`rdflib>=7.6`, `click>=8.5`); our own
+  constraints may stay as written, the resolver picks the compatible versions.
+- Seen while testing, out of scope: `fingerprint/__init__.py` runs `logging.config.fileConfig('logging.conf')`
+  relative to the CWD, so importing the package outside the repo root fails (the known
+  logging-on-import defect); `handlers.py` uses the legacy `importlib.resources.path(package, name)` (aliased
+  `pkg_resources`), which warns as deprecated on 3.12 only (3.13 un-deprecated it); the
+  `importlib_resources` fallback branch is dead on 3.12+ and `importlib-resources` can be dropped.
+- Oxigraph 0.5.13 as a SPARQL server (same test data): the first run rendered `nan` in the
+  object/property type columns — the templates `GROUP_CONCAT` IRIs, an error in strict SPARQL 1.1
+  that Fuseki tolerates. Wrapping the arguments in `STR()` fixes Oxigraph and leaves the Fuseki
+  report byte-identical. What still differs is spec-legal: decimal lexical form (`1` vs `1.0`)
+  and `GROUP_CONCAT` order. Oxigraph rendered the treaties report in 8.6 s vs 13.3 s on Fuseki.
+  eds4jinja2's in-process `oxigraph` engine is not used: the fingerprinter talks HTTP to an endpoint.
+- Coverage's default tracer slowed the report tests ~12× (174 s vs 14 s); `core = sysmon` fixes it.
+
+**Decision confirmed**: depend on `eds4jinja2>=2.0,<3`; minimum Python 3.12 (DEC-7, DEC-8).
