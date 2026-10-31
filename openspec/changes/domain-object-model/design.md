@@ -74,7 +74,8 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
     {slug, label, diagram, classes*}`, `DocumentClass {iri, label, anchor, instances, precision, sampled,
     parents*, properties*}`, `ParentReference {label, source}`, `DocumentProperty {iri, label, types*,
     cardinality, usage, inheritance}`, `Caveats {sampled*, failures*, skipped*}`, `SampledClass {graph,
-    class_label, precision}`, `FailureNote {graph, class_label, measurement, message}`.
+    class_label, precision}`, `FailureNote {graph, class_label, measurement, message}` (`measurement` is the text
+    Jinja prints today: `str(query_kind)`).
   
   Frozen, `extra=forbid`. **Template edits** (a Pydantic object iterates as `(field, value)` pairs, so
   every tuple unpacking must go; the rendered text stays the same):
@@ -140,12 +141,18 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   - `make_document()` keeps its behaviour.
   **The port** (`TemplateRenderer` in `service_layer/generators/generator.py`) becomes:
   `prefixes: dict[str, str]` (# dict-ok: prefix table); `render(package, outputs: list[tuple[str,
-  BaseModel]], *, autoescape) -> list[RenderedDocument]` (in memory, through `render_documents`); and
-  `make(package, outputs, *, folder, check, autoescape) -> list[Path]` (through `make_documents`). The
+  BaseModel]], *, conf, autoescape) -> list[RenderedDocument]` (in memory, through `render_documents`);
+  and `make(package, outputs, *, conf, folder, check, autoescape) -> list[Path]` (through
+  `make_documents`). `conf` is what the template sees as `conf` — the analytics as `conf.profile`
+  for every format (documented for custom templates), and for the report the 1.x keys and the
+  caller's `extra_conf` — passed to `ReportBuilder(additional_config={"conf": …})` inside the adapter
+  (`# dict-ok: eds4jinja2 configuration`); at the port it is the 1.x mapping for the report (public
+  API) and `{"profile": analytics}` built in the adapter for the generators. The
   adapter turns the typed `(file name, view)` pairs into eds4jinja2's mapping (`# dict-ok: eds4jinja2
   outputs`). `Generator.serialize()` uses `render`; `Generator.write()` uses `make`. The document gets
   its diagrams as today — `make_generator` calls the PlantUML generator's `serialize()` (in memory) and
-  passes the texts by slug to the document generator. The report uses `make` with one output. The
+  passes them to the document generator as `list[RenderedDocument]` (`DocumentGenerator(diagrams:
+  list[RenderedDocument])`, looked up by slug inside the generator). The report uses `make` with one output. The
   `template_env` guard test goes. Released as eds4jinja2
   2.1.0 **with the developer's go-ahead** (that repository grants agents no release authority);
   rdf-fingerprinter then requires `eds4jinja2>=2.1,<3`. If the release is refused, task 6.1 is dropped
@@ -189,7 +196,8 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   passes to ignore the environment, is read through a `MappingConfigResolver(mapping)` and parsed the
   same way); its `cli`/`env`/`config` mapping parameters are public API (`# dict-ok: documented
   resolve_settings signature`); it builds `Settings(**{slot: first
-  non-None})` (construction syntax), maps `ValidationError` to `UsageError`, then applies the `(0, 1]`
+  non-None})` (construction syntax; inside `resolve_settings` the global configuration is imported as
+  `fingerprint_config`, since the `config` parameter keeps its 1.x name), maps `ValidationError` to `UsageError`, then applies the `(0, 1]`
   threshold rule. *Accepted difference:* each source is type-checked on its own, so a malformed value
   in a lower-precedence source now fails even when a higher one overrides it (today the merged result
   was checked once); the CHANGELOG states it. `settings_sources.py` goes. Stays constant (standards and
@@ -243,7 +251,7 @@ but for timestamps and version; `make test-e2e` after groups 3 and 6.
 
 | Failure mode | How it is detected | Expected handling |
 |---|---|---|
-| a body that is not SPARQL results JSON | `Result.parse` raises `ValueError` | `PermanentError` "unreadable response" |
+| a body that is not SPARQL results JSON | `Result.parse` raises `ValueError`, `ResultException` or (no `bindings`) `KeyError` | `PermanentError` "unreadable response" |
 | HTTP 500 with a timeout marker in the body | `HTTPError` 500 + marker check | `QueryTimeout` (unchanged rule) |
 | HTTP 429/502/503, connection reset | `urllib.error` | transient → retried per `RDF_FINGERPRINTER_RETRY_BACKOFF_SECONDS` |
 | per-query timeout | `socket.timeout` / `TimeoutError` | `QueryTimeout` |

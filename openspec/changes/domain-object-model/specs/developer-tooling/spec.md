@@ -25,8 +25,9 @@ classes SHALL be immutable (frozen) and reject unknown fields.
 
 ### Requirement: Values are domain objects
 Code in `fingerprint/` SHALL pass, return and store LinkML-generated Pydantic objects and enums, never
-composed dicts. `make check-all` SHALL fail on a dict display, dict comprehension or `dict(...)` call
-inside a function, or a `dict`/`Mapping` parameter or return annotation, unless the line is marked
+composed dicts. `make check-all` SHALL fail on a dict display, a dict comprehension or a call to
+`dict`, `dict.fromkeys`, `defaultdict`, `OrderedDict` or `Counter` inside a function, or a `dict`,
+`Mapping` or `defaultdict` parameter, return or attribute annotation, unless the line is marked
 `# dict-ok: <reason>`; module-level constant tables, keyword arguments to `model_copy(update=…)` and
 dicts unpacked with `**` into a constructor are allowed.
 
