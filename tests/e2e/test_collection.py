@@ -1,5 +1,6 @@
 """Collection and analysis of the loaded test store (`make oxigraph-load-test-data`)."""
 
+import json
 from pathlib import Path
 
 from fingerprint.adapters.profile_file import load_profile
@@ -33,4 +34,15 @@ def test_a_live_collection_equals_the_sample_profile():
     sample = load_profile(Path(__file__).parents[1] / "test_data" / "profiles" / "sample-profile.json")
     run = collect(LOCAL_ENDPOINT, sample.settings, SparqlHttpClient(LOCAL_ENDPOINT, sample.settings.timeout_seconds))
     varying = {"started_at", "finished_at", "tool_version"}
-    assert run.model_dump(exclude_none=True, exclude=varying) == sample.model_dump(exclude_none=True, exclude=varying)
+    assert ordered(run.model_dump(exclude_none=True, exclude=varying)) == ordered(
+        sample.model_dump(exclude_none=True, exclude=varying)
+    )
+
+
+def ordered(value):
+    """Lists sorted by their JSON text: stores may return rows (e.g. property partitions) in any order."""
+    if isinstance(value, dict):
+        return {key: ordered(item) for key, item in value.items()}  # dict-ok: comparing JSON dumps
+    if isinstance(value, list):
+        return sorted((ordered(item) for item in value), key=lambda item: json.dumps(item, sort_keys=True, default=str))
+    return value
