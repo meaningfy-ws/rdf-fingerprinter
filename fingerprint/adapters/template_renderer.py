@@ -4,14 +4,26 @@ Rendering goes through `ReportBuilder.template_env`, not `make_document()`, so o
 several files and every text is checked before any file is written.
 """
 
+import json
 from collections.abc import Callable, Mapping
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
 import rdflib
 from eds4jinja2.services.report_builder import ReportBuilder
 
+import fingerprint_report_templates
 from fingerprint.adapters.exceptions import GeneratedOutputError, TemplatePackageError
+from fingerprint.domain.iri import curie, to_iriref, turtle_number, turtle_string, turtle_term
+
+# The one prefix list of the package, shared with the report (P-7).
+PREFIXES_FILE = Path(str(files(fingerprint_report_templates) / "fingerprint_report" / "templates" / "prefixes.json"))
+
+
+def load_prefixes(path: Path = PREFIXES_FILE) -> dict[str, str]:
+    """`{"skos": "http://www.w3.org/2004/02/skos/core#", …}` from the report's `{"skos:": …}` file."""
+    return {prefix.rstrip(":"): namespace for prefix, namespace in json.loads(path.read_text()).items()}
 
 
 def _parse_turtle(text: str) -> None:
@@ -22,8 +34,17 @@ CHECKS: dict[str, Callable[[str], None]] = {"turtle": _parse_turtle}
 
 
 class JinjaTemplateRenderer:
-    def __init__(self, filters: Mapping[str, Callable[..., Any]] | None = None):
-        self.filters = dict(filters or {})
+    """Every template gets the IRI and literal filters, so custom templates can escape like the packaged ones."""
+
+    def __init__(self, prefixes: Mapping[str, str] | None = None):
+        self.prefixes = dict(load_prefixes() if prefixes is None else prefixes)
+        self.filters: dict[str, Callable[..., Any]] = {
+            "turtle_iri": to_iriref,
+            "turtle_term": lambda iri: turtle_term(iri, self.prefixes)[0],
+            "turtle_string": turtle_string,
+            "turtle_number": turtle_number,
+            "curie": lambda iri: curie(iri, self.prefixes),
+        }
 
     def render(
         self,

@@ -47,3 +47,15 @@ def test_invalid_turtle_writes_nothing(tmp_path):
     with pytest.raises(GeneratedOutputError, match="bad.ttl"):
         JinjaTemplateRenderer().write(tmp_path, texts, check="turtle")
     assert not list(tmp_path.iterdir())
+
+
+def test_the_filters_escape_for_custom_templates(tmp_path):
+    body = "{{ view.iri | turtle_term }} {{ view.text | turtle_string }} {{ view.iri | curie }}"
+    renderer = JinjaTemplateRenderer(prefixes={"ex": "http://ex.org/"})
+    view = {"iri": "http://ex.org/a", "text": 'say "x"'}
+    assert renderer.render(package(tmp_path, body), view=view) == 'ex:a "say \\"x\\"" ex:a'
+
+
+def test_the_packaged_prefixes_are_loaded_once_without_colons():
+    prefixes = JinjaTemplateRenderer().prefixes
+    assert prefixes["skos"] == "http://www.w3.org/2004/02/skos/core#" and not any(p.endswith(":") for p in prefixes)
