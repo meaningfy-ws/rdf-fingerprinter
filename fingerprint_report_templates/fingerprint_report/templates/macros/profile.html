@@ -1,4 +1,5 @@
-{# Renderers over conf.profile (ProfileAnalytics); no queries are issued here (DEC-6). #}
+{# Renderers over conf.profile (ProfileAnalytics); no queries are issued here (DEC-6).
+   render_report enables autoescape for this template: endpoint data is untrusted. #}
 
 {# Shorten an IRI with the first matching prefix from prefixes.json ({"skos:": "http://…#"}). #}
 {% macro curie(iri, prefixes) -%}

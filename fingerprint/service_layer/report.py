@@ -48,7 +48,12 @@ def render_report(
     config["conf"]["default_endpoint"] = analytics.endpoint
     config["conf"]["selected_graphs"] = profiled
     config["conf"]["profile"] = analytics
-    ReportBuilder(
+    builder = ReportBuilder(
         target_path=template_location or DEFAULT_TEMPLATE_LOCATION, additional_config=config, output_path=location
-    ).make_document()
+    )
+    if template_location is None:
+        # Endpoint data is untrusted and eds4jinja2 disables autoescape; templates compile on first load,
+        # so this applies to every template of the packaged report. Custom templates keep 1.x behaviour.
+        builder.template_env.autoescape = True
+    builder.make_document()
     return location / config["template"]

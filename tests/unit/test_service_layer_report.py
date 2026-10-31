@@ -100,3 +100,11 @@ def test_profiled_graphs_and_extra_constants_reach_the_template(tmp_path):
     soup = rendered(tmp_path, profile, extra_conf={"title": "Custom title"})[1]
     assert soup.find("h1", attrs={"id": "skip-toc"}).text == "Custom title"
     assert "default graph" in soup.get_text(" ") and EX + "g" in soup.get_text(" ")
+
+
+def test_endpoint_values_are_escaped(tmp_path):
+    evil = "http://x/<script>alert(1)</script>"
+    failure = {"query_kind": "class_partitions", "graph": evil, "class_iri": evil, "message": "skipping"}
+    raw = {"endpoint": "http://e", "settings": {}, "graphs": [{"graph": evil}], "failures": [failure]}
+    html = render_report(analyse(ProfileRun.model_validate(raw)), tmp_path).read_text()
+    assert "<script>alert" not in html and "&lt;script&gt;alert(1)" in html
