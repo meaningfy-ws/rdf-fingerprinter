@@ -22,6 +22,7 @@ source_modules =
 forbidden_modules =
     fingerprint.domain.iri
     fingerprint.domain.analytics
+    fingerprint.domain.exceptions
     fingerprint.adapters
     fingerprint.service_layer
     fingerprint.entrypoints
@@ -35,3 +36,17 @@ forbidden_modules =
     SPARQLWrapper
     eds4jinja2
     click
+
+# I/O libraries are reached only through adapters (profile-representations P-12). Indirect imports
+# are allowed: handlers builds the default SPARQL client, which imports SPARQLWrapper itself.
+[importlinter:contract:service-io]
+name = service layer imports no I/O library itself
+type = forbidden
+source_modules =
+    fingerprint.service_layer
+forbidden_modules =
+    jinja2
+    eds4jinja2
+    rdflib
+    SPARQLWrapper
+allow_indirect_imports = True

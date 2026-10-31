@@ -18,7 +18,7 @@ TEST_DATA = tests/test_data
 GRAPH_BASE = http://publications.europa.eu/resources/authority
 OXIGRAPH = http://localhost:$(RDF_FINGERPRINTER_OXIGRAPH_PORT)
 # Coverage is reported, not gated.
-COV_FLAGS = --cov=$(PACKAGE_NAME) --cov-report=term --cov-report=xml:coverage.xml
+COV_FLAGS = --cov=$(PACKAGE_NAME) --cov-report=term --cov-report=xml:coverage.xml --cov-fail-under=80
 
 .DEFAULT_GOAL := help
 

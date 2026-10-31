@@ -2,8 +2,8 @@
 
 ## 1. Scaffolding
 
-- [ ] 1.0 Gherkin projected from UC-W2/UC-B2.1/UC-B2.2 (`docs/modules/ROOT/pages/use-cases/`), the spec scenarios and the error matrix: `tests/features/profile_representations.feature`; the two `fingerprint-report` scenarios added to `tests/features/fingerprint_report.feature`; every scenario of every feature, 2.0 ones included, tagged with its use case and the tags registered in `pytest.ini` (DEC-9, P-17)
-- [ ] 1.1 rdflib declared as a runtime dependency, pySHACL added to the `test` group, lock updated; `--cov-fail-under=80` in `make test`; empty modules of the P-12 table; `.importlinter` contract "service layer imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself" (`allow_indirect_imports = True`) added (expected red until 2.2); `fingerprint.domain.exceptions` in the `generated` contract (P-12, P-17)
+- [x] 1.0 Gherkin projected from UC-W2/UC-B2.1/UC-B2.2 (`docs/modules/ROOT/pages/use-cases/`), the spec scenarios and the error matrix: `tests/features/profile_representations.feature`; the two `fingerprint-report` scenarios added to `tests/features/fingerprint_report.feature`; every scenario of every feature, 2.0 ones included, tagged with its use case and the tags registered in `pytest.ini` (DEC-9, P-17)
+- [x] 1.1 rdflib declared as a runtime dependency, pySHACL added to the `test` group, lock updated; `--cov-fail-under=80` in `make test`; empty modules of the P-12 table; `.importlinter` contract "service layer imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself" (`allow_indirect_imports = True`) added (expected red until 2.2); `fingerprint.domain.exceptions` in the `generated` contract (P-12, P-17)
 - [ ] 1.2 A fixed test profile `tests/test_data/profiles/sample-profile.json`, collected once from the existing continents and treaties data (`make oxigraph-load-test-data`) with fixed `started_at`/`finished_at`/`tool_version`, plus small hand-built profiles in `tests/unit/fakes.py` for first-N, failures and unusual IRIs (no new RDF data)
 
 ## 2. Layer clean-up of 2.0 (behaviour unchanged, existing tests green)
@@ -26,7 +26,7 @@
 
 - [ ] 4.1 `ShaclGenerator` hooks: counts from the label, value constraints from `value_partitions` (langString rule), the severity table incl. presence-only, first-N and `any_graph` rows, classes with no observed instances, annotations, shape IRIs, used prefixes (DEC-5, P-9, P-10; Requirement: SHACL shapes)
 - [ ] 4.2 Template package `fingerprint_report_templates/shacl_shapes/` (`config.json`, `templates/shapes.ttl`); `check` parses the Turtle
-- [ ] 4.3 Golden file `tests/test_data/golden/shapes-*.ttl` from the sample profile; pySHACL (`inference="none"`), asserting that no result has severity `sh:Violation` (not `sh:conforms`): the continents graph's shapes on `continents-source-ap.rdf`, the treaties graph's on `treaties-source-ap.rdf`, the default graph's on both files parsed into one graph (Requirements: Golden outputs; SHACL shapes)
+- [ ] 4.3 Golden file `tests/test_data/golden/shapes-*.ttl` from the sample profile; pySHACL (`inference="none"`), asserting that no result has severity `sh:Violation` (not `sh:conforms`): the continents graph's shapes on `continents-source-ap.rdf`, the treaties graph's on `treaties-source-ap.rdf`, the default graph's on `continents-source-ap.rdf` (the only file `make oxigraph-load-test-data` loads there; no union default graph) (Requirements: Golden outputs; SHACL shapes)
 
 ## 5. PlantUML generator
 
@@ -52,11 +52,12 @@
 - [ ] 8.1 Antora page `docs/modules/ROOT/pages/representations.adoc` (commands, files, SHACL mapping and severities, custom templates); nav, getting-started and api-reference updated; how-it-works, UC-W2/UC-B2.x and AD-7..AD-10 brought in line with what was built (drop the "(2.1)" markers)
 - [ ] 8.2 CHANGELOG 2.1.0, version bump in `pyproject.toml`
 - [ ] 8.3 Pre-PR review (five lenses, `meaningfy-code-review`); act on findings
-- [ ] 8.4 `/opsx:archive` the change into `openspec/specs/`
+- [ ] 8.4 Living-spec alignment with the architecture docs (harden-fingerprinter check, 2026-10-31), as deltas in this change: `statistics-collection` settings precedence in full, error classes and the response per collection stage; `fingerprint-report` exit 3 only at the start, read-only queries, credential redaction, refusal before any query, library exceptions and custom template constants; `developer-tooling` "Reports on strict SPARQL stores" restated (templates issue no queries); AGENTS.md project specifics and the stale `(DEC-9)` comment in `entrypoints/cli/main.py` corrected
+- [ ] 8.5 `/opsx:archive` the change into `openspec/specs/`
 
 ## Roadmap
 
-- [ ] 1.0 · [ ] 1.1 · [ ] 1.2 · [ ] 2.0 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.0 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 3.4 · [ ] 3.5 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4
+- [x] 1.0 · [x] 1.1 · [ ] 1.2 · [ ] 2.0 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.0 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 3.4 · [ ] 3.5 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

@@ -6,8 +6,8 @@ what it observed.
 
 ----
  1 collect   endpoint ──SPARQL──▶ profile run (raw counts)              service layer + SPARQL adapter
- 2 analyse   profile run ──────▶ analytics (indicators)                 domain, pure
- 3 save      profile run ──────▶ profile.json                (2.1)      Profile store
+ 2 save      profile run ──────▶ profile.json                (2.1)      Profile store
+ 3 analyse   profile run ──────▶ analytics (indicators)                 domain, pure
  4 render    analytics ────────▶ report, SHACL, diagram, doc (2.1)      eds4jinja2 templates
 ----
 
@@ -70,7 +70,15 @@ small questions per class:
 
 The result is a _profile run_: raw counts only, no judgement.
 
-== 2. Analyse: from counts to indicators
+== 2. Save: the profile file (from 2.1)
+
+As soon as collection ends, before anything is rendered, the raw run is written to `profile.json`.
+If that write fails (a full disk, no permission), the run ends with an unexpected error (exit 4) and
+nothing else is written. Every later representation reads that
+file, so the endpoint is queried once per fingerprint, however many formats are produced and however
+often they are regenerated (xref:decisions.adoc#ad-7[AD-7]).
+
+== 3. Analyse: from counts to indicators
 
 `analyse` turns each histogram into indicators, with no I/O:
 
@@ -88,14 +96,6 @@ threshold is a reading choice, not a fact about the data.
 
 The analysis also finds parents (declared, or implied when every instance also has the parent
 type), marks each property own, inherited or refined, and flags first-N classes as inexact.
-
-== 3. Save: the profile file (from 2.1)
-
-As soon as collection ends, before anything is rendered, the raw run is written to `profile.json`.
-If that write fails (a full disk, no permission), the run ends with an unexpected error (exit 4) and
-nothing else is written. Every later representation reads that
-file, so the endpoint is queried once per fingerprint, however many formats are produced and however
-often they are regenerated (xref:decisions.adoc#ad-7[AD-7]).
 
 == 4. Render: one profile, several representations
 
@@ -153,7 +153,7 @@ Every error the SPARQL client meets is put in one class:
 
 | Transient | HTTP 429, 502, 503; connection reset or refused. Retried after 1 s, then 4 s; if it persists, it is treated as a timeout — except on the first query, below.
 | Timeout | the per-query timeout (`timeout_seconds`), HTTP 504, or a 500 whose message says "timeout", "time limit", "timed out" or "estimated execution time".
-| Permanent | HTTP 400, 404, 414, other 4xx and 500s, unreadable responses. Never retried.
+| Permanent | HTTP 400, 404, 414, other 4xx and 500s, responses that are not SPARQL results (bad JSON, missing keys). Never retried. Distinct from a well-formed result holding an unexpected value — a count that is not a number — which is an unexpected error (exit 4, xref:decisions.adoc#ad-11[AD-11]).
 | Unreachable | HTTP 401, 403, 407. Only the first query can make the endpoint unreachable; on any later query it counts as permanent.
 |===
 
@@ -163,7 +163,7 @@ What a failed query costs depends on the stage it belongs to:
 |===
 | Stage | Response
 
-| Listing the named graphs (first query) | Unreachable, or transient after its retries: the run stops, nothing is written, the CLI exits 3. Timeout or permanent: only the default graph is profiled, recorded as a failure — unless graphs were chosen with `--graph`, in which case those are profiled and only a WARNING is logged.
+| Listing the named graphs (first query) | Unreachable, or transient after its retries: the run stops, nothing is written, the CLI exits 3. Timeout or permanent: only the default graph is profiled, recorded as a failure — unless graphs were chosen (`--graph`, the `selected_graphs` setting or parameter), in which case those are profiled and only a WARNING is logged.
 | Other discovery (store-wide subclass statements; per graph: predicates, classes, counts, graph totals) | Each has a fallback or is recorded and skipped: classes not counted in one query are listed and counted one by one; predicates not listed in one query are listed without counts; subclass statements and graph totals not read are recorded as failures.
 | First wave of a class (instance listing, histograms, value partitions, co-types) | Timeout: the class escalates under `auto` (exact → first N); in first-N mode or under `exact`, a failure. Permanent: a failure at once. Either way the class is left out of the profile.
 | Second wave of a class (top values, completeness check, incoming links) | Recorded as a failure; the class is kept, without that measurement.

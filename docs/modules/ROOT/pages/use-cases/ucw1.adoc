@@ -60,8 +60,8 @@ The requester asks for a fingerprint of the endpoint.
 . The system resolves the settings.
 . The system discovers the graphs and their classes.
 . The system profiles each class exactly.
-. The system derives the analytics.
-. The system saves the profile file (2.1) and writes the report.
+. The system saves the profile file (2.1).
+. The system derives the analytics and writes the report.
 
 == Alternate Scenarios
 

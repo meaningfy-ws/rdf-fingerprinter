@@ -3,8 +3,8 @@
 
 Each record states one commitment that shapes the code below it. They are grouped by the C4 level
 they constrain (xref:architecture.adoc[Architecture]). `DEC-n` / `P-n` ids point to the OpenSpec
-change that took the decision: `harden-fingerprinter` (2.0, archived) for AD-1 to AD-6,
-`profile-representations` (2.1) for AD-7 to AD-11. Each record's *Confirmation* names the test,
+change that took the decision: `harden-fingerprinter` (2.0, archived) for AD-1 to AD-6 and AD-11,
+`profile-representations` (2.1) for AD-7 to AD-10. Each record's *Confirmation* names the test,
 scenario or tool run that checks it. Terms are those of the xref:glossary.adoc[Glossary].
 
 [cols="1,4,1,1"]
@@ -36,7 +36,7 @@ Considered options::
 . Store-specific SPARQL or native access (Virtuoso JDBC, QLever variants), as void-generator does.
 . Load dumps into a local store first.
 Decision outcome:: Option 1. Statistics come from the instance data, not from a declared ontology;
-only `SELECT` and `ASK` are sent (DEC-5).
+only `SELECT` and `ASK` are sent (DEC-5 portable SPARQL 1.1, P-2 the read-only port).
 Consequences::
 * Good: works on every compliant store; needs read access only.
 * Bad: cannot use store shortcuts, so cost is bounded by query design (<<ad-3>>), not engine tricks.
@@ -85,7 +85,8 @@ Decision outcome:: Option 1, with open shapes (developer, 2026-10-31; DEC-5 of `
 The rule kept by every shapes file: validated against the data it was generated from, it reports
 no `sh:Violation`. Because `sh:targetClass` also targets instances of declared subclasses, which the
 parent's statistics never counted, the shapes of a class with declared subclasses are graded
-`sh:Warning` at most. The table is in xref:how-it-works.adoc#severity[How it works].
+`sh:Warning` at most. The rule assumes well-formed literals: a value such as
+`"2020-13-45"^^xsd:date` breaks `sh:datatype` whatever the profile says. The table is in xref:how-it-works.adoc#severity[How it works].
 Consequences::
 * Good: shapes are usable as-is for validation and as documentation of the usual shape.
 * Good: the threshold a reader chose stays visible in the output.
@@ -160,7 +161,8 @@ Considered options::
   list the failures in them, and signal partial success (CLI exit 1).
 . Stop at the first failure.
 . Keep going and drop failed measurements silently.
-Decision outcome:: Option 1 (P-5 of `harden-fingerprinter`). The only stop is an endpoint unreachable
+Decision outcome:: Option 1 (`harden-fingerprinter`: the solution outline, P-5 failure classes,
+P-7 exit 1, the error matrix). The only stop is an endpoint unreachable
 when the run starts. The classes of error and their responses are in
 xref:how-it-works.adoc#failure-classes[How it works].
 Consequences::

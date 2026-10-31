@@ -1,5 +1,6 @@
 # Capability: fingerprint-report (openspec/specs/fingerprint-report)
-# Step definitions are written during implementation.
+# Projected from UC-W1, UC-B1.1, UC-B1.2 and UC-B2.2 (docs/modules/ROOT/pages/use-cases/).
+@uc_w1
 Feature: The fingerprint report and the command line
   As a data steward
   I want a readable report and an honest exit status
@@ -44,6 +45,7 @@ Feature: The fingerprint report and the command line
 
   Rule: The exit status tells what happened
 
+    @uc_b1_1
     Scenario Outline: Exit status
       Given <situation>
       When the fingerprint command runs
@@ -62,11 +64,51 @@ Feature: The fingerprint report and the command line
 
   Rule: Library callers keep the 1.x call
 
+    @uc_b1_2
     Scenario: A 1.x call still works
       When the library is called with only an endpoint and an output folder
       Then it returns the path of the main report document
 
+    @uc_b1_2
     Scenario: Custom template constants survive
       Given a custom template that reads a constant from the additional configuration
       When the report is generated with that constant
       Then the constant appears in the report
+
+  Rule: The profile is saved with the report
+
+    @uc_b1_1
+    Scenario: The profile file sits beside the report
+      Given every class is profiled
+      When the fingerprint command runs
+      Then the output folder holds the report and the profile file
+
+    @uc_b1_1
+    Scenario: Recorded failures are saved too
+      Given one class fails and the others are profiled
+      When the fingerprint command runs
+      Then the profile file lists that failure
+      And it exits with 1
+
+    @uc_b1_1
+    Scenario: The profile is kept when the report fails
+      Given every class is profiled
+      And the report template raises an error
+      When the fingerprint command runs
+      Then the output folder holds the profile file
+      And it exits with 4
+
+  Rule: Representations can be rendered in the same run
+
+    @uc_b2_2
+    Scenario: Report plus shapes in one run
+      Given every class is profiled
+      When the fingerprint command runs with the shapes format
+      Then the output folder holds the report, the profile file and one shapes file per profiled graph
+
+    @uc_b2_2
+    Scenario: An unknown format is refused
+      Given every class is profiled
+      When the fingerprint command runs with the format "void"
+      Then it exits with 2
+      And the endpoint was never queried

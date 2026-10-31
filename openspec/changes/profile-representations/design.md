@@ -179,6 +179,7 @@ failure leaves that format's files unwritten and keeps those of formats finished
 
 ```python
 class TemplateRenderer(Protocol):                 # implemented by adapters.template_renderer
+    prefixes: dict[str, str]                      # from the packaged prefixes.json, for the hooks' terms
     def render(self, package: Path, view: dict, analytics, autoescape: bool) -> str: ...
     def write(self, folder: Path, texts: dict[str, str], check: str | None) -> list[Path]: ...  # check="turtle"
 
