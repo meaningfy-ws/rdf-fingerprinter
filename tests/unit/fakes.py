@@ -32,6 +32,9 @@ def _binding(value: Any) -> dict[str, str]:
         return {"type": "bnode", "value": str(value)}
     if isinstance(value, str) and value.startswith("_:"):
         return {"type": "bnode", "value": value[2:]}
+    if isinstance(value, Literal):
+        typed = {"datatype": str(value.datatype)} if value.datatype else {}
+        return {"type": "literal", "value": str(value)} | typed | ({"xml:lang": value.language} if value.language else {})
     return {"type": "uri" if isinstance(value, URIRef) else "literal", "value": str(value)}
 
 

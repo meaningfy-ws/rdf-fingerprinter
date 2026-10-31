@@ -25,7 +25,7 @@ from fingerprint.service_layer.report import (  # noqa: F401 — kept importable
     render_report,
 )
 from fingerprint.service_layer.representations import generate_representations
-from fingerprint.service_layer.settings import resolve_settings, validate_config
+from fingerprint.service_layer.settings import resolve_settings, validate_config, validate_endpoint
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +45,7 @@ def fingerprint_report(
     the exit code). The profile is saved before rendering, so a rendering failure loses nothing collected;
     the chosen `formats` are rendered from the same run afterwards (UC-B2.2)."""
     validate_config()
+    validate_endpoint(sparql_endpoint_url)
     sparql = sparql or SparqlHttpClient(sparql_endpoint_url, settings.timeout_seconds)
     renderer = renderer or JinjaTemplateRenderer()
     run = collect(sparql_endpoint_url, settings, sparql)

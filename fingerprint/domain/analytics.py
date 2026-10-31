@@ -16,6 +16,7 @@ from fingerprint.domain.profile import (
     NodeKind,
     ParentClass,
     ParentSource,
+    PrecisionMode,
     ProfileAnalytics,
     ProfileRun,
     PropertyAnalytics,
@@ -126,10 +127,10 @@ def cardinality_label(histogram: list[CardinalityBin], observed: int, threshold:
 
 
 _BOUNDS: dict[str, tuple[int | None, int | None]] = {
-    CardinalityLabel.exactly_one.value: (1, 1),
-    CardinalityLabel.zero_or_one.value: (None, 1),
-    CardinalityLabel.one_or_more.value: (1, None),
-    CardinalityLabel.zero_or_more.value: (None, None),
+    CardinalityLabel.exactly_one: (1, 1),
+    CardinalityLabel.zero_or_one: (None, 1),
+    CardinalityLabel.one_or_more: (1, None),
+    CardinalityLabel.zero_or_more: (None, None),
 }
 
 
@@ -213,7 +214,7 @@ def property_analytics(profile: PropertyProfile, cls: ClassProfile, threshold: f
     """Every property indicator except inheritance, which needs the parents."""
     if profile.presence_only:
         return PropertyAnalytics(**profile.model_dump(exclude_none=True), is_exact=False)
-    exact = cls.precision_mode != "first_n"
+    exact = cls.precision_mode != PrecisionMode.first_n
     observed = cls.observed_instances or 0
     histogram = profile.cardinality_histogram or []
     stats = cardinality_statistics(histogram, observed)
@@ -305,7 +306,7 @@ def graph_analytics(graph: GraphProfile, threshold: float, top_k: int) -> GraphA
                 mean_out_degree=_ratio(sum(p.total_triples or 0 for p in props), observed),
                 label_coverage=max([p.confidence or 0 for p in props if p.property in LABEL_PREDICATES], default=0.0),
                 sample_ratio=_ratio(observed, c.instances),
-                is_exact=c.precision_mode != "first_n" and all(p.is_exact for p in props),
+                is_exact=c.precision_mode != PrecisionMode.first_n and all(p.is_exact for p in props),
             )
         )
 

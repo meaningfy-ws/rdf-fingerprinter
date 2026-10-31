@@ -56,7 +56,7 @@ def graph_slug(graph: str | None) -> str:
 
 def plain_label(graph: str | None) -> str:
     """The graph's name for titles and comments: letters, digits and `:/#.~ -` only, anything else `_`."""
-    return _NOT_PLAIN.sub("_", graph) if graph else config.default_graph_label
+    return _NOT_PLAIN.sub("_", graph or config.default_graph_label)
 
 
 class Generator:

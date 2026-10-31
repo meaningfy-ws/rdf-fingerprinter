@@ -4,6 +4,7 @@ Each source is read as a `SettingsOverride`; per setting, the first source that 
 (domain-object-model P-7).
 """
 
+import urllib.parse
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,8 @@ from fingerprint import config as fingerprint_config
 from fingerprint.adapters import config_resolver
 from fingerprint.adapters.config_resolver import MappingConfigResolver
 from fingerprint.adapters.exceptions import ConfigError, ConfigFileError
+from fingerprint.adapters.sparql import redact
+from fingerprint.adapters.template_renderer import load_prefixes
 from fingerprint.domain.profile import Settings, SettingsOverride
 from fingerprint.service_layer.exceptions import UsageError
 
@@ -29,10 +32,29 @@ def load_config_file(path: str | Path) -> dict[str, Any]:  # dict-ok: documented
         raise UsageError(str(error)) from error
 
 
+def describe(error: ValidationError) -> str:
+    """A validation error in one line per field, without Pydantic's links."""
+    return "; ".join(f"{'.'.join(map(str, e['loc'])) or 'value'}: {e['msg']}" for e in error.errors())
+
+
+def check_acceptance_threshold(threshold: float) -> float:
+    """The model allows [0, 1]; a cardinality label needs some support, so 0 is refused (P-6)."""
+    if not 0 < threshold <= 1:
+        raise UsageError("acceptance_threshold must be in (0, 1]")
+    return threshold
+
+
+def validate_endpoint(url: str) -> None:
+    """Only HTTP(S) endpoints: urllib would also open file:, ftp: and data: URLs."""
+    if urllib.parse.urlsplit(url).scheme.lower() not in ("http", "https"):
+        raise UsageError(f"the endpoint must be an http or https URL, not {redact(url)!r}")
+
+
 def validate_config() -> None:
     """Every `RDF_FINGERPRINTER_*` value read once, before any query or write; a bad one is a usage error."""
     try:
         fingerprint_config.validate()
+        load_prefixes()  # the generators' prefix file: a bad one is the caller's usage error, before any write
     except ConfigError as error:
         raise UsageError(str(error)) from error
 
@@ -43,7 +65,7 @@ def _override(source: Mapping[str, Any] | SettingsOverride | None) -> SettingsOv
     try:
         return SettingsOverride.model_validate(source) if source else SettingsOverride()
     except ValidationError as error:
-        raise UsageError(str(error)) from error
+        raise UsageError(describe(error)) from error
 
 
 def _environment(env: Mapping[str, str] | None) -> SettingsOverride:  # dict-ok: resolve_settings API
@@ -78,7 +100,6 @@ def resolve_settings(
     try:
         settings = Settings(**{name: value for name, value in chosen if value is not None})
     except ValidationError as error:
-        raise UsageError(str(error)) from error
-    if settings.acceptance_threshold <= 0:  # the model allows [0, 1]; a label needs some support (P-6)
-        raise UsageError("acceptance_threshold must be in (0, 1]")
+        raise UsageError(describe(error)) from error
+    check_acceptance_threshold(settings.acceptance_threshold)
     return settings

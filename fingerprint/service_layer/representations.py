@@ -4,28 +4,22 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-from pydantic import ValidationError
-
 from fingerprint.adapters.exceptions import ProfileFileError, TemplatePackageError
 from fingerprint.adapters.profile_file import load_profile
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.exceptions import IriRefError
-from fingerprint.domain.profile import ProfileAnalytics, ProfileRun, SettingsOverride
+from fingerprint.domain.profile import ProfileAnalytics, ProfileRun
 from fingerprint.domain.views import GeneratorOptions, RepresentationFormat
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators import DOC, GENERATORS, PUML
 from fingerprint.service_layer.generators.generator import Generator, TemplateRenderer
-from fingerprint.service_layer.settings import resolve_settings, validate_config
+from fingerprint.service_layer.settings import check_acceptance_threshold, validate_config
 
 
 def with_threshold(run: ProfileRun, threshold: float) -> ProfileRun:
     """The same run read at another acceptance threshold; checked by the collection rule, (0, 1]."""
-    try:
-        override = SettingsOverride(acceptance_threshold=threshold)
-    except ValidationError as error:
-        raise UsageError(str(error)) from error
-    checked = resolve_settings(cli=override, env={}).acceptance_threshold  # dict-ok: no environment
+    checked = check_acceptance_threshold(threshold)
     return run.model_copy(update={"settings": run.settings.model_copy(update={"acceptance_threshold": checked})})
 
 

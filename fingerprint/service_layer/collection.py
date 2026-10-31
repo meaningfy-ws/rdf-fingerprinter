@@ -4,12 +4,13 @@ import logging
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
-from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
+# Only rdflib's term and row types: collection reads the client's typed results, never a graph or store (P-8).
 from rdflib import BNode
 from rdflib.query import ResultRow
 
+from fingerprint import __version__
 from fingerprint.adapters.exceptions import (
     EndpointUnreachable,
     PermanentError,
@@ -18,7 +19,7 @@ from fingerprint.adapters.exceptions import (
     SparqlError,
 )
 from fingerprint.adapters.queries import render, subjects_exact, subjects_limit, subjects_values
-from fingerprint.adapters.sparql import BLANK_NODE_PREFIX, SparqlPort, redact
+from fingerprint.adapters.sparql import SparqlPort, redact
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.profile import (
     CardinalityBin,
@@ -30,6 +31,7 @@ from fingerprint.domain.profile import (
     IncomingLink,
     NodeKind,
     PrecisionMode,
+    PrecisionPolicy,
     PredicatePartition,
     ProfileRun,
     PropertyProfile,
@@ -39,14 +41,13 @@ from fingerprint.domain.profile import (
     ValueCount,
     ValuePartition,
 )
-from fingerprint.domain.vocabulary import RDF_LANG_STRING
+from fingerprint.domain.vocabulary import BLANK_NODE_PREFIX, RDF_LANG_STRING, RDF_TYPE
 
 logger = logging.getLogger(__name__)
 
-RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
 DEPTHS = tuple(depth.value for depth in Depth)  # the schema lists the levels in order
 EXACT, FIRST_N = PrecisionMode.exact, PrecisionMode.first_n
-MODES = {"auto": (EXACT, FIRST_N), "exact": (EXACT,), "first_n": (FIRST_N,)}  # keyed by PrecisionPolicy
+MODES = {PrecisionPolicy.auto: (EXACT, FIRST_N), PrecisionPolicy.exact: (EXACT,), PrecisionPolicy.first_n: (FIRST_N,)}
 TOO_LARGE = (400, 413)
 QUERY_KIND = {
     "Q0": QueryKind.graphs,
@@ -87,17 +88,6 @@ def _int(term: Any) -> int | None:
     return int(term) if term is not None and str(term) != "" else None
 
 
-def _count(term: Any) -> int:
-    return int(term)
-
-
-def _tool_version() -> str:
-    try:
-        return version("rdf-fingerprinter")
-    except PackageNotFoundError:  # running from a source tree without installation
-        return "unknown"
-
-
 class _Collection:
     """One run's state: the settings, the port and the failures recorded so far."""
 
@@ -108,7 +98,7 @@ class _Collection:
         self.failures: list[Failure] = []
         self._lock = threading.Lock()
 
-    def depth_at_least(self, level: str) -> bool:
+    def depth_at_least(self, level: Depth) -> bool:
         return DEPTHS.index(self.settings.depth) >= DEPTHS.index(level)
 
     def fail(
@@ -250,61 +240,53 @@ class _Collection:
             for r in self.select("Q8", graph, cls=cls, subjects=subjects)
             if r["d"]
         ]
-        properties: dict[str, PropertyProfile] = {}  # dict-ok: lookup index by property IRI, in first-seen order
+        # Rows of Q5–Q7 grouped by property IRI, in first-seen order; each property is built once below.
+        order: list[str] = []
+        bins: dict[str, list[CardinalityBin]] = {}  # dict-ok: lookup index by property IRI
+        partitions: dict[str, list[ValuePartition]] = {}  # dict-ok: lookup index by property IRI
+        distinct: dict[str, int] = {}  # dict-ok: lookup index by property IRI
 
-        def prop(iri: Any) -> PropertyProfile:
-            return properties.get(str(iri)) or PropertyProfile(property=str(iri))
+        def seen(iri: str) -> str:
+            if iri not in order:
+                order.append(iri)
+            return iri
 
-        if self.depth_at_least("properties"):
+        if self.depth_at_least(Depth.properties):
             done.append("Q5")
             for r in self.select("Q5", graph, subjects=subjects):
-                if not r["p"]:  # an empty group may come back as one unbound row
-                    continue
-                p = prop(r["p"])
-                bin = CardinalityBin(values_per_subject=_count(r["n"]), subjects=_count(r["subjects"]))
-                properties[p.property] = p.model_copy(
-                    update={"cardinality_histogram": [*(p.cardinality_histogram or []), bin]}
-                )
-        if self.depth_at_least("values"):
+                if r["p"]:  # an empty group may come back as one unbound row
+                    histogram = bins.setdefault(seen(str(r["p"])), [])
+                    histogram.append(CardinalityBin(values_per_subject=int(r["n"]), subjects=int(r["subjects"])))
+        if self.depth_at_least(Depth.values):
             done.append("Q6")
             for r in self.select("Q6", graph, subjects=subjects):
                 if not r["p"]:
                     continue
-                p = prop(r["p"])
-                distinct = (p.distinct_objects or 0) + (_int(r["distinct"]) or 0)
-                partitions = p.value_partitions or []
+                iri = seen(str(r["p"]))
+                distinct[iri] = distinct.get(iri, 0) + (_int(r["distinct"]) or 0)
                 if str(r["kind"]) == NodeKind.literal.value:
-                    partitions = [
-                        *partitions,
-                        ValuePartition(
-                            node_kind=NodeKind.literal,
-                            datatype=_text(r["dt"]) or (RDF_LANG_STRING if r["lang"] else None),
-                            language=_text(r["lang"]) or None,
-                            triples=_int(r["triples"]),
-                            distinct_objects=_int(r["distinct"]),
-                            min_length=_int(r["min_length"]),
-                            max_length=_int(r["max_length"]),
-                            total_length=_int(r["total_length"]),
-                            min_value=_text(r["min_value"]),
-                            max_value=_text(r["max_value"]),
-                        ),
-                    ]
-                properties[p.property] = p.model_copy(
-                    update={"distinct_objects": distinct, "value_partitions": partitions or p.value_partitions}
-                )
+                    partitions.setdefault(iri, []).append(self.literal_partition(r))
             done.append("Q7")
             for r in self.select("Q7", graph, subjects=subjects):
-                if not r["p"]:
-                    continue
-                p = prop(r["p"])
-                partition = ValuePartition(
-                    node_kind=NodeKind(str(r["kind"])),
-                    object_class=_text(r["t"]),
-                    object_class_graph=_text(r["tg"]),
-                    triples=_int(r["triples"]),
-                    distinct_objects=_int(r["objects"]),
-                )
-                properties[p.property] = p.model_copy(update={"value_partitions": [*(p.value_partitions or []), partition]})
+                if r["p"]:
+                    partitions.setdefault(seen(str(r["p"])), []).append(
+                        ValuePartition(
+                            node_kind=NodeKind(str(r["kind"])),
+                            object_class=_text(r["t"]),
+                            object_class_graph=_text(r["tg"]),
+                            triples=_int(r["triples"]),
+                            distinct_objects=_int(r["objects"]),
+                        )
+                    )
+        properties = [
+            PropertyProfile(
+                property=iri,
+                cardinality_histogram=bins.get(iri),
+                distinct_objects=distinct.get(iri),
+                value_partitions=partitions.get(iri),
+            )
+            for iri in order
+        ]
         profile = ClassProfile(
             class_iri=cls,
             instances=instances,
@@ -312,9 +294,24 @@ class _Collection:
             observed_instances=observed,
             sample_shared=sample_shared,
             co_types=co_types,
-            property_partitions=list(properties.values()),
+            property_partitions=properties,
         )
         return profile, subjects
+
+    @staticmethod
+    def literal_partition(r: ResultRow) -> ValuePartition:
+        return ValuePartition(
+            node_kind=NodeKind.literal,
+            datatype=_text(r["dt"]) or (RDF_LANG_STRING if r["lang"] else None),
+            language=_text(r["lang"]) or None,
+            triples=_int(r["triples"]),
+            distinct_objects=_int(r["distinct"]),
+            min_length=_int(r["min_length"]),
+            max_length=_int(r["max_length"]),
+            total_length=_int(r["total_length"]),
+            min_value=_text(r["min_value"]),
+            max_value=_text(r["max_value"]),
+        )
 
     def second_wave(
         self, graph: str, profile: ClassProfile, subjects: Any, predicates: list[PredicatePartition] | None
@@ -322,7 +319,7 @@ class _Collection:
         cls, exact = profile.class_iri, profile.precision_mode == EXACT
         properties = list(profile.property_partitions or [])
         incoming = None
-        if self.depth_at_least("rich_values"):
+        if self.depth_at_least(Depth.rich_values):
             for index, p in enumerate(properties):
                 try:
                     rows = self.select("Q9", graph, prop=p.property, subjects=subjects, k=self.settings.top_k)
@@ -330,7 +327,7 @@ class _Collection:
                     properties[index] = p.model_copy(update={"top_values": top, "top_values_exact": exact})
                 except (SparqlError, IriRefError) as error:
                     self.fail("Q9", f"class {cls}, property {p.property}: Q9 failed: {error}", graph, cls, property=p.property)
-        if self.settings.completeness_check and not exact and predicates is not None and self.depth_at_least("properties"):
+        if self.settings.completeness_check and not exact and predicates is not None and self.depth_at_least(Depth.properties):
             seen = {p.property for p in properties} | {RDF_TYPE}
             for predicate in sorted({p.property for p in predicates} - seen):
                 try:
@@ -338,7 +335,7 @@ class _Collection:
                         properties.append(PropertyProfile(property=predicate, presence_only=True))
                 except (SparqlError, IriRefError) as error:
                     self.fail("Q10", f"class {cls}, property {predicate}: Q10 failed: {error}", graph, cls, property=predicate)
-        if self.depth_at_least("links"):
+        if self.depth_at_least(Depth.links):
             try:
                 incoming = [
                     IncomingLink(subject_class=_text(r["sc"]), property=_text(r["p"]), triples=_int(r["triples"]))
@@ -391,10 +388,10 @@ class _Collection:
         logger.info("graph %s: profiling", label)
         result = self.graph_totals(graph) if self.settings.graph_statistics else GraphProfile(graph=graph or None)
         predicates = None
-        if self.settings.graph_statistics or (self.settings.completeness_check and self.depth_at_least("properties")):
+        if self.settings.graph_statistics or (self.settings.completeness_check and self.depth_at_least(Depth.properties)):
             predicates = self.predicates(graph)
             result = result.model_copy(update={"predicate_partitions": predicates or []})
-        if not self.depth_at_least("classes"):
+        if not self.depth_at_least(Depth.classes):
             return result
         usable = []
         for cls, instances in self.class_counts(graph):
@@ -414,7 +411,7 @@ def collect(endpoint: str, settings: Settings, sparql: SparqlPort) -> ProfileRun
     run = _Collection(endpoint, settings, sparql)
     named = run.named_graphs()
     graphs = list(settings.selected_graphs or ["", *named])
-    edges = run.declared_edges() if run.depth_at_least("classes") else []
+    edges = run.declared_edges() if run.depth_at_least(Depth.classes) else []
     profiles = []
     for graph in graphs:
         try:
@@ -425,7 +422,7 @@ def collect(endpoint: str, settings: Settings, sparql: SparqlPort) -> ProfileRun
         endpoint=run.endpoint,
         started_at=started,
         finished_at=datetime.now(UTC),
-        tool_version=_tool_version(),
+        tool_version=__version__,
         settings=settings,
         graphs=profiles,
         failures=run.failures,

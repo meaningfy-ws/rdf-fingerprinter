@@ -5,6 +5,7 @@ several files and every text is checked before any file is written.
 """
 
 import json
+import re
 from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
@@ -13,17 +14,33 @@ import rdflib
 from eds4jinja2.services.report_builder import ReportBuilder
 
 from fingerprint import config
-from fingerprint.adapters.exceptions import GeneratedOutputError, TemplatePackageError
+from fingerprint.adapters.exceptions import ConfigError, GeneratedOutputError, TemplatePackageError
+from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import curie, to_iriref, turtle_number, turtle_string, turtle_term
 from fingerprint.domain.views import RenderedDocument
 
+_PREFIX_KEY = re.compile(r"[A-Za-z][A-Za-z0-9_.-]*:")
+
 
 def load_prefixes(path: Path | None = None) -> dict[str, str]:  # dict-ok: prefix table
-    """`{"skos": "http://www.w3.org/2004/02/skos/core#", …}` from a `{"skos:": …}` file; default: `config.prefixes_file`."""
-    text = (path or config.prefixes_file).read_text()
-    return {
-        prefix.rstrip(":"): namespace for prefix, namespace in json.loads(text).items()
-    }  # dict-ok: prefix table, JSON being parsed
+    """`{"skos": "http://www.w3.org/2004/02/skos/core#", …}` from a `{"skos:": …}` file; default: `config.prefixes_file`.
+
+    The names reach PlantUML and Turtle text, so each must be a plain prefix and each namespace a writable IRI."""
+    location = path or config.prefixes_file
+    try:
+        table = json.loads(location.read_text())
+    except (OSError, ValueError) as error:
+        raise ConfigError(f"RDF_FINGERPRINTER_PREFIXES_FILE: cannot read {location}: {error}") from error
+    if not isinstance(table, dict):
+        raise ConfigError(f"RDF_FINGERPRINTER_PREFIXES_FILE: {location} must hold a JSON object")
+    for prefix, namespace in table.items():
+        if not (_PREFIX_KEY.fullmatch(prefix) and isinstance(namespace, str)):
+            raise ConfigError(f"RDF_FINGERPRINTER_PREFIXES_FILE: {location}: {prefix!r} is not a prefix (`name:`) with an IRI")
+        try:
+            to_iriref(namespace)
+        except IriRefError as error:
+            raise ConfigError(f"RDF_FINGERPRINTER_PREFIXES_FILE: {location}: {namespace!r} is not a writable IRI") from error
+    return {prefix.rstrip(":"): namespace for prefix, namespace in table.items()}  # dict-ok: prefix table
 
 
 def _parse_turtle(text: str) -> None:

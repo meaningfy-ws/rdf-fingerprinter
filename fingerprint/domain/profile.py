@@ -281,7 +281,37 @@ class Settings(ConfiguredBaseModel):
     """
     Collection parameters, recorded so a profile can be interpreted and reproduced.
     """
-    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema',
+         'slot_usage': {'acceptance_threshold': {'ifabsent': 'float(0.95)',
+                                                 'name': 'acceptance_threshold',
+                                                 'required': True},
+                        'completeness_check': {'ifabsent': 'false',
+                                               'name': 'completeness_check',
+                                               'required': True},
+                        'concurrency': {'ifabsent': 'int(4)',
+                                        'name': 'concurrency',
+                                        'required': True},
+                        'depth': {'ifabsent': 'string(values)',
+                                  'name': 'depth',
+                                  'required': True},
+                        'first_n': {'ifabsent': 'int(10000)',
+                                    'name': 'first_n',
+                                    'required': True},
+                        'graph_statistics': {'ifabsent': 'false',
+                                             'name': 'graph_statistics',
+                                             'required': True},
+                        'object_type_scope': {'ifabsent': 'string(same_graph)',
+                                              'name': 'object_type_scope',
+                                              'required': True},
+                        'precision_policy': {'ifabsent': 'string(auto)',
+                                             'name': 'precision_policy',
+                                             'required': True},
+                        'timeout_seconds': {'ifabsent': 'int(60)',
+                                            'name': 'timeout_seconds',
+                                            'required': True},
+                        'top_k': {'ifabsent': 'int(20)',
+                                  'name': 'top_k',
+                                  'required': True}}})
 
     depth: Depth = Field(default=Depth("values"), description="""How much was collected.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'string(values)'} })
     precision_policy: PrecisionPolicy = Field(default=PrecisionPolicy("auto"), description="""Allowed precision modes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'string(auto)'} })
@@ -505,7 +535,7 @@ class IncomingLink(ConfiguredBaseModel):
 
 class SettingsOverride(ConfiguredBaseModel):
     """
-    Collection settings given by one source (command line, environment, parameter, config file); unset ones are absent. The first source that sets a setting wins (domain-object-model P-7).
+    Collection settings given by one source (command line, environment, parameter, config file); unset ones are absent. The first source that sets a setting wins (domain-object-model P-7). Kept out of fingerprint_stats so the published profile.json schema does not list it.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema'})
 

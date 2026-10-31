@@ -10,12 +10,13 @@ variable with a default (domain-object-model DEC-6, P-7). Values resolve on acce
 
 from importlib.metadata import version
 from pathlib import Path
-from typing import Any
+from typing import Any, get_args
 
 from pydantic import ValidationError
 
 from fingerprint.adapters.config_resolver import ConfigResolverABC, EnvConfigResolver, env_property
 from fingerprint.adapters.exceptions import ConfigError
+from fingerprint.domain.iri import to_iriref
 from fingerprint.domain.profile import SettingsOverride
 from fingerprint_report_templates import packaged
 
@@ -70,6 +71,7 @@ class FingerprintConfig:
         """Namespace of the generated SHACL shape IRIs."""
         if not value:
             raise ValueError("an IRI is required")
+        to_iriref(value)  # an IRI Turtle can hold, else IriRefError (a ValueError)
         return value
 
     @env_property(f"{ENV_PREFIX}DEFAULT_GRAPH_LABEL", "default graph")
@@ -102,7 +104,7 @@ class FingerprintConfig:
 def _setting(name: str, raw: str) -> Any:
     if name == "selected_graphs":
         return [graph.strip() for graph in raw.split(",")]
-    if "bool" in str(SettingsOverride.model_fields[name].annotation):
+    if bool in get_args(SettingsOverride.model_fields[name].annotation):
         value = raw.strip().lower()
         if value not in _TRUE | _FALSE:
             raise ConfigError(f"{ENV_PREFIX}{name.upper()} must be one of 1/true/yes/on or 0/false/no/off, not {raw!r}")

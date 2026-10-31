@@ -1,3 +1,5 @@
+import base64
+import http.client
 import io
 import json
 import urllib.error
@@ -162,3 +164,55 @@ def test_the_query_is_a_sparql_protocol_form_post_with_the_timeout(monkeypatch):
     assert request.get_header("Content-type") == "application/x-www-form-urlencoded"
     assert request.get_header("Accept") == "application/sparql-results+json"
     assert request.get_header("User-agent") == f"rdf-fingerprinter/{__version__}"
+
+
+def test_literals_keep_the_endpoint_lexical_form():
+    """rdflib's own parser would rewrite these; the profile keeps the text the endpoint sent (DEC-8)."""
+    values = [
+        ("2020-01-01T00:00:00Z", "http://www.w3.org/2001/XMLSchema#dateTime", None),
+        ("1.5E2", "http://www.w3.org/2001/XMLSchema#double", None),
+        ("01", XSD_INTEGER, None),
+        ("v", None, "en_US"),
+    ]
+    bindings = [
+        {"o": {"type": "literal", "value": v} | ({"datatype": d} if d else {}) | ({"xml:lang": lang} if lang else {})}
+        for v, d, lang in values
+    ]
+    rows = Flaky([], answer={"head": {"vars": ["o"]}, "results": {"bindings": bindings}}).select("# Q9 x\nSELECT")
+    assert [str(r["o"]) for r in rows] == [v for v, _, _ in values]
+    assert rows[2]["o"].toPython() == 1
+
+
+def test_a_timeout_is_not_retried():
+    client = Flaky([TimeoutError("timed out")])
+    with pytest.raises(QueryTimeout):
+        client.select("# Q1 x\nSELECT")
+    assert client.calls == 1 and client.slept == []
+
+
+def test_an_http_error_without_a_body_is_classified():
+    assert type(classify(urllib.error.HTTPError("http://x", 503, "status", {}, None))) is TransientError  # type: ignore[arg-type]
+
+
+def test_user_info_is_sent_as_basic_authentication_never_in_the_url(monkeypatch):
+    sent = []
+
+    def urlopen(request, timeout):
+        sent.append(request)
+        return Response(json.dumps(SELECT_ANSWER).encode())
+
+    monkeypatch.setattr(sparql.urllib.request, "urlopen", urlopen)
+    SparqlHttpClient("http://ann:s%40cret@e:8080/sparql?key=k", timeout_seconds=7).select("# Q1 x\nSELECT * {}")
+    assert sent[0].full_url == "http://e:8080/sparql?key=k"
+    assert sent[0].get_header("Authorization") == "Basic " + base64.b64encode(b"ann:s@cret").decode()
+
+
+def test_an_unusable_url_never_shows_its_text(monkeypatch, caplog):
+    def urlopen(request, timeout):
+        raise http.client.InvalidURL("nonnumeric port: 'pw@localhost'")
+
+    monkeypatch.setattr(sparql.urllib.request, "urlopen", urlopen)
+    client = SparqlHttpClient("https://localhost/sparql", timeout_seconds=1, sleep=lambda s: None)
+    with caplog.at_level("INFO"), pytest.raises(PermanentError) as raised:
+        client.select("# Q0 x\nSELECT")
+    assert "pw" not in str(raised.value) and "pw" not in caplog.text

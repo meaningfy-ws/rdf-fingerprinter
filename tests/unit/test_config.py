@@ -1,5 +1,6 @@
 """One typed configuration read from `RDF_FINGERPRINTER_*` variables (domain-object-model DEC-6, P-7)."""
 
+import ast
 import subprocess
 import sys
 from pathlib import Path
@@ -13,8 +14,12 @@ from fingerprint.adapters.exceptions import ConfigError
 from fingerprint.domain.profile import Settings, SettingsOverride
 from fingerprint.entrypoints.cli.main import fingerprint_endpoint
 from fingerprint.service_layer import handlers
-from fingerprint.service_layer.settings import resolve_settings
+from fingerprint.service_layer.exceptions import UsageError
+from fingerprint.service_layer.generators.generator import plain_label
+from fingerprint.service_layer.settings import resolve_settings, validate_config
 from tests.unit.fakes import FakeSparql
+
+PACKAGE = Path(__file__).parents[2] / "fingerprint"
 
 
 def test_defaults_are_todays_constants():
@@ -103,3 +108,54 @@ def test_a_badly_typed_variable_exits_2_before_any_query(tmp_path, monkeypatch):
     )
     assert result.exit_code == 2 and "RDF_FINGERPRINTER_RETRY_BACKOFF_SECONDS" in result.output
     assert list(tmp_path.iterdir()) == []
+
+
+def test_an_unwritable_shapes_namespace_names_its_variable():
+    with pytest.raises(ConfigError, match="RDF_FINGERPRINTER_SHAPES_NAMESPACE"):
+        FingerprintConfig(MappingConfigResolver({"RDF_FINGERPRINTER_SHAPES_NAMESPACE": "urn:x y<"})).validate()
+
+
+@pytest.mark.parametrize(
+    "content",
+    [None, "[]", '{"x\\n!include /etc/passwd\\n\'": "http://ex.org/"}', '{"ex:": "http://ex.org/a b"}'],
+    ids=["missing", "not-an-object", "injected-name", "unwritable-namespace"],
+)
+def test_a_bad_prefixes_file_is_a_usage_error(tmp_path, monkeypatch, content):
+    path = tmp_path / "prefixes.json"
+    if content is not None:
+        path.write_text(content)
+    monkeypatch.setenv("RDF_FINGERPRINTER_PREFIXES_FILE", str(path))
+    with pytest.raises(UsageError, match="RDF_FINGERPRINTER_PREFIXES_FILE"):
+        validate_config()
+
+
+def test_the_default_graph_label_is_written_as_plain_text(monkeypatch):
+    monkeypatch.setenv("RDF_FINGERPRINTER_DEFAULT_GRAPH_LABEL", "x\n!include /etc/passwd")
+    assert "\n" not in plain_label(None)
+
+
+@pytest.mark.parametrize("arguments", [["--first-n", "0"], ["--concurrency", "0"]])
+def test_an_invalid_cli_setting_exits_2_before_any_query(tmp_path, monkeypatch, arguments):
+    monkeypatch.setattr(handlers, "SparqlHttpClient", lambda endpoint, timeout: pytest.fail("a query was sent"))
+    result = CliRunner().invoke(fingerprint_endpoint, ["-e", "http://fake/sparql", "-o", str(tmp_path), *arguments])
+    assert result.exit_code == 2 and "errors.pydantic.dev" not in result.output
+
+
+def test_only_http_endpoints_are_queried(tmp_path, monkeypatch):
+    monkeypatch.setattr(handlers, "SparqlHttpClient", lambda endpoint, timeout: pytest.fail("a query was sent"))
+    result = CliRunner().invoke(fingerprint_endpoint, ["-e", "file:///etc/hostname", "-o", str(tmp_path)])
+    assert result.exit_code == 2 and "http or https" in result.output
+
+
+def test_the_modules_the_root_imports_never_import_it_back():
+    """fingerprint/__init__.py holds the config (the settings pattern) and imports these; a module among them
+    that imported `fingerprint` would make a circular import."""
+    root = ast.parse((PACKAGE / "__init__.py").read_text())
+    imported = {
+        n.module for n in ast.walk(root) if isinstance(n, ast.ImportFrom) and (n.module or "").startswith("fingerprint.")
+    }
+    for module in imported:
+        tree = ast.parse((PACKAGE.parent / (module.replace(".", "/") + ".py")).read_text())
+        names = {n.module for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
+        names |= {a.name for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names}
+        assert "fingerprint" not in names, f"{module} imports the package root"

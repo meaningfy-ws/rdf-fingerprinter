@@ -7,3 +7,5 @@ SH = "http://www.w3.org/ns/shacl#"
 FP = "https://data.meaningfy.ws/fingerprint/"  # the profile model's namespace root
 
 RDF_LANG_STRING = RDF + "langString"
+RDF_TYPE = RDF + "type"
+BLANK_NODE_PREFIX = "_:"  # how the profile writes a blank node: `_:<id>`

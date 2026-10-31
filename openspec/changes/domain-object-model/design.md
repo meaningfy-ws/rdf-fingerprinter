@@ -111,13 +111,13 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   `urllib.request.urlopen(request, timeout=timeout_seconds)`. This differs from SPARQLWrapper's request
   (it also sent `format=json&output=json&results=json`, a four-type Accept and its own User-Agent);
   the standard protocol is accepted as the new request (no requirement fixes the wire format), and the
-  e2e suite on Oxigraph checks it. The answer is parsed with
-  `rdflib.query.Result.parse(BytesIO(body), format="json")`. `SparqlPort.select`
+  e2e suite on Oxigraph checks it. The answer is read by
+  `parse_answer` into rdflib `ResultRow`s whose literals are built with `normalize=False` (refined in
+  review 7.3: `Result.parse` normalises lexical forms and refuses lax language tags, against DEC-8). `SparqlPort.select`
   returns `list[ResultRow]` (`URIRef`, `BNode`, typed `Literal`; unbound → `None`); `ask` returns
-  `Result.askAnswer`. `classify` keeps today's table on the urllib/socket side and **keeps the 500 rule**:
+  the JSON `boolean`. `classify` keeps today's table on the urllib/socket side and **keeps the 500 rule**:
   an `HTTPError` 500 whose body excerpt holds a timeout marker is a `QueryTimeout`, else permanent; a
-  body `Result.parse` cannot read (`ValueError` such as `JSONDecodeError`, or
-  `rdflib.query.ResultException`) is permanent. Failure *messages* lose SPARQLWrapper's wording (they
+  body that cannot be read (`ValueError` such as `JSONDecodeError`, a missing key) is permanent. Failure *messages* lose SPARQLWrapper's wording (they
   keep the status and a body excerpt); tests that assert message text are updated, the requirements
   (kinds, attempts, exit codes) do not change. The
   SPARQLWrapper branches and `rows_from_json` go. `SparqlWrapperClient` (documented in the API
@@ -270,4 +270,4 @@ but for timestamps and version; `make test-e2e` after groups 3 and 6.
 
 ## Open Questions
 
-- DEC-5 as amended awaits the developer's confirmation (P-5 proceeds unless told otherwise).
+- DEC-5 as amended is confirmed (developer, 2026-10-31). P-5 refined in implementation: the answer is read into rdflib terms with `normalize=False` instead of `Result.parse`, which normalises literals and refuses lax language tags (DEC-8, review 7.3).

@@ -52,7 +52,11 @@ and an application-profile document.
   per-query timeout) and reads the answer with rdflib; the request differs from SPARQLWrapper's
   (no `format`/`output`/`results` parameters, `Accept: application/sparql-results+json`,
   `User-Agent: rdf-fingerprinter/<version>`). Failure messages keep the status and a body excerpt but
-  lose SPARQLWrapper's wording.
+  lose SPARQLWrapper's wording. Literals keep the endpoint's lexical form. User info in the endpoint
+  URL is sent as HTTP Basic authentication, never in the request URL or a message; only `http` and
+  `https` endpoints are accepted (exit 2 otherwise).
+- A prefixes file given by `RDF_FINGERPRINTER_PREFIXES_FILE` is checked (plain prefix names, writable
+  IRIs) before any query or write.
 - **Settings sources are checked one by one:** a malformed value in a lower-precedence source (say
   the config file) now fails even when a higher one (the CLI) sets the same setting.
 - `make test` fails under 80 % coverage; every Gherkin scenario is tagged with its use case.
