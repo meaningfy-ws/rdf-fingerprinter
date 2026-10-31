@@ -1,12 +1,17 @@
 = The Report
 
-The report has one section per profiled graph (the default graph first, then each named graph)
-and, inside it, one table per class instantiated in that graph. The report is rendered from the
-analysis of the collected statistics; it sends no queries of its own
-(xref:statistics.adoc[Statistics and Settings]).
+The report, `main.html`, is one static page. It has one section per profiled graph (the default
+graph first, then each named graph) and, inside it, one collapsible section per class instantiated
+in that graph. It is rendered from the analysis of the collected statistics; it sends no queries of
+its own (xref:statistics.adoc[Statistics and Settings]).
 
-IRIs are shortened with the prefixes in the template's `prefixes.json` (for example
-`skos:prefLabel`).
+Every IRI is shown as `prefix:local` (for example `skos:prefLabel`), from the namespace table the run
+resolved (xref:representations.adoc#prefixes[Prefixes]); hover a name for its full IRI. The table of
+contents on the left lists graphs, namespaces and classes; the search box keeps the classes and
+property rows whose names or IRIs match; the switches hide whole namespaces. Classes of `rdf`,
+`rdfs`, `owl` and `sh` are hidden by default (xref:representations.adoc#filters[Namespace filters]).
+
+`fingerprint-gen-doc profile.json -o out/` writes the same page again from a saved profile.
 
 == Per class
 
@@ -37,8 +42,9 @@ A value that could not be computed is shown as `—`.
 
 == Collection
 
-The closing *Collection* section lists the settings used and every measurement that failed. A
-failed measurement is missing from the tables above it.
+The *Collection* section lists every measurement that failed, and the settings used. A failed
+measurement is missing from the tables above it. The *Caveats* section lists sampled classes,
+subjects without a type, the namespaces the filters hid, and IRIs that could not be written.
 
 == Reading it
 

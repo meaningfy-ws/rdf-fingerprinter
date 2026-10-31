@@ -91,9 +91,9 @@ Parses options, configures logging, maps outcomes to exit codes.
 | service layer, adapters, domain
 
 | `fingerprint.service_layer`
-| Public function (`generate_endpoint_fingerprint_report`); Report service; Settings resolver;
-Collector; Generators (one per format, building its view) and the Representations service,
-which the generator commands call.
+| Library entry (`fingerprint_report`); Settings resolver; Collector; Prefix resolver (the
+namespace table); Generators (one per format, building its view; the report page is the document
+generator's) and the Representations service, which the generator commands call.
 | adapters, domain
 
 | `fingerprint.adapters`

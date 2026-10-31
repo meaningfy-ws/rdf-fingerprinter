@@ -6,6 +6,47 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-10-31
+
+Readable representations (OpenSpec change `readable-representations`). Every IRI in every output is
+written as `prefix:local`, the report is one usable static page, shapes have readable names, and
+diagrams are split into digestible modules.
+
+### Added
+- **A prefix for every namespace.** After collection, each namespace in use is named from your prefix
+  file (`--prefixes FILE` or `RDF_FINGERPRINTER_PREFIXES_FILE`), the packaged prefixes, prefix.cc's
+  prefix list (read once per run; `--no-prefix-lookup` or `RDF_FINGERPRINTER_PREFIX_LOOKUP=false`
+  to skip it), or a generated name (`ex-core`, `brainframe`, `graph2`). The table, with each prefix's
+  source, is saved in `profile.json`; outputs shorten each IRI by its longest namespace.
+- **Namespace filters.** `--exclude-namespace` / `--include-namespace` (prefix or IRI, repeatable) on
+  `fingerprint` and the `fingerprint-gen-*` commands; the report lists what it hid.
+- **Report page features:** a table of contents by graph, namespace and class, a search box, one
+  switch per namespace, light and dark mode, and phone width; readable without JavaScript and with
+  no external request.
+- **`--module-size N`** (default 15) on `fingerprint` and `fingerprint-gen-puml`;
+  **`--shapes-namespace`** now also on `fingerprint`.
+
+### Changed
+- **BREAKING** `profile.html` is no longer written: `main.html` is the one HTML page, written by the
+  run and by `fingerprint-gen-doc`; `--format doc` on `fingerprint` writes nothing more.
+- **BREAKING** The library entry is `fingerprint_report(url, folder, settings, *, formats, options,
+  template, user_prefixes, prefix_list, sparql, renderer)`. `generate_endpoint_fingerprint_report`,
+  `generate_report_builder_config` and `render_report` are removed; custom report templates render
+  the document view model (`view`, a `ProfileDocument`) instead of `conf.profile`. Migration: see the
+  API reference.
+- **BREAKING** SHACL shapes are named `<class namespace>/shape/<local>` under `<prefix>-shape:`
+  (or `shape:<prefix>-<local>` in a given `--shapes-namespace`), and property shapes are named IRIs;
+  `RDF_FINGERPRINTER_SHAPES_NAMESPACE` is unset by default (was `urn:fingerprint:shape:`).
+- **BREAKING** PlantUML writes, per graph, an overview (`diagram-<graph>.puml`) and one file per
+  namespace module (`diagram-<graph>--<module>.puml`) instead of one file per graph; custom PlantUML
+  templates receive `DiagramOverview` / `DiagramModule` views.
+- **BREAKING** Classes of `rdf`, `rdfs`, `owl` and `sh` are hidden from every output by default
+  (`--include-namespace owl` brings one back).
+- **BREAKING** `RDF_FINGERPRINTER_PREFIXES_FILE` adds your prefixes over the packaged ones instead of
+  replacing them.
+- A graph with no shown class produces no shapes or diagram file.
+- The report renders much faster (on a 79k-triple store: 1.4 s instead of 10.8 s) and is smaller.
+
 ## [2.1.0] - 2026-10-31
 
 Representations release (OpenSpec change `profile-representations`). A fingerprint is saved once

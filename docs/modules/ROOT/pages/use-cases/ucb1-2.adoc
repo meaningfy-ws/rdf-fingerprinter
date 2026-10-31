@@ -15,9 +15,9 @@ As UC-W1.
 
 == Brief Description
 
-The embedding application calls `generate_endpoint_fingerprint_report` with an endpoint and an
-output folder, optionally graphs, a custom template folder and constants. Collection settings travel
-in `additional_config["collection"]`. The function returns the path of the report.
+The embedding application calls `fingerprint_report` with an endpoint, an output folder and the
+settings built by `resolve_settings`, optionally formats, generator options, a template package, its
+own prefixes and a prefix list source. The function returns the path of the report and the run.
 
 == Preconditions
 
@@ -31,11 +31,9 @@ As UC-W1.
 
 This Blue path adds only:
 
-. The return value is the path of the main report document, as in 1.x. It does not say whether
-  failures were recorded: they show in the report's collection section and in the WARNING log. A
-  caller that must act on them uses the separate steps (`collect`, `analyse`, `render_report`), whose
-  run carries `failures` (xref:api-reference.adoc[API reference]).
-. A custom template folder renders the report instead of the packaged one, with the constants in its context.
+. The return value is the path of `main.html` and the run, whose `failures` list what could not be
+  measured (xref:api-reference.adoc[API reference]).
+. A template package renders the report page from the document view model instead of the packaged one.
 
 == Minimal Guarantees (On Failure)
 
@@ -50,13 +48,14 @@ This Blue path adds only:
 
 == Extensions
 
-1a. Unknown key in `additional_config["collection"]` — usage error naming the key.
+1a. Unknown key in the `config` given to `resolve_settings` — usage error naming the key.
 
 == Special Requirements
 
-* The signature is a compatibility contract (xref:decisions.adoc#ad-2[AD-2]).
+* The 1.x function `generate_endpoint_fingerprint_report` was removed in 3.0 (readable-representations
+  DEC-9); see xref:api-reference.adoc[API reference] for the migration.
 
 == Technology and Data Variations
 
-Setting sources, including how the calling process's environment interacts with
-`additional_config["collection"]`: xref:statistics.adoc#precedence[Settings].
+Setting sources, including how the calling process's environment interacts with the `config`
+mapping: xref:statistics.adoc#precedence[Settings].

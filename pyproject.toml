@@ -4,7 +4,7 @@
 
 [project]
 name = "rdf-fingerprinter"
-version = "2.1.0"
+version = "3.0.0"
 description = "Find out kind of data shapes your RDF dataset instantiates."
 readme = "README.md"
 requires-python = ">=3.12,<4.0"

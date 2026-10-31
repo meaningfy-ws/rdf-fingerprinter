@@ -86,12 +86,12 @@ Each setting is taken from the first source that gives it, in this order:
 
 . the command-line option (CLI only);
 . the environment variable `RDF_FINGERPRINTER_<NAME>`;
-. the `selected_graphs` parameter of `generate_endpoint_fingerprint_report` (library, graphs only);
-. the configuration: `--config FILE` for the CLI, `additional_config["collection"]` for the library;
+. the `selected_graphs` argument of `resolve_settings` (library, graphs only);
+. the configuration: `--config FILE` for the CLI, the `config` mapping of `resolve_settings` for the library;
 . the default.
 
 NOTE: For a library caller, an environment variable set in the process *overrides* the same setting
-in `additional_config["collection"]`.
+in the `config` mapping of `resolve_settings`.
 
 From 2.1 the generator commands take only `--threshold`; it is not read from the environment, and
 without it the threshold recorded in the profile applies.
@@ -134,9 +134,10 @@ environment variable when used, with the default below. A value that cannot be r
 | `RDF_FINGERPRINTER_RETRY_BACKOFF_SECONDS` | `1,4` | Seconds before each retry of a transient failure; one retry per number.
 | `RDF_FINGERPRINTER_TIMEOUT_MARKERS` | `timeout,time limit,timed out,estimated execution time` | Texts that make an HTTP 500 answer a timeout.
 | `RDF_FINGERPRINTER_ERROR_EXCERPT_LENGTH` | 200 | Characters of an endpoint's error body kept in a failure message.
-| `RDF_FINGERPRINTER_SHAPES_NAMESPACE` | `urn:fingerprint:shape:` | Namespace of generated shape IRIs (`--shapes-namespace` overrides it).
+| `RDF_FINGERPRINTER_SHAPES_NAMESPACE` | unset | One namespace for every shape IRI; unset, each class's shapes go in `<its namespace>/shape/` (`--shapes-namespace` overrides it).
 | `RDF_FINGERPRINTER_DEFAULT_GRAPH_LABEL` | `default graph` | How the representations name the default graph.
-| `RDF_FINGERPRINTER_PREFIXES_FILE` | the packaged `prefixes.json` | Prefixes the generators shorten IRIs with; the report keeps its template package's own file.
+| `RDF_FINGERPRINTER_PREFIXES_FILE` | unset | Your prefix file, over the packaged prefixes (`--prefixes` overrides it); see xref:representations.adoc#prefixes[Prefixes].
+| `RDF_FINGERPRINTER_PREFIX_LOOKUP` | `true` | Whether the `fingerprint` command reads prefix.cc's prefix list for unnamed namespaces (`--no-prefix-lookup` switches it off).
 |===
 
 From Python, `fingerprint.config` holds these values (`config.profile_file`, …);
