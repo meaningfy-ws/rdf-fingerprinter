@@ -40,14 +40,14 @@ formats=(), sparql=None)` runs them all and saves `profile.json`; `sparql` takes
 [source,python]
 ----
 from fingerprint.adapters.profile_file import save_profile
-from fingerprint.adapters.sparql import SparqlWrapperClient
+from fingerprint.adapters.sparql import SparqlHttpClient
 from fingerprint.domain.analytics import analyse
 from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.report import render_report
 from fingerprint.service_layer.settings import resolve_settings
 
 settings = resolve_settings(cli={"depth": "properties"})
-run = collect(url, settings, SparqlWrapperClient(url, settings.timeout_seconds))
+run = collect(url, settings, SparqlHttpClient(url, settings.timeout_seconds))
 save_profile(run, Path("report"))                         # report/profile.json; load_profile() reads it
 report = render_report(analyse(run), Path("report"))
 ----

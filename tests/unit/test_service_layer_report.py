@@ -122,7 +122,7 @@ def test_pipeline_logs_the_number_of_failures(tmp_path, monkeypatch, caplog):
     fake.add("ex:p", "a", "ex:Person")
     fake.add("ex:p", "ex:name", Literal("n"))
     fake.on("Q4", QueryTimeout("timed out"))
-    monkeypatch.setattr(handlers, "SparqlWrapperClient", lambda endpoint, timeout: fake)
+    monkeypatch.setattr(handlers, "SparqlHttpClient", lambda endpoint, timeout: fake)
     with caplog.at_level(logging.WARNING):
         _, run = handlers.fingerprint_report("http://fake", tmp_path, resolve_settings(env={}))
     assert len(run.failures) == 1 and "with 1 failures" in caplog.text

@@ -7,13 +7,13 @@ import shutil
 from pathlib import Path
 
 import pytest
-import SPARQLWrapper
 from bs4 import BeautifulSoup
 from click.testing import CliRunner
 from pytest_bdd import given, parsers, scenarios, then, when
 from rdflib import RDF, Graph, Literal, Namespace, URIRef
 
 from fingerprint.adapters.profile_file import load_profile, save_profile
+from fingerprint.adapters.sparql import SparqlHttpClient
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.entrypoints.cli import generate
@@ -72,7 +72,7 @@ def failing_endpoint(ctx, monkeypatch):
         ctx["queried"].append(self)
         raise AssertionError("a representation must not query")
 
-    monkeypatch.setattr(SPARQLWrapper.SPARQLWrapper, "query", refuse)
+    monkeypatch.setattr(SparqlHttpClient, "_once", refuse)
 
 
 @when("every representation is generated from the saved profile")

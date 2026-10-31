@@ -5,13 +5,12 @@ import urllib.error
 from pathlib import Path
 
 import pytest
-import SPARQLWrapper
 from bs4 import BeautifulSoup
 from click.testing import CliRunner
 from pytest_bdd import given, parsers, scenarios, then, when
 from rdflib import Literal
 
-from fingerprint.adapters.sparql import QueryTimeout
+from fingerprint.adapters.sparql import QueryTimeout, SparqlHttpClient
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.profile import ProfileRun
 from fingerprint.entrypoints.cli import main as cli
@@ -75,7 +74,7 @@ def failing_endpoint(ctx, monkeypatch):
         ctx["queried"].append(self)
         raise AssertionError("the report must not query")
 
-    monkeypatch.setattr(SPARQLWrapper.SPARQLWrapper, "query", refuse)
+    monkeypatch.setattr(SparqlHttpClient, "_once", refuse)
 
 
 @when("the report is rendered")
@@ -164,7 +163,7 @@ def fake(monkeypatch):
         fake.add(f"ex:p{i}", "a", "ex:Person")
         fake.add(f"ex:p{i}", "ex:name", Literal(f"n{i}"))
         fake.add(f"ex:c{i}", "a", "ex:City")
-    monkeypatch.setattr(handlers, "SparqlWrapperClient", lambda endpoint, timeout: fake)
+    monkeypatch.setattr(handlers, "SparqlHttpClient", lambda endpoint, timeout: fake)
     return fake
 
 

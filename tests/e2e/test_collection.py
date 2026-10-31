@@ -1,6 +1,9 @@
 """Collection and analysis of the loaded test store (`make oxigraph-load-test-data`)."""
 
-from fingerprint.adapters.sparql import SparqlWrapperClient
+from pathlib import Path
+
+from fingerprint.adapters.profile_file import load_profile
+from fingerprint.adapters.sparql import SparqlHttpClient
 from fingerprint.domain.analytics import analyse
 from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.settings import resolve_settings
@@ -9,7 +12,7 @@ from tests import LOCAL_ENDPOINT
 
 def fingerprint(**cli):
     settings = resolve_settings(cli=cli, env={})
-    return collect(LOCAL_ENDPOINT, settings, SparqlWrapperClient(LOCAL_ENDPOINT, settings.timeout_seconds))
+    return collect(LOCAL_ENDPOINT, settings, SparqlHttpClient(LOCAL_ENDPOINT, settings.timeout_seconds))
 
 
 def test_every_graph_is_profiled_without_failures():
@@ -23,3 +26,11 @@ def test_every_graph_is_profiled_without_failures():
 def test_first_n_reads_at_most_n_instances():
     run = fingerprint(precision_policy="first_n", first_n=2)
     assert all(c.observed_instances <= 2 for g in run.graphs for c in g.class_partitions)
+
+
+def test_a_live_collection_equals_the_sample_profile():
+    """Typed rdflib rows build the same profile the 2.1 sample holds (domain-object-model P-8)."""
+    sample = load_profile(Path(__file__).parents[1] / "test_data" / "profiles" / "sample-profile.json")
+    run = collect(LOCAL_ENDPOINT, sample.settings, SparqlHttpClient(LOCAL_ENDPOINT, sample.settings.timeout_seconds))
+    varying = {"started_at", "finished_at", "tool_version"}
+    assert run.model_dump(exclude_none=True, exclude=varying) == sample.model_dump(exclude_none=True, exclude=varying)

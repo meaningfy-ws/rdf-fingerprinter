@@ -1,12 +1,13 @@
 """FakeSparql: the real client's classification and retries over an in-memory rdflib store (P-2, P-8)."""
 
+import json
 import threading
 from collections.abc import Callable
 from typing import Any
 
 from rdflib import BNode, Dataset, Literal, URIRef
 
-from fingerprint.adapters.sparql import SparqlWrapperClient, query_name
+from fingerprint.adapters.sparql import SparqlHttpClient, query_name
 
 EX = "http://example.org/"
 
@@ -34,7 +35,7 @@ def _binding(value: Any) -> dict[str, str]:
     return {"type": "uri" if isinstance(value, URIRef) else "literal", "value": str(value)}
 
 
-class FakeSparql(SparqlWrapperClient):
+class FakeSparql(SparqlHttpClient):
     """Answers from `dataset`, unless a rule for the query's name (Q5, QS, …) says otherwise."""
 
     def __init__(self) -> None:
@@ -61,7 +62,8 @@ class FakeSparql(SparqlWrapperClient):
     def sent(self, name: str) -> list[str]:
         return [q for q in self.queries if query_name(q).split()[0] == name]
 
-    def _once(self, query: str, ask: bool) -> dict[str, Any]:
+    def _once(self, query: str) -> bytes:
+        """The SPARQL JSON answer body, as the endpoint would send it."""
         name = query_name(query).split()[0]
         with self._lock:
             self.queries.append(query)
@@ -72,20 +74,12 @@ class FakeSparql(SparqlWrapperClient):
                 if isinstance(rule["outcome"], BaseException):
                     raise rule["outcome"]
                 rows = rule["outcome"]
-                names = list(rows[0]) if rows else []
-                return {
-                    "head": {"vars": names},
+                answer = {
+                    "head": {"vars": list(rows[0]) if rows else []},
                     "results": {"bindings": [{k: _binding(v) for k, v in r.items() if v is not None} for r in rows]},
                 }
-            result = self.dataset.query(query)
-            if ask:
-                return {"boolean": bool(result.askAnswer)}
-            names = [str(v) for v in result.vars or []]
-            bindings = [
-                {str(v): _binding(row[v]) for v in result.vars or [] if row[v] is not None}  # type: ignore[index]
-                for row in result
-            ]
-        return {"head": {"vars": names}, "results": {"bindings": bindings}}
+                return json.dumps(answer).encode()
+            return self.dataset.query(query).serialize(format="json")
 
 
 # --- hand-built profile runs for the representation tests (profile-representations task 1.2) ---

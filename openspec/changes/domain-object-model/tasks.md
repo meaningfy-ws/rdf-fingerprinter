@@ -19,8 +19,8 @@
 
 ## 3. SPARQL client and collection (together: the row type changes under collection)
 
-- [ ] 3.1 Adapter: form-encoded POST via `urlopen(timeout=…)`, `Result.parse`, `SparqlPort` returning `ResultRow`s and `askAnswer`; `classify` with the 500-marker rule; backoff, markers and excerpt from config; `rows_from_json` removed (P-5; Requirement: Results are read as typed RDF terms; Requirement: Error classes and retries)
-- [ ] 3.2 `collection.py` builds the profile model objects from `ResultRow`s; blank nodes by `isinstance(BNode)` written as `_:<id>`; `ignore_imports = fingerprint.service_layer.collection -> rdflib` in the `service-io` contract (P-8); `FakeSparql` (`_once`, string rows in `on()`) returns rdflib `ResultRow`s; the `SPARQLWrapper.SPARQLWrapper.query` monkeypatches in `tests/unit/steps/test_fingerprint_report_steps.py`, `tests/unit/steps/test_profile_representations_steps.py` and `tests/e2e/test_representations.py` move to the new adapter; message-text assertions and `tests/unit/test_adapters_sparql.py` (SPARQLWrapper exceptions) updated; `SparqlWrapperClient` renamed `SparqlHttpClient` (P-5); SPARQLWrapper removed from `pyproject.toml`; a live collection equals `sample-profile.json` but for timestamps and version; `make test-e2e` green (P-8)
+- [x] 3.1 Adapter: form-encoded POST via `urlopen(timeout=…)`, `Result.parse`, `SparqlPort` returning `ResultRow`s and `askAnswer`; `classify` with the 500-marker rule; backoff, markers and excerpt from config; `rows_from_json` removed (P-5; Requirement: Results are read as typed RDF terms; Requirement: Error classes and retries)
+- [x] 3.2 `collection.py` builds the profile model objects from `ResultRow`s; blank nodes by `isinstance(BNode)` written as `_:<id>`; `ignore_imports = fingerprint.service_layer.collection -> rdflib` in the `service-io` contract (P-8); `FakeSparql` (`_once`, string rows in `on()`) returns rdflib `ResultRow`s; the `SPARQLWrapper.SPARQLWrapper.query` monkeypatches in `tests/unit/steps/test_fingerprint_report_steps.py`, `tests/unit/steps/test_profile_representations_steps.py` and `tests/e2e/test_representations.py` move to the new adapter; message-text assertions and `tests/unit/test_adapters_sparql.py` (SPARQLWrapper exceptions) updated; `SparqlWrapperClient` renamed `SparqlHttpClient` (P-5); SPARQLWrapper removed from `pyproject.toml`; a live collection equals `sample-profile.json` but for timestamps and version; `make test-e2e` green (P-8)
 
 ## 4. Analytics builds objects
 
@@ -45,7 +45,7 @@
 
 ## Roadmap
 
-- [x] 1.1 · [ ] 1.2 · [ ] 1.3 · [x] 0.1 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 4.1 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 0.2 · [ ] 6.1 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4
+- [x] 1.1 · [ ] 1.2 · [ ] 1.3 · [x] 0.1 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [ ] 4.1 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 0.2 · [ ] 6.1 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4
 
 ## Verification
 

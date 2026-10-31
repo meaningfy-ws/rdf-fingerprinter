@@ -3,7 +3,7 @@
 import pytest
 
 from fingerprint.adapters.queries import QUERY_FILES, render, subjects_exact, subjects_limit, subjects_values
-from fingerprint.adapters.sparql import SparqlWrapperClient
+from fingerprint.adapters.sparql import SparqlHttpClient
 from tests import LOCAL_ENDPOINT
 
 CONTINENTS = "http://publications.europa.eu/resources/authority/continents"
@@ -13,7 +13,7 @@ PREF_LABEL = "http://www.w3.org/2008/05/skos-xl#prefLabel"
 
 @pytest.fixture(scope="module")
 def sparql():
-    return SparqlWrapperClient(LOCAL_ENDPOINT, timeout_seconds=30)
+    return SparqlHttpClient(LOCAL_ENDPOINT, timeout_seconds=30)
 
 
 @pytest.mark.parametrize("graph", [CONTINENTS, ""])
@@ -31,24 +31,24 @@ def test_presence_check_runs(sparql):
 
 
 def test_named_graphs_are_listed(sparql):
-    assert {row["g"] for row in sparql.select(render("Q0"))} >= {CONTINENTS}
+    assert {str(row["g"]) for row in sparql.select(render("Q0"))} >= {CONTINENTS}
 
 
 def test_class_counts(sparql):
-    counts = {row["c"]: int(row["instances"]) for row in sparql.select(render("Q3", CONTINENTS))}
+    counts = {str(row["c"]): int(row["instances"]) for row in sparql.select(render("Q3", CONTINENTS))}
     assert counts[CONTINENT] == 6
 
 
 @pytest.mark.parametrize("name", ["Q5", "Q6", "Q7", "Q8"])
 def test_first_n_sources_agree_with_exact_on_a_small_class(sparql, name):
-    listed = [row["s"] for row in sparql.select(render("QS", CONTINENTS, cls=CONTINENT, limit=100))]
+    listed = [str(row["s"]) for row in sparql.select(render("QS", CONTINENTS, cls=CONTINENT, limit=100))]
     sources = [
         subjects_exact(CONTINENTS, CONTINENT),
         subjects_values(listed),
         subjects_limit(CONTINENTS, CONTINENT, 100),
     ]
     results = [
-        sorted(repr(sorted(r.items())) for r in sparql.select(render(name, CONTINENTS, cls=CONTINENT, subjects=s)))
+        sorted(repr(sorted(r.asdict().items())) for r in sparql.select(render(name, CONTINENTS, cls=CONTINENT, subjects=s)))
         for s in sources
     ]
     assert results[0] == results[1] == results[2]

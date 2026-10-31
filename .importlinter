@@ -34,14 +34,14 @@ type = forbidden
 source_modules =
     fingerprint.domain
 forbidden_modules =
-    SPARQLWrapper
     eds4jinja2
     jinja2
     rdflib
     click
 
 # I/O libraries are reached only through adapters (profile-representations P-12). Indirect imports
-# are allowed: handlers builds the default SPARQL client, which imports SPARQLWrapper itself.
+# are allowed: handlers builds the default SPARQL client, which imports rdflib itself. Collection reads
+# the client's rdflib result rows and tells blank nodes by their term class (domain-object-model P-8).
 [importlinter:contract:service-io]
 name = service layer imports no I/O library itself
 type = forbidden
@@ -51,5 +51,6 @@ forbidden_modules =
     jinja2
     eds4jinja2
     rdflib
-    SPARQLWrapper
 allow_indirect_imports = True
+ignore_imports =
+    fingerprint.service_layer.collection -> rdflib

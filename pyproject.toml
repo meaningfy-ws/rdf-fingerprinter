@@ -36,7 +36,6 @@ dependencies = [
     "click>=8.5.0,<9",
     "pydantic>=2.10,<3",
     "rdflib>=7.0,<8",
-    "SPARQLWrapper>=2.0.0,<3",
 ]
 
 [project.urls]

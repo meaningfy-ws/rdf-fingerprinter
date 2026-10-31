@@ -2,10 +2,10 @@
 format from the saved profile.json with any query refused (profile-representations task 7.4)."""
 
 import pytest
-import SPARQLWrapper
 from click.testing import CliRunner
 from rdflib import Graph
 
+from fingerprint.adapters.sparql import SparqlHttpClient
 from fingerprint.entrypoints.cli import generate
 from fingerprint.entrypoints.cli.main import fingerprint_endpoint
 from tests import LOCAL_ENDPOINT
@@ -34,7 +34,7 @@ def test_regenerating_from_the_saved_profile_queries_nothing(fingerprinted, tmp_
     def refuse(self, *args, **kwargs):
         raise AssertionError("a generator queried the endpoint")
 
-    monkeypatch.setattr(SPARQLWrapper.SPARQLWrapper, "query", refuse)
+    monkeypatch.setattr(SparqlHttpClient, "_once", refuse)
     result = CliRunner().invoke(command, [str(fingerprinted / "profile.json"), "-o", str(tmp_path)])
     assert result.exit_code == 0, result.output
     regenerated = {p.name: p.read_text() for p in tmp_path.iterdir()}

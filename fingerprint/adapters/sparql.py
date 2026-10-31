@@ -1,26 +1,23 @@
-"""SPARQL access: the port the service layer depends on and its SPARQLWrapper implementation (P-2, P-5)."""
+"""SPARQL access: the port the service layer depends on and its HTTP implementation (P-2, P-5).
+
+Queries go out as SPARQL 1.1 Protocol form POSTs through the standard library, which applies the
+per-query timeout; rdflib reads the JSON answer into typed terms (domain-object-model P-5).
+"""
 
 import http.client
-import json
 import logging
 import socket
 import time
 import urllib.error
 import urllib.parse
+import urllib.request
 from collections.abc import Callable
+from io import BytesIO
 from typing import Any, Protocol
 
-from SPARQLWrapper import JSON, POST, SPARQLWrapper
-from SPARQLWrapper.SPARQLExceptions import (
-    EndPointInternalError,
-    EndPointNotFound,
-    QueryBadFormed,
-    SPARQLWrapperException,
-    Unauthorized,
-    URITooLong,
-)
+from rdflib.query import Result, ResultRow
 
-from fingerprint import config
+from fingerprint import __version__, config
 from fingerprint.adapters.exceptions import (  # noqa: F401 — also importable from here (2.0)
     EndpointUnreachable,
     PermanentError,
@@ -32,13 +29,16 @@ from fingerprint.adapters.exceptions import (  # noqa: F401 — also importable 
 
 logger = logging.getLogger(__name__)
 
-Row = dict[str, str | None]
-
 BLANK_NODE_PREFIX = "_:"
+HEADERS = {
+    "Content-Type": "application/x-www-form-urlencoded",
+    "Accept": "application/sparql-results+json",
+    "User-Agent": f"rdf-fingerprinter/{__version__}",
+}
 
 
 class SparqlPort(Protocol):
-    def select(self, query: str) -> list[Row]: ...
+    def select(self, query: str) -> list[ResultRow]: ...
 
     def ask(self, query: str) -> bool: ...
 
@@ -68,20 +68,10 @@ def classify(error: BaseException) -> SparqlError:
         return error
     if isinstance(error, (socket.timeout, TimeoutError)):
         return QueryTimeout(f"timed out: {error}")
-    if isinstance(error, Unauthorized):
-        return EndpointUnreachable("401 authentication required", 401)
-    if isinstance(error, EndPointInternalError):
-        message = _excerpt(error)
-        if any(marker in message.lower() for marker in config.timeout_markers):
-            return QueryTimeout(f"500 {message}", 500)
-        return PermanentError(f"500 {message}", 500)
-    if isinstance(error, SPARQLWrapperException):
-        status = {QueryBadFormed: 400, EndPointNotFound: 404, URITooLong: 414}.get(type(error))
-        return PermanentError(f"{status or ''} {_excerpt(error)}".strip(), status)
     if isinstance(error, urllib.error.HTTPError):
         body = _excerpt(error.read() if error.fp else b"")
         message = f"{error.code} {body}".strip()
-        if error.code == 504:
+        if error.code == 504 or (error.code == 500 and any(m in body.lower() for m in config.timeout_markers)):
             return QueryTimeout(message, error.code)
         if error.code in (429, 502, 503):
             return TransientError(message, error.code)
@@ -94,51 +84,35 @@ def classify(error: BaseException) -> SparqlError:
         return TransientError(str(error.reason))
     if isinstance(error, (ConnectionError, http.client.HTTPException, OSError)):
         return TransientError(f"{type(error).__name__}: {error}")
-    return PermanentError(f"unreadable response: {error}")
+    return PermanentError(f"unreadable response: {error}")  # also an answer rdflib cannot parse
 
 
-def rows_from_json(result: dict[str, Any]) -> list[Row]:
-    """SELECT results as plain rows; blank nodes as `_:id`, unbound variables as None."""
-    variables = result["head"]["vars"]
-    rows = []
-    for binding in result["results"]["bindings"]:
-        row: Row = {}
-        for var in variables:
-            term = binding.get(var)
-            row[var] = (
-                None if term is None else (BLANK_NODE_PREFIX + term["value"] if term["type"] == "bnode" else term["value"])
-            )
-        rows.append(row)
-    return rows
-
-
-class SparqlWrapperClient:
-    """JSON over HTTP POST; a new SPARQLWrapper per call, so one client is safe to share between threads."""
+class SparqlHttpClient:
+    """One HTTP request per call, so one client is safe to share between threads."""
 
     def __init__(self, endpoint: str, timeout_seconds: int, sleep: Callable[[float], None] = time.sleep):
         self.endpoint = endpoint
         self.timeout_seconds = timeout_seconds
         self._sleep = sleep
 
-    def select(self, query: str) -> list[Row]:
-        result = self._with_retries(query, ask=False)
-        try:
-            return rows_from_json(result)
-        except (KeyError, TypeError) as error:
-            raise PermanentError(f"unreadable response: missing {error}") from error
+    def select(self, query: str) -> list[ResultRow]:
+        """Rows of `URIRef`, `BNode` and typed `Literal` terms; an unbound variable is None."""
+        result = self._with_retries(query)
+        if result.type != "SELECT":
+            raise PermanentError(f"unreadable response: {result.type} answer to a SELECT query")
+        return list(result)  # type: ignore[arg-type]
 
     def ask(self, query: str) -> bool:
-        result = self._with_retries(query, ask=True)
-        try:
-            return bool(result["boolean"])
-        except (KeyError, TypeError) as error:
-            raise PermanentError(f"unreadable response: missing {error}") from error
+        result = self._with_retries(query)
+        if result.type != "ASK":
+            raise PermanentError(f"unreadable response: {result.type} answer to an ASK query")
+        return bool(result.askAnswer)
 
-    def _with_retries(self, query: str, ask: bool) -> dict[str, Any]:
+    def _with_retries(self, query: str) -> Result:
         backoff = config.retry_backoff_seconds
         for attempt in range(len(backoff) + 1):
             try:
-                return self._once(query, ask)
+                return Result.parse(BytesIO(self._once(query)), format="json")
             except Exception as raw:  # classified below; nothing is swallowed
                 error = classify(raw)
                 if not isinstance(error, TransientError):
@@ -149,14 +123,9 @@ class SparqlWrapperClient:
                 self._sleep(backoff[attempt])
         raise AssertionError("unreachable")
 
-    def _once(self, query: str, ask: bool) -> dict[str, Any]:
-        wrapper = SPARQLWrapper(self.endpoint)
-        wrapper.setMethod(POST)
-        wrapper.setReturnFormat(JSON)
-        wrapper.setTimeout(self.timeout_seconds)
-        wrapper.setQuery(query)
-        response = wrapper.query().response
-        try:
-            return json.loads(response.read())
-        except ValueError as error:
-            raise PermanentError(f"unreadable response: {error}") from error
+    def _once(self, query: str) -> bytes:
+        """The answer body of one SPARQL 1.1 Protocol POST."""
+        body = urllib.parse.urlencode({"query": query}).encode()  # dict-ok: urllib form encoding
+        request = urllib.request.Request(self.endpoint, data=body, headers=HEADERS, method="POST")
+        with urllib.request.urlopen(request, timeout=self.timeout_seconds) as response:
+            return response.read()

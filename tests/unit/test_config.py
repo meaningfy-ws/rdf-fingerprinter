@@ -87,7 +87,7 @@ def test_a_variable_changes_a_default(tmp_path, monkeypatch):
     """Scenario: A variable changes a default."""
     fake = FakeSparql()
     fake.add("ex:p", "a", "ex:Person")
-    monkeypatch.setattr(handlers, "SparqlWrapperClient", lambda endpoint, timeout: fake)
+    monkeypatch.setattr(handlers, "SparqlHttpClient", lambda endpoint, timeout: fake)
     monkeypatch.setenv("RDF_FINGERPRINTER_PROFILE_FILE", "run.json")
     handlers.fingerprint_report("http://fake", tmp_path, resolve_settings(env={}))
     assert (tmp_path / "run.json").is_file() and not (tmp_path / "profile.json").exists()
@@ -95,7 +95,7 @@ def test_a_variable_changes_a_default(tmp_path, monkeypatch):
 
 def test_a_badly_typed_variable_exits_2_before_any_query(tmp_path, monkeypatch):
     """Scenario: A badly typed variable."""
-    monkeypatch.setattr(handlers, "SparqlWrapperClient", lambda endpoint, timeout: pytest.fail("a query was sent"))
+    monkeypatch.setattr(handlers, "SparqlHttpClient", lambda endpoint, timeout: pytest.fail("a query was sent"))
     result = CliRunner().invoke(
         fingerprint_endpoint,
         ["-e", "http://fake/sparql", "-o", str(tmp_path)],

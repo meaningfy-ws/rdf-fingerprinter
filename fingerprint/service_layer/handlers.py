@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from fingerprint.adapters.profile_file import save_profile
-from fingerprint.adapters.sparql import SparqlPort, SparqlWrapperClient
+from fingerprint.adapters.sparql import SparqlHttpClient, SparqlPort
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.profile import ProfileRun, Settings
@@ -45,7 +45,7 @@ def fingerprint_report(
     the exit code). The profile is saved before rendering, so a rendering failure loses nothing collected;
     the chosen `formats` are rendered from the same run afterwards (UC-B2.2)."""
     validate_config()
-    sparql = sparql or SparqlWrapperClient(sparql_endpoint_url, settings.timeout_seconds)
+    sparql = sparql or SparqlHttpClient(sparql_endpoint_url, settings.timeout_seconds)
     renderer = renderer or JinjaTemplateRenderer()
     run = collect(sparql_endpoint_url, settings, sparql)
     save_profile(run, output_location)
