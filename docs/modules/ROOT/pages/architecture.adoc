@@ -2,8 +2,8 @@
 :description: Scope, structure and architecture decisions of rdf-fingerprinter.
 
 This page records the minimal architecture of rdf-fingerprinter: what it is for, how it is
-structured, and the decisions that shape it. It describes the *target* architecture of release
-2.0, planned in the OpenSpec change `harden-fingerprinter`; where 1.0 differs, a note says so.
+structured, and the decisions that shape it. It describes release 2.0, delivered by the OpenSpec
+change `harden-fingerprinter`; where 1.x differed, a note says so.
 Decision ids `DEC-n` and `P-n` refer to that change (`openspec/changes/harden-fingerprinter/`).
 
 == Purpose and scope
@@ -24,7 +24,7 @@ Out of scope:: other representations (SHACL, PlantUML, ReSpec, VoID — change
 
 [cols="1,3"]
 |===
-| Scale | Must profile large knowledge graphs (millions of instances per class) without one query
+| Scale | Profiles large knowledge graphs (millions of instances per class) without one query
 covering the whole graph.
 | Portability | Any SPARQL 1.1 store; no store-specific SPARQL.
 | Honesty | Every number states how precise it is; failures are visible and fail the run.
@@ -85,7 +85,7 @@ templates (`queries/*.rq`).
 The layers are enforced by `.importlinter` (`make check-architecture`), including two forbidden
 contracts: the generated module imports no project code, and the domain imports no I/O library.
 
-NOTE: 1.0 has only `service_layer` and `entrypoints`; its statistics are computed by SPARQL inside
+NOTE: 1.x had only `service_layer` and `entrypoints`; its statistics were computed by SPARQL inside
 the templates.
 
 === Data flow

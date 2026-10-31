@@ -23,12 +23,33 @@ print(report)  # report/main.html
 
 | `sparql_endpoint_url` | `str` | The SPARQL query endpoint.
 | `output_location` | `str \| Path` | An existing folder; `NotADirectoryError` otherwise.
-| `selected_graphs` | `list[str] \| None` | Named graph IRIs to fingerprint, one section each; `""` is the default graph. `None` means the default graph only.
+| `selected_graphs` | `list[str] \| None` | Graph IRIs to fingerprint, one section each; `""` is the default graph. `None` means the default graph and every named graph.
 | `external_template_location` | `str \| Path \| None` | A custom template folder (below); `None` uses the packaged template.
-| `additional_config` | `dict \| None` | Extra values merged into the template's `conf` (for example `title`).
+| `additional_config` | `dict \| None` | Extra values merged into the template's `conf` (for example `title`); its `collection` key holds collection settings (xref:statistics.adoc#_settings[Settings]).
 |===
 
-Returns the `Path` of the main report document.
+Returns the `Path` of the main report document. Failed measurements are listed in the report
+and logged at WARNING; an unreachable endpoint raises `EndpointUnreachable`.
+
+== collect, analyse, render_report
+
+The three steps are also available separately, for example to keep the profile as JSON:
+
+[source,python]
+----
+from fingerprint.adapters.sparql import SparqlWrapperClient
+from fingerprint.domain.analytics import analyse
+from fingerprint.service_layer.collection import collect
+from fingerprint.service_layer.report import render_report
+from fingerprint.service_layer.settings import resolve_settings
+
+settings = resolve_settings(cli={"depth": "properties"})
+run = collect(url, settings, SparqlWrapperClient(url, settings.timeout_seconds))
+Path("profile.json").write_text(run.model_dump_json())   # raw statistics
+report = render_report(analyse(run), Path("report"))
+----
+
+`run.failures` lists what could not be measured.
 
 == generate_report_builder_config
 
@@ -62,10 +83,12 @@ my_template/
 }
 ----
 
-The templates read `conf.default_endpoint` and `conf.selected_graphs` and fetch data with
-eds4jinja2 (`from_endpoint(...).with_query(...).fetch_tabular()`). Start from the packaged
-template in `fingerprint_report_templates/fingerprint_report/`; its macros in
-`templates/macros/` hold the SPARQL queries.
+The templates read `conf.profile`, the analysed profile (`ProfileAnalytics`, generated from
+`model/fingerprint_analytics.yaml`), as well as `conf.default_endpoint` and `conf.selected_graphs`
+(the graphs profiled; `""` is the default graph). eds4jinja2's fetchers
+(`from_endpoint(...).with_query(...).fetch_tabular()`) remain available. Start from the packaged
+template in `fingerprint_report_templates/fingerprint_report/`; `templates/macros/profile.html`
+renders the classes and the Collection section.
 
 == Logging
 

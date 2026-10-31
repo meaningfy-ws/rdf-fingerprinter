@@ -1,12 +1,17 @@
 = The Report
 
-The report has one section per graph (the default graph, or each graph you select) and, inside
-it, one table per class instantiated in that graph. Each row is a *structural pattern*
-`(ClassOfSubjects, distinctPredicate, ClassOfObject)`: the subjects that are instances of the
-class, one property they use, and the type of the values used with it.
+The report has one section per profiled graph (the default graph first, then each named graph)
+and, inside it, one table per class instantiated in that graph. The report is rendered from the
+analysis of the collected statistics; it sends no queries of its own
+(xref:statistics.adoc[Statistics and Settings]).
 
 IRIs are shortened with the prefixes in the template's `prefixes.json` (for example
 `skos:prefLabel`).
+
+== Per class
+
+Each class shows its number of instances, its precision (`exact` or `first N of M`, see
+xref:statistics.adoc#_precision_modes[Precision modes]) and its parents, declared or implied.
 
 == Columns
 
@@ -14,20 +19,30 @@ IRIs are shortened with the prefixes in the template's `prefixes.json` (for exam
 |===
 | Column | Meaning
 
-| Property URI | The property used by instances of the class.
-| Subjects using property | How many distinct instances of the class use the property.
-| Distinct values used | How many distinct objects appear with the property.
+| Property | The property used by instances of the class.
+| Subjects | How many observed instances use the property.
 | Min | The fewest values an instance has; `0` when some instances do not use the property.
 | Max | The most values one instance has.
-| Avg | The average number of values per instance of the class.
-| Property kind | `owl:ObjectProperty` when the values are IRIs or blank nodes, otherwise `owl:DatatypeProperty`.
-| Value type | The class of the values, their datatype, or `rdfs:Resource` when they are untyped.
+| Avg | The average number of values per observed instance (instances without it count as 0).
+| Kind | `datatype_property`, `object_property` or `mixed`.
+| Distinct values | How many distinct objects appear with the property.
+| Value types | Datatypes and classes of the values, most frequent first.
+| Confidence | Share of observed instances having the property.
+| Cardinality | The accepted label (`exactly_one`, `zero_or_one`, …); `present` for a property found only by the completeness check.
+| Inheritance | `own`, `inherited` or `refined` relative to the parents.
+| Language coverage | Share of literal values with a language tag.
 |===
+
+A value that could not be computed is shown as `—`.
+
+== Collection
+
+The closing *Collection* section lists the settings used and every measurement that failed. A
+failed measurement is missing from the tables above it.
 
 == Reading it
 
-* *Min 1, Max 1* — every instance has exactly one value: a mandatory, single-valued property.
+* *Min 1, Max 1, Cardinality `exactly_one`* — a mandatory, single-valued property.
 * *Min 0* — the property is optional for this class.
-* *Several value types* — the property mixes kinds of values (for example a datatype and a
-  class); often a sign of inconsistent data.
-* A *class missing* from the report has no instances in that graph.
+* *Several value types* — the property mixes kinds of values; often a sign of inconsistent data.
+* *first N of M* — the numbers describe a sample; treat max and distinct values as lower bounds.
