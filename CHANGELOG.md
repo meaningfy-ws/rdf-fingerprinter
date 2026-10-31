@@ -6,6 +6,45 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-31
+
+Representations release (OpenSpec change `profile-representations`). A fingerprint is saved once
+and can be published, without querying the endpoint again, as SHACL shapes, a PlantUML class diagram
+and an application-profile document.
+
+### Added
+- **`profile.json`.** `fingerprint` (and `generate_endpoint_fingerprint_report`) saves the raw
+  profile run beside the report, before the report is rendered, so a template error loses nothing
+  collected. Its JSON Schema ships as `fingerprint/domain/generated/profile_run.schema.json`;
+  newer 2.x readers load older files.
+- **Generators**, modelled on LinkML's: `fingerprint-gen-shacl`, `fingerprint-gen-puml` and
+  `fingerprint-gen-doc` read a `profile.json` and write one representation (`--threshold`,
+  `--template`, and `--shapes-namespace` for SHACL); exit 0, 2 (usage) or 4 (unexpected).
+- **`fingerprint --format shacl|puml|doc`** (repeatable) renders representations in the same run.
+- **SHACL shapes**, one Turtle file per graph: open node shapes, counts from the accepted
+  cardinality, `sh:datatype` / `sh:class` / `sh:nodeKind` / `sh:or` from the values, annotated with
+  confidence and instance counts, and graded by severity so that, validated against the data they
+  came from, they report no `sh:Violation`.
+- **PlantUML class diagrams**, one source file per graph, and an **application-profile document**
+  (`profile.html`) in the style of SEMIC / EU application profiles.
+- Template filters for custom packages: `turtle_iri`, `turtle_term`, `turtle_string`,
+  `turtle_number`, `curie`.
+- Library: `fingerprint_report(..., formats=(), sparql=None)` (any `SparqlPort`), and
+  `fingerprint.service_layer.representations.generate_representations` /
+  `generate_from_profile_file`.
+- Docs: Representations, How It Works, Glossary, Architecture Decisions (AD-1 to AD-11) and a use
+  case catalogue (UC-W1, UC-W2 and their realisations).
+
+### Changed
+- The output folder of `fingerprint` now also holds `profile.json`.
+- Report rendering, setting sources and exceptions moved to their layers (`adapters/template_renderer.py`,
+  `adapters/settings_sources.py`, an `exceptions` module per layer); every old import path still works.
+- `make test` fails under 80 % coverage; every Gherkin scenario is tagged with its use case.
+
+### Dependencies
+- rdflib is now a declared runtime dependency (it was already installed through eds4jinja2);
+  pySHACL 0.40.1 for tests.
+
 ## [2.0.0] - 2026-10-31
 
 Hardening release (OpenSpec change `harden-fingerprinter`). Statistics are collected in Python
