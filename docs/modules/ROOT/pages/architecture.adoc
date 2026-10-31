@@ -73,7 +73,7 @@ templates (`queries/*.rq`).
 | domain
 
 | `fingerprint.domain`
-| The profile model (generated from LinkML), IRI guard, merge of partial results, all analytics
+| The profile model (generated from LinkML), IRI guard, all analytics
 — pure functions, no I/O.
 | nothing above it; no SPARQLWrapper, eds4jinja2 or click
 
@@ -151,7 +151,7 @@ Confirmation:: `pyproject.toml` (`fingerprint` script); unit test of the 1.x cal
 Context:: One whole-graph aggregate per class (1.0) times out on large graphs; so does one global
 class × property aggregate.
 Options:: (a) staged discovery + per-class queries scoped to the class's instances, with
-exact → batched → first-N escalation on timeout; (b) one global aggregate; (c) client-side
+exact → first-N escalation on timeout (batched mode: follow-up EPIC); (b) one global aggregate; (c) client-side
 counting of every triple (sheXer, QSE style).
 Decision:: (a) (DEC-2, DEC-3, DEC-10); classes run concurrently, biggest first.
 Consequences:: Cost grows with instances read, not classes × graph size; precision is stored per
