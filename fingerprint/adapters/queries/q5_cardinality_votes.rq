@@ -1,0 +1,8 @@
+# Q5 cardinality votes
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?p ?n (COUNT(?s) AS ?subjects) {
+  { SELECT ?s ?p (COUNT(*) AS ?n) {
+      $subjects $graph_open ?s ?p ?o . $graph_close FILTER(?p != rdf:type)
+    } GROUP BY ?s ?p }
+} GROUP BY ?p ?n

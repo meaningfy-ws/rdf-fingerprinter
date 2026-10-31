@@ -1,0 +1,13 @@
+# Q6 value partitions
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?p ?kind ?dt ?lang (COUNT(*) AS ?triples) (COUNT(DISTINCT ?o) AS ?distinct)
+       (MIN(?len) AS ?min_length) (MAX(?len) AS ?max_length) (SUM(?len) AS ?total_length)
+       (MIN(?lit) AS ?min_value) (MAX(?lit) AS ?max_value) {
+  $subjects $graph_open ?s ?p ?o . $graph_close FILTER(?p != rdf:type)
+  BIND(IF(isLiteral(?o), "literal", IF(isBlank(?o), "blank_node", "iri")) AS ?kind)
+  BIND(IF(isLiteral(?o), datatype(?o), ?unbound) AS ?dt)
+  BIND(IF(isLiteral(?o), lang(?o), ?unbound) AS ?lang)
+  BIND(IF(isLiteral(?o), STRLEN(STR(?o)), ?unbound) AS ?len)
+  BIND(IF(isLiteral(?o), ?o, ?unbound) AS ?lit)
+} GROUP BY ?p ?kind ?dt ?lang

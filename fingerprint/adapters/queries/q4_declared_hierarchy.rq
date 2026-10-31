@@ -1,0 +1,6 @@
+# Q4 declared hierarchy
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?sub ?sup {
+  { ?sub rdfs:subClassOf ?sup } UNION { GRAPH ?g { ?sub rdfs:subClassOf ?sup } }
+  FILTER(isIRI(?sub) && isIRI(?sup) && ?sub != ?sup) }

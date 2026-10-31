@@ -1,0 +1,6 @@
+# Q11 incoming links
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?sc ?p (COUNT(*) AS ?triples) {
+  $subjects $graph_open ?x ?p ?s . ?x a ?sc . $graph_close FILTER(?p != rdf:type)
+} GROUP BY ?sc ?p
