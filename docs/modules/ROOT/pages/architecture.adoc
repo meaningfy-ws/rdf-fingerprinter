@@ -42,14 +42,12 @@ covering the whole graph.
 
 == L1 — System context
 
-----
  Requester: data steward ──uses──▶ ┌───────────────────────┐ ──reads (SPARQL 1.1)──▶ SPARQL endpoint
  Requester: embedding app ─embeds─▶ │   rdf-fingerprinter   │                          (any store)
                                    └───────────────────────┘
                                       │ writes        ▲ reads
                                       ▼               │
                        output folder: report, profile.json, shapes, diagrams, document
-----
 
 Services offered::
 * *Fingerprint an endpoint* — profile + report (xref:use-cases/ucw1.adoc[UC-W1]).
@@ -90,15 +88,16 @@ which the generator commands call.
 | adapters, domain
 
 | `fingerprint.adapters`
-| SPARQL client (`SparqlPort` and its SPARQLWrapper implementation) and the query templates;
- Template renderer (eds4jinja2 rendering, Turtle check, file writes, shared by the report and
-the generators), Profile store (`profile.json`), setting sources (environment, config file).
+| SPARQL client (`SparqlPort` and its HTTP implementation, rdflib reading the results) and the
+query templates; Template renderer (eds4jinja2 rendering, Turtle check, file writes, shared by the
+report and the generators), Profile store (`profile.json`), Config resolver (environment, config
+file).
 | domain
 
 | `fingerprint.domain`
-| Profile model (generated from LinkML); Analyser; IRI rules (SPARQL and, from 2.1, Turtle).
-Pure, no I/O.
-| nothing above it; not SPARQLWrapper, eds4jinja2, jinja2, rdflib or click (enforced)
+| Profile and views models (generated from LinkML); Analyser; IRI rules (SPARQL and, from 2.1,
+Turtle). Pure, no I/O.
+| nothing above it; not eds4jinja2, jinja2, rdflib or click (enforced)
 
 | `fingerprint_report_templates`
 | Template packages: `fingerprint_report`; `shacl_shapes`, `plantuml_diagram`,
@@ -108,8 +107,15 @@ Pure, no I/O.
 
 Component names are those of the xref:glossary.adoc#components[Glossary], which maps each to its
 module. The layers are enforced by `.importlinter` (`make check-architecture`): the layer order, a
-generated model that imports no project code, a domain that imports no SPARQLWrapper, eds4jinja2,
-jinja2, rdflib or click, and a service layer that imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client).
+generated models that import no project code, a domain that imports no eds4jinja2, jinja2, rdflib
+or click, and a service layer that imports no jinja2, eds4jinja2 or rdflib itself
+(`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches
+rdflib through the default SPARQL client). One exception is declared: collection reads the client's
+rdflib result rows and tells blank nodes by their term class.
+
+The package root, `fingerprint/__init__.py`, holds the configuration: `config`, a
+`FingerprintConfig` whose values each read an `RDF_FINGERPRINTER_*` variable through the config
+resolver when accessed, never at import (xref:decisions.adoc#ad-12[AD-12]).
 
 NOTE: 1.x had only `service_layer` and `entrypoints`; its statistics were computed by SPARQL inside
 the templates. In 2.0 report rendering and the setting sources sat in the service layer; 2.1 moved
@@ -124,16 +130,17 @@ xref:how-it-works.adoc#data-flow[How it works].
 |===
 | Abstraction | Contract
 
-| `SparqlPort` | `select(query) -> rows`, `ask(query) -> bool`; raises one of the error classes of xref:how-it-works.adoc#failure-classes[How it works].
+| `SparqlPort` | `select(query) -> list[ResultRow]` (rdflib rows of `URIRef`, `BNode` and typed `Literal`; an unbound variable is `None`), `ask(query) -> bool`; raises one of the error classes of xref:how-it-works.adoc#failure-classes[How it works].
 | `ProfileRun`, `ProfileAnalytics` | The generated, frozen profile model (below).
-| `TemplateRenderer` | `render(package, *, view, config, autoescape) -> str`; `write(folder, texts, check) -> list[Path]`, checking every text before writing any; `prefixes`. The port generators and the report render through; declared in the service layer, implemented by the template renderer adapter (`SparqlPort` is declared beside its adapter, a 2.0 choice kept).
-| `Generator` | `visit_graph` / `visit_class` / `visit_property` build the view; `serialize()` returns file name → text (xref:decisions.adoc#ad-8[AD-8]).
+| `TemplateRenderer` | `render(package, *, view, config, autoescape) -> str`; `write(folder, documents, check) -> list[Path]` with `RenderedDocument` values, checking every text before writing any; `prefixes`. The port generators and the report render through; declared in the service layer, implemented by the template renderer adapter (`SparqlPort` is declared beside its adapter, a 2.0 choice kept).
+| `Generator` | pre-order `visit_graph` / `visit_class` (return `False` to skip), `visit_property` (a property's view), post-order `end_class` / `end_graph` (the frozen class and graph views); `serialize()` returns `list[RenderedDocument]`; formats keyed by `RepresentationFormat`, options a `GeneratorOptions` (xref:decisions.adoc#ad-8[AD-8]).
+| `FingerprintConfig` | `config.<value>` reads its `RDF_FINGERPRINTER_*` variable on access; `validate()` reads them all and names the first bad one (xref:decisions.adoc#ad-12[AD-12]).
 | Exit codes | 0 clean, 1 failures recorded, 2 usage error, 3 endpoint unreachable at the start, 4 unexpected error.
 |===
 
 === Profile model
 
-The model is LinkML, namespace `fp: https://data.meaningfy.ws/fingerprint/`, in two schemas
+The model is LinkML, namespace `fp: https://data.meaningfy.ws/fingerprint/`, in three schemas
 under `model/`:
 
 * `fingerprint_stats` — raw observations only: run and settings, graphs, classes with instance
@@ -141,9 +148,16 @@ under `model/`:
   subclass edges, incoming links, failures. Reuses VoID terms where the meaning matches.
 * `fingerprint_analytics` — extends each raw class with computed indicators (min/max/mean,
   confidence, cardinality label, value-type purity, diversity, parents, own/inherited, …).
+* `fingerprint_views` — what the representation templates receive: shapes graphs, diagram graphs,
+  the profile document, `RenderedDocument`, `GeneratorOptions` and the enums of formats,
+  severities and diagram members.
+
+Values are these classes and enums throughout the code, never composed dicts; the check
+`tests/unit/test_no_composed_dicts.py` fails on a new one unless its line gives a reason
+(`# dict-ok: <reason>`, kept for library boundaries, prefix tables and lookup indexes).
 
 Rules for the generated code (P-10): `make generate-models` writes
-`fingerprint/domain/profile.py` with a do-not-edit banner; `make check-models` (part of
+`fingerprint/domain/profile.py` and `fingerprint/domain/views.py` with a do-not-edit banner; `make check-models` (part of
 `make check-all`) fails when it is out of date; the generated classes are frozen and reject
 unknown fields; Ruff excludes the module; import-linter keeps it free of project imports.
 

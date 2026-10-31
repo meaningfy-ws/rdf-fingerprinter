@@ -32,18 +32,45 @@ and an application-profile document.
 - Library: `fingerprint_report(..., formats=(), sparql=None)` (any `SparqlPort`), and
   `fingerprint.service_layer.representations.generate_representations` /
   `generate_from_profile_file`.
-- Docs: Representations, How It Works, Glossary, Architecture Decisions (AD-1 to AD-11) and a use
+- Docs: Representations, How It Works, Glossary, Architecture Decisions (AD-1 to AD-12) and a use
   case catalogue (UC-W1, UC-W2 and their realisations).
+
+- **Operational variables** (OpenSpec change `domain-object-model`): `RDF_FINGERPRINTER_PROFILE_FILE`,
+  `_RETRY_BACKOFF_SECONDS`, `_TIMEOUT_MARKERS`, `_ERROR_EXCERPT_LENGTH`, `_SHAPES_NAMESPACE`,
+  `_DEFAULT_GRAPH_LABEL` and `_PREFIXES_FILE`, each defaulting to the former constant; read through
+  `fingerprint.config`, checked before any query (a bad value exits 2 naming the variable).
+- `model/fingerprint_views.yaml` → `fingerprint.domain.views`: the objects every representation
+  template receives, `GeneratorOptions` and the `RepresentationFormat` enum.
 
 ### Changed
 - The output folder of `fingerprint` now also holds `profile.json`.
-- Report rendering, setting sources and exceptions moved to their layers (`adapters/template_renderer.py`,
-  `adapters/settings_sources.py`, an `exceptions` module per layer); every old import path still works.
+- Report rendering and exceptions moved to their layers (`adapters/template_renderer.py`, an
+  `exceptions` module per layer); every 2.0 import path of these still works.
+- Values are LinkML-generated objects and enums throughout (collection, analytics, generators);
+  `tests/unit/test_no_composed_dicts.py` keeps new dicts out.
+- **The SPARQL client** sends a SPARQL 1.1 Protocol form POST through the standard library (with the
+  per-query timeout) and reads the answer with rdflib; the request differs from SPARQLWrapper's
+  (no `format`/`output`/`results` parameters, `Accept: application/sparql-results+json`,
+  `User-Agent: rdf-fingerprinter/<version>`). Failure messages keep the status and a body excerpt but
+  lose SPARQLWrapper's wording.
+- **Settings sources are checked one by one:** a malformed value in a lower-precedence source (say
+  the config file) now fails even when a higher one (the CLI) sets the same setting.
 - `make test` fails under 80 % coverage; every Gherkin scenario is tagged with its use case.
+
+### Breaking (2.0 Python API, not used in production yet)
+- `fingerprint.domain.generated.profile` is now `fingerprint.domain.profile` (and the JSON Schema
+  `fingerprint/domain/profile_run.schema.json`).
+- `fingerprint.adapters.sparql.SparqlWrapperClient` is now `SparqlHttpClient`; `SparqlPort.select`
+  returns rdflib `ResultRow`s; `rows_from_json` is gone.
+- `cardinality_statistics` and `cardinality_label` take a list of `CardinalityBin` and return
+  `CardinalityStatistics` / `CardinalityChoice`; `drop_none` is gone.
+- Custom representation templates read `view.<field>` of the views model (no more `view.graph.<field>`
+  or tuple unpacking); `Generator.serialize()` returns `list[RenderedDocument]`.
 
 ### Dependencies
 - rdflib is now a declared runtime dependency (it was already installed through eds4jinja2);
   pySHACL 0.40.1 for tests.
+- SPARQLWrapper is no longer a direct dependency.
 
 ## [2.0.0] - 2026-10-31
 

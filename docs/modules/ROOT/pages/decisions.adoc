@@ -4,7 +4,7 @@
 Each record states one commitment that shapes the code below it. They are grouped by the C4 level
 they constrain (xref:architecture.adoc[Architecture]). `DEC-n` / `P-n` ids point to the OpenSpec
 change that took the decision: `harden-fingerprinter` (2.0, archived) for AD-1 to AD-6 and AD-11,
-`profile-representations` for AD-7 to AD-10. Each record's *Confirmation* names the test,
+`profile-representations` for AD-7 to AD-10, `domain-object-model` for AD-12. Each record's *Confirmation* names the test,
 scenario or tool run that checks it. Terms are those of the xref:glossary.adoc[Glossary].
 
 [cols="1,4,1,1"]
@@ -22,6 +22,7 @@ scenario or tool run that checks it. Terms are those of the xref:glossary.adoc[G
 | <<ad-6>> | eds4jinja2 renders from the model; templates do not query | L3 | Accepted (2.0)
 | <<ad-8>> | Generators mirror LinkML's generator architecture | L3 | Accepted
 | <<ad-9>> | eds4jinja2 renders every format, Turtle included, behind a parse check | L4 | Accepted
+| <<ad-12>> | Values are generated model objects; configuration is one typed config | L4 | Accepted
 |===
 
 == L1 — Context
@@ -197,7 +198,7 @@ Consequences::
   sat in the service layer; they moved to adapters, and the SPARQL client became an injectable
   parameter of the service.
 Confirmation:: `make check-architecture` (`.importlinter`: layers, generated-model isolation, pure
-domain — the domain imports no SPARQLWrapper, eds4jinja2, jinja2, rdflib or click; from 2.1 also a service layer that imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client)).
+domain — the domain imports no eds4jinja2, jinja2, rdflib or click; from 2.1 also a service layer that imports no jinja2, eds4jinja2 or rdflib itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches rdflib through the default SPARQL client; collection alone may read rdflib's result rows)).
 Pros and cons::
 * Onion layers with a port (chosen) — good: testable without a store, I/O at the edges; bad: more modules.
 * Logic in templates — good: tiny code; bad: untestable, untimed, one full scan per class.
@@ -252,10 +253,14 @@ logic lives in the Python hooks; templates only lay out text.
 Consequences::
 * Good: a new format is one subclass and one template package.
 * Good: every statistic is available to every format.
-* Bad: `serialize()` returns a file → text map (per-graph outputs), unlike LinkML's single string.
+* Bad: `serialize()` returns a list of `RenderedDocument` (per-graph outputs), unlike LinkML's
+  single string.
+* From the views schema on (`domain-object-model` P-4) the hooks follow LinkML's shape: pre-order
+  `visit_graph` / `visit_class` keep state and filter, `visit_property` returns a property's view,
+  post-order `end_class` / `end_graph` build the frozen class and graph views.
 Confirmation:: scenario "Custom template package" of the `profile-representations` specification;
-`make check-architecture` (the service layer, generators included, imports no jinja2, eds4jinja2,
-rdflib or SPARQLWrapper itself: rendering is the template renderer adapter's).
+`make check-architecture` (the service layer, generators included, imports no jinja2, eds4jinja2 or
+rdflib itself: rendering is the template renderer adapter's).
 Pros and cons::
 * Own LinkML-shaped framework (chosen) — good: one subclass per format, every statistic available; bad: framework code to maintain.
 * LinkML's generators — good: many formats for free; bad: statistics survive only as annotations,
@@ -289,3 +294,32 @@ Pros and cons::
 * eds4jinja2 for every format (chosen) — good: one engine, customisable everywhere; bad: Turtle escaping is ours.
 * rdflib graph — good: escaping is correct by construction; bad: SHACL not customisable by template,
   two rendering paths.
+
+[#ad-12]
+=== AD-12 Values are generated model objects; configuration is one typed config
+
+Context and problem:: The 2.0 and 2.1 code modelled the profile in LinkML but passed plain dicts
+between functions — analytics helpers, collection, generator views, SPARQL rows — and read its
+settings through an ad-hoc module while other operational values were constants nobody could change.
+Considered options::
+. LinkML-generated Pydantic classes and enums for every value that is passed, returned or stored,
+  views included (`model/fingerprint_views.yaml`); rdflib's typed result rows for SPARQL; one config
+  class in the package root reading `RDF_FINGERPRINTER_*` variables through a resolver (the Meaningfy
+  settings pattern).
+. Hand-written dataclasses for the views and dict-based helpers kept.
+Decision outcome:: Option 1 (developer, 2026-10-31; DEC-1, DEC-2, DEC-5, DEC-6 of
+`domain-object-model`). SPARQLWrapper goes: the standard library sends the query with its timeout
+(rdflib's own connector cannot apply one) and rdflib parses the answer.
+Consequences::
+* Good: one definition per concept; names a reader can follow and types a checker can verify; custom
+  templates rely on a schema.
+* Good: every operational value has a variable and a default; `validate()` reports a bad one before
+  any query.
+* Bad: a dict is still built at a library's boundary (eds4jinja2's configuration, JSON being
+  parsed); each such line is marked with its reason.
+Confirmation:: `tests/unit/test_no_composed_dicts.py` (part of `make check-all`); `make check-models`;
+`tests/unit/test_config.py`; the golden files and every scenario unchanged.
+Pros and cons::
+* Generated objects everywhere (chosen) — good: one modelling language, checked shapes; bad: more
+  generated code.
+* Dataclasses for views — good: no generation step; bad: two modelling languages.

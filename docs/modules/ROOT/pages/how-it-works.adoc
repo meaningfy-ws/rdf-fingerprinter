@@ -4,12 +4,10 @@
 A fingerprint run has four stages. Only the first talks to the endpoint; the rest are functions of
 what it observed.
 
-----
  1 collect   endpoint ──SPARQL──▶ profile run (raw counts)              service layer + SPARQL adapter
  2 save      profile run ──────▶ profile.json                     Profile store
  3 analyse   profile run ──────▶ analytics (indicators)                 domain, pure
  4 render    analytics ────────▶ report, SHACL, diagram, doc      eds4jinja2 templates
-----
 
 Terms in _italics_ are defined in the xref:glossary.adoc[Glossary]. The statistics themselves are
 specified in xref:statistics.adoc[Statistics and Settings]; this page explains how they come about.
@@ -17,7 +15,6 @@ specified in xref:statistics.adoc[Statistics and Settings]; this page explains h
 [#data-flow]
 == Through the components
 
-----
  CLI / caller ──settings──▶ Collector ──SPARQL──▶ endpoint
                                │ profile run (fingerprint_stats)
                                ├──────────▶ Profile store ──▶ profile.json           
@@ -31,7 +28,6 @@ specified in xref:statistics.adoc[Statistics and Settings]; this page explains h
                                  ▼
                  Template renderer (eds4jinja2) ──check──▶ main.html,
                                  shapes-*.ttl, diagram-*.puml, profile.html
-----
 
 == A running example
 
@@ -145,15 +141,17 @@ generated shapes file keeps.
 [#failure-classes]
 == What can go wrong
 
-Every error the SPARQL client meets is put in one class:
+The SPARQL client sends each query as a SPARQL 1.1 Protocol form POST (`query=…`, `Accept:
+application/sparql-results+json`) through the Python standard library, with the per-query timeout,
+and rdflib reads the answer into typed terms. Every error it meets is put in one class:
 
 [cols="2,4"]
 |===
 | Class | Raised by
 
-| Transient | HTTP 429, 502, 503; connection reset or refused. Retried after 1 s, then 4 s; if it persists, it is treated as a timeout — except on the first query, below.
-| Timeout | the per-query timeout (`timeout_seconds`), HTTP 504, or a 500 whose message says "timeout", "time limit", "timed out" or "estimated execution time".
-| Permanent | HTTP 400, 404, 414, other 4xx and 500s, responses that are not SPARQL results (bad JSON, missing keys). Never retried. Distinct from a well-formed result holding an unexpected value — a count that is not a number — which is an unexpected error (exit 4, xref:decisions.adoc#ad-11[AD-11]).
+| Transient | HTTP 429, 502, 503; connection reset or refused. Retried after 1 s, then 4 s (`RDF_FINGERPRINTER_RETRY_BACKOFF_SECONDS`); if it persists, it is treated as a timeout — except on the first query, below.
+| Timeout | the per-query timeout (`timeout_seconds`), HTTP 504, or a 500 whose body says "timeout", "time limit", "timed out" or "estimated execution time" (`RDF_FINGERPRINTER_TIMEOUT_MARKERS`).
+| Permanent | HTTP 400, 404, 414, other 4xx and 500s, responses that are not SPARQL results (bad JSON, no `results` or `boolean`, an ASK answer to a SELECT). Never retried. Distinct from a well-formed result holding an unexpected value — a count that is not a number — which is an unexpected error (exit 4, xref:decisions.adoc#ad-11[AD-11]).
 | Unreachable | HTTP 401, 403, 407. Only the first query can make the endpoint unreachable; on any later query it counts as permanent.
 |===
 

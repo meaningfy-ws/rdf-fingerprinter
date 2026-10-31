@@ -128,11 +128,13 @@ The responsibilities the Blue use cases name as supporting actors, and where eac
 | Report service | Collect, save the profile, analyse, render the report, run chosen generators | `fingerprint_report` in `fingerprint/service_layer/handlers.py`
 | Representations service | Load a profile, apply a threshold, run generators | `fingerprint/service_layer/representations.py`
 | Settings resolver | Merges setting sources by precedence and checks them | `fingerprint/service_layer/settings.py`
+| Configuration | The operational values, each read from an `RDF_FINGERPRINTER_*` variable on access | `config` in `fingerprint/__init__.py`
+| Config resolver | Where a configuration value comes from (environment, defaults, a mapping) and the config file | `fingerprint/adapters/config_resolver.py`
 | Collector | Discovery, per-class queries, precision escalation, concurrency | `fingerprint/service_layer/collection.py`
 | SPARQL client | Sends queries with timeout and retries; classifies errors | `fingerprint/adapters/sparql.py`
 | Analyser | Derives the analytics, no I/O | `fingerprint/domain/analytics.py`
 | Template renderer | Renders a template package and writes its output | `fingerprint/adapters/template_renderer.py`
 | Profile store | Saves and loads `profile.json` | `fingerprint/adapters/profile_file.py`
-| Generator | Builds one representation's view from the analytics | `fingerprint/service_layer/generators/`
+| Generator | Builds one representation's view objects from the analytics | `fingerprint/service_layer/generators/`; views in `fingerprint/domain/views.py`
 | Output check | Refuses a generated text that does not parse | `fingerprint/adapters/template_renderer.py`
 |===

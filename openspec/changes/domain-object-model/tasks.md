@@ -39,13 +39,13 @@
 ## 7. Close
 
 - [x] 7.1 Allow-list of 1.2 empty; only `# dict-ok:` marks remain, each with its reason
-- [ ] 7.2 Docs: architecture (L3/L4, data flow), decisions (AD-12 domain objects and configuration; AD-1, AD-6, AD-9 updated for P-5/P-6), how-it-works (error classes on urllib), statistics (the variables table), api-reference (import paths, `GeneratorOptions`); CHANGELOG 2.1.0 (import path, SPARQLWrapper removed and the new request, the variables, stricter per-source settings checks)
+- [x] 7.2 Docs: architecture (L3/L4, data flow), decisions (AD-12 domain objects and configuration; AD-1, AD-6, AD-9 updated for P-5/P-6), how-it-works (error classes on urllib), statistics (the variables table), api-reference (import paths, `GeneratorOptions`); CHANGELOG 2.1.0 (import path, SPARQLWrapper removed and the new request, the variables, stricter per-source settings checks)
 - [ ] 7.3 Pre-PR review (five lenses); act on findings
 - [ ] 7.4 `/opsx:archive` (one ADDED/MODIFIED section per delta; check the merged counts); PR #40 ready to merge
 
 ## Roadmap
 
-- [x] 1.1 · [ ] 1.2 · [ ] 1.3 · [x] 0.1 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [x] 4.1 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [ ] 0.2 · [ ] 6.1 · [x] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4
+- [x] 1.1 · [ ] 1.2 · [ ] 1.3 · [x] 0.1 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [x] 4.1 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [ ] 0.2 · [ ] 6.1 · [x] 7.1 · [x] 7.2 · [ ] 7.3 · [ ] 7.4
 
 ## Verification
 

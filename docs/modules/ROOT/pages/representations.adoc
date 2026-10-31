@@ -99,8 +99,11 @@ lists it under its caveats, shown as text.
 
 Every format is an eds4jinja2 template package: a folder with `config.json`
 (`{"template": "<file>", "conf": {…}}`) and `templates/`. Pass one with `--template`. A template
-receives `view` (the generator's prepared view: `view.graph` per graph, or `view.graphs` for the
-document), `conf.profile` (the whole analytics profile) and the constants of its `conf`. These
+receives `view`, the generator's prepared view — a `ShapesGraph` or a `DiagramGraph` per graph, the
+`ProfileDocument` for the document, all defined in `model/fingerprint_views.yaml` — as well as
+`conf.profile` (the whole analytics profile) and the constants of its `conf`. From the 2.1 views
+schema on, a per-graph template reads `view.node_shapes`, `view.classes`, `view.graph_label`,
+`view.skipped` directly. These
 filters keep the output valid:
 
 [cols="1,3"]
@@ -127,4 +130,8 @@ from fingerprint.service_layer.representations import generate_from_profile_file
 
 generate_from_profile_file("out/profile.json", "shapes/", ["shacl"], threshold=0.9)
 generate_representations(run, "out/", ["shacl", "puml", "doc"])   # a ProfileRun already in memory
+generate_representations(run, "out/", ["shacl"], options=GeneratorOptions(shapes_namespace="https://ex.org/shape/"))
 ----
+
+`GeneratorOptions` and the views are in `fingerprint.domain.views`; the formats are the
+`RepresentationFormat` enum (`shacl`, `puml`, `doc`).
