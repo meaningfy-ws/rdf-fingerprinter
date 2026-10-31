@@ -84,7 +84,10 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   - `shacl_shapes/shapes.ttl`: `view.graph.classes` → `view.node_shapes`, `cls.properties` →
     `ns.property_shapes`; `for p in view.prefixes` → `@prefix {{ p.prefix }}: {{ p.namespace | turtle_iri }}`;
     `for a in ns.annotations` / `ps.annotations` → `{{ a.predicate }} {{ a.value }}`; the severity line
-    from `ps.severity` (`sh:Info`/`sh:Warning`, none for `violation`).
+    from `ps.severity` (`sh:Info`/`sh:Warning`, none for `violation`), written after the constraints and
+    before the annotations, where it is today.
+  - `ShapesGraph`, `DiagramGraph` and `ProfileDocument` keep `skipped*` (the IRIs left out), which
+    every view carries today and custom templates may read.
   - `plantuml_diagram/diagram.puml`: attributes = `members` with kind `attribute` (`m.text`); the link
     lines = `{{ c.alias }} --> {{ m.text }}` for kind `association`; generalisations unchanged.
   - `profile_document/profile.html`: `for s in view.overview.settings` → `s.name`/`s.value`
@@ -116,10 +119,14 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   `rdflib.query.ResultException`) is permanent. Failure *messages* lose SPARQLWrapper's wording (they
   keep the status and a body excerpt); tests that assert message text are updated, the requirements
   (kinds, attempts, exit codes) do not change. The
-  SPARQLWrapper branches and `rows_from_json` go.
-- **P-6 eds4jinja2 2.1 (DEC-7)**, a change in `../eds4jinja2` with its own spec and tests:
-  `ReportBuilder.make_documents(outputs: Mapping[str, Mapping[str, Any]], *, check: Callable[[str, str],
-  None] | None = None, autoescape: bool | None = None) -> list[Path]`:
+  SPARQLWrapper branches and `rows_from_json` go. `SparqlWrapperClient` (documented in the API
+  reference, base class of the tests' `FakeSparql`) is renamed `SparqlHttpClient`; the CHANGELOG notes
+  the rename with the other 2.x import breaks.
+- **P-6 eds4jinja2 2.1 (DEC-7)**, a change in `../eds4jinja2` with its own spec and tests, adding two
+  methods to `ReportBuilder`: `render_documents(outputs: Mapping[str, Mapping[str, Any]], *,
+  autoescape: bool | None = None) -> dict[str, str]` (render to memory, write nothing) and
+  `make_documents(outputs, *, check: Callable[[str, str], None] | None = None, autoescape: bool | None
+  = None) -> list[Path]` (= `render_documents`, then every `check`, then write all):
   - each key is an output file name under the builder's existing `output_path`; each value holds the
     template variables of that output (passed to `render(**variables)`; `conf` stays the global);
   - `autoescape`, when given, is set on the environment before the first render (as `render_report`
@@ -131,9 +138,15 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   - the before-rendering listeners run once before the batch, the after-rendering listeners once after
     the files are written;
   - `make_document()` keeps its behaviour.
-  The template renderer adapter calls `make_documents` (one output for the report and the document, one
-  per graph for SHACL and PlantUML) with the Turtle check and the autoescape of the format;
-  `JinjaTemplateRenderer.render`/`write` and the `template_env` guard test go. Released as eds4jinja2
+  **The port** (`TemplateRenderer` in `service_layer/generators/generator.py`) becomes:
+  `prefixes: dict[str, str]` (# dict-ok: prefix table); `render(package, outputs: list[tuple[str,
+  BaseModel]], *, autoescape) -> list[RenderedDocument]` (in memory, through `render_documents`); and
+  `make(package, outputs, *, folder, check, autoescape) -> list[Path]` (through `make_documents`). The
+  adapter turns the typed `(file name, view)` pairs into eds4jinja2's mapping (`# dict-ok: eds4jinja2
+  outputs`). `Generator.serialize()` uses `render`; `Generator.write()` uses `make`. The document gets
+  its diagrams as today — `make_generator` calls the PlantUML generator's `serialize()` (in memory) and
+  passes the texts by slug to the document generator. The report uses `make` with one output. The
+  `template_env` guard test goes. Released as eds4jinja2
   2.1.0 **with the developer's go-ahead** (that repository grants agents no release authority);
   rdf-fingerprinter then requires `eds4jinja2>=2.1,<3`. If the release is refused, task 6.1 is dropped
   and the current adapter stays.
@@ -142,8 +155,10 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   default)` whose property reads through the **instance's** resolver (`self.resolver`), so tests pass
   `FingerprintConfig(DefaultConfigResolver())`. `fingerprint/__init__.py`: `class FingerprintConfig`
   and `config = FingerprintConfig(EnvConfigResolver())`; nothing resolves at import.
-  `config.validate()` reads every property once and raises `UsageError` naming the first variable
-  that does not coerce; it runs at the start of the commands and of the service entry points
+  `config.validate()` reads every property once and raises `ConfigError` (in
+  `adapters/exceptions.py`, so `fingerprint/__init__.py` imports no service-layer module) naming the
+  first variable that does not coerce; the entry points map it to `UsageError` as they do
+  `ConfigFileError`; it runs at the start of the commands and of the service entry points
   (`generate_endpoint_fingerprint_report`, `fingerprint_report`, `generate_from_profile_file`,
   `generate_representations`), before any query or write. The lower-level functions (`collect`,
   `render_report`) read config on access: a bad variable there is still a `UsageError`, raised when the
@@ -171,7 +186,9 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   An empty `selected_graphs` list counts as unset, as today. `resolve_settings` keeps its documented
   signature (`cli`, `env`, `selected_graphs`, `config`) and turns each argument into an override
   (`env=None` means the process environment through `config`; an explicit mapping, as `with_threshold`
-  passes to ignore the environment, is parsed the same way); it builds `Settings(**{slot: first
+  passes to ignore the environment, is read through a `MappingConfigResolver(mapping)` and parsed the
+  same way); its `cli`/`env`/`config` mapping parameters are public API (`# dict-ok: documented
+  resolve_settings signature`); it builds `Settings(**{slot: first
   non-None})` (construction syntax), maps `ValidationError` to `UsageError`, then applies the `(0, 1]`
   threshold rule. *Accepted difference:* each source is type-checked on its own, so a malformed value
   in a lower-precedence source now fails even when a higher one overrides it (today the merged result
@@ -179,9 +196,10 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   protocol tables): `vocabulary.py`, `RDF_TYPE`, `QUERY_FILES`, `QUERY_KIND`, `MODES`, `NODE_KINDS`,
   `TOO_LARGE`, `LABEL_PREDICATES`.
 - **P-8 Collection and analytics build objects.** rdflib's term classes are data types, not I/O: the
-  `service-io` import-linter contract changes from forbidding `rdflib` to forbidding `rdflib.graph`,
-  `rdflib.plugin` and `rdflib.plugins` (parsing, serialising, stores), so the service layer may import
-  `rdflib.term` and `rdflib.query.ResultRow`. Collection builds `ValuePartition(node_kind=…,
+  `service-io` import-linter contract keeps forbidding `rdflib` and gains
+  `ignore_imports = fingerprint.service_layer.collection -> rdflib` (import-linter 2.15 cannot forbid
+  subpackages of an external package; verified), so only collection may import rdflib — and only its
+  term types (`rdflib.term`, `rdflib.query.ResultRow`), which a code comment states. Collection builds `ValuePartition(node_kind=…,
   datatype=…, triples=row.n.toPython())` etc. straight from `ResultRow`s; a blank node is recognised by
   `isinstance(term, BNode)` and written to the profile as `_:<id>` exactly as today (the `"_:"` prefix
   test goes). Analytics helpers return `PropertyAnalytics`, `ClassAnalytics`, `GraphAnalytics`,

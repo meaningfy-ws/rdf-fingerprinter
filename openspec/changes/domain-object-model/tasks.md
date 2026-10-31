@@ -2,7 +2,7 @@
 
 ## 0. eds4jinja2 2.1 (in ../eds4jinja2, its own OpenSpec change)
 
-- [ ] 0.1 OpenSpec change `batch-documents` in eds4jinja2 for `ReportBuilder.make_documents(outputs, *, check, autoescape)` as P-6 specifies (variables per output, listeners once per batch, parallel path per output, check-then-write); TDD; `make_document()` unchanged; CHANGELOG 2.1.0
+- [ ] 0.1 OpenSpec change `batch-documents` in eds4jinja2 for `ReportBuilder.render_documents(outputs, *, autoescape)` and `make_documents(outputs, *, check, autoescape)` as P-6 specifies (variables per output, listeners once per batch, parallel path per output, check-then-write); TDD; `make_document()` unchanged; CHANGELOG 2.1.0
 - [ ] 0.2 eds4jinja2 PR, CI green; release 2.1.0 only after the developer's go-ahead (P-6)
 
 ## 1. Rule, check and generated modules
@@ -14,13 +14,13 @@
 ## 2. Configuration
 
 - [ ] 2.1 `adapters/config_resolver.py` (`ConfigResolverABC`, `EnvConfigResolver`, `DefaultConfigResolver`, instance-resolver `env_property`) with tests (P-7)
-- [ ] 2.2 `FingerprintConfig` + `config` in `fingerprint/__init__.py` with the P-7 variables and `validate()`; constants replaced by `config.X`; `validate()` called at every entry point; import side-effect free (Requirement: Configuration through one typed config; Requirement: Import has no side effects)
-- [ ] 2.3 `SettingsOverride` in `model/fingerprint_stats.yaml` (+ field-name test); `resolve_settings(*overrides)`; CLI options, environment, `selected_graphs`, `--config` and `additional_config["collection"]` as overrides; `settings_sources.py` removed; the CLI modules and `handlers.py` cleared from the allow-list (P-7; Requirement: Settings)
+- [ ] 2.2 `FingerprintConfig` + `config` in `fingerprint/__init__.py` with the P-7 variables and `validate()` raising `ConfigError`; constants replaced by `config.X`; `validate()` called at every entry point; import side-effect free (Requirement: Configuration through one typed config; Requirement: Import has no side effects)
+- [ ] 2.3 `SettingsOverride` in `model/fingerprint_stats.yaml` (+ field-name test); `resolve_settings` keeps its signature and builds overrides; `MappingConfigResolver`; CLI options, environment, `selected_graphs`, `--config` and `additional_config["collection"]` as overrides; `settings_sources.py` removed; the CLI modules and `handlers.py` cleared from the allow-list (P-7; Requirement: Settings)
 
 ## 3. SPARQL client and collection (together: the row type changes under collection)
 
 - [ ] 3.1 Adapter: form-encoded POST via `urlopen(timeout=…)`, `Result.parse`, `SparqlPort` returning `ResultRow`s and `askAnswer`; `classify` with the 500-marker rule; backoff, markers and excerpt from config; `rows_from_json` removed (P-5; Requirement: Results are read as typed RDF terms; Requirement: Error classes and retries)
-- [ ] 3.2 `collection.py` builds the profile model objects from `ResultRow`s; blank nodes by `isinstance(BNode)` written as `_:<id>`; the `service-io` contract narrowed to rdflib's I/O modules (P-8); `FakeSparql` (`_once`, string rows in `on()`) returns rdflib `ResultRow`s; the `SPARQLWrapper.SPARQLWrapper.query` monkeypatches in `tests/unit/steps/test_fingerprint_report_steps.py`, `tests/unit/steps/test_profile_representations_steps.py` and `tests/e2e/test_representations.py` move to the new adapter; message-text assertions updated (P-5); SPARQLWrapper removed from `pyproject.toml`; a live collection equals `sample-profile.json` but for timestamps and version; `make test-e2e` green (P-8)
+- [ ] 3.2 `collection.py` builds the profile model objects from `ResultRow`s; blank nodes by `isinstance(BNode)` written as `_:<id>`; the `service-io` contract narrowed to rdflib's I/O modules (P-8); `FakeSparql` (`_once`, string rows in `on()`) returns rdflib `ResultRow`s; the `SPARQLWrapper.SPARQLWrapper.query` monkeypatches in `tests/unit/steps/test_fingerprint_report_steps.py`, `tests/unit/steps/test_profile_representations_steps.py` and `tests/e2e/test_representations.py` move to the new adapter; message-text assertions and `tests/unit/test_adapters_sparql.py` (SPARQLWrapper exceptions) updated; `SparqlWrapperClient` renamed `SparqlHttpClient` (P-5); SPARQLWrapper removed from `pyproject.toml`; a live collection equals `sample-profile.json` but for timestamps and version; `make test-e2e` green (P-8)
 
 ## 4. Analytics builds objects
 
@@ -34,7 +34,7 @@
 
 ## 6. Rendering through eds4jinja2
 
-- [ ] 6.1 After 0.2: `eds4jinja2>=2.1,<3`; the template renderer adapter calls `make_documents` with the Turtle check and the format's autoescape; `report.py` on it; `render`/`write` and the `template_env` guard test removed; `make test-e2e` green (P-6)
+- [ ] 6.1 After 0.2: `eds4jinja2>=2.1,<3`; the port's `render` / `make` on `render_documents` / `make_documents` with the Turtle check and the format's autoescape; `report.py` on `make`; the `template_env` guard test removed; `make test-e2e` green (P-6)
 
 ## 7. Close
 
