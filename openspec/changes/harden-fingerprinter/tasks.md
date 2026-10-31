@@ -21,19 +21,19 @@
 
 ## 3. Adapters
 
-- [ ] 3.1 `adapters/sparql.py`: `SparqlPort`, `SparqlWrapperClient`, error classes, timeout, classification markers and retry/backoff (P-2, P-5)
-- [ ] 3.2 `adapters/queries/*.rq` (Q0–Q11, Q2a, Q3a, Q3b, QS, QU as in `design.md`) + template filling with subject sources and type lookup per setting (P-3, DEC-10; Requirements: Per-class queries are scoped to the class; rdf:type is not a property row)
-- [ ] 3.3 Unit tests of the rendered query texts per mode; e2e test of each query on Oxigraph
+- [x] 3.1 `adapters/sparql.py`: `SparqlPort`, `SparqlWrapperClient`, error classes, timeout, classification markers and retry/backoff (P-2, P-5)
+- [x] 3.2 `adapters/queries/*.rq` (Q0–Q11, Q2a, Q3a, Q3b, QS, QU as in `design.md`) + template filling with subject sources and type lookup per setting (P-3, DEC-10; Requirements: Per-class queries are scoped to the class; rdf:type is not a property row)
+- [x] 3.3 Unit tests of the rendered query texts per mode; e2e test of each query on Oxigraph
 
 ## 4. Collection service
 
-- [ ] 4.1 `service_layer/settings.py`: the P-6 table, precedence, `--config FILE`, boolean parsing, into `Settings` (P-6, DEC-12; Requirement: Settings)
-- [ ] 4.2 Discovery: graphs (default first, `selected_graphs`), Q0 rejection, class counts with fallback, subclass edges, graph statistics switch (Requirements: Staged discovery; Depth and switches select the queries)
-- [ ] 4.3 First-wave per-class queries Q5–Q8 → raw `ClassProfile` (Requirement: Raw statistics per class; Object types across graphs)
-- [ ] 4.4 Precision escalation exact → first_n (one QS per class, blank-node fallback, oversized-query failure), failure recording and logging per the error matrix (Requirements: Precision escalation; Failures are recorded and fail the run)
-- [ ] 4.5 Thread pool, biggest classes first (P-4)
-- [ ] 4.6 Second wave: top-K, completeness check, incoming links (Requirement: Completeness check for first-N classes)
-- [ ] 4.7 Step definitions for `statistics_collection.feature` with `FakeSparql` (e2e-only rows on Oxigraph), green
+- [x] 4.1 `service_layer/settings.py`: the P-6 table, precedence, `--config FILE`, boolean parsing, into `Settings` (P-6, DEC-12; Requirement: Settings)
+- [x] 4.2 Discovery: graphs (default first, `selected_graphs`), Q0 rejection, class counts with fallback, subclass edges, graph statistics switch (Requirements: Staged discovery; Depth and switches select the queries)
+- [x] 4.3 First-wave per-class queries Q5–Q8 → raw `ClassProfile` (Requirement: Raw statistics per class; Object types across graphs)
+- [x] 4.4 Precision escalation exact → first_n (one QS per class, blank-node fallback, oversized-query failure), failure recording and logging per the error matrix (Requirements: Precision escalation; Failures are recorded and fail the run)
+- [x] 4.5 Thread pool, biggest classes first (P-4)
+- [x] 4.6 Second wave: top-K, completeness check, incoming links (Requirement: Completeness check for first-N classes)
+- [x] 4.7 Step definitions for `statistics_collection.feature` with `FakeSparql` (e2e-only rows on Oxigraph), green
 
 ## 5. Report and CLI
 
@@ -49,7 +49,7 @@
 
 ## Roadmap
 
-- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 1.4 · [x] 2.1 · [x] 2.3 · [x] 2.4 · [x] 2.5 · [x] 2.6 · [x] 2.7 · [x] 2.8 · [x] 2.9 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 4.5 · [ ] 4.6 · [ ] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 5.4 · [ ] 6.1 · [ ] 6.2
+- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 1.4 · [x] 2.1 · [x] 2.3 · [x] 2.4 · [x] 2.5 · [x] 2.6 · [x] 2.7 · [x] 2.8 · [x] 2.9 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 4.5 · [x] 4.6 · [x] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 5.4 · [ ] 6.1 · [ ] 6.2
 
 ## Verification
 

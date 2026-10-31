@@ -51,6 +51,7 @@ test = [
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
     "pytest-bdd==8.1.0",
+    "rdflib==7.6.0",
 ]
 lint = [
     "ruff==0.17.3",
