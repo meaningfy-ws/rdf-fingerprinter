@@ -1,0 +1,93 @@
+[#uc-w2]
+= UC-W2: Publish a fingerprint as an application profile
+
+*Use Case Level:* White (Summary) +
+*Primary Actor:* Requester +
+*Scope:* rdf-fingerprinter
+
+== Stakeholders and Interests
+
+* The requester requires the profile in the forms application profiles are published in: shapes
+  to validate data with, a class diagram, a readable specification.
+* Data consumers require shapes that do not overstate what the data showed.
+* The endpoint operator requires that publishing causes no new queries.
+
+== Brief Description
+
+From a fingerprint, the requester obtains SHACL shapes and a PlantUML diagram per graph and one
+application-profile document, each rendered from the profile alone. The requester may re-read the
+profile at another acceptance threshold, or render with their own templates, without collecting
+again.
+
+== Preconditions
+
+* A profile run exists — saved as `profile.json` by xref:use-cases/ucw1.adoc[UC-W1], or just collected.
+* The output folder exists.
+
+== Trigger
+
+The requester asks for one or more representations of a fingerprint.
+
+== Success Guarantee (Postconditions)
+
+. Each requested representation is written; SHACL and PlantUML once per profiled graph, the document once.
+. No query is sent to any endpoint.
+. Validated against the data it was profiled from, the generated SHACL reports no `sh:Violation`;
+  constraints that held with exceptions, on a sample, across graphs or for a class with declared
+  subclasses are graded `sh:Warning` or `sh:Info` (xref:decisions.adoc#ad-10[AD-10]).
+. Sampled classes, recorded failures and skipped IRIs are stated in the document.
+. Rendering the same profile twice gives identical files.
+
+== Minimal Guarantees (On Failure)
+
+. If the profile file is missing, not JSON or not a profile, nothing is written and the file is named.
+. If one representation fails (for example its Turtle would not parse), none of that representation's
+  files is written and an error is reported; representations finished before it are kept.
+. An IRI that cannot be written in a format is left out of it and reported, never written broken.
+
+== Main Success Scenario
+
+. The requester names the profile, the formats and the output folder.
+. The system loads the profile and derives the analytics.
+. The system renders each requested representation.
+. The system checks and writes the files and reports success.
+
+== Alternate Scenarios
+
+Another threshold::
+. In step 1 the requester gives an acceptance threshold; in step 2 the analytics are derived at it.
+
+Own templates::
+. In step 1 the requester names a template folder of their own; step 3 renders from it.
+
+== Extensions
+
+1a. Threshold outside (0, 1] — refused, nothing written. +
+1b. Template folder without a usable configuration — refused, the folder named. +
+2a. Profile file unusable — minimal guarantee 1. +
+3a. The profile records collection failures — rendered; failures listed as caveats. +
+3b. Several formats requested — rendered one after the other in the order given; each is checked
+    before any of its files is written. +
+4a. Generated Turtle does not parse — minimal guarantee 2.
+
+== Out of Scope
+
+* Rendering diagrams to images; VoID, ShEx, OWL or LLM formats; reading representations back.
+
+== Special Requirements
+
+* No queries (xref:decisions.adoc#ad-7[AD-7]); one engine for every format (xref:decisions.adoc#ad-9[AD-9]).
+
+== Notes and Business Rules
+
+* SHACL shapes are open; a shape repeats the properties its class inherits.
+* The diagram shows own and refined properties only; declared parents solid, implied dashed.
+
+== Technology and Data Variations
+
+* Formats: SHACL (Turtle), PlantUML source, HTML document.
+* One file per graph for SHACL and PlantUML.
+
+== Frequency of Occurrence
+
+After each fingerprint, and again whenever a different threshold or template is wanted.

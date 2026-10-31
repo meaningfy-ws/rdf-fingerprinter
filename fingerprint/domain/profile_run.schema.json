@@ -1,0 +1,805 @@
+{
+    "$defs": {
+        "CardinalityBin": {
+            "additionalProperties": false,
+            "description": "One bin of a cardinality histogram (a cardinality vote).",
+            "properties": {
+                "subjects": {
+                    "description": "Number of distinct subjects.",
+                    "minimum": 0,
+                    "type": "integer"
+                },
+                "values_per_subject": {
+                    "description": "A value n of the cardinality histogram \u2014 subjects having exactly n values.",
+                    "minimum": 0,
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "values_per_subject",
+                "subjects"
+            ],
+            "title": "CardinalityBin",
+            "type": "object"
+        },
+        "ClassProfile": {
+            "additionalProperties": false,
+            "description": "Observations about the instances of one class in one graph.",
+            "properties": {
+                "class_iri": {
+                    "description": "IRI of a class instantiated in the graph.",
+                    "type": "string"
+                },
+                "co_types": {
+                    "description": "Other classes the observed instances also have.",
+                    "items": {
+                        "$ref": "#/$defs/CoTypeCount"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "incoming_links": {
+                    "description": "Classes and properties pointing at the observed instances.",
+                    "items": {
+                        "$ref": "#/$defs/IncomingLink"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "instances": {
+                    "description": "Exact number of distinct instances of the class.",
+                    "minimum": 0,
+                    "type": "integer"
+                },
+                "observed_instances": {
+                    "description": "Number of instances actually read (equals instances unless the mode is first_n).",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "precision_mode": {
+                    "$ref": "#/$defs/PrecisionMode",
+                    "description": "The precision mode actually used for this class."
+                },
+                "property_partitions": {
+                    "description": "One profile per property used by the instances.",
+                    "items": {
+                        "$ref": "#/$defs/PropertyProfile"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "sample_shared": {
+                    "description": "In first_n mode, true when every query used the same listed instances; false after the blank-node fallback.",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "class_iri",
+                "instances",
+                "precision_mode"
+            ],
+            "title": "ClassProfile",
+            "type": "object"
+        },
+        "CoTypeCount": {
+            "additionalProperties": false,
+            "description": "Observed instances that also have another class.",
+            "properties": {
+                "class_iri": {
+                    "description": "IRI of a class instantiated in the graph.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "subjects": {
+                    "description": "Number of distinct subjects.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                }
+            },
+            "title": "CoTypeCount",
+            "type": "object"
+        },
+        "Depth": {
+            "description": "How much is collected; each level includes the previous ones.",
+            "enum": [
+                "graphs",
+                "classes",
+                "properties",
+                "values",
+                "rich_values",
+                "links"
+            ],
+            "title": "Depth",
+            "type": "string"
+        },
+        "Failure": {
+            "additionalProperties": false,
+            "description": "A query that could not be answered.",
+            "properties": {
+                "attempts": {
+                    "description": "How many attempts were made.",
+                    "minimum": 1,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "class_iri": {
+                    "description": "IRI of a class instantiated in the graph.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "graph": {
+                    "description": "IRI of the profiled named graph; absent for the default graph.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "message": {
+                    "description": "The last error message.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "property": {
+                    "description": "IRI of a predicate.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "query_kind": {
+                    "$ref": "#/$defs/QueryKind",
+                    "description": "Which collection query failed."
+                }
+            },
+            "required": [
+                "query_kind"
+            ],
+            "title": "Failure",
+            "type": "object"
+        },
+        "GraphProfile": {
+            "additionalProperties": false,
+            "description": "Observations about one graph (a VoID dataset).",
+            "properties": {
+                "class_partitions": {
+                    "description": "One profile per instantiated class.",
+                    "items": {
+                        "$ref": "#/$defs/ClassProfile"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "declared_subclass_edges": {
+                    "description": "rdfs:subClassOf edges declared in the dataset.",
+                    "items": {
+                        "$ref": "#/$defs/SubclassEdge"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "distinct_objects": {
+                    "description": "Number of distinct objects.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "distinct_subjects": {
+                    "description": "Number of distinct subjects in the graph.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "graph": {
+                    "description": "IRI of the profiled named graph; absent for the default graph.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "predicate_partitions": {
+                    "description": "Triples per predicate across the graph.",
+                    "items": {
+                        "$ref": "#/$defs/PredicatePartition"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "triples": {
+                    "description": "Number of triples.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "untyped_subjects": {
+                    "description": "Distinct subjects in the graph that have no rdf:type.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                }
+            },
+            "title": "GraphProfile",
+            "type": "object"
+        },
+        "IncomingLink": {
+            "additionalProperties": false,
+            "description": "Triples whose object is an observed instance of the class.",
+            "properties": {
+                "property": {
+                    "description": "IRI of a predicate.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "subject_class": {
+                    "description": "Class of the subjects that point to the profiled class (incoming links).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "triples": {
+                    "description": "Number of triples.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                }
+            },
+            "title": "IncomingLink",
+            "type": "object"
+        },
+        "NodeKind": {
+            "description": "The RDF term kind of an object.",
+            "enum": [
+                "iri",
+                "blank_node",
+                "literal"
+            ],
+            "title": "NodeKind",
+            "type": "string"
+        },
+        "ObjectTypeScope": {
+            "description": "Where the types of objects are looked up.",
+            "enum": [
+                "same_graph",
+                "any_graph"
+            ],
+            "title": "ObjectTypeScope",
+            "type": "string"
+        },
+        "PrecisionMode": {
+            "description": "How the instances of a class were read.",
+            "enum": [
+                "exact",
+                "first_n"
+            ],
+            "title": "PrecisionMode",
+            "type": "string"
+        },
+        "PrecisionPolicy": {
+            "description": "Which precision modes the collector may use.",
+            "enum": [
+                "auto",
+                "exact",
+                "first_n"
+            ],
+            "title": "PrecisionPolicy",
+            "type": "string"
+        },
+        "PredicatePartition": {
+            "additionalProperties": false,
+            "description": "Triples using one predicate across a graph.",
+            "properties": {
+                "property": {
+                    "description": "IRI of a predicate.",
+                    "type": "string"
+                },
+                "triples": {
+                    "description": "Number of triples.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "property"
+            ],
+            "title": "PredicatePartition",
+            "type": "object"
+        },
+        "ProfileRun": {
+            "additionalProperties": false,
+            "description": "One fingerprinting run over one endpoint.",
+            "properties": {
+                "endpoint": {
+                    "description": "The SPARQL endpoint URL that was profiled.",
+                    "format": "uri",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "failures": {
+                    "description": "Queries that failed after all retries and fallbacks.",
+                    "items": {
+                        "$ref": "#/$defs/Failure"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "finished_at": {
+                    "description": "When the run finished.",
+                    "format": "date-time",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "graphs": {
+                    "description": "The profiled graphs.",
+                    "items": {
+                        "$ref": "#/$defs/GraphProfile"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "settings": {
+                    "$ref": "#/$defs/Settings",
+                    "description": "The settings the run used."
+                },
+                "started_at": {
+                    "description": "When the run started.",
+                    "format": "date-time",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "tool_version": {
+                    "description": "Version of rdf-fingerprinter that produced the profile.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "settings"
+            ],
+            "title": "ProfileRun",
+            "type": "object"
+        },
+        "PropertyProfile": {
+            "additionalProperties": false,
+            "description": "Observations about one property used by the instances of one class.",
+            "properties": {
+                "cardinality_histogram": {
+                    "description": "Subjects with exactly n values, for each observed n \u2265 1 (n = 0 is derived).",
+                    "items": {
+                        "$ref": "#/$defs/CardinalityBin"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "distinct_objects": {
+                    "description": "Distinct objects over all partitions (the report's distinct values).",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "distinct_objects_exact": {
+                    "description": "False when the distinct count is a lower bound (reserved for the batched-collection EPIC).",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "presence_only": {
+                    "description": "True when the property was found only by the completeness check (no statistics).",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "property": {
+                    "description": "IRI of a predicate.",
+                    "type": "string"
+                },
+                "top_values": {
+                    "description": "The most frequent values, at most top_k.",
+                    "items": {
+                        "$ref": "#/$defs/ValueCount"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "top_values_exact": {
+                    "description": "True when the top values were computed over all instances (class mode exact).",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "value_partitions": {
+                    "description": "Objects split by kind, datatype, language and object class.",
+                    "items": {
+                        "$ref": "#/$defs/ValuePartition"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "property"
+            ],
+            "title": "PropertyProfile",
+            "type": "object"
+        },
+        "QueryKind": {
+            "description": "The collection query a failure refers to (mapping in design.md).",
+            "enum": [
+                "graphs",
+                "triples",
+                "predicate_partitions",
+                "class_partitions",
+                "declared_hierarchy",
+                "cardinality_votes",
+                "value_partitions",
+                "object_classes",
+                "co_types",
+                "top_values",
+                "property_presence",
+                "incoming_links",
+                "untyped_subjects",
+                "subject_stream"
+            ],
+            "title": "QueryKind",
+            "type": "string"
+        },
+        "Settings": {
+            "additionalProperties": false,
+            "description": "Collection parameters, recorded so a profile can be interpreted and reproduced.",
+            "properties": {
+                "acceptance_threshold": {
+                    "description": "Share of instances a cardinality label must cover.",
+                    "maximum": 1,
+                    "minimum": 0,
+                    "type": "number"
+                },
+                "completeness_check": {
+                    "description": "Whether property presence was checked for first_n classes.",
+                    "type": "boolean"
+                },
+                "concurrency": {
+                    "description": "Maximum concurrent queries.",
+                    "minimum": 1,
+                    "type": "integer"
+                },
+                "depth": {
+                    "$ref": "#/$defs/Depth",
+                    "description": "How much was collected."
+                },
+                "first_n": {
+                    "description": "N for the first_n mode.",
+                    "minimum": 1,
+                    "type": "integer"
+                },
+                "graph_statistics": {
+                    "description": "Whether graph totals, predicate partitions and untyped subjects were collected (full scans).",
+                    "type": "boolean"
+                },
+                "object_type_scope": {
+                    "$ref": "#/$defs/ObjectTypeScope",
+                    "description": "Where object types are looked up."
+                },
+                "precision_policy": {
+                    "$ref": "#/$defs/PrecisionPolicy",
+                    "description": "Allowed precision modes."
+                },
+                "selected_graphs": {
+                    "description": "Graphs requested; empty means all.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "timeout_seconds": {
+                    "description": "Per-query timeout.",
+                    "minimum": 1,
+                    "type": "integer"
+                },
+                "top_k": {
+                    "description": "How many top values to keep per class and property.",
+                    "minimum": 1,
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "depth",
+                "precision_policy",
+                "first_n",
+                "top_k",
+                "object_type_scope",
+                "completeness_check",
+                "timeout_seconds",
+                "concurrency",
+                "acceptance_threshold",
+                "graph_statistics"
+            ],
+            "title": "Settings",
+            "type": "object"
+        },
+        "SubclassEdge": {
+            "additionalProperties": false,
+            "description": "A declared rdfs:subClassOf edge.",
+            "properties": {
+                "sub_class": {
+                    "description": "The narrower class of a subclass edge.",
+                    "type": "string"
+                },
+                "super_class": {
+                    "description": "The broader class of a subclass edge.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "sub_class",
+                "super_class"
+            ],
+            "title": "SubclassEdge",
+            "type": "object"
+        },
+        "ValueCount": {
+            "additionalProperties": false,
+            "description": "How often one value occurs.",
+            "properties": {
+                "triples": {
+                    "description": "Number of triples.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "value": {
+                    "description": "An object value, IRI or literal lexical form.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                }
+            },
+            "title": "ValueCount",
+            "type": "object"
+        },
+        "ValuePartition": {
+            "additionalProperties": false,
+            "description": "Objects of one class-property pair sharing kind, datatype, language and object class.",
+            "properties": {
+                "datatype": {
+                    "description": "Datatype IRI of literal objects.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "distinct_objects": {
+                    "description": "Number of distinct objects.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "distinct_objects_exact": {
+                    "description": "False when the distinct count is a lower bound (reserved for the batched-collection EPIC).",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
+                },
+                "language": {
+                    "description": "Language tag of literal objects; empty for untagged literals.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "max_length": {
+                    "description": "Longest lexical form (STRLEN) among the literals.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "max_value": {
+                    "description": "Largest value in SPARQL order (meaningful for numeric and temporal datatypes).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "min_length": {
+                    "description": "Shortest lexical form (STRLEN) among the literals.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "min_value": {
+                    "description": "Smallest value in SPARQL order (meaningful for numeric and temporal datatypes).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "node_kind": {
+                    "$ref": "#/$defs/NodeKind",
+                    "description": "The term kind of these objects."
+                },
+                "object_class": {
+                    "description": "A class of the objects; absent when the objects are untyped.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "object_class_graph": {
+                    "description": "Graph in which the object class was asserted, when looked up across graphs.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "total_length": {
+                    "description": "Sum of lexical-form lengths; mean length is derived.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                },
+                "triples": {
+                    "description": "Number of triples.",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
+                        "null"
+                    ]
+                }
+            },
+            "required": [
+                "node_kind"
+            ],
+            "title": "ValuePartition",
+            "type": "object"
+        }
+    },
+    "$id": "https://data.meaningfy.ws/fingerprint/stats/schema",
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
+    "additionalProperties": false,
+    "description": "One fingerprinting run over one endpoint.",
+    "metamodel_version": "1.12.0",
+    "properties": {
+        "endpoint": {
+            "description": "The SPARQL endpoint URL that was profiled.",
+            "format": "uri",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "failures": {
+            "description": "Queries that failed after all retries and fallbacks.",
+            "items": {
+                "$ref": "#/$defs/Failure"
+            },
+            "type": [
+                "array",
+                "null"
+            ]
+        },
+        "finished_at": {
+            "description": "When the run finished.",
+            "format": "date-time",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "graphs": {
+            "description": "The profiled graphs.",
+            "items": {
+                "$ref": "#/$defs/GraphProfile"
+            },
+            "type": [
+                "array",
+                "null"
+            ]
+        },
+        "settings": {
+            "$ref": "#/$defs/Settings",
+            "description": "The settings the run used."
+        },
+        "started_at": {
+            "description": "When the run started.",
+            "format": "date-time",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        "tool_version": {
+            "description": "Version of rdf-fingerprinter that produced the profile.",
+            "type": [
+                "string",
+                "null"
+            ]
+        }
+    },
+    "required": [
+        "settings"
+    ],
+    "title": "fingerprint_stats",
+    "type": "object",
+    "version": "0.1.0"
+}
+

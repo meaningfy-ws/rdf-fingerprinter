@@ -1,0 +1,6 @@
+{
+  "template": "profile.html",
+  "conf": {
+    "title": "Application profile inferred by rdf-fingerprinter"
+  }
+}

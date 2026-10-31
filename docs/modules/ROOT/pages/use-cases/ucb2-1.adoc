@@ -1,0 +1,51 @@
+[#uc-b2-1]
+= UC-B2.1: Generate representations from a saved profile
+
+*Use Case Level:* Blue (User-goal) +
+*Primary Actor:* Requester (a data steward at the command line) +
+*Supporting Actors:* Command line (generator commands, shared arguments, exit codes); Profile store (load and validate `profile.json`); Analyser (re-derives at the given threshold); Generator (visit hooks build the view); Template renderer (lays the view out as text); Output check (refuses a text that does not parse) +
+*Scope:* rdf-fingerprinter — generator commands
+
+This Blue use case refines xref:use-cases/ucw2.adoc[UC-W2: Publish a fingerprint as an application
+profile]. The shared contract is stated there. Components are those of the
+xref:glossary.adoc#components[Glossary]. This page states only how the generator commands
+realise it.
+
+== Stakeholders and Interests
+
+As UC-W2.
+
+== Brief Description
+
+`fingerprint-gen-<format> PROFILE -o FOLDER [--threshold T] [--template DIR]` loads the profile
+through the profile store, re-derives the analytics, lets the format's generator build its view
+through visit hooks (graph, class, property), has the template renderer lay the view out with the
+format's template package, checks every text, then writes them (xref:decisions.adoc#ad-8[AD-8]).
+
+== Preconditions
+
+As UC-W2.
+
+== Trigger
+
+As UC-W2.
+
+== Success Guarantee (Postconditions)
+
+This Blue path adds only:
+
+. Exit 0 when the files are written, even if the profile records collection failures.
+. File names: `shapes-<graph>.ttl`, `diagram-<graph>.puml`, `profile.html`; `<graph>` is `default` or a readable slug with a short hash.
+
+== Minimal Guarantees (On Failure)
+
+. Exit 2 for an unusable profile file, threshold, output folder or template folder.
+. Exit 4 for an unexpected error, including Turtle that does not parse (UC-W2 minimal guarantee 2).
+
+== Extensions
+
+1a. `--shapes-namespace` given (SHACL only) — node shapes are minted under it instead of `urn:fingerprint:shape:`.
+
+== Technology and Data Variations
+
+The command names follow LinkML's `gen-*`, prefixed so they never shadow LinkML's own scripts.

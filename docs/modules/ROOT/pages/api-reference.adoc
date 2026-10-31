@@ -25,7 +25,7 @@ print(report)  # report/main.html
 | `output_location` | `str \| Path` | An existing folder; `NotADirectoryError` otherwise.
 | `selected_graphs` | `list[str] \| None` | Graph IRIs to fingerprint, one section each; `""` is the default graph. `None` means the default graph and every named graph.
 | `external_template_location` | `str \| Path \| None` | A custom template folder (below); `None` uses the packaged template.
-| `additional_config` | `dict \| None` | Extra values merged into the template's `conf` (for example `title`); its `collection` key holds collection settings (xref:statistics.adoc#_settings[Settings]).
+| `additional_config` | `dict \| None` | Extra values merged into the template's `conf` (for example `title`); its `collection` key holds collection settings (xref:statistics.adoc#settings[Settings]).
 |===
 
 Returns the `Path` of the main report document. Failed measurements are listed in the report
@@ -33,23 +33,27 @@ and logged at WARNING; an unreachable endpoint raises `EndpointUnreachable`.
 
 == collect, analyse, render_report
 
-The three steps are also available separately, for example to keep the profile as JSON:
+The three steps are also available separately. `fingerprint_report(url, folder, settings, *,
+formats=(), sparql=None)` runs them all and saves `profile.json`; `sparql` takes any `SparqlPort`
+(for example a fake in tests). Separately:
 
 [source,python]
 ----
-from fingerprint.adapters.sparql import SparqlWrapperClient
+from fingerprint.adapters.profile_file import save_profile
+from fingerprint.adapters.sparql import SparqlHttpClient
 from fingerprint.domain.analytics import analyse
 from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.report import render_report
 from fingerprint.service_layer.settings import resolve_settings
 
 settings = resolve_settings(cli={"depth": "properties"})
-run = collect(url, settings, SparqlWrapperClient(url, settings.timeout_seconds))
-Path("profile.json").write_text(run.model_dump_json())   # raw statistics
+run = collect(url, settings, SparqlHttpClient(url, settings.timeout_seconds))
+save_profile(run, Path("report"))                         # report/profile.json; load_profile() reads it
 report = render_report(analyse(run), Path("report"))
 ----
 
-`run.failures` lists what could not be measured.
+`run.failures` lists what could not be measured. Representations of a run: see
+xref:representations.adoc#from-python[Representations].
 
 == generate_report_builder_config
 

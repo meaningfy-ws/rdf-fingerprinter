@@ -13,15 +13,18 @@ import sys
 from enum import Enum
 
 import click
+from pydantic import ValidationError
 
-from fingerprint.adapters.sparql import EndpointUnreachable, redact
-from fingerprint.domain.generated.profile import Depth, ObjectTypeScope, PrecisionPolicy
+from fingerprint.adapters.exceptions import EndpointUnreachable
+from fingerprint.adapters.sparql import redact
+from fingerprint.domain.profile import Depth, ObjectTypeScope, PrecisionPolicy, SettingsOverride
+from fingerprint.entrypoints.cli import EXIT_FAILURES, EXIT_UNEXPECTED, EXIT_UNREACHABLE, configure_logging
+from fingerprint.service_layer.exceptions import UsageError
+from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.handlers import fingerprint_report
-from fingerprint.service_layer.settings import UsageError, load_config_file, resolve_settings
+from fingerprint.service_layer.settings import describe, load_config_file, resolve_settings, validate_config, validate_endpoint
 
 logger = logging.getLogger(__name__)
-
-EXIT_FAILURES, EXIT_UNREACHABLE, EXIT_UNEXPECTED = 1, 3, 4
 
 
 def _choice(enum: type[Enum]) -> click.Choice:
@@ -44,26 +47,43 @@ def _choice(enum: type[Enum]) -> click.Choice:
 @click.option("--concurrency", type=int, help="classes profiled at once")
 @click.option("--graph", "graphs", multiple=True, help="graph to profile (repeatable; empty string = default graph)")
 @click.option("--config", "config_file", type=click.Path(dir_okay=False), help="JSON file with collection settings")
-def fingerprint_endpoint(sparql_endpoint_url: str, output: str, graphs: tuple[str, ...], config_file: str | None, **options):
+@click.option(
+    "--format",
+    "formats",
+    multiple=True,
+    type=click.Choice(sorted(f.value for f in GENERATORS)),
+    help="also render a representation after the report (repeatable)",
+)
+def fingerprint_endpoint(
+    sparql_endpoint_url: str,
+    output: str,
+    graphs: tuple[str, ...],
+    config_file: str | None,
+    formats: tuple[str, ...],
+    **options,
+):
     """
     Generate a fingerprint report on a given SPARQL endpoint.
     Exit status: 0 profiled, 1 report written with failures, 2 usage error, 3 endpoint unreachable, 4 unexpected error.
     """
-    # the application, not the library, configures logging (DEC-9)
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)5s %(name)s: %(message)s")
+    configure_logging()
     output_location = pathlib.Path(output)
     if not output_location.is_dir():
         raise click.BadParameter(f"{output} is not an existing folder", param_hint="--output")
     try:
+        validate_config()
+        validate_endpoint(sparql_endpoint_url)
         settings = resolve_settings(
-            cli={**options, "selected_graphs": list(graphs) or None},
+            cli=SettingsOverride(**options, selected_graphs=list(graphs) or None),
             config=load_config_file(config_file) if config_file else None,
         )
     except UsageError as error:
         raise click.UsageError(str(error)) from error
+    except ValidationError as error:
+        raise click.UsageError(describe(error)) from error
 
     try:
-        _, run = fingerprint_report(sparql_endpoint_url, output_location, settings)
+        _, run = fingerprint_report(sparql_endpoint_url, output_location, settings, formats=formats)
     except EndpointUnreachable as error:
         logger.error("%s", error)
         sys.exit(EXIT_UNREACHABLE)

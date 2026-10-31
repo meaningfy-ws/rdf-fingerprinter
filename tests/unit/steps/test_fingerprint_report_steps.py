@@ -5,15 +5,14 @@ import urllib.error
 from pathlib import Path
 
 import pytest
-import SPARQLWrapper
 from bs4 import BeautifulSoup
 from click.testing import CliRunner
 from pytest_bdd import given, parsers, scenarios, then, when
 from rdflib import Literal
 
-from fingerprint.adapters.sparql import QueryTimeout
+from fingerprint.adapters.sparql import QueryTimeout, SparqlHttpClient
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.generated.profile import ProfileRun
+from fingerprint.domain.profile import ProfileRun
 from fingerprint.entrypoints.cli import main as cli
 from fingerprint.service_layer import handlers
 from fingerprint.service_layer.report import render_report
@@ -75,7 +74,7 @@ def failing_endpoint(ctx, monkeypatch):
         ctx["queried"].append(self)
         raise AssertionError("the report must not query")
 
-    monkeypatch.setattr(SPARQLWrapper.SPARQLWrapper, "query", refuse)
+    monkeypatch.setattr(SparqlHttpClient, "_once", refuse)
 
 
 @when("the report is rendered")
@@ -95,7 +94,7 @@ def not_written(ctx):
 
 @then("the endpoint was never queried")
 def never_queried(ctx):
-    assert ctx["queried"] == []
+    assert (ctx["queried"] if "queried" in ctx else ctx["fake"].queries) == []
 
 
 @given(parsers.parse("a class read in {mode} with {observed:d} of {instances:d} instances observed"))
@@ -164,7 +163,7 @@ def fake(monkeypatch):
         fake.add(f"ex:p{i}", "a", "ex:Person")
         fake.add(f"ex:p{i}", "ex:name", Literal(f"n{i}"))
         fake.add(f"ex:c{i}", "a", "ex:City")
-    monkeypatch.setattr(handlers, "SparqlWrapperClient", lambda endpoint, timeout: fake)
+    monkeypatch.setattr(handlers, "SparqlHttpClient", lambda endpoint, timeout: fake)
     return fake
 
 
@@ -191,6 +190,7 @@ SITUATIONS = {
 
 @given(parsers.re(r"(?P<situation>" + "|".join(SITUATIONS) + ")$"))
 def situation(ctx, fake, situation):
+    ctx["fake"] = fake
     SITUATIONS[situation](fake, ctx)
 
 
@@ -233,3 +233,73 @@ def with_constant(ctx, fake):
 @then("the constant appears in the report")
 def constant_appears(ctx):
     assert soup(ctx).find("h1").text == "Ours"
+
+
+# --- the saved profile ---
+
+
+@given("the report template raises an error")
+def report_raises(monkeypatch):
+    from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
+
+    def broken(self, *args, **kwargs):
+        raise RuntimeError("template error")
+
+    monkeypatch.setattr(JinjaTemplateRenderer, "make", broken)
+
+
+@then("the output folder holds the report and the profile file")
+def report_and_profile(ctx):
+    assert {"main.html", "profile.json"} <= {p.name for p in ctx["output"].iterdir()}
+
+
+@then("the output folder holds the profile file")
+def profile_only(ctx):
+    assert (ctx["output"] / "profile.json").is_file()
+
+
+@then("the profile file lists that failure")
+def profile_lists_failure(ctx):
+    run = ProfileRun.model_validate_json((ctx["output"] / "profile.json").read_text())
+    assert [f.class_iri for f in run.failures or []] == [EX + "City"]
+
+
+# --- representations in the same run (UC-B2.2) ---
+
+
+@when("the fingerprint command runs with the shapes format")
+def command_runs_with_shapes(ctx):
+    args = ["-e", "http://fake/sparql", "-o", str(ctx["output"]), "--format", "shacl"]
+    ctx["result"] = CliRunner().invoke(cli.fingerprint_endpoint, args)
+
+
+@when(parsers.parse('the fingerprint command runs with the format "{name}"'))
+def command_runs_with_format(ctx, name):
+    args = ["-e", "http://fake/sparql", "-o", str(ctx["output"]), "--format", name]
+    ctx["result"] = CliRunner().invoke(cli.fingerprint_endpoint, args)
+
+
+@then("the output folder holds the report, the profile file and one shapes file per profiled graph")
+def report_profile_and_shapes(ctx):
+    names = {p.name for p in ctx["output"].iterdir()}
+    assert {"main.html", "profile.json"} <= names and [n for n in names if n.startswith("shapes-")] == ["shapes-default.ttl"]
+
+
+@then("the message names the known formats")
+def names_known_formats(ctx):
+    assert all(name in ctx["result"].output for name in ("shacl", "puml", "doc"))
+
+
+@given("the shapes fail to render")
+def shapes_fail(monkeypatch):
+    from fingerprint.adapters.exceptions import GeneratedOutputError
+    from fingerprint.service_layer import representations
+
+    class Failing:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def write(self, folder):
+            raise GeneratedOutputError("shapes-default.ttl is not valid turtle")
+
+    monkeypatch.setitem(representations.GENERATORS, "shacl", Failing)

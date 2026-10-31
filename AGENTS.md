@@ -73,6 +73,11 @@ Divergence). Commit only on explicit developer consent.
 - The innermost layer is **`domain`** (the book's `models/`). Direction:
   `entrypoints → services → domain`, `adapters → domain`. `domain` imports nothing upward.
   Enforced by `.importlinter`; checked via `make check-architecture`.
+- **Values are domain objects, never composed dicts.** Pass, return and store LinkML-generated
+  Pydantic classes and enums (`model/*.yaml` → `make generate-models`); never build a dict as a
+  value. Allowed: keyword arguments to a model constructor or `model_copy(update=…)`, module-level
+  UPPER_CASE lookup tables, and dicts at an external library's boundary marked
+  `# dict-ok: <reason>`. Checked by `tests/unit/test_no_composed_dicts.py` (domain-object-model DEC-1).
 - Run Python tooling through Poetry (`poetry run pytest`, `poetry run ruff`, …). Never invoke
   bare `python`/`pytest` — prefer the `make` targets below.
 - **Subagents** — before spawning one, follow *Subagent dispatch* in the `guardrails` skill: spawn
@@ -91,10 +96,13 @@ artifacts above; do not reintroduce parallel epic files under `.claude/`.
 ## Project specifics
 
 - **Archetype:** library (PyPI `rdf-fingerprinter`, console script `fingerprint`).
-- **Top-level package(s):** `fingerprint/` (code) and `fingerprint_report_templates/` (packaged
-  eds4jinja2 report templates + SPARQL queries). No `/src`.
-- **Modules:** `fingerprint/service_layer/handlers.py` (report generation),
-  `fingerprint/entrypoints/cli/main.py` (click CLI).
+- **Top-level package(s):** `fingerprint/` (code; the SPARQL queries are in
+  `fingerprint/adapters/queries/`) and `fingerprint_report_templates/` (packaged eds4jinja2 template
+  packages: the report, SHACL shapes, PlantUML diagram, profile document; they issue no queries). No
+  `/src`.
+- **Modules:** `fingerprint/service_layer/handlers.py` (the report service), `collection.py`,
+  `representations.py` and `generators/` (one generator per format); `fingerprint/entrypoints/cli/`
+  (`main.py` the `fingerprint` command, `generate.py` the `fingerprint-gen-*` commands).
 - **External systems:** any SPARQL endpoint; tests use a local Oxigraph
   (`make oxigraph-load-test-data`, config in `docker/`) for the local-only `tests/e2e`; the
   endpoint comes from `RDF_FINGERPRINTER_TEST_ENDPOINT`. `tests/unit` need no store.

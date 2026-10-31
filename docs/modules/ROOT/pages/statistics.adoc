@@ -74,17 +74,30 @@ uses it. Such properties are listed as present, without statistics.
 
 == Failures
 
-A query that fails after its retries is recorded with the graph, class, property, the
-measurement and the error, and logged at WARNING. The class is still profiled when only a
-second-wave measurement (top values, completeness check, incoming links) fails. The report lists
-the failures in its Collection section, and the CLI exits with 1.
+A failure is recorded with the graph, class, property, the measurement and the error, and logged
+at WARNING; the report lists the failures in its Collection section and the CLI exits with 1. Not
+every failed query is a failure: some discovery queries fall back to a cheaper query with only a
+WARNING. What each stage does is in xref:how-it-works.adoc#failure-classes[How it works].
 
 == Settings
 
-Each setting can be given on the command line, as an environment variable
-`RDF_FINGERPRINTER_<NAME>`, or in a configuration file: `--config FILE` for the CLI,
-`additional_config["collection"]` for the library. The first one found, in that order, wins.
-The settings used are recorded in the profile and shown in the report.
+[#precedence]
+Each setting is taken from the first source that gives it, in this order:
+
+. the command-line option (CLI only);
+. the environment variable `RDF_FINGERPRINTER_<NAME>`;
+. the `selected_graphs` parameter of `generate_endpoint_fingerprint_report` (library, graphs only);
+. the configuration: `--config FILE` for the CLI, `additional_config["collection"]` for the library;
+. the default.
+
+NOTE: For a library caller, an environment variable set in the process *overrides* the same setting
+in `additional_config["collection"]`.
+
+From 2.1 the generator commands take only `--threshold`; it is not read from the environment, and
+without it the threshold recorded in the profile applies.
+
+The settings used are recorded in the profile and shown in the report. Each source is checked on
+its own: a malformed value fails even when a source with higher precedence sets the same setting.
 
 [cols="2,2,1,3"]
 |===
@@ -105,6 +118,29 @@ The settings used are recorded in the profile and shown in the report.
 
 Booleans in environment variables are `1/true/yes/on` or `0/false/no/off`. An unknown key in a
 configuration file or an invalid value is a usage error.
+
+[#operational-variables]
+=== Operational variables
+
+These values are not collection settings and are not recorded in the profile; each is read from its
+environment variable when used, with the default below. A value that cannot be read is a usage error
+(exit 2) naming the variable, reported before any query is sent.
+
+[cols="2,2,3"]
+|===
+| Variable | Default | Meaning
+
+| `RDF_FINGERPRINTER_PROFILE_FILE` | `profile.json` | File name of the saved profile run in the output folder.
+| `RDF_FINGERPRINTER_RETRY_BACKOFF_SECONDS` | `1,4` | Seconds before each retry of a transient failure; one retry per number.
+| `RDF_FINGERPRINTER_TIMEOUT_MARKERS` | `timeout,time limit,timed out,estimated execution time` | Texts that make an HTTP 500 answer a timeout.
+| `RDF_FINGERPRINTER_ERROR_EXCERPT_LENGTH` | 200 | Characters of an endpoint's error body kept in a failure message.
+| `RDF_FINGERPRINTER_SHAPES_NAMESPACE` | `urn:fingerprint:shape:` | Namespace of generated shape IRIs (`--shapes-namespace` overrides it).
+| `RDF_FINGERPRINTER_DEFAULT_GRAPH_LABEL` | `default graph` | How the representations name the default graph.
+| `RDF_FINGERPRINTER_PREFIXES_FILE` | the packaged `prefixes.json` | Prefixes the generators shorten IRIs with; the report keeps its template package's own file.
+|===
+
+From Python, `fingerprint.config` holds these values (`config.profile_file`, …);
+`FingerprintConfig(DefaultConfigResolver())` gives the defaults whatever the environment.
 
 == Graphs
 

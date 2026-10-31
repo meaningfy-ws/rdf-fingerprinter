@@ -1,0 +1,140 @@
+= Glossary
+:description: The terms rdf-fingerprinter's documentation, use cases and decisions use, each with one meaning.
+
+Each term has one meaning across these pages, the use cases and the specifications
+(`openspec/specs/`). Where a page and this glossary disagree, the glossary wins.
+
+== Actors and stakeholders
+
+[#requester]
+Requester:: Whoever asks for a fingerprint or its representations: a data steward at the command
+line, or an embedding application through the library. The primary actor of every use case; each
+Blue use case says which of the two it serves.
+
+[#data-steward]
+Data steward:: A person who wants to know, document or validate the structure of a knowledge
+graph, and runs the commands. One kind of requester.
+
+[#embedding-application]
+Embedding application:: Software that calls the library inside its own process, for example
+rdf-fingerprinter-ws. The other kind of requester.
+
+[#sparql-endpoint]
+SPARQL endpoint:: The external store that holds the data. rdf-fingerprinter only sends it SPARQL
+1.1 `SELECT` and `ASK` queries.
+
+[#endpoint-operator]
+Endpoint operator:: Whoever runs the SPARQL endpoint and cares about the load it receives.
+
+[#data-consumer]
+Data consumer:: Whoever uses a published representation, for example to validate data against
+the generated SHACL shapes.
+
+== The profile
+
+[#fingerprint]
+Fingerprint:: The result of profiling one endpoint once: a profile run and everything rendered
+from it.
+
+[#application-profile]
+Application profile:: The set of shapes a dataset follows: per class, which properties its
+instances use, how many values and of what kind. rdf-fingerprinter infers one from the data.
+
+[#profile-run]
+Profile run (raw profile):: What one collection observed: settings, graphs, classes, instance
+counts, per-property cardinality histograms, value partitions, failures. The `fingerprint_stats`
+model. Saved as `profile.json` (since 2.1).
+
+[#analytics]
+Analytics:: Indicators derived from a profile run by pure functions: min/max/mean, confidence,
+cardinality label, value types, parents, own/inherited. The `fingerprint_analytics` model. Never
+collected, never saved; always recomputed from the run.
+
+[#failure]
+Failure:: A measurement that could not be made (its query failed after the responses described in
+xref:how-it-works.adoc#failure-classes[How it works]). Recorded in the profile run with its graph,
+class, property, measurement and error. A run with failures still produces its outputs.
+
+[#representation]
+Representation:: A rendering of the analytics in one format: the statistics report (HTML), and from
+2.1 SHACL shapes, a PlantUML class diagram and an application-profile document.
+
+== Measures
+
+[#instances]
+Instances / observed instances:: *Instances* is how many subjects have the class. *Observed
+instances* is how many of them were read: all of them in exact mode, the first N in first-N mode.
+
+[#confidence]
+Confidence:: The share of observed instances that have the property at least once. 1.0 means every
+instance uses it.
+
+[#cardinality-label]
+Cardinality label:: How many values an instance has for a property. Written in ShEx notation in the
+outputs, named in the profile model:
++
+[cols="1,2,3"]
+|===
+| Notation | Model name | Meaning
+
+| `1` | `exactly_one` | exactly one value
+| `?` | `zero_or_one` | at most one value
+| `+` | `one_or_more` | at least one value
+| `*` | `zero_or_more` | any number
+| `\{n}` | `exactly_n` | exactly n values, n > 1
+|===
++
+The *accepted* label is the strictest one that at least the acceptance threshold of the observed
+instances fit.
+
+[#acceptance-threshold]
+Acceptance threshold:: The share of observed instances a cardinality label must fit to be accepted
+(setting `acceptance_threshold`, default 0.95, range (0, 1]). At 1.0 a label is accepted only when
+every instance fits; at the default, when 95 % do.
+
+[#label-support]
+Label support:: The share of observed instances that fit the accepted label. Always at least the
+threshold; below 1.0 means the label was accepted *with exceptions*.
+
+[#precision-mode]
+Precision mode:: How a class was read: `exact` (every instance) or `first_n` (its first N instances).
+Under the default policy `auto` a class is read in first-N mode only after its exact query timed
+out; policy `first_n` reads every class that way, policy `exact` never does. Each class records its
+mode; first-N numbers describe a sample.
+
+[#inheritance]
+Own / inherited / refined:: Whether a property is introduced by the class, inherited from a parent
+class, or inherited with a different cardinality or value type.
+
+[#severity]
+Severity (SHACL):: How strongly a generated shape asserts a constraint: `sh:Info` when the property
+has no cardinality label or its confidence is below the acceptance threshold; `sh:Warning` when the
+constraint held with exceptions, the class was read on a sample, the class has declared subclasses,
+or the run looked up object types across graphs (`object_type_scope = any_graph`) and the shape uses `sh:class`; `sh:Violation` when it held for every instance. A
+validator's `sh:conforms` is false as soon as any result exists, whatever its severity; the promise
+of the generated shapes is "no `sh:Violation` on their own data", not "conforms". See xref:how-it-works.adoc#severity[How it works].
+
+== Components
+
+The responsibilities the Blue use cases name as supporting actors, and where each lives
+(xref:architecture.adoc#l3-components-inside-the-library[L3 components]).
+
+[cols="1,3,2"]
+|===
+| Component | Responsibility | Module
+
+| Command line | Parses options, configures logging, maps outcomes to exit codes | `fingerprint/entrypoints/cli/`
+| Public function | The 1.x library call | `fingerprint/service_layer/handlers.py`
+| Report service | Collect, save the profile, analyse, render the report, run chosen generators | `fingerprint_report` in `fingerprint/service_layer/handlers.py`
+| Representations service | Load a profile, apply a threshold, run generators | `fingerprint/service_layer/representations.py`
+| Settings resolver | Merges setting sources by precedence and checks them | `fingerprint/service_layer/settings.py`
+| Configuration | The operational values, each read from an `RDF_FINGERPRINTER_*` variable on access | `config` in `fingerprint/__init__.py`
+| Config resolver | Where a configuration value comes from (environment, defaults, a mapping) and the config file | `fingerprint/adapters/config_resolver.py`
+| Collector | Discovery, per-class queries, precision escalation, concurrency | `fingerprint/service_layer/collection.py`
+| SPARQL client | Sends queries with timeout and retries; classifies errors | `fingerprint/adapters/sparql.py`
+| Analyser | Derives the analytics, no I/O | `fingerprint/domain/analytics.py`
+| Template renderer | Renders a template package and writes its output | `fingerprint/adapters/template_renderer.py`
+| Profile store | Saves and loads `profile.json` | `fingerprint/adapters/profile_file.py`
+| Generator | Builds one representation's view objects from the analytics | `fingerprint/service_layer/generators/`; views in `fingerprint/domain/views.py`
+| Output check | Refuses a generated text that does not parse | `fingerprint/adapters/template_renderer.py`
+|===

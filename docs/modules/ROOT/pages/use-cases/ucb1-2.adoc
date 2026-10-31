@@ -1,0 +1,62 @@
+[#uc-b1-2]
+= UC-B1.2: Fingerprint from an embedding application
+
+*Use Case Level:* Blue (User-goal) +
+*Primary Actor:* Requester (an embedding application) +
+*Supporting Actors:* Public function (the 1.x call); Settings resolver; Collector; SPARQL client; Analyser; Template renderer; Profile store +
+*Scope:* rdf-fingerprinter — library API
+
+This Blue use case refines xref:use-cases/ucw1.adoc[UC-W1: Fingerprint an endpoint]. The
+shared contract is stated there. This page states only how the library call realises it.
+
+== Stakeholders and Interests
+
+As UC-W1.
+
+== Brief Description
+
+The embedding application calls `generate_endpoint_fingerprint_report` with an endpoint and an
+output folder, optionally graphs, a custom template folder and constants. Collection settings travel
+in `additional_config["collection"]`. The function returns the path of the report.
+
+== Preconditions
+
+As UC-W1.
+
+== Trigger
+
+As UC-W1.
+
+== Success Guarantee (Postconditions)
+
+This Blue path adds only:
+
+. The return value is the path of the main report document, as in 1.x. It does not say whether
+  failures were recorded: they show in the report's collection section and in the WARNING log. A
+  caller that must act on them uses the separate steps (`collect`, `analyse`, `render_report`), whose
+  run carries `failures` (xref:api-reference.adoc[API reference]).
+. A custom template folder renders the report instead of the packaged one, with the constants in its context.
+
+== Minimal Guarantees (On Failure)
+
+. Exceptions instead of exit codes: `NotADirectoryError` for a missing output folder; `UsageError`
+  (a `ValueError`, from `fingerprint.service_layer.settings`) for an invalid setting;
+  `EndpointUnreachable` (from `fingerprint.adapters.sparql`) when the endpoint is unreachable at the
+  start. From 2.1 both are also importable from their layer's `exceptions` module.
+. Any other exception propagates unchanged; there is no library counterpart to exit 4. Some of them
+  (a validation error from the model, a non-numeric count) are also `ValueError` subclasses, so a
+  caller that must tell usage errors apart catches `UsageError`, not `ValueError`.
+. Importing the library has no logging side effects.
+
+== Extensions
+
+1a. Unknown key in `additional_config["collection"]` — usage error naming the key.
+
+== Special Requirements
+
+* The signature is a compatibility contract (xref:decisions.adoc#ad-2[AD-2]).
+
+== Technology and Data Variations
+
+Setting sources, including how the calling process's environment interacts with
+`additional_config["collection"]`: xref:statistics.adoc#precedence[Settings].

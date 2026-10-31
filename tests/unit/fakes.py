@@ -1,12 +1,13 @@
 """FakeSparql: the real client's classification and retries over an in-memory rdflib store (P-2, P-8)."""
 
+import json
 import threading
 from collections.abc import Callable
 from typing import Any
 
 from rdflib import BNode, Dataset, Literal, URIRef
 
-from fingerprint.adapters.sparql import SparqlWrapperClient, query_name
+from fingerprint.adapters.sparql import SparqlHttpClient, query_name
 
 EX = "http://example.org/"
 
@@ -31,10 +32,13 @@ def _binding(value: Any) -> dict[str, str]:
         return {"type": "bnode", "value": str(value)}
     if isinstance(value, str) and value.startswith("_:"):
         return {"type": "bnode", "value": value[2:]}
+    if isinstance(value, Literal):
+        typed = {"datatype": str(value.datatype)} if value.datatype else {}
+        return {"type": "literal", "value": str(value)} | typed | ({"xml:lang": value.language} if value.language else {})
     return {"type": "uri" if isinstance(value, URIRef) else "literal", "value": str(value)}
 
 
-class FakeSparql(SparqlWrapperClient):
+class FakeSparql(SparqlHttpClient):
     """Answers from `dataset`, unless a rule for the query's name (Q5, QS, …) says otherwise."""
 
     def __init__(self) -> None:
@@ -61,7 +65,8 @@ class FakeSparql(SparqlWrapperClient):
     def sent(self, name: str) -> list[str]:
         return [q for q in self.queries if query_name(q).split()[0] == name]
 
-    def _once(self, query: str, ask: bool) -> dict[str, Any]:
+    def _once(self, query: str) -> bytes:
+        """The SPARQL JSON answer body, as the endpoint would send it."""
         name = query_name(query).split()[0]
         with self._lock:
             self.queries.append(query)
@@ -72,17 +77,64 @@ class FakeSparql(SparqlWrapperClient):
                 if isinstance(rule["outcome"], BaseException):
                     raise rule["outcome"]
                 rows = rule["outcome"]
-                names = list(rows[0]) if rows else []
-                return {
-                    "head": {"vars": names},
+                answer = {
+                    "head": {"vars": list(rows[0]) if rows else []},
                     "results": {"bindings": [{k: _binding(v) for k, v in r.items() if v is not None} for r in rows]},
                 }
-            result = self.dataset.query(query)
-            if ask:
-                return {"boolean": bool(result.askAnswer)}
-            names = [str(v) for v in result.vars or []]
-            bindings = [
-                {str(v): _binding(row[v]) for v in result.vars or [] if row[v] is not None}  # type: ignore[index]
-                for row in result
-            ]
-        return {"head": {"vars": names}, "results": {"bindings": bindings}}
+                return json.dumps(answer).encode()
+            return self.dataset.query(query).serialize(format="json")
+
+
+def files(documents) -> dict[str, str]:
+    """Rendered documents as file name → text, for assertions."""
+    return {d.file_name: d.text for d in documents}
+
+
+# --- hand-built profile runs for the representation tests (profile-representations task 1.2) ---
+
+XSD = "http://www.w3.org/2001/XMLSchema#"
+
+
+def literals(triples: int, datatype: str | None = XSD + "string", language: str | None = None) -> dict[str, Any]:
+    partition = {"node_kind": "literal", "triples": triples, "datatype": datatype, "language": language}
+    return {k: v for k, v in partition.items() if v is not None}
+
+
+def resources(triples: int, object_class: str | None = None, kind: str = "iri") -> dict[str, Any]:
+    partition = {"node_kind": kind, "triples": triples, "object_class": object_class}
+    return {k: v for k, v in partition.items() if v is not None}
+
+
+def prop(iri: str, bins: dict[int, int] | None = None, *partitions: dict[str, Any], presence_only: bool = False):
+    """A property with its cardinality histogram ({values per subject: subjects}) and value partitions."""
+    if presence_only:
+        return {"property": iri, "presence_only": True}
+    histogram = [{"values_per_subject": n, "subjects": s} for n, s in sorted((bins or {}).items())]
+    return {"property": iri, "cardinality_histogram": histogram, "value_partitions": list(partitions)}
+
+
+def klass(iri: str, instances: int, *props: dict[str, Any], observed: int | None = None, co_types=()):
+    mode = "exact" if observed is None or observed == instances else "first_n"
+    profile = {
+        "class_iri": iri,
+        "instances": instances,
+        "observed_instances": instances if observed is None else observed,
+        "precision_mode": mode,
+        "property_partitions": list(props),
+    }
+    if co_types:
+        profile["co_types"] = [{"class_iri": c, "subjects": s} for c, s in co_types]
+    return profile
+
+
+def profile_run(*classes, graph=None, edges=(), failures=(), **settings):
+    from fingerprint.domain.profile import ProfileRun
+
+    graph_profile: dict[str, Any] = {"class_partitions": list(classes)}
+    if graph:
+        graph_profile["graph"] = graph
+    if edges:
+        graph_profile["declared_subclass_edges"] = [{"sub_class": s, "super_class": p} for s, p in edges]
+    return ProfileRun.model_validate(
+        {"endpoint": "http://e/sparql", "settings": settings, "graphs": [graph_profile], "failures": list(failures)}
+    )

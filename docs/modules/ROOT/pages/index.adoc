@@ -21,9 +21,11 @@ structure.
 | Licence | Apache 2.0
 |===
 
-The report is rendered with https://github.com/meaningfy-ws/eds4jinja2[eds4jinja2] templates
-that embed their SPARQL queries; the default template ships with the package and can be replaced
-by your own (xref:api-reference.adoc#custom-templates[custom templates]).
+The library collects the statistics itself, class by class, and the report is rendered from them
+with https://github.com/meaningfy-ws/eds4jinja2[eds4jinja2] templates that issue no queries; the
+default template ships with the package and can be replaced by your own
+(xref:api-reference.adoc#custom-templates[custom templates]). xref:how-it-works.adoc[How it works]
+walks through a run.
 
 NOTE: The https://github.com/meaningfy-ws/rdf-fingerprinter-ws[rdf-fingerprinter-ws] service
 builds an API and UI on top of this library.

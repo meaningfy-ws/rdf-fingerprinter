@@ -1,24 +1,31 @@
 = Architecture
 :description: Scope, structure and architecture decisions of rdf-fingerprinter.
 
-This page records the minimal architecture of rdf-fingerprinter: what it is for, how it is
-structured, and the decisions that shape it. It describes release 2.0, delivered by the OpenSpec
-change `harden-fingerprinter`; where 1.x differed, a note says so.
-Decision ids `DEC-n` and `P-n` refer to that change (`openspec/changes/archive/2026-10-31-harden-fingerprinter/`; the requirements are in `openspec/specs/`).
+This page records the architecture of rdf-fingerprinter: what it is for and how it is
+structured, as of release 2.1. The collection, analytics and report came with 2.0 (OpenSpec change
+`harden-fingerprinter`), the saved profile and the representations with 2.1 (change
+`profile-representations`); where 1.x differed, a note says so.
+
+Reading guide::
+* xref:how-it-works.adoc[How it works] — what a run does, with a worked example.
+* xref:use-cases/index.adoc[Use cases] — the behavioural contract (White) and its realisations (Blue).
+* xref:decisions.adoc[Architecture decisions] — why it is built this way (AD-1 to AD-11).
+* xref:glossary.adoc[Glossary] — the terms all of these use.
+* `openspec/specs/` — the normative requirements, with scenarios.
 
 == Purpose and scope
 
 rdf-fingerprinter infers the *application profile* a knowledge graph actually follows. It reads
 the data through a SPARQL endpoint, collects statistics per graph, class and property, derives
 indicators from them (cardinalities, confidence, value types, hierarchy), and writes an HTML
-report. It is a Python library with a console script (`fingerprint`); it is not deployed as a
+report, the raw profile and, from 2.1, SHACL shapes, a PlantUML diagram and an application-profile
+document. It is a Python library with a console script (`fingerprint`); it is not deployed as a
 service.
 
 In scope:: profiling any SPARQL 1.1 endpoint, read-only; the statistics and analytics model;
-the HTML report.
-Out of scope:: other representations (SHACL, PlantUML, ReSpec, VoID — change
-`profile-representations`); LLM tooling (`llm-schema-tools`); benchmarking
-(`benchmark-fingerprinter`); writing to the endpoint.
+the HTML report; the saved profile and the SHACL, PlantUML and document representations.
+Out of scope:: VoID and LLM tooling (`llm-schema-tools`); benchmarking (`benchmark-fingerprinter`);
+batched collection (`batched-collection`); profiling RDF files; writing to the endpoint.
 
 == Architectural drivers
 
@@ -28,81 +35,112 @@ Out of scope:: other representations (SHACL, PlantUML, ReSpec, VoID — change
 covering the whole graph.
 | Portability | Any SPARQL 1.1 store; no store-specific SPARQL.
 | Honesty | Every number states how precise it is; failures are visible and fail the run.
-| Reuse | One profile feeds the report now and further representations later, without querying again.
+| Reuse | One profile feeds every representation without querying again (xref:decisions.adoc#ad-7[AD-7]).
+| Trustworthy shapes | Generated constraints never claim more than the profile observed (xref:decisions.adoc#ad-10[AD-10]).
 | Embeddability | Usable as a library inside other applications (rdf-fingerprinter-ws) and as a CLI.
 |===
 
 == L1 — System context
 
-----
- Data steward / developer ──uses──▶ rdf-fingerprinter (library + CLI)
-                                         │  reads (SPARQL 1.1 SELECT/ASK over HTTP)
-                                         ▼
-                                    SPARQL endpoint (any store)
-                                         │
- rdf-fingerprinter-ws ──embeds──▶ rdf-fingerprinter ──writes──▶ report folder (HTML)
-----
+ Requester: data steward ──uses──▶ ┌───────────────────────┐ ──reads (SPARQL 1.1)──▶ SPARQL endpoint
+ Requester: embedding app ─embeds─▶ │   rdf-fingerprinter   │                          (any store)
+                                   └───────────────────────┘
+                                      │ writes        ▲ reads
+                                      ▼               │
+                       output folder: report, profile.json, shapes, diagrams, document
 
-Services offered:: *Fingerprint an endpoint* (profile + HTML report), through the
-`fingerprint` CLI and the function `generate_endpoint_fingerprint_report`.
+Services offered::
+* *Fingerprint an endpoint* — profile + report (xref:use-cases/ucw1.adoc[UC-W1]).
+* *Publish a fingerprint as an application profile* — SHACL shapes, a class diagram and a
+  specification document from a profile (xref:use-cases/ucw2.adoc[UC-W2]).
+
+Actors and systems are those of the xref:glossary.adoc#actors-and-stakeholders[Glossary]. The
+interfaces that offer these services are listed at L3.
 
 == L2 — Containers
 
-rdf-fingerprinter has no runtime of its own: it runs inside the caller's Python process. The
-containers around it are the *SPARQL endpoint* (external, read-only use) and the *output folder*
-(files). Communication is synchronous HTTP to the endpoint and file writes to the folder.
+[cols="1,2,2"]
+|===
+| Container | Responsibility | Interaction
+
+| *rdf-fingerprinter* (system under design) | Profiles, analyses and renders. Has no runtime of its own: it runs inside the caller's process (a shell or an embedding application). | —
+| *SPARQL endpoint* (external) | Holds the data. | read-only, synchronous request–response from rdf-fingerprinter
+| *Output folder* (files) | Holds the outputs; also the saved profile, read back for later regenerations. | written by rdf-fingerprinter; `profile.json` read back
+|===
+
+From 2.1 the generators never contact the endpoint (xref:decisions.adoc#ad-7[AD-7]).
 
 == L3 — Components (inside the library)
 
 [cols="1,2,2"]
 |===
-| Layer (package) | Responsibility | May import
+| Layer (package) | Components | May import
 
-| `fingerprint.entrypoints` (`cli`)
-| Parse options, configure logging, call the service layer, map outcomes to exit codes 0 (clean), 1 (failures recorded), 3 (endpoint unreachable), 4 (unexpected error).
+| `fingerprint.entrypoints`
+| Command line: the `fingerprint` command; `--format` and the `fingerprint-gen-*` commands.
+Parses options, configures logging, maps outcomes to exit codes.
 | service layer, adapters, domain
 
 | `fingerprint.service_layer`
-| Settings precedence; the collection algorithm (discovery, per-class queries, precision
-escalation, concurrency); report rendering through eds4jinja2; the public function.
+| Public function (`generate_endpoint_fingerprint_report`); Report service; Settings resolver;
+Collector; Generators (one per format, building its view) and the Representations service,
+which the generator commands call.
 | adapters, domain
 
 | `fingerprint.adapters`
-| `SparqlPort` and its SPARQLWrapper implementation (timeout, retry, failure classes); the query
-templates (`queries/*.rq`).
+| SPARQL client (`SparqlPort` and its HTTP implementation, rdflib reading the results) and the
+query templates; Template renderer (eds4jinja2 rendering, Turtle check, file writes, shared by the
+report and the generators), Profile store (`profile.json`), Config resolver (environment, config
+file).
 | domain
 
 | `fingerprint.domain`
-| The profile model (generated from LinkML), IRI guard, all analytics
-— pure functions, no I/O.
-| nothing above it; no SPARQLWrapper, eds4jinja2 or click
+| Profile and views models (generated from LinkML); Analyser; IRI rules (SPARQL and, from 2.1,
+Turtle). Pure, no I/O.
+| nothing above it; not eds4jinja2, jinja2, rdflib or click (enforced)
 
 | `fingerprint_report_templates`
-| Packaged eds4jinja2 templates; render the analytics passed in the context; issue no queries.
+| Template packages: `fingerprint_report`; `shacl_shapes`, `plantuml_diagram`,
+`profile_document`. Lay out what they are given; issue no queries.
 | —
 |===
 
-The layers are enforced by `.importlinter` (`make check-architecture`), including two forbidden
-contracts: the generated module imports no project code, and the domain imports no I/O library.
+Component names are those of the xref:glossary.adoc#components[Glossary], which maps each to its
+module. The layers are enforced by `.importlinter` (`make check-architecture`): the layer order, a
+generated models that import no project code, a domain that imports no eds4jinja2, jinja2, rdflib
+or click, and a service layer that imports no jinja2, eds4jinja2 or rdflib itself
+(`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches
+rdflib through the default SPARQL client). One exception is declared: collection reads the client's
+rdflib result rows and tells blank nodes by their term class.
+
+The package root, `fingerprint/__init__.py`, holds the configuration: `config`, a
+`FingerprintConfig` whose values each read an `RDF_FINGERPRINTER_*` variable through the config
+resolver when accessed, never at import (xref:decisions.adoc#ad-12[AD-12]).
 
 NOTE: 1.x had only `service_layer` and `entrypoints`; its statistics were computed by SPARQL inside
-the templates.
+the templates. In 2.0 report rendering and the setting sources sat in the service layer; 2.1 moved
+them to adapters (xref:decisions.adoc#ad-4[AD-4]).
 
-=== Data flow
+The dynamic view — how a run moves through these components — is in
+xref:how-it-works.adoc#data-flow[How it works].
 
-----
- CLI / caller ──settings──▶ collect() ──SPARQL──▶ endpoint
-                               │ raw statistics (fingerprint_stats)
-                               ▼
-                           analyse()  (domain, pure)
-                               │ analytics (fingerprint_analytics)
-                               ▼
-                       render_report() ──eds4jinja2──▶ main.html
-----
+== L4 — Key abstractions
+
+[cols="1,3"]
+|===
+| Abstraction | Contract
+
+| `SparqlPort` | `select(query) -> list[ResultRow]` (rdflib rows of `URIRef`, `BNode` and typed `Literal`; an unbound variable is `None`), `ask(query) -> bool`; raises one of the error classes of xref:how-it-works.adoc#failure-classes[How it works].
+| `ProfileRun`, `ProfileAnalytics` | The generated, frozen profile model (below).
+| `TemplateRenderer` | `render(package, outputs, *, conf, autoescape) -> list[RenderedDocument]` (in memory); `make(package, outputs, *, folder, conf, check, autoescape) -> list[Path]`, checking every text before writing any; `outputs` are (file name, view) pairs; `prefixes`. Implemented on eds4jinja2 2.1's `render_documents` / `make_documents`. The port generators and the report render through; declared in the service layer, implemented by the template renderer adapter (`SparqlPort` is declared beside its adapter, a 2.0 choice kept).
+| `Generator` | pre-order `visit_graph` / `visit_class` (return `False` to skip), `visit_property` (a property's view), post-order `end_class` / `end_graph` (the frozen class and graph views); `serialize()` returns `list[RenderedDocument]`; formats keyed by `RepresentationFormat`, options a `GeneratorOptions` (xref:decisions.adoc#ad-8[AD-8]).
+| `FingerprintConfig` | `config.<value>` reads its `RDF_FINGERPRINTER_*` variable on access; `validate()` reads them all and names the first bad one (xref:decisions.adoc#ad-12[AD-12]).
+| Exit codes | 0 clean, 1 failures recorded, 2 usage error, 3 endpoint unreachable at the start, 4 unexpected error.
+|===
 
 === Profile model
 
-The model is LinkML, namespace `fp: https://data.meaningfy.ws/fingerprint/`, in two schemas
+The model is LinkML, namespace `fp: https://data.meaningfy.ws/fingerprint/`, in three schemas
 under `model/`:
 
 * `fingerprint_stats` — raw observations only: run and settings, graphs, classes with instance
@@ -110,84 +148,20 @@ under `model/`:
   subclass edges, incoming links, failures. Reuses VoID terms where the meaning matches.
 * `fingerprint_analytics` — extends each raw class with computed indicators (min/max/mean,
   confidence, cardinality label, value-type purity, diversity, parents, own/inherited, …).
+* `fingerprint_views` — what the representation templates receive: shapes graphs, diagram graphs,
+  the profile document, `RenderedDocument`, `GeneratorOptions` and the enums of formats,
+  severities and diagram members.
+
+Values are these classes and enums throughout the code, never composed dicts; the check
+`tests/unit/test_no_composed_dicts.py` fails on a new one unless its line gives a reason
+(`# dict-ok: <reason>`, kept for library boundaries, prefix tables and lookup indexes).
 
 Rules for the generated code (P-10): `make generate-models` writes
-`fingerprint/domain/generated/profile.py` with a do-not-edit banner; `make check-models` (part of
+`fingerprint/domain/profile.py` and `fingerprint/domain/views.py` with a do-not-edit banner; `make check-models` (part of
 `make check-all`) fails when it is out of date; the generated classes are frozen and reject
-unknown fields; Ruff excludes the folder; import-linter keeps it free of project imports.
+unknown fields; Ruff excludes the module; import-linter keeps it free of project imports.
 
 == Architecture decisions
 
-=== L1 — Context
-
-[#ad-1]
-==== AD-1 Profile from the data, through any SPARQL 1.1 endpoint, read-only
-
-Context:: Profiles must reflect what the data *does*, on any store, without access beyond
-querying.
-Options:: (a) portable SPARQL 1.1 over HTTP; (b) store-specific SPARQL or native access
-(Virtuoso JDBC, QLever variants), as void-generator does; (c) load dumps locally.
-Decision:: (a). Statistics come from instance data, not from a declared ontology; only `SELECT`
-and `ASK` are sent (DEC-5).
-Consequences:: Works on every compliant store; cannot use store shortcuts, so cost is bounded by
-query design (AD-3), not by engine tricks.
-Confirmation:: e2e tests on Oxigraph; no store-specific syntax in `adapters/queries/`.
-
-[#ad-2]
-==== AD-2 A library with a CLI, not a service
-
-Context:: Profiling is embedded by other systems (rdf-fingerprinter-ws) and run ad hoc.
-Options:: (a) Python library + console script; (b) a deployed web service.
-Decision:: (a); the service lives in rdf-fingerprinter-ws.
-Consequences:: No runtime, no deployment; the public function's signature is a compatibility
-contract (kept from 1.x).
-Confirmation:: `pyproject.toml` (`fingerprint` script); unit test of the 1.x call.
-
-=== L2 — Runtime and interaction
-
-[#ad-3]
-==== AD-3 Bounded work per query: staged discovery, class-scoped queries, precision escalation
-
-Context:: One whole-graph aggregate per class (1.0) times out on large graphs; so does one global
-class × property aggregate.
-Options:: (a) staged discovery + per-class queries scoped to the class's instances, with
-exact → first-N escalation on timeout (batched mode: follow-up EPIC); (b) one global aggregate; (c) client-side
-counting of every triple (sheXer, QSE style).
-Decision:: (a) (DEC-2, DEC-3, DEC-10); classes run concurrently, biggest first.
-Consequences:: Cost grows with instances read, not classes × graph size; precision is stored per
-class; first-N results are biased to the store's row order and labelled as such.
-Confirmation:: query texts contain the class inside the subject source; escalation scenarios in
-`statistics-collection` spec.
-
-=== L3 — Components
-
-[#ad-4]
-==== AD-4 Onion layers with a SPARQL port
-
-Context:: The statistics logic must be testable without a store and isolated from I/O.
-Options:: (a) cosmic-python layers, `SparqlPort` injected into the service layer; (b) logic in
-templates (1.0).
-Decision:: (a) (DEC-1, DEC-7).
-Consequences:: Unit tests use a fake port; adding another SPARQL client touches only adapters.
-Confirmation:: `.importlinter` contracts; `make check-architecture`.
-
-[#ad-5]
-==== AD-5 LinkML profile model as the contract: raw statistics and analytics, generated read-only
-
-Context:: The report and later representations must read the same numbers.
-Options:: (a) LinkML schemas, raw + analytics, generated Pydantic; (b) hand-written dataclasses.
-Decision:: (a) (DEC-8, P-10). Analytics are always derived, never collected.
-Consequences:: One contract for every consumer; a codegen step and a sync check; LinkML only at
-development time, Pydantic at runtime.
-Confirmation:: `make check-models`; frozen-model test.
-
-[#ad-6]
-==== AD-6 eds4jinja2 renders from the model; templates do not query
-
-Context:: Custom templates exist in the wild; 1.0 templates embed SPARQL.
-Options:: (a) keep eds4jinja2 as the renderer and pass the analytics in the context; (b) plain
-Jinja2.
-Decision:: (a) (DEC-6).
-Consequences:: Custom templates keep working (eds4jinja2 fetchers still available); the default
-template becomes query-free.
-Confirmation:: report test with a SPARQL client that fails on any call.
+The decisions behind this structure are recorded as ADRs, grouped by C4 level, in
+xref:decisions.adoc[Architecture Decisions].

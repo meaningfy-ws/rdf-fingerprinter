@@ -1,0 +1,213 @@
+id: https://data.meaningfy.ws/fingerprint/views/schema
+name: fingerprint_views
+title: Fingerprint representation views
+description: |
+  What each representation template receives: the SHACL shapes, the PlantUML diagram and the
+  profile document of a fingerprint, with every value already written for its format by the
+  generators in fingerprint/service_layer/generators. Custom templates rely on these names
+  (domain-object-model DEC-2, P-3).
+  Source of fingerprint/domain/views.py (make generate-models).
+version: 0.1.0
+license: Apache-2.0
+prefixes:
+  linkml: https://w3id.org/linkml/
+  fp: https://data.meaningfy.ws/fingerprint/
+default_prefix: fp
+default_range: string
+imports:
+  - linkml:types
+
+enums:
+  RepresentationFormat:
+    description: A representation a fingerprint can be published as; the name the commands and --format use.
+    permissible_values:
+      shacl: { description: "SHACL shapes, one Turtle file per graph." }
+      puml: { description: "A PlantUML class diagram, one source file per graph." }
+      doc: { description: "The application-profile document (HTML)." }
+  ShapeSeverity:
+    description: The severity of a property shape; violation is SHACL's default and is not written.
+    permissible_values:
+      info: {}
+      warning: {}
+      violation: {}
+  OutputCheck:
+    description: The check a generated text must pass before any file of its format is written.
+    permissible_values:
+      turtle: { description: "The text parses as Turtle." }
+  DiagramMemberKind:
+    description: How a property appears in a diagram class.
+    permissible_values:
+      attribute: { description: "A line inside the class box." }
+      association: { description: "An arrow to the class of its values." }
+
+classes:
+  # --- shared ---
+  PrefixDeclaration:
+    description: A prefix and its namespace IRI.
+    attributes:
+      prefix: { required: true }
+      namespace: { required: true }
+
+  Annotation:
+    description: A predicate and its value, both written as Turtle.
+    attributes:
+      predicate: { required: true }
+      value: { required: true }
+
+  RenderedDocument:
+    description: A rendered text and the file name it is written under.
+    attributes:
+      file_name: { required: true }
+      text: { required: true }
+
+  GraphText:
+    description: The rendered text of one graph's view, by the graph's slug (e.g. a diagram the document embeds).
+    attributes:
+      slug: { required: true }
+      text: { required: true }
+
+  GraphView:
+    mixin: true
+    description: What every per-graph view carries.
+    attributes:
+      graph_label: { required: true, description: "The graph's plain name, for the title." }
+      slug: { required: true, description: "The graph's file-safe name." }
+      skipped: { multivalued: true, description: "IRIs left out because they cannot be written." }
+
+  GeneratorOptions:
+    description: Options of the generators beyond the shared ones.
+    attributes:
+      shapes_namespace: { description: "Namespace of the node shape IRIs (SHACL only)." }
+
+  # --- SHACL ---
+  ShapesGraph:
+    description: The shapes of one graph.
+    mixins: [GraphView]
+    attributes:
+      prefixes: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true }
+      node_shapes: { range: NodeShape, multivalued: true, inlined_as_list: true }
+
+  NodeShape:
+    description: The open node shape of one class.
+    attributes:
+      shape: { required: true, description: "The shape IRI, as Turtle." }
+      target: { required: true, description: "The target class, as Turtle." }
+      annotations: { range: Annotation, multivalued: true, inlined_as_list: true }
+      property_shapes: { range: PropertyShape, multivalued: true, inlined_as_list: true }
+
+  PropertyShape:
+    description: The shape of one property of one class.
+    attributes:
+      path: { required: true, description: "The property, as Turtle." }
+      constraints: { multivalued: true, description: "Constraint lines, as Turtle." }
+      severity: { range: ShapeSeverity, required: true }
+      annotations: { range: Annotation, multivalued: true, inlined_as_list: true }
+
+  # --- PlantUML ---
+  DiagramGraph:
+    description: The class diagram of one graph.
+    mixins: [GraphView]
+    attributes:
+      classes: { range: DiagramClass, multivalued: true, inlined_as_list: true }
+      parent_boxes: { range: DiagramBox, multivalued: true, inlined_as_list: true, description: "Parents not profiled in this graph." }
+
+  DiagramClass:
+    description: One class box.
+    attributes:
+      alias: { required: true }
+      label: { required: true }
+      members: { range: DiagramMember, multivalued: true, inlined_as_list: true }
+      generalisations: { multivalued: true, description: "Generalisation lines, as PlantUML." }
+
+  DiagramMember:
+    description: An attribute line, or the target of an association (multiplicity, class alias and label).
+    attributes:
+      kind: { range: DiagramMemberKind, required: true }
+      text: { required: true }
+
+  DiagramBox:
+    description: A box for a parent class.
+    attributes:
+      alias: { required: true }
+      label: { required: true }
+
+  # --- document ---
+  ProfileDocument:
+    description: The application-profile document.
+    attributes:
+      overview: { range: Overview, required: true, inlined: true }
+      namespaces: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true, description: "The prefixes the labels use." }
+      graphs: { range: DocumentGraph, multivalued: true, inlined_as_list: true }
+      caveats: { range: Caveats, required: true, inlined: true }
+      skipped: { multivalued: true, description: "IRIs that cannot be written; the same list as caveats.skipped, kept for custom templates." }
+
+  Overview:
+    description: How the profile was collected.
+    attributes:
+      endpoint: {}
+      started_at: { range: datetime }
+      finished_at: { range: datetime }
+      tool_version: {}
+      settings: { range: SettingValue, multivalued: true, inlined_as_list: true }
+
+  SettingValue:
+    description: A collection setting as the document prints it.
+    attributes:
+      name: { required: true }
+      value: { required: true, description: "The value as text; — when unset." }
+
+  DocumentGraph:
+    description: The chapter of one graph.
+    attributes:
+      slug: { required: true }
+      label: { required: true }
+      diagram: { required: true, description: "The PlantUML source of the graph's diagram; empty when none." }
+      classes: { range: DocumentClass, multivalued: true, inlined_as_list: true }
+
+  DocumentClass:
+    description: The section of one class.
+    attributes:
+      iri: { required: true }
+      label: { required: true }
+      anchor: { required: true }
+      instances: { range: integer, required: true }
+      precision: { required: true, description: "exact, or first N of M." }
+      sampled: { range: boolean, required: true }
+      parents: { range: ParentReference, multivalued: true, inlined_as_list: true }
+      properties: { range: DocumentProperty, multivalued: true, inlined_as_list: true }
+
+  ParentReference:
+    description: A parent class as the document names it.
+    attributes:
+      label: { required: true }
+      source: { required: true, description: "declared or implied." }
+
+  DocumentProperty:
+    description: The row of one property.
+    attributes:
+      iri: { required: true }
+      label: { required: true }
+      types: { multivalued: true }
+      cardinality: { required: true }
+      usage: { required: true }
+      inheritance: { required: true }
+
+  Caveats:
+    description: What the reader should know about how complete the profile is.
+    attributes:
+      sampled: { range: SampledClass, multivalued: true, inlined_as_list: true }
+      failures: { range: FailureNote, multivalued: true, inlined_as_list: true }
+      skipped: { multivalued: true }
+
+  SampledClass:
+    attributes:
+      graph: { required: true }
+      class_label: { required: true }
+      precision: { required: true }
+
+  FailureNote:
+    attributes:
+      graph: { required: true }
+      class_label: { required: true }
+      measurement: { required: true, description: "The query kind that failed." }
+      message: {}

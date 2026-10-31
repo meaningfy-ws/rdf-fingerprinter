@@ -7,7 +7,7 @@ description: |
   and the precision mode actually used. Holds only what was observed; every computed value
   (min, mean, confidence, cardinality labels, ...) lives in the fingerprint_analytics extension.
   Terms reuse VoID where the meaning matches.
-  Source of fingerprint/domain/generated/profile.py (make generate-models).
+  Source of fingerprint/domain/profile.py (make generate-models).
 version: 0.1.0
 license: Apache-2.0
 prefixes:
@@ -198,6 +198,19 @@ slots:
     range: boolean
     description: True when the property was found only by the completeness check (no statistics).
 
+  # collection settings, shared by Settings and SettingsOverride (domain-object-model P-7)
+  depth: { range: Depth, description: "How much was collected." }
+  precision_policy: { range: PrecisionPolicy, description: "Allowed precision modes." }
+  first_n: { range: integer, minimum_value: 1, description: "N for the first_n mode." }
+  top_k: { range: integer, minimum_value: 1, description: "How many top values to keep per class and property." }
+  object_type_scope: { range: ObjectTypeScope, description: "Where object types are looked up." }
+  completeness_check: { range: boolean, description: "Whether property presence was checked for first_n classes." }
+  timeout_seconds: { range: integer, minimum_value: 1, description: "Per-query timeout." }
+  concurrency: { range: integer, minimum_value: 1, description: "Maximum concurrent queries." }
+  acceptance_threshold: { range: float, minimum_value: 0, maximum_value: 1, description: "Share of instances a cardinality label must cover." }
+  graph_statistics: { range: boolean, description: "Whether graph totals, predicate partitions and untyped subjects were collected (full scans)." }
+  selected_graphs: { range: uriorcurie, multivalued: true, description: "Graphs requested; empty means all." }
+
 classes:
   ProfileRun:
     tree_root: true
@@ -222,18 +235,18 @@ classes:
 
   Settings:
     description: Collection parameters, recorded so a profile can be interpreted and reproduced.
-    attributes:
-      depth: { range: Depth, required: true, ifabsent: "string(values)", description: "How much was collected." }
-      precision_policy: { range: PrecisionPolicy, required: true, ifabsent: "string(auto)", description: "Allowed precision modes." }
-      first_n: { required: true, range: integer, minimum_value: 1, ifabsent: "int(10000)", description: "N for the first_n mode." }
-      top_k: { required: true, range: integer, minimum_value: 1, ifabsent: "int(20)", description: "How many top values to keep per class and property." }
-      object_type_scope: { range: ObjectTypeScope, required: true, ifabsent: "string(same_graph)", description: "Where object types are looked up." }
-      completeness_check: { required: true, range: boolean, ifabsent: "false", description: "Whether property presence was checked for first_n classes." }
-      timeout_seconds: { required: true, range: integer, minimum_value: 1, ifabsent: "int(60)", description: "Per-query timeout." }
-      concurrency: { required: true, range: integer, minimum_value: 1, ifabsent: "int(4)", description: "Maximum concurrent queries." }
-      acceptance_threshold: { required: true, range: float, minimum_value: 0, maximum_value: 1, ifabsent: "float(0.95)", description: "Share of instances a cardinality label must cover." }
-      graph_statistics: { required: true, range: boolean, ifabsent: "false", description: "Whether graph totals, predicate partitions and untyped subjects were collected (full scans)." }
-      selected_graphs: { range: uriorcurie, multivalued: true, description: "Graphs requested; empty means all." }
+    slots: [depth, precision_policy, first_n, top_k, object_type_scope, completeness_check, timeout_seconds, concurrency, acceptance_threshold, graph_statistics, selected_graphs]
+    slot_usage:
+      depth: { required: true, ifabsent: "string(values)" }
+      precision_policy: { required: true, ifabsent: "string(auto)" }
+      first_n: { required: true, ifabsent: "int(10000)" }
+      top_k: { required: true, ifabsent: "int(20)" }
+      object_type_scope: { required: true, ifabsent: "string(same_graph)" }
+      completeness_check: { required: true, ifabsent: "false" }
+      timeout_seconds: { required: true, ifabsent: "int(60)" }
+      concurrency: { required: true, ifabsent: "int(4)" }
+      acceptance_threshold: { required: true, ifabsent: "float(0.95)" }
+      graph_statistics: { required: true, ifabsent: "false" }
 
   Failure:
     description: A query that could not be answered.

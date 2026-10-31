@@ -2,7 +2,6 @@
 
 ## Purpose
 How rdf-fingerprinter collects raw statistics from a SPARQL 1.1 endpoint: staged discovery, class-scoped queries, exact → first-N precision escalation, recorded failures and the collection settings. Formulas and query texts: openspec/changes/archive/2026-10-31-harden-fingerprinter/design.md.
-
 ## Requirements
 ### Requirement: Staged discovery
 The collector SHALL profile the default graph and then every named graph (DEC-11), and SHALL obtain
@@ -113,9 +112,12 @@ graph, class, property, message, attempts); the other classes SHALL still be col
 - **THEN** the profile contains the other classes and one failure naming that class
 
 ### Requirement: Settings
-Every collection parameter SHALL be settable by CLI option, environment variable
-`RDF_FINGERPRINTER_<NAME>` or the library's `additional_config["collection"]`, in that precedence,
-with the defaults of DEC-12, and SHALL be recorded in the profile. The completeness check SHALL be
+Every collection parameter SHALL be settable, in this precedence, by CLI option, environment
+variable `RDF_FINGERPRINTER_<NAME>`, the `selected_graphs` parameter of
+`generate_endpoint_fingerprint_report` (graphs only), configuration (`--config FILE` for the CLI,
+`additional_config["collection"]` for the library), and the defaults of DEC-12; the settings used
+SHALL be recorded in the profile. An unknown configuration key, an unreadable configuration file or
+an invalid value SHALL be a usage error raised before any query. The completeness check SHALL be
 switchable by configuration property or environment variable.
 
 #### Scenario: Environment variable overrides default
@@ -126,6 +128,14 @@ switchable by configuration property or environment variable.
 - **WHEN** the environment sets concurrency 2 and the CLI passes `--concurrency 8`
 - **THEN** the recorded settings have `concurrency` 8
 
+#### Scenario: Environment overrides the library configuration
+- **WHEN** a library caller passes `additional_config["collection"]` with `top_k` 5 while `RDF_FINGERPRINTER_TOP_K=7` is set
+- **THEN** the recorded settings have `top_k` 7
+
+#### Scenario: Unknown configuration key
+- **WHEN** the configuration holds the key `colour`
+- **THEN** a usage error names `colour` and no query is sent
+
 ### Requirement: Completeness check for first-N classes
 When the completeness check is on and a class was read in `first_n` mode, the collector SHALL ask,
 for every predicate of the graph not seen in the class's sample, whether any instance uses it, and
@@ -134,4 +144,58 @@ record each one found as a property with `presence_only` true.
 #### Scenario: Rare property found
 - **WHEN** a class is read in first_n mode, the completeness check is on, and only instance 20 000 uses `ex:rare`
 - **THEN** the class profile lists `ex:rare` with `presence_only` true and no histogram
+
+### Requirement: Error classes and retries
+The SPARQL client SHALL classify every error into one class with one response: transient (HTTP 429,
+502, 503, connection failures) retried after 1 s and then 4 s and, if it persists, treated as a
+timeout; timeout (the per-query timeout, HTTP 504, or a 500 whose message mentions a time limit);
+permanent (other 4xx and 500s, responses that are not SPARQL results), never retried; unreachable
+(HTTP 401, 403, 407), which SHALL stop the run only on the first query — on any later query it
+SHALL count as permanent.
+
+#### Scenario: Transient error retried
+- **WHEN** a query fails once with HTTP 503 and then succeeds
+- **THEN** its result is used and no failure is recorded
+
+#### Scenario: Refusal after the start concerns one query
+- **WHEN** a per-class query is refused with HTTP 403 after the graphs were listed
+- **THEN** that measurement is recorded as a failure with one attempt and the run goes on
+
+### Requirement: Response per collection stage
+A failed query SHALL cost only its stage: the graph listing — unreachable or persistently transient
+stops the run, a timeout or rejection profiles the default graph only and records a failure (with
+graphs chosen, those are profiled and a WARNING is logged); other discovery queries fall back
+(classes counted one by one, predicates listed without counts) or are recorded and skipped; a
+failure in a class's first wave (instance listing, histograms, value partitions, co-types) escalates
+under `auto` on a timeout and otherwise leaves the class out with a recorded failure; a failure in its
+second wave (top values, completeness check, incoming links) is recorded and the class is kept. A
+class whose IRI cannot be put in a query SHALL be skipped and recorded. A well-formed response
+holding a value the collector cannot interpret SHALL end the run as an unexpected error.
+
+#### Scenario: Second-wave failure keeps the class
+- **WHEN** the top-values query of a class times out
+- **THEN** the class is in the profile without top values, and the only failures recorded are top-values failures (one per property queried)
+
+#### Scenario: Permanent first-wave failure does not escalate
+- **WHEN** the histogram query of a class is rejected with HTTP 400
+- **THEN** the class is left out, one failure is recorded and no first-N attempt is made
+
+### Requirement: Results are read as typed RDF terms
+The SPARQL client SHALL send each query with its per-query timeout and SHALL return the results as
+rdflib result rows of typed terms (IRIs, blank nodes, typed literals); collection SHALL build the
+profile model objects from those terms directly, without an intermediate string-keyed row. Literals
+SHALL keep the lexical form the endpoint sent, and a literal whose language tag rdflib refuses SHALL
+keep its text rather than fail the answer.
+
+#### Scenario: A count arrives as a number
+- **WHEN** an endpoint answers a class count with `"3"^^xsd:integer`
+- **THEN** the class's `instances` is the integer 3
+
+#### Scenario: The timeout still applies
+- **WHEN** the endpoint does not answer within `timeout_seconds`
+- **THEN** the query fails as a timeout and the class escalates as before
+
+#### Scenario: Values keep the endpoint's text
+- **WHEN** the endpoint answers a value `"2020-01-01T00:00:00Z"^^xsd:dateTime` or `"v"@en_US`
+- **THEN** the profile records `2020-01-01T00:00:00Z` and `v`, unchanged
 

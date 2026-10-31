@@ -1,0 +1,4694 @@
+{
+  "endpoint": "http://localhost:7878/query",
+  "started_at": "2026-10-31T12:00:00Z",
+  "finished_at": "2026-10-31T12:00:00Z",
+  "tool_version": "2.1.0",
+  "settings": {
+    "depth": "values",
+    "precision_policy": "auto",
+    "first_n": 10000,
+    "top_k": 20,
+    "object_type_scope": "same_graph",
+    "completeness_check": false,
+    "timeout_seconds": 60,
+    "concurrency": 4,
+    "acceptance_threshold": 0.95,
+    "graph_statistics": false
+  },
+  "graphs": [
+    {
+      "declared_subclass_edges": [],
+      "class_partitions": [
+        {
+          "class_iri": "http://www.w3.org/2008/05/skos-xl#Label",
+          "instances": 145,
+          "observed_instances": 145,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 145
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 145,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 145
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 145,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1450,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://lexvo.org/ontology#script",
+              "distinct_objects": 2,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 12
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 12,
+                  "distinct_objects": 2,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#literalForm",
+              "distinct_objects": 145,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 145
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "fr",
+                  "min_length": 4,
+                  "max_length": 11,
+                  "total_length": 43,
+                  "min_value": "Afrique",
+                  "max_value": "Océanie",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "bg",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Азия",
+                  "max_value": "Океания",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "it",
+                  "min_length": 4,
+                  "max_length": 9,
+                  "total_length": 39,
+                  "min_value": "Africa",
+                  "max_value": "Oceania",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "sv",
+                  "min_length": 5,
+                  "max_length": 9,
+                  "total_length": 41,
+                  "min_value": "Afrika",
+                  "max_value": "Oceanien",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "ro",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Africa",
+                  "max_value": "Oceania",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "pt",
+                  "min_length": 4,
+                  "max_length": 9,
+                  "total_length": 39,
+                  "min_value": "América",
+                  "max_value": "Ásia",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "pl",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Afryka",
+                  "max_value": "Oceania",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "nl",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Afrika",
+                  "max_value": "Oceanië",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "lt",
+                  "min_length": 5,
+                  "max_length": 10,
+                  "total_length": 42,
+                  "min_value": "Afrika",
+                  "max_value": "Okeanija",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "el",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Αμερική",
+                  "max_value": "Ωκεανία",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "hr",
+                  "min_length": 5,
+                  "max_length": 10,
+                  "total_length": 42,
+                  "min_value": "Afrika",
+                  "max_value": "Oceanija",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 7,
+                  "distinct_objects": 7,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "en",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 49,
+                  "min_value": "Africa",
+                  "max_value": "Oceania",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "cs",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Africa",
+                  "max_value": "Oceánie",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "hu",
+                  "min_length": 5,
+                  "max_length": 10,
+                  "total_length": 41,
+                  "min_value": "Afrika",
+                  "max_value": "Óceánia",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "sk",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Afrika",
+                  "max_value": "Ázia",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "fi",
+                  "min_length": 5,
+                  "max_length": 11,
+                  "total_length": 46,
+                  "min_value": "Aasia",
+                  "max_value": "Oseania",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "de",
+                  "min_length": 5,
+                  "max_length": 9,
+                  "total_length": 41,
+                  "min_value": "Afrika",
+                  "max_value": "Ozeanien",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "sl",
+                  "min_length": 5,
+                  "max_length": 10,
+                  "total_length": 42,
+                  "min_value": "Afrika",
+                  "max_value": "Oceanija",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "da",
+                  "min_length": 5,
+                  "max_length": 9,
+                  "total_length": 41,
+                  "min_value": "Africa",
+                  "max_value": "Oceanien",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "es",
+                  "min_length": 4,
+                  "max_length": 9,
+                  "total_length": 39,
+                  "min_value": "América",
+                  "max_value": "África",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "lv",
+                  "min_length": 5,
+                  "max_length": 10,
+                  "total_length": 42,
+                  "min_value": "Amerika",
+                  "max_value": "Āzija",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "et",
+                  "min_length": 5,
+                  "max_length": 9,
+                  "total_length": 44,
+                  "min_value": "Aafrica",
+                  "max_value": "Okeaania",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "mt",
+                  "min_length": 6,
+                  "max_length": 11,
+                  "total_length": 51,
+                  "min_value": "L-Afrika",
+                  "max_value": "L-Oċeanja",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "ga",
+                  "min_length": 7,
+                  "max_length": 10,
+                  "total_length": 53,
+                  "min_value": "An Afraic",
+                  "max_value": "Meiriceá",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/type",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 145
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 145,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 2,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 145
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 145,
+                  "distinct_objects": 2,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1450,
+                  "min_value": "1952-07-24",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://publications.europa.eu/ontology/euvoc#Continent",
+          "instances": 6,
+          "observed_instances": 6,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2004/02/skos/core#Concept",
+              "subjects": 6
+            }
+          ],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 144,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 24,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 144,
+                  "distinct_objects": 144,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#xlNotation",
+              "distinct_objects": 6,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#XlNotation",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2004/02/skos/core#topConceptOf",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2002/07/owl#Ontology",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2004/02/skos/core#inScheme",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2002/07/owl#Ontology",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "1952-07-24",
+                  "max_value": "1952-07-24",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://publications.europa.eu/ontology/euvoc#XlNotation",
+          "instances": 6,
+          "observed_instances": 6,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://purl.org/dc/terms/type",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
+              "distinct_objects": 6,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "AFRICA",
+                  "max_value": "OCEANIA",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "1952-07-24",
+                  "max_value": "1952-07-24",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://www.w3.org/2004/02/skos/core#Concept",
+          "instances": 6,
+          "observed_instances": 6,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://publications.europa.eu/ontology/euvoc#Continent",
+              "subjects": 6
+            }
+          ],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 144,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 24,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 144,
+                  "distinct_objects": 144,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#xlNotation",
+              "distinct_objects": 6,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#XlNotation",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2004/02/skos/core#topConceptOf",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2002/07/owl#Ontology",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2004/02/skos/core#inScheme",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2002/07/owl#Ontology",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "1952-07-24",
+                  "max_value": "1952-07-24",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://www.w3.org/2002/07/owl#Ontology",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+              "subjects": 1
+            }
+          ],
+          "property_partitions": [
+            {
+              "property": "http://www.w3.org/2000/01/rdf-schema#comment",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2000/01/rdf-schema#Literal",
+                  "min_length": 9,
+                  "max_length": 9,
+                  "total_length": 9,
+                  "min_value": "Continent",
+                  "max_value": "Continent",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2002/07/owl#imports",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/identifier",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 58,
+                  "max_length": 58,
+                  "total_length": 58,
+                  "min_value": "http://publications.europa.eu/resource/authority/continent",
+                  "max_value": "http://publications.europa.eu/resource/authority/continent",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 10,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 10,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2002/07/owl#Ontology",
+              "subjects": 1
+            }
+          ],
+          "property_partitions": [
+            {
+              "property": "http://www.w3.org/2000/01/rdf-schema#comment",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2000/01/rdf-schema#Literal",
+                  "min_length": 9,
+                  "max_length": 9,
+                  "total_length": 9,
+                  "min_value": "Continent",
+                  "max_value": "Continent",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2002/07/owl#imports",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/identifier",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 58,
+                  "max_length": 58,
+                  "total_length": 58,
+                  "min_value": "http://publications.europa.eu/resource/authority/continent",
+                  "max_value": "http://publications.europa.eu/resource/authority/continent",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 10,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 10,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "graph": "http://publications.europa.eu/resources/authority/continents",
+      "declared_subclass_edges": [],
+      "class_partitions": [
+        {
+          "class_iri": "http://www.w3.org/2008/05/skos-xl#Label",
+          "instances": 145,
+          "observed_instances": 145,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 145
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 145,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/type",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 145
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 145,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://lexvo.org/ontology#script",
+              "distinct_objects": 2,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 12
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 12,
+                  "distinct_objects": 2,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#literalForm",
+              "distinct_objects": 145,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 145
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "fr",
+                  "min_length": 4,
+                  "max_length": 11,
+                  "total_length": 43,
+                  "min_value": "Afrique",
+                  "max_value": "Océanie",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "bg",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Азия",
+                  "max_value": "Океания",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "it",
+                  "min_length": 4,
+                  "max_length": 9,
+                  "total_length": 39,
+                  "min_value": "Africa",
+                  "max_value": "Oceania",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "sv",
+                  "min_length": 5,
+                  "max_length": 9,
+                  "total_length": 41,
+                  "min_value": "Afrika",
+                  "max_value": "Oceanien",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "ro",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Africa",
+                  "max_value": "Oceania",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "pt",
+                  "min_length": 4,
+                  "max_length": 9,
+                  "total_length": 39,
+                  "min_value": "América",
+                  "max_value": "Ásia",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "pl",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Afryka",
+                  "max_value": "Oceania",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "nl",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Afrika",
+                  "max_value": "Oceanië",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "lt",
+                  "min_length": 5,
+                  "max_length": 10,
+                  "total_length": 42,
+                  "min_value": "Afrika",
+                  "max_value": "Okeanija",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "el",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Αμερική",
+                  "max_value": "Ωκεανία",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "hr",
+                  "min_length": 5,
+                  "max_length": 10,
+                  "total_length": 42,
+                  "min_value": "Afrika",
+                  "max_value": "Oceanija",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 7,
+                  "distinct_objects": 7,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "en",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 49,
+                  "min_value": "Africa",
+                  "max_value": "Oceania",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "cs",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Africa",
+                  "max_value": "Oceánie",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "hu",
+                  "min_length": 5,
+                  "max_length": 10,
+                  "total_length": 41,
+                  "min_value": "Afrika",
+                  "max_value": "Óceánia",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "sk",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "Afrika",
+                  "max_value": "Ázia",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "fi",
+                  "min_length": 5,
+                  "max_length": 11,
+                  "total_length": 46,
+                  "min_value": "Aasia",
+                  "max_value": "Oseania",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "de",
+                  "min_length": 5,
+                  "max_length": 9,
+                  "total_length": 41,
+                  "min_value": "Afrika",
+                  "max_value": "Ozeanien",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "sl",
+                  "min_length": 5,
+                  "max_length": 10,
+                  "total_length": 42,
+                  "min_value": "Afrika",
+                  "max_value": "Oceanija",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "da",
+                  "min_length": 5,
+                  "max_length": 9,
+                  "total_length": 41,
+                  "min_value": "Africa",
+                  "max_value": "Oceanien",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "es",
+                  "min_length": 4,
+                  "max_length": 9,
+                  "total_length": 39,
+                  "min_value": "América",
+                  "max_value": "África",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "lv",
+                  "min_length": 5,
+                  "max_length": 10,
+                  "total_length": 42,
+                  "min_value": "Amerika",
+                  "max_value": "Āzija",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "et",
+                  "min_length": 5,
+                  "max_length": 9,
+                  "total_length": 44,
+                  "min_value": "Aafrica",
+                  "max_value": "Okeaania",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "mt",
+                  "min_length": 6,
+                  "max_length": 11,
+                  "total_length": 51,
+                  "min_value": "L-Afrika",
+                  "max_value": "L-Oċeanja",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "ga",
+                  "min_length": 7,
+                  "max_length": 10,
+                  "total_length": 53,
+                  "min_value": "An Afraic",
+                  "max_value": "Meiriceá",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 2,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 145
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 145,
+                  "distinct_objects": 2,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1450,
+                  "min_value": "1952-07-24",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 145
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 145,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1450,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://publications.europa.eu/ontology/euvoc#Continent",
+          "instances": 6,
+          "observed_instances": 6,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2004/02/skos/core#Concept",
+              "subjects": 6
+            }
+          ],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 144,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 24,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 144,
+                  "distinct_objects": 144,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#xlNotation",
+              "distinct_objects": 6,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#XlNotation",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2004/02/skos/core#topConceptOf",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2002/07/owl#Ontology",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2004/02/skos/core#inScheme",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2002/07/owl#Ontology",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "1952-07-24",
+                  "max_value": "1952-07-24",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://publications.europa.eu/ontology/euvoc#XlNotation",
+          "instances": 6,
+          "observed_instances": 6,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "1952-07-24",
+                  "max_value": "1952-07-24",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
+              "distinct_objects": 6,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 4,
+                  "max_length": 10,
+                  "total_length": 40,
+                  "min_value": "AFRICA",
+                  "max_value": "OCEANIA",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/type",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://www.w3.org/2004/02/skos/core#Concept",
+          "instances": 6,
+          "observed_instances": 6,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://publications.europa.eu/ontology/euvoc#Continent",
+              "subjects": 6
+            }
+          ],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 144,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 24,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 144,
+                  "distinct_objects": 144,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#xlNotation",
+              "distinct_objects": 6,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 6,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#XlNotation",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2004/02/skos/core#topConceptOf",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2002/07/owl#Ontology",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2004/02/skos/core#inScheme",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2002/07/owl#Ontology",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "1952-07-24",
+                  "max_value": "1952-07-24",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://www.w3.org/2002/07/owl#Ontology",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+              "subjects": 1
+            }
+          ],
+          "property_partitions": [
+            {
+              "property": "http://www.w3.org/2000/01/rdf-schema#comment",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2000/01/rdf-schema#Literal",
+                  "min_length": 9,
+                  "max_length": 9,
+                  "total_length": 9,
+                  "min_value": "Continent",
+                  "max_value": "Continent",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2002/07/owl#imports",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/identifier",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 58,
+                  "max_length": 58,
+                  "total_length": 58,
+                  "min_value": "http://publications.europa.eu/resource/authority/continent",
+                  "max_value": "http://publications.europa.eu/resource/authority/continent",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 10,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 10,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2002/07/owl#Ontology",
+              "subjects": 1
+            }
+          ],
+          "property_partitions": [
+            {
+              "property": "http://www.w3.org/2000/01/rdf-schema#comment",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2000/01/rdf-schema#Literal",
+                  "min_length": 9,
+                  "max_length": 9,
+                  "total_length": 9,
+                  "min_value": "Continent",
+                  "max_value": "Continent",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2002/07/owl#imports",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/identifier",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 58,
+                  "max_length": 58,
+                  "total_length": 58,
+                  "min_value": "http://publications.europa.eu/resource/authority/continent",
+                  "max_value": "http://publications.europa.eu/resource/authority/continent",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 10,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 10,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "graph": "http://publications.europa.eu/resources/authority/treaties",
+      "declared_subclass_edges": [],
+      "class_partitions": [
+        {
+          "class_iri": "http://www.w3.org/2008/05/skos-xl#Label",
+          "instances": 4530,
+          "observed_instances": 4530,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 3,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 4530
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 4530,
+                  "distinct_objects": 3,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 11,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 4080
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 4080,
+                  "distinct_objects": 11,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 40800,
+                  "min_value": "2011-05-19",
+                  "max_value": "2018-05-17",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#endDate",
+              "distinct_objects": 13,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1216
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1216,
+                  "distinct_objects": 13,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 12160,
+                  "min_value": "1951-01-01",
+                  "max_value": "2016-06-06",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://lexvo.org/ontology#script",
+              "distinct_objects": 2,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 386
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 386,
+                  "distinct_objects": 2,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#literalForm",
+              "distinct_objects": 4176,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 4530
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 203,
+                  "distinct_objects": 188,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "fr",
+                  "min_length": 10,
+                  "max_length": 720,
+                  "total_length": 15289,
+                  "min_value": "Accord EEE (1993)",
+                  "max_value": "Version consolidée du traité sur le fonctionnement de l'Union européenne (2016)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 193,
+                  "distinct_objects": 178,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "bg",
+                  "min_length": 13,
+                  "max_length": 563,
+                  "total_length": 12811,
+                  "min_value": "Aкт относно условията за присъединяване и промените в Договорите",
+                  "max_value": "Шенгенско споразумение (1985 г.)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 199,
+                  "distinct_objects": 187,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "it",
+                  "min_length": 10,
+                  "max_length": 704,
+                  "total_length": 14242,
+                  "min_value": "Accordo SEE (1993)",
+                  "max_value": "Versione consolidata del trattato sul funzionamento dell'Unione europea (2016)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 187,
+                  "distinct_objects": 173,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "sv",
+                  "min_length": 10,
+                  "max_length": 605,
+                  "total_length": 12628,
+                  "min_value": "Akt om anslutningsvillkoren och om anpassning av fördragen",
+                  "max_value": "Österrike, Finland och Sverige anslutning (Anpassning beslut 1995)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 188,
+                  "distinct_objects": 173,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "pt",
+                  "min_length": 10,
+                  "max_length": 654,
+                  "total_length": 12643,
+                  "min_value": "Acordo EEE (1993)",
+                  "max_value": "Versão consolidada do Tratado que institui a Comunidade Europeia da Energia Atómica (2016)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 183,
+                  "distinct_objects": 168,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "ro",
+                  "min_length": 10,
+                  "max_length": 580,
+                  "total_length": 11841,
+                  "min_value": "Acordul de la Schengen (1985)",
+                  "max_value": "Versiune consolidată a Tratatului privind Uniunea Europeană (2016)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 185,
+                  "distinct_objects": 170,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "pl",
+                  "min_length": 10,
+                  "max_length": 588,
+                  "total_length": 12296,
+                  "min_value": "Akt dotyczący warunków przystąpienia Austrii, Finlandii i Szwecji oraz dostosowań w Traktatach",
+                  "max_value": "Wersja skonsolidowana Traktatu ustanawiającego Wspólnotę Europejską (2006)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 191,
+                  "distinct_objects": 176,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "nl",
+                  "min_length": 9,
+                  "max_length": 658,
+                  "total_length": 14666,
+                  "min_value": "Akkoord van Schengen (1985)",
+                  "max_value": "Verdrag van Rome (1957)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 199,
+                  "distinct_objects": 181,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "lt",
+                  "min_length": 10,
+                  "max_length": 636,
+                  "total_length": 12340,
+                  "min_value": "Aktas dėl Austrijos, Suomijos ir Švedijos stojimo sąlygų ir Sutarčių pritaikomųjų pataisų",
+                  "max_value": "Šengeno susitarimas (1985)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 165,
+                  "distinct_objects": 150,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "hr",
+                  "min_length": 11,
+                  "max_length": 255,
+                  "total_length": 8694,
+                  "min_value": "Akt o izmjeni Protokola o Statutu Europske investicijske banke kojim se vijeće guvernera ovlašćuje za osnivanje Europskog investicijskog fonda (1993.)",
+                  "max_value": "Ugovor s Grenlandom (1984.)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 193,
+                  "distinct_objects": 179,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "el",
+                  "min_length": 10,
+                  "max_length": 824,
+                  "total_length": 14396,
+                  "min_value": "Έγγραφα σχετικά με την προσχώρηση της Δημοκρατίας της Βουλγαρίας και της Ρουμανίας στην Ευρωπαϊκή Ένωση (2005)",
+                  "max_value": "Χάρτης των Θεμελιωδών Δικαιωμάτων της Ευρωπαϊκής Ένωσης (ενοποιημένη έκδοση 2016)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 215,
+                  "distinct_objects": 196,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "en",
+                  "min_length": 6,
+                  "max_length": 361,
+                  "total_length": 13444,
+                  "min_value": "Accession of Austria, Finland and Sweden (1994)",
+                  "max_value": "Treaty on the Functioning of the European Union (consolidated version 2016)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 196,
+                  "distinct_objects": 181,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "cs",
+                  "min_length": 10,
+                  "max_length": 219,
+                  "total_length": 11017,
+                  "min_value": "Akt o podmínkách přistoupení Bulharska a Rumunska a o úpravách smluv",
+                  "max_value": "Římské smlouva (1957)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 178,
+                  "distinct_objects": 163,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "hu",
+                  "min_length": 12,
+                  "max_length": 633,
+                  "total_length": 12499,
+                  "min_value": "(1.) Jegyzőkönyv a nemzeti parlamenteknek az Európai Unióban betöltött szerepéről",
+                  "max_value": "Szerződés európai alkotmány létrehozásáról (2004)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 186,
+                  "distinct_objects": 171,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "sk",
+                  "min_length": 10,
+                  "max_length": 622,
+                  "total_length": 11683,
+                  "min_value": "Akt o podmienkach pristúpenia Bulharska a Rumunska a o úpravách zmlúv",
+                  "max_value": "Zmluva, ktorou sa zriaďuje európsky mechanizmus pre stabilitu medzi Belgickým kráľovstvom, Spolkovou republikou Nemecko, Estónskou republikou, Írskom, Helénskou republikou, Španielskym kráľovstvom, Francúzskou republikou, Talianskou republikou, Cyperskou republikou, Luxemburským veľkovojvodstvom, Maltskou republikou, Holandským kráľovstvom, Rakúskou republikou, Portugalskou republikou, Slovinskou republikou, Slovenskou republikou a Fínskou republikou (2012)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 174,
+                  "distinct_objects": 160,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "fi",
+                  "min_length": 10,
+                  "max_length": 633,
+                  "total_length": 11936,
+                  "min_value": "Alankomaiden Antilleja koskeva yleissopimus (1962)",
+                  "max_value": "Yleissopimus tietyistä Euroopan yhteisöille yhteisistä toimielimistä (1957)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 199,
+                  "distinct_objects": 184,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "de",
+                  "min_length": 10,
+                  "max_length": 690,
+                  "total_length": 14774,
+                  "min_value": "AEUV (2008)",
+                  "max_value": "Übereinkommen von Schengen (1985)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 186,
+                  "distinct_objects": 171,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "sl",
+                  "min_length": 10,
+                  "max_length": 577,
+                  "total_length": 11345,
+                  "min_value": "Akt o dopolnitvi Protokola o Statutu Evropske investicijske banke, ki pooblašča svet guvernerjev za ustanovitev Evropskega investicijskega sklada (1993)",
+                  "max_value": "Sporazum o Evropskem gospodarskem prostoru (1993)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 192,
+                  "distinct_objects": 178,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "et",
+                  "min_length": 10,
+                  "max_length": 573,
+                  "total_length": 11766,
+                  "min_value": "Akt Austria, Soome ja Rootsi ühinemistingimuste ja aluslepingutesse tehtavate muudatuste kohta",
+                  "max_value": "Ühtne Euroopa akt (1986)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 196,
+                  "distinct_objects": 181,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "es",
+                  "min_length": 10,
+                  "max_length": 671,
+                  "total_length": 13985,
+                  "min_value": "Acta por la que se modifica el Protocolo sobre los Estatutos del Banco Europeo de Inversiones y se faculta al Consejo de Gobernadores para crear un Fondo Europeo de Inversiones (1993)",
+                  "max_value": "Versión consolidada del Tratado de la Unión Europea (2016)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 188,
+                  "distinct_objects": 173,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "lv",
+                  "min_length": 10,
+                  "max_length": 597,
+                  "total_length": 11568,
+                  "min_value": "Akts par Austrijas, Somijas un Zviedrijas pievienošanās nosacījumiem un pielāgojumiem Līgumos",
+                  "max_value": "Šengenas konvencija (1985)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 191,
+                  "distinct_objects": 179,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "da",
+                  "min_length": 10,
+                  "max_length": 614,
+                  "total_length": 12969,
+                  "min_value": "Aftale om Det Europæiske Økonomiske Samarbejdsområde (1993)",
+                  "max_value": "Østrigs, Finlands og Sveriges tiltrædelse (Tilpasningsafgørelse 1995)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 187,
+                  "distinct_objects": 172,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "mt",
+                  "min_length": 10,
+                  "max_length": 709,
+                  "total_length": 13064,
+                  "min_value": "Att dwar kondizzjonijiet tal-adeżjoni tar-Repubblika tal-Kroazja u l-aġġustamenti għat-Trattati",
+                  "max_value": "Verżjoni konsolidata tat-Trattat li jistabbilixxi l-Komunità Ewropea tal-Enerġija Atomika (2016)",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 156,
+                  "distinct_objects": 144,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "ga",
+                  "min_length": 10,
+                  "max_length": 635,
+                  "total_length": 9922,
+                  "min_value": "An Conradh ag bunú Chomhphobal Eacnamaíochta na hEorpa (1957)",
+                  "max_value": "Prótacal ar Aintillí na hÍsiltíre (1962)",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 40,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 4080
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 4080,
+                  "distinct_objects": 40,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 40800,
+                  "min_value": "1950-12-31",
+                  "max_value": "2016-06-07",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/type",
+              "distinct_objects": 5,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 4530
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 4530,
+                  "distinct_objects": 5,
+                  "node_kind": "iri"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://publications.europa.eu/ontology/euvoc#XlNotation",
+          "instances": 357,
+          "observed_instances": 357,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 3,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 157
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 157,
+                  "distinct_objects": 3,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 39,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 157
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 157,
+                  "distinct_objects": 39,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1570,
+                  "min_value": "1950-12-31",
+                  "max_value": "2016-06-07",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 10,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 157
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 157,
+                  "distinct_objects": 10,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1570,
+                  "min_value": "2011-05-19",
+                  "max_value": "2018-05-17",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
+              "distinct_objects": 317,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 357
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 357,
+                  "distinct_objects": 317,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 2,
+                  "max_length": 20,
+                  "total_length": 3352,
+                  "min_value": "11951K",
+                  "max_value": "UNION",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/type",
+              "distinct_objects": 5,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 357
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 357,
+                  "distinct_objects": 5,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#endDate",
+              "distinct_objects": 13,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 56
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 56,
+                  "distinct_objects": 13,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 560,
+                  "min_value": "1951-01-01",
+                  "max_value": "2016-06-06",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://publications.europa.eu/ontology/euvoc#Treaty",
+          "instances": 104,
+          "observed_instances": 104,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2004/02/skos/core#Concept",
+              "subjects": 104
+            }
+          ],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#xlDefinition",
+              "distinct_objects": 10,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 2,
+                  "subjects": 4
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 10,
+                  "distinct_objects": 10,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#XlNote",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#altLabel",
+              "distinct_objects": 2040,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 36,
+                  "subjects": 5
+                },
+                {
+                  "values_per_subject": 42,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 23,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 4,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 73,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 10,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 16,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 47,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 72,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 15,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 21,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 65,
+                  "subjects": 3
+                },
+                {
+                  "values_per_subject": 2,
+                  "subjects": 4
+                },
+                {
+                  "values_per_subject": 46,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 64,
+                  "subjects": 6
+                },
+                {
+                  "values_per_subject": 1,
+                  "subjects": 4
+                },
+                {
+                  "values_per_subject": 45,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 26,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 19,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 44,
+                  "subjects": 5
+                },
+                {
+                  "values_per_subject": 25,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 31,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 43,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 24,
+                  "subjects": 3
+                },
+                {
+                  "values_per_subject": 68,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 49,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 30,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 74,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 2040,
+                  "distinct_objects": 2040,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2004/02/skos/core#topConceptOf",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2002/07/owl#Ontology",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 104,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#xlNotation",
+              "distinct_objects": 357,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 6,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 5,
+                  "subjects": 46
+                },
+                {
+                  "values_per_subject": 4,
+                  "subjects": 5
+                },
+                {
+                  "values_per_subject": 3,
+                  "subjects": 10
+                },
+                {
+                  "values_per_subject": 2,
+                  "subjects": 29
+                },
+                {
+                  "values_per_subject": 1,
+                  "subjects": 13
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 357,
+                  "distinct_objects": 357,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#XlNotation",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2004/02/skos/core#inScheme",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2002/07/owl#Ontology",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 104,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://data.europa.eu/eli/ontology#date_document",
+              "distinct_objects": 30,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 83
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 83,
+                  "distinct_objects": 30,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 830,
+                  "min_value": "1951-04-18",
+                  "max_value": "2012-02-02",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 39,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 39,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1040,
+                  "min_value": "1950-12-31",
+                  "max_value": "2016-06-07",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://data.europa.eu/eli/ontology#first_date_entry_in_force",
+              "distinct_objects": 27,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 82
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 82,
+                  "distinct_objects": 27,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 820,
+                  "min_value": "1952-07-23",
+                  "max_value": "2013-07-01",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://lemon-model.net/lemon#context",
+              "distinct_objects": 2,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 2,
+                  "subjects": 101
+                },
+                {
+                  "values_per_subject": 1,
+                  "subjects": 3
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 205,
+                  "distinct_objects": 2,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 2489,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 24,
+                  "subjects": 97
+                },
+                {
+                  "values_per_subject": 23,
+                  "subjects": 7
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 2489,
+                  "distinct_objects": 2489,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/dateSubmitted",
+              "distinct_objects": 8,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 8,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1040,
+                  "min_value": "2011-10-06",
+                  "max_value": "2018-05-23",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#xlHistoryNote",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#XlNote",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 10,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 10,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1040,
+                  "min_value": "2011-05-19",
+                  "max_value": "2018-05-17",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 3,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 3,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#officialJournalNumber",
+              "distinct_objects": 32,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 92
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 92,
+                  "distinct_objects": 32,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 1,
+                  "max_length": 4,
+                  "total_length": 263,
+                  "min_value": "1",
+                  "max_value": "91",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#officialJournalSeries",
+              "distinct_objects": 3,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 92
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 92,
+                  "distinct_objects": 3,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 1,
+                  "max_length": 1,
+                  "total_length": 92,
+                  "min_value": "C",
+                  "max_value": "P",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/dateAccepted",
+              "distinct_objects": 8,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 8,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1040,
+                  "min_value": "2012-06-27",
+                  "max_value": "2018-06-06",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#xlChangeNote",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#XlNote",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/type",
+              "distinct_objects": 6,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 6,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/replaces",
+              "distinct_objects": 22,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 22
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 22,
+                  "distinct_objects": 22,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#Treaty",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 22,
+                  "distinct_objects": 22,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#Concept",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#signatureLocation",
+              "distinct_objects": 13,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 2,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 1,
+                  "subjects": 72
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 76,
+                  "distinct_objects": 13,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#officialJournalDate",
+              "distinct_objects": 31,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 92
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 92,
+                  "distinct_objects": 31,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 920,
+                  "min_value": "1964-10-01",
+                  "max_value": "2016-06-07",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/isReplacedBy",
+              "distinct_objects": 22,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 22
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 22,
+                  "distinct_objects": 22,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#Treaty",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 22,
+                  "distinct_objects": 22,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#Concept",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#endDate",
+              "distinct_objects": 13,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 22
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 22,
+                  "distinct_objects": 13,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 220,
+                  "min_value": "1951-01-01",
+                  "max_value": "2016-06-06",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://www.w3.org/2004/02/skos/core#Concept",
+          "instances": 104,
+          "observed_instances": 104,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://publications.europa.eu/ontology/euvoc#Treaty",
+              "subjects": 104
+            }
+          ],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#xlDefinition",
+              "distinct_objects": 10,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 2,
+                  "subjects": 4
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 10,
+                  "distinct_objects": 10,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#XlNote",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#altLabel",
+              "distinct_objects": 2040,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 36,
+                  "subjects": 5
+                },
+                {
+                  "values_per_subject": 42,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 23,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 4,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 73,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 10,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 16,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 47,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 72,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 15,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 21,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 65,
+                  "subjects": 3
+                },
+                {
+                  "values_per_subject": 2,
+                  "subjects": 4
+                },
+                {
+                  "values_per_subject": 46,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 64,
+                  "subjects": 6
+                },
+                {
+                  "values_per_subject": 1,
+                  "subjects": 4
+                },
+                {
+                  "values_per_subject": 45,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 26,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 19,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 44,
+                  "subjects": 5
+                },
+                {
+                  "values_per_subject": 25,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 31,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 43,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 24,
+                  "subjects": 3
+                },
+                {
+                  "values_per_subject": 68,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 49,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 30,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 74,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 2040,
+                  "distinct_objects": 2040,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2004/02/skos/core#topConceptOf",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2002/07/owl#Ontology",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 104,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#xlNotation",
+              "distinct_objects": 357,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 6,
+                  "subjects": 1
+                },
+                {
+                  "values_per_subject": 5,
+                  "subjects": 46
+                },
+                {
+                  "values_per_subject": 4,
+                  "subjects": 5
+                },
+                {
+                  "values_per_subject": 3,
+                  "subjects": 10
+                },
+                {
+                  "values_per_subject": 2,
+                  "subjects": 29
+                },
+                {
+                  "values_per_subject": 1,
+                  "subjects": 13
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 357,
+                  "distinct_objects": 357,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#XlNotation",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2004/02/skos/core#inScheme",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2002/07/owl#Ontology",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 104,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://data.europa.eu/eli/ontology#date_document",
+              "distinct_objects": 30,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 83
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 83,
+                  "distinct_objects": 30,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 830,
+                  "min_value": "1951-04-18",
+                  "max_value": "2012-02-02",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 39,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 39,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1040,
+                  "min_value": "1950-12-31",
+                  "max_value": "2016-06-07",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://data.europa.eu/eli/ontology#first_date_entry_in_force",
+              "distinct_objects": 27,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 82
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 82,
+                  "distinct_objects": 27,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 820,
+                  "min_value": "1952-07-23",
+                  "max_value": "2013-07-01",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://lemon-model.net/lemon#context",
+              "distinct_objects": 2,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 2,
+                  "subjects": 101
+                },
+                {
+                  "values_per_subject": 1,
+                  "subjects": 3
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 205,
+                  "distinct_objects": 2,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 2489,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 24,
+                  "subjects": 97
+                },
+                {
+                  "values_per_subject": 23,
+                  "subjects": 7
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 2489,
+                  "distinct_objects": 2489,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/dateSubmitted",
+              "distinct_objects": 8,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 8,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1040,
+                  "min_value": "2011-10-06",
+                  "max_value": "2018-05-23",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#xlHistoryNote",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#XlNote",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 10,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 10,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1040,
+                  "min_value": "2011-05-19",
+                  "max_value": "2018-05-17",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 3,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 3,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#officialJournalNumber",
+              "distinct_objects": 32,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 92
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 92,
+                  "distinct_objects": 32,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 1,
+                  "max_length": 4,
+                  "total_length": 263,
+                  "min_value": "1",
+                  "max_value": "91",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#officialJournalSeries",
+              "distinct_objects": 3,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 92
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 92,
+                  "distinct_objects": 3,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 1,
+                  "max_length": 1,
+                  "total_length": 92,
+                  "min_value": "C",
+                  "max_value": "P",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/dateAccepted",
+              "distinct_objects": 8,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 8,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1040,
+                  "min_value": "2012-06-27",
+                  "max_value": "2018-06-06",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#xlChangeNote",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#XlNote",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/type",
+              "distinct_objects": 6,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 104
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 104,
+                  "distinct_objects": 6,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/replaces",
+              "distinct_objects": 22,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 22
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 22,
+                  "distinct_objects": 22,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#Treaty",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 22,
+                  "distinct_objects": 22,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#Concept",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#signatureLocation",
+              "distinct_objects": 13,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 2,
+                  "subjects": 2
+                },
+                {
+                  "values_per_subject": 1,
+                  "subjects": 72
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 76,
+                  "distinct_objects": 13,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#officialJournalDate",
+              "distinct_objects": 31,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 92
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 92,
+                  "distinct_objects": 31,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 920,
+                  "min_value": "1964-10-01",
+                  "max_value": "2016-06-07",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/isReplacedBy",
+              "distinct_objects": 22,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 22
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 22,
+                  "distinct_objects": 22,
+                  "object_class": "http://publications.europa.eu/ontology/euvoc#Treaty",
+                  "node_kind": "iri"
+                },
+                {
+                  "triples": 22,
+                  "distinct_objects": 22,
+                  "object_class": "http://www.w3.org/2004/02/skos/core#Concept",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#endDate",
+              "distinct_objects": 13,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 22
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 22,
+                  "distinct_objects": 13,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 220,
+                  "min_value": "1951-01-01",
+                  "max_value": "2016-06-06",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://publications.europa.eu/ontology/euvoc#XlNote",
+          "instances": 12,
+          "observed_instances": 12,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 2,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 12
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 12,
+                  "distinct_objects": 2,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/source",
+              "distinct_objects": 3,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 10
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 4,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "fr",
+                  "min_length": 35,
+                  "max_length": 35,
+                  "total_length": 140,
+                  "min_value": "Synthèses de la législation de l'UE",
+                  "max_value": "Synthèses de la législation de l'UE",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 6,
+                  "distinct_objects": 2,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "en",
+                  "min_length": 0,
+                  "max_length": 27,
+                  "total_length": 108,
+                  "min_value": "",
+                  "max_value": "Summaries of EU Legislation",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
+              "distinct_objects": 12,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 12
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 4,
+                  "distinct_objects": 4,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "fr",
+                  "min_length": 182,
+                  "max_length": 497,
+                  "total_length": 1420,
+                  "min_value": "Initialement créé pour coordonner les programmes de recherche des États en vue d'une utilisation pacifique de l'énergie nucléaire, le traité Euratom contribue de nos jours à la mise en commun des connaissances, des infrastructures et du financement de l'énergie nucléaire. Il assure la sécurité de l'approvisionnement en énergie atomique dans le cadre d'un contrôle centralisé.",
+                  "max_value": "Le traité sur l'Union européenne, marque une nouvelle étape dans l'intégration européenne puisqu'il permet le lancement de l'intégration politique. Il crée une Union européenne qui comporte de trois piliers : les Communautés européennes, la Politique étrangère et de sécurité commune et la coopération dans les domaines de la justice et des affaires intérieures. Le traité : institue une citoyenneté européenne, renforce les pouvoirs du Parlement européen et lance l'union économique et monétaire.",
+                  "node_kind": "literal"
+                },
+                {
+                  "triples": 8,
+                  "distinct_objects": 8,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "en",
+                  "min_length": 78,
+                  "max_length": 452,
+                  "total_length": 1963,
+                  "min_value": "Act signed on 25/03/1993 and entered into force on 01/05/1994 which amended the Protocol on the Statute of the European Investment Bank empowering the Board of Governors to establish a European Investment Fund",
+                  "max_value": "Treaty signed on 10/07/1975 and entered into force on 01/10/1977 which amended certain provisions of the Protocol on the Statute of the European Investment Bank",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 6,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 12
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 12,
+                  "distinct_objects": 6,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 120,
+                  "min_value": "1951-04-18",
+                  "max_value": "1993-03-25",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 3,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 12
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 12,
+                  "distinct_objects": 3,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 120,
+                  "min_value": "2014-10-20",
+                  "max_value": "2018-05-17",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://www.w3.org/2002/07/owl#Ontology",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+              "subjects": 1
+            }
+          ],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2000/01/rdf-schema#comment",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2000/01/rdf-schema#Literal",
+                  "min_length": 6,
+                  "max_length": 6,
+                  "total_length": 6,
+                  "min_value": "Treaty",
+                  "max_value": "Treaty",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/identifier",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 55,
+                  "max_length": 55,
+                  "total_length": 55,
+                  "min_value": "http://publications.europa.eu/resource/authority/treaty",
+                  "max_value": "http://publications.europa.eu/resource/authority/treaty",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2002/07/owl#imports",
+              "distinct_objects": 2,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 2,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 2,
+                  "distinct_objects": 2,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 10,
+                  "min_value": "2011-09-23",
+                  "max_value": "2011-09-23",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 10,
+                  "min_value": "2011-09-23",
+                  "max_value": "2011-09-23",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2002/07/owl#Ontology",
+              "subjects": 1
+            }
+          ],
+          "property_partitions": [
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2000/01/rdf-schema#comment",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2000/01/rdf-schema#Literal",
+                  "min_length": 6,
+                  "max_length": 6,
+                  "total_length": 6,
+                  "min_value": "Treaty",
+                  "max_value": "Treaty",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/identifier",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 55,
+                  "max_length": 55,
+                  "total_length": 55,
+                  "min_value": "http://publications.europa.eu/resource/authority/treaty",
+                  "max_value": "http://publications.europa.eu/resource/authority/treaty",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "blank_node"
+                }
+              ]
+            },
+            {
+              "property": "http://www.w3.org/2002/07/owl#imports",
+              "distinct_objects": 2,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 2,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 2,
+                  "distinct_objects": 2,
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 10,
+                  "min_value": "2011-09-23",
+                  "max_value": "2011-09-23",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 10,
+                  "min_value": "2011-09-23",
+                  "max_value": "2011-09-23",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "failures": []
+}

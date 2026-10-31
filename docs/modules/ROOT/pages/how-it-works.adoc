@@ -1,0 +1,176 @@
+= How It Works
+:description: What happens during a fingerprint run, from the first query to the written files, with one worked example.
+
+A fingerprint run has four stages. Only the first talks to the endpoint; the rest are functions of
+what it observed.
+
+ 1 collect   endpoint ──SPARQL──▶ profile run (raw counts)              service layer + SPARQL adapter
+ 2 save      profile run ──────▶ profile.json                     Profile store
+ 3 analyse   profile run ──────▶ analytics (indicators)                 domain, pure
+ 4 render    analytics ────────▶ report, SHACL, diagram, doc      eds4jinja2 templates
+
+Terms in _italics_ are defined in the xref:glossary.adoc[Glossary]. The statistics themselves are
+specified in xref:statistics.adoc[Statistics and Settings]; this page explains how they come about.
+
+[#data-flow]
+== Through the components
+
+ CLI / caller ──settings──▶ Collector ──SPARQL──▶ endpoint
+                               │ profile run (fingerprint_stats)
+                               ├──────────▶ Profile store ──▶ profile.json           
+                               ▼                                 │ (later regenerations)
+                           Analyser (domain, pure) ◀─────────────┘ (+ threshold)
+                               │ analytics (fingerprint_analytics)
+                   ┌───────────┴─────────────────┐
+                   ▼                             ▼
+             report context              Generators: visit hooks → view         
+                   └─────────────┬───────────────┘
+                                 ▼
+                 Template renderer (eds4jinja2) ──check──▶ main.html,
+                                 shapes-*.ttl, diagram-*.puml, profile.html
+
+== A running example
+
+A graph holds three people and two cities:
+
+[source,turtle]
+----
+ex:ana  a ex:Person ; ex:name "Ana" ; ex:livesIn ex:cluj .
+ex:bob  a ex:Person ; ex:name "Bob" ; ex:livesIn ex:cluj .
+ex:cid  a ex:Person ; ex:name "Cid" , "C." .
+ex:cluj a ex:City ; ex:name "Cluj"@ro .
+ex:iasi a ex:City ; ex:name "Iași"@ro .
+----
+
+== 1. Collect: count, class by class
+
+Collection never asks one question about the whole graph at once; on a graph with millions of
+triples such a query times out (xref:decisions.adoc#ad-3[AD-3]). It discovers first, then asks
+small questions per class:
+
+. *Discovery.* List the named graphs and, once for the whole store, the `rdfs:subClassOf`
+  statements; then, per graph, the classes and their instance counts (`ex:Person` 3, `ex:City` 2).
+. *Per class.* For each class, biggest first and a few at a time (`concurrency`, default 4), queries
+  that bind the class inside the pattern, so the store touches only that class's instances:
+  * a *cardinality histogram* per property — for `ex:Person`/`ex:name`: 2 instances have 1 value,
+    1 instance has 2 values; for `ex:Person`/`ex:livesIn`: 2 have 1 value, 1 has none;
+  * *value partitions* — `ex:name` on people: 4 literals of `xsd:string`; `ex:livesIn`: 2 resources
+    of class `ex:City`;
+  * the *other types* its instances have (co-types), which reveal implied parents;
+  * at deeper depths, a second wave: top values, the completeness check and incoming links.
+. *Escalation.* Under the default policy `auto`, if a class's query times out, the class is read
+  again from its first N instances (_first-N mode_) and marked so. If that also fails, a _failure_
+  is recorded and the run goes on. Policy `exact` records the timeout as a failure at once; policy
+  `first_n` reads every class from its first N directly. How each kind of error is handled is in
+  <<failure-classes>>.
+
+The result is a _profile run_: raw counts only, no judgement.
+
+== 2. Save: the profile file
+
+As soon as collection ends, before anything is rendered, the raw run is written to `profile.json`.
+If that write fails (a full disk, no permission), the run ends with an unexpected error (exit 4) and
+nothing else is written. Every later representation reads that
+file, so the endpoint is queried once per fingerprint, however many formats are produced and however
+often they are regenerated (xref:decisions.adoc#ad-7[AD-7]).
+
+== 3. Analyse: from counts to indicators
+
+`analyse` turns each histogram into indicators, with no I/O:
+
+[cols="2,1,1,3"]
+|===
+| Property of `ex:Person` | Confidence | Accepted label (at 0.95) | Why
+
+| `ex:name` | 1.0 | `+` | every person has a name; one has two, so `1` fits only 2 of 3 (0.67)
+| `ex:livesIn` | 0.67 | `?` | one person lacks it, so `1` and `+` fit only 2 of 3; nobody has two, so `?` fits all
+|===
+
+At threshold 0.6 the same counts give `1` for both properties, with support 0.67: accepted _with
+exceptions_. That is why a saved profile is re-analysed rather than stored analysed: the
+threshold is a reading choice, not a fact about the data.
+
+The analysis also finds parents (declared, or implied when every instance also has the parent
+type), marks each property own, inherited or refined, and flags first-N classes as inexact.
+
+== 4. Render: one profile, several representations
+
+Every representation is an eds4jinja2 template package that receives the analytics and issues no
+queries (xref:decisions.adoc#ad-6[AD-6], xref:decisions.adoc#ad-9[AD-9]).
+
+Statistics report (`main.html`):: the per-class tables described in xref:report.adoc[The Report].
+
+From 2.1, through `fingerprint --format …` or one command per format reading `profile.json`
+(xref:decisions.adoc#ad-8[AD-8]):
+
+SHACL shapes (`shapes-<graph>.ttl`):: a node shape per class with a property shape per property:
+counts from the accepted label; `sh:datatype`, `sh:class` and `sh:nodeKind` from the value
+partitions, combined with `sh:or` when the values are of several kinds.
+PlantUML diagram (`diagram-<graph>.puml`):: classes, attributes, associations with multiplicities,
+generalisations (declared solid, implied dashed).
+Application-profile document (`profile.html`):: a specification in the style of SEMIC application
+profiles: overview, namespaces, a section per class with its property table, caveats.
+
+[#severity]
+=== How strong is a generated shape?
+
+A shape says "every instance must…", but the profile only knows what the observed instances did. The
+generator keeps the two honest by grading each property shape (xref:decisions.adoc#ad-10[AD-10]);
+the first matching row wins:
+
+[cols="3,1"]
+|===
+| What the profile knows | Severity
+
+| no cardinality label (presence only), or _confidence_ below the _acceptance threshold_ | `sh:Info`
+| the label was accepted with exceptions (support below 1) | `sh:Warning`
+| the class was read in first-N mode | `sh:Warning`
+| the run looked up object types across graphs (`object_type_scope = any_graph`) and the shape uses `sh:class` | `sh:Warning`
+| the class has declared subclasses (`sh:targetClass` also reaches their instances, which its statistics did not count) | `sh:Warning`
+| held for every instance | `sh:Violation` (default)
+|===
+
+In the example at threshold 0.95: `ex:Person`/`ex:name` gets `sh:minCount 1` and `sh:datatype
+xsd:string` at `sh:Violation`; `ex:livesIn` gets `sh:maxCount 1` and `sh:class ex:City` at `sh:Info`,
+because its confidence (0.67) is below the threshold (0.95). At the default threshold a property
+used by 90 % of instances is therefore also `sh:Info`: the grade says how far the shape can be
+trusted, not how important the property is.
+Validating the example graph against its own shapes therefore reports no violation — the rule every
+generated shapes file keeps.
+
+[#failure-classes]
+== What can go wrong
+
+The SPARQL client sends each query as a SPARQL 1.1 Protocol form POST (`query=…`, `Accept:
+application/sparql-results+json`) through the Python standard library, with the per-query timeout,
+and rdflib reads the answer into typed terms. Every error it meets is put in one class:
+
+[cols="2,4"]
+|===
+| Class | Raised by
+
+| Transient | HTTP 429, 502, 503; connection reset or refused. Retried after 1 s, then 4 s (`RDF_FINGERPRINTER_RETRY_BACKOFF_SECONDS`); if it persists, it is treated as a timeout — except on the first query, below.
+| Timeout | the per-query timeout (`timeout_seconds`), HTTP 504, or a 500 whose body says "timeout", "time limit", "timed out" or "estimated execution time" (`RDF_FINGERPRINTER_TIMEOUT_MARKERS`).
+| Permanent | HTTP 400, 404, 414, other 4xx and 500s, responses that are not SPARQL results (bad JSON, no `results` or `boolean`, an ASK answer to a SELECT). Never retried. Distinct from a well-formed result holding an unexpected value — a count that is not a number — which is an unexpected error (exit 4, xref:decisions.adoc#ad-11[AD-11]).
+| Unreachable | HTTP 401, 403, 407. Only the first query can make the endpoint unreachable; on any later query it counts as permanent.
+|===
+
+What a failed query costs depends on the stage it belongs to:
+
+[cols="2,4"]
+|===
+| Stage | Response
+
+| Listing the named graphs (first query) | Unreachable, or transient after its retries: the run stops, nothing is written, the CLI exits 3. Timeout or permanent: only the default graph is profiled, recorded as a failure — unless graphs were chosen (`--graph`, the `selected_graphs` setting or parameter), in which case those are profiled and only a WARNING is logged.
+| Other discovery (store-wide subclass statements; per graph: predicates, classes, counts, graph totals) | Each has a fallback or is recorded and skipped: classes not counted in one query are listed and counted one by one; predicates not listed in one query are listed without counts; subclass statements and graph totals not read are recorded as failures.
+| First wave of a class (instance listing, histograms, value partitions, co-types) | Timeout: the class escalates under `auto` (exact → first N); in first-N mode or under `exact`, a failure. Permanent: a failure at once. Either way the class is left out of the profile.
+| Second wave of a class (top values, completeness check, incoming links) | Recorded as a failure; the class is kept, without that measurement.
+|===
+
+Every recorded failure appears in the outputs and makes the CLI exit 1 (xref:decisions.adoc#ad-11[AD-11]).
+
+* *An IRI cannot be written in Turtle* (it contains a space or `>`): from 2.1 it is left out of the
+  shapes and the diagram and listed in the document's caveats. A class whose IRI cannot be put in a
+  SPARQL query at all is skipped and recorded as a failure.
+* *Sampled numbers:* first-N figures describe the first N instances in the store's order, which is not
+  a random sample. Every representation says so.

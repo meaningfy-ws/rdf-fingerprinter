@@ -1,5 +1,6 @@
 # Capability: statistics-collection (openspec/specs/statistics-collection)
 # Error rows: openspec/changes/archive/2026-10-31-harden-fingerprinter/design.md "Error matrix". Step definitions are written during implementation.
+@uc_w1
 Feature: Collecting raw statistics from a knowledge graph
   As a data steward
   I want the structure of every class in my knowledge graph measured from its data
@@ -144,21 +145,23 @@ Feature: Collecting raw statistics from a knowledge graph
       And one failure names "ex:Big", the failed measurement and the number of attempts
 
     Scenario Outline: Failures in optional measurements keep the class
-      Given the <measurement> of a class fails
+      Given the <measurement> of a class <fails>
       When the knowledge graph is fingerprinted
       Then the class is still profiled
-      And a failure for the <measurement> is recorded
+      And only failures of the <measurement> are recorded
 
       Examples:
-        | measurement             |
-        | top values              |
-        | property presence check |
-        | incoming links          |
+        | measurement             | fails          |
+        | top values              | is rejected    |
+        | top values              | times out      |
+        | property presence check | is rejected    |
+        | incoming links          | is rejected    |
 
     Scenario: The endpoint rejects a query as malformed
       Given the endpoint rejects a class's measurement as malformed
       When the knowledge graph is fingerprinted
       Then the failure is recorded without retrying
+      And that class is left out without a first-N attempt
       And the other classes are still profiled
 
     Scenario: A transient endpoint error is retried

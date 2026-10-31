@@ -1,0 +1,395 @@
+# SHACL shapes inferred by rdf-fingerprinter — http://publications.europa.eu/resources/authority/continents
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix euvoc: <http://publications.europa.eu/ontology/euvoc#> .
+@prefix fp: <https://data.meaningfy.ws/fingerprint/> .
+@prefix lvont: <http://lexvo.org/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix skosxl: <http://www.w3.org/2008/05/skos-xl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<urn:fingerprint:shape:http%3A%2F%2Fpublications.europa.eu%2Fontology%2Feuvoc%23Continent> a sh:NodeShape ;
+    sh:targetClass euvoc:Continent ;
+    fp:instances 6 ;
+    fp:observedInstances 6 ;
+    fp:precisionMode "exact" ;
+    sh:property [
+        sh:path euvoc:startDate ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path euvoc:status ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path euvoc:xlNotation ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class euvoc:XlNotation ;
+        sh:nodeKind sh:BlankNode ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path dcterms:created ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path skos:inScheme ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:class owl:Ontology ] [ sh:class skos:ConceptScheme ] ) ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path skos:topConceptOf ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:class owl:Ontology ] [ sh:class skos:ConceptScheme ] ) ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path skosxl:prefLabel ;
+        sh:minCount 24 ;
+        sh:maxCount 24 ;
+        sh:class skosxl:Label ;
+        sh:nodeKind sh:BlankNode ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+.
+
+<urn:fingerprint:shape:http%3A%2F%2Fpublications.europa.eu%2Fontology%2Feuvoc%23XlNotation> a sh:NodeShape ;
+    sh:targetClass euvoc:XlNotation ;
+    fp:instances 6 ;
+    fp:observedInstances 6 ;
+    fp:precisionMode "exact" ;
+    sh:property [
+        sh:path euvoc:startDate ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path euvoc:status ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path dcterms:created ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path dcterms:type ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path rdf:value ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+.
+
+<urn:fingerprint:shape:http%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23Ontology> a sh:NodeShape ;
+    sh:targetClass owl:Ontology ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property [
+        sh:path euvoc:startDate ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path euvoc:status ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path dcterms:created ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path dcterms:identifier ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path rdfs:comment ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype rdfs:Literal ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path owl:imports ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path skosxl:prefLabel ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class skosxl:Label ;
+        sh:nodeKind sh:BlankNode ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+.
+
+<urn:fingerprint:shape:http%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23Concept> a sh:NodeShape ;
+    sh:targetClass skos:Concept ;
+    fp:instances 6 ;
+    fp:observedInstances 6 ;
+    fp:precisionMode "exact" ;
+    sh:property [
+        sh:path euvoc:startDate ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path euvoc:status ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path euvoc:xlNotation ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class euvoc:XlNotation ;
+        sh:nodeKind sh:BlankNode ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path dcterms:created ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path skos:inScheme ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:class owl:Ontology ] [ sh:class skos:ConceptScheme ] ) ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path skos:topConceptOf ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:or ( [ sh:class owl:Ontology ] [ sh:class skos:ConceptScheme ] ) ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path skosxl:prefLabel ;
+        sh:minCount 24 ;
+        sh:maxCount 24 ;
+        sh:class skosxl:Label ;
+        sh:nodeKind sh:BlankNode ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+.
+
+<urn:fingerprint:shape:http%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23ConceptScheme> a sh:NodeShape ;
+    sh:targetClass skos:ConceptScheme ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property [
+        sh:path euvoc:startDate ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path euvoc:status ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path dcterms:created ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path dcterms:identifier ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path rdfs:comment ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype rdfs:Literal ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path owl:imports ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path skosxl:prefLabel ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class skosxl:Label ;
+        sh:nodeKind sh:BlankNode ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+.
+
+<urn:fingerprint:shape:http%3A%2F%2Fwww.w3.org%2F2008%2F05%2Fskos-xl%23Label> a sh:NodeShape ;
+    sh:targetClass skosxl:Label ;
+    fp:instances 145 ;
+    fp:observedInstances 145 ;
+    fp:precisionMode "exact" ;
+    sh:property [
+        sh:path lvont:script ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:severity sh:Info ;
+        fp:confidence 0.0828 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path euvoc:startDate ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path euvoc:status ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path dcterms:created ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path dcterms:type ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+    sh:property [
+        sh:path skosxl:literalForm ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype rdf:langString ;
+        sh:nodeKind sh:Literal ;
+        fp:confidence 1.0 ;
+        fp:labelSupport 1.0 ;
+    ] ;
+.

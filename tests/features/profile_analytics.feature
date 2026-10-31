@@ -1,5 +1,6 @@
 # Capability: profile-analytics (openspec/specs/profile-analytics)
 # Formulas: openspec/changes/archive/2026-10-31-harden-fingerprinter/design.md "Analytics (domain, pure)". Step definitions are written during implementation.
+@uc_w1
 Feature: Deriving analytics from the raw statistics
   As a data steward
   I want readable indicators computed from the observed statistics

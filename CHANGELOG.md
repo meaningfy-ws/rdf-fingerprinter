@@ -6,6 +6,78 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-31
+
+Representations release (OpenSpec change `profile-representations`). A fingerprint is saved once
+and can be published, without querying the endpoint again, as SHACL shapes, a PlantUML class diagram
+and an application-profile document.
+
+### Added
+- **`profile.json`.** `fingerprint` (and `generate_endpoint_fingerprint_report`) saves the raw
+  profile run beside the report, before the report is rendered, so a template error loses nothing
+  collected. Its JSON Schema ships as `fingerprint/domain/profile_run.schema.json`;
+  newer 2.x readers load older files.
+- **Generators**, modelled on LinkML's: `fingerprint-gen-shacl`, `fingerprint-gen-puml` and
+  `fingerprint-gen-doc` read a `profile.json` and write one representation (`--threshold`,
+  `--template`, and `--shapes-namespace` for SHACL); exit 0, 2 (usage) or 4 (unexpected).
+- **`fingerprint --format shacl|puml|doc`** (repeatable) renders representations in the same run.
+- **SHACL shapes**, one Turtle file per graph: open node shapes, counts from the accepted
+  cardinality, `sh:datatype` / `sh:class` / `sh:nodeKind` / `sh:or` from the values, annotated with
+  confidence and instance counts, and graded by severity so that, validated against the data they
+  came from, they report no `sh:Violation`.
+- **PlantUML class diagrams**, one source file per graph, and an **application-profile document**
+  (`profile.html`) in the style of SEMIC / EU application profiles.
+- Template filters for custom packages: `turtle_iri`, `turtle_term`, `turtle_string`,
+  `turtle_number`, `curie`.
+- Library: `fingerprint_report(..., formats=(), sparql=None)` (any `SparqlPort`), and
+  `fingerprint.service_layer.representations.generate_representations` /
+  `generate_from_profile_file`.
+- Docs: Representations, How It Works, Glossary, Architecture Decisions (AD-1 to AD-12) and a use
+  case catalogue (UC-W1, UC-W2 and their realisations).
+
+- **Operational variables** (OpenSpec change `domain-object-model`): `RDF_FINGERPRINTER_PROFILE_FILE`,
+  `_RETRY_BACKOFF_SECONDS`, `_TIMEOUT_MARKERS`, `_ERROR_EXCERPT_LENGTH`, `_SHAPES_NAMESPACE`,
+  `_DEFAULT_GRAPH_LABEL` and `_PREFIXES_FILE`, each defaulting to the former constant; read through
+  `fingerprint.config`, checked before any query (a bad value exits 2 naming the variable).
+- `model/fingerprint_views.yaml` → `fingerprint.domain.views`: the objects every representation
+  template receives, `GeneratorOptions` and the `RepresentationFormat` enum.
+
+### Changed
+- The output folder of `fingerprint` now also holds `profile.json`.
+- Report rendering and exceptions moved to their layers (`adapters/template_renderer.py`, an
+  `exceptions` module per layer); every 2.0 import path of these still works.
+- Values are LinkML-generated objects and enums throughout (collection, analytics, generators);
+  `tests/unit/test_no_composed_dicts.py` keeps new dicts out.
+- **The SPARQL client** sends a SPARQL 1.1 Protocol form POST through the standard library (with the
+  per-query timeout) and reads the answer with rdflib; the request differs from SPARQLWrapper's
+  (no `format`/`output`/`results` parameters, `Accept: application/sparql-results+json`,
+  `User-Agent: rdf-fingerprinter/<version>`). Failure messages keep the status and a body excerpt but
+  lose SPARQLWrapper's wording. Literals keep the endpoint's lexical form. User info in the endpoint
+  URL is sent as HTTP Basic authentication, never in the request URL or a message; only `http` and
+  `https` endpoints are accepted (exit 2 otherwise).
+- A prefixes file given by `RDF_FINGERPRINTER_PREFIXES_FILE` is checked (plain prefix names, writable
+  IRIs) before any query or write.
+- **Settings sources are checked one by one:** a malformed value in a lower-precedence source (say
+  the config file) now fails even when a higher one (the CLI) sets the same setting.
+- `make test` fails under 80 % coverage; every Gherkin scenario is tagged with its use case.
+
+### Breaking (2.0 Python API, not used in production yet)
+- `fingerprint.domain.generated.profile` is now `fingerprint.domain.profile` (and the JSON Schema
+  `fingerprint/domain/profile_run.schema.json`).
+- `fingerprint.adapters.sparql.SparqlWrapperClient` is now `SparqlHttpClient`; `SparqlPort.select`
+  returns rdflib `ResultRow`s; `rows_from_json` is gone.
+- `cardinality_statistics` and `cardinality_label` take a list of `CardinalityBin` and return
+  `CardinalityStatistics` / `CardinalityChoice`; `drop_none` is gone.
+- Custom representation templates read `view.<field>` of the views model (no more `view.graph.<field>`
+  or tuple unpacking); `Generator.serialize()` returns `list[RenderedDocument]`.
+
+### Dependencies
+- rdflib is now a declared runtime dependency (it was already installed through eds4jinja2);
+  pySHACL 0.40.1 for tests.
+- SPARQLWrapper is no longer a direct dependency.
+- eds4jinja2 ≥ 2.1: every format and the report are rendered and written through its
+  `render_documents` / `make_documents`.
+
 ## [2.0.0] - 2026-10-31
 
 Hardening release (OpenSpec change `harden-fingerprinter`). Statistics are collected in Python

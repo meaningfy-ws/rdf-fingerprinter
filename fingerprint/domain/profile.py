@@ -78,7 +78,7 @@ linkml_meta = LinkMLMeta({'default_prefix': 'fp',
                     'extends its raw counterpart.\n'
                     'The catalogue is open: new indicators are added here without '
                     'touching collection.\n'
-                    'Source of fingerprint/domain/generated/profile.py (make '
+                    'Source of fingerprint/domain/profile.py (make '
                     'generate-models).\n',
      'id': 'https://data.meaningfy.ws/fingerprint/analytics/schema',
      'imports': ['linkml:types', 'fingerprint_stats'],
@@ -281,19 +281,50 @@ class Settings(ConfiguredBaseModel):
     """
     Collection parameters, recorded so a profile can be interpreted and reproduced.
     """
-    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema',
+         'slot_usage': {'acceptance_threshold': {'ifabsent': 'float(0.95)',
+                                                 'name': 'acceptance_threshold',
+                                                 'required': True},
+                        'completeness_check': {'ifabsent': 'false',
+                                               'name': 'completeness_check',
+                                               'required': True},
+                        'concurrency': {'ifabsent': 'int(4)',
+                                        'name': 'concurrency',
+                                        'required': True},
+                        'depth': {'ifabsent': 'string(values)',
+                                  'name': 'depth',
+                                  'required': True},
+                        'first_n': {'ifabsent': 'int(10000)',
+                                    'name': 'first_n',
+                                    'required': True},
+                        'graph_statistics': {'ifabsent': 'false',
+                                             'name': 'graph_statistics',
+                                             'required': True},
+                        'object_type_scope': {'ifabsent': 'string(same_graph)',
+                                              'name': 'object_type_scope',
+                                              'required': True},
+                        'precision_policy': {'ifabsent': 'string(auto)',
+                                             'name': 'precision_policy',
+                                             'required': True},
+                        'timeout_seconds': {'ifabsent': 'int(60)',
+                                            'name': 'timeout_seconds',
+                                            'required': True},
+                        'top_k': {'ifabsent': 'int(20)',
+                                  'name': 'top_k',
+                                  'required': True}}})
 
-    depth: Depth = Field(default=Depth("values"), description="""How much was collected.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'string(values)'} })
-    precision_policy: PrecisionPolicy = Field(default=PrecisionPolicy("auto"), description="""Allowed precision modes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'string(auto)'} })
-    first_n: int = Field(default=10000, description="""N for the first_n mode.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(10000)'} })
-    top_k: int = Field(default=20, description="""How many top values to keep per class and property.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(20)'} })
-    object_type_scope: ObjectTypeScope = Field(default=ObjectTypeScope("same_graph"), description="""Where object types are looked up.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'string(same_graph)'} })
-    completeness_check: bool = Field(default=False, description="""Whether property presence was checked for first_n classes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'false'} })
-    timeout_seconds: int = Field(default=60, description="""Per-query timeout.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(60)'} })
-    concurrency: int = Field(default=4, description="""Maximum concurrent queries.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(4)'} })
-    acceptance_threshold: float = Field(default=0.95, description="""Share of instances a cardinality label must cover.""", ge=0, le=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'float(0.95)'} })
-    graph_statistics: bool = Field(default=False, description="""Whether graph totals, predicate partitions and untyped subjects were collected (full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'false'} })
-    selected_graphs: Optional[list[str]] = Field(default=None, description="""Graphs requested; empty means all.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings']} })
+    depth: Depth = Field(default=Depth("values"), description="""How much was collected.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'string(values)'} })
+    precision_policy: PrecisionPolicy = Field(default=PrecisionPolicy("auto"), description="""Allowed precision modes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'string(auto)'} })
+    first_n: int = Field(default=10000, description="""N for the first_n mode.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'int(10000)'} })
+    top_k: int = Field(default=20, description="""How many top values to keep per class and property.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'int(20)'} })
+    object_type_scope: ObjectTypeScope = Field(default=ObjectTypeScope("same_graph"), description="""Where object types are looked up.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'],
+         'ifabsent': 'string(same_graph)'} })
+    completeness_check: bool = Field(default=False, description="""Whether property presence was checked for first_n classes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'false'} })
+    timeout_seconds: int = Field(default=60, description="""Per-query timeout.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'int(60)'} })
+    concurrency: int = Field(default=4, description="""Maximum concurrent queries.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'int(4)'} })
+    acceptance_threshold: float = Field(default=0.95, description="""Share of instances a cardinality label must cover.""", ge=0, le=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'float(0.95)'} })
+    graph_statistics: bool = Field(default=False, description="""Whether graph totals, predicate partitions and untyped subjects were collected (full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'false'} })
+    selected_graphs: Optional[list[str]] = Field(default=None, description="""Graphs requested; empty means all.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
 
 
 class Failure(ConfiguredBaseModel):
@@ -502,6 +533,25 @@ class IncomingLink(ConfiguredBaseModel):
          'slot_uri': 'void:triples'} })
 
 
+class SettingsOverride(ConfiguredBaseModel):
+    """
+    Collection settings given by one source (command line, environment, parameter, config file); unset ones are absent. The first source that sets a setting wins (domain-object-model P-7). Kept out of fingerprint_stats so the published profile.json schema does not list it.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema'})
+
+    depth: Optional[Depth] = Field(default=None, description="""How much was collected.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    precision_policy: Optional[PrecisionPolicy] = Field(default=None, description="""Allowed precision modes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    first_n: Optional[int] = Field(default=None, description="""N for the first_n mode.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    top_k: Optional[int] = Field(default=None, description="""How many top values to keep per class and property.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    object_type_scope: Optional[ObjectTypeScope] = Field(default=None, description="""Where object types are looked up.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    completeness_check: Optional[bool] = Field(default=None, description="""Whether property presence was checked for first_n classes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    timeout_seconds: Optional[int] = Field(default=None, description="""Per-query timeout.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    concurrency: Optional[int] = Field(default=None, description="""Maximum concurrent queries.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    acceptance_threshold: Optional[float] = Field(default=None, description="""Share of instances a cardinality label must cover.""", ge=0, le=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    graph_statistics: Optional[bool] = Field(default=None, description="""Whether graph totals, predicate partitions and untyped subjects were collected (full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    selected_graphs: Optional[list[str]] = Field(default=None, description="""Graphs requested; empty means all.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+
+
 class ProfileAnalytics(ProfileRun):
     """
     A profile run with every level replaced by its analytics.
@@ -519,44 +569,102 @@ class ProfileAnalytics(ProfileRun):
     failures: Optional[list[Failure]] = Field(default=None, description="""Queries that failed after all retries and fallbacks.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileRun']} })
 
 
-class PropertyAnalytics(PropertyProfile):
+class CardinalityStatistics(ConfiguredBaseModel):
+    """
+    Values per instance of one property of one class, from its cardinality histogram.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema',
+         'mixin': True})
+
+    subjects_with_property: Optional[int] = Field(default=None, description="""Σ subjects over bins n ≥ 1.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    subjects_without_property: Optional[int] = Field(default=None, description="""Observed instances minus subjects with the property (the n = 0 bin).""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    total_triples: Optional[int] = Field(default=None, description="""Σ n × subjects.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    min: Optional[int] = Field(default=None, description="""0 when some instances lack the property, else the smallest n.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    max: Optional[int] = Field(default=None, description="""Largest n (a lower bound in first_n mode).""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    mean: Optional[float] = Field(default=None, description="""Mean values per observed instance, zeros included (today's avg).""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    mean_when_present: Optional[float] = Field(default=None, description="""Mean over instances that have the property.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    median: Optional[float] = Field(default=None, description="""Median values per instance, zeros included.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    mode: Optional[int] = Field(default=None, description="""Most frequent n.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    stddev: Optional[float] = Field(default=None, description="""Standard deviation of values per instance.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    confidence: Optional[float] = Field(default=None, description="""Share of observed instances having the property (QSE confidence, sheXer frequency).""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    is_mandatory: Optional[bool] = Field(default=None, description="""confidence = 1.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    is_functional: Optional[bool] = Field(default=None, description="""max ≤ 1.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+
+
+class CardinalityChoice(ConfiguredBaseModel):
+    """
+    The cardinality label accepted at the threshold, its support and the stricter labels rejected.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema',
+         'mixin': True})
+
+    exact_count: Optional[int] = Field(default=None, description="""n of an exactly_n label.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityChoice']} })
+    cardinality_label: Optional[CardinalityLabel] = Field(default=None, description="""Accepted cardinality at the acceptance threshold.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityChoice']} })
+    label_support: Optional[float] = Field(default=None, description="""Share of instances conforming to the accepted label.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityChoice']} })
+    alternative_labels: Optional[list[CardinalityLabel]] = Field(default=None, description="""Labels rejected below the threshold, kept for the reader.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityChoice']} })
+
+
+class ValueIndicators(ConfiguredBaseModel):
+    """
+    Indicators from the value partitions (Q6, Q7) and top values (Q9) of one property.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema',
+         'mixin': True})
+
+    property_kind: Optional[PropertyKind] = Field(default=None, description="""From node kinds of the objects.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    value_types: Optional[list[str]] = Field(default=None, description="""Datatypes and object classes, most frequent first.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    dominant_value_type: Optional[str] = Field(default=None, description="""The most frequent datatype or object class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    type_purity: Optional[float] = Field(default=None, description="""Share of triples whose value has the dominant type.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    untyped_object_ratio: Optional[float] = Field(default=None, description="""Share of resource objects with no class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    languages: Optional[list[str]] = Field(default=None, description="""Language tags seen, most frequent first.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    language_coverage: Optional[float] = Field(default=None, description="""Share of literal triples carrying a language tag.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    mean_length: Optional[float] = Field(default=None, description="""Mean lexical length of literals.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    distinct_ratio: Optional[float] = Field(default=None, description="""Distinct objects ÷ triples (1 = all different).""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    is_identifier_like: Optional[bool] = Field(default=None, description="""Label exactly_one and distinct objects equal subjects with the property.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    is_enumeration_candidate: Optional[bool] = Field(default=None, description="""Distinct objects ≤ top_k — candidate for sh:in.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    top_k_share: Optional[float] = Field(default=None, description="""Share of triples covered by the top values.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    entropy_estimate: Optional[float] = Field(default=None, description="""Shannon entropy estimated from top values plus the remainder.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+
+
+class PropertyAnalytics(ValueIndicators, CardinalityChoice, CardinalityStatistics, PropertyProfile):
     """
     Indicators for one property of one class.
     """
-    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema'})
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema',
+         'mixins': ['CardinalityStatistics', 'CardinalityChoice', 'ValueIndicators']})
 
-    subjects_with_property: Optional[int] = Field(default=None, description="""Σ subjects over bins n ≥ 1.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    subjects_without_property: Optional[int] = Field(default=None, description="""Observed instances minus subjects with the property (the n = 0 bin).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    total_triples: Optional[int] = Field(default=None, description="""Σ n × subjects.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    min: Optional[int] = Field(default=None, description="""0 when some instances lack the property, else the smallest n.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    max: Optional[int] = Field(default=None, description="""Largest n (a lower bound in first_n mode).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    mean: Optional[float] = Field(default=None, description="""Mean values per observed instance, zeros included (today's avg).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    mean_when_present: Optional[float] = Field(default=None, description="""Mean over instances that have the property.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    median: Optional[float] = Field(default=None, description="""Median values per instance, zeros included.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    mode: Optional[int] = Field(default=None, description="""Most frequent n.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    stddev: Optional[float] = Field(default=None, description="""Standard deviation of values per instance.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    confidence: Optional[float] = Field(default=None, description="""Share of observed instances having the property (QSE confidence, sheXer frequency).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    exact_count: Optional[int] = Field(default=None, description="""n of an exactly_n label.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    cardinality_label: Optional[CardinalityLabel] = Field(default=None, description="""Accepted cardinality at the acceptance threshold.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    label_support: Optional[float] = Field(default=None, description="""Share of instances conforming to the accepted label.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    alternative_labels: Optional[list[CardinalityLabel]] = Field(default=None, description="""Labels rejected below the threshold, kept for the reader.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    is_mandatory: Optional[bool] = Field(default=None, description="""confidence = 1.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    is_functional: Optional[bool] = Field(default=None, description="""max ≤ 1.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    property_kind: Optional[PropertyKind] = Field(default=None, description="""From node kinds of the objects.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    value_types: Optional[list[str]] = Field(default=None, description="""Datatypes and object classes, most frequent first.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    dominant_value_type: Optional[str] = Field(default=None, description="""The most frequent datatype or object class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    type_purity: Optional[float] = Field(default=None, description="""Share of triples whose value has the dominant type.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    untyped_object_ratio: Optional[float] = Field(default=None, description="""Share of resource objects with no class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    languages: Optional[list[str]] = Field(default=None, description="""Language tags seen, most frequent first.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    language_coverage: Optional[float] = Field(default=None, description="""Share of literal triples carrying a language tag.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    mean_length: Optional[float] = Field(default=None, description="""Mean lexical length of literals.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    distinct_ratio: Optional[float] = Field(default=None, description="""Distinct objects ÷ triples (1 = all different).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    is_identifier_like: Optional[bool] = Field(default=None, description="""Label exactly_one and distinct objects equal subjects with the property.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    is_enumeration_candidate: Optional[bool] = Field(default=None, description="""Distinct objects ≤ top_k — candidate for sh:in.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    top_k_share: Optional[float] = Field(default=None, description="""Share of triples covered by the top values.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
-    entropy_estimate: Optional[float] = Field(default=None, description="""Shannon entropy estimated from top values plus the remainder.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
     inheritance: Optional[Inheritance] = Field(default=None, description="""Own, inherited or refined relative to the parents.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics']} })
     is_exact: Optional[bool] = Field(default=None, description="""False when the class was read in first_n mode or distincts are bounds.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyAnalytics', 'ClassAnalytics']} })
+    subjects_with_property: Optional[int] = Field(default=None, description="""Σ subjects over bins n ≥ 1.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    subjects_without_property: Optional[int] = Field(default=None, description="""Observed instances minus subjects with the property (the n = 0 bin).""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    total_triples: Optional[int] = Field(default=None, description="""Σ n × subjects.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    min: Optional[int] = Field(default=None, description="""0 when some instances lack the property, else the smallest n.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    max: Optional[int] = Field(default=None, description="""Largest n (a lower bound in first_n mode).""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    mean: Optional[float] = Field(default=None, description="""Mean values per observed instance, zeros included (today's avg).""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    mean_when_present: Optional[float] = Field(default=None, description="""Mean over instances that have the property.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    median: Optional[float] = Field(default=None, description="""Median values per instance, zeros included.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    mode: Optional[int] = Field(default=None, description="""Most frequent n.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    stddev: Optional[float] = Field(default=None, description="""Standard deviation of values per instance.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    confidence: Optional[float] = Field(default=None, description="""Share of observed instances having the property (QSE confidence, sheXer frequency).""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    is_mandatory: Optional[bool] = Field(default=None, description="""confidence = 1.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    is_functional: Optional[bool] = Field(default=None, description="""max ≤ 1.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityStatistics']} })
+    exact_count: Optional[int] = Field(default=None, description="""n of an exactly_n label.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityChoice']} })
+    cardinality_label: Optional[CardinalityLabel] = Field(default=None, description="""Accepted cardinality at the acceptance threshold.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityChoice']} })
+    label_support: Optional[float] = Field(default=None, description="""Share of instances conforming to the accepted label.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityChoice']} })
+    alternative_labels: Optional[list[CardinalityLabel]] = Field(default=None, description="""Labels rejected below the threshold, kept for the reader.""", json_schema_extra = { "linkml_meta": {'domain_of': ['CardinalityChoice']} })
+    property_kind: Optional[PropertyKind] = Field(default=None, description="""From node kinds of the objects.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    value_types: Optional[list[str]] = Field(default=None, description="""Datatypes and object classes, most frequent first.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    dominant_value_type: Optional[str] = Field(default=None, description="""The most frequent datatype or object class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    type_purity: Optional[float] = Field(default=None, description="""Share of triples whose value has the dominant type.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    untyped_object_ratio: Optional[float] = Field(default=None, description="""Share of resource objects with no class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    languages: Optional[list[str]] = Field(default=None, description="""Language tags seen, most frequent first.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    language_coverage: Optional[float] = Field(default=None, description="""Share of literal triples carrying a language tag.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    mean_length: Optional[float] = Field(default=None, description="""Mean lexical length of literals.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    distinct_ratio: Optional[float] = Field(default=None, description="""Distinct objects ÷ triples (1 = all different).""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    is_identifier_like: Optional[bool] = Field(default=None, description="""Label exactly_one and distinct objects equal subjects with the property.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    is_enumeration_candidate: Optional[bool] = Field(default=None, description="""Distinct objects ≤ top_k — candidate for sh:in.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    top_k_share: Optional[float] = Field(default=None, description="""Share of triples covered by the top values.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
+    entropy_estimate: Optional[float] = Field(default=None, description="""Shannon entropy estimated from top values plus the remainder.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
     property: str = Field(default=..., description="""IRI of a predicate.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
                        'PredicatePartition',
                        'PropertyProfile',
@@ -654,7 +762,11 @@ CardinalityBin.model_rebuild()
 ValuePartition.model_rebuild()
 ValueCount.model_rebuild()
 IncomingLink.model_rebuild()
+SettingsOverride.model_rebuild()
 ProfileAnalytics.model_rebuild()
+CardinalityStatistics.model_rebuild()
+CardinalityChoice.model_rebuild()
+ValueIndicators.model_rebuild()
 PropertyAnalytics.model_rebuild()
 ParentClass.model_rebuild()
 ClassAnalytics.model_rebuild()

@@ -4,8 +4,8 @@ from collections.abc import Iterable
 from importlib.resources import files
 from string import Template
 
-from fingerprint.domain.generated.profile import ObjectTypeScope
 from fingerprint.domain.iri import to_iriref
+from fingerprint.domain.profile import ObjectTypeScope
 
 QUERY_FILES = {
     "Q0": "q0_named_graphs.rq",
