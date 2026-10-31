@@ -4,8 +4,6 @@ Rendering goes through eds4jinja2's own document building (2.1, domain-object-mo
 `render_documents` for texts in memory, `make_documents` to check every text before any file is written.
 """
 
-import json
-import re
 from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -14,34 +12,10 @@ import rdflib
 from eds4jinja2.services.report_builder import ReportBuilder
 from pydantic import BaseModel
 
-from fingerprint import config
-from fingerprint.adapters.exceptions import ConfigError, GeneratedOutputError, TemplatePackageError
-from fingerprint.domain.exceptions import IriRefError
+from fingerprint.adapters.exceptions import GeneratedOutputError, TemplatePackageError
 from fingerprint.domain.iri import curie, to_iriref, turtle_number, turtle_string, turtle_term
+from fingerprint.domain.prefixes import PrefixTable
 from fingerprint.domain.views import OutputCheck, RenderedDocument
-
-_PREFIX_KEY = re.compile(r"[A-Za-z][A-Za-z0-9_.-]*:")
-
-
-def load_prefixes(path: Path | None = None) -> dict[str, str]:  # dict-ok: prefix table
-    """`{"skos": "http://www.w3.org/2004/02/skos/core#", …}` from a `{"skos:": …}` file; default: `config.prefixes_file`.
-
-    The names reach PlantUML and Turtle text, so each must be a plain prefix and each namespace a writable IRI."""
-    location = path or config.prefixes_file
-    try:
-        table = json.loads(location.read_text())
-    except (OSError, ValueError) as error:
-        raise ConfigError(f"RDF_FINGERPRINTER_PREFIXES_FILE: cannot read {location}: {error}") from error
-    if not isinstance(table, dict):
-        raise ConfigError(f"RDF_FINGERPRINTER_PREFIXES_FILE: {location} must hold a JSON object")
-    for prefix, namespace in table.items():
-        if not (_PREFIX_KEY.fullmatch(prefix) and isinstance(namespace, str)):
-            raise ConfigError(f"RDF_FINGERPRINTER_PREFIXES_FILE: {location}: {prefix!r} is not a prefix (`name:`) with an IRI")
-        try:
-            to_iriref(namespace)
-        except IriRefError as error:
-            raise ConfigError(f"RDF_FINGERPRINTER_PREFIXES_FILE: {location}: {namespace!r} is not a writable IRI") from error
-    return {prefix.rstrip(":"): namespace for prefix, namespace in table.items()}  # dict-ok: prefix table
 
 
 def _parse_turtle(text: str) -> None:
@@ -51,18 +25,20 @@ def _parse_turtle(text: str) -> None:
 CHECKS: dict[OutputCheck, Callable[[str], None]] = {OutputCheck.turtle: _parse_turtle}
 
 
-class JinjaTemplateRenderer:
-    """Every template gets the IRI and literal filters, so custom templates can escape like the packaged ones."""
+def filters(prefixes: PrefixTable) -> dict[str, Callable[..., Any]]:  # dict-ok: eds4jinja2 filters
+    """The IRI and literal filters every template gets, bound to the profile's prefix table, so custom templates
+    escape and shorten like the packaged ones."""
+    return {  # dict-ok: eds4jinja2 filters
+        "turtle_iri": to_iriref,
+        "turtle_term": lambda iri: turtle_term(iri, prefixes)[0],
+        "turtle_string": turtle_string,
+        "turtle_number": turtle_number,
+        "curie": lambda iri: curie(iri, prefixes),
+    }
 
-    def __init__(self, prefixes: Mapping[str, str] | None = None):  # dict-ok: prefix table
-        self.prefixes = dict(load_prefixes() if prefixes is None else prefixes)  # dict-ok: prefix table
-        self.filters: dict[str, Callable[..., Any]] = {  # dict-ok: eds4jinja2 filters
-            "turtle_iri": to_iriref,
-            "turtle_term": lambda iri: turtle_term(iri, self.prefixes)[0],
-            "turtle_string": turtle_string,
-            "turtle_number": turtle_number,
-            "curie": lambda iri: curie(iri, self.prefixes),
-        }
+
+class JinjaTemplateRenderer:
+    """Renders eds4jinja2 template packages; the prefix table comes with each call (the profile's own)."""
 
     def render(
         self,
@@ -71,9 +47,10 @@ class JinjaTemplateRenderer:
         *,
         conf: Mapping[str, Any] | None = None,  # dict-ok: eds4jinja2 configuration
         autoescape: bool | None = None,
+        prefixes: PrefixTable | None = None,
     ) -> list[RenderedDocument]:
         """Each output's text, in memory: the package's template rendered with `view` = the output's view."""
-        texts = self._builder(package, conf).render_documents(_variables(outputs), autoescape=autoescape)
+        texts = self._builder(package, conf, prefixes).render_documents(_variables(outputs), autoescape=autoescape)
         return [RenderedDocument(file_name=name, text=text) for name, text in texts.items()]
 
     def make(
@@ -85,6 +62,7 @@ class JinjaTemplateRenderer:
         conf: Mapping[str, Any] | None = None,  # dict-ok: eds4jinja2 configuration
         check: OutputCheck | None = None,
         autoescape: bool | None = None,
+        prefixes: PrefixTable | None = None,
     ) -> list[Path]:
         """Render, check every text, then write them all; a text that fails its check leaves the folder untouched."""
 
@@ -95,23 +73,24 @@ class JinjaTemplateRenderer:
                 except Exception as error:  # the parser's own error types vary; the message is kept
                     raise GeneratedOutputError(f"{name} is not valid {check.value}: {error}") from error
 
-        builder = self._builder(package, conf, folder)
+        builder = self._builder(package, conf, prefixes, folder)
         return builder.make_documents(_variables(outputs), check=checked, autoescape=autoescape)
 
     def _builder(
         self,
         package: str | Path,
         conf: Mapping[str, Any] | None,  # dict-ok: eds4jinja2 configuration
+        prefixes: PrefixTable | None,
         folder: str | Path | None = None,
     ) -> ReportBuilder:
         """The package's builder, `conf` deep-merged over its `config.json` `conf`, writing into `folder`."""
         try:
-            additional = {"conf": dict(conf or {})}  # dict-ok: eds4jinja2 configuration
+            additional = {"conf": dict(conf)} if conf else None  # dict-ok: eds4jinja2 configuration
             return ReportBuilder(
                 target_path=package,
                 output_path=None if folder is None else str(folder),
                 additional_config=additional,
-                external_filters=self.filters,
+                external_filters=filters(prefixes or PrefixTable(None)),
             )
         except FileNotFoundError as error:
             raise TemplatePackageError(f"{package} is not a template package: {error}") from error

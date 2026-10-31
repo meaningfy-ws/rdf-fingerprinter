@@ -27,21 +27,61 @@ Feature: The fingerprint report and the command line
         | exact   | 120      | 120       | exact                |
         | first-N | 10000    | 50000     | first 10000 of 50000 |
 
-    Scenario: The 1.x columns survive
+    Scenario: The property columns
       Given the report is generated for the test data
       Then every class table has the columns property, subjects, min, max, avg, kind, distinct values and value types
-      And every class table has the columns confidence, cardinality and inheritance
+      And every class table has the columns confidence, cardinality, inheritance and language coverage
 
     Scenario: Absent values are shown as a dash
       Given a property whose language coverage is absent
       When the report is rendered
       Then its language coverage cell shows "—"
 
-    Scenario: Failures and settings are reported
+    Scenario: Failure listed
       Given the profile contains one failure for class "ex:Big"
       When the report is rendered
       Then the collection section lists "ex:Big" with the failed measurement and the error message
       And the collection section lists the settings used
+
+    Scenario: Short names only
+      Given the readability test profile
+      When the report is rendered
+      Then no visible text outside the namespace table, the endpoint, the settings, the failures and the caveats holds a full IRI
+
+    Scenario: Hidden namespaces are listed
+      Given the readability test profile
+      When the report is rendered
+      Then the caveats list "owl" as hidden with 1 class
+      And no "owl:" class section exists
+
+  Rule: The report is one self-contained page
+
+    Scenario: No external resources
+      Given the readability test profile
+      When the report is rendered
+      Then the page has no external stylesheet, script, image or CSS url
+
+    Scenario: Content outside the script
+      Given the readability test profile
+      When the report is rendered
+      Then without its scripts the page still has the table of contents, every class section and every table
+
+    Scenario: Search data is present
+      Given the readability test profile
+      When the report is rendered
+      Then each class section carries its prefix and a search text with its short name and full IRI
+
+    @manual
+    Scenario: Search narrows the classes
+      Given the brainframe report open in a browser
+      When the reader types "risk" in the search box
+      Then only the classes and property rows whose names or IRIs contain "risk" stay shown, and the shown count updates
+
+    @manual
+    Scenario: Namespace switched off
+      Given the brainframe report open in a browser
+      When the reader switches off a namespace
+      Then its class sections and contents entries are hidden, and the search still applies to the rest
 
   Rule: The exit status tells what happened
 
@@ -60,20 +100,21 @@ Feature: The fingerprint report and the command line
         | the endpoint requires authentication        | 3    | no report is written      |
         | the output folder does not exist            | 2    | no report is written      |
         | a setting is invalid                        | 2    | no report is written      |
+        | the prefix file is malformed                | 2    | no report is written      |
         | an unexpected error occurs                  | 4    | no report is written      |
 
-  Rule: Library callers keep the 1.x call
+  Rule: Library callers call fingerprint_report
 
     @uc_b1_2
-    Scenario: A 1.x call still works
-      When the library is called with only an endpoint and an output folder
+    Scenario: Minimal call
+      When the library is called with an endpoint, an output folder and default settings
       Then it returns the path of the main report document
 
     @uc_b1_2
-    Scenario: Custom template constants survive
-      Given a custom template that reads a constant from the additional configuration
-      When the report is generated with that constant
-      Then the constant appears in the report
+    Scenario: Custom template package
+      Given a custom template package that prints the number of graphs
+      When the report is generated with that package
+      Then the page shows that number
 
   Rule: The profile is saved with the report
 
@@ -82,6 +123,7 @@ Feature: The fingerprint report and the command line
       Given every class is profiled
       When the fingerprint command runs
       Then the output folder holds the report and the profile file
+      And the profile file holds a namespace table
 
     @uc_b1_1
     Scenario: Recorded failures are saved too
@@ -103,8 +145,14 @@ Feature: The fingerprint report and the command line
     @uc_b2_2
     Scenario: Report plus shapes in one run
       Given every class is profiled
-      When the fingerprint command runs with the shapes format
-      Then the output folder holds the report, the profile file and one shapes file per profiled graph
+      When the fingerprint command runs with the format "shacl"
+      Then the output folder holds the report, the profile file and one shapes file per non-empty profiled graph
+
+    @uc_b2_2
+    Scenario: The document is the report
+      Given every class is profiled
+      When the fingerprint command runs with the format "doc"
+      Then the output folder holds the report and no profile.html
 
     @uc_b2_2
     Scenario: An unknown format is refused
@@ -118,6 +166,6 @@ Feature: The fingerprint report and the command line
     Scenario: A failing representation keeps the report
       Given every class is profiled
       And the shapes fail to render
-      When the fingerprint command runs with the shapes format
+      When the fingerprint command runs with the format "shacl"
       Then the output folder holds the report and the profile file
       And it exits with 4

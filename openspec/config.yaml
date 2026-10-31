@@ -13,10 +13,11 @@ context: |
   Layout (2.0): fingerprint/domain (analytics, IRIREF guard, generated/ from model/*.yaml via
   `make generate-models`, read-only), fingerprint/adapters (SPARQL client, queries/*.rq),
   fingerprint/service_layer (settings, collection, report, handlers), fingerprint/entrypoints/cli.
-  Report templates in fingerprint_report_templates/ (eds4jinja2 2.x) render conf.profile, no queries.
+  Report templates in fingerprint_report_templates/ (eds4jinja2 2.x) render prepared views (`view`), no
+  queries; the report main.html is the document generator's page (3.0).
   Layers + purity contracts in .importlinter (`make check-architecture`). Poetry; Python 3.12–3.14.
   Living specs: openspec/specs/ (statistics-collection, profile-analytics, fingerprint-report,
-  developer-tooling). Gherkin in tests/features/, steps in tests/unit/steps/ (pytest-bdd).
+  profile-representations, namespace-prefixes, developer-tooling). Gherkin in tests/features/, steps in tests/unit/steps/ (pytest-bdd).
   Gate: `make check-all` (unit tests, no store; what CI runs). tests/e2e need a SPARQL store:
   Oxigraph (`make oxigraph-load-test-data`, then `make test-e2e`), local only; endpoint from
   RDF_FINGERPRINTER_TEST_ENDPOINT. Docs: Antora in docs/, GitHub Pages (`make build-docs`).

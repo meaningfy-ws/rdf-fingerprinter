@@ -35,7 +35,7 @@ As UC-W2.
 This Blue path adds only:
 
 . Exit 0 when the files are written, even if the profile records collection failures.
-. File names: `shapes-<graph>.ttl`, `diagram-<graph>.puml`, `profile.html`; `<graph>` is `default` or a readable slug with a short hash.
+. File names: `shapes-<graph>.ttl`, `diagram-<graph>.puml` and `diagram-<graph>--<module>.puml`, `main.html`; `<graph>` is `default` or a readable slug with a short hash. A graph with no shown class has no shapes or diagram file.
 
 == Minimal Guarantees (On Failure)
 
@@ -44,7 +44,9 @@ This Blue path adds only:
 
 == Extensions
 
-1a. `--shapes-namespace` given (SHACL only) — node shapes are minted under it instead of `urn:fingerprint:shape:`.
+1a. `--shapes-namespace` given (SHACL only) — every shape is minted under it instead of under each class's `<namespace>/shape/`.
+1b. `--prefixes FILE` given — its prefixes replace the saved ones for the namespaces it names.
+1c. `--exclude-namespace` / `--include-namespace` given — the classes of those namespaces are hidden or shown again.
 
 == Technology and Data Variations
 

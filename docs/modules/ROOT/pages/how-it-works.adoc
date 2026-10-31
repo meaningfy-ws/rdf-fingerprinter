@@ -32,7 +32,7 @@ flowchart TB
     ana -- analytics --> gen["Generators<br/>visit hooks → view"]
     ctx --> tr["Template renderer<br/>(eds4jinja2)"]
     gen --> tr
-    tr -- check --> files[("main.html, shapes-*.ttl,<br/>diagram-*.puml, profile.html")]
+    tr -- check --> files[("main.html, shapes-*.ttl,<br/>diagram-*.puml")]
 ....
 
 == A running example
@@ -112,10 +112,11 @@ From 2.1, through `fingerprint --format …` or one command per format reading `
 SHACL shapes (`shapes-<graph>.ttl`):: a node shape per class with a property shape per property:
 counts from the accepted label; `sh:datatype`, `sh:class` and `sh:nodeKind` from the value
 partitions, combined with `sh:or` when the values are of several kinds.
-PlantUML diagram (`diagram-<graph>.puml`):: classes, attributes, associations with multiplicities,
-generalisations (declared solid, implied dashed).
-Application-profile document (`profile.html`):: a specification in the style of SEMIC application
-profiles: overview, namespaces, a section per class with its property table, caveats.
+PlantUML diagrams (`diagram-<graph>.puml` and `diagram-<graph>--<module>.puml`):: an overview of
+the namespaces and their links, then one diagram per namespace module: classes, attributes,
+associations with multiplicities, generalisations (declared solid, implied dashed).
+Report page (`main.html`):: the profile as one static page: overview, namespaces, a section per class
+with its property table, collection, caveats; with contents, search and namespace switches.
 
 [#severity]
 === How strong is a generated shape?

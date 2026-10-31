@@ -1,0 +1,16 @@
+@startuml
+title Class diagram inferred by rdf-fingerprinter — authority:treaties — skosxl
+hide empty members
+
+class "skosxl:Label" as C6 {
+  lvont:script : resource [0..1]
+  euvoc:endDate : xsd:date [0..1]
+  euvoc:startDate : xsd:date [0..1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [0..1]
+  dcterms:type : resource [1]
+  skosxl:literalForm : rdf:langString [1]
+}
+
+
+@enduml

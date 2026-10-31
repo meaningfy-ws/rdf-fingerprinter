@@ -18,22 +18,26 @@ from pydantic import BaseModel
 
 from fingerprint import config
 from fingerprint.domain.exceptions import IriRefError
-from fingerprint.domain.iri import split_curie, to_iriref
+from fingerprint.domain.iri import to_iriref
+from fingerprint.domain.prefixes import PrefixTable, namespace_of
 from fingerprint.domain.profile import ClassAnalytics, GraphAnalytics, ProfileAnalytics, PropertyAnalytics
-from fingerprint.domain.views import GeneratorOptions, GraphText, GraphView, OutputCheck, PrefixDeclaration, RenderedDocument
+from fingerprint.domain.views import GeneratorOptions, GraphView, OutputCheck, PrefixDeclaration, RenderedDocument
+from fingerprint.domain.vocabulary import OWL, RDF, RDFS, SH
+from fingerprint.service_layer.prefixes import resolve_namespaces
 
 logger = logging.getLogger(__name__)
 
 # Graph names reach PlantUML titles and Turtle comments, where the tools interpret text: keep it plain.
 _NOT_PLAIN = re.compile(r"[^\w:/#.~ -]")
+# The meta vocabularies no output shows by default (readable-representations DEC-8).
+META_NAMESPACES = frozenset({RDF, RDFS, OWL, SH})
 
 
 class TemplateRenderer(Protocol):
-    """The port the generators and the report render through; `fingerprint.adapters.template_renderer`
-    implements it. `outputs` are (file name, view) pairs rendered with one template package; `conf` is what
-    the template sees as `conf`, over the package's own `config.json` (domain-object-model P-6)."""
-
-    prefixes: dict[str, str]  # dict-ok: prefix table
+    """The port the generators render through; `fingerprint.adapters.template_renderer` implements it.
+    `outputs` are (file name, view) pairs rendered with one template package; `conf` is what the template sees
+    as `conf`, over the package's own `config.json` (domain-object-model P-6); `prefixes` binds the `curie` and
+    `turtle_term` filters to the profile's table."""
 
     def render(
         self,
@@ -42,6 +46,7 @@ class TemplateRenderer(Protocol):
         *,
         conf: Mapping[str, Any] | None = None,  # dict-ok: eds4jinja2 configuration
         autoescape: bool | None = None,
+        prefixes: PrefixTable | None = None,
     ) -> list[RenderedDocument]:
         """The texts, in memory, in the order of `outputs`."""
         ...
@@ -55,6 +60,7 @@ class TemplateRenderer(Protocol):
         conf: Mapping[str, Any] | None = None,  # dict-ok: eds4jinja2 configuration
         check: OutputCheck | None = None,
         autoescape: bool | None = None,
+        prefixes: PrefixTable | None = None,
     ) -> list[Path]:
         """Render, check every text, then write them all under `folder`; one failed check writes nothing."""
         ...
@@ -67,6 +73,24 @@ def graph_slug(graph: str | None) -> str:
     name = next((part for part in reversed(re.split(r"[/#:]", graph)) if part), "")
     readable = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")[:40] or "graph"
     return f"{readable}-{hashlib.sha1(graph.encode()).hexdigest()[:8]}"
+
+
+def excluded_namespaces(options: GeneratorOptions, table: PrefixTable) -> tuple[set[str], list[str]]:
+    """The namespaces whose classes are left out (meta defaults + excludes − includes), and the unknown names."""
+    unknown: list[str] = []
+
+    def namespaces(names: list[str] | None) -> set[str]:
+        found = set()
+        for name in names or []:
+            entry = table.resolve(name)
+            if entry is None:
+                unknown.append(name)
+            else:
+                found.add(entry.namespace)
+        return found
+
+    excluded = (set(META_NAMESPACES) | namespaces(options.exclude_namespaces)) - namespaces(options.include_namespaces)
+    return excluded, unknown
 
 
 def plain_label(graph: str | None) -> str:
@@ -88,12 +112,16 @@ class Generator:
         template_location: str | Path | None = None,
         options: GeneratorOptions | None = None,
     ):
+        if analytics.namespaces is None:  # a profile saved before 3.0, or a library caller's own run
+            analytics = resolve_namespaces(analytics)
         self.analytics = analytics
         self.renderer = renderer
-        self.prefixes = renderer.prefixes
+        self.table = PrefixTable(analytics.namespaces)
         self.template_location = template_location
         self.options = options or GeneratorOptions()
+        self.excluded, _ = excluded_namespaces(self.options, self.table)
         self.skipped: list[str] = []  # IRIs left out because they cannot be written (P-8)
+        self.hidden: dict[str, set[str]] = {}  # dict-ok: lookup index namespace → hidden class IRIs
         self.namespaces: dict[str, str] = {}  # dict-ok: lookup index of the prefixes the labels used
 
     # --- hooks, overridden per format ---
@@ -135,13 +163,21 @@ class Generator:
             return False
         return True
 
+    def namespace(self, iri: str) -> str:
+        entry = self.table.entry_for(iri)
+        return entry.namespace if entry else namespace_of(iri)
+
+    def shown(self, iri: str) -> bool:
+        """Whether a class is shown: its namespace is not excluded (DEC-5, DEC-8)."""
+        return self.namespace(iri) not in self.excluded
+
     def label(self, iri: str) -> str:
         """A CURIE for display, remembering the namespace it used."""
-        found = split_curie(iri, self.prefixes)
-        if not found:
+        entry = self.table.entry_for(iri)
+        if entry is None:
             return iri
-        self.namespaces[found[0]] = self.prefixes[found[0]]
-        return f"{found[0]}:{found[1]}"
+        self.namespaces[entry.prefix] = entry.namespace
+        return f"{entry.prefix}:{iri[len(entry.namespace) :]}"
 
     def used_namespaces(self) -> list[PrefixDeclaration]:
         return [PrefixDeclaration(prefix=p, namespace=ns) for p, ns in sorted(self.namespaces.items())]
@@ -156,12 +192,17 @@ class Generator:
                 continue
             classes = []
             for cls in sorted(graph.class_partitions or [], key=lambda c: c.class_iri):
+                if not self.shown(cls.class_iri):
+                    self.hidden.setdefault(self.namespace(cls.class_iri), set()).add(cls.class_iri)
+                    continue
                 if not self.visit_class(graph, cls):
                     continue
                 props = sorted(cls.property_partitions or [], key=lambda p: p.property)
                 properties = [v for p in props if (v := self.visit_property(graph, cls, p)) is not None]
                 if (class_view := self.end_class(graph, cls, properties)) is not None:
                     classes.append(class_view)
+            if self.per_graph and not classes:  # no shown class: no file (profile-representations)
+                continue
             if (graph_view := self.end_graph(graph, classes)) is not None:
                 graphs.append(graph_view)
         return graphs
@@ -176,24 +217,28 @@ class Generator:
         views: list[GraphView] = graphs
         return [(self.file_name.format(slug=g.slug), g.model_copy(update={"skipped": skipped})) for g in views]
 
-    def render_graphs(self) -> list[GraphText]:
-        """The text of each graph's view, by slug (per-graph formats), e.g. for a document to embed."""
-        outputs = self.outputs()
-        documents = self.renderer.render(self._package(), outputs, conf=self._conf(), autoescape=self.autoescape)
-        return [GraphText(slug=view.slug, text=d.text) for (_, view), d in zip(outputs, documents, strict=True)]  # type: ignore[attr-defined]
-
     def serialize(self) -> list[RenderedDocument]:
         """The files, in memory."""
-        return self.renderer.render(self._package(), self.outputs(), conf=self._conf(), autoescape=self.autoescape)
+        outputs = self.outputs()
+        return self.renderer.render(
+            self._package(), outputs, conf=self._conf(), autoescape=self.autoescape, prefixes=self.table
+        )
 
     def write(self, folder: str | Path) -> list[Path]:
+        outputs = self.outputs()
         return self.renderer.make(
-            self._package(), self.outputs(), folder=folder, conf=self._conf(), check=self.check, autoescape=self.autoescape
+            self._package(),
+            outputs,
+            folder=folder,
+            conf=self._conf(),
+            check=self.check,
+            autoescape=self.autoescape,
+            prefixes=self.table,
         )
 
     def _package(self) -> str | Path:
         return self.template_location or self.template_package
 
     def _conf(self) -> Mapping[str, Any]:  # dict-ok: eds4jinja2 configuration
-        """What every template sees as `conf.profile`: the whole analytics profile."""
-        return {"profile": self.analytics}  # dict-ok: eds4jinja2 configuration
+        """Nothing beyond the package's own `config.json`: templates read their `view` (DEC-9)."""
+        return {}  # dict-ok: eds4jinja2 configuration

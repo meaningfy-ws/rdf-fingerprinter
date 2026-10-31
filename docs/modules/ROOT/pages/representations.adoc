@@ -1,21 +1,22 @@
 = Representations
-:description: SHACL shapes, a PlantUML class diagram and an application-profile document, generated from a saved profile without querying again.
+:description: The report page, SHACL shapes and PlantUML class diagrams, generated from a saved profile without querying again.
 
-A fingerprint can be published in three more forms besides the statistics report. Each is generated
-from the profile alone, so the endpoint is queried once, whatever is generated afterwards
-(xref:use-cases/ucw2.adoc[UC-W2]).
+A fingerprint is published as the report page and in two more forms. Each is generated from the
+profile alone, so the endpoint is queried once, whatever is generated afterwards
+(xref:use-cases/ucw2.adoc[UC-W2]). Every IRI is written as `prefix:local`
+(<<prefixes,Prefixes>>).
 
 [cols="1,2,3"]
 |===
 | Format | Files | Content
 
-| SHACL shapes | `shapes-<graph>.ttl`, one per graph | a node shape per class with a property shape per property
-| PlantUML diagram | `diagram-<graph>.puml`, one per graph | classes, attributes, associations, generalisations — source only
-| Profile document | `profile.html` | an application-profile specification in the style of SEMIC / EU profiles
+| Report page | `main.html` | the profile as one static page with contents, search and namespace switches
+| SHACL shapes | `shapes-<graph>.ttl`, one per graph with a shown class | a node shape per class with a property shape per property
+| PlantUML diagrams | `diagram-<graph>.puml` (overview) and `diagram-<graph>--<module>.puml` | namespaces and their links; per module the classes, attributes, associations, generalisations — source only
 |===
 
 `<graph>` is `default` for the default graph, else a readable name from the graph IRI plus a short
-hash, for example `shapes-continents-214e8f67.ttl`. The document gives each graph's suffix.
+hash, for example `shapes-continents-214e8f67.ttl`.
 
 == In the same run
 
@@ -25,7 +26,8 @@ fingerprint -e https://my.endpoint/sparql -o out --format shacl --format puml --
 ----
 
 `out/` then holds the report (`main.html`), the saved profile (`profile.json`) and the chosen
-representations. Without `--format`, only the report and `profile.json` are written.
+representations. Without `--format`, only the report and `profile.json` are written; `--format doc`
+writes nothing more, because `main.html` is the document.
 
 == Later, from the saved profile
 
@@ -44,20 +46,56 @@ Every command takes:
 | `-o`, `--output` | an existing folder (default `./output`)
 | `--threshold` | the acceptance threshold to read the profile at, in (0, 1]; default: the one recorded in the profile. Not read from the environment.
 | `--template` | a template package of your own (below)
+| `--prefixes FILE` | your prefixes, over the saved table (<<prefixes,Prefixes>>)
+| `--exclude-namespace`, `--include-namespace` | hide or show the classes of a namespace, by prefix or IRI; repeatable (<<filters,Namespace filters>>)
 |===
 
-`fingerprint-gen-shacl` also takes `--shapes-namespace` (default `urn:fingerprint:shape:`), the
-namespace of the node shape IRIs.
+`fingerprint-gen-shacl` also takes `--shapes-namespace`, and `fingerprint-gen-puml` takes
+`--module-size N` (default 15). The `fingerprint` command takes all of these, and `--no-prefix-lookup`.
 
 Exit status: 0 written; 2 for a usage error — a missing or unreadable profile file, a threshold out
 of range, a missing output folder or template package; 4 for an unexpected error, including
 generated Turtle that does not parse. A profile that recorded collection failures still generates
-(exit 0); the document lists the failures.
+(exit 0); the page lists the failures.
+
+[#prefixes]
+== Prefixes
+
+After collection, every namespace the profile uses gets a prefix, from the first source that names it:
+
+. your prefix file: `--prefixes FILE`, else `RDF_FINGERPRINTER_PREFIXES_FILE` — a JSON object
+  `{"bf:": "https://ontology.brainframe.com/2016/04/brainframe#"}`;
+. the table saved in `profile.json`, when a saved profile is rendered again;
+. the packaged prefixes (about 2,600);
+. prefix.cc's prefix list, read once per run by the `fingerprint` command (over HTTPS, or over HTTP
+  when prefix.cc's certificate fails). No namespace of your store is sent. Switch it off with
+  `--no-prefix-lookup` or `RDF_FINGERPRINTER_PREFIX_LOOKUP=false`; if prefix.cc cannot be reached,
+  one warning is logged and the run goes on;
+. a generated prefix: a sub-namespace of a named one takes its prefix plus the extra segment or
+  subdomain (`ex-core`, `ex-data`); otherwise the last meaningful path segment
+  (`https://ontology.brainframe.com/2016/04/brainframe#` → `brainframe`), else the domain's own label.
+  A clash gets a number (`graph2`).
+
+The table, with each prefix's source, is saved in `profile.json` and shown in the report. The
+outputs shorten each IRI by its longest namespace. `rdf`, `rdfs`, `owl`, `xsd`, `sh`, `fp` and
+`shape` are reserved for their standard namespaces.
+
+[#filters]
+== Namespace filters
+
+By default no output shows the classes of the meta vocabularies `rdf`, `rdfs`, `owl` and `sh`. Add a
+namespace with `--exclude-namespace bf`, bring one back with `--include-namespace owl`. A name that
+matches no namespace logs a warning. The report lists the hidden namespaces and their class counts
+under its caveats; collection is not affected.
 
 == SHACL shapes
 
-Each class gets an open node shape (`sh:targetClass`, no `sh:closed`) with a property shape per
-property its instances use, inherited ones included:
+Each class gets an open node shape (`sh:targetClass`, no `sh:closed`) with a named property shape
+per property its instances use, inherited ones included. Shapes are named after the class:
+`https://ontology.brainframe.com/2016/04/brainframe#Asset` gets
+`brainframe-shape:Asset` (`…/brainframe/shape/Asset`), and its `rdfs:label` shape
+`brainframe-shape:Asset-rdfs-label`. With `--shapes-namespace IRI`, every shape is minted there
+instead, as `shape:brainframe-Asset`; a repeated name gets `-2`, `-3`. The shapes contain:
 
 * counts from the accepted cardinality label — `1` → `sh:minCount 1`, `sh:maxCount 1`; `?` →
   `sh:maxCount 1`; `+` → `sh:minCount 1`; `*` → none; `\{n}` → `sh:minCount n`, `sh:maxCount n`;
@@ -74,37 +112,43 @@ rules are in xref:how-it-works.adoc#severity[How it works]. Validated against th
 profiled from, the shapes report no `sh:Violation`. Expect `sh:Warning` and `sh:Info` results, so
 read the severities, not just `sh:conforms`.
 
-== PlantUML diagram
+== PlantUML diagrams
 
-One `@startuml` … `@enduml` per graph. Classes show their own and refined datatype properties as
-attributes (`ex:name : xsd:string [1]`); an object property whose values are all of one profiled
-class is an association with its multiplicity; declared parents are solid generalisations, implied
-parents dashed. Render the source with any PlantUML tool; rdf-fingerprinter does not render it.
+Per graph, `diagram-<graph>.puml` is the overview: one package per namespace with its class count
+(and `referenced` for a namespace that only holds link targets), and one arrow per pair of
+namespaces counting the links between them. Then one diagram per module: a namespace's classes, or,
+when it has more than `--module-size` classes (default 15), clusters of closely linked classes named
+`<prefix>~1`, `<prefix>~2`, …. A module shows each class with its own and refined properties: an
+object property with one value class and no untyped objects is an association, anything else an
+attribute (`ex:name : xsd:string [1]`); declared parents are solid generalisations, implied parents
+dashed. Classes outside the module are grey reference boxes. There is never one diagram per class.
+Render the source with any PlantUML tool; rdf-fingerprinter does not render it.
 
-== Profile document
+== Report page
 
-Sections: overview (endpoint, dates, version, settings), namespaces, one chapter per graph with its
-files, the PlantUML source and a section per class (instances, precision, parents, and a table of
-property, value types, cardinality, usage and inheritance), and caveats: sampled classes, recorded
-failures and IRIs that could not be written in the shapes or the diagram. Static HTML, no
-JavaScript, printable.
+`main.html` is one static file with its CSS and script inline and no external request; it reads
+fully with JavaScript off, follows the browser's light or dark mode and fits a phone. It has a table
+of contents by graph, namespace and class; a search box over short names and full IRIs; one switch
+per namespace; an overview with provenance; the namespace table; per class its instances, precision,
+parents and the property table (subjects, min, max, avg, kind, distinct values, value types,
+confidence, cardinality, inheritance, language coverage); the collection section with settings and
+failures; and the caveats: sampled classes, untyped subjects, hidden namespaces and IRIs that
+could not be written. `fingerprint-gen-doc` writes the same page from a saved profile.
 
 == IRIs that cannot be written
 
 An IRI holding a space, `<`, `>`, `"`, a line break or another character Turtle forbids cannot appear
-in the shapes or the diagram — whether it names a class, a property, a parent or a value type. Such a class or property is left out of both, a WARNING is logged, and the document
+in the shapes or the diagram — whether it names a class, a property, a parent or a value type. Such a class or property is left out of both, a WARNING is logged, and the report
 lists it under its caveats, shown as text.
 
 == Your own templates
 
 Every format is an eds4jinja2 template package: a folder with `config.json`
 (`{"template": "<file>", "conf": {…}}`) and `templates/`. Pass one with `--template`. A template
-receives `view`, the generator's prepared view — a `ShapesGraph` or a `DiagramGraph` per graph, the
-`ProfileDocument` for the document, all defined in `model/fingerprint_views.yaml` — as well as
-`conf.profile` (the whole analytics profile) and the constants of its `conf`. From the 2.1 views
-schema on, a per-graph template reads `view.node_shapes`, `view.classes`, `view.graph_label`,
-`view.skipped` directly. These
-filters keep the output valid:
+receives `view`, the generator's prepared view — a `ShapesGraph` per graph, a `DiagramOverview` or a
+`DiagramModule` per diagram file (told apart by `view.kind`), the `ProfileDocument` for the page,
+all defined in `model/fingerprint_views.yaml` — and the constants of its `conf`. These filters keep
+the output valid, and shorten IRIs with the profile's namespace table:
 
 [cols="1,3"]
 |===
@@ -115,8 +159,8 @@ filters keep the output valid:
 | `curie` | a shortened IRI for display
 |===
 
-The packaged packages are in `fingerprint_report_templates/` (`shacl_shapes`, `plantuml_diagram`,
-`profile_document`). The SHACL output of a custom package is still parsed before it is written.
+The packaged packages are in `fingerprint_report_templates/` (`fingerprint_report`, `shacl_shapes`,
+`plantuml_diagram`). The SHACL output of a custom package is still parsed before it is written.
 
 WARNING: A template package is code: it runs in an unsandboxed Jinja environment with your
 permissions. Use only packages you trust. The data it renders is not trusted: escape it with the
@@ -131,7 +175,10 @@ from fingerprint.service_layer.representations import generate_from_profile_file
 generate_from_profile_file("out/profile.json", "shapes/", ["shacl"], threshold=0.9)
 generate_representations(run, "out/", ["shacl", "puml", "doc"])   # a ProfileRun already in memory
 generate_representations(run, "out/", ["shacl"], options=GeneratorOptions(shapes_namespace="https://ex.org/shape/"))
+generate_representations(run, "out/", ["puml"], options=GeneratorOptions(include_namespaces=["owl"], module_size=10))
 ----
+
+A run without a namespace table is resolved first, from the files only.
 
 `GeneratorOptions` and the views are in `fingerprint.domain.views`; the formats are the
 `RepresentationFormat` enum (`shacl`, `puml`, `doc`).

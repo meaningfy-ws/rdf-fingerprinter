@@ -53,6 +53,13 @@ enums:
         description: "L3+ — top-K values per class and property."
       links:
         description: L4 — incoming links per class.
+  PrefixSource:
+    description: Where a namespace's prefix came from (readable-representations DEC-1).
+    permissible_values:
+      user: { description: "The user's prefix file." }
+      packaged: { description: "The prefixes packaged with the fingerprinter." }
+      prefix_cc: { description: "prefix.cc's prefix list." }
+      generated: { description: "Generated from the namespace IRI." }
   NodeKind:
     description: The RDF term kind of an object.
     permissible_values:
@@ -232,6 +239,18 @@ classes:
         multivalued: true
         inlined_as_list: true
         description: Queries that failed after all retries and fallbacks.
+      namespaces:
+        range: NamespacePrefix
+        multivalued: true
+        inlined_as_list: true
+        description: The prefix of every namespace the profile uses; absent in profiles saved before 3.0.
+
+  NamespacePrefix:
+    description: A namespace and the prefix the outputs write it with.
+    attributes:
+      prefix: { required: true, description: "The prefix name, without the colon." }
+      namespace: { required: true, description: "The namespace IRI." }
+      source: { range: PrefixSource, required: true }
 
   Settings:
     description: Collection parameters, recorded so a profile can be interpreted and reproduced.

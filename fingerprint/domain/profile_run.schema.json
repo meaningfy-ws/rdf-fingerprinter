@@ -287,6 +287,30 @@
             "title": "IncomingLink",
             "type": "object"
         },
+        "NamespacePrefix": {
+            "additionalProperties": false,
+            "description": "A namespace and the prefix the outputs write it with.",
+            "properties": {
+                "namespace": {
+                    "description": "The namespace IRI.",
+                    "type": "string"
+                },
+                "prefix": {
+                    "description": "The prefix name, without the colon.",
+                    "type": "string"
+                },
+                "source": {
+                    "$ref": "#/$defs/PrefixSource"
+                }
+            },
+            "required": [
+                "prefix",
+                "namespace",
+                "source"
+            ],
+            "title": "NamespacePrefix",
+            "type": "object"
+        },
         "NodeKind": {
             "description": "The RDF term kind of an object.",
             "enum": [
@@ -348,6 +372,17 @@
             "title": "PredicatePartition",
             "type": "object"
         },
+        "PrefixSource": {
+            "description": "Where a namespace's prefix came from (readable-representations DEC-1).",
+            "enum": [
+                "user",
+                "packaged",
+                "prefix_cc",
+                "generated"
+            ],
+            "title": "PrefixSource",
+            "type": "string"
+        },
         "ProfileRun": {
             "additionalProperties": false,
             "description": "One fingerprinting run over one endpoint.",
@@ -382,6 +417,16 @@
                     "description": "The profiled graphs.",
                     "items": {
                         "$ref": "#/$defs/GraphProfile"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "namespaces": {
+                    "description": "The prefix of every namespace the profile uses; absent in profiles saved before 3.0.",
+                    "items": {
+                        "$ref": "#/$defs/NamespacePrefix"
                     },
                     "type": [
                         "array",
@@ -769,6 +814,16 @@
             "description": "The profiled graphs.",
             "items": {
                 "$ref": "#/$defs/GraphProfile"
+            },
+            "type": [
+                "array",
+                "null"
+            ]
+        },
+        "namespaces": {
+            "description": "The prefix of every namespace the profile uses; absent in profiles saved before 3.0.",
+            "items": {
+                "$ref": "#/$defs/NamespacePrefix"
             },
             "type": [
                 "array",

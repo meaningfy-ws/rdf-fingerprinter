@@ -15,14 +15,25 @@ from enum import Enum
 import click
 from pydantic import ValidationError
 
+from fingerprint import config
 from fingerprint.adapters.exceptions import EndpointUnreachable
+from fingerprint.adapters.prefixes import PrefixCcList
 from fingerprint.adapters.sparql import redact
 from fingerprint.domain.profile import Depth, ObjectTypeScope, PrecisionPolicy, SettingsOverride
+from fingerprint.domain.views import GeneratorOptions
 from fingerprint.entrypoints.cli import EXIT_FAILURES, EXIT_UNEXPECTED, EXIT_UNREACHABLE, configure_logging
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.handlers import fingerprint_report
-from fingerprint.service_layer.settings import describe, load_config_file, resolve_settings, validate_config, validate_endpoint
+from fingerprint.service_layer.representations import validate_options
+from fingerprint.service_layer.settings import (
+    describe,
+    load_config_file,
+    load_user_prefixes,
+    resolve_settings,
+    validate_config,
+    validate_endpoint,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -52,14 +63,26 @@ def _choice(enum: type[Enum]) -> click.Choice:
     "formats",
     multiple=True,
     type=click.Choice(sorted(f.value for f in GENERATORS)),
-    help="also render a representation after the report (repeatable)",
+    help="also render a representation after the report (repeatable; doc: main.html is the document)",
 )
+@click.option("--prefixes", "prefixes_file", type=click.Path(dir_okay=False), help="your prefix file, over the packaged one")
+@click.option("--no-prefix-lookup", is_flag=True, help="do not read prefix.cc's prefix list")
+@click.option("--exclude-namespace", multiple=True, help="leave out a namespace's classes (prefix or IRI; repeatable)")
+@click.option("--include-namespace", multiple=True, help="show a namespace again, e.g. owl (prefix or IRI; repeatable)")
+@click.option("--module-size", type=click.IntRange(min=1), help="most classes per PlantUML module (default 15)")
+@click.option("--shapes-namespace", help="one namespace for every SHACL shape IRI (default: each class's <ns>/shape/)")
 def fingerprint_endpoint(
     sparql_endpoint_url: str,
     output: str,
     graphs: tuple[str, ...],
     config_file: str | None,
     formats: tuple[str, ...],
+    prefixes_file: str | None,
+    no_prefix_lookup: bool,
+    exclude_namespace: tuple[str, ...],
+    include_namespace: tuple[str, ...],
+    module_size: int | None,
+    shapes_namespace: str | None,
     **options,
 ):
     """
@@ -77,13 +100,30 @@ def fingerprint_endpoint(
             cli=SettingsOverride(**options, selected_graphs=list(graphs) or None),
             config=load_config_file(config_file) if config_file else None,
         )
+        user_prefixes = load_user_prefixes(prefixes_file)
+        generator_options = GeneratorOptions(
+            exclude_namespaces=list(exclude_namespace),
+            include_namespaces=list(include_namespace),
+            module_size=module_size,
+            shapes_namespace=shapes_namespace,
+        )
+        validate_options(generator_options)
+        lookup = None if no_prefix_lookup or not config.prefix_lookup else PrefixCcList()
     except UsageError as error:
         raise click.UsageError(str(error)) from error
     except ValidationError as error:
         raise click.UsageError(describe(error)) from error
 
     try:
-        _, run = fingerprint_report(sparql_endpoint_url, output_location, settings, formats=formats)
+        _, run = fingerprint_report(
+            sparql_endpoint_url,
+            output_location,
+            settings,
+            formats=formats,
+            options=generator_options,
+            user_prefixes=user_prefixes,
+            prefix_list=lookup,
+        )
     except EndpointUnreachable as error:
         logger.error("%s", error)
         sys.exit(EXIT_UNREACHABLE)

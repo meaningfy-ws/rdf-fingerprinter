@@ -1,20 +1,28 @@
 = API Reference
 
-The library has one entry point, in `fingerprint.service_layer.handlers`.
+The library has one entry point, `fingerprint_report`, in `fingerprint.service_layer.handlers`.
 
-== generate_endpoint_fingerprint_report
+== fingerprint_report
 
 [source,python]
 ----
 from pathlib import Path
-from fingerprint.service_layer.handlers import generate_endpoint_fingerprint_report
+from fingerprint.adapters.prefixes import PrefixCcList
+from fingerprint.domain.views import GeneratorOptions
+from fingerprint.service_layer.handlers import fingerprint_report
+from fingerprint.service_layer.settings import load_user_prefixes, resolve_settings
 
-report = generate_endpoint_fingerprint_report(
-    sparql_endpoint_url="https://my.endpoint/sparql",
-    output_location=Path("report"),
-    selected_graphs=["http://example.org/graph/a", "http://example.org/graph/b"],
+settings = resolve_settings(selected_graphs=["http://example.org/graph/a"], config={"depth": "properties"})
+report, run = fingerprint_report(
+    "https://my.endpoint/sparql",
+    Path("report"),
+    settings,
+    formats=["shacl", "puml"],
+    options=GeneratorOptions(exclude_namespaces=["skos"]),
+    user_prefixes=load_user_prefixes("my-prefixes.json"),
+    prefix_list=PrefixCcList(),          # None (the default): no prefix.cc lookup
 )
-print(report)  # report/main.html
+print(report)  # report/main.html; run.failures lists what could not be measured
 ----
 
 [cols="2,2,4"]
@@ -23,53 +31,47 @@ print(report)  # report/main.html
 
 | `sparql_endpoint_url` | `str` | The SPARQL query endpoint.
 | `output_location` | `str \| Path` | An existing folder; `NotADirectoryError` otherwise.
-| `selected_graphs` | `list[str] \| None` | Graph IRIs to fingerprint, one section each; `""` is the default graph. `None` means the default graph and every named graph.
-| `external_template_location` | `str \| Path \| None` | A custom template folder (below); `None` uses the packaged template.
-| `additional_config` | `dict \| None` | Extra values merged into the template's `conf` (for example `title`); its `collection` key holds collection settings (xref:statistics.adoc#settings[Settings]).
+| `settings` | `Settings` | The collection settings; build them with `resolve_settings` (xref:statistics.adoc#settings[Settings]).
+| `formats` | `Sequence[str]` | Representations to write after the report: `shacl`, `puml` (`doc` is the report itself).
+| `options` | `GeneratorOptions \| None` | Namespace filters, module size, shapes namespace (xref:representations.adoc[Representations]).
+| `template` | `str \| Path \| None` | A template package of your own for the report page (below).
+| `user_prefixes` | `list[NamespacePrefix] \| None` | Your prefixes, over the packaged ones (xref:representations.adoc#prefixes[Prefixes]).
+| `prefix_list` | `PrefixListSource \| None` | Where to look up unnamed namespaces; `PrefixCcList()` reads prefix.cc, `None` looks up nothing.
+| `sparql` | `SparqlPort \| None` | Any SPARQL port, for example a fake in tests.
 |===
 
-Returns the `Path` of the main report document. Failed measurements are listed in the report
-and logged at WARNING; an unreachable endpoint raises `EndpointUnreachable`.
+It returns the path of `main.html` and the raw run. Every usage error — an invalid setting, an
+unwritable shapes namespace, a module size below 1 — is a `UsageError` (a `ValueError`) raised before
+any query; an endpoint unreachable at the start raises `EndpointUnreachable`. `profile.json`, with its
+namespace table, is saved before anything is rendered.
 
-== collect, analyse, render_report
+The steps are also available separately: `collect`, `resolve_namespaces`
+(`fingerprint.service_layer.prefixes`), `save_profile` and `generate_representations`
+(xref:representations.adoc#from-python[From Python]).
 
-The three steps are also available separately. `fingerprint_report(url, folder, settings, *,
-formats=(), sparql=None)` runs them all and saves `profile.json`; `sparql` takes any `SparqlPort`
-(for example a fake in tests). Separately:
+=== Migrating from 2.x
 
-[source,python]
-----
-from fingerprint.adapters.profile_file import save_profile
-from fingerprint.adapters.sparql import SparqlHttpClient
-from fingerprint.domain.analytics import analyse
-from fingerprint.service_layer.collection import collect
-from fingerprint.service_layer.report import render_report
-from fingerprint.service_layer.settings import resolve_settings
-
-settings = resolve_settings(cli={"depth": "properties"})
-run = collect(url, settings, SparqlHttpClient(url, settings.timeout_seconds))
-save_profile(run, Path("report"))                         # report/profile.json; load_profile() reads it
-report = render_report(analyse(run), Path("report"))
-----
-
-`run.failures` lists what could not be measured. Representations of a run: see
-xref:representations.adoc#from-python[Representations].
-
-== generate_report_builder_config
+`generate_endpoint_fingerprint_report`, `generate_report_builder_config` and `render_report` were
+removed in 3.0. Replace
 
 [source,python]
 ----
-generate_report_builder_config(sparql_endpoint_url, selected_graphs, external_template_location) -> dict
+generate_endpoint_fingerprint_report(url, folder, selected_graphs=graphs, additional_config={"collection": cfg})
 ----
 
-Reads the template's `config.json` and sets `conf.default_endpoint` and `conf.selected_graphs`.
-`generate_endpoint_fingerprint_report` calls it; use it to inspect the configuration a report
-will get.
+with
+
+[source,python]
+----
+fingerprint_report(url, folder, resolve_settings(selected_graphs=graphs, config=cfg))[0]
+----
+
+A custom report template now renders the page's view model instead of `conf.profile` (below).
 
 [#custom-templates]
 == Custom templates
 
-A template folder holds a `config.json` and a `templates/` folder of
+A template package holds a `config.json` and a `templates/` folder of
 https://github.com/meaningfy-ws/eds4jinja2[eds4jinja2] Jinja templates:
 
 ----
@@ -83,20 +85,17 @@ my_template/
 ----
 {
   "template": "main.html",
-  "conf": { "title": "My structural fingerprint", "type": "report" }
+  "conf": { "title": "My structural fingerprint" }
 }
 ----
 
-The templates read `conf.profile`, the analysed profile (`ProfileAnalytics`, generated from
-`model/fingerprint_analytics.yaml`), as well as `conf.default_endpoint` and `conf.selected_graphs`
-(the graphs profiled; `""` is the default graph). eds4jinja2's fetchers
-(`from_endpoint(...).with_query(...).fetch_tabular()`) remain available. Start from the packaged
-template in `fingerprint_report_templates/fingerprint_report/`; `templates/macros/profile.html`
-renders the classes and the Collection section.
+The template receives `view`, a `ProfileDocument` (`model/fingerprint_views.yaml`), with every value
+already written as text and every IRI as a short name: `view.overview`, `view.namespaces`,
+`view.graphs[*].classes[*].properties`, `view.collection`, `view.caveats`. `conf` holds your
+constants. Start from the packaged package in `fingerprint_report_templates/fingerprint_report/`.
 
-WARNING: Values in `conf.profile` come from the endpoint and are untrusted. The packaged template
-is rendered with autoescape on; a custom template is rendered as in 1.x, with autoescape off, so
-escape endpoint values yourself (`{{ value | e }}`).
+WARNING: Values in `view` come from the endpoint and are untrusted. The report page is rendered with
+autoescape on, custom packages included.
 
 == Logging
 

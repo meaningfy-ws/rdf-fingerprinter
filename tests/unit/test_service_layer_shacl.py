@@ -12,12 +12,11 @@ from tests.unit.fakes import EX, XSD, files, klass, literals, profile_run, prop,
 
 SH = Namespace("http://www.w3.org/ns/shacl#")
 FP = Namespace("https://data.meaningfy.ws/fingerprint/")
-PREFIXES = {"ex": EX, "xsd": XSD}
 
 
 def shapes(run, shapes_namespace=None) -> Graph:
     options = GeneratorOptions(shapes_namespace=shapes_namespace)
-    texts = files(ShaclGenerator(analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES), options=options).serialize())
+    texts = files(ShaclGenerator(analyse(run), JinjaTemplateRenderer(), options=options).serialize())
     (text,) = texts.values()
     return Graph().parse(data=text, format="turtle")
 
@@ -126,11 +125,23 @@ def test_a_sampled_class_is_annotated():
     assert g.value(shape, FP.precisionMode) == Literal("first_n")
 
 
-def test_shapes_are_open_and_named_under_the_namespace():
+def test_shapes_are_open_and_named_under_the_given_namespace():
     g = shapes(person(prop(EX + "p", {1: 4}, literals(4))), shapes_namespace="https://shapes.ex/")
     shape = node_shape(g, EX + "Person")
-    assert str(shape) == "https://shapes.ex/http%3A%2F%2Fexample.org%2FPerson"
+    assert str(shape) == "https://shapes.ex/ex-Person"
     assert (shape, RDF.type, SH.NodeShape) in g and g.value(shape, SH.closed) is None
+    assert str(property_shape(g, EX + "Person", EX + "p")) == "https://shapes.ex/ex-Person-ex-p"
+
+
+def test_shapes_are_named_after_the_class_namespace_by_default():
+    run = profile_run(
+        klass("http://ex.org/a#Thing", 1), klass("http://ex.org/a/Thing", 1, prop(EX + "p", {1: 1}, literals(1)))
+    )
+    g = shapes(run)
+    assert str(node_shape(g, "http://ex.org/a#Thing")) == "http://ex.org/a/shape/Thing"
+    assert str(node_shape(g, "http://ex.org/a/Thing")) == "http://ex.org/a/shape/Thing-2"
+    assert str(property_shape(g, "http://ex.org/a/Thing", EX + "p")) == "http://ex.org/a/shape/Thing-ex-p"
+    assert (property_shape(g, "http://ex.org/a/Thing", EX + "p"), RDF.type, SH.PropertyShape) in g
 
 
 def test_unusual_iris_stay_valid_turtle():
@@ -142,14 +153,14 @@ def test_unusual_iris_stay_valid_turtle():
 def test_an_unwritable_class_is_left_out():
     bad = "http://ex.org/<script>alert(1)</script> x"
     run = profile_run(klass(bad, 4), klass(EX + "Person", 4))
-    generator = ShaclGenerator(analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES))
+    generator = ShaclGenerator(analyse(run), JinjaTemplateRenderer())
     (text,) = files(generator.serialize()).values()
     assert "script" not in text and generator.skipped == [bad]
 
 
 def test_one_file_per_graph():
     run = profile_run(klass(EX + "Person", 4), graph="http://ex.org/graphs/people")
-    names = list(files(ShaclGenerator(analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES)).serialize()))
+    names = list(files(ShaclGenerator(analyse(run), JinjaTemplateRenderer()).serialize()))
     assert len(names) == 1 and names[0].startswith("shapes-people-") and names[0].endswith(".ttl")
 
 
@@ -167,7 +178,7 @@ def test_a_language_tagged_literal_without_datatype_conforms():
 def test_an_unwritable_property_is_left_out():
     bad = "http://ex.org/a b"
     run = person(prop(bad, {1: 4}, literals(4)), prop(EX + "ok", {1: 4}, literals(4)))
-    generator = ShaclGenerator(analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES))
+    generator = ShaclGenerator(analyse(run), JinjaTemplateRenderer())
     g = Graph().parse(data=only_text(generator), format="turtle")
     assert generator.skipped == [bad] and property_shape(g, EX + "Person", EX + "ok") is not None
     assert len(list(g.objects(node_shape(g, EX + "Person"), SH.property))) == 1
@@ -181,7 +192,7 @@ def test_a_literal_with_neither_datatype_nor_language_is_any_literal():
 
 def test_an_unwritable_value_type_keeps_only_the_node_kind():
     generator = ShaclGenerator(
-        analyse(person(prop(EX + "p", {1: 4}, literals(4, datatype="http://x/a b")))), JinjaTemplateRenderer(prefixes=PREFIXES)
+        analyse(person(prop(EX + "p", {1: 4}, literals(4, datatype="http://x/a b")))), JinjaTemplateRenderer()
     )
     g = Graph().parse(data=only_text(generator), format="turtle")
     ps = property_shape(g, EX + "Person", EX + "p")

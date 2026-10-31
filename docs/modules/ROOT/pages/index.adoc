@@ -15,7 +15,7 @@ structure.
 |===
 | Install | `pip install rdf-fingerprinter` (Python 3.12+)
 | Run | `fingerprint -e https://my.endpoint/sparql -o report/`
-| Library | `generate_endpoint_fingerprint_report(...)` — see xref:api-reference.adoc[]
+| Library | `fingerprint_report(...)` — see xref:api-reference.adoc[]
 | Source | https://github.com/meaningfy-ws/rdf-fingerprinter
 | Package | https://pypi.org/project/rdf-fingerprinter/
 | Licence | Apache 2.0

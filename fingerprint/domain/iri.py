@@ -1,7 +1,7 @@
 """IRI rules: the IRIREF guard every IRI passes before it goes into SPARQL or Turtle (P-3), and Turtle/display terms."""
 
 import re
-from collections.abc import Mapping
+from typing import Protocol
 
 from fingerprint.domain.exceptions import IriRefError  # noqa: F401 — also importable from here (2.0)
 
@@ -21,18 +21,16 @@ _SAFE_LOCAL = re.compile(r"[A-Za-z0-9_](?:[A-Za-z0-9_.-]*[A-Za-z0-9_-])?")
 _STRING_ESCAPES = str.maketrans({"\\": "\\\\", '"': '\\"', "\n": "\\n", "\r": "\\r", "\t": "\\t"})
 
 
-def split_curie(iri: str, prefixes: Mapping[str, str]) -> tuple[str, str] | None:  # dict-ok: prefix table
-    """(prefix, local part) for the first prefix whose namespace starts the IRI (the report's rule)."""
-    for prefix, namespace in prefixes.items():
-        if iri.startswith(namespace):
-            return prefix, iri[len(namespace) :]
-    return None
+class Shortener(Protocol):
+    """What shortens an IRI: `fingerprint.domain.prefixes.PrefixTable` (the longest namespace wins)."""
+
+    def shorten(self, iri: str) -> tuple[str, str] | None: ...
 
 
-def turtle_term(iri: str, prefixes: Mapping[str, str]) -> tuple[str, str | None]:  # dict-ok: prefix table
+def turtle_term(iri: str, prefixes: Shortener) -> tuple[str, str | None]:
     """`prefix:local` when that is a valid Turtle name, else `<iri>`; also the prefix used, to declare it."""
     iriref = to_iriref(iri)
-    found = split_curie(iri, prefixes)
+    found = prefixes.shorten(iri)
     if found and _SAFE_LOCAL.fullmatch(found[1]):
         return f"{found[0]}:{found[1]}", found[0]
     return iriref, None
@@ -52,7 +50,7 @@ def turtle_number(value: float | int | bool) -> str:
     return text + "0" if text.endswith(".") else text
 
 
-def curie(iri: str, prefixes: Mapping[str, str]) -> str:  # dict-ok: prefix table
-    """For display only: any matching namespace shortens the IRI, whatever its local part."""
-    found = split_curie(iri, prefixes)
+def curie(iri: str, prefixes: Shortener) -> str:
+    """For display only: the longest matching namespace shortens the IRI, whatever its local part."""
+    found = prefixes.shorten(iri)
     return f"{found[0]}:{found[1]}" if found else iri

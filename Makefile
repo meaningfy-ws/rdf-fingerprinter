@@ -83,7 +83,7 @@ test: ## Unit tests with coverage (no SPARQL store needed)
 
 test-e2e: ## End-to-end tests against the loaded test store (run oxigraph-load-test-data first); local only
 	@ echo -e "$(BUILD_PRINT)Running the e2e tests against $${RDF_FINGERPRINTER_TEST_ENDPOINT:-$(OXIGRAPH)/query}$(END_BUILD_PRINT)"
-	@ poetry run pytest $(TEST_PATH)/e2e
+	@ RDF_FINGERPRINTER_PREFIX_LOOKUP=false poetry run pytest $(TEST_PATH)/e2e
 
 #-----------------------------------------------------------------------------
 # Profile model — LinkML sources in model/, generated read-only Pydantic (P-10)

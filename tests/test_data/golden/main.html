@@ -1,0 +1,1370 @@
+<!doctype html><html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="rdf-fingerprinter">
+<title>RDF fingerprint</title>
+<style>
+:root {
+  --paper: #f6f7f5; --panel: #ffffff; --ink: #1d2422; --muted: #5c6764; --rule: #d8ddda; --accent: #1f6b73;
+  --chip-l: 36%; --chip-s: 52%;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --paper: #141a19; --panel: #1b2321; --ink: #e3e9e6; --muted: #98a4a0; --rule: #2d3734; --accent: #74c4cc;
+          --chip-l: 72%; --chip-s: 48%; }
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 4.5rem; }
+body { margin: 0; background: var(--paper); color: var(--ink);
+       font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center;
+       padding: .7rem 1rem; background: var(--panel); border-bottom: 1px solid var(--rule); }
+.bar h1 { margin: 0; font-size: 1.05rem; font-weight: 650; }
+.bar h1 small { font-weight: 400; color: var(--muted); }
+.bar input[type=search] { flex: 1 1 14rem; max-width: 26rem; padding: .4rem .6rem; font: inherit; color: inherit;
+       background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; }
+.count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.frame { display: grid; grid-template-columns: 17rem minmax(0, 1fr); gap: 0 2rem; max-width: 92rem; margin: 0 auto; padding: 0 1rem; }
+nav { position: sticky; top: 3.6rem; align-self: start; max-height: calc(100vh - 3.6rem); overflow: auto; padding: 1rem 0 2rem;
+      font-size: .9rem; }
+nav ul { list-style: none; margin: 0; padding: 0 0 0 .75rem; }
+nav li { margin: .1rem 0; overflow-wrap: anywhere; }
+nav summary { cursor: pointer; font-weight: 600; margin-top: .6rem; }
+nav .group { color: var(--muted); margin-top: .35rem; }
+nav fieldset { border: 0; padding: 0; margin: 1.25rem 0 0; }
+nav legend { font-weight: 600; padding: 0; margin-bottom: .3rem; }
+nav label { display: flex; gap: .4rem; align-items: center; }
+main { padding: 1rem 0 4rem; min-width: 0; }
+h2 { font-size: 1.3rem; margin: 2.2rem 0 .6rem; padding-bottom: .3rem; border-bottom: 1px solid var(--rule); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .75rem; margin: 0; }
+.facts div { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: .6rem .8rem; }
+.facts dt { color: var(--muted); font-size: .85rem; }
+.facts dd { margin: 0; font-size: 1.15rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.pfx { color: hsl(var(--h, 190) var(--chip-s) var(--chip-l)); font-weight: 600; }
+.curie { overflow-wrap: anywhere; }
+details.cls { background: var(--panel); border: 1px solid var(--rule); border-left: 4px solid hsl(var(--h, 190) var(--chip-s) var(--chip-l));
+              border-radius: 6px; margin: .7rem 0; }
+details.cls > summary { cursor: pointer; padding: .6rem .9rem; display: flex; flex-wrap: wrap; gap: .25rem 1rem; align-items: baseline; }
+details.cls > summary h3 { margin: 0; font-size: 1.02rem; }
+.meta { color: var(--muted); font-size: .88rem; }
+.scroll { overflow-x: auto; padding: 0 .9rem .8rem; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); white-space: nowrap; }
+td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.plain { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; }
+.note { color: var(--muted); }
+[hidden] { display: none !important; }
+@media (max-width: 760px) {
+  .frame { grid-template-columns: minmax(0, 1fr); }
+  nav { position: static; max-height: none; border-bottom: 1px solid var(--rule); }
+  html { scroll-padding-top: 7rem; }
+}
+@media (prefers-reduced-motion: no-preference) { details.cls[open] > .scroll { animation: open .15s ease-out; } }
+@keyframes open { from { opacity: 0; } to { opacity: 1; } }
+
+[data-ns="authority"] { --h: 190; }
+[data-ns="dcterms"] { --h: 327; }
+[data-ns="eli"] { --h: 104; }
+[data-ns="euvoc"] { --h: 241; }
+[data-ns="lemon"] { --h: 18; }
+[data-ns="lvont"] { --h: 155; }
+[data-ns="owl"] { --h: 292; }
+[data-ns="rdf"] { --h: 69; }
+[data-ns="rdfs"] { --h: 206; }
+[data-ns="skos"] { --h: 343; }
+[data-ns="skosxl"] { --h: 120; }
+[data-ns="xsd"] { --h: 257; }
+
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <h1>RDF fingerprint <small>http://localhost:7878/query</small></h1>
+  <input id="q" type="search" placeholder="Search classes and properties" aria-label="Search classes and properties" hidden data-js>
+  <span class="count" id="count" aria-live="polite">16 classes</span>
+</header>
+<div class="frame">
+<nav aria-label="Contents">
+  <a href="#overview">Overview</a> · <a href="#namespaces">Namespaces</a> · <a href="#collection">Collection</a> · <a href="#caveats">Caveats</a>
+  <details open>
+    <summary>default graph <span class="note">(5)</span></summary>
+    <div class="group"><span class="pfx" data-ns="euvoc">euvoc</span> 2</div>
+    <ul>
+      <li data-anchor="default-continent-4ed30680"><a href="#default-continent-4ed30680">Continent</a></li>
+      <li data-anchor="default-xlnotation-86ef84a2"><a href="#default-xlnotation-86ef84a2">XlNotation</a></li>
+    </ul>
+    <div class="group"><span class="pfx" data-ns="skos">skos</span> 2</div>
+    <ul>
+      <li data-anchor="default-concept-07819658"><a href="#default-concept-07819658">Concept</a></li>
+      <li data-anchor="default-conceptscheme-6d2ac9e0"><a href="#default-conceptscheme-6d2ac9e0">ConceptScheme</a></li>
+    </ul>
+    <div class="group"><span class="pfx" data-ns="skosxl">skosxl</span> 1</div>
+    <ul>
+      <li data-anchor="default-label-1f1eba51"><a href="#default-label-1f1eba51">Label</a></li>
+    </ul>
+  </details>
+  <details open>
+    <summary>authority:continents <span class="note">(5)</span></summary>
+    <div class="group"><span class="pfx" data-ns="euvoc">euvoc</span> 2</div>
+    <ul>
+      <li data-anchor="continents-214e8f67-continent-4ed30680"><a href="#continents-214e8f67-continent-4ed30680">Continent</a></li>
+      <li data-anchor="continents-214e8f67-xlnotation-86ef84a2"><a href="#continents-214e8f67-xlnotation-86ef84a2">XlNotation</a></li>
+    </ul>
+    <div class="group"><span class="pfx" data-ns="skos">skos</span> 2</div>
+    <ul>
+      <li data-anchor="continents-214e8f67-concept-07819658"><a href="#continents-214e8f67-concept-07819658">Concept</a></li>
+      <li data-anchor="continents-214e8f67-conceptscheme-6d2ac9e0"><a href="#continents-214e8f67-conceptscheme-6d2ac9e0">ConceptScheme</a></li>
+    </ul>
+    <div class="group"><span class="pfx" data-ns="skosxl">skosxl</span> 1</div>
+    <ul>
+      <li data-anchor="continents-214e8f67-label-1f1eba51"><a href="#continents-214e8f67-label-1f1eba51">Label</a></li>
+    </ul>
+  </details>
+  <details open>
+    <summary>authority:treaties <span class="note">(6)</span></summary>
+    <div class="group"><span class="pfx" data-ns="euvoc">euvoc</span> 3</div>
+    <ul>
+      <li data-anchor="treaties-3b4301a8-treaty-09a01768"><a href="#treaties-3b4301a8-treaty-09a01768">Treaty</a></li>
+      <li data-anchor="treaties-3b4301a8-xlnotation-86ef84a2"><a href="#treaties-3b4301a8-xlnotation-86ef84a2">XlNotation</a></li>
+      <li data-anchor="treaties-3b4301a8-xlnote-d7938f35"><a href="#treaties-3b4301a8-xlnote-d7938f35">XlNote</a></li>
+    </ul>
+    <div class="group"><span class="pfx" data-ns="skos">skos</span> 2</div>
+    <ul>
+      <li data-anchor="treaties-3b4301a8-concept-07819658"><a href="#treaties-3b4301a8-concept-07819658">Concept</a></li>
+      <li data-anchor="treaties-3b4301a8-conceptscheme-6d2ac9e0"><a href="#treaties-3b4301a8-conceptscheme-6d2ac9e0">ConceptScheme</a></li>
+    </ul>
+    <div class="group"><span class="pfx" data-ns="skosxl">skosxl</span> 1</div>
+    <ul>
+      <li data-anchor="treaties-3b4301a8-label-1f1eba51"><a href="#treaties-3b4301a8-label-1f1eba51">Label</a></li>
+    </ul>
+  </details>
+  <fieldset hidden data-js>
+    <legend>Show namespaces</legend>
+    <label><input type="checkbox" checked data-switch value="euvoc"> <span class="pfx" data-ns="euvoc">euvoc</span></label>
+    <label><input type="checkbox" checked data-switch value="skos"> <span class="pfx" data-ns="skos">skos</span></label>
+    <label><input type="checkbox" checked data-switch value="skosxl"> <span class="pfx" data-ns="skosxl">skosxl</span></label>
+  </fieldset>
+</nav>
+<main>
+  <section id="overview">
+    <h2>Overview</h2>
+    <dl class="facts">
+      <div><dt>Endpoint</dt><dd>http://localhost:7878/query</dd></div>
+      <div><dt>Graphs</dt><dd>3</dd></div>
+      <div><dt>Classes shown</dt><dd>16</dd></div>
+      <div><dt>Namespaces</dt><dd>12</dd></div>
+      <div><dt>Started</dt><dd>2026-10-31 12:00:00+00:00</dd></div>
+      <div><dt>Finished</dt><dd>2026-10-31 12:00:00+00:00</dd></div>
+      <div><dt>rdf-fingerprinter</dt><dd>2.1.0</dd></div>
+    </dl>
+    <p class="note">Each class states its precision: exact when every instance was read, or first N of M when only the
+      first N instances the store returned were read. Absent values are shown as —.</p>
+  </section>
+
+  <section id="namespaces">
+    <h2>Namespaces</h2>
+    <div class="scroll plain">
+    <table>
+      <thead><tr><th>Prefix</th><th>Namespace</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pfx" data-ns="authority">authority</span></td><td class="curie">http://publications.europa.eu/resources/authority/</td><td>generated</td></tr>
+        <tr><td><span class="pfx" data-ns="dcterms">dcterms</span></td><td class="curie">http://purl.org/dc/terms/</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="eli">eli</span></td><td class="curie">http://data.europa.eu/eli/ontology#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="euvoc">euvoc</span></td><td class="curie">http://publications.europa.eu/ontology/euvoc#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="lemon">lemon</span></td><td class="curie">http://lemon-model.net/lemon#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="lvont">lvont</span></td><td class="curie">http://lexvo.org/ontology#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="owl">owl</span></td><td class="curie">http://www.w3.org/2002/07/owl#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="rdf">rdf</span></td><td class="curie">http://www.w3.org/1999/02/22-rdf-syntax-ns#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="rdfs">rdfs</span></td><td class="curie">http://www.w3.org/2000/01/rdf-schema#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="skos">skos</span></td><td class="curie">http://www.w3.org/2004/02/skos/core#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="skosxl">skosxl</span></td><td class="curie">http://www.w3.org/2008/05/skos-xl#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="xsd">xsd</span></td><td class="curie">http://www.w3.org/2001/XMLSchema#</td><td>packaged</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <section id="graph-default">
+    <h2>Default graph</h2>
+    <details class="cls" id="default-continent-4ed30680" open data-ns="euvoc" data-q="euvoc:continent http://publications.europa.eu/ontology/euvoc#continent">
+      <summary>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Continent" title="http://publications.europa.eu/ontology/euvoc#Continent"><span class="pfx" data-ns="euvoc">euvoc:</span>Continent</a></h3>
+        <span class="meta">6 instances, exact</span>
+        <span class="meta">parents: <a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#xlNotation" title="http://publications.europa.eu/ontology/euvoc#xlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>xlNotation</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">6</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#inScheme" title="http://www.w3.org/2004/02/skos/core#inScheme"><span class="pfx" data-ns="skos">skos:</span>inScheme</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#topConceptOf" title="http://www.w3.org/2004/02/skos/core#topConceptOf"><span class="pfx" data-ns="skos">skos:</span>topConceptOf</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#prefLabel" title="http://www.w3.org/2008/05/skos-xl#prefLabel"><span class="pfx" data-ns="skosxl">skosxl:</span>prefLabel</a></td><td class="n">6</td><td class="n">24</td><td class="n">24</td>
+            <td class="n">24</td><td>object_property</td><td class="n">144</td>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+            <td class="n">1</td><td>exactly_n</td><td>own</td><td class="n">—</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="default-xlnotation-86ef84a2" open data-ns="euvoc" data-q="euvoc:xlnotation http://publications.europa.eu/ontology/euvoc#xlnotation">
+      <summary>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></h3>
+        <span class="meta">6 instances, exact</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/type" title="http://purl.org/dc/terms/type"><span class="pfx" data-ns="dcterms">dcterms:</span>type</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#value" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#value"><span class="pfx" data-ns="rdf">rdf:</span>value</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">6</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#string" title="http://www.w3.org/2001/XMLSchema#string"><span class="pfx" data-ns="xsd">xsd:</span>string</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="default-concept-07819658" open data-ns="skos" data-q="skos:concept http://www.w3.org/2004/02/skos/core#concept">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a></h3>
+        <span class="meta">6 instances, exact</span>
+        <span class="meta">parents: <a class="curie" href="http://publications.europa.eu/ontology/euvoc#Continent" title="http://publications.europa.eu/ontology/euvoc#Continent"><span class="pfx" data-ns="euvoc">euvoc:</span>Continent</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#xlNotation" title="http://publications.europa.eu/ontology/euvoc#xlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>xlNotation</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">6</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#inScheme" title="http://www.w3.org/2004/02/skos/core#inScheme"><span class="pfx" data-ns="skos">skos:</span>inScheme</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#topConceptOf" title="http://www.w3.org/2004/02/skos/core#topConceptOf"><span class="pfx" data-ns="skos">skos:</span>topConceptOf</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#prefLabel" title="http://www.w3.org/2008/05/skos-xl#prefLabel"><span class="pfx" data-ns="skosxl">skosxl:</span>prefLabel</a></td><td class="n">6</td><td class="n">24</td><td class="n">24</td>
+            <td class="n">24</td><td>object_property</td><td class="n">144</td>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+            <td class="n">1</td><td>exactly_n</td><td>own</td><td class="n">—</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="default-conceptscheme-6d2ac9e0" open data-ns="skos" data-q="skos:conceptscheme http://www.w3.org/2004/02/skos/core#conceptscheme">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">parents: <a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/identifier" title="http://purl.org/dc/terms/identifier"><span class="pfx" data-ns="dcterms">dcterms:</span>identifier</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#string" title="http://www.w3.org/2001/XMLSchema#string"><span class="pfx" data-ns="xsd">xsd:</span>string</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2000/01/rdf-schema#comment" title="http://www.w3.org/2000/01/rdf-schema#comment"><span class="pfx" data-ns="rdfs">rdfs:</span>comment</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2000/01/rdf-schema#Literal" title="http://www.w3.org/2000/01/rdf-schema#Literal"><span class="pfx" data-ns="rdfs">rdfs:</span>Literal</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#imports" title="http://www.w3.org/2002/07/owl#imports"><span class="pfx" data-ns="owl">owl:</span>imports</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#prefLabel" title="http://www.w3.org/2008/05/skos-xl#prefLabel"><span class="pfx" data-ns="skosxl">skosxl:</span>prefLabel</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="default-label-1f1eba51" open data-ns="skosxl" data-q="skosxl:label http://www.w3.org/2008/05/skos-xl#label">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></h3>
+        <span class="meta">145 instances, exact</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://lexvo.org/ontology#script" title="http://lexvo.org/ontology#script"><span class="pfx" data-ns="lvont">lvont:</span>script</a></td><td class="n">12</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.08</td><td>object_property</td><td class="n">2</td>
+            <td>—</td>
+            <td class="n">0.08</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">145</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">2</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">145</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">145</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/type" title="http://purl.org/dc/terms/type"><span class="pfx" data-ns="dcterms">dcterms:</span>type</a></td><td class="n">145</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#literalForm" title="http://www.w3.org/2008/05/skos-xl#literalForm"><span class="pfx" data-ns="skosxl">skosxl:</span>literalForm</a></td><td class="n">145</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">145</td>
+            <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"><span class="pfx" data-ns="rdf">rdf:</span>langString</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">1</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+  </section>
+  <section id="graph-continents-214e8f67">
+    <h2><a class="curie" href="http://publications.europa.eu/resources/authority/continents" title="http://publications.europa.eu/resources/authority/continents"><span class="pfx" data-ns="authority">authority:</span>continents</a></h2>
+    <details class="cls" id="continents-214e8f67-continent-4ed30680" open data-ns="euvoc" data-q="euvoc:continent http://publications.europa.eu/ontology/euvoc#continent">
+      <summary>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Continent" title="http://publications.europa.eu/ontology/euvoc#Continent"><span class="pfx" data-ns="euvoc">euvoc:</span>Continent</a></h3>
+        <span class="meta">6 instances, exact</span>
+        <span class="meta">parents: <a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#xlNotation" title="http://publications.europa.eu/ontology/euvoc#xlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>xlNotation</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">6</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#inScheme" title="http://www.w3.org/2004/02/skos/core#inScheme"><span class="pfx" data-ns="skos">skos:</span>inScheme</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#topConceptOf" title="http://www.w3.org/2004/02/skos/core#topConceptOf"><span class="pfx" data-ns="skos">skos:</span>topConceptOf</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#prefLabel" title="http://www.w3.org/2008/05/skos-xl#prefLabel"><span class="pfx" data-ns="skosxl">skosxl:</span>prefLabel</a></td><td class="n">6</td><td class="n">24</td><td class="n">24</td>
+            <td class="n">24</td><td>object_property</td><td class="n">144</td>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+            <td class="n">1</td><td>exactly_n</td><td>own</td><td class="n">—</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="continents-214e8f67-xlnotation-86ef84a2" open data-ns="euvoc" data-q="euvoc:xlnotation http://publications.europa.eu/ontology/euvoc#xlnotation">
+      <summary>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></h3>
+        <span class="meta">6 instances, exact</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/type" title="http://purl.org/dc/terms/type"><span class="pfx" data-ns="dcterms">dcterms:</span>type</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#value" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#value"><span class="pfx" data-ns="rdf">rdf:</span>value</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">6</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#string" title="http://www.w3.org/2001/XMLSchema#string"><span class="pfx" data-ns="xsd">xsd:</span>string</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="continents-214e8f67-concept-07819658" open data-ns="skos" data-q="skos:concept http://www.w3.org/2004/02/skos/core#concept">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a></h3>
+        <span class="meta">6 instances, exact</span>
+        <span class="meta">parents: <a class="curie" href="http://publications.europa.eu/ontology/euvoc#Continent" title="http://publications.europa.eu/ontology/euvoc#Continent"><span class="pfx" data-ns="euvoc">euvoc:</span>Continent</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#xlNotation" title="http://publications.europa.eu/ontology/euvoc#xlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>xlNotation</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">6</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#inScheme" title="http://www.w3.org/2004/02/skos/core#inScheme"><span class="pfx" data-ns="skos">skos:</span>inScheme</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#topConceptOf" title="http://www.w3.org/2004/02/skos/core#topConceptOf"><span class="pfx" data-ns="skos">skos:</span>topConceptOf</a></td><td class="n">6</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#prefLabel" title="http://www.w3.org/2008/05/skos-xl#prefLabel"><span class="pfx" data-ns="skosxl">skosxl:</span>prefLabel</a></td><td class="n">6</td><td class="n">24</td><td class="n">24</td>
+            <td class="n">24</td><td>object_property</td><td class="n">144</td>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+            <td class="n">1</td><td>exactly_n</td><td>own</td><td class="n">—</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="continents-214e8f67-conceptscheme-6d2ac9e0" open data-ns="skos" data-q="skos:conceptscheme http://www.w3.org/2004/02/skos/core#conceptscheme">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">parents: <a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/identifier" title="http://purl.org/dc/terms/identifier"><span class="pfx" data-ns="dcterms">dcterms:</span>identifier</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#string" title="http://www.w3.org/2001/XMLSchema#string"><span class="pfx" data-ns="xsd">xsd:</span>string</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2000/01/rdf-schema#comment" title="http://www.w3.org/2000/01/rdf-schema#comment"><span class="pfx" data-ns="rdfs">rdfs:</span>comment</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2000/01/rdf-schema#Literal" title="http://www.w3.org/2000/01/rdf-schema#Literal"><span class="pfx" data-ns="rdfs">rdfs:</span>Literal</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#imports" title="http://www.w3.org/2002/07/owl#imports"><span class="pfx" data-ns="owl">owl:</span>imports</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#prefLabel" title="http://www.w3.org/2008/05/skos-xl#prefLabel"><span class="pfx" data-ns="skosxl">skosxl:</span>prefLabel</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="continents-214e8f67-label-1f1eba51" open data-ns="skosxl" data-q="skosxl:label http://www.w3.org/2008/05/skos-xl#label">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></h3>
+        <span class="meta">145 instances, exact</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://lexvo.org/ontology#script" title="http://lexvo.org/ontology#script"><span class="pfx" data-ns="lvont">lvont:</span>script</a></td><td class="n">12</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.08</td><td>object_property</td><td class="n">2</td>
+            <td>—</td>
+            <td class="n">0.08</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">145</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">2</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">145</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">145</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/type" title="http://purl.org/dc/terms/type"><span class="pfx" data-ns="dcterms">dcterms:</span>type</a></td><td class="n">145</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#literalForm" title="http://www.w3.org/2008/05/skos-xl#literalForm"><span class="pfx" data-ns="skosxl">skosxl:</span>literalForm</a></td><td class="n">145</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">145</td>
+            <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"><span class="pfx" data-ns="rdf">rdf:</span>langString</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">1</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+  </section>
+  <section id="graph-treaties-3b4301a8">
+    <h2><a class="curie" href="http://publications.europa.eu/resources/authority/treaties" title="http://publications.europa.eu/resources/authority/treaties"><span class="pfx" data-ns="authority">authority:</span>treaties</a></h2>
+    <details class="cls" id="treaties-3b4301a8-treaty-09a01768" open data-ns="euvoc" data-q="euvoc:treaty http://publications.europa.eu/ontology/euvoc#treaty">
+      <summary>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Treaty" title="http://publications.europa.eu/ontology/euvoc#Treaty"><span class="pfx" data-ns="euvoc">euvoc:</span>Treaty</a></h3>
+        <span class="meta">104 instances, exact</span>
+        <span class="meta">parents: <a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://data.europa.eu/eli/ontology#date_document" title="http://data.europa.eu/eli/ontology#date_document"><span class="pfx" data-ns="eli">eli:</span>date_document</a></td><td class="n">83</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.8</td><td>datatype_property</td><td class="n">30</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.8</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://data.europa.eu/eli/ontology#first_date_entry_in_force" title="http://data.europa.eu/eli/ontology#first_date_entry_in_force"><span class="pfx" data-ns="eli">eli:</span>first_date_entry_in_force</a></td><td class="n">82</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.79</td><td>datatype_property</td><td class="n">27</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.79</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://lemon-model.net/lemon#context" title="http://lemon-model.net/lemon#context"><span class="pfx" data-ns="lemon">lemon:</span>context</a></td><td class="n">104</td><td class="n">1</td><td class="n">2</td>
+            <td class="n">1.97</td><td>object_property</td><td class="n">2</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_n</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#endDate" title="http://publications.europa.eu/ontology/euvoc#endDate"><span class="pfx" data-ns="euvoc">euvoc:</span>endDate</a></td><td class="n">22</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.21</td><td>datatype_property</td><td class="n">13</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.21</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#officialJournalDate" title="http://publications.europa.eu/ontology/euvoc#officialJournalDate"><span class="pfx" data-ns="euvoc">euvoc:</span>officialJournalDate</a></td><td class="n">92</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.88</td><td>datatype_property</td><td class="n">31</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.88</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#officialJournalNumber" title="http://publications.europa.eu/ontology/euvoc#officialJournalNumber"><span class="pfx" data-ns="euvoc">euvoc:</span>officialJournalNumber</a></td><td class="n">92</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.88</td><td>datatype_property</td><td class="n">32</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#string" title="http://www.w3.org/2001/XMLSchema#string"><span class="pfx" data-ns="xsd">xsd:</span>string</a></td>
+            <td class="n">0.88</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#officialJournalSeries" title="http://publications.europa.eu/ontology/euvoc#officialJournalSeries"><span class="pfx" data-ns="euvoc">euvoc:</span>officialJournalSeries</a></td><td class="n">92</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.88</td><td>datatype_property</td><td class="n">3</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#string" title="http://www.w3.org/2001/XMLSchema#string"><span class="pfx" data-ns="xsd">xsd:</span>string</a></td>
+            <td class="n">0.88</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#signatureLocation" title="http://publications.europa.eu/ontology/euvoc#signatureLocation"><span class="pfx" data-ns="euvoc">euvoc:</span>signatureLocation</a></td><td class="n">74</td><td class="n">0</td><td class="n">2</td>
+            <td class="n">0.73</td><td>object_property</td><td class="n">13</td>
+            <td>—</td>
+            <td class="n">0.71</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">39</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">3</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#xlChangeNote" title="http://publications.europa.eu/ontology/euvoc#xlChangeNote"><span class="pfx" data-ns="euvoc">euvoc:</span>xlChangeNote</a></td><td class="n">1</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.01</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNote" title="http://publications.europa.eu/ontology/euvoc#XlNote"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNote</a></td>
+            <td class="n">0.01</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#xlDefinition" title="http://publications.europa.eu/ontology/euvoc#xlDefinition"><span class="pfx" data-ns="euvoc">euvoc:</span>xlDefinition</a></td><td class="n">6</td><td class="n">0</td><td class="n">2</td>
+            <td class="n">0.1</td><td>object_property</td><td class="n">10</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNote" title="http://publications.europa.eu/ontology/euvoc#XlNote"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNote</a></td>
+            <td class="n">0.06</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#xlHistoryNote" title="http://publications.europa.eu/ontology/euvoc#xlHistoryNote"><span class="pfx" data-ns="euvoc">euvoc:</span>xlHistoryNote</a></td><td class="n">1</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.01</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNote" title="http://publications.europa.eu/ontology/euvoc#XlNote"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNote</a></td>
+            <td class="n">0.01</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#xlNotation" title="http://publications.europa.eu/ontology/euvoc#xlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>xlNotation</a></td><td class="n">104</td><td class="n">1</td><td class="n">6</td>
+            <td class="n">3.43</td><td>object_property</td><td class="n">357</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></td>
+            <td class="n">1</td><td>one_or_more</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">10</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/dateAccepted" title="http://purl.org/dc/terms/dateAccepted"><span class="pfx" data-ns="dcterms">dcterms:</span>dateAccepted</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">8</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/dateSubmitted" title="http://purl.org/dc/terms/dateSubmitted"><span class="pfx" data-ns="dcterms">dcterms:</span>dateSubmitted</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">8</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/isReplacedBy" title="http://purl.org/dc/terms/isReplacedBy"><span class="pfx" data-ns="dcterms">dcterms:</span>isReplacedBy</a></td><td class="n">22</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.21</td><td>object_property</td><td class="n">22</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Treaty" title="http://publications.europa.eu/ontology/euvoc#Treaty"><span class="pfx" data-ns="euvoc">euvoc:</span>Treaty</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a></td>
+            <td class="n">0.21</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/replaces" title="http://purl.org/dc/terms/replaces"><span class="pfx" data-ns="dcterms">dcterms:</span>replaces</a></td><td class="n">22</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.21</td><td>object_property</td><td class="n">22</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Treaty" title="http://publications.europa.eu/ontology/euvoc#Treaty"><span class="pfx" data-ns="euvoc">euvoc:</span>Treaty</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a></td>
+            <td class="n">0.21</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/type" title="http://purl.org/dc/terms/type"><span class="pfx" data-ns="dcterms">dcterms:</span>type</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">6</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#inScheme" title="http://www.w3.org/2004/02/skos/core#inScheme"><span class="pfx" data-ns="skos">skos:</span>inScheme</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#topConceptOf" title="http://www.w3.org/2004/02/skos/core#topConceptOf"><span class="pfx" data-ns="skos">skos:</span>topConceptOf</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#altLabel" title="http://www.w3.org/2008/05/skos-xl#altLabel"><span class="pfx" data-ns="skosxl">skosxl:</span>altLabel</a></td><td class="n">56</td><td class="n">0</td><td class="n">74</td>
+            <td class="n">19.62</td><td>object_property</td><td class="n">2040</td>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+            <td class="n">0.54</td><td>zero_or_more</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#prefLabel" title="http://www.w3.org/2008/05/skos-xl#prefLabel"><span class="pfx" data-ns="skosxl">skosxl:</span>prefLabel</a></td><td class="n">104</td><td class="n">23</td><td class="n">24</td>
+            <td class="n">23.93</td><td>object_property</td><td class="n">2489</td>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+            <td class="n">1</td><td>one_or_more</td><td>own</td><td class="n">—</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="treaties-3b4301a8-xlnotation-86ef84a2" open data-ns="euvoc" data-q="euvoc:xlnotation http://publications.europa.eu/ontology/euvoc#xlnotation">
+      <summary>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></h3>
+        <span class="meta">357 instances, exact</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#endDate" title="http://publications.europa.eu/ontology/euvoc#endDate"><span class="pfx" data-ns="euvoc">euvoc:</span>endDate</a></td><td class="n">56</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.16</td><td>datatype_property</td><td class="n">13</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.16</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">157</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.44</td><td>datatype_property</td><td class="n">39</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.44</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">157</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.44</td><td>object_property</td><td class="n">3</td>
+            <td>—</td>
+            <td class="n">0.44</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">157</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.44</td><td>datatype_property</td><td class="n">10</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.44</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/type" title="http://purl.org/dc/terms/type"><span class="pfx" data-ns="dcterms">dcterms:</span>type</a></td><td class="n">357</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">5</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#value" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#value"><span class="pfx" data-ns="rdf">rdf:</span>value</a></td><td class="n">357</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">317</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#string" title="http://www.w3.org/2001/XMLSchema#string"><span class="pfx" data-ns="xsd">xsd:</span>string</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="treaties-3b4301a8-xlnote-d7938f35" open data-ns="euvoc" data-q="euvoc:xlnote http://publications.europa.eu/ontology/euvoc#xlnote">
+      <summary>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNote" title="http://publications.europa.eu/ontology/euvoc#XlNote"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNote</a></h3>
+        <span class="meta">12 instances, exact</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">12</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">6</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">12</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">2</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">12</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">3</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/source" title="http://purl.org/dc/terms/source"><span class="pfx" data-ns="dcterms">dcterms:</span>source</a></td><td class="n">10</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.83</td><td>datatype_property</td><td class="n">3</td>
+            <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"><span class="pfx" data-ns="rdf">rdf:</span>langString</a></td>
+            <td class="n">0.83</td><td>zero_or_one</td><td>own</td><td class="n">1</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#value" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#value"><span class="pfx" data-ns="rdf">rdf:</span>value</a></td><td class="n">12</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">12</td>
+            <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"><span class="pfx" data-ns="rdf">rdf:</span>langString</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">1</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="treaties-3b4301a8-concept-07819658" open data-ns="skos" data-q="skos:concept http://www.w3.org/2004/02/skos/core#concept">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a></h3>
+        <span class="meta">104 instances, exact</span>
+        <span class="meta">parents: <a class="curie" href="http://publications.europa.eu/ontology/euvoc#Treaty" title="http://publications.europa.eu/ontology/euvoc#Treaty"><span class="pfx" data-ns="euvoc">euvoc:</span>Treaty</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://data.europa.eu/eli/ontology#date_document" title="http://data.europa.eu/eli/ontology#date_document"><span class="pfx" data-ns="eli">eli:</span>date_document</a></td><td class="n">83</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.8</td><td>datatype_property</td><td class="n">30</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.8</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://data.europa.eu/eli/ontology#first_date_entry_in_force" title="http://data.europa.eu/eli/ontology#first_date_entry_in_force"><span class="pfx" data-ns="eli">eli:</span>first_date_entry_in_force</a></td><td class="n">82</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.79</td><td>datatype_property</td><td class="n">27</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.79</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://lemon-model.net/lemon#context" title="http://lemon-model.net/lemon#context"><span class="pfx" data-ns="lemon">lemon:</span>context</a></td><td class="n">104</td><td class="n">1</td><td class="n">2</td>
+            <td class="n">1.97</td><td>object_property</td><td class="n">2</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_n</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#endDate" title="http://publications.europa.eu/ontology/euvoc#endDate"><span class="pfx" data-ns="euvoc">euvoc:</span>endDate</a></td><td class="n">22</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.21</td><td>datatype_property</td><td class="n">13</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.21</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#officialJournalDate" title="http://publications.europa.eu/ontology/euvoc#officialJournalDate"><span class="pfx" data-ns="euvoc">euvoc:</span>officialJournalDate</a></td><td class="n">92</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.88</td><td>datatype_property</td><td class="n">31</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.88</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#officialJournalNumber" title="http://publications.europa.eu/ontology/euvoc#officialJournalNumber"><span class="pfx" data-ns="euvoc">euvoc:</span>officialJournalNumber</a></td><td class="n">92</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.88</td><td>datatype_property</td><td class="n">32</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#string" title="http://www.w3.org/2001/XMLSchema#string"><span class="pfx" data-ns="xsd">xsd:</span>string</a></td>
+            <td class="n">0.88</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#officialJournalSeries" title="http://publications.europa.eu/ontology/euvoc#officialJournalSeries"><span class="pfx" data-ns="euvoc">euvoc:</span>officialJournalSeries</a></td><td class="n">92</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.88</td><td>datatype_property</td><td class="n">3</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#string" title="http://www.w3.org/2001/XMLSchema#string"><span class="pfx" data-ns="xsd">xsd:</span>string</a></td>
+            <td class="n">0.88</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#signatureLocation" title="http://publications.europa.eu/ontology/euvoc#signatureLocation"><span class="pfx" data-ns="euvoc">euvoc:</span>signatureLocation</a></td><td class="n">74</td><td class="n">0</td><td class="n">2</td>
+            <td class="n">0.73</td><td>object_property</td><td class="n">13</td>
+            <td>—</td>
+            <td class="n">0.71</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">39</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">3</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#xlChangeNote" title="http://publications.europa.eu/ontology/euvoc#xlChangeNote"><span class="pfx" data-ns="euvoc">euvoc:</span>xlChangeNote</a></td><td class="n">1</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.01</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNote" title="http://publications.europa.eu/ontology/euvoc#XlNote"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNote</a></td>
+            <td class="n">0.01</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#xlDefinition" title="http://publications.europa.eu/ontology/euvoc#xlDefinition"><span class="pfx" data-ns="euvoc">euvoc:</span>xlDefinition</a></td><td class="n">6</td><td class="n">0</td><td class="n">2</td>
+            <td class="n">0.1</td><td>object_property</td><td class="n">10</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNote" title="http://publications.europa.eu/ontology/euvoc#XlNote"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNote</a></td>
+            <td class="n">0.06</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#xlHistoryNote" title="http://publications.europa.eu/ontology/euvoc#xlHistoryNote"><span class="pfx" data-ns="euvoc">euvoc:</span>xlHistoryNote</a></td><td class="n">1</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.01</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNote" title="http://publications.europa.eu/ontology/euvoc#XlNote"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNote</a></td>
+            <td class="n">0.01</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#xlNotation" title="http://publications.europa.eu/ontology/euvoc#xlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>xlNotation</a></td><td class="n">104</td><td class="n">1</td><td class="n">6</td>
+            <td class="n">3.43</td><td>object_property</td><td class="n">357</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></td>
+            <td class="n">1</td><td>one_or_more</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">10</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/dateAccepted" title="http://purl.org/dc/terms/dateAccepted"><span class="pfx" data-ns="dcterms">dcterms:</span>dateAccepted</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">8</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/dateSubmitted" title="http://purl.org/dc/terms/dateSubmitted"><span class="pfx" data-ns="dcterms">dcterms:</span>dateSubmitted</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">8</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/isReplacedBy" title="http://purl.org/dc/terms/isReplacedBy"><span class="pfx" data-ns="dcterms">dcterms:</span>isReplacedBy</a></td><td class="n">22</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.21</td><td>object_property</td><td class="n">22</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Treaty" title="http://publications.europa.eu/ontology/euvoc#Treaty"><span class="pfx" data-ns="euvoc">euvoc:</span>Treaty</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a></td>
+            <td class="n">0.21</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/replaces" title="http://purl.org/dc/terms/replaces"><span class="pfx" data-ns="dcterms">dcterms:</span>replaces</a></td><td class="n">22</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.21</td><td>object_property</td><td class="n">22</td>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Treaty" title="http://publications.europa.eu/ontology/euvoc#Treaty"><span class="pfx" data-ns="euvoc">euvoc:</span>Treaty</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a></td>
+            <td class="n">0.21</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/type" title="http://purl.org/dc/terms/type"><span class="pfx" data-ns="dcterms">dcterms:</span>type</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">6</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#inScheme" title="http://www.w3.org/2004/02/skos/core#inScheme"><span class="pfx" data-ns="skos">skos:</span>inScheme</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#topConceptOf" title="http://www.w3.org/2004/02/skos/core#topConceptOf"><span class="pfx" data-ns="skos">skos:</span>topConceptOf</a></td><td class="n">104</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a>, <a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#altLabel" title="http://www.w3.org/2008/05/skos-xl#altLabel"><span class="pfx" data-ns="skosxl">skosxl:</span>altLabel</a></td><td class="n">56</td><td class="n">0</td><td class="n">74</td>
+            <td class="n">19.62</td><td>object_property</td><td class="n">2040</td>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+            <td class="n">0.54</td><td>zero_or_more</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#prefLabel" title="http://www.w3.org/2008/05/skos-xl#prefLabel"><span class="pfx" data-ns="skosxl">skosxl:</span>prefLabel</a></td><td class="n">104</td><td class="n">23</td><td class="n">24</td>
+            <td class="n">23.93</td><td>object_property</td><td class="n">2489</td>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+            <td class="n">1</td><td>one_or_more</td><td>own</td><td class="n">—</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="treaties-3b4301a8-conceptscheme-6d2ac9e0" open data-ns="skos" data-q="skos:conceptscheme http://www.w3.org/2004/02/skos/core#conceptscheme">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">parents: <a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/identifier" title="http://purl.org/dc/terms/identifier"><span class="pfx" data-ns="dcterms">dcterms:</span>identifier</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#string" title="http://www.w3.org/2001/XMLSchema#string"><span class="pfx" data-ns="xsd">xsd:</span>string</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2000/01/rdf-schema#comment" title="http://www.w3.org/2000/01/rdf-schema#comment"><span class="pfx" data-ns="rdfs">rdfs:</span>comment</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2000/01/rdf-schema#Literal" title="http://www.w3.org/2000/01/rdf-schema#Literal"><span class="pfx" data-ns="rdfs">rdfs:</span>Literal</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2002/07/owl#imports" title="http://www.w3.org/2002/07/owl#imports"><span class="pfx" data-ns="owl">owl:</span>imports</a></td><td class="n">1</td><td class="n">2</td><td class="n">2</td>
+            <td class="n">2</td><td>object_property</td><td class="n">2</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_n</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#prefLabel" title="http://www.w3.org/2008/05/skos-xl#prefLabel"><span class="pfx" data-ns="skosxl">skosxl:</span>prefLabel</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="treaties-3b4301a8-label-1f1eba51" open data-ns="skosxl" data-q="skosxl:label http://www.w3.org/2008/05/skos-xl#label">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></h3>
+        <span class="meta">4530 instances, exact</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td><a class="curie" href="http://lexvo.org/ontology#script" title="http://lexvo.org/ontology#script"><span class="pfx" data-ns="lvont">lvont:</span>script</a></td><td class="n">386</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.09</td><td>object_property</td><td class="n">2</td>
+            <td>—</td>
+            <td class="n">0.09</td><td>zero_or_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#endDate" title="http://publications.europa.eu/ontology/euvoc#endDate"><span class="pfx" data-ns="euvoc">euvoc:</span>endDate</a></td><td class="n">1216</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.27</td><td>datatype_property</td><td class="n">13</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.27</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td><td class="n">4080</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.9</td><td>datatype_property</td><td class="n">40</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.9</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#status" title="http://publications.europa.eu/ontology/euvoc#status"><span class="pfx" data-ns="euvoc">euvoc:</span>status</a></td><td class="n">4530</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">3</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/created" title="http://purl.org/dc/terms/created"><span class="pfx" data-ns="dcterms">dcterms:</span>created</a></td><td class="n">4080</td><td class="n">0</td><td class="n">1</td>
+            <td class="n">0.9</td><td>datatype_property</td><td class="n">11</td>
+            <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#date" title="http://www.w3.org/2001/XMLSchema#date"><span class="pfx" data-ns="xsd">xsd:</span>date</a></td>
+            <td class="n">0.9</td><td>zero_or_one</td><td>own</td><td class="n">0</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://purl.org/dc/terms/type" title="http://purl.org/dc/terms/type"><span class="pfx" data-ns="dcterms">dcterms:</span>type</a></td><td class="n">4530</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">5</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#literalForm" title="http://www.w3.org/2008/05/skos-xl#literalForm"><span class="pfx" data-ns="skosxl">skosxl:</span>literalForm</a></td><td class="n">4530</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">4176</td>
+            <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"><span class="pfx" data-ns="rdf">rdf:</span>langString</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">1</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+  </section>
+
+  <section id="collection">
+    <h2>Collection</h2>
+    <p>Every measurement succeeded.</p>
+    <details>
+      <summary>Settings used</summary>
+      <div class="scroll plain">
+      <table>
+        <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>acceptance_threshold</td><td>0.95</td></tr>
+          <tr><td>completeness_check</td><td>False</td></tr>
+          <tr><td>concurrency</td><td>4</td></tr>
+          <tr><td>depth</td><td>values</td></tr>
+          <tr><td>first_n</td><td>10000</td></tr>
+          <tr><td>graph_statistics</td><td>False</td></tr>
+          <tr><td>object_type_scope</td><td>same_graph</td></tr>
+          <tr><td>precision_policy</td><td>auto</td></tr>
+          <tr><td>selected_graphs</td><td>—</td></tr>
+          <tr><td>timeout_seconds</td><td>60</td></tr>
+          <tr><td>top_k</td><td>20</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+  </section>
+
+  <section id="caveats">
+    <h2>Caveats</h2>
+    <h3>Hidden namespaces</h3>
+    <p class="note">Their classes are left out of this page; show them with <code>--include-namespace</code>.</p>
+    <ul><li><span class="pfx" data-ns="owl" title="http://www.w3.org/2002/07/owl#">owl</span>: 1 classes</li></ul>
+  </section>
+</main>
+</div>
+
+
+<script>
+/* Search and namespace switches: they only toggle `hidden`; the page reads fully without this script. */
+(function () {
+  var q = document.getElementById("q"), count = document.getElementById("count");
+  var switches = Array.prototype.slice.call(document.querySelectorAll("input[data-switch]"));
+  var classes = Array.prototype.slice.call(document.querySelectorAll("details.cls"));
+  var entries = Array.prototype.slice.call(document.querySelectorAll("li[data-anchor]"));
+  document.querySelectorAll("[data-js]").forEach(function (el) { el.hidden = false; });
+
+  function apply() {
+    var text = q.value.trim().toLowerCase();
+    var off = {};
+    switches.forEach(function (s) { if (!s.checked) off[s.value] = true; });
+    var shown = 0;
+    classes.forEach(function (cls) {
+      var own = !text || cls.dataset.q.indexOf(text) >= 0;
+      var anyRow = false;
+      cls.querySelectorAll("tbody tr").forEach(function (row) {
+        var link = row.querySelector(".curie");
+        var haystack = (row.cells[0].textContent + " " + (link ? link.title : "")).toLowerCase();
+        var match = text && haystack.indexOf(text) >= 0;
+        anyRow = anyRow || match;
+        row.hidden = !(own || match);
+      });
+      var visible = !off[cls.dataset.ns] && (own || anyRow);
+      cls.hidden = !visible;
+      if (visible) {
+        shown += 1;
+        if (anyRow && !own) cls.open = true;
+      }
+    });
+    entries.forEach(function (li) {
+      var target = document.getElementById(li.dataset.anchor);
+      li.hidden = !target || target.hidden;
+    });
+    count.textContent = shown + " shown, " + (classes.length - shown) + " hidden";
+  }
+
+  q.addEventListener("input", apply);
+  switches.forEach(function (s) { s.addEventListener("change", apply); });
+  apply();
+})();
+</script>
+
+</body>
+</html>

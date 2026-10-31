@@ -10,7 +10,7 @@ from fingerprint.entrypoints.cli import generate
 
 SAMPLE = Path(__file__).parents[1] / "test_data" / "profiles" / "sample-profile.json"
 COMMANDS = {"shacl": generate.gen_shacl, "puml": generate.gen_puml, "doc": generate.gen_doc}
-FIRST_FILE = {"shacl": "shapes-default.ttl", "puml": "diagram-default.puml", "doc": "profile.html"}
+FIRST_FILE = {"shacl": "shapes-default.ttl", "puml": "diagram-default.puml", "doc": "main.html"}
 
 
 def invoke(command, *args):
@@ -92,7 +92,7 @@ def test_a_profile_with_failures_still_generates(tmp_path):
     out = tmp_path / "out"
     out.mkdir()
     result = invoke(generate.gen_doc, path, "-o", out)
-    assert result.exit_code == 0 and "not profiled" in (out / "profile.html").read_text()
+    assert result.exit_code == 0 and "not profiled" in (out / "main.html").read_text()
 
 
 def test_a_template_error_exits_4_and_names_the_template(tmp_path):

@@ -23,7 +23,8 @@ def fingerprinted(tmp_path_factory):
 
 def test_one_run_writes_the_report_the_profile_and_every_representation(fingerprinted):
     names = {p.name for p in fingerprinted.iterdir()}
-    assert {"main.html", "profile.json", "profile.html", "shapes-default.ttl", "diagram-default.puml"} <= names
+    assert {"main.html", "profile.json", "shapes-default.ttl", "diagram-default.puml"} <= names
+    assert "profile.html" not in names and any(n.startswith("diagram-default--") for n in names)
     assert len([n for n in names if n.startswith("shapes-")]) == 3  # default + continents + treaties
     for shapes in fingerprinted.glob("shapes-*.ttl"):
         Graph().parse(shapes, format="turtle")

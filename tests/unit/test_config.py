@@ -16,7 +16,7 @@ from fingerprint.entrypoints.cli.main import fingerprint_endpoint
 from fingerprint.service_layer import handlers
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators.generator import plain_label
-from fingerprint.service_layer.settings import resolve_settings, validate_config
+from fingerprint.service_layer.settings import load_user_prefixes, resolve_settings
 from tests.unit.fakes import FakeSparql
 
 PACKAGE = Path(__file__).parents[2] / "fingerprint"
@@ -28,9 +28,11 @@ def test_defaults_are_todays_constants():
     assert config.retry_backoff_seconds == (1, 4)
     assert config.timeout_markers == ("timeout", "time limit", "timed out", "estimated execution time")
     assert config.error_excerpt_length == 200
-    assert config.shapes_namespace == "urn:fingerprint:shape:"
+    assert config.shapes_namespace is None
     assert config.default_graph_label == "default graph"
-    assert config.prefixes_file.name == "prefixes.json" and config.prefixes_file.is_file()
+    assert config.prefixes_file is None
+    assert config.prefix_lookup is True
+    assert config.packaged_prefixes_file.name == "prefixes.json" and config.packaged_prefixes_file.is_file()
     assert config.settings_override() == SettingsOverride()
     config.validate()
 
@@ -43,6 +45,8 @@ def test_values_are_coerced():
                 "RDF_FINGERPRINTER_TIMEOUT_MARKERS": "Deadline,",
                 "RDF_FINGERPRINTER_ERROR_EXCERPT_LENGTH": "50",
                 "RDF_FINGERPRINTER_PREFIXES_FILE": "/x/p.json",
+                "RDF_FINGERPRINTER_PREFIX_LOOKUP": "off",
+                "RDF_FINGERPRINTER_SHAPES_NAMESPACE": "http://ex.org/shapes/",
             }
         )
     )
@@ -50,6 +54,8 @@ def test_values_are_coerced():
     assert config.timeout_markers == ("deadline",)
     assert config.error_excerpt_length == 50
     assert config.prefixes_file == Path("/x/p.json")
+    assert config.prefix_lookup is False
+    assert config.shapes_namespace == "http://ex.org/shapes/"
 
 
 @pytest.mark.parametrize(
@@ -59,7 +65,8 @@ def test_values_are_coerced():
         ("RDF_FINGERPRINTER_RETRY_BACKOFF_SECONDS", "-1"),
         ("RDF_FINGERPRINTER_ERROR_EXCERPT_LENGTH", "0"),
         ("RDF_FINGERPRINTER_PROFILE_FILE", "a/b.json"),
-        ("RDF_FINGERPRINTER_SHAPES_NAMESPACE", ""),
+        ("RDF_FINGERPRINTER_SHAPES_NAMESPACE", "urn:x y<"),
+        ("RDF_FINGERPRINTER_PREFIX_LOOKUP", "maybe"),
         ("RDF_FINGERPRINTER_FIRST_N", "0"),
         ("RDF_FINGERPRINTER_COMPLETENESS_CHECK", "maybe"),
     ],
@@ -126,7 +133,7 @@ def test_a_bad_prefixes_file_is_a_usage_error(tmp_path, monkeypatch, content):
         path.write_text(content)
     monkeypatch.setenv("RDF_FINGERPRINTER_PREFIXES_FILE", str(path))
     with pytest.raises(UsageError, match="RDF_FINGERPRINTER_PREFIXES_FILE"):
-        validate_config()
+        load_user_prefixes()
 
 
 def test_the_default_graph_label_is_written_as_plain_text(monkeypatch):

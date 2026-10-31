@@ -35,8 +35,10 @@ xref:statistics.adoc#settings[Settings].
 
 The command writes `main.html` and `profile.json` (the raw profile, saved before the report is
 rendered) into the folder and logs its progress (one line per graph and per class) to stderr. From
-`profile.json`, the `fingerprint-gen-*` commands generate SHACL shapes, a class diagram and a
-profile document without querying again (xref:representations.adoc[]). By default it profiles the default graph and every named graph. To use your own
+`profile.json`, the `fingerprint-gen-*` commands generate SHACL shapes, class diagrams and the
+report page again without querying (xref:representations.adoc[]). By default it profiles the default
+graph and every named graph, and names every namespace with a prefix, looking unknown ones up on
+prefix.cc (`--no-prefix-lookup` to skip it; `--prefixes FILE` to choose your own). To use your own
 template, call the library (xref:api-reference.adoc[]).
 
 == Exit status
