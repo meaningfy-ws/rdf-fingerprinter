@@ -23,6 +23,7 @@ from fingerprint.domain.profile import (
     PropertyKind,
     PropertyProfile,
     ValueIndicators,
+    ValuePartition,
 )
 from fingerprint.domain.vocabulary import RDF_LANG_STRING  # noqa: F401 — also importable from here (2.0)
 
@@ -155,41 +156,44 @@ def _ordered_by_triples(weights: dict[str, int]) -> list[str]:  # dict-ok: looku
     return sorted(weights, key=lambda key: (-weights[key], key))
 
 
+def _partition_indicators(partitions: list[ValuePartition], total: int) -> ValueIndicators:
+    """Kind, value types, languages and lengths from the value partitions (Q6/Q7)."""
+    literals = [p for p in partitions if p.node_kind == NodeKind.literal]
+    literal_triples = sum(p.triples or 0 for p in literals)
+    if len(literals) == len(partitions):
+        kind = PropertyKind.datatype_property
+    else:
+        kind = PropertyKind.object_property if not literals else PropertyKind.mixed
+    types: dict[str, int] = defaultdict(int)  # dict-ok: lookup index value type → triples
+    languages: dict[str, int] = defaultdict(int)  # dict-ok: lookup index language → triples
+    untyped = 0
+    for p in partitions:
+        if p.node_kind == NodeKind.literal:
+            types[p.datatype or (RDF_LANG_STRING if p.language else "")] += p.triples or 0
+            if p.language:
+                languages[p.language] += p.triples or 0
+        elif p.object_class:
+            types[p.object_class] += p.triples or 0
+        else:
+            untyped += p.triples or 0
+    types.pop("", None)
+    value_types = _ordered_by_triples(types)
+    return ValueIndicators(
+        property_kind=kind,
+        value_types=value_types or None,
+        dominant_value_type=value_types[0] if value_types else None,
+        type_purity=_ratio(types[value_types[0]], total) if value_types else None,
+        languages=_ordered_by_triples(languages) or None,
+        untyped_object_ratio=_ratio(untyped, total - literal_triples),
+        language_coverage=_ratio(sum(languages.values()), literal_triples),
+        mean_length=_ratio(sum(p.total_length or 0 for p in literals), literal_triples),
+    )
+
+
 def value_profile(profile: PropertyProfile, total: int, with_property: int, label: str | None, top_k: int) -> ValueIndicators:
     """Indicators from value partitions (Q6/Q7) and top values (Q9); absent when those queries did not run."""
-    indicators = ValueIndicators()
     partitions = profile.value_partitions
-    if partitions:
-        literals = [p for p in partitions if p.node_kind == NodeKind.literal]
-        literal_triples = sum(p.triples or 0 for p in literals)
-        if len(literals) == len(partitions):
-            kind = PropertyKind.datatype_property
-        else:
-            kind = PropertyKind.object_property if not literals else PropertyKind.mixed
-        types: dict[str, int] = defaultdict(int)  # dict-ok: lookup index value type → triples
-        languages: dict[str, int] = defaultdict(int)  # dict-ok: lookup index language → triples
-        untyped = 0
-        for p in partitions:
-            if p.node_kind == NodeKind.literal:
-                types[p.datatype or (RDF_LANG_STRING if p.language else "")] += p.triples or 0
-                if p.language:
-                    languages[p.language] += p.triples or 0
-            elif p.object_class:
-                types[p.object_class] += p.triples or 0
-            else:
-                untyped += p.triples or 0
-        types.pop("", None)
-        value_types = _ordered_by_triples(types)
-        indicators = ValueIndicators(
-            property_kind=kind,
-            value_types=value_types or None,
-            dominant_value_type=value_types[0] if value_types else None,
-            type_purity=_ratio(types[value_types[0]], total) if value_types else None,
-            languages=_ordered_by_triples(languages) or None,
-            untyped_object_ratio=_ratio(untyped, total - literal_triples),
-            language_coverage=_ratio(sum(languages.values()), literal_triples),
-            mean_length=_ratio(sum(p.total_length or 0 for p in literals), literal_triples),
-        )
+    indicators = _partition_indicators(partitions, total) if partitions else ValueIndicators()
     if profile.distinct_objects is not None:
         indicators = indicators.model_copy(
             update={
@@ -269,12 +273,52 @@ def _namespace(iri: str) -> str:
     return iri[: cut + 1] if cut >= 0 else iri
 
 
+def _acyclic_hierarchy(
+    declared: dict[str, set[str]], parents_by_class: dict[str, list[ParentClass]]
+) -> dict[str, set[str]]:  # dict-ok: lookup indexes class → parents
+    """Every class's parents, declared or implied, without pairs that are each other's parent: those are
+    equivalent classes, neither compared nor counted in depth."""
+    hierarchy = {k: set(v) for k, v in declared.items()}  # dict-ok: lookup index class → parents
+    hierarchy.update({c: {p.parent for p in ps} for c, ps in parents_by_class.items()})  # dict-ok: lookup index
+    equivalent = {(a, b) for a, ups in hierarchy.items() for b in ups if a in hierarchy.get(b, set())}
+    return {a: {b for b in ups if (a, b) not in equivalent} for a, ups in hierarchy.items()}  # dict-ok: lookup index
+
+
+def _class_analytics(
+    c: ClassProfile, props: list[PropertyAnalytics], parents: list[ParentClass], depth: int
+) -> ClassAnalytics:
+    observed = c.observed_instances or 0
+    return ClassAnalytics(
+        **c.model_dump(exclude_none=True, exclude={"property_partitions"}),
+        property_partitions=props,
+        parents=parents,
+        hierarchy_depth=depth,
+        own_property_count=sum(p.inheritance == Inheritance.own for p in props),
+        mandatory_property_count=sum(p.confidence == 1 for p in props),
+        mean_out_degree=_ratio(sum(p.total_triples or 0 for p in props), observed),
+        label_coverage=max([p.confidence or 0 for p in props if p.property in LABEL_PREDICATES], default=0.0),
+        sample_ratio=_ratio(observed, c.instances),
+        is_exact=c.precision_mode != PrecisionMode.first_n and all(p.is_exact for p in props),
+    )
+
+
+def _vocabularies(classes: list[ClassAnalytics]) -> tuple[list[str], int]:
+    """Namespaces by weight (instances of their classes, triples of their properties), and the property count."""
+    weights: dict[str, int] = defaultdict(int)  # dict-ok: lookup index namespace → weight
+    properties: set[str] = set()
+    for analysed in classes:
+        weights[_namespace(analysed.class_iri)] += analysed.instances
+        for p in analysed.property_partitions or []:
+            properties.add(p.property)
+            weights[_namespace(p.property)] += p.total_triples or 0
+    return _ordered_by_triples(weights), len(properties)
+
+
 def graph_analytics(graph: GraphProfile, threshold: float, top_k: int) -> GraphAnalytics:
     classes = graph.class_partitions or []
     declared: dict[str, set[str]] = defaultdict(set)  # dict-ok: lookup index class → declared parents
     for edge in graph.declared_subclass_edges or []:
         declared[edge.sub_class].add(edge.super_class)
-
     props_by_class = {  # dict-ok: lookup index class → property → analytics
         c.class_iri: {
             p.property: property_analytics(p, c, threshold, top_k) for p in c.property_partitions or []
@@ -282,41 +326,17 @@ def graph_analytics(graph: GraphProfile, threshold: float, top_k: int) -> GraphA
         for c in classes
     }
     parents_by_class = {c.class_iri: _parents(c, declared) for c in classes}  # dict-ok: lookup index
-    hierarchy = {k: set(v) for k, v in declared.items()}  # dict-ok: lookup index class → parents
-    hierarchy.update({c: {p.parent for p in ps} for c, ps in parents_by_class.items()})  # dict-ok: lookup index
-    # Classes that are each other's parent are equivalent: not compared, not counted in depth.
-    equivalent = {(a, b) for a, ups in hierarchy.items() for b in ups if a in hierarchy.get(b, set())}
-    acyclic = {a: {b for b in ups if (a, b) not in equivalent} for a, ups in hierarchy.items()}  # dict-ok: lookup index
+    acyclic = _acyclic_hierarchy(declared, parents_by_class)
 
-    analysed_classes: list[ClassAnalytics] = []
+    analysed_classes = []
     for c in classes:
-        observed = c.observed_instances or 0
         compared = [props_by_class[p] for p in acyclic.get(c.class_iri, set()) if p in props_by_class]
         props = [
             p.model_copy(update={"inheritance": _inheritance(p, compared).value}) for p in props_by_class[c.class_iri].values()
         ]
-        analysed_classes.append(
-            ClassAnalytics(
-                **c.model_dump(exclude_none=True, exclude={"property_partitions"}),
-                property_partitions=props,
-                parents=parents_by_class[c.class_iri],
-                hierarchy_depth=_depth(c.class_iri, acyclic),
-                own_property_count=sum(p.inheritance == Inheritance.own for p in props),
-                mandatory_property_count=sum(p.confidence == 1 for p in props),
-                mean_out_degree=_ratio(sum(p.total_triples or 0 for p in props), observed),
-                label_coverage=max([p.confidence or 0 for p in props if p.property in LABEL_PREDICATES], default=0.0),
-                sample_ratio=_ratio(observed, c.instances),
-                is_exact=c.precision_mode != PrecisionMode.first_n and all(p.is_exact for p in props),
-            )
-        )
+        analysed_classes.append(_class_analytics(c, props, parents_by_class[c.class_iri], _depth(c.class_iri, acyclic)))
 
-    weights: dict[str, int] = defaultdict(int)  # dict-ok: lookup index namespace → weight
-    properties: set[str] = set()
-    for analysed in analysed_classes:
-        weights[_namespace(analysed.class_iri)] += analysed.instances
-        for p in analysed.property_partitions or []:
-            properties.add(p.property)
-            weights[_namespace(p.property)] += p.total_triples or 0
+    vocabularies, property_count = _vocabularies(analysed_classes)
     cross_graph = {
         part.object_class_graph
         for c in classes
@@ -333,9 +353,9 @@ def graph_analytics(graph: GraphProfile, threshold: float, top_k: int) -> GraphA
         **graph.model_dump(exclude_none=True, exclude={"class_partitions"}),
         class_partitions=analysed_classes,
         class_count=len(analysed_classes),
-        property_count=len(properties),
+        property_count=property_count,
         typed_subject_ratio=typed,
-        vocabularies=_ordered_by_triples(weights),
+        vocabularies=vocabularies,
         cross_graph_object_types=sorted(cross_graph),
     )
 

@@ -99,8 +99,8 @@ class ShaclGenerator(Generator):
         if not self.accepts(prop.property):
             return None
         labelled = prop.cardinality_label is not None and not prop.presence_only
-        constraints = self.counts(prop) + (self.value_constraints(prop) if labelled else [])
-        has_class = any(c.startswith("sh:class") or "[ sh:class" in c for c in constraints)
+        value_constraints, has_class = self.value_constraints(prop) if labelled else ([], False)
+        constraints = self.counts(prop) + value_constraints
         annotations = []
         if prop.confidence is not None:
             annotations.append(Annotation(predicate="fp:confidence", value=turtle_number(prop.confidence)))
@@ -177,15 +177,16 @@ class ShaclGenerator(Generator):
         kinds = frozenset(NodeKind(p.node_kind).value for p in prop.value_partitions or [])
         return Values(kinds, datatypes, classes, any_literal)
 
-    def value_constraints(self, prop: PropertyAnalytics) -> list[str]:
+    def value_constraints(self, prop: PropertyAnalytics) -> tuple[list[str], bool]:
         """Alternatives every observed value satisfies: datatypes, classes (only when every resource is typed)
-        and any resource when some are untyped; one alternative inline, several in sh:or."""
+        and any resource when some are untyped; one alternative inline, several in sh:or. The flag says whether
+        an sh:class constraint was written, which the severity rule needs."""
         values = self.values(prop)
         if not values.kinds:
-            return []
+            return [], False
         node_kind = [f"sh:nodeKind {NODE_KINDS[values.kinds]}"] if values.kinds in NODE_KINDS else []
         if not all(self.accepts(t) for t in sorted(values.datatypes | values.classes)):
-            return node_kind  # a value type that cannot be written: keep only the node kind
+            return node_kind, False  # a value type that cannot be written: keep only the node kind
         resource_kinds = values.kinds - {LITERAL}
         untyped = bool(resource_kinds) and (prop.untyped_object_ratio or 0) > 0
         alternatives = [f"sh:datatype {self.term(d)}" for d in sorted(values.datatypes)]
@@ -195,9 +196,11 @@ class ShaclGenerator(Generator):
             alternatives.append("sh:nodeKind sh:Literal")
         if untyped:
             alternatives.append(f"sh:nodeKind {NODE_KINDS[frozenset(resource_kinds)]}")
+        has_class = bool(values.classes) and not untyped
         if len(alternatives) == 1:
-            return [c for i, c in enumerate(alternatives + node_kind) if c not in (alternatives + node_kind)[:i]]
-        return [f"sh:or ( {' '.join(f'[ {a} ]' for a in alternatives)} )"] + node_kind
+            inline = alternatives if alternatives == node_kind else alternatives + node_kind
+            return inline, has_class
+        return [f"sh:or ( {' '.join(f'[ {a} ]' for a in alternatives)} )"] + node_kind, has_class
 
     def severity(self, cls: ClassAnalytics, prop: PropertyAnalytics, labelled: bool, has_class: bool) -> ShapeSeverity:
         """First matching rule (how-it-works, "How strong is a generated shape?")."""
