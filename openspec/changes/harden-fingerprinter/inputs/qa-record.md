@@ -26,3 +26,4 @@ Developer answers, in conversation order.
     4, batch 2 000, first_n 10 000, distinct_limit 1 000 000, top_k 20, threshold 0.95, depth
     `values`, policy `auto`, object types `same_graph`, completeness check off.
 13. Benchmarking moves to its own EPIC pitch (`benchmark-fingerprinter`).
+14. Separate implementations per mode? No — one algorithm. Batched mode carries most of the complexity → moved to a follow-up EPIC (`batched-collection`, DEC-14 re-shape).

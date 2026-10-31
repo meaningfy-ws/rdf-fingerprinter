@@ -46,7 +46,8 @@ Collection, per graph (queries and trade-offs in `inputs/stats-design.md`):
    classes (inner join, untyped counted, same or any graph); co-types.
 3. **Second wave, only where the first wave says so**: top-K values; property-presence `ASK`
    for classes read in `first_n` mode; incoming links.
-4. **Precision escalates per class on timeout**: exact → batched → first N → recorded failure.
+4. **Precision escalates per class on timeout**: exact → first N → recorded failure (batched
+   mode is the follow-up EPIC `batched-collection`, DEC-14).
 5. **Analytics**: min/max/mean/median, confidence, cardinality label with alternatives,
    property kind, type purity, language coverage, diversity, declared and implied parents,
    own/inherited properties, and more — an open catalogue.
@@ -58,9 +59,9 @@ Collection, per graph (queries and trade-offs in `inputs/stats-design.md`):
   template (eds4jinja2 cannot parallelise data-dependent fetches).
 - **DEC-2**: Staged discovery + per-class queries scoped to the class's instances; rejected: one
   global class × property aggregate (times out on large graphs, developer 2026-10-31).
-- **DEC-3**: Precise by default; sampling only as a fallback. Per class: exact → batched (VALUES
-  batches merged client-side) → first N (`LIMIT` without `ORDER BY`, labelled "first N of M",
-  developer 2026-10-31) → recorded failure. The mode used is stored per class; rejected: random
+- **DEC-3**: Precise by default; sampling only as a fallback. Per class: exact → first N (the
+  first N instances listed once, `LIMIT` without `ORDER BY`, labelled "first N of M", developer
+  2026-10-31) → recorded failure. The mode used is stored per class; rejected: random
   sampling (needs every instance IRI first).
 - **DEC-4**: Property statistics derive from per-instance cardinality votes; min/max/avg keep
   today's meaning (min 0 when some instances lack the property; avg over all instances read).
@@ -80,15 +81,24 @@ Collection, per graph (queries and trade-offs in `inputs/stats-design.md`):
 - **DEC-9**: Object types may be looked up across graphs (`object_type_scope`); the completeness
   check is a configuration property / environment variable (developer 2026-10-31).
 - **DEC-10**: One collection algorithm: the precision mode only swaps the subject source; every
-  statistic is a mergeable partial result; rejected: parallel implementations per mode.
+  statistic stays mergeable so batched mode (DEC-14) can be added without a rewrite; rejected:
+  parallel implementations per mode.
 - **DEC-11**: The default graph is always profiled, then every named graph (developer
   2026-10-31), documented for union-default-graph stores; rejected: skipping the default graph.
   Note (corrected 2026-10-31): 1.x, called with no graph selected, profiled the default graph
   only, so profiling the named graphs too is a BREAKING change listed in the CHANGELOG.
-- **DEC-12**: Defaults (developer 2026-10-31): timeout 60 s, concurrency 4, batch 2 000,
-  first_n 10 000, distinct_limit 1 000 000, top_k 20, acceptance threshold 0.95, depth `values`,
+- **DEC-12**: Defaults (developer 2026-10-31): timeout 60 s, concurrency 4,
+  first_n 10 000, top_k 20, acceptance threshold 0.95, depth `values`,
   policy `auto`, object types `same_graph`, completeness check off. Each is overridable by CLI
   option, config file or environment variable.
+
+- **DEC-14** (re-shape, developer 2026-10-31): batched mode (all instances read in VALUES
+  batches, merged client-side) moves to the follow-up EPIC `batched-collection`. Reason: it
+  carried most of the PLAN's complexity (distinct-set merging, memory limits, typed min/max
+  merge, truncated listings, blank-node handling) for the narrow case of classes too big for one
+  exact query yet readable in chunks; `benchmark-fingerprinter` will show how common that is.
+  Rejected: keeping it here (developer kept three modes earlier the same day; reversed after
+  the complexity review). Logged in `inputs/qa-record.md`.
 
 ## Rabbit-holes
 
@@ -105,6 +115,7 @@ Collection, per graph (queries and trade-offs in `inputs/stats-design.md`):
   with defaults only).
 - No deletion of repo files without explicit developer go-ahead (cleanup is recorded only).
 - No random sampling; no store-specific SPARQL.
+- No batched precision mode — the `batched-collection` EPIC (DEC-14).
 - No performance benchmark — the `benchmark-fingerprinter` EPIC (developer, 2026-10-31); this
   EPIC proves correctness and bounded per-query work, not speed-ups.
 

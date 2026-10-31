@@ -36,8 +36,7 @@ New choices made while planning (EPIC decisions are cited, not repeated):
   - `model/fingerprint_stats.yaml`, `model/fingerprint_analytics.yaml` — the LinkML sources.
   - `fingerprint/domain/generated/profile.py` — generated from `fingerprint_analytics.yaml` (which
     imports `fingerprint_stats`, so one module holds every class). See P-10.
-  - `fingerprint/domain/iri.py` (IRIREF guard), `merge.py` (batch merge), `analytics.py` (raw →
-    analytics), `values.py` (typed comparison of literal values).
+  - `fingerprint/domain/iri.py` (IRIREF guard), `analytics.py` (raw → analytics).
   - `fingerprint/adapters/sparql.py` — `SparqlPort` protocol, `SparqlWrapperClient`, the error
     classes `QueryTimeout`, `TransientError`, `PermanentError`, `EndpointUnreachable`.
   - `fingerprint/adapters/queries/*.rq` — the query templates below (package data).
@@ -45,7 +44,7 @@ New choices made while planning (EPIC decisions are cited, not repeated):
     `report.py` (`render_report`), `handlers.py` (public function, signature kept).
   - `fingerprint/entrypoints/cli/main.py`.
 - **P-2 SPARQL access.** `SparqlWrapperClient` wraps SPARQLWrapper (declared as a direct
-  dependency because we import it), JSON results, a new wrapper per call (thread-safe), timeout
+  dependency because we import it), JSON results over HTTP POST (first_n queries carry up to `first_n` IRIs in one `VALUES` block), a new wrapper per call (thread-safe), timeout
   from settings. The port is `select(query) -> list[dict[str, str | None]]` and
   `ask(query) -> bool`; unit tests pass a `FakeSparql` answering canned rows per query file name.
 - **P-3 Query templates.** `.rq` files filled with `string.Template`. Placeholders: `$graph_open`
@@ -67,16 +66,16 @@ New choices made while planning (EPIC decisions are cited, not repeated):
     `TransientError` after its two retries, or with HTTP 401, 403 or 407. For Q0 only, an
     exhausted transient error is raised as `EndpointUnreachable`, not `QueryTimeout`.
 - **P-6 Settings.** Precedence per setting: CLI option > environment variable > the
-  `selected_graphs` function parameter (graphs only) > `additional_config["collection"][key]` >
-  default. Values are parsed into the generated `Settings` class (validation from the model).
+  `selected_graphs` function parameter (graphs only) > config file > default. The config file is
+  `additional_config["collection"]` for library callers and `--config FILE` (a JSON object with the
+  same keys) for the CLI — together they fulfil DEC-12's "config file"; unknown keys are a usage
+  error. Values are parsed into the generated `Settings` class (validation from the model).
 
   | Setting (model slot) | CLI option | Env var `RDF_FINGERPRINTER_…` | Type | Default |
   |---|---|---|---|---|
   | `depth` | `--depth` | `DEPTH` | `Depth` | `values` |
   | `precision_policy` | `--precision` | `PRECISION_POLICY` | `PrecisionPolicy` | `auto` |
   | `first_n` | `--first-n` | `FIRST_N` | int ≥ 1 | 10 000 |
-  | `batch_size` | `--batch-size` | `BATCH_SIZE` | int ≥ 1 | 2 000 |
-  | `distinct_limit` | `--distinct-limit` | `DISTINCT_LIMIT` | int ≥ 1 | 1 000 000 |
   | `top_k` | `--top-k` | `TOP_K` | int ≥ 1 | 20 |
   | `acceptance_threshold` | `--threshold` | `ACCEPTANCE_THRESHOLD` | float in (0, 1] | 0.95 |
   | `object_type_scope` | `--object-types` | `OBJECT_TYPE_SCOPE` | `ObjectTypeScope` | `same_graph` |
@@ -95,7 +94,9 @@ New choices made while planning (EPIC decisions are cited, not repeated):
   raises `EndpointUnreachable`; `analyse(run) -> ProfileAnalytics` (domain);
   `render_report(analytics, output, template) -> Path`. The public
   `generate_endpoint_fingerprint_report` composes the three and returns the `Path` (1.x signature);
-  recorded failures are in the report and logged at WARNING. The CLI calls the three functions
+  recorded failures are in the report and logged at WARNING. It checks the output folder
+  **before** `collect`, so a bad path fails fast. `conf.default_endpoint` and
+  `conf.selected_graphs` are still set (the 1.x keys custom templates read), next to `conf.profile`. The CLI calls the three functions
   itself so it can read `failures`: exit **0** no failures, **1** report written with failures,
   **3** `EndpointUnreachable` (2 stays click's usage error; a missing output folder is reported as
 a click usage error, exit 2); any other unexpected exception is logged with its traceback and
@@ -140,22 +141,22 @@ adds to the previous one.
 | `values` (default) | + Q6, Q7 |
 | `rich_values` | + Q9 |
 | `links` | + Q11 |
-| `completeness_check` on, class read in `first_n` | Q10 per missing predicate (runs Q2 first if not yet run; its result is recorded in `predicate_partitions` either way) |
+| `completeness_check` on, depth ≥ `properties`, class read in `first_n` | Q10 per missing predicate (Rules); Q2 runs at discovery when the check is on, recorded in `predicate_partitions` |
 
 ### Query → `QueryKind` (for `Failure.query_kind`)
 
 | Query | Kind | Query | Kind |
 |---|---|---|---|
-| Q0 | `graphs` | Q7, Q7b | `object_classes` |
+| Q0 | `graphs` | Q7 | `object_classes` |
 | Q1 | `triples` | Q8 | `co_types` |
 | Q2, Q2a | `predicate_partitions` | Q9 | `top_values` |
 | Q3, Q3a, Q3b | `class_partitions` | Q10 | `property_presence` |
 | Q4 | `declared_hierarchy` | Q11 | `incoming_links` |
 | Q5 | `cardinality_votes` | QS | `subject_stream` |
-| Q6, Q6b | `value_partitions` | QU | `untyped_subjects` |
+| Q6 | `value_partitions` | QU | `untyped_subjects` |
 
 "All modes failed" records the kind of the last query that failed and `attempts` = number of
-modes actually tried (a skipped batched mode does not count). An IRIREF failure records the kind
+modes actually tried. An IRIREF failure records the kind
 of the query being built.
 
 ### Subject sources (DEC-10)
@@ -163,18 +164,14 @@ of the query being built.
 | Mode | `$subjects` |
 |---|---|
 | exact | `$graph_open ?s a $cls . $graph_close` |
-| first_n | `VALUES ?s { … }` — IRIs from **one** QS run with `LIMIT $limit`, `batch_size` per batch |
-| batched | `VALUES ?s { … }` — IRIs from one QS run without limit, `batch_size` per batch |
+| first_n | `VALUES ?s { … }` — all IRIs from **one** QS run, in one block |
 
-QS: `SELECT ?s { $graph_open ?s a $cls . $graph_close }` (`SELECT DISTINCT ?s` for the default
-graph), plus `LIMIT $limit` in first_n mode. Running QS once and reusing its IRIs keeps every
-query of a class on the **same** instances (a repeated `LIMIT` subquery without `ORDER BY` may
-return different rows each time). `observed_instances` = number of QS rows (first_n) or
-`instances` (exact, batched).
-- Batched: if QS returns fewer rows than `instances` (endpoint result cap), batched mode is
-  treated as failed and the class escalates.
-- Blank-node instances cannot be put in `VALUES`. If QS returns any: batched is skipped; first_n
-  falls back to the subquery source `{ SELECT ?s { $graph_open ?s a $cls . $graph_close } LIMIT
+QS: `SELECT ?s { $graph_open ?s a $cls . $graph_close } LIMIT $limit` (`SELECT DISTINCT ?s` for
+the default graph). Running QS once and reusing its IRIs keeps every query of a class on the
+**same** instances (a repeated `LIMIT` subquery without `ORDER BY` may return different rows each
+time). `observed_instances` = number of QS rows (first_n) or `instances` (exact). Every query
+reads its whole subject set in one request, so no partial results are ever merged.
+- Blank-node instances cannot be put in `VALUES`. If QS returns any, first_n falls back to the subquery source `{ SELECT ?s { $graph_open ?s a $cls . $graph_close } LIMIT
   $limit }` in every query, and the profile notes that the sample may differ between queries.
 
 ### Query templates (final text; prefixes `rdf:`, `rdfs:` declared in every file)
@@ -222,7 +219,6 @@ SELECT ?p ?kind ?dt ?lang (COUNT(*) AS ?triples) (COUNT(DISTINCT ?o) AS ?distinc
   BIND(IF(isLiteral(?o), STRLEN(STR(?o)), ?unbound) AS ?len)
   BIND(IF(isLiteral(?o), ?o, ?unbound) AS ?lit)
 } GROUP BY ?p ?kind ?dt ?lang
-# Q6b (batched only, feeds the distinct sets): SELECT DISTINCT ?p ?kind ?dt ?lang ?o { same body }
 
 # Q7 object classes; untyped objects have ?t unbound
 SELECT ?p ?kind ?t ?tg (COUNT(*) AS ?triples) (COUNT(DISTINCT ?o) AS ?objects) {
@@ -233,13 +229,12 @@ SELECT ?p ?kind ?t ?tg (COUNT(*) AS ?triples) (COUNT(DISTINCT ?o) AS ?objects) {
 } GROUP BY ?p ?kind ?t ?tg
 #   same_graph: OPTIONAL { $graph_open ?o a ?t . $graph_close }
 #   any_graph:  OPTIONAL { { ?o a ?t } UNION { GRAPH ?tg { ?o a ?t } } }
-# Q7b (batched only): SELECT DISTINCT ?p ?kind ?t ?tg ?o { same body }
 
 # Q8 co-types
 SELECT ?d (COUNT(DISTINCT ?s) AS ?subjects)
 { $subjects $graph_open ?s a ?d . $graph_close FILTER(?d != $cls) } GROUP BY ?d
 
-# Q9 top values (subject source: exact or first_n — batched uses first_n, see Rules)
+# Q9 top values (subject source of the class's mode)
 SELECT ?o (COUNT(*) AS ?triples) { $subjects $graph_open ?s $prop ?o . $graph_close }
 GROUP BY ?o ORDER BY DESC(?triples) LIMIT $k
 
@@ -264,28 +259,21 @@ collect(endpoint, settings, sparql) -> ProfileRun
   edges = Q4 once (if depth ≥ classes); copied into every GraphProfile.declared_subclass_edges
   for graph in graphs:
     graph_stats (if switch): Q1, Q2 (→ Q2a), QU
+    Q2 (→ Q2a) also here when completeness_check is on and not yet run
     instances = Q3 (timeout → Q3a + Q3b per class)
     pool.map(profile_class, classes sorted by instances desc)
   return ProfileRun(...)
 
 profile_class(cls):
-  for mode in allowed_modes(policy):        # auto: exact, batched, first_n
-    try:   partial = run_first_wave(cls, mode)   # Q8 [+Q5] [+Q6, Q7]; batched: per batch + Q6b/Q7b
-           break                            # merge partials only after all batches succeed
+  for mode in allowed_modes(policy):        # auto: exact, first_n
+    try:   partial = run_first_wave(cls, mode)   # first_n: QS once, then Q8 [+Q5] [+Q6, Q7]
+           break
     except QueryTimeout: log WARNING, discard partial, continue
     except PermanentError: record Failure, return
   else: record Failure(attempts=len(modes)), return
   second wave: Q9 per property (rich_values), Q10 (completeness), Q11 (links)
                — a failure here records a Failure for that item, keeps the class
 ```
-
-**Merge rules** (`domain/merge.py`, batched mode): histogram bins, `triples`, `total_length`,
-co-type and incoming-link counts add; `min_length`/`max_length` take min/max; `min_value`/
-`max_value` compare with `domain/values.py` (numeric XSD types as `Decimal`; `xsd:date`,
-`xsd:dateTime`, `xsd:time` via `fromisoformat`, values without timezone compared as naive;
-everything else by code point, as SPARQL does); distinct objects come from the Q6b/Q7b sets per
-partition, capped at `distinct_limit`, after which the count freezes and
-`distinct_objects_exact = false`. Each subject lives in exactly one batch, so subject counts add.
 
 **Row → model mapping.**
 - Q5 rows → `PropertyProfile.cardinality_histogram` (`values_per_subject` = `?n`, `subjects`).
@@ -308,7 +296,8 @@ For one property of one class with `O` = `observed_instances` and bins `{n: subj
 
 - `with = Σ subjects`, `without = O − with`, `total = Σ n·subjects`
 - `min = 0 if without > 0 else min(n)`; `max = max(n)`; `mean = total / O`;
-  `mean_when_present = total / with`; median, mode and stddev over the bins with the n = 0 bin added
+  `mean_when_present = total / with`; median, mode and stddev over the bins with the n = 0 bin
+  added — population stddev (`statistics.pstdev` semantics), a mode tie takes the smallest n
 - `confidence = with / O`; `is_mandatory = confidence == 1`; `is_functional = max ≤ 1`
 - **Cardinality label** at `t = acceptance_threshold`, share(x) = subjects satisfying x ÷ O:
   1. if share(n ≥ 1) ≥ t: `exactly_one` if share(n = 1) ≥ t; else `exactly_n` (with
@@ -330,7 +319,7 @@ For one property of one class with `O` = `observed_instances` and bins `{n: subj
   `exactly_one` ∧ `distinct_objects == with`; `is_enumeration_candidate` = `distinct_objects ≤
   top_k`; `top_k_share` = Σ top-value triples ÷ `total`; `entropy_estimate` = −Σ pᵢ log₂ pᵢ over the
   top values plus one bucket for the remainder (`total − Σ top`), 0 when `total = 0`.
-- `is_exact` = class mode ≠ `first_n` ∧ every partition `distinct_objects_exact`.
+- `is_exact` = class mode ≠ `first_n` (and not `presence_only`).
 - **`presence_only` properties**: only `inheritance` and `is_exact = false` are set; every
   statistic is absent. Inheritance: `inherited` if any compared parent has the property, else `own`.
 - **Inputs not collected** (depth below `values`: no Q6/Q7; below `rich_values`: no Q9): every
@@ -344,8 +333,10 @@ For one property of one class with `O` = `observed_instances` and bins `{n: subj
   other's parent and treated as **equivalent**: excluded from inheritance comparison and depth.
   `hierarchy_depth` = longest path to a class without parents over the remaining edges, cycles cut
   by a visited set. `own_property_count`, `mandatory_property_count`; `mean_out_degree` = Σ property
-  totals ÷ O; `label_coverage` = max confidence among `rdfs:label`, `skos:prefLabel`,
-  `dcterms:title`, `schema:name`, `foaf:name` (0 if none); `sample_ratio` = O ÷ instances;
+  totals ÷ O; `label_coverage` = max confidence among
+  `http://www.w3.org/2000/01/rdf-schema#label`, `http://www.w3.org/2004/02/skos/core#prefLabel`,
+  `http://purl.org/dc/terms/title`, `http://schema.org/name`, `https://schema.org/name`,
+  `http://xmlns.com/foaf/0.1/name` (0 if none); `sample_ratio` = O ÷ instances;
   `is_exact` = mode ≠ `first_n` ∧ all its properties exact.
 - **Inheritance** of property p on class C: look at C's parents that have a profile in the same
   graph (parents without a profile are listed but not compared). `inherited` if any such parent has
@@ -358,8 +349,8 @@ For one property of one class with `O` = `observed_instances` and bins `{n: subj
   `object_class_graph` values other than the graph itself.
 
 **Rules.** `rdf:type` is never a property row (Q5–Q7, Q11 filter it); type information lives in
-co-types and parents. Q9 in batched mode uses the first_n subject source and sets
-`top_values_exact = false`.
+co-types and parents. Q10 checks only the missing predicates = Q2/Q2a predicates − properties
+seen in Q5 − `rdf:type`, and runs only at depth ≥ `properties`.
 
 **Worked example.** `ex:Person`, O = 4, `ex:name` bins `{1: 2, 2: 1}` → with 3, without 1, total 4;
 min 0, max 2, mean 1.0, mean_when_present 1.33, confidence 0.75; share(n ≥ 1) = 0.75 < 0.95 →
@@ -369,7 +360,7 @@ step 2; share(n ≤ 1) = 0.75 < 0.95 → `zero_or_more`, support 1.0, alternativ
 ### Report
 
 `main.html` iterates `conf.profile.graphs → class_partitions → property_partitions` and renders, per
-class: IRI (prefixed with the packaged `prefixes.json`), instances, mode (`exact`, `batched`,
+class: IRI (prefixed with the packaged `prefixes.json`), instances, mode (`exact` or
 `first N of M`), parents; per property: property, subjects (`subjects_with_property`), min, max,
 avg (`mean`), kind, distinct values, value types — today's columns — plus confidence, cardinality
 label, inheritance. A closing "Collection" section lists settings and failures.
@@ -384,7 +375,7 @@ label, inheritance. A closing "Collection" section lists settings and failures.
 | Store derived numbers in the raw model | derive in `domain/analytics.py` | one truth; formats never disagree |
 | Query from templates or renderers | pass the analytics into the context | DEC-1, DEC-6 |
 | Edit `domain/generated/` or mutate a model object | edit YAML + regenerate; build new objects | P-10 |
-| Add per-batch `COUNT(DISTINCT)` | merge Q6b/Q7b sets | per-batch distincts overlap |
+| Re-run a `LIMIT` subquery in every first_n query | list the first N once (QS), reuse them via `VALUES` | each query could see different instances |
 | Swallow a failed query | `Failure` + WARNING + exit 1 | the 1.x silent partial report |
 
 ## Error matrix
@@ -392,20 +383,20 @@ label, inheritance. A closing "Collection" section lists settings and failures.
 | Failure mode | How it is detected | Expected handling | Log | Message (log / report) |
 |---|---|---|---|---|
 | Endpoint unreachable | Q0 connection error, transient after retries, HTTP 401/403/407 | raise `EndpointUnreachable`; CLI exit 3; no report | ERROR | `cannot reach endpoint <url>: <reason>` |
-| Q0 rejected (no `GRAPH ?g {}`) | `PermanentError` on Q0 | default graph only; `Failure(graphs)` | WARNING | `named graphs not listed (<reason>); profiling the default graph only` |
+| Q0 rejected (no `GRAPH ?g {}`) | `PermanentError` on Q0 | if `selected_graphs` is set: profile them, no Failure; else default graph only + `Failure(graphs)` | WARNING | `named graphs not listed (<reason>); profiling the default graph only` |
 | Q1/Q2/QU timeout | `QueryTimeout` | Q2 → Q2a; Q1/QU → `Failure`, slots left empty | WARNING | `graph <g>: <query> timed out after <t> s` |
 | Q3 timeout | `QueryTimeout` | Q3a + Q3b per class; a Q3b timeout → `Failure(class_partitions, class)` | WARNING | `graph <g>: class counts timed out; counting per class` |
 | Q3a timeout / error | `QueryTimeout`, `PermanentError` | `Failure(class_partitions, graph)`; graph profiled without classes; next graph | WARNING | `graph <g>: classes not listed: <reason>` |
-| Q0 timeout | `QueryTimeout` | default graph only; `Failure(graphs)` | WARNING | `named graphs not listed (timeout); profiling the default graph only` |
+| Q0 timeout | `QueryTimeout` | if `selected_graphs` is set: profile them, no Failure; else default graph only + `Failure(graphs)` | WARNING | `named graphs not listed (timeout); profiling the default graph only` |
 | Q4 timeout / error | `QueryTimeout`, `PermanentError` | `Failure(declared_hierarchy)`; no declared edges | WARNING | `declared hierarchy not read: <reason>` |
 | First-wave timeout (Q5–Q8, QS) | `QueryTimeout` | discard partial; next mode | WARNING | `class <c>: <mode> timed out after <t> s; trying <next>` |
-| QS truncated / blank-node instances | row count < instances; bnode in QS | skip batched | WARNING | `class <c>: batched mode unavailable (<reason>)` |
+| Blank-node instances in first_n | bnode in QS | subquery source for that class; profile notes the sample may vary | INFO | `class <c>: blank-node instances; first-N sample may differ between queries` |
+| first_n query too large | HTTP 400/413 on a `VALUES` query | `Failure(kind, class)`, message suggests lowering `first_n` | WARNING | `class <c>: endpoint rejected <n>-IRI query; lower --first-n` |
 | All modes failed | loop exhausted | `Failure(query_kind, class, attempts)`; class omitted | WARNING | `class <c>: not profiled after <n> attempts` |
 | Transient error | 502/503/429, reset | retry ×2 (1 s, 4 s), then `QueryTimeout` | INFO per retry | `retrying <query> (<n>/2): <reason>` |
 | Malformed query / unsupported feature | `PermanentError` | `Failure`, no retry, no escalation | WARNING | `<query> rejected by endpoint: <status> <body excerpt>` |
 | Second-wave failure (Q9, Q10, Q11) | any error after retries | `Failure` for that item; class kept | WARNING | `class <c>, property <p>: <query> failed` |
 | IRI not an IRIREF | `to_iriref` raises | `Failure` for that class/graph | WARNING | `skipping <iri>: not usable in a SPARQL query` |
-| Distinct set at limit | counter = `distinct_limit` | freeze count, `distinct_objects_exact = false` | INFO | `class <c>, property <p>: distinct count capped at <n>` |
 | Output folder missing | existing check | `NotADirectoryError` (unchanged) | — | unchanged |
 | Run finished with failures | `failures` non-empty | report written with Failures section; CLI exit 1 | WARNING | `report written to <path> with <n> failures` |
 
@@ -418,7 +409,8 @@ instances, <q> queries`).
 - [first_n bias toward store row order] → labelled per class; Q10 optional.
 - [Union-default-graph stores double count; `any_graph` lookups can return the same type from the
   default and a named graph] → documented (DEC-11); distinct counts unaffected.
-- [Endpoint result caps truncate QS] → detected by row count; batched skipped.
+- [Large `VALUES` blocks rejected by some stores] → POST; clear failure message; `first_n` adjustable.
+- [Classes too big for exact but readable in chunks get only a first-N sample] → batched mode is the follow-up EPIC `batched-collection`.
 - [Generated Pydantic shape changes with LinkML versions] → LinkML pinned in the `model` group;
   `check-models` catches drift.
 - [Report rows change for custom-template users] → eds4jinja2 fetchers kept; CHANGELOG notes.

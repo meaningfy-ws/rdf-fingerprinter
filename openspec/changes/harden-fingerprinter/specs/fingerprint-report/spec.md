@@ -10,7 +10,7 @@ SHALL NOT issue SPARQL queries; it SHALL be rendered by eds4jinja2's `ReportBuil
 
 ### Requirement: Report content
 Per graph and class the report SHALL show the class, its instance count, its precision mode
-("exact", "batched" or "first N of M") and its parents; per property it SHALL show today's columns
+("exact" or "first N of M") and its parents; per property it SHALL show today's columns
 (property, subjects using it, min, max, avg, property kind, distinct values, value types) plus
 confidence, cardinality label and own/inherited/refined, with IRIs shortened by the packaged prefixes.
 

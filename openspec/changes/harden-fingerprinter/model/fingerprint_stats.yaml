@@ -27,19 +27,15 @@ enums:
     permissible_values:
       exact:
         description: All instances in one query per statistic.
-      batched:
-        description: All instances, read in VALUES batches and merged client-side.
       first_n:
         description: Only the first N instances the store returned (LIMIT without ORDER BY).
   PrecisionPolicy:
     description: Which precision modes the collector may use.
     permissible_values:
       auto:
-        description: Start exact; on timeout escalate exact → batched → first_n.
+        description: Start exact; on timeout escalate to first_n.
       exact:
         description: Exact only; a timeout is a failure.
-      batched:
-        description: Batched only.
       first_n:
         description: First N only (fast preview).
   Depth:
@@ -87,7 +83,7 @@ enums:
       incoming_links: {}
       untyped_subjects: {}
       subject_stream:
-        description: The instance listing used by the batched mode.
+        description: The instance listing (first N) used by the first_n mode.
 
 slots:
   # --- identity of profiled things ---
@@ -150,10 +146,10 @@ slots:
     range: integer
     minimum_value: 0
     slot_uri: void:distinctObjects
-    description: Number of distinct objects (a lower bound when distinct_objects_exact is false).
+    description: Number of distinct objects.
   distinct_objects_exact:
     range: boolean
-    description: False when the distinct count stopped at the client-side memory limit (batched mode).
+    description: False when the distinct count is a lower bound (reserved for the batched-collection EPIC).
   untyped_subjects:
     range: integer
     minimum_value: 0
@@ -230,8 +226,6 @@ classes:
       depth: { range: Depth, required: true, ifabsent: "string(values)", description: "How much was collected." }
       precision_policy: { range: PrecisionPolicy, required: true, ifabsent: "string(auto)", description: "Allowed precision modes." }
       first_n: { range: integer, minimum_value: 1, ifabsent: "int(10000)", description: "N for the first_n mode." }
-      batch_size: { range: integer, minimum_value: 1, ifabsent: "int(2000)", description: "VALUES batch size for the batched mode." }
-      distinct_limit: { range: integer, minimum_value: 1, ifabsent: "int(1000000)", description: "Client-side distinct-set limit per class and property in batched mode." }
       top_k: { range: integer, minimum_value: 1, ifabsent: "int(20)", description: "How many top values to keep per class and property." }
       object_type_scope: { range: ObjectTypeScope, required: true, ifabsent: "string(same_graph)", description: "Where object types are looked up." }
       completeness_check: { range: boolean, ifabsent: "false", description: "Whether property presence was checked for first_n classes." }

@@ -36,7 +36,7 @@ co-types.
 
 ### Requirement: Per-class queries are scoped to the class
 Every per-class query SHALL select its subjects through the class's own subject source (all
-instances, a VALUES batch, or the first N); no query SHALL aggregate over the whole graph and filter
+instances, or the first N listed once); no query SHALL aggregate over the whole graph and filter
 by class afterwards.
 
 #### Scenario: Query text binds the class inside the pattern
@@ -76,9 +76,9 @@ graph is used.
 
 ### Requirement: Precision escalation
 Under policy `auto` the collector SHALL read each class exactly first and, when a per-class query
-times out, retry the class in `batched` mode, then in `first_n` mode, then record a failure.
+times out, retry the class in `first_n` mode, then record a failure.
 Partial results of a failed attempt MUST be discarded. The mode used SHALL be stored per class.
-A forced policy (`exact`, `batched`, `first_n`) SHALL use only that mode.
+A forced policy (`exact`, `first_n`) SHALL use only that mode.
 
 #### Scenario: Exact succeeds
 - **WHEN** every query for a class answers within the timeout
@@ -89,16 +89,12 @@ A forced policy (`exact`, `batched`, `first_n`) SHALL use only that mode.
 - **THEN** the vote, value, object-class and co-type queries all use the same instance IRIs from a single listing query
 
 #### Scenario: Escalation to first N
-- **WHEN** the exact and batched attempts for a class with 50 000 instances time out and first N = 10 000 succeeds
+- **WHEN** the exact attempt for a class with 50 000 instances times out and first N = 10 000 succeeds
 - **THEN** `precision_mode` is `first_n`, `observed_instances` is 10 000 and `instances` is 50 000
 
-#### Scenario: Batched equals exact
-- **WHEN** the same class on the e2e store is collected once with policy `exact` and once with policy `batched` and batch size 1
+#### Scenario: First N on a small class equals exact
+- **WHEN** a class with fewer instances than N is collected once with policy `exact` and once with policy `first_n`
 - **THEN** the histograms, value partitions and distinct counts are equal
-
-#### Scenario: Truncated instance listing
-- **WHEN** the instance listing for batched mode returns fewer rows than the class's instance count
-- **THEN** batched mode is skipped for that class and the next mode is tried
 
 ### Requirement: Failures are recorded and fail the run
 A query that still fails after retries and fallbacks SHALL be recorded as a `Failure` (query kind,
