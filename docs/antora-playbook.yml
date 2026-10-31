@@ -26,3 +26,6 @@ antora:
   extensions:
     - require: '@antora/lunr-extension'
       snippet_length: 250
+    # Renders [mermaid] blocks in the browser with mermaid.js; no diagram text leaves the page.
+    - require: '@sntke/antora-mermaid-extension'
+      mermaid_library_url: https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs

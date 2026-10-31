@@ -42,12 +42,21 @@ covering the whole graph.
 
 == L1 — System context
 
- Requester: data steward ──uses──▶ ┌───────────────────────┐ ──reads (SPARQL 1.1)──▶ SPARQL endpoint
- Requester: embedding app ─embeds─▶ │   rdf-fingerprinter   │                          (any store)
-                                   └───────────────────────┘
-                                      │ writes        ▲ reads
-                                      ▼               │
-                       output folder: report, profile.json, shapes, diagrams, document
+[mermaid]
+....
+flowchart LR
+    steward(["Requester: data steward"])
+    app(["Requester: embedding application"])
+    fp["<b>rdf-fingerprinter</b>"]
+    endpoint[("SPARQL endpoint<br/>(any store)")]
+    out[("Output folder<br/>report, profile.json, shapes,<br/>diagrams, document")]
+
+    steward -- uses --> fp
+    app -- embeds --> fp
+    fp -- "reads (SPARQL 1.1)" --> endpoint
+    fp -- writes --> out
+    out -- "profile.json read back" --> fp
+....
 
 Services offered::
 * *Fingerprint an endpoint* — profile + report (xref:use-cases/ucw1.adoc[UC-W1]).
