@@ -10,7 +10,7 @@ out as text.
 import hashlib
 import logging
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any, ClassVar, Protocol
 
@@ -20,7 +20,7 @@ from fingerprint import config
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import split_curie, to_iriref
 from fingerprint.domain.profile import ClassAnalytics, GraphAnalytics, ProfileAnalytics, PropertyAnalytics
-from fingerprint.domain.views import GeneratorOptions, PrefixDeclaration, RenderedDocument
+from fingerprint.domain.views import GeneratorOptions, GraphText, GraphView, OutputCheck, PrefixDeclaration, RenderedDocument
 
 logger = logging.getLogger(__name__)
 
@@ -29,20 +29,35 @@ _NOT_PLAIN = re.compile(r"[^\w:/#.~ -]")
 
 
 class TemplateRenderer(Protocol):
-    """The port the generators render through; `fingerprint.adapters.template_renderer` implements it."""
+    """The port the generators and the report render through; `fingerprint.adapters.template_renderer`
+    implements it. `outputs` are (file name, view) pairs rendered with one template package; `conf` is what
+    the template sees as `conf`, over the package's own `config.json` (domain-object-model P-6)."""
 
     prefixes: dict[str, str]  # dict-ok: prefix table
 
     def render(
         self,
         package: str | Path,
+        outputs: Sequence[tuple[str, BaseModel | None]],
         *,
-        view: BaseModel | None = None,
-        config: Mapping[str, Any] | None = None,  # dict-ok: eds4jinja2 configuration
+        conf: Mapping[str, Any] | None = None,  # dict-ok: eds4jinja2 configuration
         autoescape: bool | None = None,
-    ) -> str: ...
+    ) -> list[RenderedDocument]:
+        """The texts, in memory, in the order of `outputs`."""
+        ...
 
-    def write(self, folder: str | Path, documents: list[RenderedDocument], check: str | None = None) -> list[Path]: ...
+    def make(
+        self,
+        package: str | Path,
+        outputs: Sequence[tuple[str, BaseModel | None]],
+        *,
+        folder: str | Path,
+        conf: Mapping[str, Any] | None = None,  # dict-ok: eds4jinja2 configuration
+        check: OutputCheck | None = None,
+        autoescape: bool | None = None,
+    ) -> list[Path]:
+        """Render, check every text, then write them all under `folder`; one failed check writes nothing."""
+        ...
 
 
 def graph_slug(graph: str | None) -> str:
@@ -64,7 +79,7 @@ class Generator:
     file_name: ClassVar[str]  # "{slug}" is replaced per graph when per_graph
     per_graph: ClassVar[bool] = True
     autoescape: ClassVar[bool | None] = None
-    check: ClassVar[str | None] = None  # a check of the template renderer, e.g. "turtle"
+    check: ClassVar[OutputCheck | None] = None  # what every text must pass before any file is written
 
     def __init__(
         self,
@@ -100,7 +115,11 @@ class Generator:
         return None
 
     def end_graph(self, graph: GraphAnalytics, classes: list[Any]) -> Any:
-        """The view of one graph from its classes' views, or None to leave it out."""
+        """The view of one graph from its classes' views (a `GraphView` for per-graph formats), or None."""
+        return None
+
+    def end_profile(self, graphs: list[Any]) -> BaseModel | None:
+        """The one view of a format that covers every graph (`per_graph` False), or None to write nothing."""
         return None
 
     # --- shared rules ---
@@ -147,25 +166,34 @@ class Generator:
                 graphs.append(graph_view)
         return graphs
 
-    def render_graphs(self) -> list[RenderedDocument]:
-        """One text per graph, under the graph's slug (per-graph formats); each view lists every IRI skipped."""
-        views = self.view()
-        return [
-            RenderedDocument(file_name=g.slug, text=self._render(g.model_copy(update={"skipped": list(self.skipped)})))
-            for g in views
-        ]
+    def outputs(self) -> list[tuple[str, BaseModel]]:
+        """(file name, view) pairs: one per graph, each listing every IRI skipped, or one for all graphs."""
+        graphs = self.view()
+        if not self.per_graph:
+            document = self.end_profile(graphs)
+            return [] if document is None else [(self.file_name, document)]
+        skipped = list(self.skipped)
+        views: list[GraphView] = graphs
+        return [(self.file_name.format(slug=g.slug), g.model_copy(update={"skipped": skipped})) for g in views]
+
+    def render_graphs(self) -> list[GraphText]:
+        """The text of each graph's view, by slug (per-graph formats), e.g. for a document to embed."""
+        outputs = self.outputs()
+        documents = self.renderer.render(self._package(), outputs, conf=self._conf(), autoescape=self.autoescape)
+        return [GraphText(slug=view.slug, text=d.text) for (_, view), d in zip(outputs, documents, strict=True)]  # type: ignore[attr-defined]
 
     def serialize(self) -> list[RenderedDocument]:
-        """The files: one per graph, or one for all graphs."""
-        return [RenderedDocument(file_name=self.file_name.format(slug=d.file_name), text=d.text) for d in self.render_graphs()]
+        """The files, in memory."""
+        return self.renderer.render(self._package(), self.outputs(), conf=self._conf(), autoescape=self.autoescape)
 
     def write(self, folder: str | Path) -> list[Path]:
-        return self.renderer.write(folder, self.serialize(), self.check)
-
-    def _render(self, view: BaseModel) -> str:
-        return self.renderer.render(
-            self.template_location or self.template_package,
-            view=view,
-            config={"conf": {"profile": self.analytics}},  # dict-ok: eds4jinja2 configuration
-            autoescape=self.autoescape,
+        return self.renderer.make(
+            self._package(), self.outputs(), folder=folder, conf=self._conf(), check=self.check, autoescape=self.autoescape
         )
+
+    def _package(self) -> str | Path:
+        return self.template_location or self.template_package
+
+    def _conf(self) -> Mapping[str, Any]:  # dict-ok: eds4jinja2 configuration
+        """What every template sees as `conf.profile`: the whole analytics profile."""
+        return {"profile": self.analytics}  # dict-ok: eds4jinja2 configuration

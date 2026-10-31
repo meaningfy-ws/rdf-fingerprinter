@@ -7,7 +7,6 @@ from typing import Any
 
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.profile import ProfileAnalytics
-from fingerprint.domain.views import RenderedDocument
 from fingerprint.service_layer.generators.generator import TemplateRenderer
 from fingerprint_report_templates import packaged
 
@@ -52,5 +51,5 @@ def render_report(
     # custom templates keep 1.x behaviour.
     autoescape = True if template_location is None else None
     renderer = renderer or JinjaTemplateRenderer()
-    text = renderer.render(template_location or DEFAULT_TEMPLATE_LOCATION, config=config, autoescape=autoescape)
-    return renderer.write(location, [RenderedDocument(file_name=config["template"], text=text)])[0]
+    package = template_location or DEFAULT_TEMPLATE_LOCATION
+    return renderer.make(package, [(config["template"], None)], folder=location, conf=config["conf"], autoescape=autoescape)[0]

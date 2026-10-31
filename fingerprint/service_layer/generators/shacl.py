@@ -22,6 +22,7 @@ from fingerprint.domain.views import (
     Annotation,
     GeneratorOptions,
     NodeShape,
+    OutputCheck,
     PrefixDeclaration,
     PropertyShape,
     ShapeSeverity,
@@ -54,7 +55,7 @@ class Values(NamedTuple):
 class ShaclGenerator(Generator):
     template_package = packaged("shacl_shapes")
     file_name = "shapes-{slug}.ttl"
-    check = "turtle"
+    check = OutputCheck.turtle
 
     def __init__(
         self,

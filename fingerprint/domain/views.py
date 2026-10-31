@@ -117,6 +117,16 @@ class ShapeSeverity(str, Enum):
     violation = "violation"
 
 
+class OutputCheck(str, Enum):
+    """
+    The check a generated text must pass before any file of its format is written.
+    """
+    turtle = "turtle"
+    """
+    The text parses as Turtle.
+    """
+
+
 class DiagramMemberKind(str, Enum):
     """
     How a property appears in a diagram class.
@@ -154,12 +164,34 @@ class Annotation(ConfiguredBaseModel):
 
 class RenderedDocument(ConfiguredBaseModel):
     """
-    A rendered text and the file name it is written under (or the graph slug it belongs to).
+    A rendered text and the file name it is written under.
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     file_name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['RenderedDocument']} })
-    text: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['RenderedDocument', 'DiagramMember']} })
+    text: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['RenderedDocument', 'GraphText', 'DiagramMember']} })
+
+
+class GraphText(ConfiguredBaseModel):
+    """
+    The rendered text of one graph's view, by the graph's slug (e.g. a diagram the document embeds).
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    slug: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['GraphText', 'GraphView', 'DocumentGraph']} })
+    text: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['RenderedDocument', 'GraphText', 'DiagramMember']} })
+
+
+class GraphView(ConfiguredBaseModel):
+    """
+    What every per-graph view carries.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema',
+         'mixin': True})
+
+    graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
+    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphText', 'GraphView', 'DocumentGraph']} })
+    skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
 
 
 class GeneratorOptions(ConfiguredBaseModel):
@@ -171,17 +203,18 @@ class GeneratorOptions(ConfiguredBaseModel):
     shapes_namespace: Optional[str] = Field(default=None, description="""Namespace of the node shape IRIs (SHACL only).""", json_schema_extra = { "linkml_meta": {'domain_of': ['GeneratorOptions']} })
 
 
-class ShapesGraph(ConfiguredBaseModel):
+class ShapesGraph(GraphView):
     """
     The shapes of one graph.
     """
-    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema',
+         'mixins': ['GraphView']})
 
-    graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph', 'DiagramGraph']} })
-    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph', 'DiagramGraph', 'DocumentGraph']} })
     prefixes: Optional[list[PrefixDeclaration]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph']} })
     node_shapes: Optional[list[NodeShape]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph']} })
-    skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph', 'DiagramGraph', 'ProfileDocument', 'Caveats']} })
+    graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
+    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphText', 'GraphView', 'DocumentGraph']} })
+    skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
 
 
 class NodeShape(ConfiguredBaseModel):
@@ -208,17 +241,18 @@ class PropertyShape(ConfiguredBaseModel):
     annotations: Optional[list[Annotation]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['NodeShape', 'PropertyShape']} })
 
 
-class DiagramGraph(ConfiguredBaseModel):
+class DiagramGraph(GraphView):
     """
     The class diagram of one graph.
     """
-    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema',
+         'mixins': ['GraphView']})
 
-    graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph', 'DiagramGraph']} })
-    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph', 'DiagramGraph', 'DocumentGraph']} })
     classes: Optional[list[DiagramClass]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramGraph', 'DocumentGraph']} })
     parent_boxes: Optional[list[DiagramBox]] = Field(default=None, description="""Parents not profiled in this graph.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramGraph']} })
-    skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph', 'DiagramGraph', 'ProfileDocument', 'Caveats']} })
+    graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
+    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphText', 'GraphView', 'DocumentGraph']} })
+    skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
 
 
 class DiagramClass(ConfiguredBaseModel):
@@ -245,7 +279,7 @@ class DiagramMember(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     kind: DiagramMemberKind = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramMember']} })
-    text: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['RenderedDocument', 'DiagramMember']} })
+    text: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['RenderedDocument', 'GraphText', 'DiagramMember']} })
 
 
 class DiagramBox(ConfiguredBaseModel):
@@ -273,7 +307,7 @@ class ProfileDocument(ConfiguredBaseModel):
     namespaces: Optional[list[PrefixDeclaration]] = Field(default=None, description="""The prefixes the labels use.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
     graphs: Optional[list[DocumentGraph]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
     caveats: Caveats = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
-    skipped: Optional[list[str]] = Field(default=None, description="""IRIs that cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph', 'DiagramGraph', 'ProfileDocument', 'Caveats']} })
+    skipped: Optional[list[str]] = Field(default=None, description="""IRIs that cannot be written; the same list as caveats.skipped, kept for custom templates.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
 
 
 class Overview(ConfiguredBaseModel):
@@ -305,7 +339,7 @@ class DocumentGraph(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
-    slug: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph', 'DiagramGraph', 'DocumentGraph']} })
+    slug: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['GraphText', 'GraphView', 'DocumentGraph']} })
     label: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramClass',
                        'DiagramBox',
                        'DocumentGraph',
@@ -379,7 +413,7 @@ class Caveats(ConfiguredBaseModel):
 
     sampled: Optional[list[SampledClass]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass', 'Caveats']} })
     failures: Optional[list[FailureNote]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Caveats']} })
-    skipped: Optional[list[str]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph', 'DiagramGraph', 'ProfileDocument', 'Caveats']} })
+    skipped: Optional[list[str]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
 
 
 class SampledClass(ConfiguredBaseModel):
@@ -404,6 +438,8 @@ class FailureNote(ConfiguredBaseModel):
 PrefixDeclaration.model_rebuild()
 Annotation.model_rebuild()
 RenderedDocument.model_rebuild()
+GraphText.model_rebuild()
+GraphView.model_rebuild()
 GeneratorOptions.model_rebuild()
 ShapesGraph.model_rebuild()
 NodeShape.model_rebuild()

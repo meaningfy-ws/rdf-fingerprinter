@@ -30,6 +30,10 @@ enums:
       info: {}
       warning: {}
       violation: {}
+  OutputCheck:
+    description: The check a generated text must pass before any file of its format is written.
+    permissible_values:
+      turtle: { description: "The text parses as Turtle." }
   DiagramMemberKind:
     description: How a property appears in a diagram class.
     permissible_values:
@@ -51,10 +55,24 @@ classes:
       value: { required: true }
 
   RenderedDocument:
-    description: A rendered text and the file name it is written under (or the graph slug it belongs to).
+    description: A rendered text and the file name it is written under.
     attributes:
       file_name: { required: true }
       text: { required: true }
+
+  GraphText:
+    description: The rendered text of one graph's view, by the graph's slug (e.g. a diagram the document embeds).
+    attributes:
+      slug: { required: true }
+      text: { required: true }
+
+  GraphView:
+    mixin: true
+    description: What every per-graph view carries.
+    attributes:
+      graph_label: { required: true, description: "The graph's plain name, for the title." }
+      slug: { required: true, description: "The graph's file-safe name." }
+      skipped: { multivalued: true, description: "IRIs left out because they cannot be written." }
 
   GeneratorOptions:
     description: Options of the generators beyond the shared ones.
@@ -64,12 +82,10 @@ classes:
   # --- SHACL ---
   ShapesGraph:
     description: The shapes of one graph.
+    mixins: [GraphView]
     attributes:
-      graph_label: { required: true, description: "The graph's plain name, for the title." }
-      slug: { required: true, description: "The graph's file-safe name." }
       prefixes: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true }
       node_shapes: { range: NodeShape, multivalued: true, inlined_as_list: true }
-      skipped: { multivalued: true, description: "IRIs left out because they cannot be written." }
 
   NodeShape:
     description: The open node shape of one class.
@@ -90,12 +106,10 @@ classes:
   # --- PlantUML ---
   DiagramGraph:
     description: The class diagram of one graph.
+    mixins: [GraphView]
     attributes:
-      graph_label: { required: true, description: "The graph's plain name, for the title." }
-      slug: { required: true, description: "The graph's file-safe name." }
       classes: { range: DiagramClass, multivalued: true, inlined_as_list: true }
       parent_boxes: { range: DiagramBox, multivalued: true, inlined_as_list: true, description: "Parents not profiled in this graph." }
-      skipped: { multivalued: true, description: "IRIs left out because they cannot be written." }
 
   DiagramClass:
     description: One class box.
@@ -125,7 +139,7 @@ classes:
       namespaces: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true, description: "The prefixes the labels use." }
       graphs: { range: DocumentGraph, multivalued: true, inlined_as_list: true }
       caveats: { range: Caveats, required: true, inlined: true }
-      skipped: { multivalued: true, description: "IRIs that cannot be written." }
+      skipped: { multivalued: true, description: "IRIs that cannot be written; the same list as caveats.skipped, kept for custom templates." }
 
   Overview:
     description: How the profile was collected.

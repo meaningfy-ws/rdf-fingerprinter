@@ -12,7 +12,7 @@ from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.profile import ProfileAnalytics, ProfileRun
 from fingerprint.domain.views import GeneratorOptions, RepresentationFormat
 from fingerprint.service_layer.exceptions import UsageError
-from fingerprint.service_layer.generators import DOC, GENERATORS, PUML
+from fingerprint.service_layer.generators import DOC, GENERATORS, PUML, DocumentGenerator
 from fingerprint.service_layer.generators.generator import Generator, TemplateRenderer
 from fingerprint.service_layer.settings import check_acceptance_threshold, validate_config
 
@@ -34,7 +34,7 @@ def make_generator(
     try:
         if name == DOC:
             diagrams = GENERATORS[PUML](analytics, renderer).render_graphs()
-            return GENERATORS[DOC](analytics, renderer, template_location, options, diagrams=diagrams)  # type: ignore[call-arg]
+            return DocumentGenerator(analytics, renderer, template_location, options, diagrams=diagrams)
         return GENERATORS[name](analytics, renderer, template_location, options)  # type: ignore[index]
     except IriRefError as error:  # e.g. an unwritable --shapes-namespace
         raise UsageError(f"{error.iri!r} cannot be written as an IRI") from error

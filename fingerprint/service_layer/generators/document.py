@@ -18,10 +18,10 @@ from fingerprint.domain.views import (
     DocumentProperty,
     FailureNote,
     GeneratorOptions,
+    GraphText,
     Overview,
     ParentReference,
     ProfileDocument,
-    RenderedDocument,
     SampledClass,
     SettingValue,
 )
@@ -43,7 +43,7 @@ class DocumentGenerator(Generator):
         renderer: TemplateRenderer,
         template_location: str | Path | None = None,
         options: GeneratorOptions | None = None,
-        diagrams: list[RenderedDocument] | None = None,
+        diagrams: list[GraphText] | None = None,
     ):
         """`diagrams`: the PlantUML source per graph slug, composed by the representations service."""
         super().__init__(analytics, renderer, template_location, options)
@@ -84,12 +84,11 @@ class DocumentGenerator(Generator):
 
     def end_graph(self, graph: GraphAnalytics, classes: list[DocumentClass]) -> DocumentGraph:
         slug = graph_slug(graph.graph)
-        diagram = next((d.text for d in self.diagrams if d.file_name == slug), "")
+        diagram = next((d.text for d in self.diagrams if d.slug == slug), "")
         return DocumentGraph(slug=slug, label=graph.graph or config.default_graph_label, diagram=diagram, classes=classes)
 
-    def render_graphs(self) -> list[RenderedDocument]:
-        """The whole document under one name: it covers every graph."""
-        graphs = self.view()
+    def end_profile(self, graphs: list[DocumentGraph]) -> ProfileDocument:
+        """The whole document: it covers every graph."""
         analytics = self.analytics
         sampled = [
             SampledClass(graph=g.label, class_label=c.label, precision=c.precision)
@@ -116,14 +115,10 @@ class DocumentGenerator(Generator):
                 for name, value in sorted(analytics.settings.model_dump(mode="json").items())
             ],
         )
-        document = ProfileDocument(
+        return ProfileDocument(
             overview=overview,
             namespaces=self.used_namespaces(),
             graphs=graphs,
             caveats=Caveats(sampled=sampled, failures=failures, skipped=list(self.skipped)),
             skipped=list(self.skipped),
         )
-        return [RenderedDocument(file_name=self.file_name, text=self._render(document))]
-
-    def serialize(self) -> list[RenderedDocument]:
-        return self.render_graphs()
