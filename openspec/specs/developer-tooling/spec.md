@@ -42,7 +42,8 @@ current working directory.
 - **THEN** the import succeeds and the root logger's handlers are unchanged
 
 ### Requirement: Reports on strict SPARQL stores
-The packaged report templates SHALL use SPARQL 1.1 that strict stores evaluate without errors.
+The packaged report SHALL render from the analytics alone (its templates issue no queries) and SHALL
+render the e2e test data collected from a strict store without a `nan` cell.
 
 #### Scenario: Oxigraph renders the type columns
 - **WHEN** the default report is generated against Oxigraph loaded with the test data
