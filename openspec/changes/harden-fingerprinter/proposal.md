@@ -35,7 +35,7 @@ domain functions compute an **analytics model** from it; the HTML report renders
 through eds4jinja2. Outcome: profiling cost grows with the number of instances read, not with
 classes × graph size; every number states how precise it is; failures are visible and fail the run.
 
-Collection, per graph (queries and trade-offs in `inputs/stats-design.md`):
+Collection, per graph (queries, settings and rules in `design.md`):
 
 1. **Discover cheaply** (void-generator): graphs; instance counts per class in one `GROUP BY ?c`
    (fallback: per-class counts); declared `rdfs:subClassOf` edges; optional predicate partitions

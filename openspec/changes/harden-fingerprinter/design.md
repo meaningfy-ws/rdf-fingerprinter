@@ -85,18 +85,23 @@ New choices made while planning (EPIC decisions are cited, not repeated):
   | `concurrency` | `--concurrency` | `CONCURRENCY` | int ≥ 1 | 4 |
   | `selected_graphs` | `--graph` (repeatable) | `SELECTED_GRAPHS` (comma-separated) | IRIs | empty |
 
-  Booleans in env vars: `1/true/yes/on` and `0/false/no/off`, case-insensitive; anything else is a
+  Only the 11 names above are read; other `RDF_FINGERPRINTER_*` variables (e.g. the test
+  endpoint and Oxigraph port) are ignored. Booleans in env vars: `1/true/yes/on` and `0/false/no/off`, case-insensitive; anything else is a
   usage error. `selected_graphs` empty → default graph + every named graph (DEC-11; **changed**
   from 1.x, which profiled only the default graph); non-empty → only those, where `""` means the
   default graph (as in 1.x). `acceptance_threshold` must be in (0, 1]; 0 is rejected by
   `settings.py` as a usage error (the model allows [0, 1]).
 - **P-7 Service-layer API and exit codes.** `collect(endpoint, settings, sparql) -> ProfileRun`
   raises `EndpointUnreachable`; `analyse(run) -> ProfileAnalytics` (domain);
-  `render_report(analytics, output, template) -> Path`. The public
+  `render_report(analytics, output, template, extra_conf: dict | None = None) -> Path`, which
+  merges `extra_conf` (the caller's `additional_config`, minus its `collection` key) into `conf` as
+  1.x does, then sets `conf.default_endpoint`, `conf.selected_graphs` (the graphs actually
+  profiled, `""` for the default graph) and `conf.profile`. The public
   `generate_endpoint_fingerprint_report` composes the three and returns the `Path` (1.x signature);
   recorded failures are in the report and logged at WARNING. It checks the output folder
   **before** `collect`, so a bad path fails fast. `conf.default_endpoint` and
-  `conf.selected_graphs` are still set (the 1.x keys custom templates read), next to `conf.profile`. The CLI calls the three functions
+  `conf.selected_graphs` are still set (the 1.x keys custom templates read), next to `conf.profile`
+  (see `render_report`). The CLI calls the three functions
   itself so it can read `failures`: exit **0** no failures, **1** report written with failures,
   **3** `EndpointUnreachable` (2 stays click's usage error; a missing output folder is reported as
 a click usage error, exit 2); any other unexpected exception is logged with its traceback and
@@ -123,7 +128,7 @@ exits **4**. The analytics object is passed as
        `fingerprint.domain` (a layer may import only layers below it);
     2. forbidden: `fingerprint.domain.generated` imports no other `fingerprint` module;
     3. forbidden: `fingerprint.domain` imports none of `SPARQLWrapper`, `eds4jinja2`, `click`
-       (external I/O stays outside the domain).
+       (external I/O stays outside the domain); needs `include_external_packages = True`.
 
 ## Algorithm / approach
 
@@ -172,7 +177,8 @@ the default graph). Running QS once and reusing its IRIs keeps every query of a 
 time). `observed_instances` = number of QS rows (first_n) or `instances` (exact). Every query
 reads its whole subject set in one request, so no partial results are ever merged.
 - Blank-node instances cannot be put in `VALUES`. If QS returns any, first_n falls back to the subquery source `{ SELECT ?s { $graph_open ?s a $cls . $graph_close } LIMIT
-  $limit }` in every query, and the profile notes that the sample may differ between queries.
+  $limit }` in every query, and sets `ClassProfile.sample_shared = false` (true otherwise in first_n), shown in the report as
+  "sample may differ between queries".
 
 ### Query templates (final text; prefixes `rdf:`, `rdfs:` declared in every file)
 
@@ -259,7 +265,7 @@ collect(endpoint, settings, sparql) -> ProfileRun
   edges = Q4 once (if depth ≥ classes); copied into every GraphProfile.declared_subclass_edges
   for graph in graphs:
     graph_stats (if switch): Q1, Q2 (→ Q2a), QU
-    Q2 (→ Q2a) also here when completeness_check is on and not yet run
+    Q2 (→ Q2a) also here when completeness_check is on, depth ≥ properties, and not yet run
     instances = Q3 (timeout → Q3a + Q3b per class)
     pool.map(profile_class, classes sorted by instances desc)
   return ProfileRun(...)
@@ -277,7 +283,8 @@ profile_class(cls):
 
 **Row → model mapping.**
 - Q5 rows → `PropertyProfile.cardinality_histogram` (`values_per_subject` = `?n`, `subjects`).
-- Q6 rows with `kind = literal` → `ValuePartition` (`node_kind literal`, `datatype`, `language`,
+- Q6 rows with `kind = literal` → `ValuePartition` (`node_kind literal`, `datatype` — `?dt` unbound
+  with `?lang` ≠ "" is recorded as `rdf:langString`, for pre-RDF-1.1 stores — `language`,
   `triples`, `distinct_objects`, lengths, values).
 - Q6 rows of all kinds → `PropertyProfile.distinct_objects` = Σ `?distinct` (the groups hold
   disjoint values, so the sum is exact) — the report's "distinct values" column.
@@ -322,6 +329,9 @@ For one property of one class with `O` = `observed_instances` and bins `{n: subj
 - `is_exact` = class mode ≠ `first_n` (and not `presence_only`).
 - **`presence_only` properties**: only `inheritance` and `is_exact = false` are set; every
   statistic is absent. Inheritance: `inherited` if any compared parent has the property, else `own`.
+- **Zero denominators**: a ratio or mean whose denominator is 0 (`untyped_object_ratio`,
+  `language_coverage`, `mean_length`, `distinct_ratio`, `top_k_share`, `typed_subject_ratio`, …) is
+  absent; the report shows "—".
 - **Inputs not collected** (depth below `values`: no Q6/Q7; below `rich_values`: no Q9): every
   indicator derived from the missing query is absent — `property_kind`, `value_types`,
   `dominant_value_type`, `type_purity`, `untyped_object_ratio`, `languages`,
@@ -329,7 +339,8 @@ For one property of one class with `O` = `observed_instances` and bins `{n: subj
   `is_enumeration_candidate` (no Q6/Q7); `top_k_share`, `entropy_estimate` (no Q9). Inheritance
   then compares labels only. The report shows "—" for absent values.
 - **Class**: `parents` = declared edges ∪ implied (a co-type with `subjects == O` and `O > 0`,
-  source `implied`; declared wins if both). Two classes implied by each other are recorded as each
+  source `implied`; declared wins if both). `co_type_ratio` = co-type subjects ÷ O, 0 for a
+  declared parent that is not a co-type. Two classes implied by each other are recorded as each
   other's parent and treated as **equivalent**: excluded from inheritance comparison and depth.
   `hierarchy_depth` = longest path to a class without parents over the remaining edges, cycles cut
   by a visited set. `own_property_count`, `mandatory_property_count`; `mean_out_degree` = Σ property
@@ -345,7 +356,8 @@ For one property of one class with `O` = `observed_instances` and bins `{n: subj
 - **Graph**: `class_count`, `property_count` (distinct properties over all classes);
   `typed_subject_ratio` = (distinct_subjects − untyped_subjects) ÷ distinct_subjects, only when
   `graph_statistics` ran; `vocabularies` = namespaces (IRI up to and including the last `#` or `/`)
-  of classes and properties, ordered by triples; `cross_graph_object_types` = distinct
+  of classes and properties, ordered by weight = Σ property total triples + Σ class instances
+  under that namespace; `cross_graph_object_types` = distinct
   `object_class_graph` values other than the graph itself.
 
 **Rules.** `rdf:type` is never a property row (Q5–Q7, Q11 filter it); type information lives in
@@ -388,6 +400,7 @@ label, inheritance. A closing "Collection" section lists settings and failures.
 | Q3 timeout | `QueryTimeout` | Q3a + Q3b per class; a Q3b timeout → `Failure(class_partitions, class)` | WARNING | `graph <g>: class counts timed out; counting per class` |
 | Q3a timeout / error | `QueryTimeout`, `PermanentError` | `Failure(class_partitions, graph)`; graph profiled without classes; next graph | WARNING | `graph <g>: classes not listed: <reason>` |
 | Q0 timeout | `QueryTimeout` | if `selected_graphs` is set: profile them, no Failure; else default graph only + `Failure(graphs)` | WARNING | `named graphs not listed (timeout); profiling the default graph only` |
+| Q2a timeout / error | `QueryTimeout`, `PermanentError` | `Failure(predicate_partitions, graph)`; Q10 skipped for that graph | WARNING | `graph <g>: predicates not listed; completeness check skipped` |
 | Q4 timeout / error | `QueryTimeout`, `PermanentError` | `Failure(declared_hierarchy)`; no declared edges | WARNING | `declared hierarchy not read: <reason>` |
 | First-wave timeout (Q5–Q8, QS) | `QueryTimeout` | discard partial; next mode | WARNING | `class <c>: <mode> timed out after <t> s; trying <next>` |
 | Blank-node instances in first_n | bnode in QS | subquery source for that class; profile notes the sample may vary | INFO | `class <c>: blank-node instances; first-N sample may differ between queries` |

@@ -286,6 +286,9 @@ classes:
       instances: { required: true }
       precision_mode: { required: true }
     attributes:
+      sample_shared:
+        range: boolean
+        description: In first_n mode, true when every query used the same listed instances; false after the blank-node fallback.
       co_types:
         range: CoTypeCount
         multivalued: true
