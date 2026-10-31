@@ -97,7 +97,7 @@ application profiles. Each is a function of the profile, so none should query th
 - New commands, one per format, that read a `profile.json` and write the representation.
 - A generator framework (base class, shared arguments) and three generators.
 - Three new eds4jinja2 template packages (SHACL, PlantUML, profile document) shipped in the wheel.
-- Docs: a page per format; CHANGELOG 2.1.0.
+- Docs: one representations page covering the three formats; CHANGELOG 2.1.0.
 
 ## Capabilities
 
@@ -113,5 +113,6 @@ application profiles. Each is a function of the profile, so none should query th
 
 - Code: new generator modules (service layer + adapters), CLI entry points in `pyproject.toml`
   (`[project.scripts]`), `fingerprint_report_templates/` gains three packages.
-- Dependencies: a SHACL engine (pySHACL) for tests only; no new runtime dependency expected.
+- Dependencies: a SHACL engine (pySHACL) for tests only; rdflib (already installed through
+  eds4jinja2) becomes a declared runtime dependency for the Turtle check.
 - No change to collection, the endpoint queries or the profile model's meaning.

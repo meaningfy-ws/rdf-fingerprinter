@@ -49,25 +49,45 @@ Turtle IRIs and string literals escaped per Turtle, PlantUML names quoted when t
 identifiers, and the HTML document autoescaped. SHACL output SHALL be parsed before it is written;
 a parse failure SHALL be an error (exit 4), never a written file (DEC-4).
 
-#### Scenario Outline: Hostile values stay valid
-- **WHEN** the profile holds <value> as <where>
-- **THEN** the SHACL parses as Turtle, the PlantUML keeps one element per class, and the HTML shows the value as text
+#### Scenario Outline: Unusual IRIs stay valid
+- **WHEN** the profile holds <iri> as a <where>
+- **THEN** the SHACL parses as Turtle, the PlantUML keeps one element per class, and the HTML shows the IRI as text
 
   Examples:
-    | value                          | where                         |
-    | an IRI with `>` and a space    | a class IRI                   |
-    | `"quoted"` and a newline       | a literal in the top values   |
-    | `<script>alert(1)</script>`    | a language-tagged literal     |
-    | non-ASCII letters (`ș`, `ü`)   | a property IRI                |
+    | iri                                    | where          |
+    | `http://ex.org/q?a=1&b='x'`            | class IRI      |
+    | `http://ex.org/ș/ü`                    | property IRI   |
+
+#### Scenario: An IRI that cannot be written is skipped, not broken
+- **WHEN** the profile holds the class IRI `http://ex.org/<script>alert(1)</script> x`
+- **THEN** that class is absent from the SHACL and PlantUML outputs, a warning is logged, and the document lists it under caveats as text, not markup
 
 ### Requirement: SHACL shapes
 The SHACL generator SHALL write one Turtle file per profiled graph with an open `sh:NodeShape` per
 class (`sh:targetClass`, no `sh:closed`) holding a `sh:PropertyShape` per property, inherited ones
 included (DEC-5). Counts SHALL follow the accepted cardinality label; value constraints SHALL follow
 the value types (`sh:datatype` for one datatype, `sh:class` for one class, `sh:nodeKind`, `sh:or`
-when mixed); a property whose label is accepted below the threshold SHALL carry `sh:severity sh:Info`;
-shapes SHALL be annotated with confidence and observed/total instances, and a first-N class marked
-as sampled.
+when mixed; a literal without a datatype but with a language counts as `rdf:langString`). Severity
+SHALL follow the first matching rule: no cardinality label, or confidence below the acceptance
+threshold → `sh:Info`; label support below 1, a class read in first-N mode, or `sh:class` under
+cross-graph object types → `sh:Warning`; otherwise the default `sh:Violation`. Shapes SHALL be annotated with confidence and observed/total instances, and a first-N
+class marked as sampled.
+
+#### Scenario Outline: Severity from the threshold
+- **WHEN** at threshold 0.8 a property of a class read in <mode> has <usage>
+- **THEN** its property shape has severity <severity>
+
+  Examples:
+    | mode    | usage                                     | severity               |
+    | exact   | presence only, no cardinality label       | sh:Info                |
+    | exact   | confidence 0.3, label support 1.0         | sh:Info                |
+    | exact   | confidence 1.0, label support 0.9         | sh:Warning             |
+    | first-N | confidence 1.0, label support 1.0         | sh:Warning             |
+    | exact   | confidence 1.0, label support 1.0         | sh:Violation (default) |
+
+#### Scenario: Language-tagged literals without a datatype
+- **WHEN** a store leaves the datatype of language-tagged literals unbound
+- **THEN** the property shape allows `rdf:langString`, and the shapes still conform on that data
 
 #### Scenario Outline: Counts from the cardinality label
 - **WHEN** a property's accepted label is <label>
@@ -83,7 +103,7 @@ as sampled.
 
 #### Scenario: Shapes conform on their own data
 - **WHEN** the shapes generated from the e2e test data validate that same data with a SHACL engine
-- **THEN** there is no violation at severity `sh:Violation`
+- **THEN** there is no violation at severity `sh:Violation` (first-N classes and cross-graph types are at most `sh:Warning`)
 
 #### Scenario: Sampled class is marked
 - **WHEN** a class was read in first-N mode
@@ -127,5 +147,5 @@ Adding the generators SHALL NOT change the statistics report, the `fingerprint` 
 options and exit codes, or the 1.x library function (DEC-8).
 
 #### Scenario: Report untouched
-- **WHEN** the report is generated for the e2e test data with no format selected
-- **THEN** its tables equal those 2.0.0 produces
+- **WHEN** the existing report, command-line and library scenarios run with no format selected
+- **THEN** they pass unchanged
