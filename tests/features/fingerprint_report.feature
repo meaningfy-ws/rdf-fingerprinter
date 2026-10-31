@@ -1,4 +1,4 @@
-# Capability: fingerprint-report (openspec/changes/harden-fingerprinter/specs/fingerprint-report)
+# Capability: fingerprint-report (openspec/specs/fingerprint-report)
 # Step definitions are written during implementation.
 Feature: The fingerprint report and the command line
   As a data steward

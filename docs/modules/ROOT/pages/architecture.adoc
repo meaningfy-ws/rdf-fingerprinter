@@ -4,7 +4,7 @@
 This page records the minimal architecture of rdf-fingerprinter: what it is for, how it is
 structured, and the decisions that shape it. It describes release 2.0, delivered by the OpenSpec
 change `harden-fingerprinter`; where 1.x differed, a note says so.
-Decision ids `DEC-n` and `P-n` refer to that change (`openspec/changes/harden-fingerprinter/`).
+Decision ids `DEC-n` and `P-n` refer to that change (`openspec/changes/archive/2026-10-31-harden-fingerprinter/`; the requirements are in `openspec/specs/`).
 
 == Purpose and scope
 

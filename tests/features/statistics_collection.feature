@@ -1,5 +1,5 @@
-# Capability: statistics-collection (openspec/changes/harden-fingerprinter/specs/statistics-collection)
-# Error rows: design.md "Error matrix". Step definitions are written during implementation.
+# Capability: statistics-collection (openspec/specs/statistics-collection)
+# Error rows: openspec/changes/archive/2026-10-31-harden-fingerprinter/design.md "Error matrix". Step definitions are written during implementation.
 Feature: Collecting raw statistics from a knowledge graph
   As a data steward
   I want the structure of every class in my knowledge graph measured from its data
