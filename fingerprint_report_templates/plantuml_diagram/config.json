@@ -1,0 +1,6 @@
+{
+  "template": "diagram.puml",
+  "conf": {
+    "title": "Class diagram inferred by rdf-fingerprinter"
+  }
+}

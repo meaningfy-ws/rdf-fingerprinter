@@ -1,0 +1,21 @@
+{#- One class diagram per graph. Names, multiplicities and arrows come ready from the generator
+    (fingerprint/service_layer/generators/plantuml.py); this template only lays them out. -#}
+@startuml
+title {{ conf.title }} — {{ view.graph.graph_label }}
+hide empty members
+{% for cls in view.graph.classes %}
+class "{{ cls.label }}" as {{ cls.alias }} {
+{%- for attribute in cls.attributes %}
+  {{ attribute }}
+{%- endfor %}
+}
+{%- endfor %}
+{% for box in view.graph.parent_boxes %}
+class "{{ box.label }}" as {{ box.alias }}
+{%- endfor %}
+{% for cls in view.graph.classes %}
+{%- for line in cls.generalisations + cls.links %}
+{{ line }}
+{%- endfor %}
+{%- endfor %}
+@enduml

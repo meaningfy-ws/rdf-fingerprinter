@@ -1,0 +1,62 @@
+@startuml
+title Class diagram inferred by rdf-fingerprinter — http://publications.europa.eu/resources/authority/continents
+hide empty members
+
+class "euvoc:Continent" as C1 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  skos:inScheme : owl:Ontology | skos:ConceptScheme [1]
+  skos:topConceptOf : owl:Ontology | skos:ConceptScheme [1]
+}
+class "euvoc:XlNotation" as C2 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:type : resource [1]
+  rdf:value : xsd:string [1]
+}
+class "owl:Ontology" as C3 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:identifier : xsd:string [1]
+  rdfs:comment : rdfs:Literal [1]
+  owl:imports : resource [1]
+}
+class "skos:Concept" as C4 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  skos:inScheme : owl:Ontology | skos:ConceptScheme [1]
+  skos:topConceptOf : owl:Ontology | skos:ConceptScheme [1]
+}
+class "skos:ConceptScheme" as C5 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:identifier : xsd:string [1]
+  rdfs:comment : rdfs:Literal [1]
+  owl:imports : resource [1]
+}
+class "skosxl:Label" as C6 {
+  lvont:script : resource [0..1]
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:type : resource [1]
+  skosxl:literalForm : rdf:langString [1]
+}
+
+
+C1 ..|> C4
+C1 --> "1" C2 : euvoc:xlNotation
+C1 --> "24" C6 : skosxl:prefLabel
+C3 ..|> C5
+C3 --> "1" C6 : skosxl:prefLabel
+C4 ..|> C1
+C4 --> "1" C2 : euvoc:xlNotation
+C4 --> "24" C6 : skosxl:prefLabel
+C5 ..|> C3
+C5 --> "1" C6 : skosxl:prefLabel
+@enduml

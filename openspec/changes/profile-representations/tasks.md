@@ -30,9 +30,9 @@
 
 ## 5. PlantUML generator
 
-- [ ] 5.1 `PlantumlGenerator` hooks: aliases, own/refined attributes, associations, multiplicities, declared/implied generalisations, parent boxes (DEC-6; Requirement: PlantUML class diagram)
-- [ ] 5.2 Template package `fingerprint_report_templates/plantuml_diagram/` (`templates/diagram.puml`)
-- [ ] 5.3 Golden file `tests/test_data/golden/diagram-*.puml`; structural check (one `@startuml`/`@enduml`, one `class` line per class) (Requirement: Golden outputs)
+- [x] 5.1 `PlantumlGenerator` hooks: aliases, own/refined attributes, associations, multiplicities, declared/implied generalisations, parent boxes (DEC-6; Requirement: PlantUML class diagram)
+- [x] 5.2 Template package `fingerprint_report_templates/plantuml_diagram/` (`templates/diagram.puml`)
+- [x] 5.3 Golden file `tests/test_data/golden/diagram-*.puml`; structural check (one `@startuml`/`@enduml`, one `class` line per class) (Requirement: Golden outputs)
 
 ## 6. Profile document generator
 
@@ -57,7 +57,7 @@
 
 ## Roadmap
 
-- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.0 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.0 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 
