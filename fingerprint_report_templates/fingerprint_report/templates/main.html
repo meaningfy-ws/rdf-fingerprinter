@@ -1,10 +1,9 @@
 {% extends "layout.html" %}
-{% import "macros/builders.html" as builders %}
+{% import "macros/profile.html" as profile %}
 
 {% block content %}
-    {# Read the and invert the namespace/prefix definitions for substitution #}
+    {# The namespace/prefix definitions used to shorten IRIs #}
     {% set prefixes, error = from_file(conf.template_path+'/prefixes.json').fetch_tree() %}
-    {% set inverted_prefixes = invert_dict(prefixes) %}
 
     <h1>Class application profiles</h1>
     <section>
@@ -22,7 +21,17 @@
             (c) number of total occurrences of the pattern (d) minimal, (e) maximal and (f) average number of
             occurences.
         </p>
-        {{ builders.build_default_endpoint_fingerprint(inverted_prefixes) }}
+        <p>Each class states its precision: <em>exact</em> when every instance was read, or <em>first N of M</em>
+            when only the first N instances the store returned were read. Absent values are shown as —.</p>
     </section>
+    {% for graph in conf.profile.graphs or [] %}
+        <h2>{{ 'Named graph ' ~ graph.graph ~ ' fingerprints' if graph.graph else 'Default graph fingerprints' }}</h2>
+        <section>
+            {% for cls in graph.class_partitions or [] %}
+                {{ profile.class_section(cls, prefixes) }}
+            {% endfor %}
+        </section>
+    {% endfor %}
+    {{ profile.collection_section(conf.profile, prefixes) }}
 
 {% endblock %}

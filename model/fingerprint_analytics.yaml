@@ -1,0 +1,137 @@
+id: https://data.meaningfy.ws/fingerprint/analytics/schema
+name: fingerprint_analytics
+title: Fingerprint analytics (computed values)
+description: |
+  Values computed from the raw fingerprint_stats observations — never collected, always derived
+  by pure functions in fingerprint/domain, so every representation (HTML report, SHACL, PlantUML,
+  ReSpec, VoID) reads the same numbers. Each analytical class extends its raw counterpart.
+  The catalogue is open: new indicators are added here without touching collection.
+  Source of fingerprint/domain/generated/profile.py (make generate-models).
+version: 0.1.0
+license: Apache-2.0
+prefixes:
+  linkml: https://w3id.org/linkml/
+  fp: https://data.meaningfy.ws/fingerprint/
+default_prefix: fp
+default_range: string
+imports:
+  - linkml:types
+  - fingerprint_stats
+
+enums:
+  CardinalityLabel:
+    description: The cardinality accepted for a property of a class (ShEx-style).
+    permissible_values:
+      exactly_one: { description: "1 — every instance has exactly one value." }
+      zero_or_one: { description: "? — at most one value, some instances have none." }
+      one_or_more: { description: "+ — every instance has at least one value." }
+      zero_or_more: { description: "* — no constraint." }
+      exactly_n: { description: "{n} — every instance has exactly n > 1 values." }
+  PropertyKind:
+    description: Whether a property points to resources, literals or both (today's report column).
+    permissible_values:
+      object_property: {}
+      datatype_property: {}
+      mixed: {}
+  Inheritance:
+    description: Whether a property is introduced by the class or inherited from a parent class.
+    permissible_values:
+      own: {}
+      inherited: {}
+      refined: { description: "Inherited, but with a different cardinality or value type here." }
+  ParentSource:
+    description: Why a class is considered a parent.
+    permissible_values:
+      declared: { description: "rdfs:subClassOf in the data." }
+      implied: { description: "Every observed instance also has the parent type." }
+
+slots:
+  ratio:
+    range: float
+    minimum_value: 0
+    maximum_value: 1
+    description: A share between 0 and 1.
+
+classes:
+  ProfileAnalytics:
+    is_a: ProfileRun
+    tree_root: true
+    description: A profile run with every level replaced by its analytics.
+    slot_usage:
+      graphs: { range: GraphAnalytics }
+
+  PropertyAnalytics:
+    is_a: PropertyProfile
+    description: Indicators for one property of one class.
+    attributes:
+      # from the cardinality histogram
+      subjects_with_property: { range: integer, description: "Σ subjects over bins n ≥ 1." }
+      subjects_without_property: { range: integer, description: "Observed instances minus subjects with the property (the n = 0 bin)." }
+      total_triples: { range: integer, description: "Σ n × subjects." }
+      min: { range: integer, description: "0 when some instances lack the property, else the smallest n." }
+      max: { range: integer, description: "Largest n (a lower bound in first_n mode)." }
+      mean: { range: float, description: "Mean values per observed instance, zeros included (today's avg)." }
+      mean_when_present: { range: float, description: "Mean over instances that have the property." }
+      median: { range: float, description: "Median values per instance, zeros included." }
+      mode: { range: integer, description: "Most frequent n." }
+      stddev: { range: float, description: "Standard deviation of values per instance." }
+      confidence: { range: float, description: "Share of observed instances having the property (QSE confidence, sheXer frequency)." }
+      exact_count: { range: integer, description: "n of an exactly_n label." }
+      cardinality_label: { range: CardinalityLabel, description: "Accepted cardinality at the acceptance threshold." }
+      label_support: { range: float, description: "Share of instances conforming to the accepted label." }
+      alternative_labels: { range: CardinalityLabel, multivalued: true, description: "Labels rejected below the threshold, kept for the reader." }
+      is_mandatory: { range: boolean, description: "confidence = 1." }
+      is_functional: { range: boolean, description: "max ≤ 1." }
+      # from value partitions
+      property_kind: { range: PropertyKind, description: "From node kinds of the objects." }
+      value_types: { range: uriorcurie, multivalued: true, description: "Datatypes and object classes, most frequent first." }
+      dominant_value_type: { range: uriorcurie, description: "The most frequent datatype or object class." }
+      type_purity: { range: float, description: "Share of triples whose value has the dominant type." }
+      untyped_object_ratio: { range: float, description: "Share of resource objects with no class." }
+      languages: { multivalued: true, description: "Language tags seen, most frequent first." }
+      language_coverage: { range: float, description: "Share of literal triples carrying a language tag." }
+      mean_length: { range: float, description: "Mean lexical length of literals." }
+      # diversity
+      distinct_ratio: { range: float, description: "Distinct objects ÷ triples (1 = all different)." }
+      is_identifier_like: { range: boolean, description: "Label exactly_one and distinct objects equal subjects with the property." }
+      is_enumeration_candidate: { range: boolean, description: "Distinct objects ≤ top_k — candidate for sh:in." }
+      top_k_share: { range: float, description: "Share of triples covered by the top values." }
+      entropy_estimate: { range: float, description: "Shannon entropy estimated from top values plus the remainder." }
+      # hierarchy
+      inheritance: { range: Inheritance, description: "Own, inherited or refined relative to the parents." }
+      # trust
+      is_exact: { range: boolean, description: "False when the class was read in first_n mode or distincts are bounds." }
+
+  ParentClass:
+    description: A parent of a class, declared or implied by the data.
+    attributes:
+      parent: { range: uriorcurie, required: true, description: "The parent class." }
+      source: { range: ParentSource, required: true, description: "Declared or implied." }
+      co_type_ratio: { range: float, description: "Share of observed instances also typed with the parent." }
+
+  ClassAnalytics:
+    is_a: ClassProfile
+    description: Indicators for one class.
+    slot_usage:
+      property_partitions: { range: PropertyAnalytics }
+    attributes:
+      parents: { range: ParentClass, multivalued: true, inlined_as_list: true, description: "Declared and implied parents." }
+      hierarchy_depth: { range: integer, description: "Longest path to a root class." }
+      own_property_count: { range: integer, description: "Properties not inherited from a parent." }
+      mandatory_property_count: { range: integer, description: "Properties with confidence 1." }
+      mean_out_degree: { range: float, description: "Mean triples per observed instance." }
+      label_coverage: { range: float, description: "Share of instances with a label property (rdfs:label, skos:prefLabel, ...)." }
+      is_exact: { range: boolean, description: "False when the class was read in first_n mode or any property is not exact." }
+      sample_ratio: { range: float, description: "Observed instances ÷ instances." }
+
+  GraphAnalytics:
+    is_a: GraphProfile
+    description: Indicators for one graph.
+    slot_usage:
+      class_partitions: { range: ClassAnalytics }
+    attributes:
+      class_count: { range: integer, description: "Instantiated classes." }
+      property_count: { range: integer, description: "Distinct predicates." }
+      typed_subject_ratio: { range: float, description: "Share of subjects with at least one type." }
+      vocabularies: { multivalued: true, description: "Namespaces of the predicates and classes, by triples." }
+      cross_graph_object_types: { range: uriorcurie, multivalued: true, description: "Graphs that supply object types (linksets)." }

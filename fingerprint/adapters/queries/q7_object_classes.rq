@@ -1,0 +1,9 @@
+# Q7 object classes
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?p ?kind ?t ?tg (COUNT(*) AS ?triples) (COUNT(DISTINCT ?o) AS ?objects) {
+  $subjects $graph_open ?s ?p ?o . $graph_close
+  FILTER(?p != rdf:type && !isLiteral(?o))
+  BIND(IF(isBlank(?o), "blank_node", "iri") AS ?kind)
+  $type_lookup
+} GROUP BY ?p ?kind ?t ?tg

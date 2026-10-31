@@ -1,0 +1,102 @@
+{# Renderers over conf.profile (ProfileAnalytics); no queries are issued here (DEC-6).
+   render_report enables autoescape for this template: endpoint data is untrusted. #}
+
+{# Shorten an IRI with the first matching prefix from prefixes.json ({"skos:": "http://…#"}). #}
+{% macro curie(iri, prefixes) -%}
+    {%- set found = namespace(text=iri) -%}
+    {%- if iri -%}
+        {%- for prefix, uri in prefixes.items() -%}
+            {%- if found.text == iri and iri.startswith(uri) -%}
+                {%- set found.text = prefix ~ iri[uri|length:] -%}
+            {%- endif -%}
+        {%- endfor -%}
+    {%- endif -%}
+    {{- found.text if found.text else '—' -}}
+{%- endmacro %}
+
+{# A number rounded to 2 decimals; an absent value is a dash. #}
+{% macro num(value) -%}
+    {{- '—' if value is none else (value | round(2) if value is float else value) -}}
+{%- endmacro %}
+
+{% macro precision(cls) -%}
+    {%- if cls.precision_mode == 'first_n' -%}
+        first {{ cls.observed_instances }} of {{ cls.instances }}
+        {%- if cls.sample_shared == false %} (sample may differ between queries){% endif -%}
+    {%- else -%}
+        exact
+    {%- endif -%}
+{%- endmacro %}
+
+{% macro class_section(cls, prefixes) -%}
+    <h3>Class {{ curie(cls.class_iri, prefixes) }}</h3>
+    <p>Instances: {{ cls.instances }} · precision: <em>{{ precision(cls) }}</em>
+        {%- if cls.parents %} · parents:
+            {% for p in cls.parents %}{{ curie(p.parent, prefixes) }} ({{ p.source }}){{ ", " if not loop.last }}{% endfor %}
+        {%- endif %}</p>
+    <table class="display class-profile">
+        <thead class="center aligned">
+        <tr>
+            <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th>
+            <th>Distinct values</th><th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for p in cls.property_partitions or [] %}
+            <tr>
+                <td>{{ curie(p.property, prefixes) }}</td>
+                <td class="center aligned collapsing">{{ num(p.subjects_with_property) }}</td>
+                <td class="center aligned collapsing">{{ num(p.min) }}</td>
+                <td class="center aligned collapsing">{{ num(p.max) }}</td>
+                <td class="center aligned collapsing">{{ num(p.mean) }}</td>
+                <td class="center aligned collapsing">{{ p.property_kind or '—' }}</td>
+                <td class="center aligned collapsing">{{ num(p.distinct_objects) }}</td>
+                <td>{% if p.value_types %}{% for t in p.value_types %}{{ curie(t, prefixes) }}{{ ", " if not loop.last }}{% endfor %}{% else %}—{% endif %}</td>
+                <td class="center aligned collapsing">{{ num(p.confidence) }}</td>
+                <td class="center aligned collapsing">{{ p.cardinality_label or ('present' if p.presence_only else '—') }}</td>
+                <td class="center aligned collapsing">{{ p.inheritance or '—' }}</td>
+                <td class="center aligned collapsing">{{ num(p.language_coverage) }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <caption>The shape of {{ curie(cls.class_iri, prefixes) }} class instances</caption>
+    </table>
+{%- endmacro %}
+
+{% macro collection_section(profile, prefixes) -%}
+    <div id="collection">
+    <h2>Collection</h2>
+    <section>
+        <p>Endpoint {{ profile.endpoint | e }}{% if profile.tool_version %}, rdf-fingerprinter {{ profile.tool_version }}{% endif %}.</p>
+        <table class="display settings">
+            <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+            <tbody>
+            {% for name, value in profile.settings.model_dump().items() %}
+                <tr><td>{{ name }}</td><td>{{ '—' if value is none else value }}</td></tr>
+            {% endfor %}
+            </tbody>
+            <caption>Settings used</caption>
+        </table>
+        {% if profile.failures %}
+            <table class="display failures">
+                <thead><tr><th>Graph</th><th>Class</th><th>Property</th><th>Measurement</th><th>Attempts</th><th>Message</th></tr></thead>
+                <tbody>
+                {% for f in profile.failures %}
+                    <tr>
+                        <td>{{ f.graph or 'default' }}</td>
+                        <td>{{ curie(f.class_iri, prefixes) }}</td>
+                        <td>{{ curie(f.property, prefixes) }}</td>
+                        <td>{{ f.query_kind }}</td>
+                        <td>{{ num(f.attempts) }}</td>
+                        <td>{{ f.message | e }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                <caption>Failures: these measurements are missing from the report</caption>
+            </table>
+        {% else %}
+            <p>Every measurement succeeded.</p>
+        {% endif %}
+    </section>
+    </div>
+{%- endmacro %}

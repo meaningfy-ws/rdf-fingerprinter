@@ -1,10 +1,37 @@
 [importlinter]
 root_package = fingerprint
+# Needed by the external-packages contract below.
+include_external_packages = True
 
-# Today's layers only; the domain/adapters split waits for a real need (DEC-4).
+# Onion layers (DEC-7, P-10): a layer may import only the layers below it.
 [importlinter:contract:layers]
 name = fingerprint layers
 type = layers
 layers =
     fingerprint.entrypoints
     fingerprint.service_layer
+    fingerprint.adapters
+    fingerprint.domain
+
+# Lists, not patterns: a new module under fingerprint.domain must be added to this contract.
+[importlinter:contract:generated]
+name = generated model imports no project code
+type = forbidden
+source_modules =
+    fingerprint.domain.generated
+forbidden_modules =
+    fingerprint.domain.iri
+    fingerprint.domain.analytics
+    fingerprint.adapters
+    fingerprint.service_layer
+    fingerprint.entrypoints
+
+[importlinter:contract:pure-domain]
+name = domain imports no I/O library
+type = forbidden
+source_modules =
+    fingerprint.domain
+forbidden_modules =
+    SPARQLWrapper
+    eds4jinja2
+    click

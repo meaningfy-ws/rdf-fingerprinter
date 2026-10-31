@@ -1,0 +1,116 @@
+= Statistics and Settings
+:description: What rdf-fingerprinter measures, how precise each number is, and the settings that control collection.
+
+rdf-fingerprinter works in three steps. It *collects* raw statistics from the endpoint, *analyses*
+them into indicators without querying again, and *renders* the report from the analysis. The raw
+statistics and the indicators are defined by the LinkML models in `model/`
+(`fingerprint_stats.yaml`, `fingerprint_analytics.yaml`).
+
+== What is collected
+
+Every query is scoped to one graph, and every per-class query reads only that class's instances.
+The depth setting decides how far collection goes; each level includes the previous ones.
+
+[cols="1,3"]
+|===
+| Depth | Collected
+
+| `graphs` | The list of named graphs.
+| `classes` | Instances per class, `rdfs:subClassOf` statements, and the other types the instances have.
+| `properties` | A histogram per class and property: how many instances have exactly _n_ values.
+| `values` (default) | Value groups per property: literals by datatype and language (with shortest, longest and total length, smallest and largest value), resources by class, untyped resources, distinct values.
+| `rich_values` | The most frequent values per class and property (`top_k`).
+| `links` | Incoming links: which classes point at the instances, through which properties.
+|===
+
+Two switches add full-graph scans: `graph_statistics` (statements, distinct subjects and objects,
+statements per predicate, untyped subjects) and `completeness_check` (below).
+
+`rdf:type` is never reported as a property; type information appears as the class's other types
+and parents.
+
+== What is derived
+
+From the histogram of a property on a class with _O_ observed instances:
+
+* *min* is 0 when some instances lack the property, else the fewest values; *max* the most;
+  *mean* (the report's Avg) counts instances without the property as 0, as in 1.x.
+* *confidence* is the share of instances that have the property.
+* the *cardinality label* is `exactly_one`, `exactly_n`, `one_or_more`, `zero_or_one` or
+  `zero_or_more`, accepted when at least `acceptance_threshold` of the instances (default 95 %)
+  conform. The rejected stricter labels are kept, so a reader sees how close the data came.
+
+From the value groups: property kind (datatype, object or mixed), value types by frequency, the
+dominant type and its share, untyped-object ratio, languages and language coverage, mean
+length, distinct ratio, identifier-like and enumeration-candidate flags, top-K share and an
+entropy estimate.
+
+For classes: parents, either declared (`rdfs:subClassOf`) or implied (every observed instance
+also has the parent type), hierarchy depth, and for each property whether it is `own`,
+`inherited` (same label and dominant type as on a parent) or `refined`. Two classes whose
+instances always have both types are treated as equivalent.
+
+A value that cannot be computed, for example a ratio with nothing to divide by or an indicator
+whose query did not run at the chosen depth, is absent. The report shows it as `—`.
+
+== Precision modes
+
+Each class is read in one of two modes, and the report says which:
+
+exact:: every instance is read. Shown as `exact`.
+first N:: only the first N instances the store returns (`first_n`, default 10 000) are read.
+Shown as `first N of M`. The numbers describe that sample, which follows the store's row order
+and is not random. All queries of the class read the same listed instances. When the instances are
+blank nodes, which cannot be listed, each query takes its own first N, and the report adds
+"sample may differ between queries".
+
+With the default policy `auto`, a class is read exactly; if a query times out, it is read again
+in first-N mode. Policy `exact` records the timeout as a failure; policy `first_n` reads every
+class in first-N mode (a fast preview).
+
+The *completeness check* finds properties used only by instances outside the first N. It asks,
+for each predicate of the graph that the sample did not show, whether any instance of the class
+uses it. Such properties are listed as present, without statistics.
+
+== Failures
+
+A query that fails after its retries is recorded with the graph, class, property, the
+measurement and the error, and logged at WARNING. The class is still profiled when only a
+second-wave measurement (top values, completeness check, incoming links) fails. The report lists
+the failures in its Collection section, and the CLI exits with 1.
+
+== Settings
+
+Each setting can be given on the command line, as an environment variable
+`RDF_FINGERPRINTER_<NAME>`, or in a configuration file: `--config FILE` for the CLI,
+`additional_config["collection"]` for the library. The first one found, in that order, wins.
+The settings used are recorded in the profile and shown in the report.
+
+[cols="2,2,1,3"]
+|===
+| Setting | CLI option | Default | Meaning
+
+| `depth` | `--depth` | `values` | How much is collected (table above).
+| `precision_policy` | `--precision` | `auto` | `auto`, `exact` or `first_n`.
+| `first_n` | `--first-n` | 10000 | Instances read per class in first-N mode.
+| `top_k` | `--top-k` | 20 | Top values kept per class and property.
+| `acceptance_threshold` | `--threshold` | 0.95 | Share of instances a cardinality label must cover, in (0, 1].
+| `object_type_scope` | `--object-types` | `same_graph` | Where object types are looked up: `same_graph` or `any_graph`.
+| `completeness_check` | `--completeness` | off | Check properties outside the first N.
+| `graph_statistics` | `--graph-stats` | off | Collect graph totals (full scans).
+| `timeout_seconds` | `--timeout` | 60 | Per-query timeout.
+| `concurrency` | `--concurrency` | 4 | Classes profiled at once.
+| `selected_graphs` | `--graph` (repeatable) | all | Graphs to profile; `""` is the default graph. Comma-separated in the environment variable.
+|===
+
+Booleans in environment variables are `1/true/yes/on` or `0/false/no/off`. An unknown key in a
+configuration file or an invalid value is a usage error.
+
+== Graphs
+
+Without selected graphs, rdf-fingerprinter profiles the default graph first and then every named
+graph. 1.x profiled only the default graph.
+
+NOTE: Some stores expose the union of all named graphs as their default graph. On those stores
+the default graph's counts repeat what the named graphs already contain. Select the graphs you
+want with `--graph` to avoid that.

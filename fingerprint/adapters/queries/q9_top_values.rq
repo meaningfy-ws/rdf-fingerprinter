@@ -1,0 +1,5 @@
+# Q9 top values
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?o (COUNT(*) AS ?triples) { $subjects $graph_open ?s $prop ?o . $graph_close }
+GROUP BY ?o ORDER BY DESC(?triples) LIMIT $k
