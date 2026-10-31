@@ -57,6 +57,8 @@ class JinjaTemplateRenderer:
         """The text of the package's template; `config` is deep-merged over its `config.json`."""
         try:
             builder = ReportBuilder(target_path=package, additional_config=dict(config or {}), external_filters=self.filters)
+        except FileNotFoundError as error:
+            raise TemplatePackageError(f"{package} is not a template package: {error}") from error
         except KeyError as error:
             raise TemplatePackageError(f"{package}/config.json must have `template` and `conf`: {error}") from error
         if autoescape is not None:
