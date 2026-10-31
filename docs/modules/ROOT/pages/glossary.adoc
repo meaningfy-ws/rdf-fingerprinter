@@ -109,8 +109,10 @@ class, or inherited with a different cardinality or value type.
 [#severity]
 Severity (SHACL):: How strongly a generated shape asserts a constraint: `sh:Info` when the property
 has no cardinality label or its confidence is below the acceptance threshold; `sh:Warning` when the
-constraint held with exceptions, on a sample, or relies on types from other graphs; `sh:Violation`
-when it held for every instance. See xref:how-it-works.adoc#severity[How it works].
+constraint held with exceptions, the class was read on a sample, the class has declared subclasses,
+or the run looked up object types across graphs (`object_type_scope = any_graph`) and the shape uses `sh:class`; `sh:Violation` when it held for every instance. A
+validator's `sh:conforms` is false as soon as any result exists, whatever its severity; the promise
+of the generated shapes is "no `sh:Violation` on their own data", not "conforms". See xref:how-it-works.adoc#severity[How it works].
 
 == Components
 
@@ -123,6 +125,8 @@ The responsibilities the Blue use cases name as supporting actors, and where eac
 
 | Command line | Parses options, configures logging, maps outcomes to exit codes | `fingerprint/entrypoints/cli/`
 | Public function | The 1.x library call | `fingerprint/service_layer/handlers.py`
+| Report service | Collect, save the profile (2.1), analyse, render the report, run chosen generators (2.1) | `fingerprint_report` in `fingerprint/service_layer/handlers.py`
+| Representations service (2.1) | Load a profile, apply a threshold, run generators | `fingerprint/service_layer/representations.py`
 | Settings resolver | Merges setting sources by precedence and checks them | `fingerprint/service_layer/settings.py`
 | Collector | Discovery, per-class queries, precision escalation, concurrency | `fingerprint/service_layer/collection.py`
 | SPARQL client | Sends queries with timeout and retries; classifies errors | `fingerprint/adapters/sparql.py`

@@ -30,17 +30,17 @@ The requester asks for a fingerprint of the endpoint.
 
 == Success Guarantee (Postconditions)
 
-. A report is written covering every profiled graph and every instantiated class in it.
+. A report is written covering every profiled graph; every instantiated class in it is either profiled or listed as a failure.
 . Each class shows its precision mode; first-N figures say "first N of M".
 . The settings used are recorded with the report and, from 2.1, the raw profile is saved as `profile.json`.
 . The endpoint received only read queries.
-. Every recorded failure is listed in the report with its graph, class and error, and logged at WARNING.
+. Every recorded failure is listed in the report with its graph, class and error, and reported in the log.
 
 == Minimal Guarantees (On Failure)
 
 . If the endpoint cannot be reached when the run starts (the graph listing meets an authorisation
-  refusal, or a transient error — connection failure, HTTP 429/502/503 — that persists after its
-  retries), nothing is written and the outcome names the endpoint without credentials.
+  refusal, or a transient error that persists after its retries; error classes in
+  xref:how-it-works.adoc#failure-classes[How it works]), nothing is written and the outcome names the endpoint without credentials.
 . If a setting is invalid or the output folder is missing, nothing is queried and the outcome names the problem.
 . If measurements fail after the start — timeouts, rejections, a refusal of one query — the report
   and profile are still written, with the failures listed (success guarantee 5).

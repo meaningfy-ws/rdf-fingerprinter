@@ -46,7 +46,7 @@ This Blue path adds only:
 == Extensions
 
 1a. Unknown or malformed option — usage error, exit 2. +
-2a. Config file unreadable or holding unknown keys — exit 2, the file named.
+2a. Config file unreadable or not a JSON object — exit 2, the file named; holding unknown keys — exit 2, the keys named.
 
 == Technology and Data Variations
 

@@ -43,6 +43,9 @@ This Blue path adds only:
   (a `ValueError`, from `fingerprint.service_layer.settings`) for an invalid setting;
   `EndpointUnreachable` (from `fingerprint.adapters.sparql`) when the endpoint is unreachable at the
   start. From 2.1 both are also importable from their layer's `exceptions` module.
+. Any other exception propagates unchanged; there is no library counterpart to exit 4. Some of them
+  (a validation error from the model, a non-numeric count) are also `ValueError` subclasses, so a
+  caller that must tell usage errors apart catches `UsageError`, not `ValueError`.
 . Importing the library has no logging side effects.
 
 == Extensions

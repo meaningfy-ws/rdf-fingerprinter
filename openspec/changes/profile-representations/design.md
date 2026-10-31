@@ -119,8 +119,8 @@ eds4jinja2 itself.
   | `fingerprint/domain/exceptions.py` | `IriRefError` (moved) |
   | `fingerprint/adapters/template_renderer.py` | `JinjaTemplateRenderer`: eds4jinja2 rendering, prefixes file loading, Turtle check (rdflib), check-then-write |
   | `fingerprint/adapters/profile_file.py` | `save_profile`, `load_profile` |
-  | `fingerprint/adapters/settings_sources.py` | `load_config_file` (moved), `environment()` |
-  | `fingerprint/adapters/exceptions.py` | the SPARQL error classes (moved), `ProfileFileError`, `GeneratedOutputError` |
+  | `fingerprint/adapters/settings_sources.py` | `load_config_file` (moved; raises `ConfigFileError`, which the settings resolver turns into `UsageError`, since adapters may not import the service layer), `environment()` |
+  | `fingerprint/adapters/exceptions.py` | the SPARQL error classes (moved), `ProfileFileError`, `GeneratedOutputError`, `ConfigFileError`, `TemplatePackageError` |
   | `fingerprint/service_layer/generators/generator.py` | `Generator` (hooks, view, `serialize(renderer)`), `TemplateRenderer` protocol |
   | `fingerprint/service_layer/generators/{shacl,plantuml,document}.py` + `__init__.py` | the three generators, `GENERATORS = {"shacl": …, "puml": …, "doc": …}` |
   | `fingerprint/service_layer/representations.py` | `generate_representations(run, output, formats, *, threshold=None, template=None, renderer=None) -> list[Path]` and `generate_from_profile_file(path, …)` |
@@ -128,8 +128,8 @@ eds4jinja2 itself.
   | `fingerprint/entrypoints/cli/generate.py` | the three commands: parse, call `generate_from_profile_file`, map exceptions to exit codes |
 
   Moved names stay importable from their old modules (they import them), so callers and tests keep
-  working. `.importlinter` gains a forbidden contract: `fingerprint.service_layer` imports no `eds4jinja2`,
-  `rdflib` or `SPARQLWrapper` itself, with `allow_indirect_imports = True` (the default
+  working. `.importlinter` gains a forbidden contract: `fingerprint.service_layer` imports no `jinja2`,
+  `eds4jinja2`, `rdflib` or `SPARQLWrapper` itself, with `allow_indirect_imports = True` (the default
   `SparqlWrapperClient` that `handlers` builds reaches SPARQLWrapper through `adapters`, which is the
   intent); `fingerprint.domain.exceptions` joins the `generated` contract list. template packages `fingerprint_report_templates/{shacl_shapes,plantuml_diagram,profile_document}/`
   (each `config.json` + `templates/`). rdflib becomes a declared runtime dependency (already installed
@@ -150,9 +150,9 @@ eds4jinja2 itself.
 
 - **P-16 The profile file is a published format** (AD-7). `make generate-models` also runs
   `gen-json-schema` on `model/fingerprint_stats.yaml` into `fingerprint/domain/generated/profile_run.schema.json`
-  (shipped in the wheel; `make check-models` diffs it too). Compatibility rule: 2.x minor releases only
-  add optional fields; `load_profile` names the file and the `tool_version` it carries when it does
-  not match.
+  (shipped in the wheel; `make check-models` diffs it too). Compatibility rule (AD-7): 2.x minor releases only
+  add optional fields, so newer readers load older files; an older reader rejects a newer file
+  (`extra="forbid"`); `load_profile` then names the file and the `tool_version` it carries.
 - **P-17 Gates that back the method.** `make test` gains `--cov-fail-under=80` (today 97 %). Every
   feature scenario, 2.0 ones included, is tagged with its use case (`@uc_w1`, `@uc_b1_1`, …,
   `@uc_b2_2`; pytest-bdd turns tags into markers, registered in `pytest.ini` because of
@@ -293,7 +293,7 @@ render time, so the golden file is stable.
 | `--threshold` outside (0, 1] | `resolve_settings` raises `UsageError` | exit 2 |
 | output folder missing | `NotADirectoryError` check, as `fingerprint` | exit 2 |
 | `--template` folder without `config.json` | `FileNotFoundError` from `ReportBuilder` | exit 2, names the folder |
-| custom `config.json` without `template` or `conf` | `KeyError` while building, caught in `Generator.__init__` | exit 2, "config.json must have `template` and `conf`" |
+| custom `config.json` without `template` or `conf` | `KeyError` while the template renderer builds its `ReportBuilder`, raised as `TemplatePackageError` (adapters) | the service turns it into a usage error, exit 2, "config.json must have `template` and `conf`" |
 | custom template has a Jinja error | `jinja2.TemplateError` | exit 4, message shows template and line |
 | class/property IRI not writable as IRIREF | `to_iriref` raises `IriRefError` in a hook | element skipped from SHACL/PlantUML, WARNING logged, listed in caveats; exit 0 |
 | generated Turtle does not parse | `rdflib.Graph().parse(data=…, format="turtle")` raises in `check` | `GeneratedOutputError`, exit 4, none of that format's files written; formats finished before it kept |

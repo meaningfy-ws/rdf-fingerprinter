@@ -70,7 +70,7 @@ the value types (`sh:datatype` for one datatype, `sh:class` for one class, `sh:n
 when mixed; a literal without a datatype but with a language counts as `rdf:langString`). Severity
 SHALL follow the first matching rule: no cardinality label, or confidence below the acceptance
 threshold → `sh:Info`; label support below 1, a class read in first-N mode, or `sh:class` under
-cross-graph object types, or a class with declared subclasses → `sh:Warning`; otherwise the default `sh:Violation`. Shapes SHALL be annotated with confidence and observed/total instances, and a first-N
+`sh:class` when the run looked up object types across graphs, or a class with declared subclasses → `sh:Warning`; otherwise the default `sh:Violation`. Shapes SHALL be annotated with confidence and observed/total instances, and a first-N
 class marked as sampled.
 
 #### Scenario Outline: Severity from the threshold
@@ -101,9 +101,9 @@ class marked as sampled.
     | zero_or_more | neither                         |
     | exactly_n 3  | `sh:minCount 3`, `sh:maxCount 3` |
 
-#### Scenario: Shapes conform on their own data
+#### Scenario: Shapes report no violation on their own data
 - **WHEN** the shapes generated from the e2e test data validate that same data with a SHACL engine
-- **THEN** there is no violation at severity `sh:Violation` (first-N classes and cross-graph types are at most `sh:Warning`)
+- **THEN** no result has severity `sh:Violation` (results at `sh:Warning` and `sh:Info` are expected, so `sh:conforms` may be false) (first-N classes and cross-graph types are at most `sh:Warning`)
 
 #### Scenario: Sampled class is marked
 - **WHEN** a class was read in first-N mode

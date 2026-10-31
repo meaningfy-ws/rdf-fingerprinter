@@ -90,7 +90,7 @@ Consequences::
 * Good: shapes are usable as-is for validation and as documentation of the usual shape.
 * Good: the threshold a reader chose stays visible in the output.
 * Bad: a consumer must read severities, not just `sh:conforms`.
-Confirmation:: scenarios "Shapes conform on their own data" (pySHACL on the e2e source files) and
+Confirmation:: scenarios "Shapes report no violation on their own data" (pySHACL on the e2e source files) and
 "Severity from the threshold" of the `profile-representations` specification.
 Pros and cons::
 * Graded severities (chosen) — good: shapes conform on their own data and still carry what was learned; bad: consumers must read severities.
@@ -139,9 +139,10 @@ Consequences::
 * Good: one collection, any number of representations, regenerated at will.
 * Good: the acceptance threshold can change without touching the endpoint.
 * Bad: the file becomes a public format. Rule: it is the JSON of the `fingerprint_stats` model, with
-  a JSON Schema generated from the same LinkML schema and shipped in the package; minor releases
-  only add optional fields, so a 2.x reader loads every 2.x file; a major release may break it. A
-  file that does not match is a usage error naming the file and the `tool_version` it carries.
+  a JSON Schema generated from the same LinkML schema and shipped in the package. Minor releases
+  only add optional fields, so a newer 2.x reader loads every older 2.x file; an older reader rejects
+  a newer file (the model forbids unknown fields) with a usage error naming the file and the
+  `tool_version` it carries. A major release may break both directions.
 Confirmation:: scenarios "Round-trip" and "Rendering without an endpoint" of the
 `profile-representations` specification; `make check-models` also checks the JSON Schema.
 Pros and cons::
@@ -194,7 +195,7 @@ Consequences::
   file) sit in the service layer; they move to adapters, and the SPARQL client becomes an injectable
   parameter of the service.
 Confirmation:: `make check-architecture` (`.importlinter`: layers, generated-model isolation, pure
-domain — the domain imports no SPARQLWrapper, eds4jinja2 or click; from 2.1 also a service layer that imports no eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client)).
+domain — the domain imports no SPARQLWrapper, eds4jinja2 or click; from 2.1 also a service layer that imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client)).
 Pros and cons::
 * Onion layers with a port (chosen) — good: testable without a store, I/O at the edges; bad: more modules.
 * Logic in templates — good: tiny code; bad: untestable, untimed, one full scan per class.
@@ -251,8 +252,8 @@ Consequences::
 * Good: every statistic is available to every format.
 * Bad: `serialize()` returns a file → text map (per-graph outputs), unlike LinkML's single string.
 Confirmation:: scenario "Custom template package" of the `profile-representations` specification;
-`make check-architecture` (generators import no rendering library themselves: rendering is the
-template renderer adapter's).
+`make check-architecture` (the service layer, generators included, imports no jinja2, eds4jinja2,
+rdflib or SPARQLWrapper itself: rendering is the template renderer adapter's).
 Pros and cons::
 * Own LinkML-shaped framework (chosen) — good: one subclass per format, every statistic available; bad: framework code to maintain.
 * LinkML's generators — good: many formats for free; bad: statistics survive only as annotations,

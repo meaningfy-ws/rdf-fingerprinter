@@ -7,7 +7,7 @@ what it observed.
 ----
  1 collect   endpoint ──SPARQL──▶ profile run (raw counts)              service layer + SPARQL adapter
  2 analyse   profile run ──────▶ analytics (indicators)                 domain, pure
- 3 save      profile run ──────▶ profile.json                (2.1)      file adapter
+ 3 save      profile run ──────▶ profile.json                (2.1)      Profile store
  4 render    analytics ────────▶ report, SHACL, diagram, doc (2.1)      eds4jinja2 templates
 ----
 
@@ -129,7 +129,7 @@ the first matching row wins:
 | no cardinality label (presence only), or _confidence_ below the _acceptance threshold_ | `sh:Info`
 | the label was accepted with exceptions (support below 1) | `sh:Warning`
 | the class was read in first-N mode | `sh:Warning`
-| `sh:class` checks types looked up in other graphs | `sh:Warning`
+| the run looked up object types across graphs (`object_type_scope = any_graph`) and the shape uses `sh:class` | `sh:Warning`
 | the class has declared subclasses (`sh:targetClass` also reaches their instances, which its statistics did not count) | `sh:Warning`
 | held for every instance | `sh:Violation` (default)
 |===

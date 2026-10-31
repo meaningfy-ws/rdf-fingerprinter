@@ -83,10 +83,9 @@ Parses options, configures logging, maps outcomes to exit codes.
 | service layer, adapters, domain
 
 | `fingerprint.service_layer`
-| Public function (`generate_endpoint_fingerprint_report`); Settings resolver; Collector; report
-orchestration; _(2.1)_ Generators (one per format, building its view) and the representations
-service: `generate_representations` (a run in memory) and `generate_from_profile_file`, which the
-generator commands call.
+| Public function (`generate_endpoint_fingerprint_report`); Report service; Settings resolver;
+Collector; _(2.1)_ Generators (one per format, building its view) and the Representations service,
+which the generator commands call.
 | adapters, domain
 
 | `fingerprint.adapters`
@@ -109,7 +108,7 @@ Pure, no I/O.
 Component names are those of the xref:glossary.adoc#components[Glossary], which maps each to its
 module. The layers are enforced by `.importlinter` (`make check-architecture`): the layer order, a
 generated model that imports no project code, a domain that imports no SPARQLWrapper, eds4jinja2 or
-click, and _(2.1)_ a service layer that imports no eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client).
+click, and _(2.1)_ a service layer that imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client).
 
 NOTE: 1.x had only `service_layer` and `entrypoints`; its statistics were computed by SPARQL inside
 the templates. In 2.0 report rendering and the setting sources still sit in the service layer; 2.1

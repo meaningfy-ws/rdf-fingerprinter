@@ -18,7 +18,7 @@ As UC-W2.
 == Brief Description
 
 `fingerprint-gen-<format> PROFILE -o FOLDER [--threshold T] [--template DIR]` loads the profile
-through the file adapter, re-derives the analytics, lets the format's generator build its view
+through the profile store, re-derives the analytics, lets the format's generator build its view
 through visit hooks (graph, class, property), has the template renderer lay the view out with the
 format's template package, checks every text, then writes them (xref:decisions.adoc#ad-8[AD-8]).
 
