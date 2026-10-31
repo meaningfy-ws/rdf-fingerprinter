@@ -84,7 +84,7 @@ Behaviour does not change: the golden files and every scenario are the safety ne
 ## Rabbit-holes
 
 - Over-modelling the views: one class per thing a template iterates over, no deeper.
-- rdflib's connector raises urllib errors, not SPARQLWrapper's: the failure classification must be
+- Without SPARQLWrapper the errors are urllib's and rdflib's: the failure classification must be
   re-mapped and re-tested row by row (the error-class table in How it works).
 - Config read at import time would break "import has no side effects": values resolve on access.
 - eds4jinja2's parallel pre-fetch path must keep working for its other users.
@@ -107,7 +107,7 @@ Behaviour does not change: the golden files and every scenario are the safety ne
   `model/fingerprint_views.yaml`; a dict-construction check in the gate; AGENTS.md rule.
 - `fingerprint/domain/generated/` folded into `fingerprint/domain/` (**BREAKING** import path,
   within 2.x by decision).
-- SPARQL adapter on rdflib's `SPARQLConnector`; SPARQLWrapper removed from the dependencies.
+- SPARQL adapter on the standard library (timeout) with rdflib parsing the results; SPARQLWrapper removed.
 - `fingerprint/__init__.py` config with `RDF_FINGERPRINTER_*` variables; `settings_sources.py` removed.
 - eds4jinja2 minor release; the template renderer adapter calls its document building.
 

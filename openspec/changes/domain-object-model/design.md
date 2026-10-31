@@ -34,22 +34,29 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   Pydantic objects and enums, never composed dicts." `tests/unit/test_no_composed_dicts.py` walks the
   AST of `fingerprint/**/*.py` (the generated `domain/profile.py`, `domain/views.py` excluded) and
   reports `file:line` for:
-  1. a `dict`, `dict[...]`, `Dict[...]` or `Mapping[...]` parameter or return annotation (bare `dict`
-     included);
-  2. a dict display, dict comprehension or `dict(...)` call inside a function body;
+  1. a `dict`, `dict[...]`, `Dict[...]`, `Mapping[...]` or `defaultdict[...]` parameter, return or
+     attribute annotation (bare `dict` included);
+  2. inside a function body: a dict display, a dict comprehension, or a call to `dict`, `dict.fromkeys`,
+     `defaultdict`, `OrderedDict` or `Counter`;
   
   except when (a) the dict is the direct value of a keyword argument named `update` (to `model_copy`)
   or is unpacked with `**` into a call (construction syntax, DEC-1), (b) it is assigned at module level
   to an UPPER_CASE name (a table), or (c) the line carries `# dict-ok: <reason>`. Expected marks after
   this change, each with its reason: eds4jinja2's configuration and `make_documents` outputs (adapter
   boundary), JSON being parsed into a model (`additional_config["collection"]`, the config file), the
-  prefix table (`dict[str, str]` loaded once from `prefixes.json`, a lookup table), local lookup
-  indexes built and consumed inside one function (`{c.class_iri: c for c in …}`), and the 1.x
-  `additional_config: dict` parameter (public API). A temporary allow-list file
-  (`tests/unit/composed_dicts_allowlist.txt`, `file:line` per entry) holds today's offenders; each
-  task group removes its own; 8.1 requires it empty.
+  prefix table (`dict[str, str]` loaded once from `prefixes.json`) and the namespaces a generator has
+  used, lookup indexes (local ones such as `{c.class_iri: c for c in …}` and `defaultdict` counters in
+  analytics; per-generator ones built in one hook and read in another: PlantUML's aliases and parent
+  boxes), and the 1.x public API (`generate_endpoint_fingerprint_report(additional_config: dict)`,
+  `fingerprint_report(extra_conf: dict)`, `generate_report_builder_config() -> dict`). The per-format
+  generator options become a model (`GeneratorOptions {shapes_namespace?}` in the views schema), so
+  `generate_representations(options: GeneratorOptions)` and `make_generator(…, options)` carry no dict.
+  A temporary allow-list `tests/unit/composed_dicts_allowlist.txt` holds a **count per file** of
+  today's offenders; the test fails when a file has more than its count (and asks to lower the count
+  when it has fewer), so edits never make it stale; each task group lowers its files to 0; task 7.1
+  requires the file empty.
 - **P-2 Generated modules (DEC-2, DEC-3).** `make generate-models` writes `fingerprint/domain/profile.py`
-  and `fingerprint/domain/profile_run.schema.json` (task 1.3) and, from task 6.1, also
+  and `fingerprint/domain/profile_run.schema.json` (task 1.3) and, from task 5.1, also
   `fingerprint/domain/views.py`; `check-models` diffs each module that exists. Ruff excludes the
   generated modules; the `generated` import-linter contract covers them.
 - **P-3 The views schema** `model/fingerprint_views.yaml` (namespace `fp:views/`, no import of the
@@ -71,29 +78,44 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   
   Frozen, `extra=forbid`. **Template edits** (a Pydantic object iterates as `(field, value)` pairs, so
   every tuple unpacking must go; the rendered text stays the same):
-  - `shacl_shapes/shapes.ttl`: `for p in view.graph.prefixes` → `@prefix {{ p.prefix }}: {{ p.namespace | turtle_iri }}`;
-    `for a in ns.annotations` / `for a in ps.annotations` → `{{ a.predicate }} {{ a.value }}`; the
-    severity line from `ps.severity` (`sh:Info`/`sh:Warning`, none for `violation`); `cls`→`ns`, `p`→`ps`.
+  - the template root: per-graph templates receive `view` = the graph object (`ShapesGraph`,
+    `DiagramGraph`), so `view.graph.X` becomes `view.X`; the document receives `view` = the
+    `ProfileDocument`. `ShapesGraph` and `DiagramGraph` carry `slug` (for the file name).
+  - `shacl_shapes/shapes.ttl`: `view.graph.classes` → `view.node_shapes`, `cls.properties` →
+    `ns.property_shapes`; `for p in view.prefixes` → `@prefix {{ p.prefix }}: {{ p.namespace | turtle_iri }}`;
+    `for a in ns.annotations` / `ps.annotations` → `{{ a.predicate }} {{ a.value }}`; the severity line
+    from `ps.severity` (`sh:Info`/`sh:Warning`, none for `violation`).
   - `plantuml_diagram/diagram.puml`: attributes = `members` with kind `attribute` (`m.text`); the link
     lines = `{{ c.alias }} --> {{ m.text }}` for kind `association`; generalisations unchanged.
-  - `profile_document/profile.html`: `for s in view.overview.settings` → `s.name`/`s.value`;
+  - `profile_document/profile.html`: `for s in view.overview.settings` → `s.name`/`s.value`
+    (`SettingValue.value` is text the generator writes as Jinja printed it: `str(value)`, and `—` for
+    `None`, so lists and booleans render as today);
     `for n in view.namespaces` → `n.prefix`/`n.namespace`; caveat rows `s.class_label`, `f.class_label`.
   - `fingerprint_report` (the statistics report): unchanged; it reads `conf.profile`, not a view.
-- **P-4 Generator hooks (LinkML's begin/visit/end shape).** `begin_graph(graph) -> None` (pre-order:
-  SHACL resets used prefixes and finds classes with declared subclasses; PlantUML assigns aliases),
-  then `visit_property(graph, cls, prop) -> P | None`, `visit_class(graph, cls, properties: list[P]) ->
-  C | None`, `visit_graph(graph, classes: list[C]) -> G | None` (post-order: frozen objects are built
-  after their children). `serialize() -> list[RenderedDocument]`, `render_graphs() ->
+- **P-4 Generator hooks (LinkML's visit/end shape).** Pre-order, for state and filtering:
+  `visit_graph(graph) -> bool` (SHACL resets used prefixes and finds classes with declared subclasses;
+  PlantUML assigns aliases) and `visit_class(graph, cls) -> bool` (False skips the class and its
+  properties are never visited, so no prefix or skip is recorded for them — LinkML's `visit_class`
+  returns False the same way). Then `visit_property(graph, cls, prop) -> P | None`, and post-order
+  `end_class(graph, cls, properties: list[P]) -> C | None` and `end_graph(graph, classes: list[C]) ->
+  G | None` (frozen objects are built after their children). `serialize() -> list[RenderedDocument]`, `render_graphs() ->
   list[tuple[slug, text]]` becomes `list[RenderedDocument]` keyed by slug in `file_name`. `GENERATORS`
   is a module-level table keyed by `RepresentationFormat`.
-- **P-5 SPARQL (DEC-5 as amended).** The adapter sends each query as today on the wire —
-  `POST`, `Content-Type: application/x-www-form-urlencoded`, body `query=<urlencoded>`, `Accept:
-  application/sparql-results+json` — with `urllib.request.urlopen(request, timeout=timeout_seconds)`,
-  and parses the body with `rdflib.query.Result.parse(BytesIO(body), format="json")`. `SparqlPort.select`
+- **P-5 SPARQL (DEC-5 as amended).** The adapter sends each query as a SPARQL 1.1 Protocol POST —
+  `Content-Type: application/x-www-form-urlencoded`, body `query=<urlencoded>`, `Accept:
+  application/sparql-results+json`, `User-Agent: rdf-fingerprinter/<version>` — with
+  `urllib.request.urlopen(request, timeout=timeout_seconds)`. This differs from SPARQLWrapper's request
+  (it also sent `format=json&output=json&results=json`, a four-type Accept and its own User-Agent);
+  the standard protocol is accepted as the new request (no requirement fixes the wire format), and the
+  e2e suite on Oxigraph checks it. The answer is parsed with
+  `rdflib.query.Result.parse(BytesIO(body), format="json")`. `SparqlPort.select`
   returns `list[ResultRow]` (`URIRef`, `BNode`, typed `Literal`; unbound → `None`); `ask` returns
   `Result.askAnswer`. `classify` keeps today's table on the urllib/socket side and **keeps the 500 rule**:
   an `HTTPError` 500 whose body excerpt holds a timeout marker is a `QueryTimeout`, else permanent; a
-  body `Result.parse` cannot read (`ValueError`, e.g. `JSONDecodeError`) is permanent. The
+  body `Result.parse` cannot read (`ValueError` such as `JSONDecodeError`, or
+  `rdflib.query.ResultException`) is permanent. Failure *messages* lose SPARQLWrapper's wording (they
+  keep the status and a body excerpt); tests that assert message text are updated, the requirements
+  (kinds, attempts, exit codes) do not change. The
   SPARQLWrapper branches and `rows_from_json` go.
 - **P-6 eds4jinja2 2.1 (DEC-7)**, a change in `../eds4jinja2` with its own spec and tests:
   `ReportBuilder.make_documents(outputs: Mapping[str, Mapping[str, Any]], *, check: Callable[[str, str],
@@ -102,8 +124,9 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
     template variables of that output (passed to `render(**variables)`; `conf` stays the global);
   - `autoescape`, when given, is set on the environment before the first render (as `render_report`
     does today);
-  - each output is rendered through the same path as `make_document()` (sequential, or the parallel
-    pre-fetch when `parallelism > 1`, record pass per output);
+  - each output is rendered **to memory** through the same steps as `make_document()` (sequential, or
+    the parallel pre-fetch when `parallelism > 1`, record pass per output — including its fallback,
+    which today writes straight to the file and must render to memory instead);
   - every text is passed to `check(name, text)`; only if all pass are the files written;
   - the before-rendering listeners run once before the batch, the after-rendering listeners once after
     the files are written;
@@ -112,7 +135,7 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   per graph for SHACL and PlantUML) with the Turtle check and the autoescape of the format;
   `JinjaTemplateRenderer.render`/`write` and the `template_env` guard test go. Released as eds4jinja2
   2.1.0 **with the developer's go-ahead** (that repository grants agents no release authority);
-  rdf-fingerprinter then requires `eds4jinja2>=2.1,<3`. If the release is refused, task 7.1 is dropped
+  rdf-fingerprinter then requires `eds4jinja2>=2.1,<3`. If the release is refused, task 6.1 is dropped
   and the current adapter stays.
 - **P-7 Configuration (DEC-6).** `fingerprint/adapters/config_resolver.py`: `ConfigResolverABC`,
   `EnvConfigResolver`, `DefaultConfigResolver` (Meaningfy settings pattern), and `env_property(name,
@@ -120,9 +143,11 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   `FingerprintConfig(DefaultConfigResolver())`. `fingerprint/__init__.py`: `class FingerprintConfig`
   and `config = FingerprintConfig(EnvConfigResolver())`; nothing resolves at import.
   `config.validate()` reads every property once and raises `UsageError` naming the first variable
-  that does not coerce; it runs at the start of every entry point (the `fingerprint` and
-  `fingerprint-gen-*` commands, `generate_endpoint_fingerprint_report`, `fingerprint_report`,
-  `generate_from_profile_file`), before any query or write. Variables:
+  that does not coerce; it runs at the start of the commands and of the service entry points
+  (`generate_endpoint_fingerprint_report`, `fingerprint_report`, `generate_from_profile_file`,
+  `generate_representations`), before any query or write. The lower-level functions (`collect`,
+  `render_report`) read config on access: a bad variable there is still a `UsageError`, raised when the
+  value is first needed. Variables:
 
   | Variable | Type, default | Replaces |
   |---|---|---|
@@ -132,7 +157,7 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   | `RDF_FINGERPRINTER_ERROR_EXCERPT_LENGTH` | integer, `200` | `EXCERPT` |
   | `RDF_FINGERPRINTER_SHAPES_NAMESPACE` | IRI text, `urn:fingerprint:shape:` | `DEFAULT_SHAPES_NAMESPACE` |
   | `RDF_FINGERPRINTER_DEFAULT_GRAPH_LABEL` | text, `default graph` | `DEFAULT_GRAPH_LABEL` |
-  | `RDF_FINGERPRINTER_PREFIXES_FILE` | path, the packaged `prefixes.json` | `PREFIXES_FILE` |
+  | `RDF_FINGERPRINTER_PREFIXES_FILE` | path, the packaged `prefixes.json` | `PREFIXES_FILE` (the generators' prefixes; the statistics report keeps reading the `prefixes.json` of its own template package, as custom report templates do) |
   | `RDF_FINGERPRINTER_<SETTING>` per collection setting | as today, unset by default | the env branch of `resolve_settings` |
 
   **Collection settings.** `model/fingerprint_stats.yaml` gains `SettingsOverride` (every `Settings`
@@ -143,12 +168,20 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   a bad value raises `UsageError` naming `RDF_FINGERPRINTER_<NAME>`), the `selected_graphs` parameter,
   the configuration (`--config` file or `additional_config["collection"]`, both through
   `SettingsOverride.model_validate`; unknown keys → `UsageError` "unknown collection settings: …").
-  An empty `selected_graphs` list counts as unset, as today. `resolve_settings(*overrides)` builds
-  `Settings(**{slot: first non-None})` (construction syntax), maps `ValidationError` to `UsageError`,
-  then applies the `(0, 1]` threshold rule. `settings_sources.py` goes. Stays constant (standards and
+  An empty `selected_graphs` list counts as unset, as today. `resolve_settings` keeps its documented
+  signature (`cli`, `env`, `selected_graphs`, `config`) and turns each argument into an override
+  (`env=None` means the process environment through `config`; an explicit mapping, as `with_threshold`
+  passes to ignore the environment, is parsed the same way); it builds `Settings(**{slot: first
+  non-None})` (construction syntax), maps `ValidationError` to `UsageError`, then applies the `(0, 1]`
+  threshold rule. *Accepted difference:* each source is type-checked on its own, so a malformed value
+  in a lower-precedence source now fails even when a higher one overrides it (today the merged result
+  was checked once); the CHANGELOG states it. `settings_sources.py` goes. Stays constant (standards and
   protocol tables): `vocabulary.py`, `RDF_TYPE`, `QUERY_FILES`, `QUERY_KIND`, `MODES`, `NODE_KINDS`,
   `TOO_LARGE`, `LABEL_PREDICATES`.
-- **P-8 Collection and analytics build objects.** Collection builds `ValuePartition(node_kind=…,
+- **P-8 Collection and analytics build objects.** rdflib's term classes are data types, not I/O: the
+  `service-io` import-linter contract changes from forbidding `rdflib` to forbidding `rdflib.graph`,
+  `rdflib.plugin` and `rdflib.plugins` (parsing, serialising, stores), so the service layer may import
+  `rdflib.term` and `rdflib.query.ResultRow`. Collection builds `ValuePartition(node_kind=…,
   datatype=…, triples=row.n.toPython())` etc. straight from `ResultRow`s; a blank node is recognised by
   `isinstance(term, BNode)` and written to the profile as `_:<id>` exactly as today (the `"_:"` prefix
   test goes). Analytics helpers return `PropertyAnalytics`, `ClassAnalytics`, `GraphAnalytics`,
@@ -158,14 +191,14 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
 
 ### Order of work
 
-Groups 1, 2, 3, 4, 5 run in order, each green; group 0 (eds4jinja2) runs alongside; 6 needs 1.3; 7
-needs 0.2. The SPARQL adapter and collection change together (task group 3), because the row type
+Groups 1 → 2 → 3 → 4 → 5 run in order, each green; group 0 (eds4jinja2) runs alongside; group 6
+(rendering) needs 0.2; group 7 closes. The SPARQL adapter and collection change together (task group 3), because the row type
 changes under collection.
 
 ### Safety net (DEC-8)
 
 Golden files byte-equal after every group; a live collection after group 3 equals `sample-profile.json`
-but for timestamps and version; `make test-e2e` after groups 3 and 7.
+but for timestamps and version; `make test-e2e` after groups 3 and 6.
 
 ### Example — a property shape, before and after
 
@@ -205,7 +238,7 @@ but for timestamps and version; `make test-e2e` after groups 3 and 7.
 ## Risks / Trade-offs
 
 - [Large diff] → one commit per group, each green, goldens per group.
-- [eds4jinja2 release needs a person] → group 7 waits; refused → dropped, current adapter stays.
+- [eds4jinja2 release needs a person] → group 6 waits; refused → dropped, current adapter stays.
 - [`Result.parse` cost on big results] → measured by the benchmark EPIC.
 - [`SettingsOverride` drifting from `Settings`] → the field-name test.
 
