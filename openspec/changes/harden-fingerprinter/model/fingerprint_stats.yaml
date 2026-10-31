@@ -1,0 +1,362 @@
+id: https://data.meaningfy.ws/fingerprint/stats/schema
+name: fingerprint_stats
+title: Fingerprint statistics (raw observations)
+description: |
+  Raw observations collected from a SPARQL endpoint while fingerprinting a knowledge graph:
+  counts, histograms and value partitions per graph, class and property, plus the run settings
+  and the precision mode actually used. Holds only what was observed; every computed value
+  (min, mean, confidence, cardinality labels, ...) lives in the fingerprint_analytics extension.
+  Terms reuse VoID where the meaning matches.
+  DRAFT (2026-10-31) — moves to model/ when harden-fingerprinter is implemented.
+version: 0.1.0
+license: Apache-2.0
+prefixes:
+  linkml: https://w3id.org/linkml/
+  fp: https://data.meaningfy.ws/fingerprint/
+  void: http://rdfs.org/ns/void#
+  dcterms: http://purl.org/dc/terms/
+  prov: http://www.w3.org/ns/prov#
+default_prefix: fp
+default_range: string
+imports:
+  - linkml:types
+
+enums:
+  PrecisionMode:
+    description: How the instances of a class were read.
+    permissible_values:
+      exact:
+        description: All instances in one query per statistic.
+      batched:
+        description: All instances, read in VALUES batches and merged client-side.
+      first_n:
+        description: Only the first N instances the store returned (LIMIT without ORDER BY).
+  PrecisionPolicy:
+    description: Which precision modes the collector may use.
+    permissible_values:
+      auto:
+        description: Start exact; on timeout escalate exact → batched → first_n.
+      exact:
+        description: Exact only; a timeout is a failure.
+      batched:
+        description: Batched only.
+      first_n:
+        description: First N only (fast preview).
+  Depth:
+    description: How much is collected; each level includes the previous ones.
+    permissible_values:
+      graphs:
+        description: "L0 — the graph list only (graph totals are a separate switch: graph_statistics)."
+      classes:
+        description: L1 — class partitions, declared hierarchy, co-types.
+      properties:
+        description: L2 — cardinality histograms per class and property.
+      values:
+        description: L3 — value partitions (kinds, datatypes, languages, object classes, lexical stats).
+      rich_values:
+        description: "L3+ — top-K values per class and property."
+      links:
+        description: L4 — incoming links per class.
+  NodeKind:
+    description: The RDF term kind of an object.
+    permissible_values:
+      iri: {}
+      blank_node: {}
+      literal: {}
+  ObjectTypeScope:
+    description: Where the types of objects are looked up.
+    permissible_values:
+      same_graph:
+        description: Only in the graph being profiled.
+      any_graph:
+        description: In any graph of the dataset.
+  QueryKind:
+    description: The collection query a failure refers to (mapping in design.md).
+    permissible_values:
+      graphs: {}
+      triples: {}
+      predicate_partitions: {}
+      class_partitions: {}
+      declared_hierarchy: {}
+      cardinality_votes: {}
+      value_partitions: {}
+      object_classes: {}
+      co_types: {}
+      top_values: {}
+      property_presence: {}
+      incoming_links: {}
+      untyped_subjects: {}
+      subject_stream:
+        description: The instance listing used by the batched mode.
+
+slots:
+  # --- identity of profiled things ---
+  graph:
+    description: IRI of the profiled named graph; absent for the default graph.
+    range: uriorcurie
+  class_iri:
+    description: IRI of a class instantiated in the graph.
+    range: uriorcurie
+    slot_uri: void:class
+  property:
+    description: IRI of a predicate.
+    range: uriorcurie
+    slot_uri: void:property
+  datatype:
+    description: Datatype IRI of literal objects.
+    range: uriorcurie
+  language:
+    description: Language tag of literal objects; empty for untagged literals.
+  object_class:
+    description: A class of the objects; absent when the objects are untyped.
+    range: uriorcurie
+  object_class_graph:
+    description: Graph in which the object class was asserted, when looked up across graphs.
+    range: uriorcurie
+  sub_class:
+    range: uriorcurie
+    description: The narrower class of a subclass edge.
+  super_class:
+    range: uriorcurie
+    description: The broader class of a subclass edge.
+  subject_class:
+    range: uriorcurie
+    description: Class of the subjects that point to the profiled class (incoming links).
+  # --- counts ---
+  triples:
+    description: Number of triples.
+    range: integer
+    minimum_value: 0
+    slot_uri: void:triples
+  instances:
+    description: Exact number of distinct instances of the class.
+    range: integer
+    minimum_value: 0
+    slot_uri: void:entities
+  observed_instances:
+    description: Number of instances actually read (equals instances unless the mode is first_n).
+    range: integer
+    minimum_value: 0
+  subjects:
+    description: Number of distinct subjects.
+    range: integer
+    minimum_value: 0
+  distinct_subjects:
+    range: integer
+    minimum_value: 0
+    slot_uri: void:distinctSubjects
+    description: Number of distinct subjects in the graph.
+  distinct_objects:
+    range: integer
+    minimum_value: 0
+    slot_uri: void:distinctObjects
+    description: Number of distinct objects (a lower bound when distinct_objects_exact is false).
+  distinct_objects_exact:
+    range: boolean
+    description: False when the distinct count stopped at the client-side memory limit (batched mode).
+  untyped_subjects:
+    range: integer
+    minimum_value: 0
+    description: Distinct subjects in the graph that have no rdf:type.
+  values_per_subject:
+    description: A value n of the cardinality histogram — subjects having exactly n values.
+    range: integer
+    minimum_value: 0
+  # --- lexical statistics of literals (folded into the value-partition query) ---
+  min_length:
+    range: integer
+    minimum_value: 0
+    description: Shortest lexical form (STRLEN) among the literals.
+  max_length:
+    range: integer
+    minimum_value: 0
+    description: Longest lexical form (STRLEN) among the literals.
+  total_length:
+    range: integer
+    minimum_value: 0
+    description: Sum of lexical-form lengths; mean length is derived.
+  min_value:
+    description: Smallest value in SPARQL order (meaningful for numeric and temporal datatypes).
+  max_value:
+    description: Largest value in SPARQL order (meaningful for numeric and temporal datatypes).
+  value:
+    description: An object value, IRI or literal lexical form.
+  # --- run ---
+  endpoint:
+    range: uri
+    description: The SPARQL endpoint URL that was profiled.
+  started_at:
+    range: datetime
+    slot_uri: prov:startedAtTime
+    description: When the run started.
+  finished_at:
+    range: datetime
+    slot_uri: prov:endedAtTime
+    description: When the run finished.
+  tool_version:
+    description: Version of rdf-fingerprinter that produced the profile.
+  precision_mode:
+    range: PrecisionMode
+    description: The precision mode actually used for this class.
+  presence_only:
+    range: boolean
+    description: True when the property was found only by the completeness check (no statistics).
+
+classes:
+  ProfileRun:
+    tree_root: true
+    description: One fingerprinting run over one endpoint.
+    slots: [endpoint, started_at, finished_at, tool_version]
+    attributes:
+      settings:
+        range: Settings
+        inlined: true
+        required: true
+        description: The settings the run used.
+      graphs:
+        range: GraphProfile
+        multivalued: true
+        inlined_as_list: true
+        description: The profiled graphs.
+      failures:
+        range: Failure
+        multivalued: true
+        inlined_as_list: true
+        description: Queries that failed after all retries and fallbacks.
+
+  Settings:
+    description: Collection parameters, recorded so a profile can be interpreted and reproduced.
+    attributes:
+      depth: { range: Depth, required: true, ifabsent: "string(values)", description: "How much was collected." }
+      precision_policy: { range: PrecisionPolicy, required: true, ifabsent: "string(auto)", description: "Allowed precision modes." }
+      first_n: { range: integer, minimum_value: 1, ifabsent: "int(10000)", description: "N for the first_n mode." }
+      batch_size: { range: integer, minimum_value: 1, ifabsent: "int(2000)", description: "VALUES batch size for the batched mode." }
+      distinct_limit: { range: integer, minimum_value: 1, ifabsent: "int(1000000)", description: "Client-side distinct-set limit per class and property in batched mode." }
+      top_k: { range: integer, minimum_value: 1, ifabsent: "int(20)", description: "How many top values to keep per class and property." }
+      object_type_scope: { range: ObjectTypeScope, required: true, ifabsent: "string(same_graph)", description: "Where object types are looked up." }
+      completeness_check: { range: boolean, ifabsent: "false", description: "Whether property presence was checked for first_n classes." }
+      timeout_seconds: { range: integer, minimum_value: 1, ifabsent: "int(60)", description: "Per-query timeout." }
+      concurrency: { range: integer, minimum_value: 1, ifabsent: "int(4)", description: "Maximum concurrent queries." }
+      acceptance_threshold: { range: float, minimum_value: 0, maximum_value: 1, ifabsent: "float(0.95)", description: "Share of instances a cardinality label must cover." }
+      graph_statistics: { range: boolean, ifabsent: "false", description: "Whether graph totals, predicate partitions and untyped subjects were collected (full scans)." }
+      selected_graphs: { range: uriorcurie, multivalued: true, description: "Graphs requested; empty means all." }
+
+  Failure:
+    description: A query that could not be answered.
+    slots: [graph, class_iri, property]
+    attributes:
+      query_kind: { range: QueryKind, required: true, description: "Which collection query failed." }
+      message: { description: "The last error message." }
+      attempts: { range: integer, minimum_value: 1, description: "How many attempts were made." }
+
+  GraphProfile:
+    description: Observations about one graph (a VoID dataset).
+    class_uri: void:Dataset
+    slots: [graph, triples, distinct_subjects, distinct_objects, untyped_subjects]
+    attributes:
+      predicate_partitions:
+        range: PredicatePartition
+        multivalued: true
+        inlined_as_list: true
+        description: Triples per predicate across the graph.
+      declared_subclass_edges:
+        range: SubclassEdge
+        multivalued: true
+        inlined_as_list: true
+        description: rdfs:subClassOf edges declared in the dataset.
+      class_partitions:
+        range: ClassProfile
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: void:classPartition
+        description: One profile per instantiated class.
+
+  PredicatePartition:
+    description: Triples using one predicate across a graph.
+    slots: [property, triples]
+    slot_usage:
+      property: { required: true }
+
+  SubclassEdge:
+    description: A declared rdfs:subClassOf edge.
+    slots: [sub_class, super_class]
+    slot_usage:
+      sub_class: { required: true }
+      super_class: { required: true }
+
+  ClassProfile:
+    description: Observations about the instances of one class in one graph.
+    slots: [class_iri, instances, observed_instances, precision_mode]
+    slot_usage:
+      class_iri: { required: true }
+      instances: { required: true }
+      precision_mode: { required: true }
+    attributes:
+      co_types:
+        range: CoTypeCount
+        multivalued: true
+        inlined_as_list: true
+        description: Other classes the observed instances also have.
+      property_partitions:
+        range: PropertyProfile
+        multivalued: true
+        inlined_as_list: true
+        slot_uri: void:propertyPartition
+        description: One profile per property used by the instances.
+      incoming_links:
+        range: IncomingLink
+        multivalued: true
+        inlined_as_list: true
+        description: Classes and properties pointing at the observed instances.
+
+  CoTypeCount:
+    description: Observed instances that also have another class.
+    slots: [class_iri, subjects]
+
+  PropertyProfile:
+    description: Observations about one property used by the instances of one class.
+    slots: [property, presence_only, distinct_objects, distinct_objects_exact]
+    slot_usage:
+      property: { required: true }
+      distinct_objects: { description: "Distinct objects over all partitions (the report's distinct values)." }
+    attributes:
+      cardinality_histogram:
+        range: CardinalityBin
+        multivalued: true
+        inlined_as_list: true
+        description: Subjects with exactly n values, for each observed n ≥ 1 (n = 0 is derived).
+      value_partitions:
+        range: ValuePartition
+        multivalued: true
+        inlined_as_list: true
+        description: Objects split by kind, datatype, language and object class.
+      top_values:
+        range: ValueCount
+        multivalued: true
+        inlined_as_list: true
+        description: The most frequent values, at most top_k.
+      top_values_exact:
+        range: boolean
+        description: True when the top values were computed over all instances (class mode exact).
+
+  CardinalityBin:
+    description: One bin of a cardinality histogram (a cardinality vote).
+    slots: [values_per_subject, subjects]
+    slot_usage:
+      values_per_subject: { required: true }
+      subjects: { required: true }
+
+  ValuePartition:
+    description: Objects of one class-property pair sharing kind, datatype, language and object class.
+    slots: [triples, distinct_objects, distinct_objects_exact, datatype, language, object_class,
+            object_class_graph, min_length, max_length, total_length, min_value, max_value]
+    attributes:
+      node_kind: { range: NodeKind, required: true, description: "The term kind of these objects." }
+
+  ValueCount:
+    description: How often one value occurs.
+    slots: [value, triples]
+
+  IncomingLink:
+    description: Triples whose object is an observed instance of the class.
+    slots: [subject_class, property, triples]
