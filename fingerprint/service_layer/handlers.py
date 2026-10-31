@@ -11,7 +11,8 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from fingerprint.adapters.sparql import SparqlWrapperClient
+from fingerprint.adapters.profile_file import save_profile
+from fingerprint.adapters.sparql import SparqlPort, SparqlWrapperClient
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.generated.profile import ProfileRun, Settings
 from fingerprint.service_layer.collection import collect
@@ -31,9 +32,14 @@ def fingerprint_report(
     settings: Settings,
     template_location: str | Path | None = None,
     extra_conf: dict[str, Any] | None = None,
+    *,
+    sparql: SparqlPort | None = None,
 ) -> tuple[Path, ProfileRun]:
-    """Collect, analyse and render; returns the report path and the raw run (its failures decide the exit code)."""
-    run = collect(sparql_endpoint_url, settings, SparqlWrapperClient(sparql_endpoint_url, settings.timeout_seconds))
+    """Collect, save the profile, analyse and render; returns the report path and the raw run (its failures decide
+    the exit code). The profile is saved before rendering, so a rendering failure loses nothing collected."""
+    sparql = sparql or SparqlWrapperClient(sparql_endpoint_url, settings.timeout_seconds)
+    run = collect(sparql_endpoint_url, settings, sparql)
+    save_profile(run, output_location)
     report = render_report(analyse(run), output_location, template_location, extra_conf)
     if run.failures:
         logger.warning("report written to %s with %d failures", report, len(run.failures))

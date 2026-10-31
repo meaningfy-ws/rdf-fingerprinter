@@ -13,6 +13,7 @@ from eds4jinja2.services.report_builder import ReportBuilder
 
 from fingerprint.adapters.exceptions import GeneratedOutputError, TemplatePackageError
 
+
 def _parse_turtle(text: str) -> None:
     rdflib.Graph().parse(data=text, format="turtle")
 

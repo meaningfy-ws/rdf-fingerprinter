@@ -288,7 +288,11 @@ def drop_none(value: Any) -> Any:
 
 
 def analyse(run: ProfileRun) -> ProfileAnalytics:
-    """Derive every analytics value from a raw profile; the raw profile is not modified."""
+    """Derive every analytics value from a raw profile; the raw profile is not modified.
+
+    The helpers above hand plain dicts to each other; they are validated once, here, against the
+    generated (frozen) model rather than at every step.
+    """
     threshold, top_k = run.settings.acceptance_threshold, run.settings.top_k
     graphs = [graph_analytics(g, threshold, top_k) for g in run.graphs or []]
     return ProfileAnalytics.model_validate(drop_none({**run.model_dump(exclude_none=True), "graphs": graphs}))

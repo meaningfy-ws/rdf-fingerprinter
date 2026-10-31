@@ -39,3 +39,7 @@ class TemplatePackageError(ValueError):
 
 class GeneratedOutputError(ValueError):
     """A generated text that does not parse in its format; nothing of it is written."""
+
+
+class ProfileFileError(ValueError):
+    """A profile file that is missing, not JSON, or not a profile run."""

@@ -233,3 +233,30 @@ def with_constant(ctx, fake):
 @then("the constant appears in the report")
 def constant_appears(ctx):
     assert soup(ctx).find("h1").text == "Ours"
+
+
+# --- the saved profile ---
+
+
+@given("the report template raises an error")
+def report_raises(monkeypatch):
+    def broken(*args, **kwargs):
+        raise RuntimeError("template error")
+
+    monkeypatch.setattr(handlers, "render_report", broken)
+
+
+@then("the output folder holds the report and the profile file")
+def report_and_profile(ctx):
+    assert {"main.html", "profile.json"} <= {p.name for p in ctx["output"].iterdir()}
+
+
+@then("the output folder holds the profile file")
+def profile_only(ctx):
+    assert (ctx["output"] / "profile.json").is_file()
+
+
+@then("the profile file lists that failure")
+def profile_lists_failure(ctx):
+    run = ProfileRun.model_validate_json((ctx["output"] / "profile.json").read_text())
+    assert [f.class_iri for f in run.failures or []] == [EX + "City"]
