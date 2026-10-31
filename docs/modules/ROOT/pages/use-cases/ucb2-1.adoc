@@ -2,7 +2,7 @@
 = UC-B2.1: Generate representations from a saved profile
 
 *Use Case Level:* Blue (User-goal) +
-*Primary Actor:* Data steward +
+*Primary Actor:* Requester (a data steward at the command line) +
 *Supporting Actors:* Command line (generator commands, shared arguments, exit codes); Profile store (load and validate `profile.json`); Analyser (re-derives at the given threshold); Generator (visit hooks build the view); Template renderer (lays the view out as text); Output check (refuses a text that does not parse) +
 *Scope:* rdf-fingerprinter — generator commands (2.1)
 
@@ -28,7 +28,7 @@ This Blue path adds only:
 == Minimal Guarantees (On Failure)
 
 . Exit 2 for an unusable profile file, threshold, output folder or template folder.
-. Exit 4 for an unexpected error, including Turtle that does not parse; none of that representation's files is written.
+. Exit 4 for an unexpected error, including Turtle that does not parse (UC-W2 minimal guarantee 2).
 
 == Extensions
 

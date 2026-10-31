@@ -7,16 +7,17 @@ Each term has one meaning across these pages, the use cases and the specificatio
 == Actors and stakeholders
 
 [#requester]
-Requester:: Whoever asks for a fingerprint: a data steward at the command line, or an embedding
-application through the library. The primary actor of xref:use-cases/ucw1.adoc[UC-W1].
+Requester:: Whoever asks for a fingerprint or its representations: a data steward at the command
+line, or an embedding application through the library. The primary actor of every use case; each
+Blue use case says which of the two it serves.
 
 [#data-steward]
 Data steward:: A person who wants to know, document or validate the structure of a knowledge
-graph, and runs the commands. The primary actor of xref:use-cases/ucw2.adoc[UC-W2].
+graph, and runs the commands. One kind of requester.
 
 [#embedding-application]
 Embedding application:: Software that calls the library inside its own process, for example
-rdf-fingerprinter-ws.
+rdf-fingerprinter-ws. The other kind of requester.
 
 [#sparql-endpoint]
 SPARQL endpoint:: The external store that holds the data. rdf-fingerprinter only sends it SPARQL

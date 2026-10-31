@@ -2,8 +2,8 @@
 = UC-B2.2: Generate representations while fingerprinting
 
 *Use Case Level:* Blue (User-goal) +
-*Primary Actor:* Data steward +
-*Supporting Actors:* CLI (`--format`, repeatable); everything of xref:use-cases/ucb1-1.adoc[UC-B1.1] for collection; the generators of xref:use-cases/ucb2-1.adoc[UC-B2.1] for rendering +
+*Primary Actor:* Requester (a data steward at the command line) +
+*Supporting Actors:* Command line (`--format`, repeatable); everything of xref:use-cases/ucb1-1.adoc[UC-B1.1] for collection; the generators of xref:use-cases/ucb2-1.adoc[UC-B2.1] for rendering +
 *Scope:* rdf-fingerprinter — `fingerprint --format` (2.1)
 
 This Blue use case refines xref:use-cases/ucw2.adoc[UC-W2: Publish a fingerprint as an application

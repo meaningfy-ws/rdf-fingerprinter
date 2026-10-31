@@ -41,5 +41,5 @@ This Blue path adds only:
 
 == Technology and Data Variations
 
-An environment variable `RDF_FINGERPRINTER_<NAME>` set in the calling process overrides the same
-key in `additional_config["collection"]` (xref:statistics.adoc#precedence[Settings]).
+Setting sources, including how the calling process's environment interacts with
+`additional_config["collection"]`: xref:statistics.adoc#precedence[Settings].

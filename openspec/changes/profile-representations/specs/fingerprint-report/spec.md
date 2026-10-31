@@ -2,12 +2,17 @@
 
 ### Requirement: The profile is saved with the report
 The `fingerprint` command and `fingerprint_report` SHALL write the raw profile run as
-`profile.json` in the output folder, beside the report, whenever the report is written (EPIC DEC-2).
+`profile.json` in the output folder as soon as collection ends, before the report is rendered, so a
+rendering failure loses nothing collected (EPIC DEC-2).
 The library function `generate_endpoint_fingerprint_report` SHALL keep its return value (DEC-8).
 
 #### Scenario: Profile file beside the report
 - **WHEN** the fingerprint command runs and the report is written
 - **THEN** the output folder also holds `profile.json`
+
+#### Scenario: Profile kept when the report fails
+- **WHEN** collection succeeds and the report template raises an error
+- **THEN** `profile.json` is in the output folder and the command exits 4
 
 #### Scenario: Partial failures are saved too
 - **WHEN** one class fails and the report is written

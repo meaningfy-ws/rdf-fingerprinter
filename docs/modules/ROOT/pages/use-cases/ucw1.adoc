@@ -38,14 +38,17 @@ The requester asks for a fingerprint of the endpoint.
 
 == Minimal Guarantees (On Failure)
 
-. If the endpoint cannot be reached when the run starts (the graph listing meets a connection error
-  after its retries, or an authorisation refusal), nothing is written and the outcome names the
-  endpoint without credentials.
+. If the endpoint cannot be reached when the run starts (the graph listing meets an authorisation
+  refusal, or a transient error — connection failure, HTTP 429/502/503 — that persists after its
+  retries), nothing is written and the outcome names the endpoint without credentials.
 . If a setting is invalid or the output folder is missing, nothing is queried and the outcome names the problem.
 . If measurements fail after the start — timeouts, rejections, a refusal of one query — the report
   and profile are still written, with the failures listed (success guarantee 5).
 . If the graphs cannot be listed for another reason (timeout, rejection), the default graph is still
-  profiled and the gap is recorded as a failure.
+  profiled and the gap is recorded as a failure; when graphs were chosen, those are profiled and a
+  warning is logged.
+. If rendering or writing an output fails after collection, the saved profile (2.1) is kept, so
+  nothing collected is lost; the outcome is an unexpected error.
 . Credentials in the endpoint URL never appear in outputs or logs.
 
 == Main Success Scenario
@@ -55,7 +58,7 @@ The requester asks for a fingerprint of the endpoint.
 . The system discovers the graphs and their classes.
 . The system profiles each class exactly.
 . The system derives the analytics.
-. The system writes the report and the profile file.
+. The system saves the profile file (2.1) and writes the report.
 
 == Alternate Scenarios
 
@@ -73,8 +76,8 @@ Chosen graphs::
 
 1a. The output folder does not exist — refused before any query (minimal guarantee 2). +
 2a. A setting is out of range or unknown — refused before any query (minimal guarantee 2). +
-3a. The graph listing meets a connection error or an authorisation refusal — stop (minimal guarantee 1). +
-3b. The graph listing times out or is rejected — default graph only (minimal guarantee 4). +
+3a. The graph listing meets an authorisation refusal or a persistent transient error — stop (minimal guarantee 1). +
+3b. The graph listing times out or is rejected — default graph only, or the chosen graphs (minimal guarantee 4). +
 4a. A class fails exactly and on its first N, or fails exactly under policy `exact` — recorded as a failure; the other classes go on. +
 4b. A class's instances are blank nodes — each query takes its own first N; the report warns that the sample may differ between queries. +
 4c. A class's IRI cannot be written in a query — the class is skipped and recorded as a failure.
@@ -93,7 +96,7 @@ Chosen graphs::
 
 * `rdf:type` is never a property row; types appear as parents and co-types.
 * Analytics are always derived from the raw counts, never collected.
-* Error classes and their responses: xref:how-it-works.adoc#failure-classes[How it works].
+* Error classes and the response of each collection stage: xref:how-it-works.adoc#failure-classes[How it works].
 
 == Technology and Data Variations
 

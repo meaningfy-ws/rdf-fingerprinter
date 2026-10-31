@@ -33,15 +33,16 @@ Collection never asks one question about the whole graph at once; on a graph wit
 triples such a query times out (xref:decisions.adoc#ad-3[AD-3]). It discovers first, then asks
 small questions per class:
 
-. *Discovery.* List the named graphs; then, per graph, the classes and their instance counts
-  (`ex:Person` 3, `ex:City` 2), the `rdfs:subClassOf` statements and the other types instances have.
+. *Discovery.* List the named graphs and, once for the whole store, the `rdfs:subClassOf`
+  statements; then, per graph, the classes and their instance counts (`ex:Person` 3, `ex:City` 2).
 . *Per class.* For each class, biggest first and a few at a time (`concurrency`, default 4), queries
   that bind the class inside the pattern, so the store touches only that class's instances:
   * a *cardinality histogram* per property — for `ex:Person`/`ex:name`: 2 instances have 1 value,
     1 instance has 2 values; for `ex:Person`/`ex:livesIn`: 2 have 1 value, 1 has none;
   * *value partitions* — `ex:name` on people: 4 literals of `xsd:string`; `ex:livesIn`: 2 resources
     of class `ex:City`;
-  * at deeper depths, top values and incoming links.
+  * the *other types* its instances have (co-types), which reveal implied parents;
+  * at deeper depths, a second wave: top values, the completeness check and incoming links.
 . *Escalation.* Under the default policy `auto`, if a class's query times out, the class is read
   again from its first N instances (_first-N mode_) and marked so. If that also fails, a _failure_
   is recorded and the run goes on. Policy `exact` records the timeout as a failure at once; policy
@@ -86,7 +87,8 @@ From 2.1, through `fingerprint --format …` or one command per format reading `
 (xref:decisions.adoc#ad-8[AD-8]):
 
 SHACL shapes (`shapes-<graph>.ttl`):: a node shape per class with a property shape per property:
-counts from the accepted label, `sh:datatype` / `sh:class` from the value partitions.
+counts from the accepted label; `sh:datatype`, `sh:class` and `sh:nodeKind` from the value
+partitions, combined with `sh:or` when the values are of several kinds.
 PlantUML diagram (`diagram-<graph>.puml`):: classes, attributes, associations with multiplicities,
 generalisations (declared solid, implied dashed).
 Application-profile document (`profile.html`):: a specification in the style of SEMIC application
@@ -121,23 +123,31 @@ generated shapes file keeps.
 [#failure-classes]
 == What can go wrong
 
-Every error the SPARQL client meets is put in one class, and each class has one response:
+Every error the SPARQL client meets is put in one class:
 
-[cols="2,3,3"]
+[cols="2,4"]
 |===
-| Class | Raised by | Response
+| Class | Raised by
 
-| Transient | HTTP 429, 502, 503; connection reset or refused | retried after 1 s, then 4 s; if it persists, treated as a timeout
-| Timeout | the per-query timeout (`timeout_seconds`), HTTP 504, a 500 whose message says "timeout" | the class escalates (exact → first N, under `auto`); a timeout in first-N mode, or under `exact`, is a failure
-| Permanent | HTTP 400, 404, 414, other 4xx and 500s, unreadable responses | a failure at once, no retry, no escalation
-| Unreachable | HTTP 401, 403, 407 | *on the first query only* (listing the graphs): the run stops, nothing is written, the CLI exits 3. Later in the run it concerns that query alone and is a failure.
+| Transient | HTTP 429, 502, 503; connection reset or refused. Retried after 1 s, then 4 s; if it persists, it is treated as a timeout — except on the first query, below.
+| Timeout | the per-query timeout (`timeout_seconds`), HTTP 504, or a 500 whose message says "timeout", "time limit", "timed out" or "estimated execution time".
+| Permanent | HTTP 400, 404, 414, other 4xx and 500s, unreadable responses. Never retried.
+| Unreachable | HTTP 401, 403, 407. Only the first query can make the endpoint unreachable; on any later query it counts as permanent.
 |===
 
-So "the endpoint is unreachable" is decided once, at the start: if listing the graphs fails with a
-connection error after its retries, or with an authorisation refusal, the run stops. A refusal or
-timeout later on becomes a recorded failure; the outputs are still written and the CLI exits 1. If
-listing the graphs times out or is rejected, only the default graph is profiled, and that is recorded
-as a failure (unless the graphs were chosen explicitly).
+What a failed query costs depends on the stage it belongs to:
+
+[cols="2,4"]
+|===
+| Stage | Response
+
+| Listing the named graphs (first query) | Unreachable, or transient after its retries: the run stops, nothing is written, the CLI exits 3. Timeout or permanent: only the default graph is profiled, recorded as a failure — unless graphs were chosen with `--graph`, in which case those are profiled and only a WARNING is logged.
+| Other discovery (store-wide subclass statements; per graph: predicates, classes, counts, graph totals) | Each has a fallback or is recorded and skipped: classes not counted in one query are listed and counted one by one; predicates not listed in one query are listed without counts; subclass statements and graph totals not read are recorded as failures.
+| First wave of a class (instance listing, histograms, value partitions, co-types) | Timeout: the class escalates under `auto` (exact → first N); in first-N mode or under `exact`, a failure. Permanent: a failure at once. Either way the class is left out of the profile.
+| Second wave of a class (top values, completeness check, incoming links) | Recorded as a failure; the class is kept, without that measurement.
+|===
+
+Every recorded failure appears in the outputs and makes the CLI exit 1 (xref:decisions.adoc#ad-11[AD-11]).
 
 * *An IRI cannot be written in Turtle* (it contains a space or `>`): from 2.1 it is left out of the
   shapes and the diagram and listed in the document's caveats. A class whose IRI cannot be put in a

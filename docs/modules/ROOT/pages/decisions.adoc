@@ -42,8 +42,10 @@ Consequences::
 * Bad: cannot use store shortcuts, so cost is bounded by query design (<<ad-3>>), not engine tricks.
 Confirmation:: `tests/e2e/test_queries.py` runs every query template against Oxigraph; the read-only
 rule is structural (`SparqlPort` has only `select` and `ask`). Portability to other stores is checked
-by review of `fingerprint/adapters/queries/*.rq`, not by a test: only one store runs in CI.
+by review of `fingerprint/adapters/queries/*.rq`, not by a test. The e2e tests run locally
+(`make test-e2e` against `make oxigraph-load-test-data`); CI runs no store.
 Pros and cons::
+* Portable SPARQL 1.1 (chosen) — good: any store, read access only; bad: no engine shortcuts.
 * Store-specific access — good: faster on its store; bad: one code path per store, breaks portability.
 * Dumps — good: no endpoint limits; bad: needs the dump and a store, not "any endpoint".
 
@@ -61,6 +63,7 @@ Consequences::
 * Bad: the public function's signature is a compatibility contract, kept from 1.x.
 Confirmation:: scenario "A 1.x call still works" (`tests/features/fingerprint_report.feature`).
 Pros and cons::
+* Library + console scripts (chosen) — good: embeddable, nothing to operate; bad: no shared runs or UI here.
 * Service — good: shared runs, a UI; bad: deployment and auth for a tool most people run once.
 
 [#ad-10]
@@ -88,6 +91,7 @@ Consequences::
 Confirmation:: scenarios "Shapes conform on their own data" (pySHACL on the e2e source files) and
 "Severity from the threshold" of the `profile-representations` specification.
 Pros and cons::
+* Graded severities (chosen) — good: shapes conform on their own data and still carry what was learned; bad: consumers must read severities.
 * All at Violation — good: simple; bad: shapes reject their own data whenever the threshold < 1 or
   a class was sampled.
 * Drop the rest — good: always conforms; bad: loses most of what the profile learned.
@@ -114,6 +118,7 @@ Confirmation:: `test_exact_mode_binds_the_class_inside_the_query`
 (`tests/unit/test_adapters_queries.py`); the escalation scenarios of
 `tests/features/statistics_collection.feature`.
 Pros and cons::
+* Staged, class-scoped queries with escalation (chosen) — good: bounded cost per query; bad: more queries, first-N samples follow store order.
 * Global aggregate — good: one query; bad: the first thing to time out.
 * Client-side counting — good: exact; bad: moves the whole graph over HTTP.
 
@@ -138,6 +143,7 @@ Consequences::
 Confirmation:: scenarios "Round-trip" and "Rendering without an endpoint" of the
 `profile-representations` specification; `make check-models` also checks the JSON Schema.
 Pros and cons::
+* Save the raw run (chosen) — good: one collection, threshold adjustable later; bad: a public file format to keep compatible.
 * Save the analytics — good: no re-analysis; bad: freezes the threshold, duplicates derivable data.
 * No file — good: nothing new; bad: the expensive step repeats per format.
 
@@ -161,6 +167,7 @@ Consequences::
 Confirmation:: scenario outline "Exit status" (`tests/features/fingerprint_report.feature`);
 `test_discovery_failures_are_recorded` (`tests/unit/test_service_layer_collection.py`).
 Pros and cons::
+* Partial results (chosen) — good: nothing measured is lost, nothing failed is hidden; bad: callers must check for failures.
 * Stop at the first failure — good: simple to reason about; bad: one slow class loses the whole run.
 * Drop silently — good: clean output; bad: breaks the honesty driver.
 
@@ -182,8 +189,10 @@ Consequences::
   file) sit in the service layer; they move to adapters, and the SPARQL client becomes an injectable
   parameter of the service.
 Confirmation:: `make check-architecture` (`.importlinter`: layers, generated-model isolation, pure
-domain; from 2.1 also a service layer that imports no eds4jinja2, rdflib or SPARQLWrapper).
+domain — the domain imports no SPARQLWrapper, eds4jinja2 or click; from 2.1 also a service layer
+that imports no eds4jinja2, rdflib or SPARQLWrapper).
 Pros and cons::
+* Onion layers with a port (chosen) — good: testable without a store, I/O at the edges; bad: more modules.
 * Logic in templates — good: tiny code; bad: untestable, untimed, one full scan per class.
 
 [#ad-5]
@@ -201,6 +210,7 @@ Consequences::
 Confirmation:: `make check-models`; `test_profile_objects_are_read_only`
 (`tests/unit/test_service_layer_collection.py`).
 Pros and cons::
+* LinkML + generated Pydantic (chosen) — good: one published contract for every consumer; bad: a codegen step.
 * Dataclasses — good: no codegen; bad: no schema to publish or validate a profile file against.
 
 [#ad-6]
@@ -216,6 +226,7 @@ Consequences::
 * Bad: eds4jinja2 brings pandas and rdflib.
 Confirmation:: scenario "No queries while rendering" (`tests/features/fingerprint_report.feature`).
 Pros and cons::
+* Keep eds4jinja2 (chosen) — good: custom templates keep working; bad: heavier dependencies.
 * Plain Jinja2 — good: lighter; bad: breaks every custom template.
 
 [#ad-8]
@@ -239,6 +250,7 @@ Confirmation:: scenario "Custom template package" of the `profile-representation
 `make check-architecture` (generators import no rendering library: rendering is the template
 renderer adapter's).
 Pros and cons::
+* Own LinkML-shaped framework (chosen) — good: one subclass per format, every statistic available; bad: framework code to maintain.
 * LinkML's generators — good: many formats for free; bad: statistics survive only as annotations,
   and its PlantUML rendering calls a remote server.
 * Functions per format — good: least code now; bad: options and hooks duplicated per format.
@@ -267,5 +279,6 @@ Confirmation:: scenarios "Unusual IRIs stay valid", "An IRI that cannot be writt
 broken" and "Golden file per format" of the `profile-representations` specification;
 `test_report_builder_exposes_template_env`.
 Pros and cons::
+* eds4jinja2 for every format (chosen) — good: one engine, customisable everywhere; bad: Turtle escaping is ours.
 * rdflib graph — good: escaping is correct by construction; bad: SHACL not customisable by template,
   two rendering paths.

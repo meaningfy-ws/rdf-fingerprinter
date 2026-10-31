@@ -42,8 +42,8 @@ covering the whole graph.
 == L1 — System context
 
 ----
- Data steward ─────────uses──────▶ ┌───────────────────────┐ ──reads (SPARQL 1.1)──▶ SPARQL endpoint
- rdf-fingerprinter-ws ─embeds────▶ │   rdf-fingerprinter   │                          (any store)
+ Requester: data steward ──uses──▶ ┌───────────────────────┐ ──reads (SPARQL 1.1)──▶ SPARQL endpoint
+ Requester: embedding app ─embeds─▶ │   rdf-fingerprinter   │                          (any store)
                                    └───────────────────────┘
                                       │ writes        ▲ reads (2.1)
                                       ▼               │
@@ -84,8 +84,9 @@ Parses options, configures logging, maps outcomes to exit codes.
 
 | `fingerprint.service_layer`
 | Public function (`generate_endpoint_fingerprint_report`); Settings resolver; Collector; report
-orchestration; _(2.1)_ Generators (one per format, building its view) and the
-`generate_representations` service the generator commands call.
+orchestration; _(2.1)_ Generators (one per format, building its view) and the representations
+service: `generate_representations` (a run in memory) and `generate_from_profile_file`, which the
+generator commands call.
 | adapters, domain
 
 | `fingerprint.adapters`
@@ -97,7 +98,7 @@ the generators), Profile store (`profile.json`), setting sources (environment, c
 | `fingerprint.domain`
 | Profile model (generated from LinkML); Analyser; IRI rules (SPARQL and, from 2.1, Turtle).
 Pure, no I/O.
-| nothing above it; no I/O library
+| nothing above it; not SPARQLWrapper, eds4jinja2 or click (enforced)
 
 | `fingerprint_report_templates`
 | Template packages: `fingerprint_report`; _(2.1)_ `shacl_shapes`, `plantuml_diagram`,
@@ -107,7 +108,8 @@ Pure, no I/O.
 
 Component names are those of the xref:glossary.adoc#components[Glossary], which maps each to its
 module. The layers are enforced by `.importlinter` (`make check-architecture`): the layer order, a
-generated model that imports no project code, a domain that imports no I/O library, and _(2.1)_ a
+generated model that imports no project code, a domain that imports no SPARQLWrapper, eds4jinja2 or
+click, and _(2.1)_ a
 service layer that imports no eds4jinja2, rdflib or SPARQLWrapper.
 
 NOTE: 1.x had only `service_layer` and `entrypoints`; its statistics were computed by SPARQL inside

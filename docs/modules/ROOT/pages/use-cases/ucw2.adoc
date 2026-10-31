@@ -2,7 +2,7 @@
 = UC-W2: Publish a fingerprint as an application profile
 
 *Use Case Level:* White (Summary) +
-*Primary Actor:* Data steward +
+*Primary Actor:* Requester (a data steward; an embedding application through the `generate_representations` service) +
 *Scope:* rdf-fingerprinter (from 2.1)
 
 == Stakeholders and Interests

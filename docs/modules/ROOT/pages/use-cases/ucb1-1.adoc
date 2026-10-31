@@ -28,7 +28,8 @@ This Blue path adds only:
 
 . Exit 2 for a usage error (bad option or setting, missing output folder), before any query.
 . Exit 3 when the endpoint is unreachable at the start (UC-W1 minimal guarantee 1).
-. Exit 4 for an unexpected error.
+. Exit 4 for an unexpected error, including a report that cannot be rendered or written; the saved
+  profile (2.1) stays.
 
 == Extensions
 
@@ -37,5 +38,4 @@ This Blue path adds only:
 
 == Technology and Data Variations
 
-Options override environment variables, which override `--config`, which overrides the defaults
-(xref:statistics.adoc#precedence[Settings]).
+Setting sources: xref:statistics.adoc#precedence[Settings].

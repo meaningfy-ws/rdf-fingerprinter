@@ -164,8 +164,8 @@ eds4jinja2 itself.
 fingerprint -e URL -o out --format shacl          fingerprint-gen-shacl out/profile.json -o out2 --threshold 0.9
   fingerprint_report(…, formats=["shacl"])          generate_from_profile_file(path, out2, ["shacl"], threshold=0.9)
     collect → run                                     load_profile → run
-    render_report(analyse(run)) → out/main.html       generate_representations(run, out2, ["shacl"], threshold=0.9)
-    save_profile(run) → out/profile.json                with_threshold → analyse → ShaclGenerator(analytics)
+    save_profile(run) → out/profile.json              generate_representations(run, out2, ["shacl"], threshold=0.9)
+    render_report(analyse(run)) → out/main.html         with_threshold → analyse → ShaclGenerator(analytics)
     generate_representations(run, out, ["shacl"])       .serialize(renderer) → renderer.write(out2, texts)
 ```
 
@@ -296,6 +296,7 @@ render time, so the golden file is stable.
 | generated Turtle does not parse | `rdflib.Graph().parse(data=…, format="turtle")` raises in `check` | `GeneratedOutputError`, exit 4, no file of that run written |
 | profile records collection failures | `run.failures` non-empty | rendered, listed in caveats, exit 0 |
 | `fingerprint --format` generator fails after the report | exception from `write` | report and `profile.json` stay, exit 4 |
+| the report cannot be rendered or written after collection | exception from the template renderer | `profile.json` (saved first) stays, exit 4; regenerate with the generator commands |
 | unknown `--format` | click `Choice` | exit 2 before collecting |
 | rerun over the same output folder | — | identical bytes overwritten (idempotent) |
 
