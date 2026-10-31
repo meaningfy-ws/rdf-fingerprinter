@@ -42,9 +42,9 @@
 
 ## 7. Command line
 
-- [ ] 7.1 `fingerprint/entrypoints/cli/generate.py`: `fingerprint-gen-shacl`, `fingerprint-gen-puml`, `fingerprint-gen-doc` — parse the shared arguments, call `generate_from_profile_file`, map exceptions to exit codes 0/2/4, no other logic; scripts in `pyproject.toml` (P-3, P-4, P-13; Requirement: Generators share one framework)
-- [ ] 7.2 `fingerprint --format` (repeatable) passes the formats to `fingerprint_report`; exit 4 when a generator fails, earlier outputs kept (Requirement: Formats rendered after collecting)
-- [ ] 7.3 Step definitions for `profile_representations.feature` and the new `fingerprint_report` scenarios, green; existing scenarios unchanged and green (Requirement: The statistics report is unchanged)
+- [x] 7.1 `fingerprint/entrypoints/cli/generate.py`: `fingerprint-gen-shacl`, `fingerprint-gen-puml`, `fingerprint-gen-doc` — parse the shared arguments, call `generate_from_profile_file`, map exceptions to exit codes 0/2/4, no other logic; scripts in `pyproject.toml` (P-3, P-4, P-13; Requirement: Generators share one framework)
+- [x] 7.2 `fingerprint --format` (repeatable) passes the formats to `fingerprint_report`; exit 4 when a generator fails, earlier outputs kept (Requirement: Formats rendered after collecting)
+- [x] 7.3 Step definitions for `profile_representations.feature` and the new `fingerprint_report` scenarios, green; existing scenarios unchanged and green (Requirement: The statistics report is unchanged)
 - [ ] 7.4 e2e: `fingerprint --format shacl --format puml --format doc` against the loaded Oxigraph, then each `fingerprint-gen-*` from the written `profile.json` with `RDF_FINGERPRINTER_TEST_ENDPOINT` pointed at an unreachable port, outputs written (Requirement: Representations derive from the saved profile only)
 
 ## 8. Docs and release
@@ -57,7 +57,7 @@
 
 ## Roadmap
 
-- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.0 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.0 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

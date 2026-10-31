@@ -95,7 +95,7 @@ def not_written(ctx):
 
 @then("the endpoint was never queried")
 def never_queried(ctx):
-    assert ctx["queried"] == []
+    assert (ctx["queried"] if "queried" in ctx else ctx["fake"].queries) == []
 
 
 @given(parsers.parse("a class read in {mode} with {observed:d} of {instances:d} instances observed"))
@@ -191,6 +191,7 @@ SITUATIONS = {
 
 @given(parsers.re(r"(?P<situation>" + "|".join(SITUATIONS) + ")$"))
 def situation(ctx, fake, situation):
+    ctx["fake"] = fake
     SITUATIONS[situation](fake, ctx)
 
 
@@ -260,3 +261,24 @@ def profile_only(ctx):
 def profile_lists_failure(ctx):
     run = ProfileRun.model_validate_json((ctx["output"] / "profile.json").read_text())
     assert [f.class_iri for f in run.failures or []] == [EX + "City"]
+
+
+# --- representations in the same run (UC-B2.2) ---
+
+
+@when("the fingerprint command runs with the shapes format")
+def command_runs_with_shapes(ctx):
+    args = ["-e", "http://fake/sparql", "-o", str(ctx["output"]), "--format", "shacl"]
+    ctx["result"] = CliRunner().invoke(cli.fingerprint_endpoint, args)
+
+
+@when(parsers.parse('the fingerprint command runs with the format "{name}"'))
+def command_runs_with_format(ctx, name):
+    args = ["-e", "http://fake/sparql", "-o", str(ctx["output"]), "--format", name]
+    ctx["result"] = CliRunner().invoke(cli.fingerprint_endpoint, args)
+
+
+@then("the output folder holds the report, the profile file and one shapes file per profiled graph")
+def report_profile_and_shapes(ctx):
+    names = {p.name for p in ctx["output"].iterdir()}
+    assert {"main.html", "profile.json"} <= names and [n for n in names if n.startswith("shapes-")] == ["shapes-default.ttl"]

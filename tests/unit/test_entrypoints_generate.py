@@ -1,0 +1,78 @@
+"""The generator commands (UC-B2.1): parse, call the representations service, exit 0/2/4 (P-3, P-4, P-13)."""
+
+import json
+from pathlib import Path
+
+import pytest
+from click.testing import CliRunner
+
+from fingerprint.entrypoints.cli import generate
+
+SAMPLE = Path(__file__).parents[1] / "test_data" / "profiles" / "sample-profile.json"
+COMMANDS = {"shacl": generate.gen_shacl, "puml": generate.gen_puml, "doc": generate.gen_doc}
+FIRST_FILE = {"shacl": "shapes-default.ttl", "puml": "diagram-default.puml", "doc": "profile.html"}
+
+
+def invoke(command, *args):
+    return CliRunner().invoke(command, [str(a) for a in args])
+
+
+@pytest.mark.parametrize("name", sorted(COMMANDS))
+def test_writes_its_representation(name, tmp_path):
+    result = invoke(COMMANDS[name], SAMPLE, "-o", tmp_path)
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / FIRST_FILE[name]).is_file()
+
+
+@pytest.mark.parametrize(
+    "args, message",
+    [
+        (("missing.json",), "missing.json"),
+        ((SAMPLE, "--threshold", "0"), "acceptance_threshold"),
+        ((SAMPLE, "-o", "nowhere"), "not an existing folder"),
+        ((SAMPLE, "--template", "nowhere"), "not a template package"),
+    ],
+)
+def test_usage_errors_exit_2(tmp_path, args, message):
+    args = tuple(tmp_path / a if isinstance(a, str) and a in ("missing.json", "nowhere") else a for a in args)
+    if "-o" not in args:
+        args += ("-o", tmp_path)
+    result = invoke(generate.gen_shacl, *args)
+    assert result.exit_code == 2 and message in result.output
+
+
+def test_the_threshold_changes_the_shapes(tmp_path):
+    strict, loose = tmp_path / "strict", tmp_path / "loose"
+    strict.mkdir(), loose.mkdir()
+    invoke(generate.gen_shacl, SAMPLE, "-o", strict, "--threshold", "1")
+    invoke(generate.gen_shacl, SAMPLE, "-o", loose, "--threshold", "0.5")
+
+    def shapes(folder):
+        return {f.name: f.read_text() for f in folder.iterdir()}
+
+    assert shapes(strict).keys() == shapes(loose).keys() and shapes(strict) != shapes(loose)
+
+
+def test_shapes_namespace(tmp_path):
+    invoke(generate.gen_shacl, SAMPLE, "-o", tmp_path, "--shapes-namespace", "https://shapes.ex/")
+    assert "<https://shapes.ex/" in (tmp_path / "shapes-default.ttl").read_text()
+
+
+def test_a_custom_template_package(tmp_path):
+    package = tmp_path / "mine"
+    (package / "templates").mkdir(parents=True)
+    (package / "templates" / "out.ttl").write_text("# {{ conf.title }}\n")
+    (package / "config.json").write_text(json.dumps({"template": "out.ttl", "conf": {"title": "Ours"}}))
+    result = invoke(generate.gen_shacl, SAMPLE, "-o", tmp_path, "--template", package)
+    assert result.exit_code == 0 and (tmp_path / "shapes-default.ttl").read_text() == "# Ours"
+
+
+def test_invalid_generated_turtle_exits_4_and_writes_nothing(tmp_path):
+    package = tmp_path / "broken"
+    (package / "templates").mkdir(parents=True)
+    (package / "templates" / "out.ttl").write_text("<urn:a> <urn:b\n")
+    (package / "config.json").write_text(json.dumps({"template": "out.ttl", "conf": {}}))
+    out = tmp_path / "out"
+    out.mkdir()
+    result = invoke(generate.gen_shacl, SAMPLE, "-o", out, "--template", package)
+    assert result.exit_code == 4 and not list(out.iterdir())

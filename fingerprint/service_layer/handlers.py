@@ -8,6 +8,7 @@
 """The public library function: collect → analyse → render, with the 1.x signature (P-7)."""
 
 import logging
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -21,6 +22,7 @@ from fingerprint.service_layer.report import (  # noqa: F401 — kept importable
     generate_report_builder_config,
     render_report,
 )
+from fingerprint.service_layer.representations import generate_representations
 from fingerprint.service_layer.settings import resolve_settings
 
 logger = logging.getLogger(__name__)
@@ -33,14 +35,17 @@ def fingerprint_report(
     template_location: str | Path | None = None,
     extra_conf: dict[str, Any] | None = None,
     *,
+    formats: Sequence[str] = (),
     sparql: SparqlPort | None = None,
 ) -> tuple[Path, ProfileRun]:
     """Collect, save the profile, analyse and render; returns the report path and the raw run (its failures decide
-    the exit code). The profile is saved before rendering, so a rendering failure loses nothing collected."""
+    the exit code). The profile is saved before rendering, so a rendering failure loses nothing collected;
+    the chosen `formats` are rendered from the same run afterwards (UC-B2.2)."""
     sparql = sparql or SparqlWrapperClient(sparql_endpoint_url, settings.timeout_seconds)
     run = collect(sparql_endpoint_url, settings, sparql)
     save_profile(run, output_location)
     report = render_report(analyse(run), output_location, template_location, extra_conf)
+    generate_representations(run, output_location, formats)
     if run.failures:
         logger.warning("report written to %s with %d failures", report, len(run.failures))
     else:

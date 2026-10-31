@@ -140,7 +140,7 @@ Feature: Publishing a fingerprint as an application profile
 
     Scenario Outline: Golden output
       Given the fixed test profile
-      When the <format> is generated
+      When the <format> is generated from it
       Then it equals its golden file
 
       Examples:

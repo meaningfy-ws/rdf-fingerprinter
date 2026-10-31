@@ -16,6 +16,7 @@ import click
 
 from fingerprint.adapters.sparql import EndpointUnreachable, redact
 from fingerprint.domain.generated.profile import Depth, ObjectTypeScope, PrecisionPolicy
+from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.handlers import fingerprint_report
 from fingerprint.service_layer.settings import UsageError, load_config_file, resolve_settings
 
@@ -44,12 +45,26 @@ def _choice(enum: type[Enum]) -> click.Choice:
 @click.option("--concurrency", type=int, help="classes profiled at once")
 @click.option("--graph", "graphs", multiple=True, help="graph to profile (repeatable; empty string = default graph)")
 @click.option("--config", "config_file", type=click.Path(dir_okay=False), help="JSON file with collection settings")
-def fingerprint_endpoint(sparql_endpoint_url: str, output: str, graphs: tuple[str, ...], config_file: str | None, **options):
+@click.option(
+    "--format",
+    "formats",
+    multiple=True,
+    type=click.Choice(sorted(GENERATORS)),
+    help="also render a representation after the report (repeatable)",
+)
+def fingerprint_endpoint(
+    sparql_endpoint_url: str,
+    output: str,
+    graphs: tuple[str, ...],
+    config_file: str | None,
+    formats: tuple[str, ...],
+    **options,
+):
     """
     Generate a fingerprint report on a given SPARQL endpoint.
     Exit status: 0 profiled, 1 report written with failures, 2 usage error, 3 endpoint unreachable, 4 unexpected error.
     """
-    # the application, not the library, configures logging (DEC-9)
+    # the application, not the library, configures logging
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)5s %(name)s: %(message)s")
     output_location = pathlib.Path(output)
     if not output_location.is_dir():
@@ -63,7 +78,7 @@ def fingerprint_endpoint(sparql_endpoint_url: str, output: str, graphs: tuple[st
         raise click.UsageError(str(error)) from error
 
     try:
-        _, run = fingerprint_report(sparql_endpoint_url, output_location, settings)
+        _, run = fingerprint_report(sparql_endpoint_url, output_location, settings, formats=formats)
     except EndpointUnreachable as error:
         logger.error("%s", error)
         sys.exit(EXIT_UNREACHABLE)
