@@ -658,14 +658,14 @@ files = [
 
 [[package]]
 name = "eds4jinja2"
-version = "2.0.0"
+version = "2.1.0"
 description = "Embed the data source specifications in your JINJA templates directly, and enjoy the dynamic data contexts."
 optional = false
 python-versions = "<4.0,>=3.12"
 groups = ["main"]
 files = [
-    {file = "eds4jinja2-2.0.0-py3-none-any.whl", hash = "sha256:75b49ac48cc80ded51c071547cee802af5a723cb7f0ce64824d2f3130ac030ac"},
-    {file = "eds4jinja2-2.0.0.tar.gz", hash = "sha256:a505fcef4fb60471962b4cfba23bf3be1d36a3302b7a5182a402b5c12b565e9c"},
+    {file = "eds4jinja2-2.1.0-py3-none-any.whl", hash = "sha256:cce26856886930cefa94c07f8e39568428ac6ed3131ec859fd0924dde763b382"},
+    {file = "eds4jinja2-2.1.0.tar.gz", hash = "sha256:26afdeb614aee355cf40a3e9e4bdc2d98f93cf2e7e270cb21518c10db36a89b2"},
 ]
 
 [package.dependencies]
@@ -3818,4 +3818,4 @@ dev = ["pytest", "setuptools"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4.0"
-content-hash = "12d8208ade7707b8eb19a85fa93ea8d422fcac1da4c69c125e74826662bbc695"
+content-hash = "c3ccb5adccc15435f6324b2826f74eec9c0228b8b7185d02c51130f6fd2a2a11"

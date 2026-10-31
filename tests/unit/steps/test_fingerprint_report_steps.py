@@ -245,7 +245,7 @@ def report_raises(monkeypatch):
     def broken(self, *args, **kwargs):
         raise RuntimeError("template error")
 
-    monkeypatch.setattr(JinjaTemplateRenderer, "render", broken)
+    monkeypatch.setattr(JinjaTemplateRenderer, "make", broken)
 
 
 @then("the output folder holds the report and the profile file")

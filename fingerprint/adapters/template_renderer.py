@@ -1,7 +1,7 @@
 """Render eds4jinja2 template packages, check the texts and write them (profile-representations P-1).
 
-Rendering goes through `ReportBuilder.template_env`, not `make_document()`, so one package can yield
-several files and every text is checked before any file is written.
+Rendering goes through eds4jinja2's own document building (2.1, domain-object-model P-6):
+`render_documents` for texts in memory, `make_documents` to check every text before any file is written.
 """
 
 import json
@@ -10,7 +10,6 @@ from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-import jinja2
 import rdflib
 from eds4jinja2.services.report_builder import ReportBuilder
 from pydantic import BaseModel
@@ -74,8 +73,8 @@ class JinjaTemplateRenderer:
         autoescape: bool | None = None,
     ) -> list[RenderedDocument]:
         """Each output's text, in memory: the package's template rendered with `view` = the output's view."""
-        template = self._template(package, conf, autoescape)
-        return [RenderedDocument(file_name=name, text=template.render(view=view)) for name, view in outputs]
+        texts = self._builder(package, conf).render_documents(_variables(outputs), autoescape=autoescape)
+        return [RenderedDocument(file_name=name, text=text) for name, text in texts.items()]
 
     def make(
         self,
@@ -88,40 +87,38 @@ class JinjaTemplateRenderer:
         autoescape: bool | None = None,
     ) -> list[Path]:
         """Render, check every text, then write them all; a text that fails its check leaves the folder untouched."""
-        documents = self.render(package, outputs, conf=conf, autoescape=autoescape)
-        for document in documents:
+
+        def checked(name: str, text: str) -> None:
             if check:
                 try:
-                    CHECKS[check](document.text)
+                    CHECKS[check](text)
                 except Exception as error:  # the parser's own error types vary; the message is kept
-                    raise GeneratedOutputError(f"{document.file_name} is not valid {check.value}: {error}") from error
-        location = Path(folder)
-        location.mkdir(parents=True, exist_ok=True)
-        paths = []
-        for document in documents:
-            path = location / document.file_name
-            path.write_text(document.text, encoding="utf-8")
-            paths.append(path)
-        return paths
+                    raise GeneratedOutputError(f"{name} is not valid {check.value}: {error}") from error
 
-    def _template(
+        builder = self._builder(package, conf, folder)
+        return builder.make_documents(_variables(outputs), check=checked, autoescape=autoescape)
+
+    def _builder(
         self,
         package: str | Path,
-        conf: Mapping[str, Any] | None,
-        autoescape: bool | None,  # dict-ok: eds4jinja2 configuration
-    ) -> jinja2.Template:
-        """The package's template, `conf` deep-merged over its `config.json` `conf`.
-
-        shortcut: renders through `ReportBuilder.template_env`; with eds4jinja2 2.1 this becomes
-        `render_documents` / `make_documents` (domain-object-model task 6.1)."""
+        conf: Mapping[str, Any] | None,  # dict-ok: eds4jinja2 configuration
+        folder: str | Path | None = None,
+    ) -> ReportBuilder:
+        """The package's builder, `conf` deep-merged over its `config.json` `conf`, writing into `folder`."""
         try:
             additional = {"conf": dict(conf or {})}  # dict-ok: eds4jinja2 configuration
-            builder = ReportBuilder(target_path=package, additional_config=additional, external_filters=self.filters)
+            return ReportBuilder(
+                target_path=package,
+                output_path=None if folder is None else str(folder),
+                additional_config=additional,
+                external_filters=self.filters,
+            )
         except FileNotFoundError as error:
             raise TemplatePackageError(f"{package} is not a template package: {error}") from error
         except KeyError as error:
             raise TemplatePackageError(f"{package}/config.json must have `template` and `conf`: {error}") from error
-        if autoescape is not None:
-            # templates compile on first load, so this applies to every template of the package
-            builder.template_env.autoescape = autoescape
-        return builder.template_env.get_template(builder.template)
+
+
+def _variables(outputs: Sequence[tuple[str, BaseModel | None]]) -> dict[str, dict[str, Any]]:  # dict-ok: eds4jinja2 outputs
+    """eds4jinja2's output name → template variables; every template receives its view as `view`."""
+    return {name: {"view": view} for name, view in outputs}  # dict-ok: eds4jinja2 outputs

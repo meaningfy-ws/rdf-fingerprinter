@@ -3,7 +3,7 @@
 ## 0. eds4jinja2 2.1 (in ../eds4jinja2, its own OpenSpec change)
 
 - [x] 0.1 OpenSpec changes `render-documents` (spec `batch-document-rendering`) and `make-documents` (spec `checked-document-writing`) in eds4jinja2, split at the developer's request for `ReportBuilder.render_documents(outputs, *, autoescape)` and `make_documents(outputs, *, check, autoescape)` as P-6 specifies; branch `feature/batch-documents` there. Specification only: the developer implements it (2026-10-31)
-- [ ] 0.2 The developer implements and releases eds4jinja2 2.1.0; task 6.1 waits for it (P-6)
+- [x] 0.2 The developer implements and releases eds4jinja2 2.1.0; task 6.1 waits for it (P-6)
 
 ## 1. Rule, check and generated modules
 
@@ -34,7 +34,7 @@
 
 ## 6. Rendering through eds4jinja2
 
-- [ ] 6.1 After 0.2: `eds4jinja2>=2.1,<3`; the port's `render` / `make` on `render_documents` / `make_documents` with the Turtle check and the format's autoescape; `report.py` on `make`; the `template_env` guard test removed; with it the review's fit items: an `end_profile` hook so `DocumentGenerator` overrides no walk method and `per_graph` decides, a shared `GraphView` mixin (`graph_label`, `slug`, `skipped`), no slug in `RenderedDocument.file_name`, `check` as a callable; `make test-e2e` green (P-6)
+- [x] 6.1 After 0.2: `eds4jinja2>=2.1,<3`; the port's `render` / `make` on `render_documents` / `make_documents` with the Turtle check and the format's autoescape; `report.py` on `make`; the `template_env` guard test removed; with it the review's fit items: an `end_profile` hook so `DocumentGenerator` overrides no walk method and `per_graph` decides, a shared `GraphView` mixin (`graph_label`, `slug`, `skipped`), no slug in `RenderedDocument.file_name`, `check` as a callable; `make test-e2e` green (P-6)
 
 ## 7. Close
 
@@ -45,7 +45,7 @@
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 0.1 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [x] 4.1 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [ ] 0.2 · [ ] 6.1 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [ ] 7.4
+- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 0.1 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [x] 4.1 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 0.2 · [x] 6.1 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [ ] 7.4
 
 ## Verification
 

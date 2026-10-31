@@ -75,6 +75,8 @@ and an application-profile document.
 - rdflib is now a declared runtime dependency (it was already installed through eds4jinja2);
   pySHACL 0.40.1 for tests.
 - SPARQLWrapper is no longer a direct dependency.
+- eds4jinja2 ≥ 2.1: every format and the report are rendered and written through its
+  `render_documents` / `make_documents`.
 
 ## [2.0.0] - 2026-10-31
 

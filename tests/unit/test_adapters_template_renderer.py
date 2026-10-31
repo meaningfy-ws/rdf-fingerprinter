@@ -3,7 +3,6 @@
 import json
 
 import pytest
-from eds4jinja2.services.report_builder import ReportBuilder
 
 from fingerprint.adapters.exceptions import GeneratedOutputError, TemplatePackageError
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
@@ -15,11 +14,6 @@ def package(tmp_path, body, config=None):
     (tmp_path / "templates" / "out.txt").write_text(body)
     (tmp_path / "config.json").write_text(json.dumps(config or {"template": "out.txt", "conf": {"title": "T"}}))
     return tmp_path
-
-
-def test_report_builder_exposes_template_env(tmp_path):
-    builder = ReportBuilder(target_path=package(tmp_path, "x"))
-    assert builder.template == "out.txt" and builder.template_env.get_template("out.txt").render() == "x"
 
 
 def texts(documents):

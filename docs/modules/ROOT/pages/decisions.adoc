@@ -279,17 +279,19 @@ Considered options::
   generated Turtle is parsed before anything is written.
 . Build SHACL as an rdflib graph and serialise it; templates only for text formats.
 Decision outcome:: Option 1 (developer, 2026-10-31; DEC-4 of `profile-representations`). Rendering,
-the check and the writes live in one adapter, the template renderer, shared with the report; it uses
-the builder's Jinja environment, not `make_document()`, which writes one file and writes it
+the check and the writes live in one adapter, the template renderer, shared with the report. From
+eds4jinja2 2.1 (`domain-object-model` P-6) it uses eds4jinja2's own document building:
+`render_documents` renders several named outputs of one package in memory, `make_documents` passes
+each to the Turtle check and writes them only when all pass. 2.0's `make_document()` wrote one file,
 unchecked.
 Consequences::
 * Good: one rendering engine; a custom template package works the same way for every format.
 * Bad: escaping is ours: IRIs shortened only when the result is a valid Turtle name, unwritable IRIs
   skipped and reported.
-* Bad: relies on `ReportBuilder.template_env`, guarded by a test.
+* Good: no reliance on eds4jinja2 internals; the parallel pre-fetch applies to every format.
 Confirmation:: scenarios "Unusual IRIs stay valid", "An IRI that cannot be written is skipped, not
 broken" and "Golden file per format" of the `profile-representations` specification;
-`test_report_builder_exposes_template_env`.
+`tests/unit/test_adapters_template_renderer.py` (a failed check writes nothing).
 Pros and cons::
 * eds4jinja2 for every format (chosen) — good: one engine, customisable everywhere; bad: Turtle escaping is ours.
 * rdflib graph — good: escaping is correct by construction; bad: SHACL not customisable by template,
