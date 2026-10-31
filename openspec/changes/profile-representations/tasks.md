@@ -24,9 +24,9 @@
 
 ## 4. SHACL generator
 
-- [ ] 4.1 `ShaclGenerator` hooks: counts from the label, value constraints from `value_partitions` (langString rule), the severity table incl. presence-only, first-N and `any_graph` rows, classes with no observed instances, annotations, shape IRIs, used prefixes (DEC-5, P-9, P-10; Requirement: SHACL shapes)
-- [ ] 4.2 Template package `fingerprint_report_templates/shacl_shapes/` (`config.json`, `templates/shapes.ttl`); `check` parses the Turtle
-- [ ] 4.3 Golden file `tests/test_data/golden/shapes-*.ttl` from the sample profile; pySHACL (`inference="none"`), asserting that no result has severity `sh:Violation` (not `sh:conforms`): the continents graph's shapes on `continents-source-ap.rdf`, the treaties graph's on `treaties-source-ap.rdf`, the default graph's on `continents-source-ap.rdf` (the only file `make oxigraph-load-test-data` loads there; no union default graph) (Requirements: Golden outputs; SHACL shapes)
+- [x] 4.1 `ShaclGenerator` hooks: counts from the label, value constraints from `value_partitions` (langString rule), the severity table incl. presence-only, first-N and `any_graph` rows, classes with no observed instances, annotations, shape IRIs, used prefixes (DEC-5, P-9, P-10; Requirement: SHACL shapes)
+- [x] 4.2 Template package `fingerprint_report_templates/shacl_shapes/` (`config.json`, `templates/shapes.ttl`); `check` parses the Turtle
+- [x] 4.3 Golden file `tests/test_data/golden/shapes-*.ttl` from the sample profile; pySHACL (`inference="none"`), asserting that no result has severity `sh:Violation` (not `sh:conforms`): the continents graph's shapes on `continents-source-ap.rdf`, the treaties graph's on `treaties-source-ap.rdf`, the default graph's on `continents-source-ap.rdf` (the only file `make oxigraph-load-test-data` loads there; no union default graph) (Requirements: Golden outputs; SHACL shapes)
 
 ## 5. PlantUML generator
 
@@ -57,7 +57,7 @@
 
 ## Roadmap
 
-- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.0 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.0 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

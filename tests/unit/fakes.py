@@ -86,3 +86,53 @@ class FakeSparql(SparqlWrapperClient):
                 for row in result
             ]
         return {"head": {"vars": names}, "results": {"bindings": bindings}}
+
+
+# --- hand-built profile runs for the representation tests (profile-representations task 1.2) ---
+
+XSD = "http://www.w3.org/2001/XMLSchema#"
+
+
+def literals(triples: int, datatype: str | None = XSD + "string", language: str | None = None) -> dict[str, Any]:
+    partition = {"node_kind": "literal", "triples": triples, "datatype": datatype, "language": language}
+    return {k: v for k, v in partition.items() if v is not None}
+
+
+def resources(triples: int, object_class: str | None = None, kind: str = "iri") -> dict[str, Any]:
+    partition = {"node_kind": kind, "triples": triples, "object_class": object_class}
+    return {k: v for k, v in partition.items() if v is not None}
+
+
+def prop(iri: str, bins: dict[int, int] | None = None, *partitions: dict[str, Any], presence_only: bool = False):
+    """A property with its cardinality histogram ({values per subject: subjects}) and value partitions."""
+    if presence_only:
+        return {"property": iri, "presence_only": True}
+    histogram = [{"values_per_subject": n, "subjects": s} for n, s in sorted((bins or {}).items())]
+    return {"property": iri, "cardinality_histogram": histogram, "value_partitions": list(partitions)}
+
+
+def klass(iri: str, instances: int, *props: dict[str, Any], observed: int | None = None, co_types=()):
+    mode = "exact" if observed is None or observed == instances else "first_n"
+    profile = {
+        "class_iri": iri,
+        "instances": instances,
+        "observed_instances": instances if observed is None else observed,
+        "precision_mode": mode,
+        "property_partitions": list(props),
+    }
+    if co_types:
+        profile["co_types"] = [{"class_iri": c, "subjects": s} for c, s in co_types]
+    return profile
+
+
+def profile_run(*classes, graph=None, edges=(), failures=(), **settings):
+    from fingerprint.domain.generated.profile import ProfileRun
+
+    graph_profile: dict[str, Any] = {"class_partitions": list(classes)}
+    if graph:
+        graph_profile["graph"] = graph
+    if edges:
+        graph_profile["declared_subclass_edges"] = [{"sub_class": s, "super_class": p} for s, p in edges]
+    return ProfileRun.model_validate(
+        {"endpoint": "http://e/sparql", "settings": settings, "graphs": [graph_profile], "failures": list(failures)}
+    )

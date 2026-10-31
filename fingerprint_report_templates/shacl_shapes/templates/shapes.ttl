@@ -1,0 +1,25 @@
+{#- SHACL shapes for one graph. Every term in `view` is already written as Turtle by the
+    generator (fingerprint/service_layer/generators/shacl.py); this template only lays it out. -#}
+# {{ conf.title }} — {{ view.graph.graph_label }}
+{% for prefix, namespace in view.graph.prefixes %}
+@prefix {{ prefix }}: {{ namespace | turtle_iri }} .
+{%- endfor %}
+{% for cls in view.graph.classes %}
+{{ cls.shape }} a sh:NodeShape ;
+    sh:targetClass {{ cls.target }} ;
+{%- for predicate, value in cls.annotations %}
+    {{ predicate }} {{ value }} ;
+{%- endfor %}
+{%- for p in cls.properties %}
+    sh:property [
+        sh:path {{ p.path }} ;
+{%- for constraint in p.constraints %}
+        {{ constraint }} ;
+{%- endfor %}
+{%- for predicate, value in p.annotations %}
+        {{ predicate }} {{ value }} ;
+{%- endfor %}
+    ] ;
+{%- endfor %}
+.
+{% endfor %}

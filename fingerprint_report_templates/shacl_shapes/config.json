@@ -1,0 +1,6 @@
+{
+  "template": "shapes.ttl",
+  "conf": {
+    "title": "SHACL shapes inferred by rdf-fingerprinter"
+  }
+}
