@@ -4,10 +4,14 @@
 A fingerprint run has four stages. Only the first talks to the endpoint; the rest are functions of
 what it observed.
 
- 1 collect   endpoint ──SPARQL──▶ profile run (raw counts)              service layer + SPARQL adapter
- 2 save      profile run ──────▶ profile.json                     Profile store
- 3 analyse   profile run ──────▶ analytics (indicators)                 domain, pure
- 4 render    analytics ────────▶ report, SHACL, diagram, doc      eds4jinja2 templates
+[mermaid]
+....
+flowchart LR
+    ep[("endpoint")] -- "1 collect · SPARQL<br/>service layer + SPARQL adapter" --> run["profile run<br/>(raw counts)"]
+    run -- "2 save<br/>Profile store" --> pj[("profile.json")]
+    run -- "3 analyse<br/>domain, pure" --> an["analytics<br/>(indicators)"]
+    an -- "4 render<br/>eds4jinja2 templates" --> out["report, SHACL,<br/>diagram, doc"]
+....
 
 Terms in _italics_ are defined in the xref:glossary.adoc[Glossary]. The statistics themselves are
 specified in xref:statistics.adoc[Statistics and Settings]; this page explains how they come about.
@@ -15,19 +19,21 @@ specified in xref:statistics.adoc[Statistics and Settings]; this page explains h
 [#data-flow]
 == Through the components
 
- CLI / caller ──settings──▶ Collector ──SPARQL──▶ endpoint
-                               │ profile run (fingerprint_stats)
-                               ├──────────▶ Profile store ──▶ profile.json           
-                               ▼                                 │ (later regenerations)
-                           Analyser (domain, pure) ◀─────────────┘ (+ threshold)
-                               │ analytics (fingerprint_analytics)
-                   ┌───────────┴─────────────────┐
-                   ▼                             ▼
-             report context              Generators: visit hooks → view         
-                   └─────────────┬───────────────┘
-                                 ▼
-                 Template renderer (eds4jinja2) ──check──▶ main.html,
-                                 shapes-*.ttl, diagram-*.puml, profile.html
+[mermaid]
+....
+flowchart TB
+    caller["CLI / caller"] -- settings --> col["Collector"]
+    col -- SPARQL --> ep[("endpoint")]
+    col -- "profile run<br/>(fingerprint_stats)" --> store["Profile store"]
+    store --> pj[("profile.json")]
+    col -- "profile run" --> ana["Analyser<br/>(domain, pure)"]
+    pj -. "later regenerations<br/>(+ threshold)" .-> ana
+    ana -- "analytics<br/>(fingerprint_analytics)" --> ctx["report context"]
+    ana -- analytics --> gen["Generators<br/>visit hooks → view"]
+    ctx --> tr["Template renderer<br/>(eds4jinja2)"]
+    gen --> tr
+    tr -- check --> files[("main.html, shapes-*.ttl,<br/>diagram-*.puml, profile.html")]
+....
 
 == A running example
 
