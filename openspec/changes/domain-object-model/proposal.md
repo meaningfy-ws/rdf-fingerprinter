@@ -68,7 +68,7 @@ Behaviour does not change: the golden files and every scenario are the safety ne
   POST HTTP error), so it cannot carry the per-query timeout collection relies on. The query is sent
   with the standard library (`urlopen(…, timeout=…)`, form-encoded POST as today) and the answer is
   parsed with `rdflib.query.Result.parse`. Rejected: `SPARQLConnector` (no timeout); SPARQLWrapper.
-  Pending the developer's confirmation; the alternative is contributing a timeout to rdflib.
+  Confirmed by the developer (2026-10-31).
 - **DEC-6**: Configuration follows the Meaningfy settings pattern: an `env_property` resolver
   (adapter) and one config class in `fingerprint/__init__.py`. Operational constants (profile file
   name, retry backoff, timeout markers, error excerpt length, shapes namespace, default-graph label,

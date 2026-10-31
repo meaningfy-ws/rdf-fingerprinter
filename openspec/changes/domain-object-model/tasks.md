@@ -2,8 +2,8 @@
 
 ## 0. eds4jinja2 2.1 (in ../eds4jinja2, its own OpenSpec change)
 
-- [ ] 0.1 OpenSpec change `batch-documents` in eds4jinja2 for `ReportBuilder.render_documents(outputs, *, autoescape)` and `make_documents(outputs, *, check, autoescape)` as P-6 specifies (variables per output, listeners once per batch, parallel path per output, check-then-write); TDD; `make_document()` unchanged; CHANGELOG 2.1.0
-- [ ] 0.2 eds4jinja2 PR, CI green; release 2.1.0 only after the developer's go-ahead (P-6)
+- [x] 0.1 OpenSpec change `batch-documents` in eds4jinja2 (EPIC, PLAN, spec `batch-document-rendering`) for `ReportBuilder.render_documents(outputs, *, autoescape)` and `make_documents(outputs, *, check, autoescape)` as P-6 specifies; branch `feature/batch-documents` there. Specification only: the developer implements it (2026-10-31)
+- [ ] 0.2 The developer implements and releases eds4jinja2 2.1.0; task 6.1 waits for it (P-6)
 
 ## 1. Rule, check and generated modules
 
@@ -45,7 +45,7 @@
 
 ## Roadmap
 
-- [ ] 1.1 · [ ] 1.2 · [ ] 1.3 · [ ] 0.1 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 4.1 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 0.2 · [ ] 6.1 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4
+- [ ] 1.1 · [ ] 1.2 · [ ] 1.3 · [x] 0.1 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 4.1 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 0.2 · [ ] 6.1 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4
 
 ## Verification
 
