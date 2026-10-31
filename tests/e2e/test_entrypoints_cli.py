@@ -22,10 +22,8 @@ def test_fingerprint_execution(tmpdir):
 
     assert result.exit_code == 0
 
-    files_in_output_path = list(Path(str(output_path)).iterdir())
-    main_file = files_in_output_path[0].name
-
-    assert main_file == "main.html"
+    names = {p.name for p in Path(str(output_path)).iterdir()}
+    assert names == {"main.html", "profile.json"}
 
 
 def test_unreachable_endpoint_exits_3(tmp_path):
