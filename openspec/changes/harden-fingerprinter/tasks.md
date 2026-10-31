@@ -5,7 +5,8 @@
 - [ ] 1.1 Move `model/*.yaml` from this change to the repo's `model/`; add LinkML (pinned) to a new `model` dependency group, Pydantic and SPARQLWrapper as direct runtime dependencies (DEC-8, P-2, P-10)
 - [ ] 1.2 gen-pydantic project template (banner, frozen, `extra="forbid"`); `make generate-models` → `fingerprint/domain/generated/profile.py`; `make check-models` in `check-all`; Ruff excludes `domain/generated/` (P-10; Requirements: Generated models stay in sync; Generated code is read-only)
 - [ ] 1.3 Create `fingerprint/domain` and `fingerprint/adapters`; `.importlinter`: four layers + the two forbidden contracts (DEC-7, P-10; Requirement: Onion layers are enforced)
-- [ ] 1.4 Add `pytest-bdd` to the test group; `tests/features/` and `tests/unit/steps/` skeleton (P-8)
+- [x] 1.0 Gherkin features written from the spec scenarios and error matrix: `tests/features/statistics_collection.feature`, `profile_analytics.feature`, `fingerprint_report.feature` (P-8)
+- [ ] 1.4 Add `pytest-bdd` to the test group; `tests/unit/steps/` skeleton bound to `tests/features/` (P-8)
 
 ## 2. Domain (pure, TDD)
 
@@ -16,7 +17,7 @@
 - [ ] 2.6 Hierarchy: declared + implied parents, own/inherited/refined, depth with cycles (Requirement: Hierarchy)
 - [ ] 2.7 Exactness flags; analytics from a JSON-loaded raw profile (Requirements: Exactness is visible; Analytics are derived, never collected)
 - [ ] 2.8 Remaining class and graph indicators, median/mode/stddev, top-K share, entropy (Requirement: Further indicators)
-- [ ] 2.9 Gherkin features for 2.3–2.8 (bdd-gherkin), green
+- [ ] 2.9 Step definitions for `profile_analytics.feature`, green
 
 ## 3. Adapters
 
@@ -32,14 +33,14 @@
 - [ ] 4.4 Precision escalation exact → first_n (one QS per class, blank-node fallback, oversized-query failure), failure recording and logging per the error matrix (Requirements: Precision escalation; Failures are recorded and fail the run)
 - [ ] 4.5 Thread pool, biggest classes first (P-4)
 - [ ] 4.6 Second wave: top-K, completeness check, incoming links (Requirement: Completeness check for first-N classes)
-- [ ] 4.7 Gherkin features for collection rules with `FakeSparql`, green
+- [ ] 4.7 Step definitions for `statistics_collection.feature` with `FakeSparql` (e2e-only rows on Oxigraph), green
 
 ## 5. Report and CLI
 
 - [ ] 5.1 `service_layer/report.py` `render_report`; `handlers` composes collect → analyse → render, signature unchanged (P-7; Requirement: Public function keeps its signature)
 - [ ] 5.2 Rewrite `main.html`/macros to render the analytics; remove the SPARQL macros (Requirements: Report renders from the analytics; Report content; Failures and settings are reported)
 - [ ] 5.3 CLI options per the P-6 table; calls collect/analyse/render; exit codes 0/1/3/4 (Requirement: Exit status)
-- [ ] 5.4 e2e on Oxigraph: report on the test data; CLI exit codes
+- [ ] 5.4 e2e on Oxigraph: report on the test data; CLI exit codes; step definitions for `fingerprint_report.feature`
 
 ## 6. Docs and release
 
@@ -48,7 +49,7 @@
 
 ## Roadmap
 
-- [ ] 1.1 · [ ] 1.2 · [ ] 1.3 · [ ] 1.4 · [ ] 2.1 · [ ] 2.3 · [ ] 2.4 · [ ] 2.5 · [ ] 2.6 · [ ] 2.7 · [ ] 2.8 · [ ] 2.9 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 4.5 · [ ] 4.6 · [ ] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 5.4 · [ ] 6.1 · [ ] 6.2
+- [x] 1.0 · [ ] 1.1 · [ ] 1.2 · [ ] 1.3 · [ ] 1.4 · [ ] 2.1 · [ ] 2.3 · [ ] 2.4 · [ ] 2.5 · [ ] 2.6 · [ ] 2.7 · [ ] 2.8 · [ ] 2.9 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 4.5 · [ ] 4.6 · [ ] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 5.4 · [ ] 6.1 · [ ] 6.2
 
 ## Verification
 
