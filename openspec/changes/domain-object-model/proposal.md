@@ -31,9 +31,9 @@ LinkML-generated Pydantic class or enum.
    dict construction or `dict[str, Any]` in the code.
 2. **One home for the generated model** (DEC-3): `fingerprint/domain/generated/` disappears; the
    generated profile module and its JSON Schema sit in `fingerprint/domain/`.
-3. **SPARQL through rdflib** (DEC-5): rdflib's `SPARQLConnector` sends the queries and returns
-   typed result rows (`URIRef`, `Literal`, `BNode`); the adapter keeps only timeout, retries and
-   failure classification; SPARQLWrapper and the hand-written row parser go.
+3. **SPARQL results through rdflib** (DEC-5): the adapter sends each query with the standard library
+   (timeout, retries, failure classification) and rdflib parses the answer into typed result rows
+   (`URIRef`, `Literal`, `BNode`); SPARQLWrapper and the hand-written row parser go.
 4. **One typed configuration** (DEC-6): a config class in `fingerprint/__init__.py` reading
    environment variables through an `env_property` resolver (the Meaningfy settings pattern, as in
    ted-sws and mapping-workbench); every operational constant becomes a variable with its default.
@@ -62,8 +62,13 @@ Behaviour does not change: the golden files and every scenario are the safety ne
 - **DEC-4**: Exceptions and IRI rules stay code — reason: LinkML generates data classes, and an
   exception must subclass `Exception`; failure *data* is already modelled (`Failure`). Rejected:
   modelling exceptions in LinkML.
-- **DEC-5**: rdflib's `SPARQLConnector` replaces SPARQLWrapper (developer, 2026-10-31) — reason: one
-  library for queries and typed results; rejected: SPARQLWrapper plus rdflib parsing.
+- **DEC-5**: SPARQLWrapper goes; rdflib parses the results into typed terms (developer, 2026-10-31).
+  *Amended while planning (logged in `inputs/review-2026-10-31.md`):* the developer chose rdflib's
+  `SPARQLConnector`, but in rdflib 7.6.0 it calls `urlopen` without a timeout (and returns a tuple on a
+  POST HTTP error), so it cannot carry the per-query timeout collection relies on. The query is sent
+  with the standard library (`urlopen(…, timeout=…)`, form-encoded POST as today) and the answer is
+  parsed with `rdflib.query.Result.parse`. Rejected: `SPARQLConnector` (no timeout); SPARQLWrapper.
+  Pending the developer's confirmation; the alternative is contributing a timeout to rdflib.
 - **DEC-6**: Configuration follows the Meaningfy settings pattern: an `env_property` resolver
   (adapter) and one config class in `fingerprint/__init__.py`. Operational constants (profile file
   name, retry backoff, timeout markers, error excerpt length, shapes namespace, default-graph label,

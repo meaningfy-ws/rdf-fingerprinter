@@ -2,55 +2,51 @@
 
 ## 0. eds4jinja2 2.1 (in ../eds4jinja2, its own OpenSpec change)
 
-- [ ] 0.1 OpenSpec change `batch-documents` in eds4jinja2: proposal, spec delta and tasks for `ReportBuilder.make_documents(outputs, check)` (P-6); TDD there; `make_document()` unchanged; CHANGELOG 2.1.0
-- [ ] 0.2 PR in eds4jinja2, CI green; release 2.1.0 only after the developer's go-ahead (P-6)
+- [ ] 0.1 OpenSpec change `batch-documents` in eds4jinja2 for `ReportBuilder.make_documents(outputs, *, check, autoescape)` as P-6 specifies (variables per output, listeners once per batch, parallel path per output, check-then-write); TDD; `make_document()` unchanged; CHANGELOG 2.1.0
+- [ ] 0.2 eds4jinja2 PR, CI green; release 2.1.0 only after the developer's go-ahead (P-6)
 
 ## 1. Rule, check and generated modules
 
-- [ ] 1.1 AGENTS.md *Working conventions*: the domain-objects rule (DEC-1); spec deltas for `developer-tooling` and `statistics-collection` (this change)
-- [ ] 1.2 `tests/unit/test_no_composed_dicts.py` with `# dict-ok:` marks and a temporary allow-list file of today's offenders (P-1; Requirement: Values are domain objects)
-- [ ] 1.3 Generated model moved to `fingerprint/domain/profile.py` and `profile_run.schema.json`; `fingerprint/domain/generated/` removed; imports, Makefile, Ruff exclude, `.importlinter`, docs paths updated (P-2; Requirement: Generated models stay in sync)
+- [ ] 1.1 AGENTS.md *Working conventions*: the domain-objects rule (DEC-1)
+- [ ] 1.2 `tests/unit/test_no_composed_dicts.py` as P-1 specifies (annotations incl. bare `dict`; displays, comprehensions, `dict()` in functions; `update=`/`**`/UPPER_CASE/`# dict-ok:` exemptions) with `tests/unit/composed_dicts_allowlist.txt` holding today's offenders (Requirement: Values are domain objects)
+- [ ] 1.3 `fingerprint/domain/profile.py` and `profile_run.schema.json` from `make generate-models`; `fingerprint/domain/generated/` removed; imports, Ruff exclude, `.importlinter`, Makefile, docs paths (P-2; Requirement: Generated models stay in sync; Requirement: Generated code is read-only)
 
 ## 2. Configuration
 
-- [ ] 2.1 `adapters/config_resolver.py` (`env_property`, `EnvConfigResolver`, `DefaultConfigResolver`) with tests (P-7)
-- [ ] 2.2 `FingerprintConfig` in `fingerprint/__init__.py` with the P-7 variables; constants replaced by `config.X`; import still side-effect free (Requirement: Import has no side effects; Requirement: Configuration through one typed config)
-- [ ] 2.3 `SettingsOverride` in `model/fingerprint_stats.yaml`; `resolve_settings(*overrides)`; config file parsed into an override; `settings_sources.py` removed; precedence scenarios unchanged (P-7; Requirement: Settings)
+- [ ] 2.1 `adapters/config_resolver.py` (`ConfigResolverABC`, `EnvConfigResolver`, `DefaultConfigResolver`, instance-resolver `env_property`) with tests (P-7)
+- [ ] 2.2 `FingerprintConfig` + `config` in `fingerprint/__init__.py` with the P-7 variables and `validate()`; constants replaced by `config.X`; `validate()` called at every entry point; import side-effect free (Requirement: Configuration through one typed config; Requirement: Import has no side effects)
+- [ ] 2.3 `SettingsOverride` in `model/fingerprint_stats.yaml` (+ field-name test); `resolve_settings(*overrides)`; CLI options, environment, `selected_graphs`, `--config` and `additional_config["collection"]` as overrides; `settings_sources.py` removed; the CLI modules and `handlers.py` cleared from the allow-list (P-7; Requirement: Settings)
 
-## 3. SPARQL client
+## 3. SPARQL client and collection (together: the row type changes under collection)
 
-- [ ] 3.1 Adapter on `urlopen` + `rdflib.query.Result.parse`; `SparqlPort` returns `ResultRow`s; `classify` on urllib/socket errors; retry backoff from config (P-5; Requirement: Error classes and retries)
-- [ ] 3.2 `tests/unit/fakes.py` `FakeSparql` returns rdflib `ResultRow`s from its in-memory store; SPARQLWrapper removed from `pyproject.toml`; `make test-e2e` green
+- [ ] 3.1 Adapter: form-encoded POST via `urlopen(timeout=…)`, `Result.parse`, `SparqlPort` returning `ResultRow`s and `askAnswer`; `classify` with the 500-marker rule; backoff, markers and excerpt from config; `rows_from_json` removed (P-5; Requirement: Results are read as typed RDF terms; Requirement: Error classes and retries)
+- [ ] 3.2 `collection.py` builds the profile model objects from `ResultRow`s; blank nodes by `isinstance(BNode)` written as `_:<id>`; `FakeSparql` returns rdflib `ResultRow`s; SPARQLWrapper removed from `pyproject.toml`; a live collection equals `sample-profile.json` but for timestamps and version; `make test-e2e` green (P-8)
 
-## 4. Collection builds objects
+## 4. Analytics builds objects
 
-- [ ] 4.1 `collection.py` builds `GraphProfile` / `ClassProfile` / `PropertyProfile` / `ValuePartition` / … from `ResultRow`s; `Row` and `drop_none` uses removed; a live collection equals `sample-profile.json` but for timestamps and version (P-8)
+- [ ] 4.1 `domain/analytics.py` helpers return model objects; `drop_none` removed; `domain/iri.py` prefix tables marked as lookup tables; analytics scenarios unchanged (P-8, P-1)
 
-## 5. Analytics builds objects
+## 5. Views and generators
 
-- [ ] 5.1 `domain/analytics.py` helpers return model objects; `drop_none` removed; every analytics scenario unchanged (P-8)
+- [ ] 5.1 `model/fingerprint_views.yaml` → `fingerprint/domain/views.py`; `check-models` diffs it (P-2, P-3)
+- [ ] 5.2 Generator hooks `begin_graph` / `visit_property` / `visit_class(…, properties)` / `visit_graph(…, classes)`; `serialize() -> list[RenderedDocument]`; `GENERATORS` keyed by `RepresentationFormat`; `representations.py` and the CLI on the enum (P-4)
+- [ ] 5.3 SHACL, PlantUML and document generators build view objects; the template edits listed in P-3; golden files byte-equal (DEC-8)
 
-## 6. Views and generators
+## 6. Rendering through eds4jinja2
 
-- [ ] 6.1 `model/fingerprint_views.yaml` → `fingerprint/domain/views.py` via `make generate-models` (P-2, P-3)
-- [ ] 6.2 Generator base bottom-up (`visit_property` → `visit_class(…, properties)` → `visit_graph(…, classes)`), `GENERATORS` keyed by `RepresentationFormat` (P-4)
-- [ ] 6.3 SHACL, PlantUML and document generators build view objects; templates read attributes; golden files byte-equal (DEC-8)
+- [ ] 6.1 After 0.2: `eds4jinja2>=2.1,<3`; the template renderer adapter calls `make_documents` with the Turtle check and the format's autoescape; `report.py` on it; `render`/`write` and the `template_env` guard test removed; `make test-e2e` green (P-6)
 
-## 7. Rendering through eds4jinja2
+## 7. Close
 
-- [ ] 7.1 After 0.2: `eds4jinja2>=2.1,<3`; the template renderer adapter calls `make_documents` with the Turtle check; `render`/`write` and the `template_env` guard test removed; `make test-e2e` green (P-6)
-
-## 8. Close
-
-- [ ] 8.1 Allow-list of 1.2 empty; only `# dict-ok:` marks remain, each with its reason
-- [ ] 8.2 Docs: architecture (L3/L4, data flow), decisions (AD-12 domain objects and configuration; AD-1/AD-6/AD-9 updated for P-5/P-6), how-it-works (settings and variables), statistics (the variables table), api-reference (import paths); CHANGELOG 2.1.0 updated (import path, SPARQLWrapper removed, variables)
-- [ ] 8.3 Pre-PR review (five lenses); act on findings
-- [ ] 8.4 `/opsx:archive`; then PR #40 is ready to merge
+- [ ] 7.1 Allow-list of 1.2 empty; only `# dict-ok:` marks remain, each with its reason
+- [ ] 7.2 Docs: architecture (L3/L4, data flow), decisions (AD-12 domain objects and configuration; AD-1, AD-6, AD-9 updated for P-5/P-6), how-it-works (error classes on urllib), statistics (the variables table), api-reference (import paths); CHANGELOG 2.1.0 (import path, SPARQLWrapper removed, variables)
+- [ ] 7.3 Pre-PR review (five lenses); act on findings
+- [ ] 7.4 `/opsx:archive` (one ADDED/MODIFIED section per delta; check the merged counts); PR #40 ready to merge
 
 ## Roadmap
 
-- [ ] 1.1 · [ ] 1.2 · [ ] 1.3 · [ ] 0.1 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 4.1 · [ ] 5.1 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 0.2 · [ ] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4
+- [ ] 1.1 · [ ] 1.2 · [ ] 1.3 · [ ] 0.1 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 4.1 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 0.2 · [ ] 6.1 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4
 
 ## Verification
 
-Each group: `make check-all`, golden files unchanged, `make test-e2e` after 3, 4 and 7; `openspec validate domain-object-model --strict`; clarity gate ≥ 9/10 on this PLAN.
+Each group: `make check-all`, golden files unchanged; `make test-e2e` after 3 and 6; `openspec validate domain-object-model --strict`; clarity gate ≥ 9/10 on this PLAN.

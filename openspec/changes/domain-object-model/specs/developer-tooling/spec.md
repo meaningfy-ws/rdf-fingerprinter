@@ -27,7 +27,8 @@ classes SHALL be immutable (frozen) and reject unknown fields.
 Code in `fingerprint/` SHALL pass, return and store LinkML-generated Pydantic objects and enums, never
 composed dicts. `make check-all` SHALL fail on a dict display, dict comprehension or `dict(...)` call
 inside a function, or a `dict`/`Mapping` parameter or return annotation, unless the line is marked
-`# dict-ok: <reason>`; module-level constant tables are allowed.
+`# dict-ok: <reason>`; module-level constant tables, keyword arguments to `model_copy(update=…)` and
+dicts unpacked with `**` into a constructor are allowed.
 
 #### Scenario: A new dict value is refused
 - **WHEN** a function in `fingerprint/service_layer/` returns `{"path": p}`
@@ -48,4 +49,4 @@ read `os.environ`. Importing the package SHALL resolve no value.
 
 #### Scenario: A badly typed variable
 - **WHEN** `RDF_FINGERPRINTER_RETRY_BACKOFF_SECONDS=x` is set
-- **THEN** the command exits 2 naming the variable
+- **THEN** the command exits 2 naming the variable, before any query is sent
