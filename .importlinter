@@ -19,6 +19,8 @@ type = forbidden
 source_modules =
     fingerprint.domain.generated
 forbidden_modules =
+    fingerprint.domain.iri
+    fingerprint.domain.analytics
     fingerprint.adapters
     fingerprint.service_layer
     fingerprint.entrypoints

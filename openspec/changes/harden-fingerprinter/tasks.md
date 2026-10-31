@@ -2,22 +2,22 @@
 
 ## 1. Model and layers
 
-- [ ] 1.1 Move `model/*.yaml` from this change to the repo's `model/`; add LinkML (pinned) to a new `model` dependency group, Pydantic and SPARQLWrapper as direct runtime dependencies (DEC-8, P-2, P-10)
-- [ ] 1.2 gen-pydantic project template (banner, frozen, `extra="forbid"`); `make generate-models` → `fingerprint/domain/generated/profile.py`; `make check-models` in `check-all`; Ruff excludes `domain/generated/` (P-10; Requirements: Generated models stay in sync; Generated code is read-only)
-- [ ] 1.3 Create `fingerprint/domain` and `fingerprint/adapters`; `.importlinter`: four layers + the two forbidden contracts (DEC-7, P-10; Requirement: Onion layers are enforced)
+- [x] 1.1 Move `model/*.yaml` from this change to the repo's `model/`; add LinkML (pinned) to a new `model` dependency group, Pydantic and SPARQLWrapper as direct runtime dependencies (DEC-8, P-2, P-10)
+- [x] 1.2 gen-pydantic project template (banner, frozen, `extra="forbid"`); `make generate-models` → `fingerprint/domain/generated/profile.py`; `make check-models` in `check-all`; Ruff excludes `domain/generated/` (P-10; Requirements: Generated models stay in sync; Generated code is read-only)
+- [x] 1.3 Create `fingerprint/domain` and `fingerprint/adapters`; `.importlinter`: four layers + the two forbidden contracts (DEC-7, P-10; Requirement: Onion layers are enforced)
 - [x] 1.0 Gherkin features written from the spec scenarios and error matrix: `tests/features/statistics_collection.feature`, `profile_analytics.feature`, `fingerprint_report.feature` (P-8)
-- [ ] 1.4 Add `pytest-bdd` to the test group; `tests/unit/steps/` skeleton bound to `tests/features/` (P-8)
+- [x] 1.4 Add `pytest-bdd` to the test group; `tests/unit/steps/` skeleton bound to `tests/features/` (P-8)
 
 ## 2. Domain (pure, TDD)
 
-- [ ] 2.1 `domain/iri.py` `to_iriref` with its rejection rules (P-3)
-- [ ] 2.3 `domain/analytics.py`: cardinality statistics and confidence (Requirement: Cardinality statistics keep today's meaning)
-- [ ] 2.4 Cardinality label, support, alternatives (Requirement: Cardinality label)
-- [ ] 2.5 Value profile indicators (Requirement: Value profile indicators)
-- [ ] 2.6 Hierarchy: declared + implied parents, own/inherited/refined, depth with cycles (Requirement: Hierarchy)
-- [ ] 2.7 Exactness flags; analytics from a JSON-loaded raw profile (Requirements: Exactness is visible; Analytics are derived, never collected)
-- [ ] 2.8 Remaining class and graph indicators, median/mode/stddev, top-K share, entropy (Requirement: Further indicators)
-- [ ] 2.9 Step definitions for `profile_analytics.feature`, green
+- [x] 2.1 `domain/iri.py` `to_iriref` with its rejection rules (P-3)
+- [x] 2.3 `domain/analytics.py`: cardinality statistics and confidence (Requirement: Cardinality statistics keep today's meaning)
+- [x] 2.4 Cardinality label, support, alternatives (Requirement: Cardinality label)
+- [x] 2.5 Value profile indicators (Requirement: Value profile indicators)
+- [x] 2.6 Hierarchy: declared + implied parents, own/inherited/refined, depth with cycles (Requirement: Hierarchy)
+- [x] 2.7 Exactness flags; analytics from a JSON-loaded raw profile (Requirements: Exactness is visible; Analytics are derived, never collected)
+- [x] 2.8 Remaining class and graph indicators, median/mode/stddev, top-K share, entropy (Requirement: Further indicators)
+- [x] 2.9 Step definitions for `profile_analytics.feature`, green
 
 ## 3. Adapters
 
@@ -49,7 +49,7 @@
 
 ## Roadmap
 
-- [x] 1.0 · [ ] 1.1 · [ ] 1.2 · [ ] 1.3 · [ ] 1.4 · [ ] 2.1 · [ ] 2.3 · [ ] 2.4 · [ ] 2.5 · [ ] 2.6 · [ ] 2.7 · [ ] 2.8 · [ ] 2.9 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 4.5 · [ ] 4.6 · [ ] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 5.4 · [ ] 6.1 · [ ] 6.2
+- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 1.4 · [x] 2.1 · [x] 2.3 · [x] 2.4 · [x] 2.5 · [x] 2.6 · [x] 2.7 · [x] 2.8 · [x] 2.9 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 4.5 · [ ] 4.6 · [ ] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 5.4 · [ ] 6.1 · [ ] 6.2
 
 ## Verification
 
