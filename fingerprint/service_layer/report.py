@@ -1,4 +1,4 @@
-"""Render the analytics through eds4jinja2; the templates read `conf.profile` and issue no queries (DEC-6, P-7)."""
+"""Render the analytics through the template renderer; the templates read `conf.profile` and issue no queries (DEC-6, P-7)."""
 
 import json
 import logging
@@ -6,9 +6,8 @@ from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
-from eds4jinja2.services.report_builder import ReportBuilder
-
 import fingerprint_report_templates
+from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.generated.profile import ProfileAnalytics
 
 logger = logging.getLogger(__name__)
@@ -46,12 +45,9 @@ def render_report(
     config = generate_report_builder_config(analytics.endpoint or "", profiled, template_location)
     config["conf"].update(extra_conf or {})  # after the 1.x keys, so callers may override them, as in 1.x
     config["conf"]["profile"] = analytics
-    builder = ReportBuilder(
-        target_path=template_location or DEFAULT_TEMPLATE_LOCATION, additional_config=config, output_path=location
-    )
-    if template_location is None:
-        # Endpoint data is untrusted and eds4jinja2 disables autoescape; templates compile on first load,
-        # so this applies to every template of the packaged report. Custom templates keep 1.x behaviour.
-        builder.template_env.autoescape = True
-    builder.make_document()
-    return location / config["template"]
+    # Endpoint data is untrusted and eds4jinja2 disables autoescape: escape the packaged report;
+    # custom templates keep 1.x behaviour.
+    autoescape = True if template_location is None else None
+    renderer = JinjaTemplateRenderer()
+    text = renderer.render(template_location or DEFAULT_TEMPLATE_LOCATION, config=config, autoescape=autoescape)
+    return renderer.write(location, {config["template"]: text})[0]

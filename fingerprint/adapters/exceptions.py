@@ -31,3 +31,11 @@ class EndpointUnreachable(SparqlError):
 
 class ConfigFileError(ValueError):
     """A configuration file that cannot be read or is not a JSON object."""
+
+
+class TemplatePackageError(ValueError):
+    """A template package whose `config.json` lacks what rendering needs."""
+
+
+class GeneratedOutputError(ValueError):
+    """A generated text that does not parse in its format; nothing of it is written."""

@@ -10,7 +10,7 @@
 
 - [x] 2.0 Exceptions modules per layer: `IriRefError` → `domain/exceptions.py`, the SPARQL error classes → `adapters/exceptions.py`, `UsageError` → `service_layer/exceptions.py`; old import paths keep working (P-12)
 - [x] 2.1 `adapters/settings_sources.py` (`load_config_file` raising `ConfigFileError`, `environment()`); `resolve_settings` reads through it and turns `ConfigFileError` into `UsageError` (P-12)
-- [ ] 2.2 `adapters/template_renderer.py` with render, Turtle check and check-then-write; `render_report` delegates to it; guard test `test_report_builder_exposes_template_env`; the new import-linter contract green (P-1, P-14)
+- [x] 2.2 `adapters/template_renderer.py` with render, Turtle check and check-then-write; `render_report` delegates to it; guard test `test_report_builder_exposes_template_env`; the new import-linter contract green (P-1, P-14)
 - [ ] 2.3 `fingerprint_report(…, sparql=None)` injectable port (P-15); comment in `domain/analytics.py` on the dict hand-offs validated by `analyse()`
 
 ## 3. Saved profile and generator framework (TDD)
@@ -57,7 +57,7 @@
 
 ## Roadmap
 
-- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.0 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 3.4 · [ ] 3.5 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [x] 2.2 · [ ] 2.3 · [ ] 3.0 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 3.4 · [ ] 3.5 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 
