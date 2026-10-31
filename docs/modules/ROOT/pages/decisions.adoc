@@ -197,7 +197,7 @@ Consequences::
   sat in the service layer; they moved to adapters, and the SPARQL client became an injectable
   parameter of the service.
 Confirmation:: `make check-architecture` (`.importlinter`: layers, generated-model isolation, pure
-domain — the domain imports no SPARQLWrapper, eds4jinja2 or click; from 2.1 also a service layer that imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client)).
+domain — the domain imports no SPARQLWrapper, eds4jinja2, jinja2, rdflib or click; from 2.1 also a service layer that imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client)).
 Pros and cons::
 * Onion layers with a port (chosen) — good: testable without a store, I/O at the edges; bad: more modules.
 * Logic in templates — good: tiny code; bad: untestable, untimed, one full scan per class.

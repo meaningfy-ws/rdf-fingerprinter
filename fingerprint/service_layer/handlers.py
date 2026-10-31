@@ -14,9 +14,11 @@ from typing import Any
 
 from fingerprint.adapters.profile_file import save_profile
 from fingerprint.adapters.sparql import SparqlPort, SparqlWrapperClient
+from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.generated.profile import ProfileRun, Settings
 from fingerprint.service_layer.collection import collect
+from fingerprint.service_layer.generators.generator import TemplateRenderer
 from fingerprint.service_layer.report import (  # noqa: F401 — kept importable from here (1.x)
     DEFAULT_TEMPLATE_LOCATION,
     generate_report_builder_config,
@@ -37,15 +39,17 @@ def fingerprint_report(
     *,
     formats: Sequence[str] = (),
     sparql: SparqlPort | None = None,
+    renderer: TemplateRenderer | None = None,
 ) -> tuple[Path, ProfileRun]:
     """Collect, save the profile, analyse and render; returns the report path and the raw run (its failures decide
     the exit code). The profile is saved before rendering, so a rendering failure loses nothing collected;
     the chosen `formats` are rendered from the same run afterwards (UC-B2.2)."""
     sparql = sparql or SparqlWrapperClient(sparql_endpoint_url, settings.timeout_seconds)
+    renderer = renderer or JinjaTemplateRenderer()
     run = collect(sparql_endpoint_url, settings, sparql)
     save_profile(run, output_location)
-    report = render_report(analyse(run), output_location, template_location, extra_conf)
-    generate_representations(run, output_location, formats)
+    report = render_report(analyse(run), output_location, template_location, extra_conf, renderer=renderer)
+    generate_representations(run, output_location, formats, renderer=renderer)
     if run.failures:
         logger.warning("report written to %s with %d failures", report, len(run.failures))
     else:

@@ -301,3 +301,20 @@ def test_graph_indicators():
     assert g.typed_subject_ratio == 0.75
     assert g.vocabularies == [EX]
     assert g.cross_graph_object_types == [EX + "g2"]
+
+
+@pytest.mark.parametrize(
+    "label, exact, bounds, uml",
+    [
+        ("exactly_one", None, (1, 1), "1"),
+        ("zero_or_one", None, (None, 1), "0..1"),
+        ("one_or_more", None, (1, None), "1..*"),
+        ("zero_or_more", None, (None, None), "0..*"),
+        ("exactly_n", 3, (3, 3), "3"),
+        (None, None, (None, None), "0..*"),
+    ],
+)
+def test_label_bounds_and_multiplicity(label, exact, bounds, uml):
+    from fingerprint.domain.analytics import label_bounds, multiplicity
+
+    assert label_bounds(label, exact) == bounds and multiplicity(label, exact) == uml

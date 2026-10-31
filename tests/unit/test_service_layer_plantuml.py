@@ -72,3 +72,18 @@ def test_unusual_and_unwritable_iris():
     run = profile_run(klass("http://ex.org/q?a=1&b='x'", 4, prop("http://ex.org/ș/ü", {1: 4}, literals(4))), klass(bad, 1))
     text, generator = diagram(run)
     assert len(aliases(text)) == 1 and "script" not in text and generator.skipped == [bad]
+
+
+def test_an_unwritable_value_type_never_reaches_the_diagram():
+    evil = "http://x/a\n}\n!include /etc/hostname\nclass X {"
+    run = profile_run(klass(EX + "Person", 4, prop(EX + "p", {1: 4}, literals(4, datatype=evil))))
+    text, generator = diagram(run)
+    assert "!include" not in text and evil in generator.skipped
+    assert "ex:p : value [1]" in text
+
+
+def test_a_graph_label_is_plain_text_in_the_title():
+    run = profile_run(klass(EX + "Person", 4), graph='http://g/%getenv("HOME")\n!include x')
+    text, _ = diagram(run)
+    (title,) = [line for line in text.splitlines() if line.startswith("title ")]
+    assert "%" not in title and '"' not in title and "!include" not in text

@@ -111,4 +111,13 @@ Feature: The fingerprint report and the command line
       Given every class is profiled
       When the fingerprint command runs with the format "void"
       Then it exits with 2
+      And the message names the known formats
       And the endpoint was never queried
+
+    @uc_b2_2
+    Scenario: A failing representation keeps the report
+      Given every class is profiled
+      And the shapes fail to render
+      When the fingerprint command runs with the shapes format
+      Then the output folder holds the report and the profile file
+      And it exits with 4

@@ -5,12 +5,14 @@ from collections import defaultdict
 from typing import Any
 
 from fingerprint.domain.generated.profile import (
+    CardinalityLabel,
     ClassProfile,
     GraphProfile,
     ProfileAnalytics,
     ProfileRun,
     PropertyProfile,
 )
+from fingerprint.domain.vocabulary import RDF_LANG_STRING  # noqa: F401 — also importable from here (2.0)
 
 LABEL_PREDICATES = (
     "http://www.w3.org/2000/01/rdf-schema#label",
@@ -20,7 +22,6 @@ LABEL_PREDICATES = (
     "https://schema.org/name",
     "http://xmlns.com/foaf/0.1/name",
 )
-RDF_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
 
 _ALTERNATIVES = {
     "zero_or_more": ["one_or_more", "zero_or_one"],
@@ -103,6 +104,31 @@ def cardinality_label(bins: dict[int, int], observed: int, threshold: float) -> 
             result = {"cardinality_label": "zero_or_more", "label_support": 1.0}
     result["alternative_labels"] = list(_ALTERNATIVES[result["cardinality_label"]])
     return result
+
+
+_BOUNDS: dict[str, tuple[int | None, int | None]] = {
+    CardinalityLabel.exactly_one.value: (1, 1),
+    CardinalityLabel.zero_or_one.value: (None, 1),
+    CardinalityLabel.one_or_more.value: (1, None),
+    CardinalityLabel.zero_or_more.value: (None, None),
+}
+
+
+def label_bounds(label: str | None, exact_count: int | None = None) -> tuple[int | None, int | None]:
+    """The (min, max) values per instance a cardinality label allows; None is unbounded or no label."""
+    if label is None:
+        return None, None
+    if label == CardinalityLabel.exactly_n:
+        return exact_count, exact_count
+    return _BOUNDS[label]
+
+
+def multiplicity(label: str | None, exact_count: int | None = None) -> str:
+    """UML multiplicity of a label: `1`, `0..1`, `1..*`, `0..*` or `n`; no label reads as `0..*`."""
+    low, high = label_bounds(label, exact_count)
+    if low is not None and low == high:
+        return str(low)
+    return f"{low or 0}..{'*' if high is None else high}"
 
 
 def _ordered_by_triples(weights: dict[str, int]) -> list[str]:

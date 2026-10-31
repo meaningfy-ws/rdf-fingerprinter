@@ -20,8 +20,10 @@ Feature: Publishing a fingerprint as an application profile
     @uc_b2_1
     Scenario: The threshold changes without collecting again
       Given a saved profile with a property whose label support is 0.8
+      And an endpoint that fails on any query
       When the shapes are generated at threshold 1.0 and again at 0.5
       Then the property has its accepted counts only at threshold 0.5
+      And the endpoint was never queried
 
     Scenario: A saved profile loads back unchanged
       Given a profile run

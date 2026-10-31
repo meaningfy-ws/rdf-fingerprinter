@@ -11,12 +11,12 @@ from typing import Any
 
 import click
 
+from fingerprint.entrypoints.cli import EXIT_UNEXPECTED, configure_logging
 from fingerprint.service_layer.exceptions import UsageError
+from fingerprint.service_layer.generators import DOC, PUML, SHACL
 from fingerprint.service_layer.representations import generate_from_profile_file
 
 logger = logging.getLogger(__name__)
-
-EXIT_UNEXPECTED = 4
 
 
 def shared_arguments(command: Callable[..., Any]) -> Callable[..., Any]:
@@ -33,8 +33,8 @@ def shared_arguments(command: Callable[..., Any]) -> Callable[..., Any]:
     return command
 
 
-def run(name: str, profile: str, output: str, threshold: float | None, template: str | None, **options: Any) -> None:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)5s %(name)s: %(message)s")
+def generate_one(name: str, profile: str, output: str, threshold: float | None, template: str | None, **options: Any) -> None:
+    configure_logging()
     try:
         paths = generate_from_profile_file(
             profile,
@@ -46,8 +46,9 @@ def run(name: str, profile: str, output: str, threshold: float | None, template:
         )
     except UsageError as error:
         raise click.UsageError(str(error)) from error
-    except Exception:
+    except Exception as error:
         logger.exception("could not generate %s from %s", name, profile)
+        click.echo(f"error: could not generate {name}: {error}", err=True)
         sys.exit(EXIT_UNEXPECTED)
     for path in paths:
         logger.info("wrote %s", path)
@@ -58,18 +59,18 @@ def run(name: str, profile: str, output: str, threshold: float | None, template:
 @click.option("--shapes-namespace", help="namespace of the node shape IRIs (default urn:fingerprint:shape:)")
 def gen_shacl(profile: str, output: str, threshold: float | None, template: str | None, shapes_namespace: str | None):
     """SHACL shapes, one Turtle file per graph, from a saved profile.json."""
-    run("shacl", profile, output, threshold, template, shapes_namespace=shapes_namespace)
+    generate_one(SHACL, profile, output, threshold, template, shapes_namespace=shapes_namespace)
 
 
 @click.command()
 @shared_arguments
 def gen_puml(profile: str, output: str, threshold: float | None, template: str | None):
     """A PlantUML class diagram, one source file per graph, from a saved profile.json."""
-    run("puml", profile, output, threshold, template)
+    generate_one(PUML, profile, output, threshold, template)
 
 
 @click.command()
 @shared_arguments
 def gen_doc(profile: str, output: str, threshold: float | None, template: str | None):
     """The application-profile document (HTML) from a saved profile.json."""
-    run("doc", profile, output, threshold, template)
+    generate_one(DOC, profile, output, threshold, template)

@@ -15,8 +15,7 @@ from the profile alone, so the endpoint is queried once, whatever is generated a
 |===
 
 `<graph>` is `default` for the default graph, else a readable name from the graph IRI plus a short
-hash, for example `shapes-continents-214e8f67.ttl`. The document lists which file belongs to which
-graph.
+hash, for example `shapes-continents-214e8f67.ttl`. The document gives each graph's suffix.
 
 == In the same run
 
@@ -62,8 +61,9 @@ property its instances use, inherited ones included:
 
 * counts from the accepted cardinality label — `1` → `sh:minCount 1`, `sh:maxCount 1`; `?` →
   `sh:maxCount 1`; `+` → `sh:minCount 1`; `*` → none; `\{n}` → `sh:minCount n`, `sh:maxCount n`;
-* `sh:datatype` for literals, `sh:class` when every resource value is typed, `sh:nodeKind`, and
-  `sh:or` when the values are of several kinds; a language-tagged literal without a datatype counts as
+* `sh:datatype` for literals, `sh:class` when every resource value is typed, the observed
+  `sh:nodeKind` (`sh:Literal`, `sh:IRI`, `sh:BlankNode` or `sh:BlankNodeOrIRI`), and `sh:or` when the
+  values are of several kinds; a language-tagged literal without a datatype counts as
   `rdf:langString`;
 * annotations: `fp:instances`, `fp:observedInstances`, `fp:precisionMode` on the node shape,
   `fp:confidence` and `fp:labelSupport` on each property shape (`fp:` is
@@ -91,8 +91,8 @@ JavaScript, printable.
 
 == IRIs that cannot be written
 
-An IRI holding a space, `<`, `>`, `"` or another character Turtle forbids cannot appear in the shapes
-or the diagram. Such a class or property is left out of both, a WARNING is logged, and the document
+An IRI holding a space, `<`, `>`, `"`, a line break or another character Turtle forbids cannot appear
+in the shapes or the diagram — whether it names a class, a property, a parent or a value type. Such a class or property is left out of both, a WARNING is logged, and the document
 lists it under its caveats, shown as text.
 
 == Your own templates
@@ -114,6 +114,10 @@ filters keep the output valid:
 
 The packaged packages are in `fingerprint_report_templates/` (`shacl_shapes`, `plantuml_diagram`,
 `profile_document`). The SHACL output of a custom package is still parsed before it is written.
+
+WARNING: A template package is code: it runs in an unsandboxed Jinja environment with your
+permissions. Use only packages you trust. The data it renders is not trusted: escape it with the
+filters above, or rely on autoescape in HTML.
 
 == From Python
 

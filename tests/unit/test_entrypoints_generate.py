@@ -76,3 +76,29 @@ def test_invalid_generated_turtle_exits_4_and_writes_nothing(tmp_path):
     out.mkdir()
     result = invoke(generate.gen_shacl, SAMPLE, "-o", out, "--template", package)
     assert result.exit_code == 4 and not list(out.iterdir())
+
+
+def test_an_unwritable_shapes_namespace_is_a_usage_error(tmp_path):
+    result = invoke(generate.gen_shacl, SAMPLE, "-o", tmp_path, "--shapes-namespace", "urn:a b")
+    assert result.exit_code == 2 and "cannot be written as an IRI" in result.output
+
+
+def test_a_profile_with_failures_still_generates(tmp_path):
+    from fingerprint.adapters.profile_file import save_profile
+    from tests.unit.fakes import EX, klass, profile_run
+
+    failure = {"query_kind": "co_types", "class_iri": EX + "Big", "message": "not profiled"}
+    path = save_profile(profile_run(klass(EX + "Person", 2), failures=[failure]), tmp_path)
+    out = tmp_path / "out"
+    out.mkdir()
+    result = invoke(generate.gen_doc, path, "-o", out)
+    assert result.exit_code == 0 and "not profiled" in (out / "profile.html").read_text()
+
+
+def test_a_template_error_exits_4_and_names_the_template(tmp_path):
+    package = tmp_path / "broken"
+    (package / "templates").mkdir(parents=True)
+    (package / "templates" / "broken.ttl").write_text("{{ view | no_such_filter }}")
+    (package / "config.json").write_text(json.dumps({"template": "broken.ttl", "conf": {}}))
+    result = invoke(generate.gen_shacl, SAMPLE, "-o", tmp_path, "--template", package)
+    assert result.exit_code == 4 and "no_such_filter" in result.output

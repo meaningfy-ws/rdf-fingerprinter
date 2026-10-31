@@ -42,10 +42,10 @@ class Listing(Generator):
     file_name = "list-{slug}.txt"
 
     def visit_class(self, graph, cls):
-        return self.writable(cls.class_iri, {"iri": cls.class_iri})
+        return {"iri": cls.class_iri} if self.accepts(cls.class_iri) else None
 
     def visit_property(self, graph, cls, prop):
-        return self.writable(prop.property, {"iri": prop.property})
+        return {"iri": prop.property} if self.accepts(prop.property) else None
 
 
 BODY = "{% for c in view.graph.classes %}{{ c.iri }}:{% for p in c.properties %}{{ p.iri }},{% endfor %};{% endfor %}"

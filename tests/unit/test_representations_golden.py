@@ -6,6 +6,7 @@ Run with UPDATE_GOLDEN=1 to rewrite the golden files after an intended change, t
 import os
 from pathlib import Path
 
+import pyshacl
 import pytest
 from rdflib import Graph, Namespace
 
@@ -13,6 +14,7 @@ from fingerprint.adapters.profile_file import load_profile
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.service_layer.generators import GENERATORS
+from fingerprint.service_layer.representations import make_generator, with_threshold
 
 DATA = Path(__file__).parents[1] / "test_data"
 GOLDEN = DATA / "golden"
@@ -21,14 +23,19 @@ SH = Namespace("http://www.w3.org/ns/shacl#")
 SOURCE = {"default": "continents", "continents": "continents", "treaties": "treaties"}
 
 
-def texts(name):
-    analytics = analyse(load_profile(DATA / "profiles" / "sample-profile.json"))
-    return GENERATORS[name](analytics, JinjaTemplateRenderer()).serialize()
+def texts(name, threshold=None):
+    run = load_profile(DATA / "profiles" / "sample-profile.json")
+    if threshold is not None:
+        run = with_threshold(run, threshold)
+    return make_generator(name, analyse(run), JinjaTemplateRenderer()).serialize()
 
 
 @pytest.mark.parametrize("name", sorted(GENERATORS))
 def test_golden_output(name):
-    for file_name, text in texts(name).items():
+    produced = texts(name)
+    stem = next(iter(produced)).split("-")[0].split(".")[0]
+    assert set(produced) == {p.name for p in GOLDEN.iterdir() if p.name.startswith(stem)}
+    for file_name, text in produced.items():
         golden = GOLDEN / file_name
         if os.environ.get("UPDATE_GOLDEN"):
             golden.parent.mkdir(exist_ok=True)
@@ -36,9 +43,10 @@ def test_golden_output(name):
         assert text == golden.read_text(encoding="utf-8"), f"{file_name} differs from its golden file"
 
 
-@pytest.mark.parametrize("file_name, text", sorted(texts("shacl").items()))
-def test_shapes_report_no_violation_on_their_own_data(file_name, text):
-    pyshacl = pytest.importorskip("pyshacl")
+@pytest.mark.parametrize("threshold", [None, 0.5, 0.1])  # None: the profile's own (0.95)
+@pytest.mark.parametrize("graph", sorted(SOURCE))
+def test_shapes_report_no_violation_on_their_own_data(graph, threshold):
+    (file_name, text) = next((f, t) for f, t in texts("shacl", threshold).items() if f.startswith(f"shapes-{graph}"))
     source = next(f for key, f in SOURCE.items() if file_name.startswith(f"shapes-{key}"))
     data = Graph().parse(DATA / f"{source}-source-ap.rdf")
     _, results, _ = pyshacl.validate(data, shacl_graph=Graph().parse(data=text, format="turtle"), inference="none")

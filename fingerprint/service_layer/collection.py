@@ -7,20 +7,19 @@ from datetime import UTC, datetime
 from importlib.metadata import PackageNotFoundError, version
 from typing import Any
 
-from fingerprint.adapters.queries import render, subjects_exact, subjects_limit, subjects_values
-from fingerprint.adapters.sparql import (
-    BLANK_NODE_PREFIX,
+from fingerprint.adapters.exceptions import (
     EndpointUnreachable,
     PermanentError,
     QueryTimeout,
     RetriesExhausted,
     SparqlError,
-    SparqlPort,
-    redact,
 )
-from fingerprint.domain.analytics import RDF_LANG_STRING, drop_none
+from fingerprint.adapters.queries import render, subjects_exact, subjects_limit, subjects_values
+from fingerprint.adapters.sparql import BLANK_NODE_PREFIX, SparqlPort, redact
+from fingerprint.domain.analytics import drop_none
+from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.generated.profile import Depth, PrecisionMode, ProfileRun, Settings
-from fingerprint.domain.iri import IriRefError
+from fingerprint.domain.vocabulary import RDF_LANG_STRING
 
 logger = logging.getLogger(__name__)
 

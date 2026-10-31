@@ -23,6 +23,7 @@ forbidden_modules =
     fingerprint.domain.iri
     fingerprint.domain.analytics
     fingerprint.domain.exceptions
+    fingerprint.domain.vocabulary
     fingerprint.adapters
     fingerprint.service_layer
     fingerprint.entrypoints
@@ -35,6 +36,8 @@ source_modules =
 forbidden_modules =
     SPARQLWrapper
     eds4jinja2
+    jinja2
+    rdflib
     click
 
 # I/O libraries are reached only through adapters (profile-representations P-12). Indirect imports

@@ -14,15 +14,16 @@ from enum import Enum
 
 import click
 
-from fingerprint.adapters.sparql import EndpointUnreachable, redact
+from fingerprint.adapters.exceptions import EndpointUnreachable
+from fingerprint.adapters.sparql import redact
 from fingerprint.domain.generated.profile import Depth, ObjectTypeScope, PrecisionPolicy
+from fingerprint.entrypoints.cli import EXIT_FAILURES, EXIT_UNEXPECTED, EXIT_UNREACHABLE, configure_logging
+from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.handlers import fingerprint_report
-from fingerprint.service_layer.settings import UsageError, load_config_file, resolve_settings
+from fingerprint.service_layer.settings import load_config_file, resolve_settings
 
 logger = logging.getLogger(__name__)
-
-EXIT_FAILURES, EXIT_UNREACHABLE, EXIT_UNEXPECTED = 1, 3, 4
 
 
 def _choice(enum: type[Enum]) -> click.Choice:
@@ -64,8 +65,7 @@ def fingerprint_endpoint(
     Generate a fingerprint report on a given SPARQL endpoint.
     Exit status: 0 profiled, 1 report written with failures, 2 usage error, 3 endpoint unreachable, 4 unexpected error.
     """
-    # the application, not the library, configures logging
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)5s %(name)s: %(message)s")
+    configure_logging()
     output_location = pathlib.Path(output)
     if not output_location.is_dir():
         raise click.BadParameter(f"{output} is not an existing folder", param_hint="--output")

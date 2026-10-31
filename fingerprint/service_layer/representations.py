@@ -8,10 +8,11 @@ from fingerprint.adapters.exceptions import ProfileFileError, TemplatePackageErr
 from fingerprint.adapters.profile_file import load_profile
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.generated.profile import ProfileRun
+from fingerprint.domain.exceptions import IriRefError
+from fingerprint.domain.generated.profile import ProfileAnalytics, ProfileRun
 from fingerprint.service_layer.exceptions import UsageError
-from fingerprint.service_layer.generators import GENERATORS
-from fingerprint.service_layer.generators.generator import TemplateRenderer
+from fingerprint.service_layer.generators import DOC, GENERATORS, PUML
+from fingerprint.service_layer.generators.generator import Generator, TemplateRenderer
 from fingerprint.service_layer.settings import resolve_settings
 
 
@@ -19,6 +20,22 @@ def with_threshold(run: ProfileRun, threshold: float) -> ProfileRun:
     """The same run read at another acceptance threshold; checked by the collection rule, (0, 1]."""
     checked = resolve_settings(cli={"acceptance_threshold": threshold}, env={}).acceptance_threshold
     return run.model_copy(update={"settings": run.settings.model_copy(update={"acceptance_threshold": checked})})
+
+
+def make_generator(
+    name: str,
+    analytics: ProfileAnalytics,
+    renderer: TemplateRenderer,
+    template_location: str | Path | None = None,
+    **options: Any,
+) -> Generator:
+    """The generator of one format; the document receives the diagrams it embeds (composition, not import)."""
+    if name == DOC and "diagrams" not in options:
+        options["diagrams"] = GENERATORS[PUML](analytics, renderer).render_graphs()
+    try:
+        return GENERATORS[name](analytics, renderer, template_location, **options)
+    except IriRefError as error:  # e.g. an unwritable --shapes-namespace
+        raise UsageError(f"{error.iri!r} cannot be written as an IRI") from error
 
 
 def generate_representations(
@@ -41,8 +58,8 @@ def generate_representations(
     renderer = renderer or JinjaTemplateRenderer()
     paths: list[Path] = []
     for name in formats:
-        generator = GENERATORS[name](analytics, renderer, template_location, **dict((options or {}).get(name, {})))
         try:
+            generator = make_generator(name, analytics, renderer, template_location, **dict((options or {}).get(name, {})))
             paths += generator.write(output_location)
         except TemplatePackageError as error:
             raise UsageError(str(error)) from error

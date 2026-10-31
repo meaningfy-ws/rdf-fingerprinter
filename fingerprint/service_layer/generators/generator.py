@@ -14,13 +14,17 @@ from typing import Any, ClassVar, Protocol
 
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.generated.profile import ClassAnalytics, GraphAnalytics, ProfileAnalytics, PropertyAnalytics
-from fingerprint.domain.iri import to_iriref
+from fingerprint.domain.iri import split_curie, to_iriref
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_GRAPH_LABEL = "default graph"
+# Graph names reach PlantUML titles and Turtle comments, where the tools interpret text: keep it plain.
+_NOT_PLAIN = re.compile(r"[^\w:/#.~ -]")
+
 
 class TemplateRenderer(Protocol):
-    """Implemented by `fingerprint.adapters.template_renderer.JinjaTemplateRenderer`."""
+    """The port the generators render through; `fingerprint.adapters.template_renderer` implements it."""
 
     prefixes: dict[str, str]
 
@@ -45,12 +49,17 @@ def graph_slug(graph: str | None) -> str:
     return f"{readable}-{hashlib.sha1(graph.encode()).hexdigest()[:8]}"
 
 
+def plain_label(graph: str | None) -> str:
+    """The graph's name for titles and comments: letters, digits and `:/#.~ -` only, anything else `_`."""
+    return _NOT_PLAIN.sub("_", graph) if graph else DEFAULT_GRAPH_LABEL
+
+
 class Generator:
     template_package: ClassVar[Path]
     file_name: ClassVar[str]  # "{slug}" is replaced per graph when per_graph
     per_graph: ClassVar[bool] = True
     autoescape: ClassVar[bool | None] = None
-    check: ClassVar[str | None] = None
+    check: ClassVar[str | None] = None  # a check of the template renderer, e.g. "turtle"
 
     def __init__(self, analytics: ProfileAnalytics, renderer: TemplateRenderer, template_location: str | Path | None = None):
         self.analytics = analytics
@@ -58,11 +67,12 @@ class Generator:
         self.prefixes = renderer.prefixes
         self.template_location = template_location
         self.skipped: list[str] = []  # IRIs left out because they cannot be written (P-8)
+        self.namespaces: dict[str, str] = {}  # prefixes the labels used, for a namespaces section
 
     # --- hooks, overridden per format ---
 
     def visit_graph(self, graph: GraphAnalytics) -> dict[str, Any] | None:
-        return {"graph": graph.graph, "slug": graph_slug(graph.graph)}
+        return {"graph": graph.graph, "slug": graph_slug(graph.graph), "graph_label": plain_label(graph.graph)}
 
     def visit_class(self, graph: GraphAnalytics, cls: ClassAnalytics) -> dict[str, Any] | None:
         return {"iri": cls.class_iri}
@@ -73,17 +83,28 @@ class Generator:
     def end_graph(self, graph: GraphAnalytics, view: dict[str, Any]) -> None:
         """Called once a graph's classes are visited, e.g. to declare the prefixes they used."""
 
-    # --- the walk ---
+    # --- shared rules ---
 
-    def writable(self, iri: str, view: dict[str, Any]) -> dict[str, Any] | None:
-        """`view`, or None (with a warning) when `iri` cannot be written as an IRI."""
+    def accepts(self, iri: str) -> bool:
+        """Whether `iri` can be written as an IRI; if not, it is logged and recorded as skipped (P-8)."""
         try:
             to_iriref(iri)
         except IriRefError:
             logger.warning("skipping %r: it cannot be written as an IRI", iri)
-            self.skipped.append(iri)
-            return None
-        return view
+            if iri not in self.skipped:
+                self.skipped.append(iri)
+            return False
+        return True
+
+    def label(self, iri: str) -> str:
+        """A CURIE for display, remembering the namespace it used."""
+        found = split_curie(iri, self.prefixes)
+        if not found:
+            return iri
+        self.namespaces[found[0]] = self.prefixes[found[0]]
+        return f"{found[0]}:{found[1]}"
+
+    # --- the walk ---
 
     def view(self) -> list[dict[str, Any]]:
         """One dict per graph, each with "classes", each with "properties"; classes and properties by IRI."""
@@ -105,12 +126,15 @@ class Generator:
             graphs.append(graph_view)
         return graphs
 
+    def render_graphs(self) -> dict[str, str]:
+        """Slug → text, one per graph (per-graph formats)."""
+        return {g["slug"]: self._render({"graph": g}) for g in self.view()}
+
     def serialize(self) -> dict[str, str]:
         """File name → text: one file per graph, or one file for all graphs."""
-        graphs = self.view()
         if self.per_graph:
-            return {self.file_name.format(slug=g["slug"]): self._render({"graph": g}) for g in graphs}
-        return {self.file_name: self._render({"graphs": graphs})}
+            return {self.file_name.format(slug=slug): text for slug, text in self.render_graphs().items()}
+        return {self.file_name: self._render({"graphs": self.view()})}
 
     def write(self, folder: str | Path) -> list[Path]:
         return self.renderer.write(folder, self.serialize(), self.check)

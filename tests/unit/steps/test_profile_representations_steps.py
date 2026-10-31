@@ -18,7 +18,7 @@ from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.entrypoints.cli import generate
 from fingerprint.service_layer.generators import GENERATORS
-from fingerprint.service_layer.representations import generate_from_profile_file, with_threshold
+from fingerprint.service_layer.representations import generate_from_profile_file, make_generator, with_threshold
 from tests.unit.fakes import EX, XSD, klass, literals, profile_run, prop
 
 scenarios("profile_representations.feature")
@@ -40,7 +40,7 @@ def ctx(tmp_path):
 
 def generated(ctx, name, run=None):
     """The texts of one format for the scenario's run (hand-built profiles use the ex: prefix)."""
-    generator = GENERATORS[name](analyse(run or ctx["run"]), JinjaTemplateRenderer(prefixes=PREFIXES))
+    generator = make_generator(name, analyse(run or ctx["run"]), JinjaTemplateRenderer(prefixes=PREFIXES))
     texts = generator.serialize()
     ctx.setdefault("skipped", []).extend(generator.skipped)
     return texts
@@ -328,7 +328,8 @@ def sample_shapes(ctx):
 
 @when("the test data is validated against them")
 def validate_test_data(ctx):
-    pyshacl = pytest.importorskip("pyshacl")
+    import pyshacl
+
     ctx["results"] = []
     for name, text in ctx["shapes"].items():
         source = next(f for key, f in SOURCE.items() if name.startswith(f"shapes-{key}"))
@@ -416,7 +417,7 @@ def fixed_profile(ctx):
 
 @when(parsers.parse("the {output} is generated from it"))
 def output_generated(ctx, output):
-    ctx["texts"] = GENERATORS[FORMATS[output]](analyse(ctx["run"]), JinjaTemplateRenderer()).serialize()
+    ctx["texts"] = make_generator(FORMATS[output], analyse(ctx["run"]), JinjaTemplateRenderer()).serialize()
 
 
 @then("it equals its golden file")

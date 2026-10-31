@@ -56,7 +56,7 @@ holding a value the collector cannot interpret SHALL end the run as an unexpecte
 
 #### Scenario: Second-wave failure keeps the class
 - **WHEN** the top-values query of a class times out
-- **THEN** the class is in the profile without top values and one failure is recorded
+- **THEN** the class is in the profile without top values, and the only failures recorded are top-values failures (one per property queried)
 
 #### Scenario: Permanent first-wave failure does not escalate
 - **WHEN** the histogram query of a class is rejected with HTTP 400

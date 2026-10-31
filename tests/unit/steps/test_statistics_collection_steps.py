@@ -449,13 +449,17 @@ MEASUREMENTS = {
 }
 
 
-@given(parsers.parse("the {measurement} of a class fails"))
-def measurement_fails(ctx, measurement):
+@given(
+    parsers.re(
+        r"the (?P<measurement>top values|property presence check|incoming links) of a class (?P<fails>is rejected|times out)$"
+    )
+)
+def measurement_fails(ctx, measurement, fails):
     name, _, cli = MEASUREMENTS[measurement]
     people(ctx["fake"], 3)
     ctx["fake"].add("ex:Person0", "ex:rare", "ex:x")
     ctx["fake"].on("QS", [{"s": f"{EX}Person1"}, {"s": f"{EX}Person2"}])
-    ctx["fake"].on(name, PermanentError("400 unsupported"))
+    ctx["fake"].on(name, QueryTimeout("timed out") if fails == "times out" else PermanentError("400 unsupported"))
     ctx["cli"].update(cli)
     ctx["class"], ctx["measurement"] = "ex:Person", measurement
 
@@ -465,9 +469,10 @@ def still_profiled(ctx):
     assert klass(ctx["run"], ctx["class"])
 
 
-@then(parsers.parse("a failure for the {measurement} is recorded"))
+@then(parsers.parse("only failures of the {measurement} are recorded"))
 def measurement_failure(ctx, measurement):
-    assert MEASUREMENTS[measurement][1] in [f.query_kind for f in ctx["run"].failures]
+    kinds = [f.query_kind for f in ctx["run"].failures]
+    assert kinds and set(kinds) == {MEASUREMENTS[measurement][1]}
 
 
 @given("the endpoint rejects a class's measurement as malformed")
@@ -482,6 +487,12 @@ def recorded_without_retry(ctx):
     (failure,) = ctx["run"].failures
     assert failure.attempts == 1 and failure.query_kind == "cardinality_votes"
     assert len([q for q in ctx["fake"].sent("Q5") if "Place" in q]) == 1
+
+
+@then("that class is left out without a first-N attempt")
+def left_out_without_first_n(ctx):
+    assert EX + "Place" not in [c.class_iri for c in graph(ctx["run"]).class_partitions]
+    assert not [q for q in ctx["fake"].sent("QS") if "Place" in q]
 
 
 @then("the other classes are still profiled")

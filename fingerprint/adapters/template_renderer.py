@@ -6,19 +6,18 @@ several files and every text is checked before any file is written.
 
 import json
 from collections.abc import Callable, Mapping
-from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
 import rdflib
 from eds4jinja2.services.report_builder import ReportBuilder
 
-import fingerprint_report_templates
 from fingerprint.adapters.exceptions import GeneratedOutputError, TemplatePackageError
 from fingerprint.domain.iri import curie, to_iriref, turtle_number, turtle_string, turtle_term
+from fingerprint_report_templates import packaged
 
 # The one prefix list of the package, shared with the report (P-7).
-PREFIXES_FILE = Path(str(files(fingerprint_report_templates) / "fingerprint_report" / "templates" / "prefixes.json"))
+PREFIXES_FILE = packaged("fingerprint_report") / "templates" / "prefixes.json"
 
 
 def load_prefixes(path: Path = PREFIXES_FILE) -> dict[str, str]:

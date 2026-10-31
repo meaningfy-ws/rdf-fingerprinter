@@ -81,7 +81,7 @@ was asserted by hand.</p>
 {%- set chapter = loop.index + 2 %}
 <section class="graph" id="graph-{{ g.slug }}">
 <h2>{{ chapter }} Graph {{ g.label }}</h2>
-<p>{{ g.classes | length }} classes. Files for this graph: {% for f in g.files %}<code>{{ f }}</code>{{ ", " if not loop.last }}{% endfor %}.</p>
+<p>{{ g.classes | length }} classes. Its shapes and diagram files, when generated, end in <code>-{{ g.slug }}</code>.</p>
 <details>
 <summary>Class diagram (PlantUML source)</summary>
 <pre>{{ g.diagram }}</pre>
@@ -91,7 +91,7 @@ was asserted by hand.</p>
 <h3>{{ chapter }}.{{ loop.index }} {{ c.label }}</h3>
 <p class="iri">{{ c.iri }}</p>
 <p>{{ c.instances }} instances, {% if c.sampled %}<span class="note">{{ c.precision }}</span>{% else %}{{ c.precision }}{% endif %}.
-{%- if c.parents %} Parents: {% for label, source in c.parents %}{{ label }} ({{ source }}){{ ", " if not loop.last }}{% endfor %}.{% endif %}</p>
+{%- if c.parents %} Parents: {% for p in c.parents %}{{ p.label }} ({{ p.source }}){{ ", " if not loop.last }}{% endfor %}.{% endif %}</p>
 <table>
   <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
   <tbody>
@@ -109,7 +109,7 @@ was asserted by hand.</p>
 <h2>{{ view.graphs | length + 3 }} Caveats</h2>
 <h3>Sampled classes</h3>
 {%- if view.caveats.sampled %}
-<ul>{% for graph, cls, precision in view.caveats.sampled %}<li>{{ cls }} in {{ graph }}: {{ precision }} instances read.</li>{% endfor %}</ul>
+<ul>{% for s in view.caveats.sampled %}<li>{{ s["class"] }} in {{ s.graph }}: {{ s.precision }} instances read.</li>{% endfor %}</ul>
 {%- else %}
 <p>None: every class was read exactly.</p>
 {%- endif %}
@@ -118,8 +118,8 @@ was asserted by hand.</p>
 <table>
   <thead><tr><th>Graph</th><th>Class</th><th>Measurement</th><th>Message</th></tr></thead>
   <tbody>
-  {%- for graph, cls, kind, message in view.caveats.failures %}
-    <tr><td class="iri">{{ graph }}</td><td>{{ cls }}</td><td>{{ kind }}</td><td>{{ message }}</td></tr>
+  {%- for f in view.caveats.failures %}
+    <tr><td class="iri">{{ f.graph }}</td><td>{{ f["class"] }}</td><td>{{ f.measurement }}</td><td>{{ f.message }}</td></tr>
   {%- endfor %}
   </tbody>
 </table>

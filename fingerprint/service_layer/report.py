@@ -2,18 +2,17 @@
 
 import json
 import logging
-from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
-import fingerprint_report_templates
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.generated.profile import ProfileAnalytics
+from fingerprint.service_layer.generators.generator import TemplateRenderer
+from fingerprint_report_templates import packaged
 
 logger = logging.getLogger(__name__)
 
-# Templates ship inside the package as plain files (Poetry package data), so a real path exists.
-DEFAULT_TEMPLATE_LOCATION = Path(str(files(fingerprint_report_templates) / "fingerprint_report"))
+DEFAULT_TEMPLATE_LOCATION = packaged("fingerprint_report")
 
 
 def generate_report_builder_config(
@@ -38,6 +37,8 @@ def render_report(
     output_location: str | Path,
     template_location: str | Path | None = None,
     extra_conf: dict[str, Any] | None = None,
+    *,
+    renderer: TemplateRenderer | None = None,
 ) -> Path:
     """Write the report for `analytics`; `extra_conf` (constants for custom templates) is merged into `conf` as in 1.x."""
     location = Path(output_location)
@@ -48,6 +49,6 @@ def render_report(
     # Endpoint data is untrusted and eds4jinja2 disables autoescape: escape the packaged report;
     # custom templates keep 1.x behaviour.
     autoescape = True if template_location is None else None
-    renderer = JinjaTemplateRenderer()
+    renderer = renderer or JinjaTemplateRenderer()
     text = renderer.render(template_location or DEFAULT_TEMPLATE_LOCATION, config=config, autoescape=autoescape)
     return renderer.write(location, {config["template"]: text})[0]

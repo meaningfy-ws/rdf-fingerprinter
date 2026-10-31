@@ -110,7 +110,7 @@ eds4jinja2 itself.
   Default namespace `urn:fingerprint:shape:`.
 - **P-11 File names per graph.** `shapes-<slug>.ttl`, `diagram-<slug>.puml`; slug = `default` for the
   default graph, else the graph IRI's last non-empty part (split on `/`, `#`, `:`) lower-cased to
-  `[a-z0-9-]` (max 40 chars, `graph` if nothing is left) + `-` + the first 8 hex of its SHA-1 (as built). The document lists file ↔ graph. One document:
+  `[a-z0-9-]` (max 40 chars, `graph` if nothing is left) + `-` + the first 8 hex of its SHA-1 (as built). The document gives each graph's file-name suffix (it cannot know which formats were generated). One document:
   `profile.html`.
 - **P-12 Where code lives** (cosmic-python: I/O at the edges, services orchestrate, CLI only parses).
   | Module | Holds |
@@ -214,9 +214,10 @@ Value constraint, read from the property's `value_partitions` (literal partition
 a datatype (stores that leave `datatype()` unbound for tagged literals) counts as `rdf:langString`
 when it has a language, as `analyse` does (`RDF_LANG_STRING`), else as plain `sh:nodeKind sh:Literal`.
 The alternatives are every distinct datatype (`sh:datatype`), every distinct `object_class` (`sh:class`) when `untyped_object_ratio` is 0, and
-`sh:nodeKind sh:BlankNodeOrIRI` when some resource objects are untyped. One alternative → inline;
-several → `sh:or ( [ … ] [ … ] )`. A pure datatype property also gets `sh:nodeKind sh:Literal`; a pure
-object property `sh:nodeKind sh:BlankNodeOrIRI`. An object typed with two classes satisfies the
+the observed resource node kind (`sh:IRI`, `sh:BlankNode` or `sh:BlankNodeOrIRI`) when some resource
+objects are untyped. One alternative → inline; several → `sh:or ( [ … ] [ … ] )`. A property whose
+values are all of one kind group also gets that observed node kind (`sh:Literal`, `sh:IRI`, …; as
+built, more precise than always `sh:BlankNodeOrIRI`). An object typed with two classes satisfies the
 `sh:or` of both, so the constraint holds on the source data.
 
 Severity, from the threshold:
@@ -317,6 +318,15 @@ render time, so the golden file is stable.
   untyped; the `any_graph` comment; conformance is tested on the source data.
 - [Large graphs → huge diagrams] → per-graph files only (EPIC rabbit-hole); no pruning in 2.1.
 - [`profile.json` size] → `exclude_none`; top values bounded by `top_k`.
+
+## Deferred after the pre-PR review (recorded, not built)
+
+- Typed view models per format (frozen dataclasses) instead of view dicts — worth it once custom
+  templates rely on the view shape; the shapes are documented in the representations page.
+- A `TurtleGenerator` base (prefix bookkeeping, Turtle check) and generator commands built in a loop
+  over `GENERATORS` — when the next format (VoID, an LLM schema card) arrives.
+- Moving `prefixes.json` to the package root and the report's Jinja `curie` macro onto the filter;
+  porting the analytics steps onto the `tests/unit/fakes.py` builders.
 
 ## Open Questions
 

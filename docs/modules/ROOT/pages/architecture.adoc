@@ -98,7 +98,7 @@ the generators), Profile store (`profile.json`), setting sources (environment, c
 | `fingerprint.domain`
 | Profile model (generated from LinkML); Analyser; IRI rules (SPARQL and, from 2.1, Turtle).
 Pure, no I/O.
-| nothing above it; not SPARQLWrapper, eds4jinja2 or click (enforced)
+| nothing above it; not SPARQLWrapper, eds4jinja2, jinja2, rdflib or click (enforced)
 
 | `fingerprint_report_templates`
 | Template packages: `fingerprint_report`; `shacl_shapes`, `plantuml_diagram`,
@@ -108,8 +108,8 @@ Pure, no I/O.
 
 Component names are those of the xref:glossary.adoc#components[Glossary], which maps each to its
 module. The layers are enforced by `.importlinter` (`make check-architecture`): the layer order, a
-generated model that imports no project code, a domain that imports no SPARQLWrapper, eds4jinja2 or
-click, and a service layer that imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client).
+generated model that imports no project code, a domain that imports no SPARQLWrapper, eds4jinja2,
+jinja2, rdflib or click, and a service layer that imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client).
 
 NOTE: 1.x had only `service_layer` and `entrypoints`; its statistics were computed by SPARQL inside
 the templates. In 2.0 report rendering and the setting sources sat in the service layer; 2.1 moved
@@ -126,6 +126,7 @@ xref:how-it-works.adoc#data-flow[How it works].
 
 | `SparqlPort` | `select(query) -> rows`, `ask(query) -> bool`; raises one of the error classes of xref:how-it-works.adoc#failure-classes[How it works].
 | `ProfileRun`, `ProfileAnalytics` | The generated, frozen profile model (below).
+| `TemplateRenderer` | `render(package, *, view, config, autoescape) -> str`; `write(folder, texts, check) -> list[Path]`, checking every text before writing any; `prefixes`. The port generators and the report render through; declared in the service layer, implemented by the template renderer adapter (`SparqlPort` is declared beside its adapter, a 2.0 choice kept).
 | `Generator` | `visit_graph` / `visit_class` / `visit_property` build the view; `serialize()` returns file name → text (xref:decisions.adoc#ad-8[AD-8]).
 | Exit codes | 0 clean, 1 failures recorded, 2 usage error, 3 endpoint unreachable at the start, 4 unexpected error.
 |===

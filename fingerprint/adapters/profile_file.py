@@ -35,4 +35,4 @@ def _written_by(text: str) -> str:
         version = json.loads(text).get("tool_version")
     except (ValueError, AttributeError):
         return ""
-    return f" readable by this version (written by rdf-fingerprinter {version})" if version else ""
+    return f" readable by this version (written by rdf-fingerprinter {str(version)[:40]!r})" if version else ""

@@ -149,3 +149,49 @@ def test_one_file_per_graph():
     run = profile_run(klass(EX + "Person", 4), graph="http://ex.org/graphs/people")
     names = list(ShaclGenerator(analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES)).serialize())
     assert len(names) == 1 and names[0].startswith("shapes-people-") and names[0].endswith(".ttl")
+
+
+def test_a_language_tagged_literal_without_datatype_conforms():
+    import pyshacl
+
+    run = person(prop(EX + "label", {1: 4}, literals(4, datatype=None, language="ro")))
+    data = Graph().parse(
+        data="".join(f'<{EX}p{i}> a <{EX}Person> ; <{EX}label> "x"@ro .\n' for i in range(4)), format="turtle"
+    )
+    _, results, _ = pyshacl.validate(data, shacl_graph=shapes(run), inference="none")
+    assert not list(results.subjects(SH.resultSeverity, SH.Violation))
+
+
+def test_an_unwritable_property_is_left_out():
+    bad = "http://ex.org/a b"
+    run = person(prop(bad, {1: 4}, literals(4)), prop(EX + "ok", {1: 4}, literals(4)))
+    generator = ShaclGenerator(analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES))
+    g = Graph().parse(data=only_text(generator), format="turtle")
+    assert generator.skipped == [bad] and property_shape(g, EX + "Person", EX + "ok") is not None
+    assert len(list(g.objects(node_shape(g, EX + "Person"), SH.property))) == 1
+
+
+def test_a_literal_with_neither_datatype_nor_language_is_any_literal():
+    g = shapes(person(prop(EX + "p", {1: 4}, literals(4, datatype=None))))
+    ps = property_shape(g, EX + "Person", EX + "p")
+    assert g.value(ps, SH.nodeKind) == SH.Literal and g.value(ps, SH.datatype) is None
+
+
+def test_an_unwritable_value_type_keeps_only_the_node_kind():
+    generator = ShaclGenerator(
+        analyse(person(prop(EX + "p", {1: 4}, literals(4, datatype="http://x/a b")))), JinjaTemplateRenderer(prefixes=PREFIXES)
+    )
+    g = Graph().parse(data=only_text(generator), format="turtle")
+    ps = property_shape(g, EX + "Person", EX + "p")
+    assert g.value(ps, SH.datatype) is None and g.value(ps, SH.nodeKind) == SH.Literal
+    assert generator.skipped == ["http://x/a b"]
+
+
+def test_a_class_with_no_observed_instances_has_a_shape_without_properties():
+    g = shapes(profile_run(klass(EX + "Empty", 0)))
+    assert not list(g.objects(node_shape(g, EX + "Empty"), SH.property))
+
+
+def only_text(generator):
+    (text,) = generator.serialize().values()
+    return text

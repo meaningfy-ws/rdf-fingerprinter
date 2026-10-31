@@ -241,10 +241,12 @@ def constant_appears(ctx):
 
 @given("the report template raises an error")
 def report_raises(monkeypatch):
-    def broken(*args, **kwargs):
+    from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
+
+    def broken(self, *args, **kwargs):
         raise RuntimeError("template error")
 
-    monkeypatch.setattr(handlers, "render_report", broken)
+    monkeypatch.setattr(JinjaTemplateRenderer, "render", broken)
 
 
 @then("the output folder holds the report and the profile file")
@@ -282,3 +284,23 @@ def command_runs_with_format(ctx, name):
 def report_profile_and_shapes(ctx):
     names = {p.name for p in ctx["output"].iterdir()}
     assert {"main.html", "profile.json"} <= names and [n for n in names if n.startswith("shapes-")] == ["shapes-default.ttl"]
+
+
+@then("the message names the known formats")
+def names_known_formats(ctx):
+    assert all(name in ctx["result"].output for name in ("shacl", "puml", "doc"))
+
+
+@given("the shapes fail to render")
+def shapes_fail(monkeypatch):
+    from fingerprint.adapters.exceptions import GeneratedOutputError
+    from fingerprint.service_layer import representations
+
+    class Failing:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def write(self, folder):
+            raise GeneratedOutputError("shapes-default.ttl is not valid turtle")
+
+    monkeypatch.setitem(representations.GENERATORS, "shacl", Failing)
