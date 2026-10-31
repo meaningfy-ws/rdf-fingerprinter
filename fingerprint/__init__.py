@@ -66,13 +66,12 @@ class FingerprintConfig:
             raise ValueError("must be at least 1")
         return length
 
-    @env_property(f"{ENV_PREFIX}SHAPES_NAMESPACE", "urn:fingerprint:shape:")
-    def shapes_namespace(self, value: str | None) -> str:
-        """Namespace of the generated SHACL shape IRIs."""
-        if not value:
-            raise ValueError("an IRI is required")
-        to_iriref(value)  # an IRI Turtle can hold, else IriRefError (a ValueError)
-        return value
+    @env_property(f"{ENV_PREFIX}SHAPES_NAMESPACE")
+    def shapes_namespace(self, value: str | None) -> str | None:
+        """One namespace for every SHACL shape IRI; unset: each class's own `<namespace>/shape/`."""
+        if value:
+            to_iriref(value)  # an IRI Turtle can hold, else IriRefError (a ValueError)
+        return value or None
 
     @env_property(f"{ENV_PREFIX}DEFAULT_GRAPH_LABEL", "default graph")
     def default_graph_label(self, value: str | None) -> str:
@@ -80,9 +79,19 @@ class FingerprintConfig:
         return value or ""
 
     @env_property(f"{ENV_PREFIX}PREFIXES_FILE")
-    def prefixes_file(self, value: str | None) -> Path:
-        """The generators' prefix file (`{"skos:": "http://…#"}`); default: the packaged one."""
-        return Path(value) if value else packaged("fingerprint_report") / "templates" / "prefixes.json"
+    def prefixes_file(self, value: str | None) -> Path | None:
+        """The user's prefix file (`{"skos:": "http://…#"}`), over the packaged prefixes; unset: none."""
+        return Path(value) if value else None
+
+    @env_property(f"{ENV_PREFIX}PREFIX_LOOKUP", "true")
+    def prefix_lookup(self, value: str | None) -> bool:
+        """Whether the `fingerprint` command reads prefix.cc's prefix list for unnamed namespaces."""
+        return _flag(f"{ENV_PREFIX}PREFIX_LOOKUP", value or "")
+
+    @property
+    def packaged_prefixes_file(self) -> Path:
+        """The prefixes packaged with the fingerprinter (source `packaged`)."""
+        return packaged("fingerprint_report") / "templates" / "prefixes.json"
 
     def settings_override(self) -> SettingsOverride:
         """The collection settings set by `RDF_FINGERPRINTER_<SETTING>` variables."""
@@ -105,11 +114,15 @@ def _setting(name: str, raw: str) -> Any:
     if name == "selected_graphs":
         return [graph.strip() for graph in raw.split(",")]
     if bool in get_args(SettingsOverride.model_fields[name].annotation):
-        value = raw.strip().lower()
-        if value not in _TRUE | _FALSE:
-            raise ConfigError(f"{ENV_PREFIX}{name.upper()} must be one of 1/true/yes/on or 0/false/no/off, not {raw!r}")
-        return value in _TRUE
+        return _flag(f"{ENV_PREFIX}{name.upper()}", raw)
     return raw
+
+
+def _flag(variable: str, raw: str) -> bool:
+    value = raw.strip().lower()
+    if value not in _TRUE | _FALSE:
+        raise ConfigError(f"{variable} must be one of 1/true/yes/on or 0/false/no/off, not {raw!r}")
+    return value in _TRUE
 
 
 config = FingerprintConfig(EnvConfigResolver())

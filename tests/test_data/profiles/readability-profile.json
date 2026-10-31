@@ -1,0 +1,191 @@
+{
+  "endpoint": "http://e/sparql",
+  "settings": {
+    "depth": "values",
+    "precision_policy": "auto",
+    "first_n": 10000,
+    "top_k": 20,
+    "object_type_scope": "same_graph",
+    "completeness_check": false,
+    "timeout_seconds": 60,
+    "concurrency": 4,
+    "acceptance_threshold": 0.95,
+    "graph_statistics": false
+  },
+  "graphs": [
+    {
+      "graph": "https://my.brainframe.com/graph/workspace",
+      "class_partitions": [
+        {
+          "class_iri": "https://ontology.brainframe.com/2016/04/brainframe#Asset",
+          "instances": 4,
+          "observed_instances": 4,
+          "precision_mode": "exact",
+          "property_partitions": [
+            {
+              "property": "https://ontology.brainframe.com/2016/04/brainframe#name",
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 4
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 4,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "https://my.brainframe.com/#/knowledge/RelationId/a1b2",
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 4
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 4,
+                  "object_class": "https://ontology.brainframe.com/2016/04/brainframe#Risk",
+                  "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "https://ontology.brainframe.com/2016/04/brainframe#owner",
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 4
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 4,
+                  "object_class": "http://unknown.example.net/vocab/Widget",
+                  "node_kind": "iri"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "https://ontology.brainframe.com/2016/04/brainframe#Risk",
+          "instances": 2,
+          "observed_instances": 2,
+          "precision_mode": "exact",
+          "property_partitions": [
+            {
+              "property": "https://ontology.brainframe.com/2016/04/brainframe#level",
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 2
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 2,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "https://ontology.brainframe.com/2016/04/brainframe/sub/part",
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 2
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 2,
+                  "object_class": "https://ontology.brainframe.com/2016/04/brainframe/sub/Thing",
+                  "node_kind": "iri"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "https://ontology.brainframe.com/2016/04/brainframe/sub/Thing",
+          "instances": 2,
+          "observed_instances": 2,
+          "precision_mode": "exact",
+          "property_partitions": [
+            {
+              "property": "https://ontology.brainframe.com/2016/04/brainframe#name",
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 2
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 2,
+                  "language": "en",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://unknown.example.net/vocab/Widget",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "property_partitions": [
+            {
+              "property": "http://unknown.example.net/vocab/size",
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://www.w3.org/2002/07/owl#Ontology",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "property_partitions": [
+            {
+              "property": "http://www.w3.org/2000/01/rdf-schema#label",
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "failures": []
+}

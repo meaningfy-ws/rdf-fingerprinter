@@ -1,13 +1,12 @@
 """SHACL shapes from the analytics: one open node shape per class, graded by what the profile knows (DEC-5, AD-10)."""
 
 import re
-import urllib.parse
 from pathlib import Path
 from typing import NamedTuple
 
 from fingerprint import config
 from fingerprint.domain.analytics import label_bounds
-from fingerprint.domain.iri import to_iriref, turtle_number, turtle_string, turtle_term
+from fingerprint.domain.iri import _SAFE_LOCAL, to_iriref, turtle_number, turtle_string, turtle_term
 from fingerprint.domain.profile import (
     ClassAnalytics,
     GraphAnalytics,
@@ -18,6 +17,7 @@ from fingerprint.domain.profile import (
     ProfileAnalytics,
     PropertyAnalytics,
 )
+from fingerprint.domain.shapes import shape_iri
 from fingerprint.domain.views import (
     Annotation,
     GeneratorOptions,
@@ -66,26 +66,40 @@ class ShaclGenerator(Generator):
     ):
         super().__init__(analytics, renderer, template_location, options)
         self.shapes_namespace = self.options.shapes_namespace or config.shapes_namespace
-        to_iriref(self.shapes_namespace)  # an unwritable namespace is the caller's usage error (IriRefError)
-        # Prefixes usable in Turtle, never redefining the ones the shapes themselves need.
-        self.term_prefixes = {  # dict-ok: prefix table
-            p: ns for p, ns in self.prefixes.items() if _PN_PREFIX.fullmatch(p) and FIXED_PREFIXES.get(p, ns) == ns
-        }
+        if self.shapes_namespace:
+            to_iriref(self.shapes_namespace)  # an unwritable namespace is the caller's usage error (IriRefError)
         self.threshold = analytics.settings.acceptance_threshold
         self.cross_graph = analytics.settings.object_type_scope == ObjectTypeScope.any_graph
-        self._used: set[str] = set()
+        self._used: dict[str, str] = {}  # dict-ok: lookup index of the prefixes this graph's file declares
+        self._shapes: set[str] = set()
         self._with_subclasses: set[str] = set()
 
     def term(self, iri: str) -> str:
-        text, prefix = turtle_term(iri, self.term_prefixes)
-        if prefix:
-            self._used.add(prefix)
-        return text
+        text, prefix = turtle_term(iri, self.table)
+        if prefix and _PN_PREFIX.fullmatch(prefix):
+            self._used[prefix] = self.table.by_prefix(prefix).namespace  # type: ignore[union-attr]
+            return text
+        return to_iriref(iri)
+
+    def shape(self, cls: ClassAnalytics, prop: PropertyAnalytics | None = None) -> str:
+        """The shape IRI as Turtle, unique in the file: later duplicates get -2, -3, … in IRI order (DEC-6)."""
+        iri, prefix, namespace = shape_iri(cls.class_iri, prop.property if prop else None, self.table, self.shapes_namespace)
+        unique, n = iri, 1
+        while unique in self._shapes:
+            n += 1
+            unique = f"{iri}-{n}"
+        self._shapes.add(unique)
+        local = unique[len(namespace) :]
+        if _SAFE_LOCAL.fullmatch(local):
+            self._used[prefix] = namespace
+            return f"{prefix}:{local}"
+        return to_iriref(unique)
 
     # --- hooks ---
 
     def visit_graph(self, graph: GraphAnalytics) -> bool:
-        self._used = set()
+        self._used = {}  # dict-ok: lookup index
+        self._shapes = set()
         declared = {e.super_class for e in graph.declared_subclass_edges or []}
         declared |= {
             p.parent for c in graph.class_partitions or [] for p in c.parents or [] if p.source == ParentSource.declared
@@ -108,6 +122,7 @@ class ShaclGenerator(Generator):
         if prop.label_support is not None:
             annotations.append(Annotation(predicate="fp:labelSupport", value=turtle_number(prop.label_support)))
         return PropertyShape(
+            shape=self.shape(cls, prop),
             path=self.term(prop.property),
             constraints=constraints,
             severity=self.severity(cls, prop, labelled, has_class),
@@ -127,14 +142,14 @@ class ShaclGenerator(Generator):
         if comments:
             annotations.append(Annotation(predicate="rdfs:comment", value=turtle_string(" ".join(comments))))
         return NodeShape(
-            shape=to_iriref(self.shapes_namespace + urllib.parse.quote(cls.class_iri, safe="")),
+            shape=self.shape(cls),
             target=self.term(cls.class_iri),
             annotations=annotations,
             property_shapes=properties,
         )
 
     def end_graph(self, graph: GraphAnalytics, classes: list[NodeShape]) -> ShapesGraph:
-        used = [(p, self.term_prefixes[p]) for p in sorted(self._used) if p not in FIXED_PREFIXES]  # fixed: same IRI
+        used = [(p, ns) for p, ns in sorted(self._used.items()) if p not in FIXED_PREFIXES]  # fixed: same IRI
         prefixes = sorted([*FIXED_PREFIXES.items(), *used])
         return ShapesGraph(
             graph_label=plain_label(graph.graph),

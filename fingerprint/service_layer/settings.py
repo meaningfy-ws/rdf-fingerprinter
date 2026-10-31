@@ -16,9 +16,9 @@ from fingerprint import config as fingerprint_config
 from fingerprint.adapters import config_resolver
 from fingerprint.adapters.config_resolver import MappingConfigResolver
 from fingerprint.adapters.exceptions import ConfigError, ConfigFileError
+from fingerprint.adapters.prefixes import load_packaged_prefixes, load_prefixes
 from fingerprint.adapters.sparql import redact
-from fingerprint.adapters.template_renderer import load_prefixes
-from fingerprint.domain.profile import Settings, SettingsOverride
+from fingerprint.domain.profile import NamespacePrefix, PrefixSource, Settings, SettingsOverride
 from fingerprint.service_layer.exceptions import UsageError
 
 NAMES = tuple(Settings.model_fields)
@@ -54,9 +54,25 @@ def validate_config() -> None:
     """Every `RDF_FINGERPRINTER_*` value read once, before any query or write; a bad one is a usage error."""
     try:
         fingerprint_config.validate()
-        load_prefixes()  # the generators' prefix file: a bad one is the caller's usage error, before any write
+        load_packaged_prefixes(fingerprint_config.packaged_prefixes_file)
     except ConfigError as error:
         raise UsageError(str(error)) from error
+    load_user_prefixes()  # RDF_FINGERPRINTER_PREFIXES_FILE: a bad file is a usage error before any query
+
+
+def load_user_prefixes(path: str | Path | None = None) -> list[NamespacePrefix]:
+    """The user's prefix file: `--prefixes` when given, else `RDF_FINGERPRINTER_PREFIXES_FILE`, else none.
+
+    Loaded before any query, so a bad file is a usage error naming the option or variable (namespace-prefixes)."""
+    try:
+        if path:
+            return load_prefixes(Path(path), PrefixSource.user, "--prefixes")
+        env_path = fingerprint_config.prefixes_file
+        if env_path:
+            return load_prefixes(env_path, PrefixSource.user, "RDF_FINGERPRINTER_PREFIXES_FILE")
+    except ConfigError as error:
+        raise UsageError(str(error)) from error
+    return []
 
 
 def _override(source: Mapping[str, Any] | SettingsOverride | None) -> SettingsOverride:  # dict-ok: resolve_settings API

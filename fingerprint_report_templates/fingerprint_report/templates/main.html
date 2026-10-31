@@ -1,37 +1,230 @@
 {% extends "layout.html" %}
-{% import "macros/profile.html" as profile %}
+{#- The report page. `view` is a ProfileDocument (model/fingerprint_views.yaml); every value comes ready as text
+    from fingerprint/service_layer/generators/document.py, so this template only lays it out. -#}
+
+{%- macro term(label, iri) -%}
+  {%- set parts = label.split(':', 1) if label != iri else [] -%}
+  {%- if iri.startswith('http://') or iri.startswith('https://') -%}<a class="curie" href="{{ iri }}" title="{{ iri }}">{%- else -%}<span class="curie" title="{{ iri }}">{%- endif -%}
+  {%- if parts|length == 2 -%}<span class="pfx" data-ns="{{ parts[0] }}">{{ parts[0] }}:</span>{{ parts[1] }}{%- else -%}{{ label }}{%- endif -%}
+  {%- if iri.startswith('http://') or iri.startswith('https://') -%}</a>{%- else -%}</span>{%- endif -%}
+{%- endmacro -%}
+
+{%- set totals = namespace(classes=0, prefixes=[]) -%}
+{%- for g in view.graphs or [] -%}{%- for c in g.classes or [] -%}
+  {%- set totals.classes = totals.classes + 1 -%}
+  {%- if c.prefix not in totals.prefixes -%}{%- set totals.prefixes = totals.prefixes + [c.prefix] -%}{%- endif -%}
+{%- endfor -%}{%- endfor -%}
+
+{% block style %}
+{%- for p in view.namespaces or [] %}
+[data-ns="{{ p.prefix }}"] { --h: {{ (loop.index0 * 137 + 190) % 360 }}; }
+{%- endfor %}
+{% endblock %}
 
 {% block content %}
-    {# The namespace/prefix definitions used to shorten IRIs #}
-    {% set prefixes, error = from_file(conf.template_path+'/prefixes.json').fetch_tree() %}
+<header class="bar">
+  <h1>{{ conf.title }} <small>{{ view.overview.endpoint or '' }}</small></h1>
+  <input id="q" type="search" placeholder="Search classes and properties" aria-label="Search classes and properties" hidden data-js>
+  <span class="count" id="count" aria-live="polite">{{ totals.classes }} classes</span>
+</header>
+<div class="frame">
+<nav aria-label="Contents">
+  <a href="#overview">Overview</a> · <a href="#namespaces">Namespaces</a> · <a href="#collection">Collection</a> · <a href="#caveats">Caveats</a>
+  {%- for g in view.graphs or [] %}
+  <details open>
+    <summary>{{ g.label }} <span class="note">({{ (g.classes or [])|length }})</span></summary>
+    {%- for prefix, classes in (g.classes or [])|groupby('prefix') %}
+    <div class="group"><span class="pfx" data-ns="{{ prefix }}">{{ prefix }}</span> {{ classes|length }}</div>
+    <ul>
+      {%- for c in classes %}
+      <li data-anchor="{{ c.anchor }}"><a href="#{{ c.anchor }}">{{ c.label.split(':', 1)[-1] if ':' in c.label and not c.label.startswith('http') else c.label }}</a></li>
+      {%- endfor %}
+    </ul>
+    {%- endfor %}
+    {%- if g.empty %}<p class="note">No classes.</p>{% endif %}
+  </details>
+  {%- endfor %}
+  {%- if totals.prefixes %}
+  <fieldset hidden data-js>
+    <legend>Show namespaces</legend>
+    {%- for prefix in totals.prefixes|sort %}
+    <label><input type="checkbox" checked data-switch value="{{ prefix }}"> <span class="pfx" data-ns="{{ prefix }}">{{ prefix }}</span></label>
+    {%- endfor %}
+  </fieldset>
+  {%- endif %}
+</nav>
+<main>
+  <section id="overview">
+    <h2>Overview</h2>
+    <dl class="facts">
+      <div><dt>Endpoint</dt><dd>{{ view.overview.endpoint or '—' }}</dd></div>
+      <div><dt>Graphs</dt><dd>{{ (view.graphs or [])|length }}</dd></div>
+      <div><dt>Classes shown</dt><dd>{{ totals.classes }}</dd></div>
+      <div><dt>Namespaces</dt><dd>{{ (view.namespaces or [])|length }}</dd></div>
+      <div><dt>Started</dt><dd>{{ view.overview.started_at or '—' }}</dd></div>
+      <div><dt>Finished</dt><dd>{{ view.overview.finished_at or '—' }}</dd></div>
+      <div><dt>rdf-fingerprinter</dt><dd>{{ view.overview.tool_version or '—' }}</dd></div>
+    </dl>
+    <p class="note">Each class states its precision: exact when every instance was read, or first N of M when only the
+      first N instances the store returned were read. Absent values are shown as —.</p>
+  </section>
 
-    <h1>Class application profiles</h1>
-    <section>
-        <p>This section attempts at reconstructing the profiled shapes for each class. The profile is deduced based
-            on structural patterns for a selected class and their descriptive statistics aggregated by distinct
-            properties.
-        <p>
-            The structural pattern is a triple pattern of the type <em>(subject,predicate,object)</em>, which selects
-            subjects that are instances of a given class and on that collection of individuals identifies all unique
-            predicates used, then for each of those predicate identifies the type of the values used with it (i.e.
-            either the class or the data type). The pattern can be summarised as this: <em>(ClassOfSubjects,
-            distinctPredicate, ClassOfObject)</em>.
+  <section id="namespaces">
+    <h2>Namespaces</h2>
+    <div class="scroll plain">
+    <table>
+      <thead><tr><th>Prefix</th><th>Namespace</th><th>Source</th></tr></thead>
+      <tbody>
+      {%- for p in view.namespaces or [] %}
+        <tr><td><span class="pfx" data-ns="{{ p.prefix }}">{{ p.prefix }}</span></td><td class="curie">{{ p.namespace }}</td><td>{{ (p.source or '')|replace('_', '.') }}</td></tr>
+      {%- endfor %}
+      </tbody>
+    </table>
+    </div>
+  </section>
 
-            The descriptive statistics account for (a) the number of unique subjects, (b) the number of unique objects
-            (c) number of total occurrences of the pattern (d) minimal, (e) maximal and (f) average number of
-            occurences.
-        </p>
-        <p>Each class states its precision: <em>exact</em> when every instance was read, or <em>first N of M</em>
-            when only the first N instances the store returned were read. Absent values are shown as —.</p>
-    </section>
-    {% for graph in conf.profile.graphs or [] %}
-        <h2>{{ 'Named graph ' ~ graph.graph ~ ' fingerprints' if graph.graph else 'Default graph fingerprints' }}</h2>
-        <section>
-            {% for cls in graph.class_partitions or [] %}
-                {{ profile.class_section(cls, prefixes) }}
-            {% endfor %}
-        </section>
-    {% endfor %}
-    {{ profile.collection_section(conf.profile, prefixes) }}
+  {%- for g in view.graphs or [] %}
+  <section id="graph-{{ g.slug }}">
+    <h2>{% if g.iri %}{{ term(g.label, g.iri) }}{% else %}{{ g.label|capitalize }}{% endif %}</h2>
+    {%- if g.empty %}
+    <p class="note">This graph has no typed instances.</p>
+    {%- elif not g.classes %}
+    <p class="note">Every class of this graph is in a hidden namespace (see caveats).</p>
+    {%- endif %}
+    {%- for c in g.classes or [] %}
+    <details class="cls" id="{{ c.anchor }}" open data-ns="{{ c.prefix }}" data-q="{{ c.q }}">
+      <summary>
+        <h3>{{ term(c.label, c.iri) }}</h3>
+        <span class="meta">{{ c.instances }} instances, {{ c.precision }}{% if c.sample_note %} {{ c.sample_note }}{% endif %}</span>
+        {%- if c.parents %}
+        <span class="meta">parents: {% for p in c.parents %}{{ term(p.label, p.iri) }} ({{ p.source }}){{ ", " if not loop.last }}{% endfor %}</span>
+        {%- endif %}
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        {%- for p in c.properties or [] %}
+          <tr>
+            <td>{{ term(p.label, p.iri) }}</td><td class="n">{{ p.subjects }}</td><td class="n">{{ p.min }}</td><td class="n">{{ p.max }}</td>
+            <td class="n">{{ p.avg }}</td><td>{{ p.kind }}</td><td class="n">{{ p.distinct }}</td>
+            <td>{% for t in p.types or [] %}{{ term(t.label, t.iri) }}{{ ", " if not loop.last }}{% else %}—{% endfor %}</td>
+            <td class="n">{{ p.confidence }}</td><td>{{ p.cardinality }}</td><td>{{ p.inheritance }}</td><td class="n">{{ p.language_coverage }}</td>
+          </tr>
+        {%- endfor %}
+        </tbody>
+      </table>
+      </div>
+    </details>
+    {%- endfor %}
+  </section>
+  {%- endfor %}
 
+  <section id="collection">
+    <h2>Collection</h2>
+    {%- if view.collection.failures %}
+    <div class="scroll plain">
+    <table>
+      <caption class="note">These measurements failed and are missing from the report.</caption>
+      <thead><tr><th>Graph</th><th>Class</th><th>Property</th><th>Measurement</th><th>Attempts</th><th>Message</th></tr></thead>
+      <tbody>
+      {%- for f in view.collection.failures %}
+        <tr><td>{{ f.graph }}</td><td>{{ f.class_label }}</td><td>{{ f.property_label or '—' }}</td><td>{{ f.measurement }}</td><td class="n">{{ f.attempts or '—' }}</td><td>{{ f.message or '' }}</td></tr>
+      {%- endfor %}
+      </tbody>
+    </table>
+    </div>
+    {%- else %}
+    <p>Every measurement succeeded.</p>
+    {%- endif %}
+    <details>
+      <summary>Settings used</summary>
+      <div class="scroll plain">
+      <table>
+        <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+        <tbody>
+        {%- for s in view.collection.settings or [] %}
+          <tr><td>{{ s.name }}</td><td>{{ s.value }}</td></tr>
+        {%- endfor %}
+        </tbody>
+      </table>
+      </div>
+    </details>
+  </section>
+
+  <section id="caveats">
+    <h2>Caveats</h2>
+    {%- set cv = view.caveats %}
+    {%- if not (cv.sampled or cv.untyped or cv.hidden or cv.skipped) %}
+    <p>Nothing to flag: every class was read exactly and every IRI is shown.</p>
+    {%- endif %}
+    {%- if cv.sampled %}
+    <h3>Classes read from a sample</h3>
+    <ul>{% for s in cv.sampled %}<li>{{ s.class_label }} in {{ s.graph }}: {{ s.precision }}</li>{% endfor %}</ul>
+    {%- endif %}
+    {%- if cv.untyped %}
+    <h3>Subjects without a type</h3>
+    <ul>{% for u in cv.untyped %}<li>{{ u.graph }}: {{ u.count }} subjects have no rdf:type, so no class section covers them.</li>{% endfor %}</ul>
+    {%- endif %}
+    {%- if cv.hidden %}
+    <h3>Hidden namespaces</h3>
+    <p class="note">Their classes are left out of this page; show them with <code>--include-namespace</code>.</p>
+    <ul>{% for h in cv.hidden %}<li><span class="pfx" data-ns="{{ h.prefix }}">{{ h.prefix }}</span> ({{ h.namespace }}): {{ h.classes }} classes</li>{% endfor %}</ul>
+    {%- endif %}
+    {%- if cv.skipped %}
+    <h3>IRIs that cannot be written</h3>
+    <ul>{% for s in cv.skipped %}<li>{{ s }}</li>{% endfor %}</ul>
+    {%- endif %}
+  </section>
+</main>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+/* Search and namespace switches: they only toggle `hidden`; the page reads fully without this script. */
+(function () {
+  var q = document.getElementById("q"), count = document.getElementById("count");
+  var switches = Array.prototype.slice.call(document.querySelectorAll("input[data-switch]"));
+  var classes = Array.prototype.slice.call(document.querySelectorAll("details.cls"));
+  var entries = Array.prototype.slice.call(document.querySelectorAll("li[data-anchor]"));
+  document.querySelectorAll("[data-js]").forEach(function (el) { el.hidden = false; });
+
+  function apply() {
+    var text = q.value.trim().toLowerCase();
+    var off = {};
+    switches.forEach(function (s) { if (!s.checked) off[s.value] = true; });
+    var shown = 0;
+    classes.forEach(function (cls) {
+      var own = !text || cls.dataset.q.indexOf(text) >= 0;
+      var anyRow = false;
+      cls.querySelectorAll("tbody tr").forEach(function (row) {
+        var link = row.querySelector(".curie");
+        var haystack = (row.cells[0].textContent + " " + (link ? link.title : "")).toLowerCase();
+        var match = text && haystack.indexOf(text) >= 0;
+        anyRow = anyRow || match;
+        row.hidden = !(own || match);
+      });
+      var visible = !off[cls.dataset.ns] && (own || anyRow);
+      cls.hidden = !visible;
+      if (visible) {
+        shown += 1;
+        if (anyRow && !own) cls.open = true;
+      }
+    });
+    entries.forEach(function (li) {
+      var target = document.getElementById(li.dataset.anchor);
+      li.hidden = !target || target.hidden;
+    });
+    count.textContent = shown + " shown, " + (classes.length - shown) + " hidden";
+  }
+
+  q.addEventListener("input", apply);
+  switches.forEach(function (s) { s.addEventListener("change", apply); });
+  apply();
+})();
+</script>
 {% endblock %}

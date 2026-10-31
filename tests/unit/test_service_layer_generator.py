@@ -47,7 +47,11 @@ class Listing(Generator):
         return self.accepts(cls.class_iri)
 
     def visit_property(self, graph, cls, prop):
-        return PropertyShape(path=prop.property, severity="violation") if self.accepts(prop.property) else None
+        return (
+            PropertyShape(shape=prop.property, path=prop.property, severity="violation")
+            if self.accepts(prop.property)
+            else None
+        )
 
     def end_class(self, graph, cls, properties):
         return NodeShape(shape=cls.class_iri, target=cls.class_iri, property_shapes=properties)
@@ -60,7 +64,7 @@ BODY = "{% for c in view.node_shapes %}{{ c.target }}:{% for p in c.property_sha
 
 
 def listing(tmp_path, profile, body=BODY, **kwargs):
-    return Listing(analyse(profile), JinjaTemplateRenderer(prefixes={}), template_location=package(tmp_path, body), **kwargs)
+    return Listing(analyse(profile), JinjaTemplateRenderer(), template_location=package(tmp_path, body), **kwargs)
 
 
 def test_view_is_sorted_by_iri(tmp_path):

@@ -1,223 +1,79 @@
-<!DOCTYPE html>
+<!doctype html>
+{#- The report page frame: inline CSS and script only, no external request (readable-representations DEC-4).
+    Autoescape is on: every value comes from an endpoint. -#}
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <meta name="description" content="">
-    <meta name="mobile-web-app-capable" content="yes">
-
-    <title> {{ conf.title }} </title>
-
-    {#    <link rel="stylesheet" type="text/css"#}
-    {#          href="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.7/semantic.min.css">#}
-
-    <link rel="stylesheet" type="text/css"
-          href="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.7/semantic.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/stylesheets/jquery.tocify.min.css"
-          rel="stylesheet"
-          type="text/css">
-    <link href="https://code.jquery.com/ui/1.11.4/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css">
-
-    <link href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css">
-
-    <style>
-        table {
-            table-layout: fixed;
-            width: 100%;
-        }
-
-        table td {
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-        }
-
-        table tr {
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-        }
-
-        .buttons-print {
-            margin-bottom: 0.5em !important;
-        }
-
-        section {
-            margin-bottom: 5em !important;
-        }
-
-        .reportTitle {
-            margin-top: 1em !important;
-        }
-
-        main {
-            flex: 1 0 auto;
-        }
-
-        footer {
-            background: #bdbdbd;
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 50px;
-            margin: 0;
-        }
-
-        .footerText {
-            margin: revert !important;
-        }
-
-        .dataTables_wrapper {
-            margin-bottom: 5em;
-        }
-
-        body {
-            font-family: "Roboto", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
-            font-size: 14px !important;
-            line-height: 1.42857143;
-
-            display: flex;
-            min-height: 100vh;
-            flex-direction: column;
-        }
-
-        .content {
-            margin-top: 2.5em;
-            padding: 0.1em;
-        }
-
-        #toc {
-            width: 15%;
-            margin-top: 2.5em;
-            padding: 0.1em;
-        }
-
-        .ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
-            border: 1px solid #79b7e7;
-            background: #f5f5f5 !important;
-            font-weight: normal;
-            color: black !important;
-        }
-
-        .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
-            background: #888f9e !important;
-            color: #fff !important;
-            font-weight: normal;
-        }
-
-        .tocify {
-            border-radius: 0 !important;
-        }
-
-        .tocify li:not(:last-child) li:not(:first-child) {
-            border-bottom: 1px solid #888f9e47 !important;
-        }
-
-        @media print {
-            footer {
-                display: none;
-            }
-        }
-    </style>
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="rdf-fingerprinter">
+<title>{% block title %}{{ conf.title }}{% endblock %}</title>
+<style>
+:root {
+  --paper: #f6f7f5; --panel: #ffffff; --ink: #1d2422; --muted: #5c6764; --rule: #d8ddda; --accent: #1f6b73;
+  --chip-l: 36%; --chip-s: 52%;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --paper: #141a19; --panel: #1b2321; --ink: #e3e9e6; --muted: #98a4a0; --rule: #2d3734; --accent: #74c4cc;
+          --chip-l: 72%; --chip-s: 48%; }
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 4.5rem; }
+body { margin: 0; background: var(--paper); color: var(--ink);
+       font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center;
+       padding: .7rem 1rem; background: var(--panel); border-bottom: 1px solid var(--rule); }
+.bar h1 { margin: 0; font-size: 1.05rem; font-weight: 650; }
+.bar h1 small { font-weight: 400; color: var(--muted); }
+.bar input[type=search] { flex: 1 1 14rem; max-width: 26rem; padding: .4rem .6rem; font: inherit; color: inherit;
+       background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; }
+.count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.frame { display: grid; grid-template-columns: 17rem minmax(0, 1fr); gap: 0 2rem; max-width: 92rem; margin: 0 auto; padding: 0 1rem; }
+nav { position: sticky; top: 3.6rem; align-self: start; max-height: calc(100vh - 3.6rem); overflow: auto; padding: 1rem 0 2rem;
+      font-size: .9rem; }
+nav ul { list-style: none; margin: 0; padding: 0 0 0 .75rem; }
+nav li { margin: .1rem 0; overflow-wrap: anywhere; }
+nav summary { cursor: pointer; font-weight: 600; margin-top: .6rem; }
+nav .group { color: var(--muted); margin-top: .35rem; }
+nav fieldset { border: 0; padding: 0; margin: 1.25rem 0 0; }
+nav legend { font-weight: 600; padding: 0; margin-bottom: .3rem; }
+nav label { display: flex; gap: .4rem; align-items: center; }
+main { padding: 1rem 0 4rem; min-width: 0; }
+h2 { font-size: 1.3rem; margin: 2.2rem 0 .6rem; padding-bottom: .3rem; border-bottom: 1px solid var(--rule); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .75rem; margin: 0; }
+.facts div { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: .6rem .8rem; }
+.facts dt { color: var(--muted); font-size: .85rem; }
+.facts dd { margin: 0; font-size: 1.15rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.pfx { color: hsl(var(--h, 190) var(--chip-s) var(--chip-l)); font-weight: 600; }
+.curie { overflow-wrap: anywhere; }
+details.cls { background: var(--panel); border: 1px solid var(--rule); border-left: 4px solid hsl(var(--h, 190) var(--chip-s) var(--chip-l));
+              border-radius: 6px; margin: .7rem 0; }
+details.cls > summary { cursor: pointer; padding: .6rem .9rem; display: flex; flex-wrap: wrap; gap: .25rem 1rem; align-items: baseline; }
+details.cls > summary h3 { margin: 0; font-size: 1.02rem; }
+.meta { color: var(--muted); font-size: .88rem; }
+.scroll { overflow-x: auto; padding: 0 .9rem .8rem; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); white-space: nowrap; }
+td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.plain { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; }
+.note { color: var(--muted); }
+[hidden] { display: none !important; }
+@media (max-width: 760px) {
+  .frame { grid-template-columns: minmax(0, 1fr); }
+  nav { position: static; max-height: none; border-bottom: 1px solid var(--rule); }
+  html { scroll-padding-top: 7rem; }
+}
+@media (prefers-reduced-motion: no-preference) { details.cls[open] > .scroll { animation: open .15s ease-out; } }
+@keyframes open { from { opacity: 0; } to { opacity: 1; } }
+{% block style %}{% endblock %}
+</style>
 </head>
-
 <body>
-
-<main class="ui grid">
-    <div class="three wide column">
-        <div id="toc"></div>
-    </div>
-    <div id="print-container" class="ten wide column content">
-        <h1 class="text-center" id="skip-toc">{{ conf.title }}</h1>
-        <h3 class="text-center" id="skip-toc">[<em>{{ conf.type }}</em>]</h3>
-
-        <div>
-            <h2 class="">Abstract</h2>
-            <p> This document represents an automatically generated account of the class instantiation
-                patterns. </p>
-            <p> The datasource endpoint: <em>{{ conf.default_endpoint |e }}</em></p>
-            {% if conf.selected_graphs %}
-                <p> The profiled graphs are: </p>
-                <ul>
-                    {% for gr in conf.selected_graphs | unique | list %}
-                        {% if gr %}
-                            <li><em>{{ gr|e }}</em></li>
-                        {% else %}
-                            <li><em>default graph</em></li>
-                        {% endif %}
-
-                    {% endfor %}
-                </ul>
-            {% endif %}
-            <h2 class="">Keywords</h2>
-            <em>application profile, structural metrics, data shapes, class instantiation patterns</em>
-        </div>
-        {% block content %}
-            < empty >
-        {% endblock %}
-    </div>
-</main>
-
-<footer>
-    <div class="ui container center aligned">
-        <p class="footerText">Powered by
-            <a href="https://github.com/meaningfy-ws">Meaningfy</a></p>
-    </div>
-</footer>
+{% block content %}{% endblock %}
+{% block script %}{% endblock %}
 </body>
 </html>
-
-{#<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>#}
-{#<script src="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.7/semantic.min.js"></script>#}
-
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://code.jquery.com/jquery-migrate-1.4.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tocify/1.9.0/javascripts/jquery.tocify.min.js"></script>
-
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/dataTables.buttons.min.js"></script>
-<script type="text/javascript" src="https://cdn.datatables.net/buttons/1.6.4/js/buttons.print.min.js"></script>
-
-<script type="text/javascript">
-    $(document).ready(function () {
-
-        $(function () {
-            $("#toc").tocify({
-                selectors: "h1,h2,h3,h4,h5,h6,h7,h8",
-                theme: "jqueryui",
-                hashGenerator: "pretty",
-                ignoreSelector: "#skip-toc",
-                highlightOnScroll: "true",
-                highlightDefault: "true"
-            });
-        });
-
-        $("table.display").DataTable({
-            dom: 'B<"clear">lfrtip',
-            buttons: [
-                'print'
-            ],
-            "lengthMenu": [[5, 15, 30, -1], [5, 15, 30, "All"]],
-            responsive: {
-                details: true,
-                breakpoints: [
-                    {name: 'bigdesktop', width: Infinity},
-                    {name: 'meddesktop', width: 1480},
-                    {name: 'smalldesktop', width: 1280},
-                    {name: 'medium', width: 1188},
-                    {name: 'tabletl', width: 1024},
-                    {name: 'btwtabllandp', width: 848},
-                    {name: 'tabletp', width: 768},
-                    {name: 'mobilel', width: 480},
-                    {name: 'mobilep', width: 320}
-                ]
-            }
-        });
-    });
-</script>

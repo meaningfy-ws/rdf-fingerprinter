@@ -153,6 +153,28 @@ class Depth(str, Enum):
     """
 
 
+class PrefixSource(str, Enum):
+    """
+    Where a namespace's prefix came from (readable-representations DEC-1).
+    """
+    user = "user"
+    """
+    The user's prefix file.
+    """
+    packaged = "packaged"
+    """
+    The prefixes packaged with the fingerprinter.
+    """
+    prefix_cc = "prefix_cc"
+    """
+    prefix.cc's prefix list.
+    """
+    generated = "generated"
+    """
+    Generated from the namespace IRI.
+    """
+
+
 class NodeKind(str, Enum):
     """
     The RDF term kind of an object.
@@ -275,6 +297,18 @@ class ProfileRun(ConfiguredBaseModel):
     settings: Settings = Field(default=..., description="""The settings the run used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileRun']} })
     graphs: Optional[list[GraphProfile]] = Field(default=None, description="""The profiled graphs.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileRun']} })
     failures: Optional[list[Failure]] = Field(default=None, description="""Queries that failed after all retries and fallbacks.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileRun']} })
+    namespaces: Optional[list[NamespacePrefix]] = Field(default=None, description="""The prefix of every namespace the profile uses; absent in profiles saved before 3.0.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileRun']} })
+
+
+class NamespacePrefix(ConfiguredBaseModel):
+    """
+    A namespace and the prefix the outputs write it with.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
+
+    prefix: str = Field(default=..., description="""The prefix name, without the colon.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix']} })
+    namespace: str = Field(default=..., description="""The namespace IRI.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix']} })
+    source: PrefixSource = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix', 'ParentClass']} })
 
 
 class Settings(ConfiguredBaseModel):
@@ -567,6 +601,7 @@ class ProfileAnalytics(ProfileRun):
     settings: Settings = Field(default=..., description="""The settings the run used.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileRun']} })
     graphs: Optional[list[GraphAnalytics]] = Field(default=None, description="""The profiled graphs.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileRun']} })
     failures: Optional[list[Failure]] = Field(default=None, description="""Queries that failed after all retries and fallbacks.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileRun']} })
+    namespaces: Optional[list[NamespacePrefix]] = Field(default=None, description="""The prefix of every namespace the profile uses; absent in profiles saved before 3.0.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileRun']} })
 
 
 class CardinalityStatistics(ConfiguredBaseModel):
@@ -687,7 +722,7 @@ class ParentClass(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema'})
 
     parent: str = Field(default=..., description="""The parent class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ParentClass']} })
-    source: ParentSource = Field(default=..., description="""Declared or implied.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ParentClass']} })
+    source: ParentSource = Field(default=..., description="""Declared or implied.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix', 'ParentClass']} })
     co_type_ratio: Optional[float] = Field(default=None, description="""Share of observed instances also typed with the parent.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ParentClass']} })
 
 
@@ -750,6 +785,7 @@ class GraphAnalytics(GraphProfile):
 # Model rebuild
 # see https://pydantic-docs.helpmanual.io/usage/models/#rebuilding-a-model
 ProfileRun.model_rebuild()
+NamespacePrefix.model_rebuild()
 Settings.model_rebuild()
 Failure.model_rebuild()
 GraphProfile.model_rebuild()

@@ -4,8 +4,12 @@ import json
 
 import pytest
 
+from fingerprint import config
 from fingerprint.adapters.exceptions import GeneratedOutputError, TemplatePackageError
+from fingerprint.adapters.prefixes import load_packaged_prefixes
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
+from fingerprint.domain.prefixes import PrefixTable
+from fingerprint.domain.profile import NamespacePrefix
 from fingerprint.domain.views import Annotation, OutputCheck
 
 
@@ -61,11 +65,12 @@ def test_invalid_turtle_writes_nothing(tmp_path):
 
 def test_the_filters_escape_for_custom_templates(tmp_path):
     body = "{{ view.predicate | turtle_term }} {{ view.value | turtle_string }} {{ view.predicate | curie }}"
-    renderer = JinjaTemplateRenderer(prefixes={"ex": "http://ex.org/"})
+    table = PrefixTable([NamespacePrefix(prefix="ex", namespace="http://ex.org/", source="user")])
     view = Annotation(predicate="http://ex.org/a", value='say "x"')
-    assert texts(renderer.render(package(tmp_path, body), [("a", view)])) == ['ex:a "say \\"x\\"" ex:a']
+    rendered = JinjaTemplateRenderer().render(package(tmp_path, body), [("a", view)], prefixes=table)
+    assert texts(rendered) == ['ex:a "say \\"x\\"" ex:a']
 
 
-def test_the_packaged_prefixes_are_loaded_once_without_colons():
-    prefixes = JinjaTemplateRenderer().prefixes
+def test_the_packaged_prefixes_are_loaded_without_colons():
+    prefixes = {e.prefix: e.namespace for e in load_packaged_prefixes(config.packaged_prefixes_file)}
     assert prefixes["skos"] == "http://www.w3.org/2004/02/skos/core#" and not any(p.endswith(":") for p in prefixes)

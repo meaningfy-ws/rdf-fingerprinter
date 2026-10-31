@@ -1,105 +1,18 @@
 @startuml
-title Class diagram inferred by rdf-fingerprinter — http://publications.europa.eu/resources/authority/treaties
-hide empty members
+title Class diagram inferred by rdf-fingerprinter — authority:treaties — overview
 
-class "euvoc:Treaty" as C1 {
-  eli:date_document : xsd:date [0..1]
-  eli:first_date_entry_in_force : xsd:date [0..1]
-  lemon:context : resource [2]
-  euvoc:endDate : xsd:date [0..1]
-  euvoc:officialJournalDate : xsd:date [0..1]
-  euvoc:officialJournalNumber : xsd:string [0..1]
-  euvoc:officialJournalSeries : xsd:string [0..1]
-  euvoc:signatureLocation : resource [0..1]
-  euvoc:startDate : xsd:date [1]
-  euvoc:status : resource [1]
-  dcterms:created : xsd:date [1]
-  dcterms:dateAccepted : xsd:date [1]
-  dcterms:dateSubmitted : xsd:date [1]
-  dcterms:isReplacedBy : euvoc:Treaty | skos:Concept [0..1]
-  dcterms:replaces : euvoc:Treaty | skos:Concept [0..1]
-  dcterms:type : resource [1]
-  skos:inScheme : owl:Ontology | skos:ConceptScheme [1]
-  skos:topConceptOf : owl:Ontology | skos:ConceptScheme [1]
+package "euvoc (3 classes)" as N1 {
+  [euvoc]
 }
-class "euvoc:XlNotation" as C2 {
-  euvoc:endDate : xsd:date [0..1]
-  euvoc:startDate : xsd:date [0..1]
-  euvoc:status : resource [0..1]
-  dcterms:created : xsd:date [0..1]
-  dcterms:type : resource [1]
-  rdf:value : xsd:string [1]
+package "skos (2 classes)" as N2 {
+  [skos]
 }
-class "euvoc:XlNote" as C3 {
-  euvoc:startDate : xsd:date [1]
-  euvoc:status : resource [1]
-  dcterms:created : xsd:date [1]
-  dcterms:source : rdf:langString [0..1]
-  rdf:value : rdf:langString [1]
-}
-class "owl:Ontology" as C4 {
-  euvoc:startDate : xsd:date [1]
-  euvoc:status : resource [1]
-  dcterms:created : xsd:date [1]
-  dcterms:identifier : xsd:string [1]
-  rdfs:comment : rdfs:Literal [1]
-  owl:imports : resource [2]
-}
-class "skos:Concept" as C5 {
-  eli:date_document : xsd:date [0..1]
-  eli:first_date_entry_in_force : xsd:date [0..1]
-  lemon:context : resource [2]
-  euvoc:endDate : xsd:date [0..1]
-  euvoc:officialJournalDate : xsd:date [0..1]
-  euvoc:officialJournalNumber : xsd:string [0..1]
-  euvoc:officialJournalSeries : xsd:string [0..1]
-  euvoc:signatureLocation : resource [0..1]
-  euvoc:startDate : xsd:date [1]
-  euvoc:status : resource [1]
-  dcterms:created : xsd:date [1]
-  dcterms:dateAccepted : xsd:date [1]
-  dcterms:dateSubmitted : xsd:date [1]
-  dcterms:isReplacedBy : euvoc:Treaty | skos:Concept [0..1]
-  dcterms:replaces : euvoc:Treaty | skos:Concept [0..1]
-  dcterms:type : resource [1]
-  skos:inScheme : owl:Ontology | skos:ConceptScheme [1]
-  skos:topConceptOf : owl:Ontology | skos:ConceptScheme [1]
-}
-class "skos:ConceptScheme" as C6 {
-  euvoc:startDate : xsd:date [1]
-  euvoc:status : resource [1]
-  dcterms:created : xsd:date [1]
-  dcterms:identifier : xsd:string [1]
-  rdfs:comment : rdfs:Literal [1]
-  owl:imports : resource [2]
-}
-class "skosxl:Label" as C7 {
-  lvont:script : resource [0..1]
-  euvoc:endDate : xsd:date [0..1]
-  euvoc:startDate : xsd:date [0..1]
-  euvoc:status : resource [1]
-  dcterms:created : xsd:date [0..1]
-  dcterms:type : resource [1]
-  skosxl:literalForm : rdf:langString [1]
+package "skosxl (1 classes)" as N3 {
+  [skosxl]
 }
 
-
-C1 ..|> C5
-C1 --> "0..1" C3 : euvoc:xlChangeNote
-C1 --> "0..1" C3 : euvoc:xlDefinition
-C1 --> "0..1" C3 : euvoc:xlHistoryNote
-C1 --> "1..*" C2 : euvoc:xlNotation
-C1 --> "0..*" C7 : skosxl:altLabel
-C1 --> "1..*" C7 : skosxl:prefLabel
-C4 ..|> C6
-C4 --> "1" C7 : skosxl:prefLabel
-C5 ..|> C1
-C5 --> "0..1" C3 : euvoc:xlChangeNote
-C5 --> "0..1" C3 : euvoc:xlDefinition
-C5 --> "0..1" C3 : euvoc:xlHistoryNote
-C5 --> "1..*" C2 : euvoc:xlNotation
-C5 --> "0..*" C7 : skosxl:altLabel
-C5 --> "1..*" C7 : skosxl:prefLabel
-C6 ..|> C4
-C6 --> "1" C7 : skosxl:prefLabel
+N1 --> N2 : 1
+N1 --> N3 : 2
+N2 --> N1 : 5
+N2 --> N3 : 3
 @enduml

@@ -16,6 +16,7 @@ from fingerprint.entrypoints.cli import EXIT_UNEXPECTED, configure_logging
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators import DOC, PUML, SHACL
 from fingerprint.service_layer.representations import generate_from_profile_file
+from fingerprint.service_layer.settings import load_user_prefixes
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,15 @@ def shared_arguments(command: Callable[..., Any]) -> Callable[..., Any]:
             click.option("-o", "--output", default="./output", type=str, help="output folder (must exist)"),
             click.option("--threshold", type=float, help="acceptance threshold, (0, 1]; default: the profile's"),
             click.option("--template", type=click.Path(file_okay=False), help="a template package of your own"),
+            click.option(
+                "--prefixes", "prefixes_file", type=click.Path(dir_okay=False), help="your prefix file, over the saved table"
+            ),
+            click.option(
+                "--exclude-namespace", multiple=True, help="leave out a namespace's classes (prefix or IRI; repeatable)"
+            ),
+            click.option(
+                "--include-namespace", multiple=True, help="show a namespace again, e.g. owl (prefix or IRI; repeatable)"
+            ),
         ]
     ):
         command = decorator(command)
@@ -40,17 +50,24 @@ def generate_one(
     output: str,
     threshold: float | None,
     template: str | None,
-    options: GeneratorOptions | None = None,
+    shared: dict[str, Any],  # dict-ok: click's parsed options
+    **options: Any,
 ) -> None:
     configure_logging()
     try:
+        generator_options = GeneratorOptions(
+            exclude_namespaces=list(shared["exclude_namespace"]),
+            include_namespaces=list(shared["include_namespace"]),
+            **options,
+        )
         paths = generate_from_profile_file(
             profile,
             output,
             [name],
             threshold=threshold,
             template_location=template,
-            options=options,
+            options=generator_options,
+            user_prefixes=load_user_prefixes(shared["prefixes_file"]),
         )
     except UsageError as error:
         raise click.UsageError(str(error)) from error
@@ -64,21 +81,24 @@ def generate_one(
 
 @click.command()
 @shared_arguments
-@click.option("--shapes-namespace", help="namespace of the node shape IRIs (default urn:fingerprint:shape:)")
-def gen_shacl(profile: str, output: str, threshold: float | None, template: str | None, shapes_namespace: str | None):
-    """SHACL shapes, one Turtle file per graph, from a saved profile.json."""
-    generate_one(SHACL, profile, output, threshold, template, GeneratorOptions(shapes_namespace=shapes_namespace))
+@click.option("--shapes-namespace", help="one namespace for every shape IRI (default: each class's <ns>/shape/)")
+def gen_shacl(
+    profile: str, output: str, threshold: float | None, template: str | None, shapes_namespace: str | None, **shared
+):
+    """SHACL shapes, one Turtle file per graph with a shown class, from a saved profile.json."""
+    generate_one(SHACL, profile, output, threshold, template, shared, shapes_namespace=shapes_namespace)
 
 
 @click.command()
 @shared_arguments
-def gen_puml(profile: str, output: str, threshold: float | None, template: str | None):
-    """A PlantUML class diagram, one source file per graph, from a saved profile.json."""
-    generate_one(PUML, profile, output, threshold, template)
+@click.option("--module-size", type=click.IntRange(min=1), help="most classes per module (default 15)")
+def gen_puml(profile: str, output: str, threshold: float | None, template: str | None, module_size: int | None, **shared):
+    """PlantUML diagrams per graph, an overview and one file per module, from a saved profile.json."""
+    generate_one(PUML, profile, output, threshold, template, shared, module_size=module_size)
 
 
 @click.command()
 @shared_arguments
-def gen_doc(profile: str, output: str, threshold: float | None, template: str | None):
-    """The application-profile document (HTML) from a saved profile.json."""
-    generate_one(DOC, profile, output, threshold, template)
+def gen_doc(profile: str, output: str, threshold: float | None, template: str | None, **shared):
+    """The report page main.html from a saved profile.json."""
+    generate_one(DOC, profile, output, threshold, template, shared)

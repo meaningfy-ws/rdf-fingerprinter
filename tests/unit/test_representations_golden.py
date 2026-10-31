@@ -35,13 +35,13 @@ def texts(name, threshold=None):
 def test_golden_output(name):
     produced = texts(name)
     stem = next(iter(produced)).split("-")[0].split(".")[0]
+    if os.environ.get("UPDATE_GOLDEN"):
+        GOLDEN.mkdir(exist_ok=True)
+        for file_name, text in produced.items():
+            (GOLDEN / file_name).write_text(text, encoding="utf-8")
     assert set(produced) == {p.name for p in GOLDEN.iterdir() if p.name.startswith(stem)}
     for file_name, text in produced.items():
-        golden = GOLDEN / file_name
-        if os.environ.get("UPDATE_GOLDEN"):
-            golden.parent.mkdir(exist_ok=True)
-            golden.write_text(text, encoding="utf-8")
-        assert text == golden.read_text(encoding="utf-8"), f"{file_name} differs from its golden file"
+        assert text == (GOLDEN / file_name).read_text(encoding="utf-8"), f"{file_name} differs from its golden file"
 
 
 @pytest.mark.parametrize("threshold", [None, 0.5, 0.1])  # None: the profile's own (0.95)

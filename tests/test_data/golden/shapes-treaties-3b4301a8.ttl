@@ -3,6 +3,7 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix eli: <http://data.europa.eu/eli/ontology#> .
 @prefix euvoc: <http://publications.europa.eu/ontology/euvoc#> .
+@prefix euvoc-shape: <http://publications.europa.eu/ontology/euvoc/shape/> .
 @prefix fp: <https://data.meaningfy.ws/fingerprint/> .
 @prefix lemon: <http://lemon-model.net/lemon#> .
 @prefix lvont: <http://lexvo.org/ontology#> .
@@ -11,752 +12,832 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix skos-shape: <http://www.w3.org/2004/02/skos/core/shape/> .
 @prefix skosxl: <http://www.w3.org/2008/05/skos-xl#> .
+@prefix skosxl-shape: <http://www.w3.org/2008/05/skos-xl/shape/> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<urn:fingerprint:shape:http%3A%2F%2Fpublications.europa.eu%2Fontology%2Feuvoc%23Treaty> a sh:NodeShape ;
+euvoc-shape:Treaty a sh:NodeShape ;
     sh:targetClass euvoc:Treaty ;
     fp:instances 104 ;
     fp:observedInstances 104 ;
     fp:precisionMode "exact" ;
-    sh:property [
-        sh:path eli:date_document ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.7981 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path eli:first_date_entry_in_force ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.7885 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path lemon:context ;
-        sh:minCount 2 ;
-        sh:maxCount 2 ;
-        sh:nodeKind sh:IRI ;
-        sh:severity sh:Warning ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 0.9712 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:endDate ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.2115 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:officialJournalDate ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.8846 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:officialJournalNumber ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.8846 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:officialJournalSeries ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.8846 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:signatureLocation ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        sh:severity sh:Info ;
-        fp:confidence 0.7115 ;
-        fp:labelSupport 0.9808 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:startDate ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:status ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:xlChangeNote ;
-        sh:maxCount 1 ;
-        sh:class euvoc:XlNote ;
-        sh:nodeKind sh:BlankNode ;
-        sh:severity sh:Info ;
-        fp:confidence 0.0096 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:xlDefinition ;
-        sh:maxCount 1 ;
-        sh:class euvoc:XlNote ;
-        sh:nodeKind sh:BlankNode ;
-        sh:severity sh:Info ;
-        fp:confidence 0.0577 ;
-        fp:labelSupport 0.9615 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:xlHistoryNote ;
-        sh:maxCount 1 ;
-        sh:class euvoc:XlNote ;
-        sh:nodeKind sh:BlankNode ;
-        sh:severity sh:Info ;
-        fp:confidence 0.0096 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:xlNotation ;
-        sh:minCount 1 ;
-        sh:class euvoc:XlNotation ;
-        sh:nodeKind sh:BlankNode ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:created ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:dateAccepted ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:dateSubmitted ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:isReplacedBy ;
-        sh:maxCount 1 ;
-        sh:or ( [ sh:class euvoc:Treaty ] [ sh:class skos:Concept ] ) ;
-        sh:nodeKind sh:IRI ;
-        sh:severity sh:Info ;
-        fp:confidence 0.2115 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:replaces ;
-        sh:maxCount 1 ;
-        sh:or ( [ sh:class euvoc:Treaty ] [ sh:class skos:Concept ] ) ;
-        sh:nodeKind sh:IRI ;
-        sh:severity sh:Info ;
-        fp:confidence 0.2115 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:type ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path skos:inScheme ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:or ( [ sh:class owl:Ontology ] [ sh:class skos:ConceptScheme ] ) ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path skos:topConceptOf ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:or ( [ sh:class owl:Ontology ] [ sh:class skos:ConceptScheme ] ) ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path skosxl:altLabel ;
-        sh:class skosxl:Label ;
-        sh:nodeKind sh:BlankNode ;
-        sh:severity sh:Info ;
-        fp:confidence 0.5385 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path skosxl:prefLabel ;
-        sh:minCount 1 ;
-        sh:class skosxl:Label ;
-        sh:nodeKind sh:BlankNode ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
+    sh:property euvoc-shape:Treaty-eli-date_document ;
+    sh:property euvoc-shape:Treaty-eli-first_date_entry_in_force ;
+    sh:property euvoc-shape:Treaty-lemon-context ;
+    sh:property euvoc-shape:Treaty-euvoc-endDate ;
+    sh:property euvoc-shape:Treaty-euvoc-officialJournalDate ;
+    sh:property euvoc-shape:Treaty-euvoc-officialJournalNumber ;
+    sh:property euvoc-shape:Treaty-euvoc-officialJournalSeries ;
+    sh:property euvoc-shape:Treaty-euvoc-signatureLocation ;
+    sh:property euvoc-shape:Treaty-euvoc-startDate ;
+    sh:property euvoc-shape:Treaty-euvoc-status ;
+    sh:property euvoc-shape:Treaty-euvoc-xlChangeNote ;
+    sh:property euvoc-shape:Treaty-euvoc-xlDefinition ;
+    sh:property euvoc-shape:Treaty-euvoc-xlHistoryNote ;
+    sh:property euvoc-shape:Treaty-euvoc-xlNotation ;
+    sh:property euvoc-shape:Treaty-dcterms-created ;
+    sh:property euvoc-shape:Treaty-dcterms-dateAccepted ;
+    sh:property euvoc-shape:Treaty-dcterms-dateSubmitted ;
+    sh:property euvoc-shape:Treaty-dcterms-isReplacedBy ;
+    sh:property euvoc-shape:Treaty-dcterms-replaces ;
+    sh:property euvoc-shape:Treaty-dcterms-type ;
+    sh:property euvoc-shape:Treaty-skos-inScheme ;
+    sh:property euvoc-shape:Treaty-skos-topConceptOf ;
+    sh:property euvoc-shape:Treaty-skosxl-altLabel ;
+    sh:property euvoc-shape:Treaty-skosxl-prefLabel ;
 .
 
-<urn:fingerprint:shape:http%3A%2F%2Fpublications.europa.eu%2Fontology%2Feuvoc%23XlNotation> a sh:NodeShape ;
+euvoc-shape:Treaty-eli-date_document a sh:PropertyShape ;
+    sh:path eli:date_document ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.7981 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-eli-first_date_entry_in_force a sh:PropertyShape ;
+    sh:path eli:first_date_entry_in_force ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.7885 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-lemon-context a sh:PropertyShape ;
+    sh:path lemon:context ;
+    sh:minCount 2 ;
+    sh:maxCount 2 ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Warning ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 0.9712 ;
+.
+
+euvoc-shape:Treaty-euvoc-endDate a sh:PropertyShape ;
+    sh:path euvoc:endDate ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.2115 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-euvoc-officialJournalDate a sh:PropertyShape ;
+    sh:path euvoc:officialJournalDate ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.8846 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-euvoc-officialJournalNumber a sh:PropertyShape ;
+    sh:path euvoc:officialJournalNumber ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.8846 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-euvoc-officialJournalSeries a sh:PropertyShape ;
+    sh:path euvoc:officialJournalSeries ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.8846 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-euvoc-signatureLocation a sh:PropertyShape ;
+    sh:path euvoc:signatureLocation ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Info ;
+    fp:confidence 0.7115 ;
+    fp:labelSupport 0.9808 ;
+.
+
+euvoc-shape:Treaty-euvoc-startDate a sh:PropertyShape ;
+    sh:path euvoc:startDate ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-euvoc-status a sh:PropertyShape ;
+    sh:path euvoc:status ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-euvoc-xlChangeNote a sh:PropertyShape ;
+    sh:path euvoc:xlChangeNote ;
+    sh:maxCount 1 ;
+    sh:class euvoc:XlNote ;
+    sh:nodeKind sh:BlankNode ;
+    sh:severity sh:Info ;
+    fp:confidence 0.0096 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-euvoc-xlDefinition a sh:PropertyShape ;
+    sh:path euvoc:xlDefinition ;
+    sh:maxCount 1 ;
+    sh:class euvoc:XlNote ;
+    sh:nodeKind sh:BlankNode ;
+    sh:severity sh:Info ;
+    fp:confidence 0.0577 ;
+    fp:labelSupport 0.9615 ;
+.
+
+euvoc-shape:Treaty-euvoc-xlHistoryNote a sh:PropertyShape ;
+    sh:path euvoc:xlHistoryNote ;
+    sh:maxCount 1 ;
+    sh:class euvoc:XlNote ;
+    sh:nodeKind sh:BlankNode ;
+    sh:severity sh:Info ;
+    fp:confidence 0.0096 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-euvoc-xlNotation a sh:PropertyShape ;
+    sh:path euvoc:xlNotation ;
+    sh:minCount 1 ;
+    sh:class euvoc:XlNotation ;
+    sh:nodeKind sh:BlankNode ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-dcterms-created a sh:PropertyShape ;
+    sh:path dcterms:created ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-dcterms-dateAccepted a sh:PropertyShape ;
+    sh:path dcterms:dateAccepted ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-dcterms-dateSubmitted a sh:PropertyShape ;
+    sh:path dcterms:dateSubmitted ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-dcterms-isReplacedBy a sh:PropertyShape ;
+    sh:path dcterms:isReplacedBy ;
+    sh:maxCount 1 ;
+    sh:or ( [ sh:class euvoc:Treaty ] [ sh:class skos:Concept ] ) ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Info ;
+    fp:confidence 0.2115 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-dcterms-replaces a sh:PropertyShape ;
+    sh:path dcterms:replaces ;
+    sh:maxCount 1 ;
+    sh:or ( [ sh:class euvoc:Treaty ] [ sh:class skos:Concept ] ) ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Info ;
+    fp:confidence 0.2115 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-dcterms-type a sh:PropertyShape ;
+    sh:path dcterms:type ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-skos-inScheme a sh:PropertyShape ;
+    sh:path skos:inScheme ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:or ( [ sh:class owl:Ontology ] [ sh:class skos:ConceptScheme ] ) ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-skos-topConceptOf a sh:PropertyShape ;
+    sh:path skos:topConceptOf ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:or ( [ sh:class owl:Ontology ] [ sh:class skos:ConceptScheme ] ) ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-skosxl-altLabel a sh:PropertyShape ;
+    sh:path skosxl:altLabel ;
+    sh:class skosxl:Label ;
+    sh:nodeKind sh:BlankNode ;
+    sh:severity sh:Info ;
+    fp:confidence 0.5385 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:Treaty-skosxl-prefLabel a sh:PropertyShape ;
+    sh:path skosxl:prefLabel ;
+    sh:minCount 1 ;
+    sh:class skosxl:Label ;
+    sh:nodeKind sh:BlankNode ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:XlNotation a sh:NodeShape ;
     sh:targetClass euvoc:XlNotation ;
     fp:instances 357 ;
     fp:observedInstances 357 ;
     fp:precisionMode "exact" ;
-    sh:property [
-        sh:path euvoc:endDate ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.1569 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:startDate ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.4398 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:status ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        sh:severity sh:Info ;
-        fp:confidence 0.4398 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:created ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.4398 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:type ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path rdf:value ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
+    sh:property euvoc-shape:XlNotation-euvoc-endDate ;
+    sh:property euvoc-shape:XlNotation-euvoc-startDate ;
+    sh:property euvoc-shape:XlNotation-euvoc-status ;
+    sh:property euvoc-shape:XlNotation-dcterms-created ;
+    sh:property euvoc-shape:XlNotation-dcterms-type ;
+    sh:property euvoc-shape:XlNotation-rdf-value ;
 .
 
-<urn:fingerprint:shape:http%3A%2F%2Fpublications.europa.eu%2Fontology%2Feuvoc%23XlNote> a sh:NodeShape ;
+euvoc-shape:XlNotation-euvoc-endDate a sh:PropertyShape ;
+    sh:path euvoc:endDate ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.1569 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:XlNotation-euvoc-startDate a sh:PropertyShape ;
+    sh:path euvoc:startDate ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.4398 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:XlNotation-euvoc-status a sh:PropertyShape ;
+    sh:path euvoc:status ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Info ;
+    fp:confidence 0.4398 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:XlNotation-dcterms-created a sh:PropertyShape ;
+    sh:path dcterms:created ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.4398 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:XlNotation-dcterms-type a sh:PropertyShape ;
+    sh:path dcterms:type ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:XlNotation-rdf-value a sh:PropertyShape ;
+    sh:path rdf:value ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:XlNote a sh:NodeShape ;
     sh:targetClass euvoc:XlNote ;
     fp:instances 12 ;
     fp:observedInstances 12 ;
     fp:precisionMode "exact" ;
-    sh:property [
-        sh:path euvoc:startDate ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:status ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:created ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:source ;
-        sh:maxCount 1 ;
-        sh:datatype rdf:langString ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.8333 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path rdf:value ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype rdf:langString ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
+    sh:property euvoc-shape:XlNote-euvoc-startDate ;
+    sh:property euvoc-shape:XlNote-euvoc-status ;
+    sh:property euvoc-shape:XlNote-dcterms-created ;
+    sh:property euvoc-shape:XlNote-dcterms-source ;
+    sh:property euvoc-shape:XlNote-rdf-value ;
 .
 
-<urn:fingerprint:shape:http%3A%2F%2Fwww.w3.org%2F2002%2F07%2Fowl%23Ontology> a sh:NodeShape ;
-    sh:targetClass owl:Ontology ;
-    fp:instances 1 ;
-    fp:observedInstances 1 ;
-    fp:precisionMode "exact" ;
-    sh:property [
-        sh:path euvoc:startDate ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:status ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:created ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:identifier ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path rdfs:comment ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype rdfs:Literal ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path owl:imports ;
-        sh:minCount 2 ;
-        sh:maxCount 2 ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path skosxl:prefLabel ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:class skosxl:Label ;
-        sh:nodeKind sh:BlankNode ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
+euvoc-shape:XlNote-euvoc-startDate a sh:PropertyShape ;
+    sh:path euvoc:startDate ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
 .
 
-<urn:fingerprint:shape:http%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23Concept> a sh:NodeShape ;
+euvoc-shape:XlNote-euvoc-status a sh:PropertyShape ;
+    sh:path euvoc:status ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:XlNote-dcterms-created a sh:PropertyShape ;
+    sh:path dcterms:created ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:XlNote-dcterms-source a sh:PropertyShape ;
+    sh:path dcterms:source ;
+    sh:maxCount 1 ;
+    sh:datatype rdf:langString ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.8333 ;
+    fp:labelSupport 1.0 ;
+.
+
+euvoc-shape:XlNote-rdf-value a sh:PropertyShape ;
+    sh:path rdf:value ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype rdf:langString ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept a sh:NodeShape ;
     sh:targetClass skos:Concept ;
     fp:instances 104 ;
     fp:observedInstances 104 ;
     fp:precisionMode "exact" ;
-    sh:property [
-        sh:path eli:date_document ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.7981 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path eli:first_date_entry_in_force ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.7885 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path lemon:context ;
-        sh:minCount 2 ;
-        sh:maxCount 2 ;
-        sh:nodeKind sh:IRI ;
-        sh:severity sh:Warning ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 0.9712 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:endDate ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.2115 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:officialJournalDate ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.8846 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:officialJournalNumber ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.8846 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:officialJournalSeries ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.8846 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:signatureLocation ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        sh:severity sh:Info ;
-        fp:confidence 0.7115 ;
-        fp:labelSupport 0.9808 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:startDate ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:status ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:xlChangeNote ;
-        sh:maxCount 1 ;
-        sh:class euvoc:XlNote ;
-        sh:nodeKind sh:BlankNode ;
-        sh:severity sh:Info ;
-        fp:confidence 0.0096 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:xlDefinition ;
-        sh:maxCount 1 ;
-        sh:class euvoc:XlNote ;
-        sh:nodeKind sh:BlankNode ;
-        sh:severity sh:Info ;
-        fp:confidence 0.0577 ;
-        fp:labelSupport 0.9615 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:xlHistoryNote ;
-        sh:maxCount 1 ;
-        sh:class euvoc:XlNote ;
-        sh:nodeKind sh:BlankNode ;
-        sh:severity sh:Info ;
-        fp:confidence 0.0096 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:xlNotation ;
-        sh:minCount 1 ;
-        sh:class euvoc:XlNotation ;
-        sh:nodeKind sh:BlankNode ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:created ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:dateAccepted ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:dateSubmitted ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:isReplacedBy ;
-        sh:maxCount 1 ;
-        sh:or ( [ sh:class euvoc:Treaty ] [ sh:class skos:Concept ] ) ;
-        sh:nodeKind sh:IRI ;
-        sh:severity sh:Info ;
-        fp:confidence 0.2115 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:replaces ;
-        sh:maxCount 1 ;
-        sh:or ( [ sh:class euvoc:Treaty ] [ sh:class skos:Concept ] ) ;
-        sh:nodeKind sh:IRI ;
-        sh:severity sh:Info ;
-        fp:confidence 0.2115 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:type ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path skos:inScheme ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:or ( [ sh:class owl:Ontology ] [ sh:class skos:ConceptScheme ] ) ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path skos:topConceptOf ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:or ( [ sh:class owl:Ontology ] [ sh:class skos:ConceptScheme ] ) ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path skosxl:altLabel ;
-        sh:class skosxl:Label ;
-        sh:nodeKind sh:BlankNode ;
-        sh:severity sh:Info ;
-        fp:confidence 0.5385 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path skosxl:prefLabel ;
-        sh:minCount 1 ;
-        sh:class skosxl:Label ;
-        sh:nodeKind sh:BlankNode ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
+    sh:property skos-shape:Concept-eli-date_document ;
+    sh:property skos-shape:Concept-eli-first_date_entry_in_force ;
+    sh:property skos-shape:Concept-lemon-context ;
+    sh:property skos-shape:Concept-euvoc-endDate ;
+    sh:property skos-shape:Concept-euvoc-officialJournalDate ;
+    sh:property skos-shape:Concept-euvoc-officialJournalNumber ;
+    sh:property skos-shape:Concept-euvoc-officialJournalSeries ;
+    sh:property skos-shape:Concept-euvoc-signatureLocation ;
+    sh:property skos-shape:Concept-euvoc-startDate ;
+    sh:property skos-shape:Concept-euvoc-status ;
+    sh:property skos-shape:Concept-euvoc-xlChangeNote ;
+    sh:property skos-shape:Concept-euvoc-xlDefinition ;
+    sh:property skos-shape:Concept-euvoc-xlHistoryNote ;
+    sh:property skos-shape:Concept-euvoc-xlNotation ;
+    sh:property skos-shape:Concept-dcterms-created ;
+    sh:property skos-shape:Concept-dcterms-dateAccepted ;
+    sh:property skos-shape:Concept-dcterms-dateSubmitted ;
+    sh:property skos-shape:Concept-dcterms-isReplacedBy ;
+    sh:property skos-shape:Concept-dcterms-replaces ;
+    sh:property skos-shape:Concept-dcterms-type ;
+    sh:property skos-shape:Concept-skos-inScheme ;
+    sh:property skos-shape:Concept-skos-topConceptOf ;
+    sh:property skos-shape:Concept-skosxl-altLabel ;
+    sh:property skos-shape:Concept-skosxl-prefLabel ;
 .
 
-<urn:fingerprint:shape:http%3A%2F%2Fwww.w3.org%2F2004%2F02%2Fskos%2Fcore%23ConceptScheme> a sh:NodeShape ;
+skos-shape:Concept-eli-date_document a sh:PropertyShape ;
+    sh:path eli:date_document ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.7981 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-eli-first_date_entry_in_force a sh:PropertyShape ;
+    sh:path eli:first_date_entry_in_force ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.7885 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-lemon-context a sh:PropertyShape ;
+    sh:path lemon:context ;
+    sh:minCount 2 ;
+    sh:maxCount 2 ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Warning ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 0.9712 ;
+.
+
+skos-shape:Concept-euvoc-endDate a sh:PropertyShape ;
+    sh:path euvoc:endDate ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.2115 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-euvoc-officialJournalDate a sh:PropertyShape ;
+    sh:path euvoc:officialJournalDate ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.8846 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-euvoc-officialJournalNumber a sh:PropertyShape ;
+    sh:path euvoc:officialJournalNumber ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.8846 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-euvoc-officialJournalSeries a sh:PropertyShape ;
+    sh:path euvoc:officialJournalSeries ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.8846 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-euvoc-signatureLocation a sh:PropertyShape ;
+    sh:path euvoc:signatureLocation ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Info ;
+    fp:confidence 0.7115 ;
+    fp:labelSupport 0.9808 ;
+.
+
+skos-shape:Concept-euvoc-startDate a sh:PropertyShape ;
+    sh:path euvoc:startDate ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-euvoc-status a sh:PropertyShape ;
+    sh:path euvoc:status ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-euvoc-xlChangeNote a sh:PropertyShape ;
+    sh:path euvoc:xlChangeNote ;
+    sh:maxCount 1 ;
+    sh:class euvoc:XlNote ;
+    sh:nodeKind sh:BlankNode ;
+    sh:severity sh:Info ;
+    fp:confidence 0.0096 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-euvoc-xlDefinition a sh:PropertyShape ;
+    sh:path euvoc:xlDefinition ;
+    sh:maxCount 1 ;
+    sh:class euvoc:XlNote ;
+    sh:nodeKind sh:BlankNode ;
+    sh:severity sh:Info ;
+    fp:confidence 0.0577 ;
+    fp:labelSupport 0.9615 ;
+.
+
+skos-shape:Concept-euvoc-xlHistoryNote a sh:PropertyShape ;
+    sh:path euvoc:xlHistoryNote ;
+    sh:maxCount 1 ;
+    sh:class euvoc:XlNote ;
+    sh:nodeKind sh:BlankNode ;
+    sh:severity sh:Info ;
+    fp:confidence 0.0096 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-euvoc-xlNotation a sh:PropertyShape ;
+    sh:path euvoc:xlNotation ;
+    sh:minCount 1 ;
+    sh:class euvoc:XlNotation ;
+    sh:nodeKind sh:BlankNode ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-dcterms-created a sh:PropertyShape ;
+    sh:path dcterms:created ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-dcterms-dateAccepted a sh:PropertyShape ;
+    sh:path dcterms:dateAccepted ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-dcterms-dateSubmitted a sh:PropertyShape ;
+    sh:path dcterms:dateSubmitted ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-dcterms-isReplacedBy a sh:PropertyShape ;
+    sh:path dcterms:isReplacedBy ;
+    sh:maxCount 1 ;
+    sh:or ( [ sh:class euvoc:Treaty ] [ sh:class skos:Concept ] ) ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Info ;
+    fp:confidence 0.2115 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-dcterms-replaces a sh:PropertyShape ;
+    sh:path dcterms:replaces ;
+    sh:maxCount 1 ;
+    sh:or ( [ sh:class euvoc:Treaty ] [ sh:class skos:Concept ] ) ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Info ;
+    fp:confidence 0.2115 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-dcterms-type a sh:PropertyShape ;
+    sh:path dcterms:type ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-skos-inScheme a sh:PropertyShape ;
+    sh:path skos:inScheme ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:or ( [ sh:class owl:Ontology ] [ sh:class skos:ConceptScheme ] ) ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-skos-topConceptOf a sh:PropertyShape ;
+    sh:path skos:topConceptOf ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:or ( [ sh:class owl:Ontology ] [ sh:class skos:ConceptScheme ] ) ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-skosxl-altLabel a sh:PropertyShape ;
+    sh:path skosxl:altLabel ;
+    sh:class skosxl:Label ;
+    sh:nodeKind sh:BlankNode ;
+    sh:severity sh:Info ;
+    fp:confidence 0.5385 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept-skosxl-prefLabel a sh:PropertyShape ;
+    sh:path skosxl:prefLabel ;
+    sh:minCount 1 ;
+    sh:class skosxl:Label ;
+    sh:nodeKind sh:BlankNode ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:ConceptScheme a sh:NodeShape ;
     sh:targetClass skos:ConceptScheme ;
     fp:instances 1 ;
     fp:observedInstances 1 ;
     fp:precisionMode "exact" ;
-    sh:property [
-        sh:path euvoc:startDate ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:status ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:created ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:identifier ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path rdfs:comment ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype rdfs:Literal ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path owl:imports ;
-        sh:minCount 2 ;
-        sh:maxCount 2 ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path skosxl:prefLabel ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:class skosxl:Label ;
-        sh:nodeKind sh:BlankNode ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
+    sh:property skos-shape:ConceptScheme-euvoc-startDate ;
+    sh:property skos-shape:ConceptScheme-euvoc-status ;
+    sh:property skos-shape:ConceptScheme-dcterms-created ;
+    sh:property skos-shape:ConceptScheme-dcterms-identifier ;
+    sh:property skos-shape:ConceptScheme-rdfs-comment ;
+    sh:property skos-shape:ConceptScheme-owl-imports ;
+    sh:property skos-shape:ConceptScheme-skosxl-prefLabel ;
 .
 
-<urn:fingerprint:shape:http%3A%2F%2Fwww.w3.org%2F2008%2F05%2Fskos-xl%23Label> a sh:NodeShape ;
+skos-shape:ConceptScheme-euvoc-startDate a sh:PropertyShape ;
+    sh:path euvoc:startDate ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:ConceptScheme-euvoc-status a sh:PropertyShape ;
+    sh:path euvoc:status ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:ConceptScheme-dcterms-created a sh:PropertyShape ;
+    sh:path dcterms:created ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:ConceptScheme-dcterms-identifier a sh:PropertyShape ;
+    sh:path dcterms:identifier ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:ConceptScheme-rdfs-comment a sh:PropertyShape ;
+    sh:path rdfs:comment ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype rdfs:Literal ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:ConceptScheme-owl-imports a sh:PropertyShape ;
+    sh:path owl:imports ;
+    sh:minCount 2 ;
+    sh:maxCount 2 ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:ConceptScheme-skosxl-prefLabel a sh:PropertyShape ;
+    sh:path skosxl:prefLabel ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class skosxl:Label ;
+    sh:nodeKind sh:BlankNode ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skosxl-shape:Label a sh:NodeShape ;
     sh:targetClass skosxl:Label ;
     fp:instances 4530 ;
     fp:observedInstances 4530 ;
     fp:precisionMode "exact" ;
-    sh:property [
-        sh:path lvont:script ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        sh:severity sh:Info ;
-        fp:confidence 0.0852 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:endDate ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.2684 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:startDate ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.9007 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path euvoc:status ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:created ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:nodeKind sh:Literal ;
-        sh:severity sh:Info ;
-        fp:confidence 0.9007 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path dcterms:type ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:nodeKind sh:IRI ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
-    sh:property [
-        sh:path skosxl:literalForm ;
-        sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype rdf:langString ;
-        sh:nodeKind sh:Literal ;
-        fp:confidence 1.0 ;
-        fp:labelSupport 1.0 ;
-    ] ;
+    sh:property skosxl-shape:Label-lvont-script ;
+    sh:property skosxl-shape:Label-euvoc-endDate ;
+    sh:property skosxl-shape:Label-euvoc-startDate ;
+    sh:property skosxl-shape:Label-euvoc-status ;
+    sh:property skosxl-shape:Label-dcterms-created ;
+    sh:property skosxl-shape:Label-dcterms-type ;
+    sh:property skosxl-shape:Label-skosxl-literalForm ;
+.
+
+skosxl-shape:Label-lvont-script a sh:PropertyShape ;
+    sh:path lvont:script ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    sh:severity sh:Info ;
+    fp:confidence 0.0852 ;
+    fp:labelSupport 1.0 ;
+.
+
+skosxl-shape:Label-euvoc-endDate a sh:PropertyShape ;
+    sh:path euvoc:endDate ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.2684 ;
+    fp:labelSupport 1.0 ;
+.
+
+skosxl-shape:Label-euvoc-startDate a sh:PropertyShape ;
+    sh:path euvoc:startDate ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.9007 ;
+    fp:labelSupport 1.0 ;
+.
+
+skosxl-shape:Label-euvoc-status a sh:PropertyShape ;
+    sh:path euvoc:status ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skosxl-shape:Label-dcterms-created a sh:PropertyShape ;
+    sh:path dcterms:created ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:date ;
+    sh:nodeKind sh:Literal ;
+    sh:severity sh:Info ;
+    fp:confidence 0.9007 ;
+    fp:labelSupport 1.0 ;
+.
+
+skosxl-shape:Label-dcterms-type a sh:PropertyShape ;
+    sh:path dcterms:type ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skosxl-shape:Label-skosxl-literalForm a sh:PropertyShape ;
+    sh:path skosxl:literalForm ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype rdf:langString ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
 .

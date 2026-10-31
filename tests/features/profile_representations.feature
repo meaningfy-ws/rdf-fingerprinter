@@ -1,6 +1,5 @@
 # Capability: profile-representations (openspec/changes/profile-representations)
 # Projected from UC-W2, UC-B2.1 and UC-B2.2 (docs/modules/ROOT/pages/use-cases/).
-# Step definitions are written during implementation.
 @uc_w2
 Feature: Publishing a fingerprint as an application profile
   As a data steward
@@ -57,7 +56,7 @@ Feature: Publishing a fingerprint as an application profile
       When every representation is generated
       Then the shapes parse as Turtle
       And the diagram declares each class once
-      And the document shows "<iri>" as text
+      And the document shows "<iri>" by its short name, with the full IRI as its title
 
       Examples:
         | where        | iri                        |
@@ -135,8 +134,48 @@ Feature: Publishing a fingerprint as an application profile
     Scenario: Failures and samples are flagged
       Given a profile with a class read from its first 10 of 50 instances and one recorded failure
       When the document is generated
-      Then the caveats list the sampled class and the failure
+      Then the collection section lists the failure and the caveats list the sampled class
       And the class section shows "first 10 of 50"
+
+  Rule: Shapes have readable names
+
+    Scenario Outline: Shape names
+      Given a profile with the class "<class>" and its property "<property>"
+      When the shapes are generated with the shapes namespace "<given>"
+      Then the node shape is "<node>" and the property shape is "<shape>"
+
+      Examples:
+        | class                                                    | property                                                | given                 | node                                                            | shape                                                                       |
+        | https://ontology.brainframe.com/2016/04/brainframe#Asset | https://ontology.brainframe.com/2016/04/brainframe#name | http://ex.org/shapes/ | http://ex.org/shapes/brainframe-Asset                           | http://ex.org/shapes/brainframe-Asset-brainframe-name                       |
+
+  Rule: Namespace filters choose the classes shown
+
+    Scenario: Meta vocabularies hidden by default
+      Given a profile holding the classes "http://example.org/Person" and "http://www.w3.org/2002/07/owl#Ontology"
+      When the shapes and the diagram are generated with no filter option
+      Then "ex:Person" has a node shape and a box
+      And "owl:Ontology" has neither
+
+    Scenario: Included again
+      Given a profile holding the classes "http://example.org/Person" and "http://www.w3.org/2002/07/owl#Ontology"
+      When the shapes and the diagram are generated with include "owl"
+      Then "owl:Ontology" has a node shape and a box
+
+    Scenario: Excluded by option
+      Given a profile holding the classes "http://example.org/Person" and "http://www.w3.org/2002/07/owl#Ontology"
+      When the shapes and the diagram are generated with exclude "ex"
+      Then "ex:Person" has neither
+
+    Scenario: Unknown name
+      Given a profile holding the classes "http://example.org/Person" and "http://www.w3.org/2002/07/owl#Ontology"
+      When the shapes and the diagram are generated with exclude "nope"
+      Then a warning names "nope"
+      And "ex:Person" has a node shape and a box
+
+    Scenario: Empty default graph
+      Given a profile whose default graph is empty
+      When the shapes and the diagram are generated with no filter option
+      Then no shapes or diagram file is written for it
 
   Rule: Every format is checked into a golden file
 

@@ -1,4 +1,4 @@
-"""Step definitions for fingerprint_report.feature: render_report, the CLI and the library call over FakeSparql."""
+"""Step definitions for fingerprint_report.feature: the report page, the CLI and the library call over FakeSparql."""
 
 import io
 import urllib.error
@@ -10,17 +10,21 @@ from click.testing import CliRunner
 from pytest_bdd import given, parsers, scenarios, then, when
 from rdflib import Literal
 
+from fingerprint.adapters.profile_file import load_profile
 from fingerprint.adapters.sparql import QueryTimeout, SparqlHttpClient
+from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.profile import ProfileRun
+from fingerprint.domain.profile import ProfileRun, Settings
 from fingerprint.entrypoints.cli import main as cli
 from fingerprint.service_layer import handlers
-from fingerprint.service_layer.report import render_report
+from fingerprint.service_layer.generators import DocumentGenerator
 from tests.unit.fakes import EX, FakeSparql
 
 scenarios("fingerprint_report.feature")
 
-CUSTOM_TEMPLATE = Path(__file__).parents[2] / "test_data" / "custom_template"
+TEST_DATA = Path(__file__).parents[2] / "test_data"
+CUSTOM_TEMPLATE = TEST_DATA / "custom_template"
+READABILITY = TEST_DATA / "profiles" / "readability-profile.json"
 
 
 def raw_class(mode="exact", observed=3, instances=3, properties=None):
@@ -35,15 +39,13 @@ def raw_class(mode="exact", observed=3, instances=3, properties=None):
 
 
 def profile(classes=None, failures=None):
-    return analyse(
-        ProfileRun.model_validate(
-            {
-                "endpoint": "http://127.0.0.1:9/sparql",
-                "settings": {},
-                "graphs": [{"class_partitions": classes or [raw_class()]}],
-                "failures": failures or [],
-            }
-        )
+    return ProfileRun.model_validate(
+        {
+            "endpoint": "http://127.0.0.1:9/sparql",
+            "settings": {},
+            "graphs": [{"class_partitions": classes or [raw_class()]}],
+            "failures": failures or [],
+        }
     )
 
 
@@ -56,6 +58,10 @@ def ctx(tmp_path):
 
 def soup(ctx):
     return BeautifulSoup((ctx["output"] / "main.html").read_text(), "html.parser")
+
+
+def render(ctx):
+    DocumentGenerator(analyse(ctx["profile"]), JinjaTemplateRenderer()).write(ctx["output"])
 
 
 # --- rendering ---
@@ -79,7 +85,7 @@ def failing_endpoint(ctx, monkeypatch):
 
 @when("the report is rendered")
 def rendered(ctx):
-    render_report(ctx["profile"], ctx["output"])
+    render(ctx)
 
 
 @then("the report is written")
@@ -109,14 +115,14 @@ def section_shows(ctx, label):
 
 @given("the report is generated for the test data")
 def generated(ctx):
-    render_report(ctx["profile"], ctx["output"])
+    render(ctx)
 
 
 @then(parsers.parse("every class table has the columns {columns}"))
 def has_columns(ctx, columns):
     expected = [c.strip().lower() for c in columns.replace(" and ", ", ").split(",")]
     expected = ["avg" if c == "avg" else c for c in expected]
-    tables = soup(ctx).find_all("table", class_="class-profile")
+    tables = soup(ctx).find_all("table", class_="props")
     assert tables
     for table in tables:
         headers = [th.text.strip().lower() for th in table.find_all("th")]
@@ -130,7 +136,7 @@ def no_language(ctx):
 
 @then('its language coverage cell shows "—"')
 def dash(ctx):
-    table = soup(ctx).find("table", class_="class-profile")
+    table = soup(ctx).find("table", class_="props")
     column = [th.text.strip() for th in table.find_all("th")].index("Language coverage")
     assert table.find("tbody").find("tr").find_all("td")[column].text.strip() == "—"
 
@@ -151,6 +157,64 @@ def lists_failure(ctx, cls):
 def lists_settings(ctx):
     text = soup(ctx).find(id="collection").get_text(" ")
     assert "precision_policy" in text and "timeout_seconds" in text
+
+
+# --- readability (readability-representations: short names, one self-contained page) ---
+
+
+@given("the readability test profile")
+def readability_profile(ctx):
+    ctx["profile"] = load_profile(READABILITY)
+
+
+@then("no visible text outside the namespace table, the endpoint, the settings, the failures and the caveats holds a full IRI")
+def short_names_only(ctx):
+    page = soup(ctx)
+    for exempt in [page.find(id="namespaces"), page.find(id="collection"), page.find(id="caveats"), page.find("header")]:
+        exempt.decompose()
+    for script in page.find_all(["script", "style"]):
+        script.decompose()
+    for overview in page.select("#overview dd"):
+        overview.decompose()
+    text = page.get_text(" ")
+    assert "http://" not in text and "https://" not in text, [t for t in text.split() if "://" in t]
+
+
+@then(parsers.parse('the caveats list "{prefix}" as hidden with {count:d} class'))
+def hidden_listed(ctx, prefix, count):
+    text = " ".join(soup(ctx).find(id="caveats").get_text(" ").split())
+    assert f"{prefix} (" in text and f"{count} classes" in text
+
+
+@then(parsers.parse('no "{prefix}:" class section exists'))
+def no_hidden_section(ctx, prefix):
+    assert not soup(ctx).select(f'details.cls[data-ns="{prefix.rstrip(":")}"]')
+
+
+@then("the page has no external stylesheet, script, image or CSS url")
+def no_external_resources(ctx):
+    page = soup(ctx)
+    assert not page.find_all("link", rel="stylesheet")
+    assert not page.find_all("script", src=True) and not page.find_all("img")
+    assert "url(" not in " ".join(s.get_text() for s in page.find_all("style"))
+
+
+@then("without its scripts the page still has the table of contents, every class section and every table")
+def readable_without_script(ctx):
+    page = soup(ctx)
+    for script in page.find_all("script"):
+        script.decompose()
+    sections = page.select("details.cls")
+    assert page.find("nav") and sections and len(page.select("li[data-anchor]")) == len(sections)
+    assert all(s.find("table") for s in sections)
+
+
+@then("each class section carries its prefix and a search text with its short name and full IRI")
+def search_data(ctx):
+    for section in soup(ctx).select("details.cls"):
+        link = section.find("summary").find(class_="curie")
+        assert section["data-ns"] and link["title"].lower() in section["data-q"]
+        assert link.get_text().lower() in section["data-q"]
 
 
 # --- the command line ---
@@ -175,6 +239,12 @@ def unauthorized() -> urllib.error.HTTPError:
     return urllib.error.HTTPError("http://fake", 401, "unauthorized", {}, io.BytesIO(b""))  # type: ignore[arg-type]
 
 
+def _bad_prefixes(ctx) -> Path:
+    path = ctx["output"].parent / "bad-prefixes.json"
+    path.write_text("[]")
+    return path
+
+
 SITUATIONS = {
     "every class is profiled": lambda fake, ctx: None,
     "one class fails and the others are profiled": lambda fake, ctx: fake.on(
@@ -184,6 +254,7 @@ SITUATIONS = {
     "the endpoint requires authentication": lambda fake, ctx: fake.on("Q0", unauthorized()),
     "the output folder does not exist": lambda fake, ctx: ctx.update(output=ctx["output"] / "missing"),
     "a setting is invalid": lambda fake, ctx: ctx.update(args=["--threshold", "0"]),
+    "the prefix file is malformed": lambda fake, ctx: ctx.update(args=["--prefixes", str(_bad_prefixes(ctx))]),
     "an unexpected error occurs": lambda fake, ctx: fake.on("Q3", [{"c": EX + "Person", "instances": "many"}]),
 }
 
@@ -208,9 +279,9 @@ def exits_with(ctx, code):
 # --- the library ---
 
 
-@when("the library is called with only an endpoint and an output folder")
+@when("the library is called with an endpoint, an output folder and default settings")
 def library_call(ctx, fake):
-    ctx["returned"] = handlers.generate_endpoint_fingerprint_report("http://fake/sparql", ctx["output"])
+    ctx["returned"], _ = handlers.fingerprint_report("http://fake/sparql", ctx["output"], Settings())
 
 
 @then("it returns the path of the main report document")
@@ -218,21 +289,20 @@ def returns_path(ctx):
     assert ctx["returned"] == ctx["output"] / "main.html" and ctx["returned"].is_file()
 
 
-@given("a custom template that reads a constant from the additional configuration")
+@given("a custom template package that prints the number of graphs")
 def custom_template(ctx):
     ctx["template"] = CUSTOM_TEMPLATE
 
 
-@when("the report is generated with that constant")
-def with_constant(ctx, fake):
-    handlers.generate_endpoint_fingerprint_report(
-        "http://fake/sparql", ctx["output"], external_template_location=ctx["template"], additional_config={"title": "Ours"}
-    )
+@when("the report is generated with that package")
+def with_package(ctx, fake):
+    _, ctx["run"] = handlers.fingerprint_report("http://fake/sparql", ctx["output"], Settings(), template=ctx["template"])
 
 
-@then("the constant appears in the report")
-def constant_appears(ctx):
-    assert soup(ctx).find("h1").text == "Ours"
+@then("the page shows that number")
+def page_shows_number(ctx):
+    page = soup(ctx)
+    assert page.find("h1").text == "Ours" and page.find(id="graphs").text == str(len(ctx["run"].graphs))
 
 
 # --- the saved profile ---
@@ -258,6 +328,12 @@ def profile_only(ctx):
     assert (ctx["output"] / "profile.json").is_file()
 
 
+@then("the profile file holds a namespace table")
+def profile_has_namespaces(ctx):
+    run = ProfileRun.model_validate_json((ctx["output"] / "profile.json").read_text())
+    assert run.namespaces and {"ex", "rdf"} <= {e.prefix for e in run.namespaces}
+
+
 @then("the profile file lists that failure")
 def profile_lists_failure(ctx):
     run = ProfileRun.model_validate_json((ctx["output"] / "profile.json").read_text())
@@ -267,19 +343,19 @@ def profile_lists_failure(ctx):
 # --- representations in the same run (UC-B2.2) ---
 
 
-@when("the fingerprint command runs with the shapes format")
-def command_runs_with_shapes(ctx):
-    args = ["-e", "http://fake/sparql", "-o", str(ctx["output"]), "--format", "shacl"]
-    ctx["result"] = CliRunner().invoke(cli.fingerprint_endpoint, args)
-
-
 @when(parsers.parse('the fingerprint command runs with the format "{name}"'))
 def command_runs_with_format(ctx, name):
     args = ["-e", "http://fake/sparql", "-o", str(ctx["output"]), "--format", name]
     ctx["result"] = CliRunner().invoke(cli.fingerprint_endpoint, args)
 
 
-@then("the output folder holds the report, the profile file and one shapes file per profiled graph")
+@then("the output folder holds the report and no profile.html")
+def report_not_profile_html(ctx):
+    names = {p.name for p in ctx["output"].iterdir()}
+    assert "main.html" in names and "profile.html" not in names
+
+
+@then("the output folder holds the report, the profile file and one shapes file per non-empty profiled graph")
 def report_profile_and_shapes(ctx):
     names = {p.name for p in ctx["output"].iterdir()}
     assert {"main.html", "profile.json"} <= names and [n for n in names if n.startswith("shapes-")] == ["shapes-default.ttl"]

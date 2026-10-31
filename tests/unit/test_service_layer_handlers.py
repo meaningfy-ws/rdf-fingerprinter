@@ -1,37 +1,32 @@
-#!/usr/bin/python3
+"""The library entry `fingerprint_report` (fingerprint-report › Library outcomes)."""
 
-# test_service_layer_handlers.py
-# Date:  17/10/2020
-# Author: Eugeniu Costetchi
-# Email: costezki.eugen@gmail.com
-
-""" """
-
-import json
 from importlib.resources import files
 
 import pytest
 
 import fingerprint_report_templates
-from fingerprint.service_layer.handlers import generate_endpoint_fingerprint_report, generate_report_builder_config
+from fingerprint.domain.profile import Settings
+from fingerprint.domain.views import GeneratorOptions
+from fingerprint.service_layer.exceptions import UsageError
+from fingerprint.service_layer.handlers import fingerprint_report
+from tests.unit.fakes import FakeSparql
 
 
-def test_accessing_templates():
+def test_the_report_package_is_packaged():
     assert (files(fingerprint_report_templates) / "fingerprint_report" / "config.json").is_file()
 
 
-def test_reading_template_config_json_file():
-    config_dict = json.loads((files(fingerprint_report_templates) / "fingerprint_report" / "config.json").read_bytes())
-    assert "conf" in config_dict
-    assert "template" in config_dict
-
-
-def test_generate_report_builder_config():
-    d = generate_report_builder_config(sparql_endpoint_url="url", selected_graphs=["graph"], external_template_location=None)
-    assert "url" == d["conf"]["default_endpoint"]
-    assert "graph" in d["conf"]["selected_graphs"]
-
-
-def test_generate_endpoint_fingerprint_report_requires_an_existing_folder(tmp_path):
+def test_a_missing_output_folder_is_refused_before_any_query(tmp_path):
+    sparql = FakeSparql()
     with pytest.raises(NotADirectoryError):
-        generate_endpoint_fingerprint_report(sparql_endpoint_url="url", output_location=tmp_path / "missing")
+        fingerprint_report("http://e/sparql", tmp_path / "missing", Settings(), sparql=sparql)
+    assert sparql.sent("") == []
+
+
+def test_bad_options_are_usage_errors_before_any_query(tmp_path):
+    sparql = FakeSparql()
+    with pytest.raises(UsageError, match="shapes-namespace"):
+        fingerprint_report(
+            "http://e/sparql", tmp_path, Settings(), options=GeneratorOptions(shapes_namespace="urn:x y<"), sparql=sparql
+        )
+    assert sparql.sent("") == []

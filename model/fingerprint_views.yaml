@@ -22,8 +22,8 @@ enums:
     description: A representation a fingerprint can be published as; the name the commands and --format use.
     permissible_values:
       shacl: { description: "SHACL shapes, one Turtle file per graph." }
-      puml: { description: "A PlantUML class diagram, one source file per graph." }
-      doc: { description: "The application-profile document (HTML)." }
+      puml: { description: "PlantUML class diagrams: per graph an overview and one file per module." }
+      doc: { description: "The report page main.html (HTML), from a saved profile." }
   ShapeSeverity:
     description: The severity of a property shape; violation is SHACL's default and is not written.
     permissible_values:
@@ -39,6 +39,11 @@ enums:
     permissible_values:
       attribute: { description: "A line inside the class box." }
       association: { description: "An arrow to the class of its values." }
+  DiagramKind:
+    description: Which diagram a PlantUML file holds; the one template branches on it.
+    permissible_values:
+      overview: { description: "The namespaces of a graph and the links between them." }
+      module: { description: "The classes of one namespace, or of one cluster of it." }
 
 classes:
   # --- shared ---
@@ -47,6 +52,7 @@ classes:
     attributes:
       prefix: { required: true }
       namespace: { required: true }
+      source: { description: "Where the prefix came from (user, packaged, prefix_cc, generated); set in the report's table." }
 
   Annotation:
     description: A predicate and its value, both written as Turtle.
@@ -60,12 +66,6 @@ classes:
       file_name: { required: true }
       text: { required: true }
 
-  GraphText:
-    description: The rendered text of one graph's view, by the graph's slug (e.g. a diagram the document embeds).
-    attributes:
-      slug: { required: true }
-      text: { required: true }
-
   GraphView:
     mixin: true
     description: What every per-graph view carries.
@@ -77,7 +77,10 @@ classes:
   GeneratorOptions:
     description: Options of the generators beyond the shared ones.
     attributes:
-      shapes_namespace: { description: "Namespace of the node shape IRIs (SHACL only)." }
+      shapes_namespace: { description: "One namespace for every shape IRI (SHACL only); unset: per class namespace." }
+      exclude_namespaces: { multivalued: true, description: "Prefixes or namespace IRIs whose classes are left out, beyond the meta vocabularies." }
+      include_namespaces: { multivalued: true, description: "Prefixes or namespace IRIs shown again; wins over exclusion." }
+      module_size: { range: integer, minimum_value: 1, ifabsent: "int(15)", description: "Most classes per diagram module (PlantUML only)." }
 
   # --- SHACL ---
   ShapesGraph:
@@ -98,18 +101,45 @@ classes:
   PropertyShape:
     description: The shape of one property of one class.
     attributes:
+      shape: { required: true, description: "The property shape IRI, as Turtle." }
       path: { required: true, description: "The property, as Turtle." }
       constraints: { multivalued: true, description: "Constraint lines, as Turtle." }
       severity: { range: ShapeSeverity, required: true }
       annotations: { range: Annotation, multivalued: true, inlined_as_list: true }
 
   # --- PlantUML ---
-  DiagramGraph:
-    description: The class diagram of one graph.
+  DiagramModule:
+    description: The class diagram of one module of a graph.
     mixins: [GraphView]
     attributes:
+      kind: { range: DiagramKind, required: true }
+      name: { required: true, description: "The module's name: a prefix, with ~n for a cluster." }
       classes: { range: DiagramClass, multivalued: true, inlined_as_list: true }
-      parent_boxes: { range: DiagramBox, multivalued: true, inlined_as_list: true, description: "Parents not profiled in this graph." }
+      reference_boxes: { range: DiagramBox, multivalued: true, inlined_as_list: true, description: "Classes outside the module that its arrows point to." }
+
+  DiagramOverview:
+    description: The namespaces of one graph and the links between them.
+    mixins: [GraphView]
+    attributes:
+      kind: { range: DiagramKind, required: true }
+      packages: { range: DiagramPackage, multivalued: true, inlined_as_list: true }
+      links: { range: DiagramLink, multivalued: true, inlined_as_list: true }
+
+  DiagramPackage:
+    description: A namespace in the overview.
+    attributes:
+      alias: { required: true }
+      prefix: { required: true }
+      classes: { range: integer, required: true, description: "Shown classes of the namespace; 0 when only referenced." }
+      referenced: { range: boolean, required: true, description: "True when the namespace holds only link targets." }
+      modules: { multivalued: true, description: "The module names of the namespace." }
+
+  DiagramLink:
+    description: The links from one namespace to another.
+    attributes:
+      source: { required: true, description: "The source package alias." }
+      target: { required: true, description: "The target package alias." }
+      count: { range: integer, required: true }
 
   DiagramClass:
     description: One class box.
@@ -136,7 +166,8 @@ classes:
     description: The application-profile document.
     attributes:
       overview: { range: Overview, required: true, inlined: true }
-      namespaces: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true, description: "The prefixes the labels use." }
+      namespaces: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true, description: "The profile's namespace table, with sources." }
+      collection: { range: CollectionSection, required: true, inlined: true }
       graphs: { range: DocumentGraph, multivalued: true, inlined_as_list: true }
       caveats: { range: Caveats, required: true, inlined: true }
       skipped: { multivalued: true, description: "IRIs that cannot be written; the same list as caveats.skipped, kept for custom templates." }
@@ -148,7 +179,12 @@ classes:
       started_at: { range: datetime }
       finished_at: { range: datetime }
       tool_version: {}
+
+  CollectionSection:
+    description: How the run went - its settings and failures.
+    attributes:
       settings: { range: SettingValue, multivalued: true, inlined_as_list: true }
+      failures: { range: FailureNote, multivalued: true, inlined_as_list: true }
 
   SettingValue:
     description: A collection setting as the document prints it.
@@ -160,8 +196,9 @@ classes:
     description: The chapter of one graph.
     attributes:
       slug: { required: true }
-      label: { required: true }
-      diagram: { required: true, description: "The PlantUML source of the graph's diagram; empty when none." }
+      label: { required: true, description: "The graph as a short name." }
+      iri: { description: "The graph IRI; absent for the default graph." }
+      empty: { range: boolean, required: true, description: "True when the graph has no class partitions." }
       classes: { range: DocumentClass, multivalued: true, inlined_as_list: true }
 
   DocumentClass:
@@ -169,9 +206,12 @@ classes:
     attributes:
       iri: { required: true }
       label: { required: true }
+      prefix: { required: true, description: "The prefix of the class's namespace, for the filters." }
       anchor: { required: true }
+      q: { required: true, description: "The search text: short name and IRI, lower case." }
       instances: { range: integer, required: true }
       precision: { required: true, description: "exact, or first N of M." }
+      sample_note: { description: "(sample may differ between queries), when the sample was not shared." }
       sampled: { range: boolean, required: true }
       parents: { range: ParentReference, multivalued: true, inlined_as_list: true }
       properties: { range: DocumentProperty, multivalued: true, inlined_as_list: true }
@@ -179,25 +219,53 @@ classes:
   ParentReference:
     description: A parent class as the document names it.
     attributes:
+      iri: { required: true }
       label: { required: true }
       source: { required: true, description: "declared or implied." }
 
   DocumentProperty:
-    description: The row of one property.
+    description: The row of one property; every value is display text (numbers rounded to 2 decimals, — when absent).
     attributes:
       iri: { required: true }
       label: { required: true }
-      types: { multivalued: true }
-      cardinality: { required: true }
-      usage: { required: true }
+      subjects: { required: true }
+      min: { required: true }
+      max: { required: true }
+      avg: { required: true }
+      kind: { required: true }
+      distinct: { required: true }
+      types: { range: DocumentTerm, multivalued: true, inlined_as_list: true }
+      confidence: { required: true }
+      cardinality: { required: true, description: "The cardinality label; present for a presence-only property." }
       inheritance: { required: true }
+      language_coverage: { required: true }
+
+  DocumentTerm:
+    description: An IRI as the page shows it.
+    attributes:
+      iri: { required: true }
+      label: { required: true }
 
   Caveats:
     description: What the reader should know about how complete the profile is.
     attributes:
       sampled: { range: SampledClass, multivalued: true, inlined_as_list: true }
-      failures: { range: FailureNote, multivalued: true, inlined_as_list: true }
+      untyped: { range: UntypedSubjects, multivalued: true, inlined_as_list: true }
+      hidden: { range: HiddenNamespace, multivalued: true, inlined_as_list: true }
       skipped: { multivalued: true }
+
+  UntypedSubjects:
+    description: The subjects without rdf:type in one graph (only when graph statistics were collected).
+    attributes:
+      graph: { required: true }
+      count: { range: integer, required: true }
+
+  HiddenNamespace:
+    description: A namespace the filters hid, and how many classes it held.
+    attributes:
+      prefix: { required: true }
+      namespace: { required: true }
+      classes: { range: integer, required: true }
 
   SampledClass:
     attributes:
@@ -209,5 +277,7 @@ classes:
     attributes:
       graph: { required: true }
       class_label: { required: true }
+      property_label: {}
       measurement: { required: true, description: "The query kind that failed." }
+      attempts: {}
       message: {}

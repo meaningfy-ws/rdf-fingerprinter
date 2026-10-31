@@ -1,6 +1,8 @@
 <!DOCTYPE html>
+{#- A custom report package: it reads the document view model (`view`, a ProfileDocument). -#}
 <html lang="en">
 <body>
     <h1>{{ conf.title }}</h1>
+    <p id="graphs">{{ (view.graphs or [])|length }}</p>
 </body>
 </html>

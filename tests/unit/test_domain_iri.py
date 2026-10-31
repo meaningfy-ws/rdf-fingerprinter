@@ -31,8 +31,13 @@ def test_rejects_characters_outside_iriref(iri):
 
 from fingerprint.domain.exceptions import IriRefError  # noqa: E402
 from fingerprint.domain.iri import curie, turtle_number, turtle_string, turtle_term  # noqa: E402
+from fingerprint.domain.prefixes import PrefixTable  # noqa: E402
+from fingerprint.domain.profile import NamespacePrefix  # noqa: E402
 
-PREFIXES = {"skos": "http://www.w3.org/2004/02/skos/core#", "ex": "http://ex.org/"}
+PREFIXES = PrefixTable(
+    NamespacePrefix(prefix=p, namespace=ns, source="packaged")
+    for p, ns in {"skos": "http://www.w3.org/2004/02/skos/core#", "ex": "http://ex.org/"}.items()
+)
 
 
 @pytest.mark.parametrize(

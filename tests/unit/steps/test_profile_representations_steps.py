@@ -16,8 +16,11 @@ from fingerprint.adapters.profile_file import load_profile, save_profile
 from fingerprint.adapters.sparql import SparqlHttpClient
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
+from fingerprint.domain.prefixes import namespace_of
+from fingerprint.domain.views import GeneratorOptions
 from fingerprint.entrypoints.cli import generate
 from fingerprint.service_layer.generators import GENERATORS
+from fingerprint.service_layer.generators.generator import META_NAMESPACES
 from fingerprint.service_layer.representations import generate_from_profile_file, make_generator, with_threshold
 from tests.unit.fakes import EX, XSD, files, klass, literals, profile_run, prop
 
@@ -40,15 +43,18 @@ def ctx(tmp_path):
 
 def generated(ctx, name, run=None):
     """The texts of one format for the scenario's run (hand-built profiles use the ex: prefix)."""
-    generator = make_generator(name, analyse(run or ctx["run"]), JinjaTemplateRenderer(prefixes=PREFIXES))
+    generator = make_generator(name, analyse(run or ctx["run"]), JinjaTemplateRenderer())
     texts = files(generator.serialize())
     ctx.setdefault("skipped", []).extend(generator.skipped)
     return texts
 
 
 def only(texts):
-    (text,) = texts.values()
-    return text
+    """The one file's text, or every module file of a diagram joined (the overview carries no class)."""
+    if len(texts) == 1:
+        (text,) = texts.values()
+        return text
+    return "\n".join(t for name, t in sorted(texts.items()) if "--" in name)
 
 
 def property_shape(g, path):
@@ -83,7 +89,7 @@ def generate_all_from_file(ctx):
 @then("the shapes, the diagram and the document are written")
 def all_written(ctx):
     names = {p.name for p in ctx["paths"]}
-    assert "profile.html" in names and any(n.startswith("shapes-") for n in names)
+    assert "main.html" in names and any(n.startswith("shapes-") for n in names)
     assert any(n.startswith("diagram-") for n in names)
 
 
@@ -213,9 +219,9 @@ def diagram_classes_once(ctx):
     assert len(declared) == len(set(declared)) == len(ctx["run"].graphs[0].class_partitions)
 
 
-@then(parsers.parse('the document shows "{iri}" as text'))
+@then(parsers.parse('the document shows "{iri}" by its short name, with the full IRI as its title'))
 def document_shows(ctx, iri):
-    assert iri in BeautifulSoup(ctx["outputs"]["doc"], "html.parser").get_text(" ")
+    assert BeautifulSoup(ctx["outputs"]["doc"], "html.parser").find(class_="curie", title=iri) is not None
 
 
 @then("that class is absent from the shapes and the diagram")
@@ -231,7 +237,8 @@ def warning_names_iri(ctx):
 @then("the document lists the IRI under caveats as text")
 def caveat_lists_iri(ctx):
     soup = BeautifulSoup(ctx["outputs"]["doc"], "html.parser")
-    assert soup.find("script") is None and ctx["iri"] in soup.find(id="caveats").get_text(" ")
+    assert all("alert(1)" not in script.get_text() for script in soup.find_all("script"))
+    assert ctx["iri"] in soup.find(id="caveats").get_text(" ")
 
 
 # --- shapes say no more than the profile observed ---
@@ -385,9 +392,10 @@ def document_generated(ctx):
 def document_sections(ctx):
     soup, run = ctx["soup"], load_profile(SAMPLE)
     assert soup.find(id="overview") and soup.find(id="namespaces") and soup.find(id="caveats")
-    chapters = soup.select("section.graph")
+    chapters = soup.select('main > section[id^="graph-"]')
     assert len(chapters) == len(run.graphs)
-    assert [len(c.select("section.class")) for c in chapters] == [len(g.class_partitions) for g in run.graphs]
+    shown = [[c for c in g.class_partitions if namespace_of(c.class_iri) not in META_NAMESPACES] for g in run.graphs]
+    assert [len(c.select("details.cls")) for c in chapters] == [len(s) for s in shown]
 
 
 @given("a profile with a class read from its first 10 of 50 instances and one recorded failure")
@@ -396,15 +404,15 @@ def sampled_and_failure(ctx):
     ctx["run"] = profile_run(klass(EX + "Person", 50, prop(EX + "p", {1: 10}, literals(10)), observed=10), failures=[failure])
 
 
-@then("the caveats list the sampled class and the failure")
+@then("the collection section lists the failure and the caveats list the sampled class")
 def caveats_list(ctx):
-    text = ctx["soup"].find(id="caveats").get_text(" ")
-    assert "ex:Person" in text and "not profiled after 2 attempts" in text
+    assert "not profiled after 2 attempts" in ctx["soup"].find(id="collection").get_text(" ")
+    assert "ex:Person" in ctx["soup"].find(id="caveats").get_text(" ")
 
 
 @then(parsers.parse('the class section shows "{text}"'))
 def class_section_shows(ctx, text):
-    assert text in ctx["soup"].select_one("section.class").get_text(" ")
+    assert text in ctx["soup"].select_one("details.cls").get_text(" ")
 
 
 # --- golden files ---
@@ -424,3 +432,77 @@ def output_generated(ctx, output):
 def equals_golden(ctx):
     for name, text in ctx["texts"].items():
         assert text == (DATA / "golden" / name).read_text(encoding="utf-8"), name
+
+
+# --- shape names, filters and empty graphs (readable-representations) ---
+
+
+@given(parsers.parse('a profile with the class "{cls}" and its property "{p}"'))
+def class_and_property(ctx, cls, p):
+    ctx["run"] = profile_run(klass(cls, 2, prop(p, {1: 2}, literals(2))))
+
+
+@when(parsers.parse('the shapes are generated with the shapes namespace "{namespace}"'))
+def shapes_in_namespace(ctx, namespace):
+    generator = make_generator(
+        "shacl", analyse(ctx["run"]), JinjaTemplateRenderer(), options=GeneratorOptions(shapes_namespace=namespace)
+    )
+    ctx["graph"] = Graph().parse(data=only(files(generator.serialize())), format="turtle")
+
+
+@then(parsers.parse('the node shape is "{node}" and the property shape is "{prop_shape}"'))
+def shape_names(ctx, node, prop_shape):
+    g = ctx["graph"]
+    assert (URIRef(node), RDF.type, SH.NodeShape) in g and (URIRef(node), SH.property, URIRef(prop_shape)) in g
+
+
+@given(parsers.parse('a profile holding the classes "{first}" and "{second}"'))
+def two_classes(ctx, first, second):
+    ctx["run"] = profile_run(klass(first, 1, prop(first + "_p", {1: 1}, literals(1))), klass(second, 1))
+
+
+@when(parsers.parse("the shapes and the diagram are generated {how}"))
+def filtered(ctx, how, caplog):
+    names = re.findall(r'"([^"]+)"', how)
+    options = GeneratorOptions(
+        include_namespaces=names if "include" in how else [], exclude_namespaces=names if "exclude" in how else []
+    )
+    with caplog.at_level(logging.WARNING):
+        texts = {}
+        for name in ("shacl", "puml"):
+            texts.update(
+                files(make_generator(name, analyse(ctx["run"]), JinjaTemplateRenderer(), options=options).serialize())
+            )
+        if "exclude" in how or "include" in how:
+            from fingerprint.service_layer.prefixes import resolve_namespaces
+            from fingerprint.service_layer.representations import warn_unknown_filters
+
+            warn_unknown_filters(resolve_namespaces(ctx["run"]), options)
+    ctx["texts"], ctx["log"] = texts, caplog.text
+
+
+@then(parsers.parse('"{cls}" has a node shape and a box'))
+def has_shape_and_box(ctx, cls):
+    joined = "\n".join(ctx["texts"].values())
+    assert f"sh:targetClass {cls}" in joined and f'class "{cls}"' in joined
+
+
+@then(parsers.parse('"{cls}" has neither'))
+def has_neither(ctx, cls):
+    joined = "\n".join(ctx["texts"].values())
+    assert f"sh:targetClass {cls}" not in joined and f'class "{cls}"' not in joined
+
+
+@then(parsers.parse('a warning names "{name}"'))
+def warning_names(ctx, name):
+    assert f"--exclude-namespace {name}: no such namespace; ignored" in ctx["log"]
+
+
+@given("a profile whose default graph is empty")
+def empty_default(ctx):
+    ctx["run"] = profile_run()
+
+
+@then("no shapes or diagram file is written for it")
+def no_files_for_empty(ctx):
+    assert ctx["texts"] == {}

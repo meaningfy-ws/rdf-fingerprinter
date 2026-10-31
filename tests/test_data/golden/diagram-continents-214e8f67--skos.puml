@@ -1,0 +1,29 @@
+@startuml
+title Class diagram inferred by rdf-fingerprinter — authority:continents — skos
+hide empty members
+
+class "skos:Concept" as C3 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  skos:inScheme : owl:Ontology | skos:ConceptScheme [1]
+  skos:topConceptOf : owl:Ontology | skos:ConceptScheme [1]
+}
+class "skos:ConceptScheme" as C4 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:identifier : xsd:string [1]
+  rdfs:comment : rdfs:Literal [1]
+  owl:imports : resource [1]
+}
+
+class "euvoc:Continent" as C1 #lightgray
+class "euvoc:XlNotation" as C2 #lightgray
+class "skosxl:Label" as C5 #lightgray
+
+C3 ..|> C1
+C3 --> "1" C2 : euvoc:xlNotation
+C3 --> "24" C5 : skosxl:prefLabel
+C4 --> "1" C5 : skosxl:prefLabel
+@enduml
