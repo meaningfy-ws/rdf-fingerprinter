@@ -1,0 +1,21 @@
+= Use Cases
+:description: The externally observable behaviour of rdf-fingerprinter as Cockburn White (contract) and Blue (realisation) use cases.
+
+The catalogue is the behavioural contract of rdf-fingerprinter. *Stakeholders read the White use
+cases*: what is guaranteed, including when things go wrong. *Implementers and reviewers read the
+Blue refinements* together with the xref:decisions.adoc[decisions]: how each surface realises the
+contract. Actor names and terms are those of the xref:glossary.adoc[Glossary]. The Gherkin
+features in `tests/features/` are the executable projection of this catalogue and are tagged with
+these ids.
+
+[cols="1,3,3"]
+|===
+| Id | Use case | Purpose
+
+| xref:use-cases/ucw1.adoc#uc-w1[UC-W1] | xref:use-cases/ucw1.adoc#uc-w1[UC-W1: Fingerprint an endpoint] | The value: an honest profile of a knowledge graph, and a report of it.
+| xref:use-cases/ucb1-1.adoc#uc-b1-1[UC-B1.1] | xref:use-cases/ucb1-1.adoc#uc-b1-1[UC-B1.1: Fingerprint from the command line] | Realisation through the `fingerprint` command, with exit codes.
+| xref:use-cases/ucb1-2.adoc#uc-b1-2[UC-B1.2] | xref:use-cases/ucb1-2.adoc#uc-b1-2[UC-B1.2: Fingerprint from an embedding application] | Realisation through the library function, kept from 1.x.
+| xref:use-cases/ucw2.adoc#uc-w2[UC-W2] | xref:use-cases/ucw2.adoc#uc-w2[UC-W2: Publish a fingerprint as an application profile] | The value: SHACL shapes, a class diagram and a specification document, without querying again (2.1).
+| xref:use-cases/ucb2-1.adoc#uc-b2-1[UC-B2.1] | xref:use-cases/ucb2-1.adoc#uc-b2-1[UC-B2.1: Generate representations from a saved profile] | Realisation through one command per format reading `profile.json`.
+| xref:use-cases/ucb2-2.adoc#uc-b2-2[UC-B2.2] | xref:use-cases/ucb2-2.adoc#uc-b2-2[UC-B2.2: Generate representations while fingerprinting] | Realisation through `fingerprint --format`.
+|===

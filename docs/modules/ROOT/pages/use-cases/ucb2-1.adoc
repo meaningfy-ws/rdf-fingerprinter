@@ -1,0 +1,38 @@
+[#uc-b2-1]
+= UC-B2.1: Generate representations from a saved profile
+
+*Use Case Level:* Blue (User-goal) +
+*Primary Actor:* Data steward +
+*Supporting Actors:* Generator commands (`fingerprint-gen-shacl`, `-puml`, `-doc`: shared arguments, exit codes); Profile file adapter (load and validate `profile.json`); Analyser (re-derives at the given threshold); Generator (visit hooks build the view); eds4jinja2 template package (lays out text); Output check (parses Turtle before writing) +
+*Scope:* rdf-fingerprinter — generator commands (2.1)
+
+This Blue use case refines xref:use-cases/ucw2.adoc#uc-w2[UC-W2: Publish a fingerprint as an application
+profile]. The shared contract is stated there. This page states only how the generator commands
+realise it.
+
+== Brief Description
+
+`fingerprint-gen-<format> PROFILE -o FOLDER [--threshold T] [--template DIR]` loads the profile
+through the file adapter, re-derives the analytics, lets the format's generator build its view
+through visit hooks (graph, class, property), renders the view with the format's eds4jinja2 template
+package, checks every text, then writes them (xref:decisions.adoc#ad-8[AD-8]).
+
+== Success Guarantee (Postconditions)
+
+This Blue path adds only:
+
+. Exit 0 when the files are written, even if the profile records collection failures.
+. File names: `shapes-<graph>.ttl`, `diagram-<graph>.puml`, `profile.html`; `<graph>` is `default` or a readable slug with a short hash.
+
+== Minimal Guarantees (On Failure)
+
+. Exit 2 for an unusable profile file, threshold, output folder or template folder.
+. Exit 4 for an unexpected error, including Turtle that does not parse; nothing of that run is written.
+
+== Extensions
+
+1a. `--shapes-namespace` given (SHACL only) — node shapes are minted under it instead of `urn:fingerprint:shape:`.
+
+== Technology and Data Variations
+
+The command names follow LinkML's `gen-*`, prefixed so they never shadow LinkML's own scripts.

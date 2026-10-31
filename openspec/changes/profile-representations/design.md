@@ -29,6 +29,24 @@ Constraints found while planning:
 - Runtime dependencies list only what the code imports directly; rdflib arrives through eds4jinja2
   and is a test dependency today.
 
+## Terms and where the complexity is
+
+Terms (confidence, label support, acceptance threshold, precision mode, severity) have one meaning,
+defined in `docs/modules/ROOT/pages/glossary.adoc`. The behaviour realised here is
+`UC-W2` and its refinements `UC-B2.1` (generator commands) and `UC-B2.2` (`fingerprint --format`) in
+`docs/modules/ROOT/pages/use-cases/`; the decisions are AD-7 to AD-10 in `decisions.adoc`.
+
+Where the difficulty sits, so effort and review go there:
+
+| Part | Difficulty | Why |
+|---|---|---|
+| SHACL mapping (task group 4) | high | statistics → constraints: thresholds, samples, cross-graph types, langString; the "conforms on its own data" rule (AD-10) |
+| Turtle and PlantUML escaping (3.1, 3.4) | medium | text templates emit RDF (AD-9); safe local names, unwritable IRIs |
+| Generator base (3.2) | medium | per-graph files through `template_env`, check-then-write |
+| Profile file, threshold override (2.x, 3.3) | low | Pydantic JSON round-trip; `model_copy` |
+| PlantUML, document (5, 6) | low | layout over a prepared view |
+| Commands (7) | low | click wiring, exit codes as 2.0 |
+
 ## Goals / Non-Goals
 
 **Goals:** `profile.json` written beside the report and loadable; a LinkML-shaped generator framework;

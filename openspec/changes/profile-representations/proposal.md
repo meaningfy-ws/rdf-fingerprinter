@@ -6,6 +6,9 @@ LARGE (developer, 2026-10-31): a generator framework, three formats and a saved-
 one release (2.1.0). Depends on `harden-fingerprinter` (archived): it renders that EPIC's profile
 model (its DEC-7, DEC-8) through eds4jinja2 (its DEC-6).
 
+Realises use case `UC-W2` (`docs/modules/ROOT/pages/use-cases/ucw2.adoc`); decisions recorded as
+AD-7 to AD-10 in `docs/modules/ROOT/pages/decisions.adoc`.
+
 Seeds: `inputs/shaping-2026-10-31.md` (brief, Q&A, agent calls),
 `../archive/2026-10-31-harden-fingerprinter/inputs/prior-art.md`.
 

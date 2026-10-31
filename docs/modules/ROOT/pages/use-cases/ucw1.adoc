@@ -1,0 +1,94 @@
+[#uc-w1]
+= UC-W1: Fingerprint an endpoint
+
+*Use Case Level:* White (Summary) +
+*Primary Actor:* Data steward +
+*Scope:* rdf-fingerprinter
+
+== Stakeholders and Interests
+
+* The data steward requires a profile that says, per class and property, what the data does — and
+  how sure each number is.
+* The endpoint operator requires that profiling only reads, and that its load per query stays bounded.
+* An embedding application requires a stable call and an outcome it can act on.
+
+== Brief Description
+
+The data steward names an endpoint and an output folder. rdf-fingerprinter profiles the default
+graph and every named graph (or the graphs chosen), class by class, and writes a statistics report
+and, from 2.1, the profile file. Every number states its precision: exact, or a first-N sample.
+Partial results are kept and reported, never hidden.
+
+== Preconditions
+
+* The endpoint answers SPARQL 1.1 `SELECT` queries for the actor.
+* The output folder exists.
+
+== Trigger
+
+The data steward asks for a fingerprint of the endpoint.
+
+== Success Guarantee (Postconditions)
+
+. A report is written covering every profiled graph and every instantiated class in it.
+. Each class shows its precision mode; first-N figures say "first N of M".
+. The settings used are recorded with the report and, from 2.1, the raw profile is saved as `profile.json`.
+. The endpoint received only read queries.
+. The outcome says whether failures were recorded.
+
+== Minimal Guarantees (On Failure)
+
+. If the endpoint cannot be reached, nothing is written and the outcome names the endpoint (without credentials).
+. If a setting is invalid, nothing is queried and the outcome names the setting.
+. If some measurements fail, the report and profile are still written, every failure is listed with
+  its graph, class and error, and the outcome reports partial success.
+. Credentials in the endpoint URL never appear in outputs or logs.
+
+== Main Success Scenario
+
+. The data steward names the endpoint, the output folder and optional settings.
+. The system resolves the settings.
+. The system discovers the graphs and their classes.
+. The system profiles each class exactly.
+. The system derives the analytics.
+. The system writes the report and the profile file and reports success.
+
+== Alternate Scenarios
+
+Sampled class::
+. In step 4 a class is too big to read exactly in time; the system reads its first N instances,
+  marks the class as first-N, and continues.
+
+Chosen graphs::
+. In step 3 the data steward named graphs; only those are profiled.
+
+== Extensions
+
+2a. A setting is out of range — refused before any query (minimal guarantee 2). +
+3a. The endpoint refuses connections or authentication — stop (minimal guarantee 1). +
+4a. A class fails exactly and on its first N — recorded as a failure; the other classes go on. +
+4b. A class's instances are blank nodes — each query takes its own first N; the report warns that the sample may differ between queries. +
+6a. The output folder does not exist — refused before any query.
+
+== Out of Scope
+
+* Writing to the endpoint; profiling RDF files; comparing two fingerprints.
+
+== Special Requirements
+
+* Read-only (xref:decisions.adoc#ad-1[AD-1]); bounded work per query (xref:decisions.adoc#ad-3[AD-3]).
+* Honesty: no number without its precision; no silent failure.
+
+== Notes and Business Rules
+
+* `rdf:type` is never a property row; types appear as parents and co-types.
+* Analytics are always derived from the raw counts, never collected.
+
+== Technology and Data Variations
+
+* Any SPARQL 1.1 store; the default graph may be the union of named graphs on some stores.
+* Settings come from options, environment, a config file or defaults, in that precedence.
+
+== Frequency of Occurrence
+
+On demand: a few runs per dataset, when it is published or changes.

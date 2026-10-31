@@ -2,7 +2,7 @@
 
 ## 1. Scaffolding
 
-- [ ] 1.0 Gherkin written from the spec scenarios and the error matrix: `tests/features/profile_representations.feature`; the two `fingerprint-report` scenarios added to `tests/features/fingerprint_report.feature` (DEC-9)
+- [ ] 1.0 Gherkin projected from UC-W2/UC-B2.1/UC-B2.2 (`docs/modules/ROOT/pages/use-cases/`), the spec scenarios and the error matrix, each scenario tagged with its UC id: `tests/features/profile_representations.feature`; the two `fingerprint-report` scenarios added to `tests/features/fingerprint_report.feature` (DEC-9)
 - [ ] 1.1 rdflib declared as a runtime dependency, pySHACL added to the `test` group, lock updated; `fingerprint/service_layer/generators/` and `fingerprint/adapters/profile_file.py` created empty; `make check-architecture` green (P-12)
 - [ ] 1.2 A fixed test profile `tests/test_data/profiles/sample-profile.json`, collected once from the existing continents and treaties data (`make oxigraph-load-test-data`) with fixed `started_at`/`finished_at`/`tool_version`, plus small hand-built profiles in `tests/unit/fakes.py` for first-N, failures and unusual IRIs (no new RDF data)
 
@@ -45,7 +45,7 @@
 
 ## 8. Docs and release
 
-- [ ] 8.1 Antora page `docs/modules/ROOT/pages/representations.adoc` (commands, files, SHACL mapping and severities, custom templates); nav, getting-started and api-reference updated
+- [ ] 8.1 Antora page `docs/modules/ROOT/pages/representations.adoc` (commands, files, SHACL mapping and severities, custom templates); nav, getting-started and api-reference updated; how-it-works, UC-W2/UC-B2.x and AD-7..AD-10 brought in line with what was built (drop the "(2.1)" markers)
 - [ ] 8.2 CHANGELOG 2.1.0, version bump in `pyproject.toml`
 - [ ] 8.3 Pre-PR review (five lenses, `meaningfy-code-review`); act on findings
 - [ ] 8.4 `/opsx:archive` the change into `openspec/specs/`

@@ -1,0 +1,32 @@
+[#uc-b2-2]
+= UC-B2.2: Generate representations while fingerprinting
+
+*Use Case Level:* Blue (User-goal) +
+*Primary Actor:* Data steward +
+*Supporting Actors:* CLI (`--format`, repeatable); everything of xref:use-cases/ucb1-1.adoc#uc-b1-1[UC-B1.1] for collection; the generators of xref:use-cases/ucb2-1.adoc#uc-b2-1[UC-B2.1] for rendering +
+*Scope:* rdf-fingerprinter — `fingerprint --format` (2.1)
+
+This Blue use case refines xref:use-cases/ucw2.adoc#uc-w2[UC-W2: Publish a fingerprint as an application
+profile]; the collection half is xref:use-cases/ucw1.adoc#uc-w1[UC-W1]. Neither contract is restated here.
+
+== Brief Description
+
+`fingerprint -e URL -o FOLDER --format shacl --format puml --format doc` collects as in UC-B1.1,
+writes the report and `profile.json`, then runs the chosen generators on the run in memory, at the
+run's own threshold.
+
+== Success Guarantee (Postconditions)
+
+This Blue path adds only:
+
+. The output folder holds the report, `profile.json` and the chosen representations.
+. Without `--format`, behaviour is exactly that of 2.0 plus `profile.json`.
+
+== Minimal Guarantees (On Failure)
+
+. An unknown format is a usage error (exit 2) before anything is queried.
+. If a generator fails after the report is written, the report and `profile.json` stay and the command exits 4.
+
+== Frequency of Occurrence
+
+The common path: one command for a full fingerprint.
