@@ -2,6 +2,7 @@
 * xref:getting-started.adoc[Getting Started]
 * xref:how-it-works.adoc[How It Works]
 * xref:report.adoc[The Report]
+* xref:representations.adoc[Representations]
 * xref:statistics.adoc[Statistics and Settings]
 * xref:api-reference.adoc[API Reference]
 * xref:architecture.adoc[Architecture]

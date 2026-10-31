@@ -4,7 +4,7 @@
 *Use Case Level:* Blue (User-goal) +
 *Primary Actor:* Requester (a data steward at the command line) +
 *Supporting Actors:* Command line (generator commands, shared arguments, exit codes); Profile store (load and validate `profile.json`); Analyser (re-derives at the given threshold); Generator (visit hooks build the view); Template renderer (lays the view out as text); Output check (refuses a text that does not parse) +
-*Scope:* rdf-fingerprinter — generator commands (2.1)
+*Scope:* rdf-fingerprinter — generator commands
 
 This Blue use case refines xref:use-cases/ucw2.adoc[UC-W2: Publish a fingerprint as an application
 profile]. The shared contract is stated there. Components are those of the

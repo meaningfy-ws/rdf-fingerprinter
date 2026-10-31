@@ -16,7 +16,7 @@ change `profile-representations` (its task 1.0).
 | xref:use-cases/ucw1.adoc[UC-W1] | xref:use-cases/ucw1.adoc[UC-W1: Fingerprint an endpoint] | The value: an honest profile of a knowledge graph, and a report of it.
 | xref:use-cases/ucb1-1.adoc[UC-B1.1] | xref:use-cases/ucb1-1.adoc[UC-B1.1: Fingerprint from the command line] | Realisation through the `fingerprint` command, with exit codes.
 | xref:use-cases/ucb1-2.adoc[UC-B1.2] | xref:use-cases/ucb1-2.adoc[UC-B1.2: Fingerprint from an embedding application] | Realisation through the library function, kept from 1.x.
-| xref:use-cases/ucw2.adoc[UC-W2] | xref:use-cases/ucw2.adoc[UC-W2: Publish a fingerprint as an application profile] | The value: SHACL shapes, a class diagram and a specification document, without querying again (2.1).
+| xref:use-cases/ucw2.adoc[UC-W2] | xref:use-cases/ucw2.adoc[UC-W2: Publish a fingerprint as an application profile] | The value: SHACL shapes, a class diagram and a specification document, without querying again.
 | xref:use-cases/ucb2-1.adoc[UC-B2.1] | xref:use-cases/ucb2-1.adoc[UC-B2.1: Generate representations from a saved profile] | Realisation through one command per format reading `profile.json`.
 | xref:use-cases/ucb2-2.adoc[UC-B2.2] | xref:use-cases/ucb2-2.adoc[UC-B2.2: Generate representations while fingerprinting] | Realisation through `fingerprint --format`.
 |===

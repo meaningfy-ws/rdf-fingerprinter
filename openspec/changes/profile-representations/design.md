@@ -109,8 +109,8 @@ eds4jinja2 itself.
   unique and deterministic; property shapes are blank nodes inline, as LinkML's `gen-shacl` writes them.
   Default namespace `urn:fingerprint:shape:`.
 - **P-11 File names per graph.** `shapes-<slug>.ttl`, `diagram-<slug>.puml`; slug = `default` for the
-  default graph, else the graph IRI's last non-empty path segment lower-cased to `[a-z0-9-]` (max 40
-  chars) + `-` + the first 8 hex of its SHA-1. The document lists file ↔ graph. One document:
+  default graph, else the graph IRI's last non-empty part (split on `/`, `#`, `:`) lower-cased to
+  `[a-z0-9-]` (max 40 chars, `graph` if nothing is left) + `-` + the first 8 hex of its SHA-1 (as built). The document lists file ↔ graph. One document:
   `profile.html`.
 - **P-12 Where code lives** (cosmic-python: I/O at the edges, services orchestrate, CLI only parses).
   | Module | Holds |
@@ -139,9 +139,9 @@ eds4jinja2 itself.
   (`GeneratedOutputError`). A profile that records failures still renders with exit 0 — the failures are
   shown as caveats. `fingerprint --format`: a generator error after the report is written exits 4;
   otherwise the 2.0 exit codes stand.
-- **P-14 Template syntax.** The packaged `config.json` of the SHACL and PlantUML packages do not set
-  `template_flavour_syntax` (eds4jinja2's default syntax, no `#` line statements, so Turtle comments
-  survive); the document package sets `html`. A custom package's choice is its own; the Turtle parse
+- **P-14 Template syntax.** No packaged `config.json` sets `template_flavour_syntax`: eds4jinja2's
+  default syntax has no `#` line statements, so Turtle comments and CSS selectors survive (as built:
+  the `html` syntax was dropped for the document, whose CSS has lines starting with `#`). A custom package's choice is its own; the Turtle parse
   check still guards SHACL.
 - **P-15 Service signature.** `fingerprint_report(…, formats: Sequence[str] = (), sparql: SparqlPort | None = None)`
   keyword-only and appended; `sparql` defaults to `SparqlWrapperClient` (DIP; the 1.x function is
@@ -180,8 +180,8 @@ failure leaves that format's files unwritten and keeps those of formats finished
 ```python
 class TemplateRenderer(Protocol):                 # implemented by adapters.template_renderer
     prefixes: dict[str, str]                      # from the packaged prefixes.json, for the hooks' terms
-    def render(self, package: Path, view: dict, analytics, autoescape: bool) -> str: ...
-    def write(self, folder: Path, texts: dict[str, str], check: str | None) -> list[Path]: ...  # check="turtle"
+    def render(self, package, *, view=None, config=None, autoescape=None) -> str: ...
+    def write(self, folder, texts: dict[str, str], check: str | None = None) -> list[Path]: ...  # check="turtle"
 
 class Generator:                                  # service_layer/generators/generator.py
     template_package: ClassVar[Path]              # packaged default
@@ -190,12 +190,14 @@ class Generator:                                  # service_layer/generators/gen
     autoescape: ClassVar[bool] = False            # True only for the document
     check: ClassVar[str | None] = None            # "turtle" for SHACL
 
-    def __init__(self, analytics, template_location=None): ...
+    def __init__(self, analytics, renderer, template_location=None): ...  # as built: renderer here
+    def end_graph(self, graph, view) -> None: ...  # LinkML's end_* hook, e.g. used prefixes
     def visit_graph(self, graph) -> dict | None: ...
     def visit_class(self, graph, cls) -> dict | None: ...
     def visit_property(self, graph, cls, prop) -> dict | None: ...
     def view(self) -> list[dict]: ...             # graph dicts, each with "classes", each with "properties"
-    def serialize(self, renderer) -> dict[str, str]: ...  # file name → text
+    def serialize(self) -> dict[str, str]: ...    # file name → text
+    def write(self, folder) -> list[Path]: ...    # renderer.write(folder, serialize(), check)
 ```
 
 `renderer.write` checks every text before writing any, so a failure leaves no partial output of that format. Rendering is

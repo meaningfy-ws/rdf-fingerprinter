@@ -4,7 +4,7 @@
 *Use Case Level:* Blue (User-goal) +
 *Primary Actor:* Requester (a data steward at the command line) +
 *Supporting Actors:* Command line (`--format`, repeatable); everything of xref:use-cases/ucb1-1.adoc[UC-B1.1] for collection; the generators of xref:use-cases/ucb2-1.adoc[UC-B2.1] for rendering +
-*Scope:* rdf-fingerprinter — `fingerprint --format` (2.1)
+*Scope:* rdf-fingerprinter — `fingerprint --format`
 
 This Blue use case refines xref:use-cases/ucw2.adoc[UC-W2: Publish a fingerprint as an application
 profile]; the collection half is xref:use-cases/ucw1.adoc[UC-W1]. Neither contract is restated here.

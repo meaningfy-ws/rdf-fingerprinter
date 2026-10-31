@@ -47,7 +47,7 @@ The requester asks for a fingerprint of the endpoint.
 . If the graphs cannot be listed for another reason (timeout, rejection), the default graph is still
   profiled and the gap is recorded as a failure; when graphs were chosen, those are profiled and a
   warning is logged.
-. If rendering or writing an output fails after collection, the saved profile (2.1) is kept, so
+. If rendering or writing an output fails after collection, the saved profile is kept, so
   nothing collected is lost; the outcome is an unexpected error. If saving the profile itself fails,
   the outcome is an unexpected error and nothing is written.
 . If the endpoint returns a response that cannot be interpreted (not a query error), the run stops
@@ -60,7 +60,7 @@ The requester asks for a fingerprint of the endpoint.
 . The system resolves the settings.
 . The system discovers the graphs and their classes.
 . The system profiles each class exactly.
-. The system saves the profile file (2.1).
+. The system saves the profile file.
 . The system derives the analytics and writes the report.
 
 == Alternate Scenarios

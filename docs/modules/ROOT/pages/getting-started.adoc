@@ -27,13 +27,16 @@ fingerprint -e https://my.endpoint/sparql -o report
 | `-o`, `--output` | `./output` | Folder the report is written to; it must exist.
 | `--graph` | all graphs | A graph to profile (repeatable); `""` is the default graph.
 | `--config` | — | A JSON file with collection settings.
+| `--format` | — | Also write `shacl`, `puml` or `doc` (repeatable); see xref:representations.adoc[].
 |===
 
 The other options (`--depth`, `--precision`, `--first-n`, `--timeout`, …) are listed in
 xref:statistics.adoc#settings[Settings].
 
-The command writes `main.html` into the folder and logs its progress (one line per graph and per
-class) to stderr. By default it profiles the default graph and every named graph. To use your own
+The command writes `main.html` and `profile.json` (the raw profile, saved before the report is
+rendered) into the folder and logs its progress (one line per graph and per class) to stderr. From
+`profile.json`, the `fingerprint-gen-*` commands generate SHACL shapes, a class diagram and a
+profile document without querying again (xref:representations.adoc[]). By default it profiles the default graph and every named graph. To use your own
 template, call the library (xref:api-reference.adoc[]).
 
 == Exit status

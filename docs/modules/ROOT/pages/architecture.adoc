@@ -2,8 +2,9 @@
 :description: Scope, structure and architecture decisions of rdf-fingerprinter.
 
 This page records the architecture of rdf-fingerprinter: what it is for and how it is
-structured. It describes release 2.0 (OpenSpec change `harden-fingerprinter`) and the additions of
-2.1 (change `profile-representations`), marked _(2.1)_; where 1.x differed, a note says so.
+structured, as of release 2.1. The collection, analytics and report came with 2.0 (OpenSpec change
+`harden-fingerprinter`), the saved profile and the representations with 2.1 (change
+`profile-representations`); where 1.x differed, a note says so.
 
 Reading guide::
 * xref:how-it-works.adoc[How it works] — what a run does, with a worked example.
@@ -22,7 +23,7 @@ document. It is a Python library with a console script (`fingerprint`); it is no
 service.
 
 In scope:: profiling any SPARQL 1.1 endpoint, read-only; the statistics and analytics model;
-the HTML report; _(2.1)_ the saved profile and the SHACL, PlantUML and document representations.
+the HTML report; the saved profile and the SHACL, PlantUML and document representations.
 Out of scope:: VoID and LLM tooling (`llm-schema-tools`); benchmarking (`benchmark-fingerprinter`);
 batched collection (`batched-collection`); profiling RDF files; writing to the endpoint.
 
@@ -45,14 +46,14 @@ covering the whole graph.
  Requester: data steward ──uses──▶ ┌───────────────────────┐ ──reads (SPARQL 1.1)──▶ SPARQL endpoint
  Requester: embedding app ─embeds─▶ │   rdf-fingerprinter   │                          (any store)
                                    └───────────────────────┘
-                                      │ writes        ▲ reads (2.1)
+                                      │ writes        ▲ reads
                                       ▼               │
                        output folder: report, profile.json, shapes, diagrams, document
 ----
 
 Services offered::
 * *Fingerprint an endpoint* — profile + report (xref:use-cases/ucw1.adoc[UC-W1]).
-* _(2.1)_ *Publish a fingerprint as an application profile* — SHACL shapes, a class diagram and a
+* *Publish a fingerprint as an application profile* — SHACL shapes, a class diagram and a
   specification document from a profile (xref:use-cases/ucw2.adoc[UC-W2]).
 
 Actors and systems are those of the xref:glossary.adoc#actors-and-stakeholders[Glossary]. The
@@ -66,7 +67,7 @@ interfaces that offer these services are listed at L3.
 
 | *rdf-fingerprinter* (system under design) | Profiles, analyses and renders. Has no runtime of its own: it runs inside the caller's process (a shell or an embedding application). | —
 | *SPARQL endpoint* (external) | Holds the data. | read-only, synchronous request–response from rdf-fingerprinter
-| *Output folder* (files) | Holds the outputs; _(2.1)_ also the saved profile, read back for later regenerations. | written by rdf-fingerprinter; _(2.1)_ `profile.json` read back
+| *Output folder* (files) | Holds the outputs; also the saved profile, read back for later regenerations. | written by rdf-fingerprinter; `profile.json` read back
 |===
 
 From 2.1 the generators never contact the endpoint (xref:decisions.adoc#ad-7[AD-7]).
@@ -78,19 +79,19 @@ From 2.1 the generators never contact the endpoint (xref:decisions.adoc#ad-7[AD-
 | Layer (package) | Components | May import
 
 | `fingerprint.entrypoints`
-| Command line: the `fingerprint` command; _(2.1)_ `--format` and the `fingerprint-gen-*` commands.
+| Command line: the `fingerprint` command; `--format` and the `fingerprint-gen-*` commands.
 Parses options, configures logging, maps outcomes to exit codes.
 | service layer, adapters, domain
 
 | `fingerprint.service_layer`
 | Public function (`generate_endpoint_fingerprint_report`); Report service; Settings resolver;
-Collector; _(2.1)_ Generators (one per format, building its view) and the Representations service,
+Collector; Generators (one per format, building its view) and the Representations service,
 which the generator commands call.
 | adapters, domain
 
 | `fingerprint.adapters`
 | SPARQL client (`SparqlPort` and its SPARQLWrapper implementation) and the query templates;
-_(2.1)_ Template renderer (eds4jinja2 rendering, Turtle check, file writes, shared by the report and
+ Template renderer (eds4jinja2 rendering, Turtle check, file writes, shared by the report and
 the generators), Profile store (`profile.json`), setting sources (environment, config file).
 | domain
 
@@ -100,7 +101,7 @@ Pure, no I/O.
 | nothing above it; not SPARQLWrapper, eds4jinja2 or click (enforced)
 
 | `fingerprint_report_templates`
-| Template packages: `fingerprint_report`; _(2.1)_ `shacl_shapes`, `plantuml_diagram`,
+| Template packages: `fingerprint_report`; `shacl_shapes`, `plantuml_diagram`,
 `profile_document`. Lay out what they are given; issue no queries.
 | —
 |===
@@ -108,11 +109,11 @@ Pure, no I/O.
 Component names are those of the xref:glossary.adoc#components[Glossary], which maps each to its
 module. The layers are enforced by `.importlinter` (`make check-architecture`): the layer order, a
 generated model that imports no project code, a domain that imports no SPARQLWrapper, eds4jinja2 or
-click, and _(2.1)_ a service layer that imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client).
+click, and a service layer that imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client).
 
 NOTE: 1.x had only `service_layer` and `entrypoints`; its statistics were computed by SPARQL inside
-the templates. In 2.0 report rendering and the setting sources still sit in the service layer; 2.1
-moves them to adapters (xref:decisions.adoc#ad-4[AD-4]).
+the templates. In 2.0 report rendering and the setting sources sat in the service layer; 2.1 moved
+them to adapters (xref:decisions.adoc#ad-4[AD-4]).
 
 The dynamic view — how a run moves through these components — is in
 xref:how-it-works.adoc#data-flow[How it works].
@@ -125,7 +126,7 @@ xref:how-it-works.adoc#data-flow[How it works].
 
 | `SparqlPort` | `select(query) -> rows`, `ask(query) -> bool`; raises one of the error classes of xref:how-it-works.adoc#failure-classes[How it works].
 | `ProfileRun`, `ProfileAnalytics` | The generated, frozen profile model (below).
-| _(2.1)_ `Generator` | `visit_graph` / `visit_class` / `visit_property` build the view; `serialize()` returns file name → text (xref:decisions.adoc#ad-8[AD-8]).
+| `Generator` | `visit_graph` / `visit_class` / `visit_property` build the view; `serialize()` returns file name → text (xref:decisions.adoc#ad-8[AD-8]).
 | Exit codes | 0 clean, 1 failures recorded, 2 usage error, 3 endpoint unreachable at the start, 4 unexpected error.
 |===
 

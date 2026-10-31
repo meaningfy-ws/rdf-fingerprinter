@@ -3,7 +3,7 @@
 
 *Use Case Level:* White (Summary) +
 *Primary Actor:* Requester +
-*Scope:* rdf-fingerprinter (from 2.1)
+*Scope:* rdf-fingerprinter
 
 == Stakeholders and Interests
 

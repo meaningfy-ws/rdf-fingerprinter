@@ -3,7 +3,7 @@
 
 *Use Case Level:* Blue (User-goal) +
 *Primary Actor:* Requester (a data steward at the command line) +
-*Supporting Actors:* Command line (options, logging, exit codes); Settings resolver (sources and checks); Collector (discovery, per-class queries, escalation, concurrency); SPARQL client (timeouts, retries, error classes); Analyser (indicators); Template renderer (the report); Profile store (2.1) +
+*Supporting Actors:* Command line (options, logging, exit codes); Settings resolver (sources and checks); Collector (discovery, per-class queries, escalation, concurrency); SPARQL client (timeouts, retries, error classes); Analyser (indicators); Template renderer (the report); Profile store +
 *Scope:* rdf-fingerprinter — `fingerprint` command
 
 This Blue use case refines xref:use-cases/ucw1.adoc[UC-W1: Fingerprint an endpoint]. The
@@ -41,7 +41,7 @@ This Blue path adds only:
 . Exit 2 for a usage error (bad option or setting, missing output folder), before any query.
 . Exit 3 when the endpoint is unreachable at the start (UC-W1 minimal guarantee 1).
 . Exit 4 for an unexpected error, including a report that cannot be rendered or written; the saved
-  profile (2.1) stays.
+  profile stays.
 
 == Extensions
 

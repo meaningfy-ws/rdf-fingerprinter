@@ -49,7 +49,7 @@
 
 ## 8. Docs and release
 
-- [ ] 8.1 Antora page `docs/modules/ROOT/pages/representations.adoc` (commands, files, SHACL mapping and severities, custom templates); nav, getting-started and api-reference updated; how-it-works, UC-W2/UC-B2.x and AD-7..AD-10 brought in line with what was built (drop the "(2.1)" markers)
+- [x] 8.1 Antora page `docs/modules/ROOT/pages/representations.adoc` (commands, files, SHACL mapping and severities, custom templates); nav, getting-started and api-reference updated; how-it-works, UC-W2/UC-B2.x and AD-7..AD-10 brought in line with what was built (drop the "(2.1)" markers)
 - [ ] 8.2 CHANGELOG 2.1.0, version bump in `pyproject.toml`
 - [ ] 8.3 Pre-PR review (five lenses, `meaningfy-code-review`); act on findings
 - [ ] 8.4 Living-spec alignment with the architecture docs (harden-fingerprinter check, 2026-10-31), as deltas in this change: `statistics-collection` settings precedence in full, error classes and the response per collection stage; `fingerprint-report` exit 3 only at the start, read-only queries, credential redaction, refusal before any query, library exceptions and custom template constants; `developer-tooling` "Reports on strict SPARQL stores" restated (templates issue no queries); AGENTS.md project specifics and the stale `(DEC-9)` comment in `entrypoints/cli/main.py` corrected
@@ -57,7 +57,7 @@
 
 ## Roadmap
 
-- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.0 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [x] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.0 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [x] 7.4 · [x] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

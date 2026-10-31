@@ -6,9 +6,9 @@ what it observed.
 
 ----
  1 collect   endpoint ──SPARQL──▶ profile run (raw counts)              service layer + SPARQL adapter
- 2 save      profile run ──────▶ profile.json                (2.1)      Profile store
+ 2 save      profile run ──────▶ profile.json                     Profile store
  3 analyse   profile run ──────▶ analytics (indicators)                 domain, pure
- 4 render    analytics ────────▶ report, SHACL, diagram, doc (2.1)      eds4jinja2 templates
+ 4 render    analytics ────────▶ report, SHACL, diagram, doc      eds4jinja2 templates
 ----
 
 Terms in _italics_ are defined in the xref:glossary.adoc[Glossary]. The statistics themselves are
@@ -20,17 +20,17 @@ specified in xref:statistics.adoc[Statistics and Settings]; this page explains h
 ----
  CLI / caller ──settings──▶ Collector ──SPARQL──▶ endpoint
                                │ profile run (fingerprint_stats)
-                               ├──────────▶ Profile store ──▶ profile.json            (2.1)
+                               ├──────────▶ Profile store ──▶ profile.json           
                                ▼                                 │ (later regenerations)
                            Analyser (domain, pure) ◀─────────────┘ (+ threshold)
                                │ analytics (fingerprint_analytics)
                    ┌───────────┴─────────────────┐
                    ▼                             ▼
-             report context              Generators: visit hooks → view          (2.1)
+             report context              Generators: visit hooks → view         
                    └─────────────┬───────────────┘
                                  ▼
                  Template renderer (eds4jinja2) ──check──▶ main.html,
-                                 shapes-*.ttl, diagram-*.puml, profile.html (2.1)
+                                 shapes-*.ttl, diagram-*.puml, profile.html
 ----
 
 == A running example
@@ -70,7 +70,7 @@ small questions per class:
 
 The result is a _profile run_: raw counts only, no judgement.
 
-== 2. Save: the profile file (from 2.1)
+== 2. Save: the profile file
 
 As soon as collection ends, before anything is rendered, the raw run is written to `profile.json`.
 If that write fails (a full disk, no permission), the run ends with an unexpected error (exit 4) and

@@ -4,7 +4,7 @@
 Each record states one commitment that shapes the code below it. They are grouped by the C4 level
 they constrain (xref:architecture.adoc[Architecture]). `DEC-n` / `P-n` ids point to the OpenSpec
 change that took the decision: `harden-fingerprinter` (2.0, archived) for AD-1 to AD-6 and AD-11,
-`profile-representations` (2.1) for AD-7 to AD-10. Each record's *Confirmation* names the test,
+`profile-representations` for AD-7 to AD-10. Each record's *Confirmation* names the test,
 scenario or tool run that checks it. Terms are those of the xref:glossary.adoc[Glossary].
 
 [cols="1,4,1,1"]
@@ -13,15 +13,15 @@ scenario or tool run that checks it. Terms are those of the xref:glossary.adoc[G
 
 | <<ad-1>> | Profile from the data, through any SPARQL 1.1 endpoint, read-only | L1 | Accepted (2.0)
 | <<ad-2>> | A library with a CLI, not a service | L1 | Accepted (2.0)
-| <<ad-10>> | Generated shapes grade their strength by what the profile knows | L1 | Accepted (2.1)
+| <<ad-10>> | Generated shapes grade their strength by what the profile knows | L1 | Accepted
 | <<ad-3>> | Bounded work per query: staged discovery, class-scoped queries, precision escalation | L2 | Accepted (2.0)
 | <<ad-11>> | Partial results over all-or-nothing | L2 | Accepted (2.0, recorded 2.1)
-| <<ad-7>> | The raw profile is saved and is the input of every later regeneration | L2 | Accepted (2.1)
+| <<ad-7>> | The raw profile is saved and is the input of every later regeneration | L2 | Accepted
 | <<ad-4>> | Onion layers with a SPARQL port | L3 | Accepted (2.0)
 | <<ad-5>> | LinkML profile model as the contract | L3 | Accepted (2.0)
 | <<ad-6>> | eds4jinja2 renders from the model; templates do not query | L3 | Accepted (2.0)
-| <<ad-8>> | Generators mirror LinkML's generator architecture | L3 | Accepted (2.1)
-| <<ad-9>> | eds4jinja2 renders every format, Turtle included, behind a parse check | L4 | Accepted (2.1)
+| <<ad-8>> | Generators mirror LinkML's generator architecture | L3 | Accepted
+| <<ad-9>> | eds4jinja2 renders every format, Turtle included, behind a parse check | L4 | Accepted
 |===
 
 == L1 — Context
@@ -193,8 +193,8 @@ Decision outcome:: Option 1 (DEC-1, DEC-7 of `harden-fingerprinter`).
 Consequences::
 * Good: unit tests use a fake port; another SPARQL client touches only `adapters`.
 * Bad: more modules than 1.0's two.
-* Known gap in 2.0, closed in 2.1: report rendering and the setting sources (environment, config
-  file) sit in the service layer; they move to adapters, and the SPARQL client becomes an injectable
+* A gap of 2.0, closed in 2.1: report rendering and the setting sources (environment, config file)
+  sat in the service layer; they moved to adapters, and the SPARQL client became an injectable
   parameter of the service.
 Confirmation:: `make check-architecture` (`.importlinter`: layers, generated-model isolation, pure
 domain — the domain imports no SPARQLWrapper, eds4jinja2 or click; from 2.1 also a service layer that imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client)).

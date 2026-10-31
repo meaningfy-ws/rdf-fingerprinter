@@ -43,7 +43,7 @@ instances use, how many values and of what kind. rdf-fingerprinter infers one fr
 [#profile-run]
 Profile run (raw profile):: What one collection observed: settings, graphs, classes, instance
 counts, per-property cardinality histograms, value partitions, failures. The `fingerprint_stats`
-model. Saved as `profile.json` from 2.1.
+model. Saved as `profile.json` (since 2.1).
 
 [#analytics]
 Analytics:: Indicators derived from a profile run by pure functions: min/max/mean, confidence,
@@ -125,14 +125,14 @@ The responsibilities the Blue use cases name as supporting actors, and where eac
 
 | Command line | Parses options, configures logging, maps outcomes to exit codes | `fingerprint/entrypoints/cli/`
 | Public function | The 1.x library call | `fingerprint/service_layer/handlers.py`
-| Report service | Collect, save the profile (2.1), analyse, render the report, run chosen generators (2.1) | `fingerprint_report` in `fingerprint/service_layer/handlers.py`
-| Representations service (2.1) | Load a profile, apply a threshold, run generators | `fingerprint/service_layer/representations.py`
+| Report service | Collect, save the profile, analyse, render the report, run chosen generators | `fingerprint_report` in `fingerprint/service_layer/handlers.py`
+| Representations service | Load a profile, apply a threshold, run generators | `fingerprint/service_layer/representations.py`
 | Settings resolver | Merges setting sources by precedence and checks them | `fingerprint/service_layer/settings.py`
 | Collector | Discovery, per-class queries, precision escalation, concurrency | `fingerprint/service_layer/collection.py`
 | SPARQL client | Sends queries with timeout and retries; classifies errors | `fingerprint/adapters/sparql.py`
 | Analyser | Derives the analytics, no I/O | `fingerprint/domain/analytics.py`
-| Template renderer | Renders a template package and writes its output | `fingerprint/service_layer/report.py`; from 2.1 `fingerprint/adapters/template_renderer.py`
-| Profile store (2.1) | Saves and loads `profile.json` | `fingerprint/adapters/profile_file.py`
-| Generator (2.1) | Builds one representation's view from the analytics | `fingerprint/service_layer/generators/`
-| Output check (2.1) | Refuses a generated text that does not parse | `fingerprint/adapters/template_renderer.py`
+| Template renderer | Renders a template package and writes its output | `fingerprint/adapters/template_renderer.py`
+| Profile store | Saves and loads `profile.json` | `fingerprint/adapters/profile_file.py`
+| Generator | Builds one representation's view from the analytics | `fingerprint/service_layer/generators/`
+| Output check | Refuses a generated text that does not parse | `fingerprint/adapters/template_renderer.py`
 |===

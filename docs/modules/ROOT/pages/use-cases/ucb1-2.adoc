@@ -3,7 +3,7 @@
 
 *Use Case Level:* Blue (User-goal) +
 *Primary Actor:* Requester (an embedding application) +
-*Supporting Actors:* Public function (the 1.x call); Settings resolver; Collector; SPARQL client; Analyser; Template renderer; Profile store (2.1) +
+*Supporting Actors:* Public function (the 1.x call); Settings resolver; Collector; SPARQL client; Analyser; Template renderer; Profile store +
 *Scope:* rdf-fingerprinter — library API
 
 This Blue use case refines xref:use-cases/ucw1.adoc[UC-W1: Fingerprint an endpoint]. The

@@ -1,0 +1,126 @@
+= Representations
+:description: SHACL shapes, a PlantUML class diagram and an application-profile document, generated from a saved profile without querying again.
+
+A fingerprint can be published in three more forms besides the statistics report. Each is generated
+from the profile alone, so the endpoint is queried once, whatever is generated afterwards
+(xref:use-cases/ucw2.adoc[UC-W2]).
+
+[cols="1,2,3"]
+|===
+| Format | Files | Content
+
+| SHACL shapes | `shapes-<graph>.ttl`, one per graph | a node shape per class with a property shape per property
+| PlantUML diagram | `diagram-<graph>.puml`, one per graph | classes, attributes, associations, generalisations — source only
+| Profile document | `profile.html` | an application-profile specification in the style of SEMIC / EU profiles
+|===
+
+`<graph>` is `default` for the default graph, else a readable name from the graph IRI plus a short
+hash, for example `shapes-continents-214e8f67.ttl`. The document lists which file belongs to which
+graph.
+
+== In the same run
+
+[source,bash]
+----
+fingerprint -e https://my.endpoint/sparql -o out --format shacl --format puml --format doc
+----
+
+`out/` then holds the report (`main.html`), the saved profile (`profile.json`) and the chosen
+representations. Without `--format`, only the report and `profile.json` are written.
+
+== Later, from the saved profile
+
+[source,bash]
+----
+fingerprint-gen-shacl out/profile.json -o shapes/ --threshold 0.9
+fingerprint-gen-puml  out/profile.json -o diagrams/
+fingerprint-gen-doc   out/profile.json -o doc/
+----
+
+Every command takes:
+
+[cols="1,3"]
+|===
+| `PROFILE` | the `profile.json` written by `fingerprint`
+| `-o`, `--output` | an existing folder (default `./output`)
+| `--threshold` | the acceptance threshold to read the profile at, in (0, 1]; default: the one recorded in the profile. Not read from the environment.
+| `--template` | a template package of your own (below)
+|===
+
+`fingerprint-gen-shacl` also takes `--shapes-namespace` (default `urn:fingerprint:shape:`), the
+namespace of the node shape IRIs.
+
+Exit status: 0 written; 2 for a usage error — a missing or unreadable profile file, a threshold out
+of range, a missing output folder or template package; 4 for an unexpected error, including
+generated Turtle that does not parse. A profile that recorded collection failures still generates
+(exit 0); the document lists the failures.
+
+== SHACL shapes
+
+Each class gets an open node shape (`sh:targetClass`, no `sh:closed`) with a property shape per
+property its instances use, inherited ones included:
+
+* counts from the accepted cardinality label — `1` → `sh:minCount 1`, `sh:maxCount 1`; `?` →
+  `sh:maxCount 1`; `+` → `sh:minCount 1`; `*` → none; `\{n}` → `sh:minCount n`, `sh:maxCount n`;
+* `sh:datatype` for literals, `sh:class` when every resource value is typed, `sh:nodeKind`, and
+  `sh:or` when the values are of several kinds; a language-tagged literal without a datatype counts as
+  `rdf:langString`;
+* annotations: `fp:instances`, `fp:observedInstances`, `fp:precisionMode` on the node shape,
+  `fp:confidence` and `fp:labelSupport` on each property shape (`fp:` is
+  `https://data.meaningfy.ws/fingerprint/`).
+
+Each property shape is graded so that the shapes never claim more than the profile observed; the
+rules are in xref:how-it-works.adoc#severity[How it works]. Validated against the data they were
+profiled from, the shapes report no `sh:Violation`. Expect `sh:Warning` and `sh:Info` results, so
+read the severities, not just `sh:conforms`.
+
+== PlantUML diagram
+
+One `@startuml` … `@enduml` per graph. Classes show their own and refined datatype properties as
+attributes (`ex:name : xsd:string [1]`); an object property whose values are all of one profiled
+class is an association with its multiplicity; declared parents are solid generalisations, implied
+parents dashed. Render the source with any PlantUML tool; rdf-fingerprinter does not render it.
+
+== Profile document
+
+Sections: overview (endpoint, dates, version, settings), namespaces, one chapter per graph with its
+files, the PlantUML source and a section per class (instances, precision, parents, and a table of
+property, value types, cardinality, usage and inheritance), and caveats: sampled classes, recorded
+failures and IRIs that could not be written in the shapes or the diagram. Static HTML, no
+JavaScript, printable.
+
+== IRIs that cannot be written
+
+An IRI holding a space, `<`, `>`, `"` or another character Turtle forbids cannot appear in the shapes
+or the diagram. Such a class or property is left out of both, a WARNING is logged, and the document
+lists it under its caveats, shown as text.
+
+== Your own templates
+
+Every format is an eds4jinja2 template package: a folder with `config.json`
+(`{"template": "<file>", "conf": {…}}`) and `templates/`. Pass one with `--template`. A template
+receives `view` (the generator's prepared view: `view.graph` per graph, or `view.graphs` for the
+document), `conf.profile` (the whole analytics profile) and the constants of its `conf`. These
+filters keep the output valid:
+
+[cols="1,3"]
+|===
+| `turtle_iri` | `<iri>`, refusing an IRI Turtle cannot hold
+| `turtle_term` | `prefix:local` when that is a valid Turtle name, else `<iri>`
+| `turtle_string` | a quoted, escaped Turtle string
+| `turtle_number` | an integer, a decimal with a dot, or `true`/`false`
+| `curie` | a shortened IRI for display
+|===
+
+The packaged packages are in `fingerprint_report_templates/` (`shacl_shapes`, `plantuml_diagram`,
+`profile_document`). The SHACL output of a custom package is still parsed before it is written.
+
+== From Python
+
+[source,python]
+----
+from fingerprint.service_layer.representations import generate_from_profile_file, generate_representations
+
+generate_from_profile_file("out/profile.json", "shapes/", ["shacl"], threshold=0.9)
+generate_representations(run, "out/", ["shacl", "puml", "doc"])   # a ProfileRun already in memory
+----
