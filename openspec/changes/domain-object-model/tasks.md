@@ -2,7 +2,7 @@
 
 ## 0. eds4jinja2 2.1 (in ../eds4jinja2, its own OpenSpec change)
 
-- [x] 0.1 OpenSpec change `batch-documents` in eds4jinja2 (EPIC, PLAN, spec `batch-document-rendering`) for `ReportBuilder.render_documents(outputs, *, autoescape)` and `make_documents(outputs, *, check, autoescape)` as P-6 specifies; branch `feature/batch-documents` there. Specification only: the developer implements it (2026-10-31)
+- [x] 0.1 OpenSpec changes `render-documents` (spec `batch-document-rendering`) and `make-documents` (spec `checked-document-writing`) in eds4jinja2, split at the developer's request for `ReportBuilder.render_documents(outputs, *, autoescape)` and `make_documents(outputs, *, check, autoescape)` as P-6 specifies; branch `feature/batch-documents` there. Specification only: the developer implements it (2026-10-31)
 - [ ] 0.2 The developer implements and releases eds4jinja2 2.1.0; task 6.1 waits for it (P-6)
 
 ## 1. Rule, check and generated modules
