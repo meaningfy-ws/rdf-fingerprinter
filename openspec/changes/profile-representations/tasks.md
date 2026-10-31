@@ -36,9 +36,9 @@
 
 ## 6. Profile document generator
 
-- [ ] 6.1 `DocumentGenerator` hooks and the view (overview, namespaces, graph chapters, class sections, caveats) (DEC-7; Requirement: Application-profile document)
-- [ ] 6.2 Template package `fingerprint_report_templates/profile_document/` (`templates/profile.html`, inline CSS in the SEMIC / SHACL Play style), autoescape on
-- [ ] 6.3 Golden file `tests/test_data/golden/profile.html` (Requirement: Golden outputs)
+- [x] 6.1 `DocumentGenerator` hooks and the view (overview, namespaces, graph chapters, class sections, caveats) (DEC-7; Requirement: Application-profile document)
+- [x] 6.2 Template package `fingerprint_report_templates/profile_document/` (`templates/profile.html`, inline CSS in the SEMIC / SHACL Play style), autoescape on
+- [x] 6.3 Golden file `tests/test_data/golden/profile.html` (Requirement: Golden outputs)
 
 ## 7. Command line
 
@@ -57,7 +57,7 @@
 
 ## Roadmap
 
-- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.0 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.0 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Application profile inferred by rdf-fingerprinter</title>
+<style>
+  body { font-family: system-ui, sans-serif; line-height: 1.5; max-width: 72rem; margin: 0 auto; padding: 1rem; color: #1b1b1b; background: #fff; }
+  h1 { border-bottom: 3px solid #004494; padding-bottom: .3rem; }
+  h2 { color: #004494; border-bottom: 1px solid #ccd; margin-top: 2.5rem; }
+  h3 { margin-top: 2rem; }
+  .iri { font-family: ui-monospace, monospace; font-size: .85em; color: #555; overflow-wrap: anywhere; }
+  table { border-collapse: collapse; width: 100%; margin: .5rem 0 1rem; }
+  th, td { border: 1px solid #ccd; padding: .3rem .5rem; text-align: left; vertical-align: top; }
+  th { background: #e8eef7; }
+  tbody tr:nth-child(even) { background: #f6f8fb; }
+  nav ol { columns: 2; }
+  pre { background: #f6f8fb; padding: .5rem; overflow-x: auto; }
+  .note { color: #8a4b00; }
+  @media print {
+    nav a { color: inherit; text-decoration: none; }
+    table, section.class { break-inside: avoid; }
+    details { display: block; }
+  }
+</style>
+</head>
+<body>
+<h1>Application profile inferred by rdf-fingerprinter</h1>
+
+<nav>
+<h2>Contents</h2>
+<ol>
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#namespaces">Namespaces</a></li>
+  <li><a href="#graph-default">Graph default graph</a></li>
+  <li><a href="#graph-continents-214e8f67">Graph http://publications.europa.eu/resources/authority/continents</a></li>
+  <li><a href="#graph-treaties-3b4301a8">Graph http://publications.europa.eu/resources/authority/treaties</a></li>
+  <li><a href="#caveats">Caveats</a></li>
+</ol>
+</nav>
+
+<section id="overview">
+<h2>1 Overview</h2>
+<p>This document describes the application profile the data follows, as inferred by
+rdf-fingerprinter from what the endpoint holds. Every figure comes from the profile below; nothing
+was asserted by hand.</p>
+<table>
+  <tbody>
+    <tr><th>Endpoint</th><td class="iri">http://localhost:7878/query</td></tr>
+    <tr><th>Started</th><td>2026-10-31 12:00:00+00:00</td></tr>
+    <tr><th>Finished</th><td>2026-10-31 12:00:00+00:00</td></tr>
+    <tr><th>rdf-fingerprinter</th><td>2.1.0</td></tr>
+  </tbody>
+</table>
+<h3>Settings</h3>
+<table>
+  <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>acceptance_threshold</td><td>0.95</td></tr>
+    <tr><td>completeness_check</td><td>False</td></tr>
+    <tr><td>concurrency</td><td>4</td></tr>
+    <tr><td>depth</td><td>values</td></tr>
+    <tr><td>first_n</td><td>10000</td></tr>
+    <tr><td>graph_statistics</td><td>False</td></tr>
+    <tr><td>object_type_scope</td><td>same_graph</td></tr>
+    <tr><td>precision_policy</td><td>auto</td></tr>
+    <tr><td>selected_graphs</td><td>—</td></tr>
+    <tr><td>timeout_seconds</td><td>60</td></tr>
+    <tr><td>top_k</td><td>20</td></tr>
+  </tbody>
+</table>
+</section>
+
+<section id="namespaces">
+<h2>2 Namespaces</h2>
+<table>
+  <thead><tr><th>Prefix</th><th>Namespace</th></tr></thead>
+  <tbody>
+    <tr><td>dcterms</td><td class="iri">http://purl.org/dc/terms/</td></tr>
+    <tr><td>eli</td><td class="iri">http://data.europa.eu/eli/ontology#</td></tr>
+    <tr><td>euvoc</td><td class="iri">http://publications.europa.eu/ontology/euvoc#</td></tr>
+    <tr><td>lemon</td><td class="iri">http://lemon-model.net/lemon#</td></tr>
+    <tr><td>lvont</td><td class="iri">http://lexvo.org/ontology#</td></tr>
+    <tr><td>owl</td><td class="iri">http://www.w3.org/2002/07/owl#</td></tr>
+    <tr><td>rdf</td><td class="iri">http://www.w3.org/1999/02/22-rdf-syntax-ns#</td></tr>
+    <tr><td>rdfs</td><td class="iri">http://www.w3.org/2000/01/rdf-schema#</td></tr>
+    <tr><td>skos</td><td class="iri">http://www.w3.org/2004/02/skos/core#</td></tr>
+    <tr><td>skosxl</td><td class="iri">http://www.w3.org/2008/05/skos-xl#</td></tr>
+    <tr><td>xsd</td><td class="iri">http://www.w3.org/2001/XMLSchema#</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="graph" id="graph-default">
+<h2>3 Graph default graph</h2>
+<p>6 classes. Files for this graph: <code>shapes-default.ttl</code>, <code>diagram-default.puml</code>.</p>
+<details>
+<summary>Class diagram (PlantUML source)</summary>
+<pre>@startuml
+title Class diagram inferred by rdf-fingerprinter — default graph
+hide empty members
+
+class &#34;euvoc:Continent&#34; as C1 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  skos:inScheme : owl:Ontology | skos:ConceptScheme [1]
+  skos:topConceptOf : owl:Ontology | skos:ConceptScheme [1]
+}
+class &#34;euvoc:XlNotation&#34; as C2 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:type : resource [1]
+  rdf:value : xsd:string [1]
+}
+class &#34;owl:Ontology&#34; as C3 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:identifier : xsd:string [1]
+  rdfs:comment : rdfs:Literal [1]
+  owl:imports : resource [1]
+}
+class &#34;skos:Concept&#34; as C4 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  skos:inScheme : owl:Ontology | skos:ConceptScheme [1]
+  skos:topConceptOf : owl:Ontology | skos:ConceptScheme [1]
+}
+class &#34;skos:ConceptScheme&#34; as C5 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:identifier : xsd:string [1]
+  rdfs:comment : rdfs:Literal [1]
+  owl:imports : resource [1]
+}
+class &#34;skosxl:Label&#34; as C6 {
+  lvont:script : resource [0..1]
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:type : resource [1]
+  skosxl:literalForm : rdf:langString [1]
+}
+
+
+C1 ..|&gt; C4
+C1 --&gt; &#34;1&#34; C2 : euvoc:xlNotation
+C1 --&gt; &#34;24&#34; C6 : skosxl:prefLabel
+C3 ..|&gt; C5
+C3 --&gt; &#34;1&#34; C6 : skosxl:prefLabel
+C4 ..|&gt; C1
+C4 --&gt; &#34;1&#34; C2 : euvoc:xlNotation
+C4 --&gt; &#34;24&#34; C6 : skosxl:prefLabel
+C5 ..|&gt; C3
+C5 --&gt; &#34;1&#34; C6 : skosxl:prefLabel
+@enduml</pre>
+</details>
+<section class="class" id="default-continent-4ed30680">
+<h3>3.1 euvoc:Continent</h3>
+<p class="iri">http://publications.europa.eu/ontology/euvoc#Continent</p>
+<p>6 instances, exact. Parents: skos:Concept (implied).</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#xlNotation">euvoc:xlNotation</td><td>euvoc:XlNotation</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2004/02/skos/core#inScheme">skos:inScheme</td><td>owl:Ontology, skos:ConceptScheme</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2004/02/skos/core#topConceptOf">skos:topConceptOf</td><td>owl:Ontology, skos:ConceptScheme</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#prefLabel">skosxl:prefLabel</td><td>skosxl:Label</td><td>24</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="default-xlnotation-86ef84a2">
+<h3>3.2 euvoc:XlNotation</h3>
+<p class="iri">http://publications.europa.eu/ontology/euvoc#XlNotation</p>
+<p>6 instances, exact.</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/type">dcterms:type</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/1999/02/22-rdf-syntax-ns#value">rdf:value</td><td>xsd:string</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="default-ontology-e77ce532">
+<h3>3.3 owl:Ontology</h3>
+<p class="iri">http://www.w3.org/2002/07/owl#Ontology</p>
+<p>1 instances, exact. Parents: skos:ConceptScheme (implied).</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/identifier">dcterms:identifier</td><td>xsd:string</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2000/01/rdf-schema#comment">rdfs:comment</td><td>rdfs:Literal</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2002/07/owl#imports">owl:imports</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#prefLabel">skosxl:prefLabel</td><td>skosxl:Label</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="default-concept-07819658">
+<h3>3.4 skos:Concept</h3>
+<p class="iri">http://www.w3.org/2004/02/skos/core#Concept</p>
+<p>6 instances, exact. Parents: euvoc:Continent (implied).</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#xlNotation">euvoc:xlNotation</td><td>euvoc:XlNotation</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2004/02/skos/core#inScheme">skos:inScheme</td><td>owl:Ontology, skos:ConceptScheme</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2004/02/skos/core#topConceptOf">skos:topConceptOf</td><td>owl:Ontology, skos:ConceptScheme</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#prefLabel">skosxl:prefLabel</td><td>skosxl:Label</td><td>24</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="default-conceptscheme-6d2ac9e0">
+<h3>3.5 skos:ConceptScheme</h3>
+<p class="iri">http://www.w3.org/2004/02/skos/core#ConceptScheme</p>
+<p>1 instances, exact. Parents: owl:Ontology (implied).</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/identifier">dcterms:identifier</td><td>xsd:string</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2000/01/rdf-schema#comment">rdfs:comment</td><td>rdfs:Literal</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2002/07/owl#imports">owl:imports</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#prefLabel">skosxl:prefLabel</td><td>skosxl:Label</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="default-label-1f1eba51">
+<h3>3.6 skosxl:Label</h3>
+<p class="iri">http://www.w3.org/2008/05/skos-xl#Label</p>
+<p>145 instances, exact.</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://lexvo.org/ontology#script">lvont:script</td><td>—</td><td>0..1</td><td>8 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/type">dcterms:type</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#literalForm">skosxl:literalForm</td><td>rdf:langString</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+</section>
+<section class="graph" id="graph-continents-214e8f67">
+<h2>4 Graph http://publications.europa.eu/resources/authority/continents</h2>
+<p>6 classes. Files for this graph: <code>shapes-continents-214e8f67.ttl</code>, <code>diagram-continents-214e8f67.puml</code>.</p>
+<details>
+<summary>Class diagram (PlantUML source)</summary>
+<pre>@startuml
+title Class diagram inferred by rdf-fingerprinter — http://publications.europa.eu/resources/authority/continents
+hide empty members
+
+class &#34;euvoc:Continent&#34; as C1 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  skos:inScheme : owl:Ontology | skos:ConceptScheme [1]
+  skos:topConceptOf : owl:Ontology | skos:ConceptScheme [1]
+}
+class &#34;euvoc:XlNotation&#34; as C2 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:type : resource [1]
+  rdf:value : xsd:string [1]
+}
+class &#34;owl:Ontology&#34; as C3 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:identifier : xsd:string [1]
+  rdfs:comment : rdfs:Literal [1]
+  owl:imports : resource [1]
+}
+class &#34;skos:Concept&#34; as C4 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  skos:inScheme : owl:Ontology | skos:ConceptScheme [1]
+  skos:topConceptOf : owl:Ontology | skos:ConceptScheme [1]
+}
+class &#34;skos:ConceptScheme&#34; as C5 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:identifier : xsd:string [1]
+  rdfs:comment : rdfs:Literal [1]
+  owl:imports : resource [1]
+}
+class &#34;skosxl:Label&#34; as C6 {
+  lvont:script : resource [0..1]
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:type : resource [1]
+  skosxl:literalForm : rdf:langString [1]
+}
+
+
+C1 ..|&gt; C4
+C1 --&gt; &#34;1&#34; C2 : euvoc:xlNotation
+C1 --&gt; &#34;24&#34; C6 : skosxl:prefLabel
+C3 ..|&gt; C5
+C3 --&gt; &#34;1&#34; C6 : skosxl:prefLabel
+C4 ..|&gt; C1
+C4 --&gt; &#34;1&#34; C2 : euvoc:xlNotation
+C4 --&gt; &#34;24&#34; C6 : skosxl:prefLabel
+C5 ..|&gt; C3
+C5 --&gt; &#34;1&#34; C6 : skosxl:prefLabel
+@enduml</pre>
+</details>
+<section class="class" id="continents-214e8f67-continent-4ed30680">
+<h3>4.1 euvoc:Continent</h3>
+<p class="iri">http://publications.europa.eu/ontology/euvoc#Continent</p>
+<p>6 instances, exact. Parents: skos:Concept (implied).</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#xlNotation">euvoc:xlNotation</td><td>euvoc:XlNotation</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2004/02/skos/core#inScheme">skos:inScheme</td><td>owl:Ontology, skos:ConceptScheme</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2004/02/skos/core#topConceptOf">skos:topConceptOf</td><td>owl:Ontology, skos:ConceptScheme</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#prefLabel">skosxl:prefLabel</td><td>skosxl:Label</td><td>24</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="continents-214e8f67-xlnotation-86ef84a2">
+<h3>4.2 euvoc:XlNotation</h3>
+<p class="iri">http://publications.europa.eu/ontology/euvoc#XlNotation</p>
+<p>6 instances, exact.</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/type">dcterms:type</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/1999/02/22-rdf-syntax-ns#value">rdf:value</td><td>xsd:string</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="continents-214e8f67-ontology-e77ce532">
+<h3>4.3 owl:Ontology</h3>
+<p class="iri">http://www.w3.org/2002/07/owl#Ontology</p>
+<p>1 instances, exact. Parents: skos:ConceptScheme (implied).</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/identifier">dcterms:identifier</td><td>xsd:string</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2000/01/rdf-schema#comment">rdfs:comment</td><td>rdfs:Literal</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2002/07/owl#imports">owl:imports</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#prefLabel">skosxl:prefLabel</td><td>skosxl:Label</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="continents-214e8f67-concept-07819658">
+<h3>4.4 skos:Concept</h3>
+<p class="iri">http://www.w3.org/2004/02/skos/core#Concept</p>
+<p>6 instances, exact. Parents: euvoc:Continent (implied).</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#xlNotation">euvoc:xlNotation</td><td>euvoc:XlNotation</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2004/02/skos/core#inScheme">skos:inScheme</td><td>owl:Ontology, skos:ConceptScheme</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2004/02/skos/core#topConceptOf">skos:topConceptOf</td><td>owl:Ontology, skos:ConceptScheme</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#prefLabel">skosxl:prefLabel</td><td>skosxl:Label</td><td>24</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="continents-214e8f67-conceptscheme-6d2ac9e0">
+<h3>4.5 skos:ConceptScheme</h3>
+<p class="iri">http://www.w3.org/2004/02/skos/core#ConceptScheme</p>
+<p>1 instances, exact. Parents: owl:Ontology (implied).</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/identifier">dcterms:identifier</td><td>xsd:string</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2000/01/rdf-schema#comment">rdfs:comment</td><td>rdfs:Literal</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2002/07/owl#imports">owl:imports</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#prefLabel">skosxl:prefLabel</td><td>skosxl:Label</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="continents-214e8f67-label-1f1eba51">
+<h3>4.6 skosxl:Label</h3>
+<p class="iri">http://www.w3.org/2008/05/skos-xl#Label</p>
+<p>145 instances, exact.</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://lexvo.org/ontology#script">lvont:script</td><td>—</td><td>0..1</td><td>8 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/type">dcterms:type</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#literalForm">skosxl:literalForm</td><td>rdf:langString</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+</section>
+<section class="graph" id="graph-treaties-3b4301a8">
+<h2>5 Graph http://publications.europa.eu/resources/authority/treaties</h2>
+<p>7 classes. Files for this graph: <code>shapes-treaties-3b4301a8.ttl</code>, <code>diagram-treaties-3b4301a8.puml</code>.</p>
+<details>
+<summary>Class diagram (PlantUML source)</summary>
+<pre>@startuml
+title Class diagram inferred by rdf-fingerprinter — http://publications.europa.eu/resources/authority/treaties
+hide empty members
+
+class &#34;euvoc:Treaty&#34; as C1 {
+  eli:date_document : xsd:date [0..1]
+  eli:first_date_entry_in_force : xsd:date [0..1]
+  lemon:context : resource [2]
+  euvoc:endDate : xsd:date [0..1]
+  euvoc:officialJournalDate : xsd:date [0..1]
+  euvoc:officialJournalNumber : xsd:string [0..1]
+  euvoc:officialJournalSeries : xsd:string [0..1]
+  euvoc:signatureLocation : resource [0..1]
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:dateAccepted : xsd:date [1]
+  dcterms:dateSubmitted : xsd:date [1]
+  dcterms:isReplacedBy : euvoc:Treaty | skos:Concept [0..1]
+  dcterms:replaces : euvoc:Treaty | skos:Concept [0..1]
+  dcterms:type : resource [1]
+  skos:inScheme : owl:Ontology | skos:ConceptScheme [1]
+  skos:topConceptOf : owl:Ontology | skos:ConceptScheme [1]
+}
+class &#34;euvoc:XlNotation&#34; as C2 {
+  euvoc:endDate : xsd:date [0..1]
+  euvoc:startDate : xsd:date [0..1]
+  euvoc:status : resource [0..1]
+  dcterms:created : xsd:date [0..1]
+  dcterms:type : resource [1]
+  rdf:value : xsd:string [1]
+}
+class &#34;euvoc:XlNote&#34; as C3 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:source : rdf:langString [0..1]
+  rdf:value : rdf:langString [1]
+}
+class &#34;owl:Ontology&#34; as C4 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:identifier : xsd:string [1]
+  rdfs:comment : rdfs:Literal [1]
+  owl:imports : resource [2]
+}
+class &#34;skos:Concept&#34; as C5 {
+  eli:date_document : xsd:date [0..1]
+  eli:first_date_entry_in_force : xsd:date [0..1]
+  lemon:context : resource [2]
+  euvoc:endDate : xsd:date [0..1]
+  euvoc:officialJournalDate : xsd:date [0..1]
+  euvoc:officialJournalNumber : xsd:string [0..1]
+  euvoc:officialJournalSeries : xsd:string [0..1]
+  euvoc:signatureLocation : resource [0..1]
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:dateAccepted : xsd:date [1]
+  dcterms:dateSubmitted : xsd:date [1]
+  dcterms:isReplacedBy : euvoc:Treaty | skos:Concept [0..1]
+  dcterms:replaces : euvoc:Treaty | skos:Concept [0..1]
+  dcterms:type : resource [1]
+  skos:inScheme : owl:Ontology | skos:ConceptScheme [1]
+  skos:topConceptOf : owl:Ontology | skos:ConceptScheme [1]
+}
+class &#34;skos:ConceptScheme&#34; as C6 {
+  euvoc:startDate : xsd:date [1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [1]
+  dcterms:identifier : xsd:string [1]
+  rdfs:comment : rdfs:Literal [1]
+  owl:imports : resource [2]
+}
+class &#34;skosxl:Label&#34; as C7 {
+  lvont:script : resource [0..1]
+  euvoc:endDate : xsd:date [0..1]
+  euvoc:startDate : xsd:date [0..1]
+  euvoc:status : resource [1]
+  dcterms:created : xsd:date [0..1]
+  dcterms:type : resource [1]
+  skosxl:literalForm : rdf:langString [1]
+}
+
+
+C1 ..|&gt; C5
+C1 --&gt; &#34;0..1&#34; C3 : euvoc:xlChangeNote
+C1 --&gt; &#34;0..1&#34; C3 : euvoc:xlDefinition
+C1 --&gt; &#34;0..1&#34; C3 : euvoc:xlHistoryNote
+C1 --&gt; &#34;1..*&#34; C2 : euvoc:xlNotation
+C1 --&gt; &#34;0..*&#34; C7 : skosxl:altLabel
+C1 --&gt; &#34;1..*&#34; C7 : skosxl:prefLabel
+C4 ..|&gt; C6
+C4 --&gt; &#34;1&#34; C7 : skosxl:prefLabel
+C5 ..|&gt; C1
+C5 --&gt; &#34;0..1&#34; C3 : euvoc:xlChangeNote
+C5 --&gt; &#34;0..1&#34; C3 : euvoc:xlDefinition
+C5 --&gt; &#34;0..1&#34; C3 : euvoc:xlHistoryNote
+C5 --&gt; &#34;1..*&#34; C2 : euvoc:xlNotation
+C5 --&gt; &#34;0..*&#34; C7 : skosxl:altLabel
+C5 --&gt; &#34;1..*&#34; C7 : skosxl:prefLabel
+C6 ..|&gt; C4
+C6 --&gt; &#34;1&#34; C7 : skosxl:prefLabel
+@enduml</pre>
+</details>
+<section class="class" id="treaties-3b4301a8-treaty-09a01768">
+<h3>5.1 euvoc:Treaty</h3>
+<p class="iri">http://publications.europa.eu/ontology/euvoc#Treaty</p>
+<p>104 instances, exact. Parents: skos:Concept (implied).</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://data.europa.eu/eli/ontology#date_document">eli:date_document</td><td>xsd:date</td><td>0..1</td><td>80 %</td><td>own</td></tr>
+    <tr><td title="http://data.europa.eu/eli/ontology#first_date_entry_in_force">eli:first_date_entry_in_force</td><td>xsd:date</td><td>0..1</td><td>79 %</td><td>own</td></tr>
+    <tr><td title="http://lemon-model.net/lemon#context">lemon:context</td><td>—</td><td>2</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#endDate">euvoc:endDate</td><td>xsd:date</td><td>0..1</td><td>21 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#officialJournalDate">euvoc:officialJournalDate</td><td>xsd:date</td><td>0..1</td><td>88 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#officialJournalNumber">euvoc:officialJournalNumber</td><td>xsd:string</td><td>0..1</td><td>88 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#officialJournalSeries">euvoc:officialJournalSeries</td><td>xsd:string</td><td>0..1</td><td>88 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#signatureLocation">euvoc:signatureLocation</td><td>—</td><td>0..1</td><td>71 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#xlChangeNote">euvoc:xlChangeNote</td><td>euvoc:XlNote</td><td>0..1</td><td>1 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#xlDefinition">euvoc:xlDefinition</td><td>euvoc:XlNote</td><td>0..1</td><td>6 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#xlHistoryNote">euvoc:xlHistoryNote</td><td>euvoc:XlNote</td><td>0..1</td><td>1 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#xlNotation">euvoc:xlNotation</td><td>euvoc:XlNotation</td><td>1..*</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/dateAccepted">dcterms:dateAccepted</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/dateSubmitted">dcterms:dateSubmitted</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/isReplacedBy">dcterms:isReplacedBy</td><td>euvoc:Treaty, skos:Concept</td><td>0..1</td><td>21 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/replaces">dcterms:replaces</td><td>euvoc:Treaty, skos:Concept</td><td>0..1</td><td>21 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/type">dcterms:type</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2004/02/skos/core#inScheme">skos:inScheme</td><td>owl:Ontology, skos:ConceptScheme</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2004/02/skos/core#topConceptOf">skos:topConceptOf</td><td>owl:Ontology, skos:ConceptScheme</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#altLabel">skosxl:altLabel</td><td>skosxl:Label</td><td>0..*</td><td>54 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#prefLabel">skosxl:prefLabel</td><td>skosxl:Label</td><td>1..*</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="treaties-3b4301a8-xlnotation-86ef84a2">
+<h3>5.2 euvoc:XlNotation</h3>
+<p class="iri">http://publications.europa.eu/ontology/euvoc#XlNotation</p>
+<p>357 instances, exact.</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#endDate">euvoc:endDate</td><td>xsd:date</td><td>0..1</td><td>16 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>0..1</td><td>44 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>0..1</td><td>44 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>0..1</td><td>44 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/type">dcterms:type</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/1999/02/22-rdf-syntax-ns#value">rdf:value</td><td>xsd:string</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="treaties-3b4301a8-xlnote-d7938f35">
+<h3>5.3 euvoc:XlNote</h3>
+<p class="iri">http://publications.europa.eu/ontology/euvoc#XlNote</p>
+<p>12 instances, exact.</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/source">dcterms:source</td><td>rdf:langString</td><td>0..1</td><td>83 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/1999/02/22-rdf-syntax-ns#value">rdf:value</td><td>rdf:langString</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="treaties-3b4301a8-ontology-e77ce532">
+<h3>5.4 owl:Ontology</h3>
+<p class="iri">http://www.w3.org/2002/07/owl#Ontology</p>
+<p>1 instances, exact. Parents: skos:ConceptScheme (implied).</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/identifier">dcterms:identifier</td><td>xsd:string</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2000/01/rdf-schema#comment">rdfs:comment</td><td>rdfs:Literal</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2002/07/owl#imports">owl:imports</td><td>—</td><td>2</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#prefLabel">skosxl:prefLabel</td><td>skosxl:Label</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="treaties-3b4301a8-concept-07819658">
+<h3>5.5 skos:Concept</h3>
+<p class="iri">http://www.w3.org/2004/02/skos/core#Concept</p>
+<p>104 instances, exact. Parents: euvoc:Treaty (implied).</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://data.europa.eu/eli/ontology#date_document">eli:date_document</td><td>xsd:date</td><td>0..1</td><td>80 %</td><td>own</td></tr>
+    <tr><td title="http://data.europa.eu/eli/ontology#first_date_entry_in_force">eli:first_date_entry_in_force</td><td>xsd:date</td><td>0..1</td><td>79 %</td><td>own</td></tr>
+    <tr><td title="http://lemon-model.net/lemon#context">lemon:context</td><td>—</td><td>2</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#endDate">euvoc:endDate</td><td>xsd:date</td><td>0..1</td><td>21 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#officialJournalDate">euvoc:officialJournalDate</td><td>xsd:date</td><td>0..1</td><td>88 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#officialJournalNumber">euvoc:officialJournalNumber</td><td>xsd:string</td><td>0..1</td><td>88 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#officialJournalSeries">euvoc:officialJournalSeries</td><td>xsd:string</td><td>0..1</td><td>88 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#signatureLocation">euvoc:signatureLocation</td><td>—</td><td>0..1</td><td>71 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#xlChangeNote">euvoc:xlChangeNote</td><td>euvoc:XlNote</td><td>0..1</td><td>1 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#xlDefinition">euvoc:xlDefinition</td><td>euvoc:XlNote</td><td>0..1</td><td>6 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#xlHistoryNote">euvoc:xlHistoryNote</td><td>euvoc:XlNote</td><td>0..1</td><td>1 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#xlNotation">euvoc:xlNotation</td><td>euvoc:XlNotation</td><td>1..*</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/dateAccepted">dcterms:dateAccepted</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/dateSubmitted">dcterms:dateSubmitted</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/isReplacedBy">dcterms:isReplacedBy</td><td>euvoc:Treaty, skos:Concept</td><td>0..1</td><td>21 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/replaces">dcterms:replaces</td><td>euvoc:Treaty, skos:Concept</td><td>0..1</td><td>21 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/type">dcterms:type</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2004/02/skos/core#inScheme">skos:inScheme</td><td>owl:Ontology, skos:ConceptScheme</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2004/02/skos/core#topConceptOf">skos:topConceptOf</td><td>owl:Ontology, skos:ConceptScheme</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#altLabel">skosxl:altLabel</td><td>skosxl:Label</td><td>0..*</td><td>54 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#prefLabel">skosxl:prefLabel</td><td>skosxl:Label</td><td>1..*</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="treaties-3b4301a8-conceptscheme-6d2ac9e0">
+<h3>5.6 skos:ConceptScheme</h3>
+<p class="iri">http://www.w3.org/2004/02/skos/core#ConceptScheme</p>
+<p>1 instances, exact. Parents: owl:Ontology (implied).</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/identifier">dcterms:identifier</td><td>xsd:string</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2000/01/rdf-schema#comment">rdfs:comment</td><td>rdfs:Literal</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2002/07/owl#imports">owl:imports</td><td>—</td><td>2</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#prefLabel">skosxl:prefLabel</td><td>skosxl:Label</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+<section class="class" id="treaties-3b4301a8-label-1f1eba51">
+<h3>5.7 skosxl:Label</h3>
+<p class="iri">http://www.w3.org/2008/05/skos-xl#Label</p>
+<p>4530 instances, exact.</p>
+<table>
+  <thead><tr><th>Property</th><th>Value types</th><th>Cardinality</th><th>Usage</th><th>Inheritance</th></tr></thead>
+  <tbody>
+    <tr><td title="http://lexvo.org/ontology#script">lvont:script</td><td>—</td><td>0..1</td><td>9 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#endDate">euvoc:endDate</td><td>xsd:date</td><td>0..1</td><td>27 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#startDate">euvoc:startDate</td><td>xsd:date</td><td>0..1</td><td>90 %</td><td>own</td></tr>
+    <tr><td title="http://publications.europa.eu/ontology/euvoc#status">euvoc:status</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/created">dcterms:created</td><td>xsd:date</td><td>0..1</td><td>90 %</td><td>own</td></tr>
+    <tr><td title="http://purl.org/dc/terms/type">dcterms:type</td><td>—</td><td>1</td><td>100 %</td><td>own</td></tr>
+    <tr><td title="http://www.w3.org/2008/05/skos-xl#literalForm">skosxl:literalForm</td><td>rdf:langString</td><td>1</td><td>100 %</td><td>own</td></tr>
+  </tbody>
+</table>
+</section>
+</section>
+
+<section id="caveats">
+<h2>6 Caveats</h2>
+<h3>Sampled classes</h3>
+<p>None: every class was read exactly.</p>
+<h3>Recorded failures</h3>
+<p>None.</p>
+<h3>IRIs left out of the shapes and the diagram</h3>
+<p>None.</p>
+</section>
+</body>
+</html>
