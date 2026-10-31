@@ -4,12 +4,12 @@
 
 - [x] 1.0 Gherkin projected from UC-W2/UC-B2.1/UC-B2.2 (`docs/modules/ROOT/pages/use-cases/`), the spec scenarios and the error matrix: `tests/features/profile_representations.feature`; the two `fingerprint-report` scenarios added to `tests/features/fingerprint_report.feature`; every scenario of every feature, 2.0 ones included, tagged with its use case and the tags registered in `pytest.ini` (DEC-9, P-17)
 - [x] 1.1 rdflib declared as a runtime dependency, pySHACL added to the `test` group, lock updated; `--cov-fail-under=80` in `make test`; empty modules of the P-12 table; `.importlinter` contract "service layer imports no jinja2, eds4jinja2, rdflib or SPARQLWrapper itself" (`allow_indirect_imports = True`) added (expected red until 2.2); `fingerprint.domain.exceptions` in the `generated` contract (P-12, P-17)
-- [ ] 1.2 A fixed test profile `tests/test_data/profiles/sample-profile.json`, collected once from the existing continents and treaties data (`make oxigraph-load-test-data`) with fixed `started_at`/`finished_at`/`tool_version`, plus small hand-built profiles in `tests/unit/fakes.py` for first-N, failures and unusual IRIs (no new RDF data)
+- [x] 1.2 A fixed test profile `tests/test_data/profiles/sample-profile.json`, collected once from the existing continents and treaties data (`make oxigraph-load-test-data`) with fixed `started_at`/`finished_at`/`tool_version`, plus small hand-built profiles in `tests/unit/fakes.py` for first-N, failures and unusual IRIs (no new RDF data)
 
 ## 2. Layer clean-up of 2.0 (behaviour unchanged, existing tests green)
 
-- [ ] 2.0 Exceptions modules per layer: `IriRefError` → `domain/exceptions.py`, the SPARQL error classes → `adapters/exceptions.py`, `UsageError` → `service_layer/exceptions.py`; old import paths keep working (P-12)
-- [ ] 2.1 `adapters/settings_sources.py` (`load_config_file` raising `ConfigFileError`, `environment()`); `resolve_settings` reads through it and turns `ConfigFileError` into `UsageError` (P-12)
+- [x] 2.0 Exceptions modules per layer: `IriRefError` → `domain/exceptions.py`, the SPARQL error classes → `adapters/exceptions.py`, `UsageError` → `service_layer/exceptions.py`; old import paths keep working (P-12)
+- [x] 2.1 `adapters/settings_sources.py` (`load_config_file` raising `ConfigFileError`, `environment()`); `resolve_settings` reads through it and turns `ConfigFileError` into `UsageError` (P-12)
 - [ ] 2.2 `adapters/template_renderer.py` with render, Turtle check and check-then-write; `render_report` delegates to it; guard test `test_report_builder_exposes_template_env`; the new import-linter contract green (P-1, P-14)
 - [ ] 2.3 `fingerprint_report(…, sparql=None)` injectable port (P-15); comment in `domain/analytics.py` on the dict hand-offs validated by `analyse()`
 
@@ -57,7 +57,7 @@
 
 ## Roadmap
 
-- [x] 1.0 · [x] 1.1 · [ ] 1.2 · [ ] 2.0 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.0 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 3.4 · [ ] 3.5 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 1.0 · [x] 1.1 · [x] 1.2 · [x] 2.0 · [x] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.0 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 3.4 · [ ] 3.5 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

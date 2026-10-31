@@ -20,6 +20,15 @@ from SPARQLWrapper.SPARQLExceptions import (
     URITooLong,
 )
 
+from fingerprint.adapters.exceptions import (  # noqa: F401 — also importable from here (2.0)
+    EndpointUnreachable,
+    PermanentError,
+    QueryTimeout,
+    RetriesExhausted,
+    SparqlError,
+    TransientError,
+)
+
 logger = logging.getLogger(__name__)
 
 Row = dict[str, str | None]
@@ -28,34 +37,6 @@ TIMEOUT_MARKERS = ("timeout", "time limit", "timed out", "estimated execution ti
 BACKOFF_SECONDS = (1, 4)
 EXCERPT = 200
 BLANK_NODE_PREFIX = "_:"
-
-
-class SparqlError(Exception):
-    """A query that could not be answered; the message is meant for the log and the report."""
-
-    def __init__(self, message: str, status: int | None = None):
-        super().__init__(message)
-        self.status = status
-
-
-class QueryTimeout(SparqlError):
-    """The endpoint did not answer in time; the caller escalates or falls back."""
-
-
-class RetriesExhausted(QueryTimeout):
-    """A transient error that persisted through every retry."""
-
-
-class TransientError(SparqlError):
-    """A failure worth retrying (overload, dropped connection)."""
-
-
-class PermanentError(SparqlError):
-    """The endpoint rejected the query; retrying cannot help."""
-
-
-class EndpointUnreachable(SparqlError):
-    """The endpoint cannot be used at all (no connection, authentication required)."""
 
 
 class SparqlPort(Protocol):

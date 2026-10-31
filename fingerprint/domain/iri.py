@@ -2,16 +2,10 @@
 
 import re
 
+from fingerprint.domain.exceptions import IriRefError  # noqa: F401 — also importable from here (2.0)
+
 # SPARQL 1.1 IRIREF excludes these characters and U+0000–U+0020.
 _NOT_IRIREF = re.compile(r'[<>"{}|^`\\\x00-\x20]')
-
-
-class IriRefError(ValueError):
-    """An IRI that cannot be written as a SPARQL IRIREF."""
-
-    def __init__(self, iri: str):
-        super().__init__(f"not usable in a SPARQL query: {iri!r}")
-        self.iri = iri
 
 
 def to_iriref(iri: str) -> str:

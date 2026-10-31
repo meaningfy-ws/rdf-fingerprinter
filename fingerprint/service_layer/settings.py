@@ -1,23 +1,20 @@
 """Collection settings: CLI > environment > `selected_graphs` parameter > config file > default (P-6)."""
 
-import json
-import os
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
 from pydantic import ValidationError
 
+from fingerprint.adapters import settings_sources
+from fingerprint.adapters.exceptions import ConfigFileError
 from fingerprint.domain.generated.profile import Settings
+from fingerprint.service_layer.exceptions import UsageError  # noqa: F401 — also importable from here (2.0)
 
 ENV_PREFIX = "RDF_FINGERPRINTER_"
 NAMES = tuple(Settings.model_fields)
 _TRUE = {"1", "true", "yes", "on"}
 _FALSE = {"0", "false", "no", "off"}
-
-
-class UsageError(ValueError):
-    """A setting value the user must correct (the CLI's exit 2)."""
 
 
 def _from_env(name: str, raw: str) -> Any:
@@ -35,12 +32,9 @@ def _from_env(name: str, raw: str) -> Any:
 def load_config_file(path: str | Path) -> dict[str, Any]:
     """The `--config FILE`: a JSON object with the setting names as keys."""
     try:
-        config = json.loads(Path(path).read_text())
-    except (OSError, ValueError) as error:
-        raise UsageError(f"cannot read config file {path}: {error}") from error
-    if not isinstance(config, dict):
-        raise UsageError(f"config file {path} must hold a JSON object")
-    return config
+        return settings_sources.load_config_file(path)
+    except ConfigFileError as error:
+        raise UsageError(str(error)) from error
 
 
 def resolve_settings(
@@ -50,7 +44,7 @@ def resolve_settings(
     config: Mapping[str, Any] | None = None,
 ) -> Settings:
     """Merge the sources per setting; unknown config keys and invalid values are usage errors."""
-    env = os.environ if env is None else env
+    env = settings_sources.environment() if env is None else env
     unknown = set(config or {}) - set(NAMES)
     if unknown:
         raise UsageError(f"unknown collection settings: {', '.join(sorted(unknown))}")
