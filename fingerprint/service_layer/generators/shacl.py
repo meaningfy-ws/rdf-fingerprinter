@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import Any, NamedTuple
 
 from fingerprint.domain.analytics import label_bounds
-from fingerprint.domain.generated.profile import (
+from fingerprint.domain.iri import to_iriref, turtle_number, turtle_string, turtle_term
+from fingerprint.domain.profile import (
     ClassAnalytics,
     GraphAnalytics,
     NodeKind,
@@ -16,7 +17,6 @@ from fingerprint.domain.generated.profile import (
     ProfileAnalytics,
     PropertyAnalytics,
 )
-from fingerprint.domain.iri import to_iriref, turtle_number, turtle_string, turtle_term
 from fingerprint.domain.vocabulary import FP, RDF, RDF_LANG_STRING, RDFS, SH, XSD
 from fingerprint.service_layer.generators.generator import Generator, TemplateRenderer
 from fingerprint_report_templates import packaged

@@ -126,7 +126,7 @@ def klass(iri: str, instances: int, *props: dict[str, Any], observed: int | None
 
 
 def profile_run(*classes, graph=None, edges=(), failures=(), **settings):
-    from fingerprint.domain.generated.profile import ProfileRun
+    from fingerprint.domain.profile import ProfileRun
 
     graph_profile: dict[str, Any] = {"class_partitions": list(classes)}
     if graph:

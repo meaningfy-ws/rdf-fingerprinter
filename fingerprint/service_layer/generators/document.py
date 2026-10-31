@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from fingerprint.domain.analytics import multiplicity
-from fingerprint.domain.generated.profile import (
+from fingerprint.domain.profile import (
     ClassAnalytics,
     GraphAnalytics,
     PrecisionMode,

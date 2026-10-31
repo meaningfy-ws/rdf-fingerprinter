@@ -6,7 +6,7 @@ from pathlib import Path
 from pydantic import ValidationError
 
 from fingerprint.adapters.exceptions import ProfileFileError
-from fingerprint.domain.generated.profile import ProfileRun
+from fingerprint.domain.profile import ProfileRun
 
 PROFILE_FILE = "profile.json"
 

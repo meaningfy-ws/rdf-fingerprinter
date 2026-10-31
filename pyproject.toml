@@ -62,7 +62,7 @@ lint = [
     "mypy==2.4.1",
     "import-linter==2.15",
 ]
-# Development only: generates fingerprint/domain/generated/ from model/*.yaml (P-10).
+# Development only: generates the fingerprint/domain/ models from model/*.yaml (P-10).
 model = [
     "linkml==1.12.1",
 ]

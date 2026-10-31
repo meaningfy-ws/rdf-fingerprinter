@@ -16,7 +16,7 @@ from fingerprint.adapters.profile_file import save_profile
 from fingerprint.adapters.sparql import SparqlPort, SparqlWrapperClient
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.generated.profile import ProfileRun, Settings
+from fingerprint.domain.profile import ProfileRun, Settings
 from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.generators.generator import TemplateRenderer
 from fingerprint.service_layer.report import (  # noqa: F401 — kept importable from here (1.x)

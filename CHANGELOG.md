@@ -15,7 +15,7 @@ and an application-profile document.
 ### Added
 - **`profile.json`.** `fingerprint` (and `generate_endpoint_fingerprint_report`) saves the raw
   profile run beside the report, before the report is rendered, so a template error loses nothing
-  collected. Its JSON Schema ships as `fingerprint/domain/generated/profile_run.schema.json`;
+  collected. Its JSON Schema ships as `fingerprint/domain/profile_run.schema.json`;
   newer 2.x readers load older files.
 - **Generators**, modelled on LinkML's: `fingerprint-gen-shacl`, `fingerprint-gen-puml` and
   `fingerprint-gen-doc` read a `profile.json` and write one representation (`--threshold`,

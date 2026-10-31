@@ -4,7 +4,7 @@ import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.generated.profile import ProfileRun
+from fingerprint.domain.profile import ProfileRun
 
 scenarios("profile_analytics.feature")
 

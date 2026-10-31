@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
-from fingerprint.domain.generated.profile import ProfileAnalytics
+from fingerprint.domain.profile import ProfileAnalytics
 from fingerprint.service_layer.generators.generator import TemplateRenderer
 from fingerprint_report_templates import packaged
 

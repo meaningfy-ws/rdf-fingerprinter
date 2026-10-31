@@ -1,7 +1,7 @@
 import pytest
 
 from fingerprint.domain.analytics import analyse, cardinality_label, cardinality_statistics
-from fingerprint.domain.generated.profile import ProfileRun
+from fingerprint.domain.profile import ProfileRun
 
 EX = "http://example.org/"
 RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label"

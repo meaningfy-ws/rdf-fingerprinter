@@ -9,7 +9,7 @@ from fingerprint.adapters.profile_file import load_profile
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.exceptions import IriRefError
-from fingerprint.domain.generated.profile import ProfileAnalytics, ProfileRun
+from fingerprint.domain.profile import ProfileAnalytics, ProfileRun
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators import DOC, GENERATORS, PUML
 from fingerprint.service_layer.generators.generator import Generator, TemplateRenderer

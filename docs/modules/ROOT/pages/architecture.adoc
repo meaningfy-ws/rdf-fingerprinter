@@ -143,9 +143,9 @@ under `model/`:
   confidence, cardinality label, value-type purity, diversity, parents, own/inherited, …).
 
 Rules for the generated code (P-10): `make generate-models` writes
-`fingerprint/domain/generated/profile.py` with a do-not-edit banner; `make check-models` (part of
+`fingerprint/domain/profile.py` with a do-not-edit banner; `make check-models` (part of
 `make check-all`) fails when it is out of date; the generated classes are frozen and reject
-unknown fields; Ruff excludes the folder; import-linter keeps it free of project imports.
+unknown fields; Ruff excludes the module; import-linter keeps it free of project imports.
 
 == Architecture decisions
 

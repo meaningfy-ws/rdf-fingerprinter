@@ -16,7 +16,7 @@ import click
 
 from fingerprint.adapters.exceptions import EndpointUnreachable
 from fingerprint.adapters.sparql import redact
-from fingerprint.domain.generated.profile import Depth, ObjectTypeScope, PrecisionPolicy
+from fingerprint.domain.profile import Depth, ObjectTypeScope, PrecisionPolicy
 from fingerprint.entrypoints.cli import EXIT_FAILURES, EXIT_UNEXPECTED, EXIT_UNREACHABLE, configure_logging
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators import GENERATORS

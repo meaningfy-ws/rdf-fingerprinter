@@ -7,9 +7,9 @@
 
 ## 1. Rule, check and generated modules
 
-- [ ] 1.1 AGENTS.md *Working conventions*: the domain-objects rule (DEC-1)
-- [ ] 1.2 `tests/unit/test_no_composed_dicts.py` as P-1 specifies (annotations incl. bare `dict`; displays, comprehensions, `dict()` in functions; `update=`/`**`/UPPER_CASE/`# dict-ok:` exemptions) with `tests/unit/composed_dicts_allowlist.txt` holding today's offender count per file (Requirement: Values are domain objects)
-- [ ] 1.3 `fingerprint/domain/profile.py` and `profile_run.schema.json` from `make generate-models`; `fingerprint/domain/generated/` removed; imports, Ruff exclude, `.importlinter`, Makefile, docs paths (P-2; Requirement: Generated models stay in sync; Requirement: Generated code is read-only)
+- [x] 1.1 AGENTS.md *Working conventions*: the domain-objects rule (DEC-1)
+- [x] 1.2 `tests/unit/test_no_composed_dicts.py` as P-1 specifies (annotations incl. bare `dict`; displays, comprehensions, `dict()` in functions; `update=`/`**`/UPPER_CASE/`# dict-ok:` exemptions) with `tests/unit/composed_dicts_allowlist.txt` holding today's offender count per file (Requirement: Values are domain objects)
+- [x] 1.3 `fingerprint/domain/profile.py` and `profile_run.schema.json` from `make generate-models`; `fingerprint/domain/generated/` removed; imports, Ruff exclude, `.importlinter`, Makefile, docs paths (P-2; Requirement: Generated models stay in sync; Requirement: Generated code is read-only)
 
 ## 2. Configuration
 
@@ -45,7 +45,7 @@
 
 ## Roadmap
 
-- [ ] 1.1 · [ ] 1.2 · [ ] 1.3 · [x] 0.1 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 4.1 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 0.2 · [ ] 6.1 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4
+- [x] 1.1 · [ ] 1.2 · [ ] 1.3 · [x] 0.1 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 4.1 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 0.2 · [ ] 6.1 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4
 
 ## Verification
 

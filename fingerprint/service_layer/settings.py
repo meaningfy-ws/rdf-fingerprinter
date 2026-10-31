@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from fingerprint.adapters import settings_sources
 from fingerprint.adapters.exceptions import ConfigFileError
-from fingerprint.domain.generated.profile import Settings
+from fingerprint.domain.profile import Settings
 from fingerprint.service_layer.exceptions import UsageError  # noqa: F401 — also importable from here (2.0)
 
 ENV_PREFIX = "RDF_FINGERPRINTER_"

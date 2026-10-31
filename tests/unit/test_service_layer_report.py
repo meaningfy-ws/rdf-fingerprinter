@@ -5,7 +5,7 @@ from rdflib import Literal
 
 from fingerprint.adapters.sparql import QueryTimeout
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.generated.profile import ProfileRun
+from fingerprint.domain.profile import ProfileRun
 from fingerprint.service_layer import handlers
 from fingerprint.service_layer.report import render_report
 from fingerprint.service_layer.settings import resolve_settings

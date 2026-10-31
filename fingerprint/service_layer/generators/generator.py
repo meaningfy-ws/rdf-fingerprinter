@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import Any, ClassVar, Protocol
 
 from fingerprint.domain.exceptions import IriRefError
-from fingerprint.domain.generated.profile import ClassAnalytics, GraphAnalytics, ProfileAnalytics, PropertyAnalytics
 from fingerprint.domain.iri import split_curie, to_iriref
+from fingerprint.domain.profile import ClassAnalytics, GraphAnalytics, ProfileAnalytics, PropertyAnalytics
 
 logger = logging.getLogger(__name__)
 

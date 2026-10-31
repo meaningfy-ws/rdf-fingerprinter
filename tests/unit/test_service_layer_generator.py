@@ -7,7 +7,7 @@ import pytest
 
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.generated.profile import ProfileRun
+from fingerprint.domain.profile import ProfileRun
 from fingerprint.service_layer.generators.generator import Generator, graph_slug
 
 EX = "http://ex.org/"

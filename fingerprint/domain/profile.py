@@ -78,7 +78,7 @@ linkml_meta = LinkMLMeta({'default_prefix': 'fp',
                     'extends its raw counterpart.\n'
                     'The catalogue is open: new indicators are added here without '
                     'touching collection.\n'
-                    'Source of fingerprint/domain/generated/profile.py (make '
+                    'Source of fingerprint/domain/profile.py (make '
                     'generate-models).\n',
      'id': 'https://data.meaningfy.ws/fingerprint/analytics/schema',
      'imports': ['linkml:types', 'fingerprint_stats'],

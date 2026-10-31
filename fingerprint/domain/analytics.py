@@ -4,7 +4,7 @@ import math
 from collections import defaultdict
 from typing import Any
 
-from fingerprint.domain.generated.profile import (
+from fingerprint.domain.profile import (
     CardinalityLabel,
     ClassProfile,
     GraphProfile,

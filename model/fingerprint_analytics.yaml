@@ -6,7 +6,7 @@ description: |
   by pure functions in fingerprint/domain, so every representation (HTML report, SHACL, PlantUML,
   ReSpec, VoID) reads the same numbers. Each analytical class extends its raw counterpart.
   The catalogue is open: new indicators are added here without touching collection.
-  Source of fingerprint/domain/generated/profile.py (make generate-models).
+  Source of fingerprint/domain/profile.py (make generate-models).
 version: 0.1.0
 license: Apache-2.0
 prefixes:

@@ -18,7 +18,7 @@ from fingerprint.adapters.queries import render, subjects_exact, subjects_limit,
 from fingerprint.adapters.sparql import BLANK_NODE_PREFIX, SparqlPort, redact
 from fingerprint.domain.analytics import drop_none
 from fingerprint.domain.exceptions import IriRefError
-from fingerprint.domain.generated.profile import Depth, PrecisionMode, ProfileRun, Settings
+from fingerprint.domain.profile import Depth, PrecisionMode, ProfileRun, Settings
 from fingerprint.domain.vocabulary import RDF_LANG_STRING
 
 logger = logging.getLogger(__name__)

@@ -6,7 +6,7 @@ import pytest
 
 from fingerprint.adapters.exceptions import GeneratedOutputError
 from fingerprint.adapters.profile_file import save_profile
-from fingerprint.domain.generated.profile import ProfileRun
+from fingerprint.domain.profile import ProfileRun
 from fingerprint.service_layer import representations
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.representations import (
