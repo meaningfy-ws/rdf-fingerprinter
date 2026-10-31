@@ -39,6 +39,8 @@ are visible instead of silent.
   `additional_config["collection"]`.
 - Per-query timeout (default 60 s), retries of transient errors, and classes profiled concurrently.
 - `collect`, `analyse` and `render_report` usable separately; the raw profile serialises to JSON.
+- The endpoint URL is logged and recorded without user info or query string, which may carry
+  credentials. The packaged report escapes every value that comes from the endpoint.
 - LinkML models `model/fingerprint_stats.yaml` and `model/fingerprint_analytics.yaml`, generated
   into read-only Pydantic classes (`make generate-models`, checked by `make check-models`).
 

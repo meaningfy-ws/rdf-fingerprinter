@@ -4,6 +4,7 @@ from collections.abc import Iterable
 from importlib.resources import files
 from string import Template
 
+from fingerprint.domain.generated.profile import ObjectTypeScope
 from fingerprint.domain.iri import to_iriref
 
 QUERY_FILES = {
@@ -33,6 +34,11 @@ def _graph(graph: str | None) -> tuple[str, str]:
     return (f"GRAPH {to_iriref(graph)} {{", "}") if graph else ("", "")
 
 
+def _distinct(graph: str | None) -> str:
+    """The default graph may repeat triples across graphs on union-default stores: count distinct (DEC-11)."""
+    return "" if graph else "DISTINCT "
+
+
 def subjects_exact(graph: str | None, cls: str) -> str:
     graph_open, graph_close = _graph(graph)
     return f"{graph_open} ?s a {to_iriref(cls)} . {graph_close}"
@@ -45,12 +51,11 @@ def subjects_values(iris: Iterable[str]) -> str:
 
 def subjects_limit(graph: str | None, cls: str, limit: int) -> str:
     """Fallback when QS listed blank nodes, which VALUES cannot carry."""
-    distinct = "" if graph else "DISTINCT "
-    return f"{{ SELECT {distinct}?s {{ {subjects_exact(graph, cls)} }} LIMIT {int(limit)} }}"
+    return f"{{ SELECT {_distinct(graph)}?s {{ {subjects_exact(graph, cls)} }} LIMIT {int(limit)} }}"
 
 
 def type_lookup(graph: str | None, scope: str) -> str:
-    if scope == "any_graph":
+    if scope == ObjectTypeScope.any_graph:
         return "OPTIONAL { { ?o a ?t } UNION { GRAPH ?tg { ?o a ?t } } }"
     graph_open, graph_close = _graph(graph)
     return f"OPTIONAL {{ {graph_open} ?o a ?t . {graph_close} }}"
@@ -72,7 +77,7 @@ def render(
     return _TEMPLATES[name].substitute(
         graph_open=graph_open,
         graph_close=graph_close,
-        distinct="" if graph else "DISTINCT ",
+        distinct=_distinct(graph),
         cls=to_iriref(cls) if cls else "",
         prop=to_iriref(prop) if prop else "",
         subjects=subjects,

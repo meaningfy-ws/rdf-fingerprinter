@@ -225,14 +225,14 @@ classes:
     attributes:
       depth: { range: Depth, required: true, ifabsent: "string(values)", description: "How much was collected." }
       precision_policy: { range: PrecisionPolicy, required: true, ifabsent: "string(auto)", description: "Allowed precision modes." }
-      first_n: { range: integer, minimum_value: 1, ifabsent: "int(10000)", description: "N for the first_n mode." }
-      top_k: { range: integer, minimum_value: 1, ifabsent: "int(20)", description: "How many top values to keep per class and property." }
+      first_n: { required: true, range: integer, minimum_value: 1, ifabsent: "int(10000)", description: "N for the first_n mode." }
+      top_k: { required: true, range: integer, minimum_value: 1, ifabsent: "int(20)", description: "How many top values to keep per class and property." }
       object_type_scope: { range: ObjectTypeScope, required: true, ifabsent: "string(same_graph)", description: "Where object types are looked up." }
-      completeness_check: { range: boolean, ifabsent: "false", description: "Whether property presence was checked for first_n classes." }
-      timeout_seconds: { range: integer, minimum_value: 1, ifabsent: "int(60)", description: "Per-query timeout." }
-      concurrency: { range: integer, minimum_value: 1, ifabsent: "int(4)", description: "Maximum concurrent queries." }
-      acceptance_threshold: { range: float, minimum_value: 0, maximum_value: 1, ifabsent: "float(0.95)", description: "Share of instances a cardinality label must cover." }
-      graph_statistics: { range: boolean, ifabsent: "false", description: "Whether graph totals, predicate partitions and untyped subjects were collected (full scans)." }
+      completeness_check: { required: true, range: boolean, ifabsent: "false", description: "Whether property presence was checked for first_n classes." }
+      timeout_seconds: { required: true, range: integer, minimum_value: 1, ifabsent: "int(60)", description: "Per-query timeout." }
+      concurrency: { required: true, range: integer, minimum_value: 1, ifabsent: "int(4)", description: "Maximum concurrent queries." }
+      acceptance_threshold: { required: true, range: float, minimum_value: 0, maximum_value: 1, ifabsent: "float(0.95)", description: "Share of instances a cardinality label must cover." }
+      graph_statistics: { required: true, range: boolean, ifabsent: "false", description: "Whether graph totals, predicate partitions and untyped subjects were collected (full scans)." }
       selected_graphs: { range: uriorcurie, multivalued: true, description: "Graphs requested; empty means all." }
 
   Failure:

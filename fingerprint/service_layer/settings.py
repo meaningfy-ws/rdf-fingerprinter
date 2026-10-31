@@ -62,9 +62,10 @@ def resolve_settings(
         if raw is not None:
             values[name] = _from_env(name, raw)
     values.update({k: v for k, v in (cli or {}).items() if v is not None})
-    if values.get("acceptance_threshold") == 0:
-        raise UsageError("acceptance_threshold must be in (0, 1]")
     try:
-        return Settings.model_validate(values)
+        settings = Settings.model_validate(values)
     except ValidationError as error:
         raise UsageError(str(error)) from error
+    if settings.acceptance_threshold <= 0:  # the model allows [0, 1]; a label needs some support (P-6)
+        raise UsageError("acceptance_threshold must be in (0, 1]")
+    return settings

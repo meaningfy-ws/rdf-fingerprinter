@@ -9,21 +9,26 @@ from typing import Any
 
 from fingerprint.adapters.queries import render, subjects_exact, subjects_limit, subjects_values
 from fingerprint.adapters.sparql import (
+    BLANK_NODE_PREFIX,
     EndpointUnreachable,
     PermanentError,
     QueryTimeout,
     RetriesExhausted,
     SparqlError,
     SparqlPort,
+    redact,
 )
-from fingerprint.domain.generated.profile import ProfileRun, Settings
+from fingerprint.domain.analytics import RDF_LANG_STRING, drop_none
+from fingerprint.domain.generated.profile import Depth, PrecisionMode, ProfileRun, Settings
+from fingerprint.domain.iri import IriRefError
 
 logger = logging.getLogger(__name__)
 
 RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-RDF_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
-DEPTHS = ("graphs", "classes", "properties", "values", "rich_values", "links")
-MODES = {"auto": ("exact", "first_n"), "exact": ("exact",), "first_n": ("first_n",)}
+DEPTHS = tuple(depth.value for depth in Depth)  # the schema lists the levels in order
+EXACT, FIRST_N = PrecisionMode.exact.value, PrecisionMode.first_n.value
+MODES = {"auto": (EXACT, FIRST_N), "exact": (EXACT,), "first_n": (FIRST_N,)}  # keyed by PrecisionPolicy
+TOO_LARGE = (400, 413)
 QUERY_KIND = {
     "Q0": "graphs",
     "Q1": "triples",
@@ -60,7 +65,7 @@ class _Collection:
     """One run's state: the settings, the port and the failures recorded so far."""
 
     def __init__(self, endpoint: str, settings: Settings, sparql: SparqlPort):
-        self.endpoint = endpoint
+        self.endpoint = redact(endpoint)
         self.settings = settings
         self.sparql = sparql
         self.failures: list[dict[str, Any]] = []
@@ -76,7 +81,19 @@ class _Collection:
             self.failures.append({k: v for k, v in failure.items() if v is not None})
 
     def select(self, name: str, graph: str | None = None, **values: Any) -> list[dict[str, str | None]]:
-        return self.sparql.select(render(name, graph, scope=self.settings.object_type_scope, **values))
+        return self._run(name, self.sparql.select, graph, **values)
+
+    def ask(self, name: str, graph: str | None = None, **values: Any) -> bool:
+        return self._run(name, self.sparql.ask, graph, **values)
+
+    def _run(self, name: str, send: Any, graph: str | None, **values: Any) -> Any:
+        try:
+            return send(render(name, graph, scope=self.settings.object_type_scope, **values))
+        except EndpointUnreachable as error:
+            if name == "Q0":
+                raise
+            # past discovery, an authorisation refusal concerns this query only (P-5: unreachable is Q0's verdict)
+            raise PermanentError(str(error), error.status) from error
 
     # --- discovery ---
 
@@ -122,6 +139,8 @@ class _Collection:
             try:
                 row = self.select(name, graph)[0]
                 totals.update({c: _int(row[c]) for c in columns})
+            except QueryTimeout:
+                self.fail(name, f"graph {graph or 'default'}: {name} timed out after {self.settings.timeout_seconds} s", graph)
             except (SparqlError, IndexError) as error:
                 self.fail(name, f"graph {graph or 'default'}: {name} failed: {error}", graph)
         return totals
@@ -143,8 +162,8 @@ class _Collection:
         for cls in classes:
             try:
                 counts[cls] = int(self.select("Q3b", graph, cls=cls)[0]["instances"] or 0)
-            except ValueError:
-                self.fail("Q3b", f"skipping {cls}: not usable in a SPARQL query", graph, cls)
+            except IriRefError:
+                self.fail("Q3b", f"skipping {cls!r}: not usable in a SPARQL query", graph, cls)
             except SparqlError as error:
                 self.fail("Q3b", f"graph {label}: class {cls} not counted: {error}", graph, cls)
         return counts
@@ -154,19 +173,19 @@ class _Collection:
     def first_wave(self, graph: str, cls: str, instances: int, mode: str, done: list[str]) -> dict[str, Any]:
         """Q8 [+Q5] [+Q6, Q7] over one subject source; `done` records the queries run, for failure kinds."""
         profile: dict[str, Any] = {"class_iri": cls, "instances": instances, "precision_mode": mode}
-        if mode == "exact":
+        if mode == EXACT:
             subjects = subjects_exact(graph, cls)
             profile["observed_instances"] = instances
         else:
             done.append("QS")
             listed = [r["s"] for r in self.select("QS", graph, cls=cls, limit=self.settings.first_n) if r["s"]]
             profile["observed_instances"] = len(listed)
-            profile["sample_shared"] = not any(s.startswith("_:") for s in listed)
+            profile["sample_shared"] = not any(s.startswith(BLANK_NODE_PREFIX) for s in listed)
             if profile["sample_shared"]:
                 subjects = subjects_values(listed)
             else:
                 logger.info("class %s: blank-node instances; first-N sample may differ between queries", cls)
-                subjects = subjects_limit(graph, cls, self.settings.first_n or 1)
+                subjects = subjects_limit(graph, cls, self.settings.first_n)
         profile["_subjects"] = subjects
 
         done.append("Q8")
@@ -227,14 +246,14 @@ class _Collection:
         return profile
 
     def second_wave(self, graph: str, profile: dict[str, Any], predicates: list[dict[str, Any]] | None) -> None:
-        cls, subjects, exact = profile["class_iri"], profile["_subjects"], profile["precision_mode"] == "exact"
+        cls, subjects, exact = profile["class_iri"], profile["_subjects"], profile["precision_mode"] == EXACT
         if self.depth_at_least("rich_values"):
             for p in profile["property_partitions"]:
                 try:
                     rows = self.select("Q9", graph, prop=p["property"], subjects=subjects, k=self.settings.top_k)
                     p["top_values"] = [{"value": r["o"], "triples": _int(r["triples"])} for r in rows]
                     p["top_values_exact"] = exact
-                except (SparqlError, ValueError) as error:
+                except (SparqlError, IriRefError) as error:
                     self.fail(
                         "Q9", f"class {cls}, property {p['property']}: Q9 failed: {error}", graph, cls, property=p["property"]
                     )
@@ -242,9 +261,9 @@ class _Collection:
             seen = {p["property"] for p in profile["property_partitions"]} | {RDF_TYPE}
             for predicate in sorted({p["property"] for p in predicates} - seen):
                 try:
-                    if self.sparql.ask(render("Q10", graph, cls=cls, prop=predicate)):
+                    if self.ask("Q10", graph, cls=cls, prop=predicate):
                         profile["property_partitions"].append({"property": predicate, "presence_only": True})
-                except (SparqlError, ValueError) as error:
+                except (SparqlError, IriRefError) as error:
                     self.fail("Q10", f"class {cls}, property {predicate}: Q10 failed: {error}", graph, cls, property=predicate)
         if self.depth_at_least("links"):
             try:
@@ -253,7 +272,7 @@ class _Collection:
                     for r in self.select("Q11", graph, subjects=subjects)
                     if r["p"]
                 ]
-            except (SparqlError, ValueError) as error:
+            except (SparqlError, IriRefError) as error:
                 self.fail("Q11", f"class {cls}: Q11 failed: {error}", graph, cls)
 
     def profile_class(
@@ -266,8 +285,8 @@ class _Collection:
             try:
                 profile = self.first_wave(graph, cls, instances, mode, done)
                 break
-            except ValueError:
-                self.fail(done[-1] if done else "Q8", f"skipping {cls}: not usable in a SPARQL query", graph, cls)
+            except IriRefError as error:
+                self.fail(done[-1] if done else "Q8", f"skipping {error.iri!r}: not usable in a SPARQL query", graph, cls)
                 return None
             except QueryTimeout:
                 last = done[-1] if done else "Q8"
@@ -277,8 +296,7 @@ class _Collection:
                 )
             except PermanentError as error:
                 name = done[-1] if done else "Q8"
-                status = str(error).split(" ", 1)[0]
-                if mode == "first_n" and name != "QS" and status in ("400", "413"):
+                if mode == FIRST_N and name != "QS" and error.status in TOO_LARGE:
                     message = f"class {cls}: endpoint rejected {self.settings.first_n}-IRI query; lower --first-n"
                 else:
                     message = f"{name} rejected by endpoint: {error}"
@@ -311,8 +329,8 @@ class _Collection:
         counts = self.class_counts(graph)
         usable = {}
         for cls, instances in counts.items():
-            if cls.startswith("_:"):
-                self.fail("Q3", f"skipping {cls}: not usable in a SPARQL query", graph, cls)
+            if cls.startswith(BLANK_NODE_PREFIX):
+                self.fail("Q3", f"skipping {cls!r}: not usable in a SPARQL query", graph, cls)
             else:
                 usable[cls] = instances
         ordered = sorted(usable, key=lambda c: (-usable[c], c))
@@ -320,14 +338,6 @@ class _Collection:
             profiles = list(pool.map(lambda c: self.profile_class(graph, c, usable[c], predicates), ordered))
         result["class_partitions"] = [p for p in profiles if p]
         return result
-
-
-def _drop_none(value: Any) -> Any:
-    if isinstance(value, dict):
-        return {k: _drop_none(v) for k, v in value.items() if v is not None}
-    if isinstance(value, list):
-        return [_drop_none(v) for v in value]
-    return value
 
 
 def collect(endpoint: str, settings: Settings, sparql: SparqlPort) -> ProfileRun:
@@ -341,12 +351,12 @@ def collect(endpoint: str, settings: Settings, sparql: SparqlPort) -> ProfileRun
     for graph in graphs:
         try:
             profiles.append(run.profile_graph(graph, edges))
-        except ValueError:
-            run.fail("Q3", f"skipping {graph}: not usable in a SPARQL query", graph)
+        except IriRefError:
+            run.fail("Q3", f"skipping {graph!r}: not usable in a SPARQL query", graph)
     return ProfileRun.model_validate(
-        _drop_none(
+        drop_none(
             {
-                "endpoint": endpoint,
+                "endpoint": run.endpoint,
                 "started_at": started,
                 "finished_at": datetime.now(UTC),
                 "tool_version": _tool_version(),

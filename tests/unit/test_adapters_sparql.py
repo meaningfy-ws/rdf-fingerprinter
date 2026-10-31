@@ -94,3 +94,14 @@ def test_permanent_error_is_not_retried():
     with pytest.raises(PermanentError):
         client.select("# Q5 x\nSELECT")
     assert client.calls == 1
+
+
+def test_malformed_json_is_a_permanent_error():
+    class Broken(Flaky):
+        def _once(self, query, ask):
+            return {"unexpected": True}
+
+    with pytest.raises(PermanentError):
+        Broken([]).select("# Q1 x\nSELECT")
+    with pytest.raises(PermanentError):
+        Broken([]).ask("# Q10 x\nASK")

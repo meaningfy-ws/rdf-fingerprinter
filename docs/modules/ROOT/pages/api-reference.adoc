@@ -90,6 +90,10 @@ The templates read `conf.profile`, the analysed profile (`ProfileAnalytics`, gen
 template in `fingerprint_report_templates/fingerprint_report/`; `templates/macros/profile.html`
 renders the classes and the Collection section.
 
+WARNING: Values in `conf.profile` come from the endpoint and are untrusted. The packaged template
+is rendered with autoescape on; a custom template is rendered as in 1.x, with autoescape off, so
+escape endpoint values yourself (`{{ value | e }}`).
+
 == Logging
 
 Modules log through `logging.getLogger(__name__)` (`fingerprint.service_layer.handlers`, ...)

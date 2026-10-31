@@ -44,9 +44,7 @@ def render_report(
     location = Path(output_location)
     profiled = [graph.graph or "" for graph in analytics.graphs or []]
     config = generate_report_builder_config(analytics.endpoint or "", profiled, template_location)
-    config["conf"].update(extra_conf or {})
-    config["conf"]["default_endpoint"] = analytics.endpoint
-    config["conf"]["selected_graphs"] = profiled
+    config["conf"].update(extra_conf or {})  # after the 1.x keys, so callers may override them, as in 1.x
     config["conf"]["profile"] = analytics
     builder = ReportBuilder(
         target_path=template_location or DEFAULT_TEMPLATE_LOCATION, additional_config=config, output_path=location

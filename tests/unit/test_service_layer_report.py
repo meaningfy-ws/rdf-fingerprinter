@@ -1,8 +1,15 @@
-from bs4 import BeautifulSoup
+import logging
 
+from bs4 import BeautifulSoup
+from rdflib import Literal
+
+from fingerprint.adapters.sparql import QueryTimeout
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.generated.profile import ProfileRun
+from fingerprint.service_layer import handlers
 from fingerprint.service_layer.report import render_report
+from fingerprint.service_layer.settings import resolve_settings
+from tests.unit.fakes import FakeSparql
 
 EX = "http://example.org/"
 SKOS = "http://www.w3.org/2004/02/skos/core#"
@@ -108,3 +115,14 @@ def test_endpoint_values_are_escaped(tmp_path):
     raw = {"endpoint": "http://e", "settings": {}, "graphs": [{"graph": evil}], "failures": [failure]}
     html = render_report(analyse(ProfileRun.model_validate(raw)), tmp_path).read_text()
     assert "<script>alert" not in html and "&lt;script&gt;alert(1)" in html
+
+
+def test_pipeline_logs_the_number_of_failures(tmp_path, monkeypatch, caplog):
+    fake = FakeSparql()
+    fake.add("ex:p", "a", "ex:Person")
+    fake.add("ex:p", "ex:name", Literal("n"))
+    fake.on("Q4", QueryTimeout("timed out"))
+    monkeypatch.setattr(handlers, "SparqlWrapperClient", lambda endpoint, timeout: fake)
+    with caplog.at_level(logging.WARNING):
+        _, run = handlers.fingerprint_report("http://fake", tmp_path, resolve_settings(env={}))
+    assert len(run.failures) == 1 and "with 1 failures" in caplog.text

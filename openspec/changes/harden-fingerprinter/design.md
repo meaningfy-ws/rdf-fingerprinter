@@ -371,6 +371,8 @@ step 2; share(n ≤ 1) = 0.75 < 0.95 → `zero_or_more`, support 1.0, alternativ
 
 ### Report
 
+Endpoint data is untrusted: `render_report` turns on Jinja autoescape for the packaged template
+(eds4jinja2 leaves it off); custom templates keep 1.x behaviour and escape on their own.
 `main.html` iterates `conf.profile.graphs → class_partitions → property_partitions` and renders, per
 class: IRI (prefixed with the packaged `prefixes.json`), instances, mode (`exact` or
 `first N of M`), parents; per property: property, subjects (`subjects_with_property`), min, max,
@@ -394,10 +396,11 @@ label, inheritance. A closing "Collection" section lists settings and failures.
 
 | Failure mode | How it is detected | Expected handling | Log | Message (log / report) |
 |---|---|---|---|---|
-| Endpoint unreachable | Q0 connection error, transient after retries, HTTP 401/403/407 | raise `EndpointUnreachable`; CLI exit 3; no report | ERROR | `cannot reach endpoint <url>: <reason>` |
+| Endpoint unreachable | Q0 connection error, transient after retries, HTTP 401/403/407 | raise `EndpointUnreachable`; CLI exit 3; no report | ERROR | `cannot reach endpoint <url>: <reason>` (`<url>` without user info or query string, which may hold credentials; the profile records it the same way) |
+| Authorisation refused after Q0 | HTTP 401/403/407 on any other query | treated as `PermanentError` for that query: `Failure`, the run continues | WARNING | `<query> rejected by endpoint: <status>` |
 | Q0 rejected (no `GRAPH ?g {}`) | `PermanentError` on Q0 | if `selected_graphs` is set: profile them, no Failure; else default graph only + `Failure(graphs)` | WARNING | `named graphs not listed (<reason>); profiling the default graph only` |
-| Q1/Q2/QU timeout | `QueryTimeout` | Q2 → Q2a; Q1/QU → `Failure`, slots left empty | WARNING | `graph <g>: <query> timed out after <t> s` |
-| Q3 timeout | `QueryTimeout` | Q3a + Q3b per class; a Q3b timeout → `Failure(class_partitions, class)` | WARNING | `graph <g>: class counts timed out; counting per class` |
+| Q1/Q2/QU timeout | `QueryTimeout` (Q2 also on `PermanentError`) | Q2 → Q2a; Q1/QU → `Failure`, slots left empty | WARNING | `graph <g>: <query> timed out after <t> s` |
+| Q3 timeout or rejection | `QueryTimeout`, `PermanentError` | Q3a + Q3b per class (the same counts, one class at a time, so no Failure); a Q3b timeout → `Failure(class_partitions, class)` | WARNING | `graph <g>: class counts timed out; counting per class` |
 | Q3a timeout / error | `QueryTimeout`, `PermanentError` | `Failure(class_partitions, graph)`; graph profiled without classes; next graph | WARNING | `graph <g>: classes not listed: <reason>` |
 | Q0 timeout | `QueryTimeout` | if `selected_graphs` is set: profile them, no Failure; else default graph only + `Failure(graphs)` | WARNING | `named graphs not listed (timeout); profiling the default graph only` |
 | Q2a timeout / error | `QueryTimeout`, `PermanentError` | `Failure(predicate_partitions, graph)`; Q10 skipped for that graph | WARNING | `graph <g>: predicates not listed; completeness check skipped` |

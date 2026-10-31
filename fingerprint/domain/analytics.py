@@ -278,17 +278,17 @@ def graph_analytics(graph: GraphProfile, threshold: float, top_k: int) -> dict[s
     return result
 
 
-def _drop_none(value: Any) -> Any:
+def drop_none(value: Any) -> Any:
+    """Absent values are left out, so the generated models see only what was observed or derived."""
     if isinstance(value, dict):
-        return {k: _drop_none(v) for k, v in value.items() if v is not None}
+        return {k: drop_none(v) for k, v in value.items() if v is not None}
     if isinstance(value, list):
-        return [_drop_none(v) for v in value]
+        return [drop_none(v) for v in value]
     return value
 
 
 def analyse(run: ProfileRun) -> ProfileAnalytics:
     """Derive every analytics value from a raw profile; the raw profile is not modified."""
-    threshold = run.settings.acceptance_threshold or 0.95
-    top_k = run.settings.top_k or 20
+    threshold, top_k = run.settings.acceptance_threshold, run.settings.top_k
     graphs = [graph_analytics(g, threshold, top_k) for g in run.graphs or []]
-    return ProfileAnalytics.model_validate(_drop_none({**run.model_dump(exclude_none=True), "graphs": graphs}))
+    return ProfileAnalytics.model_validate(drop_none({**run.model_dump(exclude_none=True), "graphs": graphs}))

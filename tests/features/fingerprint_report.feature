@@ -57,6 +57,8 @@ Feature: The fingerprint report and the command line
         | the endpoint refuses connections            | 3    | no report is written      |
         | the endpoint requires authentication        | 3    | no report is written      |
         | the output folder does not exist            | 2    | no report is written      |
+        | a setting is invalid                        | 2    | no report is written      |
+        | an unexpected error occurs                  | 4    | no report is written      |
 
   Rule: Library callers keep the 1.x call
 

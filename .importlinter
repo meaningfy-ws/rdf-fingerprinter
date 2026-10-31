@@ -13,6 +13,7 @@ layers =
     fingerprint.adapters
     fingerprint.domain
 
+# Lists, not patterns: a new module under fingerprint.domain must be added to this contract.
 [importlinter:contract:generated]
 name = generated model imports no project code
 type = forbidden

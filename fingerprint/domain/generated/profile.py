@@ -285,14 +285,14 @@ class Settings(ConfiguredBaseModel):
 
     depth: Depth = Field(default=Depth("values"), description="""How much was collected.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'string(values)'} })
     precision_policy: PrecisionPolicy = Field(default=PrecisionPolicy("auto"), description="""Allowed precision modes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'string(auto)'} })
-    first_n: Optional[int] = Field(default=10000, description="""N for the first_n mode.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(10000)'} })
-    top_k: Optional[int] = Field(default=20, description="""How many top values to keep per class and property.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(20)'} })
+    first_n: int = Field(default=10000, description="""N for the first_n mode.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(10000)'} })
+    top_k: int = Field(default=20, description="""How many top values to keep per class and property.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(20)'} })
     object_type_scope: ObjectTypeScope = Field(default=ObjectTypeScope("same_graph"), description="""Where object types are looked up.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'string(same_graph)'} })
-    completeness_check: Optional[bool] = Field(default=False, description="""Whether property presence was checked for first_n classes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'false'} })
-    timeout_seconds: Optional[int] = Field(default=60, description="""Per-query timeout.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(60)'} })
-    concurrency: Optional[int] = Field(default=4, description="""Maximum concurrent queries.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(4)'} })
-    acceptance_threshold: Optional[float] = Field(default=0.95, description="""Share of instances a cardinality label must cover.""", ge=0, le=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'float(0.95)'} })
-    graph_statistics: Optional[bool] = Field(default=False, description="""Whether graph totals, predicate partitions and untyped subjects were collected (full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'false'} })
+    completeness_check: bool = Field(default=False, description="""Whether property presence was checked for first_n classes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'false'} })
+    timeout_seconds: int = Field(default=60, description="""Per-query timeout.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(60)'} })
+    concurrency: int = Field(default=4, description="""Maximum concurrent queries.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(4)'} })
+    acceptance_threshold: float = Field(default=0.95, description="""Share of instances a cardinality label must cover.""", ge=0, le=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'float(0.95)'} })
+    graph_statistics: bool = Field(default=False, description="""Whether graph totals, predicate partitions and untyped subjects were collected (full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'false'} })
     selected_graphs: Optional[list[str]] = Field(default=None, description="""Graphs requested; empty means all.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings']} })
 
 

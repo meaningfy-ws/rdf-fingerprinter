@@ -164,7 +164,6 @@ def fake(monkeypatch):
         fake.add(f"ex:p{i}", "a", "ex:Person")
         fake.add(f"ex:p{i}", "ex:name", Literal(f"n{i}"))
         fake.add(f"ex:c{i}", "a", "ex:City")
-    monkeypatch.setattr(cli, "SparqlWrapperClient", lambda endpoint, timeout: fake)
     monkeypatch.setattr(handlers, "SparqlWrapperClient", lambda endpoint, timeout: fake)
     return fake
 
@@ -185,6 +184,8 @@ SITUATIONS = {
     "the endpoint refuses connections": lambda fake, ctx: fake.on("Q0", refused()),
     "the endpoint requires authentication": lambda fake, ctx: fake.on("Q0", unauthorized()),
     "the output folder does not exist": lambda fake, ctx: ctx.update(output=ctx["output"] / "missing"),
+    "a setting is invalid": lambda fake, ctx: ctx.update(args=["--threshold", "0"]),
+    "an unexpected error occurs": lambda fake, ctx: fake.on("Q3", [{"c": EX + "Person", "instances": "many"}]),
 }
 
 
@@ -195,7 +196,8 @@ def situation(ctx, fake, situation):
 
 @when("the fingerprint command runs")
 def command_runs(ctx):
-    ctx["result"] = CliRunner().invoke(cli.fingerprint_endpoint, ["-e", "http://fake/sparql", "-o", str(ctx["output"])])
+    args = ["-e", "http://fake/sparql", "-o", str(ctx["output"]), *ctx.get("args", [])]
+    ctx["result"] = CliRunner().invoke(cli.fingerprint_endpoint, args)
 
 
 @then(parsers.parse("it exits with {code:d}"))
