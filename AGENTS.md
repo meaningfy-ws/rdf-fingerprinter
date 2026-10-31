@@ -111,4 +111,15 @@ artifacts above; do not reintroduce parallel epic files under `.claude/`.
   with Trusted Publishing — no token exists or is needed. Report the release URL afterwards.
   Changing repository or environment settings still needs the developer's go-ahead.
 - **Commits and PRs carry no AI attribution** (no `Co-Authored-By`, no "Generated with" line).
+  Enforced for Claude Code by `.claude/settings.json` (`attribution` empty); other agents follow
+  this rule by hand.
+- **Commit messages are descriptive and give the why and the what.** Subject: Conventional
+  Commit, imperative, no trailing period (`feat(collection): add precision escalation`). Body,
+  after one blank line, wrapped at ~72 columns:
+  1. **Why** — the problem, motivation or constraint; the diff cannot show it, so it comes first.
+  2. **What** — the changes in plain words, one bullet per concern, naming the main files or
+     modules, so a reviewer knows what to look for without reading the diff first.
+  3. **Trace** — the change id and decisions it implements (`Refs: harden-fingerprinter DEC-3`),
+     and any BREAKING change on its own `BREAKING CHANGE:` line.
+  A one-line body is fine only for trivial changes (typo, formatting). No AI attribution.
 - **GitNexus repo name:** rdf-fingerprinter
