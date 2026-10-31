@@ -28,16 +28,17 @@ def test_generate_endpoint_fingerprint_report_default_template(tmpdir):
     main_title = soup.find("h1", attrs={"id": "skip-toc"}).text
     assert main_title == "Structural fingerprint"
 
-    tables = soup.find_all("table")
-    assert len(tables) == 6
+    # 2.0 profiles the default graph and both named graphs (DEC-11): 6 + 6 + 7 classes
+    tables = soup.find_all("table", class_="class-profile")
+    assert len(tables) == 19
 
     classes_list = [
-        "owl#Ontology",
-        "core#ConceptScheme",
-        "skos-xl#Label",
-        "core#Concept",
-        "euvoc#Continent",
-        "euvoc#XlNotation",
+        "owl:Ontology",
+        "skos:ConceptScheme",
+        "skosxl:Label",
+        "skos:Concept",
+        "euvoc:Continent",
+        "euvoc:XlNotation",
     ]
 
     for class_name in classes_list:

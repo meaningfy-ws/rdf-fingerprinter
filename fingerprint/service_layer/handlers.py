@@ -5,21 +5,22 @@
 # Author: Eugeniu Costetchi
 # Email: costezki.eugen@gmail.com
 
-""" """
+"""The public library function: collect → analyse → render, with the 1.x signature (P-7)."""
 
-import json
 import logging
-from importlib.resources import files
 from pathlib import Path
 
-from eds4jinja2.services.report_builder import ReportBuilder
-
-import fingerprint_report_templates
+from fingerprint.adapters.sparql import SparqlWrapperClient
+from fingerprint.domain.analytics import analyse
+from fingerprint.service_layer.collection import collect
+from fingerprint.service_layer.report import (  # noqa: F401 — kept importable from here (1.x)
+    DEFAULT_TEMPLATE_LOCATION,
+    generate_report_builder_config,
+    render_report,
+)
+from fingerprint.service_layer.settings import resolve_settings
 
 logger = logging.getLogger(__name__)
-
-# Templates ship inside the package as plain files (Poetry package data), so a real path exists.
-DEFAULT_TEMPLATE_LOCATION = Path(str(files(fingerprint_report_templates) / "fingerprint_report"))
 
 
 def generate_endpoint_fingerprint_report(
@@ -31,51 +32,22 @@ def generate_endpoint_fingerprint_report(
 ) -> Path:
     """
         Calculate the fingerprint of a given endpoint and write the report in the output location.
-        Optionally the fingerprint calculation could be restricted to a particular named graph.
+        Without selected graphs, the default graph and every named graph are profiled.
     :param sparql_endpoint_url: URL to fingerprint
     :param output_location: location of where to generate the report
     :param selected_graphs: a list of valid graph URIs or empty string for the default graph
     :param external_template_location: location of custom template (if None -> use the default template)
-    :param additional_config: a dictionary with additional configuration parameters (usually for storing constants)
+    :param additional_config: constants for the template; its "collection" key holds collection settings
     :return: path to the main report document
     """
-    logger.debug("start generating fingerprinting report from endpoint")
-    if not selected_graphs:
-        selected_graphs = [""]
-
     location = Path(output_location)
     if not location.exists() or not location.is_dir():
         raise NotADirectoryError("The output location must be a folder")
 
-    template_location = external_template_location or DEFAULT_TEMPLATE_LOCATION
-
-    updated_config_content = generate_report_builder_config(sparql_endpoint_url, selected_graphs, external_template_location)
-    if additional_config:
-        updated_config_content["conf"].update(additional_config)
-
-    report_builder = ReportBuilder(
-        target_path=template_location, additional_config=updated_config_content, output_path=location
-    )
-    report_builder.make_document()
-    logger.debug("end generating fingerprinting report from endpoint")
-    return location / updated_config_content["template"]
-
-
-def generate_report_builder_config(
-    sparql_endpoint_url: str, selected_graphs: list[str], external_template_location: str | Path | None
-) -> dict:
-    """
-        Read the default config json from the fingerprint_report and set the endpoint and the graph uri if necessary
-    :param sparql_endpoint_url: URL to fingerprint
-    :param selected_graphs: a list of valid graph URIs or empty string for the default graph
-    :param external_template_location: location of the custom template
-    :return: the new configuration
-    """
-    logger.debug("start generating report builder config")
-    template_location = external_template_location or DEFAULT_TEMPLATE_LOCATION
-
-    config_dict = json.loads((Path(template_location) / "config.json").read_bytes())
-    config_dict["conf"]["default_endpoint"] = sparql_endpoint_url
-    config_dict["conf"]["selected_graphs"] = selected_graphs
-    logger.debug("end generating report builder config")
-    return config_dict
+    extra_conf = dict(additional_config or {})
+    settings = resolve_settings(selected_graphs=selected_graphs, config=extra_conf.pop("collection", None))
+    run = collect(sparql_endpoint_url, settings, SparqlWrapperClient(sparql_endpoint_url, settings.timeout_seconds or 60))
+    report = render_report(analyse(run), location, external_template_location, extra_conf)
+    if run.failures:
+        logger.warning("report written to %s with %d failures", report, len(run.failures))
+    return report

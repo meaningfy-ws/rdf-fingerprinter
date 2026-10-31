@@ -137,9 +137,7 @@
                 patterns. </p>
             <p> The datasource endpoint: <em>{{ conf.default_endpoint |e }}</em></p>
             {% if conf.selected_graphs %}
-                <p> The fingerprinting is not applied to the entire endpoint but is limited to a set of graphs.
-                    The
-                    selected graphs to fingerprint are: </p>
+                <p> The profiled graphs are: </p>
                 <ul>
                     {% for gr in conf.selected_graphs | unique | list %}
                         {% if gr %}
