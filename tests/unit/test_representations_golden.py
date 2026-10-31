@@ -15,6 +15,7 @@ from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.representations import make_generator, with_threshold
+from tests.unit.fakes import files
 
 DATA = Path(__file__).parents[1] / "test_data"
 GOLDEN = DATA / "golden"
@@ -27,7 +28,7 @@ def texts(name, threshold=None):
     run = load_profile(DATA / "profiles" / "sample-profile.json")
     if threshold is not None:
         run = with_threshold(run, threshold)
-    return make_generator(name, analyse(run), JinjaTemplateRenderer()).serialize()
+    return files(make_generator(name, analyse(run), JinjaTemplateRenderer()).serialize())
 
 
 @pytest.mark.parametrize("name", sorted(GENERATORS))

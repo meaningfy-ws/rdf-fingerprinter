@@ -6,16 +6,18 @@ from rdflib.collection import Collection
 
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
+from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer.generators.shacl import ShaclGenerator
-from tests.unit.fakes import EX, XSD, klass, literals, profile_run, prop, resources
+from tests.unit.fakes import EX, XSD, files, klass, literals, profile_run, prop, resources
 
 SH = Namespace("http://www.w3.org/ns/shacl#")
 FP = Namespace("https://data.meaningfy.ws/fingerprint/")
 PREFIXES = {"ex": EX, "xsd": XSD}
 
 
-def shapes(run, **options) -> Graph:
-    texts = ShaclGenerator(analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES), **options).serialize()
+def shapes(run, shapes_namespace=None) -> Graph:
+    options = GeneratorOptions(shapes_namespace=shapes_namespace)
+    texts = files(ShaclGenerator(analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES), options=options).serialize())
     (text,) = texts.values()
     return Graph().parse(data=text, format="turtle")
 
@@ -141,13 +143,13 @@ def test_an_unwritable_class_is_left_out():
     bad = "http://ex.org/<script>alert(1)</script> x"
     run = profile_run(klass(bad, 4), klass(EX + "Person", 4))
     generator = ShaclGenerator(analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES))
-    (text,) = generator.serialize().values()
+    (text,) = files(generator.serialize()).values()
     assert "script" not in text and generator.skipped == [bad]
 
 
 def test_one_file_per_graph():
     run = profile_run(klass(EX + "Person", 4), graph="http://ex.org/graphs/people")
-    names = list(ShaclGenerator(analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES)).serialize())
+    names = list(files(ShaclGenerator(analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES)).serialize()))
     assert len(names) == 1 and names[0].startswith("shapes-people-") and names[0].endswith(".ttl")
 
 
@@ -193,5 +195,5 @@ def test_a_class_with_no_observed_instances_has_a_shape_without_properties():
 
 
 def only_text(generator):
-    (text,) = generator.serialize().values()
+    (text,) = files(generator.serialize()).values()
     return text

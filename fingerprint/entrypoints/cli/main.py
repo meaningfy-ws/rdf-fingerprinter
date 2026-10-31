@@ -51,7 +51,7 @@ def _choice(enum: type[Enum]) -> click.Choice:
     "--format",
     "formats",
     multiple=True,
-    type=click.Choice(sorted(GENERATORS)),
+    type=click.Choice(sorted(f.value for f in GENERATORS)),
     help="also render a representation after the report (repeatable)",
 )
 def fingerprint_endpoint(

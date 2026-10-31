@@ -5,6 +5,7 @@ temporary count per file in `composed_dicts_allowlist.txt` holds the offenders n
 """
 
 import ast
+import re
 from pathlib import Path
 
 import pytest
@@ -13,7 +14,7 @@ ROOT = Path(__file__).parents[2]
 PACKAGE = ROOT / "fingerprint"
 GENERATED = {PACKAGE / "domain" / "profile.py", PACKAGE / "domain" / "views.py"}
 ALLOWLIST = Path(__file__).with_name("composed_dicts_allowlist.txt")
-MARK = "# dict-ok:"
+MARK = re.compile(r"# dict-ok: \S")  # a mark always gives its reason
 DICT_TYPES = {"dict", "Dict", "Mapping", "MutableMapping", "defaultdict", "OrderedDict", "Counter"}
 DICT_CALLS = {"dict", "defaultdict", "OrderedDict", "Counter"}
 
@@ -98,7 +99,7 @@ def offences(source: str) -> list[int]:
     text = source.splitlines()
 
     def marked(first: int, last: int, statement: int) -> bool:
-        return any(MARK in text[line - 1] for line in {*range(first, last + 1), statement})
+        return any(MARK.search(text[line - 1]) for line in {*range(first, last + 1), statement})
 
     return sorted({first for first, last, statement in finder.found if not marked(first, last, statement)})
 
@@ -148,6 +149,7 @@ def test_the_allowlist_names_existing_files():
         ("def f(\n    p: dict,\n) -> None:  # dict-ok: 1.x API\n    pass\n", []),
         ("def f(c):\n    return {  # dict-ok: lookup index\n        k: {v: 1 for v in c}\n        for k in c\n    }\n", []),
         ("def f(c):\n    x = 1  # dict-ok: not this statement\n    return {}\n", [3]),
+        ("def f(p):\n    return {'a': p}  # dict-ok:\n", [2]),
     ],
 )
 def test_the_check_finds_composed_dicts(source: str, lines: list[int]):

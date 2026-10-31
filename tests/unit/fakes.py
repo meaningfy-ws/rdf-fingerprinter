@@ -82,6 +82,11 @@ class FakeSparql(SparqlHttpClient):
             return self.dataset.query(query).serialize(format="json")
 
 
+def files(documents) -> dict[str, str]:
+    """Rendered documents as file name → text, for assertions."""
+    return {d.file_name: d.text for d in documents}
+
+
 # --- hand-built profile runs for the representation tests (profile-representations task 1.2) ---
 
 XSD = "http://www.w3.org/2001/XMLSchema#"

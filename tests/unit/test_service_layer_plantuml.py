@@ -5,14 +5,14 @@ import re
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.service_layer.generators.plantuml import PlantumlGenerator
-from tests.unit.fakes import EX, XSD, klass, literals, profile_run, prop, resources
+from tests.unit.fakes import EX, XSD, files, klass, literals, profile_run, prop, resources
 
 PREFIXES = {"ex": EX, "xsd": XSD}
 
 
 def diagram(run):
     generator = PlantumlGenerator(analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES))
-    (text,) = generator.serialize().values()
+    (text,) = files(generator.serialize()).values()
     return text, generator
 
 

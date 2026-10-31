@@ -5,13 +5,13 @@ from bs4 import BeautifulSoup
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.service_layer.representations import make_generator
-from tests.unit.fakes import EX, XSD, klass, literals, profile_run, prop
+from tests.unit.fakes import EX, XSD, files, klass, literals, profile_run, prop
 
 PREFIXES = {"ex": EX, "xsd": XSD}
 
 
 def document(run):
-    (text,) = make_generator("doc", analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES)).serialize().values()
+    (text,) = files(make_generator("doc", analyse(run), JinjaTemplateRenderer(prefixes=PREFIXES)).serialize()).values()
     return BeautifulSoup(text, "html.parser")
 
 

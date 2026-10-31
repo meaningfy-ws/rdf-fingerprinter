@@ -19,7 +19,9 @@ name = generated model imports no project code
 type = forbidden
 source_modules =
     fingerprint.domain.profile
+    fingerprint.domain.views
 forbidden_modules =
+    fingerprint.domain.profile
     fingerprint.domain.iri
     fingerprint.domain.analytics
     fingerprint.domain.exceptions

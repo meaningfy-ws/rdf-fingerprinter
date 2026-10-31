@@ -7,6 +7,7 @@ import pytest
 from fingerprint.adapters.exceptions import GeneratedOutputError
 from fingerprint.adapters.profile_file import save_profile
 from fingerprint.domain.profile import ProfileRun
+from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer import representations
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.representations import (
@@ -28,7 +29,7 @@ class Recording:
 
     seen: list = []
 
-    def __init__(self, analytics, renderer, template_location=None, **options):
+    def __init__(self, analytics, renderer, template_location=None, options=None):
         self.analytics, self.options = analytics, options
 
     def write(self, folder):
@@ -62,8 +63,9 @@ def test_threshold_outside_the_range_is_a_usage_error(run, threshold):
 
 
 def test_generators_get_the_analytics_at_the_threshold(run, tmp_path, generators):
-    generate_representations(run, tmp_path, ["a"], threshold=0.6, options={"a": {"x": 1}})
-    assert Recording.seen == [(0.6, {"x": 1})]
+    options = GeneratorOptions(shapes_namespace="urn:x:")
+    generate_representations(run, tmp_path, ["a"], threshold=0.6, options=options)
+    assert Recording.seen == [(0.6, options)]
 
 
 def test_formats_run_in_order_and_a_failure_keeps_earlier_ones(run, tmp_path, generators):

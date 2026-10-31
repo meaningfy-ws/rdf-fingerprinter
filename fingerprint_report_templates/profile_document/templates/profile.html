@@ -58,8 +58,8 @@ was asserted by hand.</p>
 <table>
   <thead><tr><th>Setting</th><th>Value</th></tr></thead>
   <tbody>
-  {%- for name, value in view.overview.settings %}
-    <tr><td>{{ name }}</td><td>{{ value if value is not none else "—" }}</td></tr>
+  {%- for s in view.overview.settings %}
+    <tr><td>{{ s.name }}</td><td>{{ s.value }}</td></tr>
   {%- endfor %}
   </tbody>
 </table>
@@ -70,8 +70,8 @@ was asserted by hand.</p>
 <table>
   <thead><tr><th>Prefix</th><th>Namespace</th></tr></thead>
   <tbody>
-  {%- for prefix, namespace in view.namespaces %}
-    <tr><td>{{ prefix }}</td><td class="iri">{{ namespace }}</td></tr>
+  {%- for n in view.namespaces %}
+    <tr><td>{{ n.prefix }}</td><td class="iri">{{ n.namespace }}</td></tr>
   {%- endfor %}
   </tbody>
 </table>
@@ -109,7 +109,7 @@ was asserted by hand.</p>
 <h2>{{ view.graphs | length + 3 }} Caveats</h2>
 <h3>Sampled classes</h3>
 {%- if view.caveats.sampled %}
-<ul>{% for s in view.caveats.sampled %}<li>{{ s["class"] }} in {{ s.graph }}: {{ s.precision }} instances read.</li>{% endfor %}</ul>
+<ul>{% for s in view.caveats.sampled %}<li>{{ s.class_label }} in {{ s.graph }}: {{ s.precision }} instances read.</li>{% endfor %}</ul>
 {%- else %}
 <p>None: every class was read exactly.</p>
 {%- endif %}
@@ -119,7 +119,7 @@ was asserted by hand.</p>
   <thead><tr><th>Graph</th><th>Class</th><th>Measurement</th><th>Message</th></tr></thead>
   <tbody>
   {%- for f in view.caveats.failures %}
-    <tr><td class="iri">{{ f.graph }}</td><td>{{ f["class"] }}</td><td>{{ f.measurement }}</td><td>{{ f.message }}</td></tr>
+    <tr><td class="iri">{{ f.graph }}</td><td>{{ f.class_label }}</td><td>{{ f.measurement }}</td><td>{{ f.message }}</td></tr>
   {%- endfor %}
   </tbody>
 </table>

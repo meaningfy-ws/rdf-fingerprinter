@@ -7,6 +7,7 @@ from eds4jinja2.services.report_builder import ReportBuilder
 
 from fingerprint.adapters.exceptions import GeneratedOutputError, TemplatePackageError
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
+from fingerprint.domain.views import Annotation, RenderedDocument
 
 
 def package(tmp_path, body, config=None):
@@ -38,21 +39,28 @@ def test_a_configuration_without_template_is_a_package_error(tmp_path):
 
 
 def test_writes_every_text(tmp_path):
-    paths = JinjaTemplateRenderer().write(tmp_path, {"a.ttl": "<urn:a> <urn:b> <urn:c> .\n", "b.txt": "b"})
+    documents = [
+        RenderedDocument(file_name="a.ttl", text="<urn:a> <urn:b> <urn:c> .\n"),
+        RenderedDocument(file_name="b.txt", text="b"),
+    ]
+    paths = JinjaTemplateRenderer().write(tmp_path, documents)
     assert [p.name for p in paths] == ["a.ttl", "b.txt"] and (tmp_path / "b.txt").read_text() == "b"
 
 
 def test_invalid_turtle_writes_nothing(tmp_path):
-    texts = {"good.ttl": "<urn:a> <urn:b> <urn:c> .\n", "bad.ttl": "<urn:a> <urn:b"}
+    texts = [
+        RenderedDocument(file_name="good.ttl", text="<urn:a> <urn:b> <urn:c> .\n"),
+        RenderedDocument(file_name="bad.ttl", text="<urn:a> <urn:b"),
+    ]
     with pytest.raises(GeneratedOutputError, match="bad.ttl"):
         JinjaTemplateRenderer().write(tmp_path, texts, check="turtle")
     assert not list(tmp_path.iterdir())
 
 
 def test_the_filters_escape_for_custom_templates(tmp_path):
-    body = "{{ view.iri | turtle_term }} {{ view.text | turtle_string }} {{ view.iri | curie }}"
+    body = "{{ view.predicate | turtle_term }} {{ view.value | turtle_string }} {{ view.predicate | curie }}"
     renderer = JinjaTemplateRenderer(prefixes={"ex": "http://ex.org/"})
-    view = {"iri": "http://ex.org/a", "text": 'say "x"'}
+    view = Annotation(predicate="http://ex.org/a", value='say "x"')
     assert renderer.render(package(tmp_path, body), view=view) == 'ex:a "say \\"x\\"" ex:a'
 
 

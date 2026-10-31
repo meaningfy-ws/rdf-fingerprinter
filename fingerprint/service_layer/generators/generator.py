@@ -1,8 +1,10 @@
-"""The generator framework, modelled on LinkML's `Generator` (AD-8, P-1, P-2).
+"""The generator framework, modelled on LinkML's `Generator` (AD-8, P-1, P-2; domain-object-model P-4).
 
-A generator walks the analytics and calls one visit hook per graph, class and property; each hook
-returns the dict its template sees at that level, or None to drop the element. All mapping logic
-lives in the hooks; the template package only lays the view out as text.
+A generator walks the analytics. Pre-order hooks keep state and filter (`visit_graph`, `visit_class`
+return False to skip); `visit_property` returns a property's view; post-order hooks build the frozen
+view of a class from its properties (`end_class`) and of a graph from its classes (`end_graph`). The
+views are LinkML-generated objects (`fingerprint.domain.views`); the template package only lays them
+out as text.
 """
 
 import hashlib
@@ -12,10 +14,13 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, ClassVar, Protocol
 
+from pydantic import BaseModel
+
 from fingerprint import config
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import split_curie, to_iriref
 from fingerprint.domain.profile import ClassAnalytics, GraphAnalytics, ProfileAnalytics, PropertyAnalytics
+from fingerprint.domain.views import GeneratorOptions, PrefixDeclaration, RenderedDocument
 
 logger = logging.getLogger(__name__)
 
@@ -26,18 +31,18 @@ _NOT_PLAIN = re.compile(r"[^\w:/#.~ -]")
 class TemplateRenderer(Protocol):
     """The port the generators render through; `fingerprint.adapters.template_renderer` implements it."""
 
-    prefixes: dict[str, str]
+    prefixes: dict[str, str]  # dict-ok: prefix table
 
     def render(
         self,
         package: str | Path,
         *,
-        view: Any = None,
-        config: Mapping[str, Any] | None = None,
+        view: BaseModel | None = None,
+        config: Mapping[str, Any] | None = None,  # dict-ok: eds4jinja2 configuration
         autoescape: bool | None = None,
     ) -> str: ...
 
-    def write(self, folder: str | Path, texts: Mapping[str, str], check: str | None = None) -> list[Path]: ...
+    def write(self, folder: str | Path, documents: list[RenderedDocument], check: str | None = None) -> list[Path]: ...
 
 
 def graph_slug(graph: str | None) -> str:
@@ -61,27 +66,42 @@ class Generator:
     autoescape: ClassVar[bool | None] = None
     check: ClassVar[str | None] = None  # a check of the template renderer, e.g. "turtle"
 
-    def __init__(self, analytics: ProfileAnalytics, renderer: TemplateRenderer, template_location: str | Path | None = None):
+    def __init__(
+        self,
+        analytics: ProfileAnalytics,
+        renderer: TemplateRenderer,
+        template_location: str | Path | None = None,
+        options: GeneratorOptions | None = None,
+    ):
         self.analytics = analytics
         self.renderer = renderer
         self.prefixes = renderer.prefixes
         self.template_location = template_location
+        self.options = options or GeneratorOptions()
         self.skipped: list[str] = []  # IRIs left out because they cannot be written (P-8)
-        self.namespaces: dict[str, str] = {}  # prefixes the labels used, for a namespaces section
+        self.namespaces: dict[str, str] = {}  # dict-ok: lookup index of the prefixes the labels used
 
     # --- hooks, overridden per format ---
 
-    def visit_graph(self, graph: GraphAnalytics) -> dict[str, Any] | None:
-        return {"graph": graph.graph, "slug": graph_slug(graph.graph), "graph_label": plain_label(graph.graph)}
+    def visit_graph(self, graph: GraphAnalytics) -> bool:
+        """Before a graph's classes: reset per-graph state; False skips the graph."""
+        return True
 
-    def visit_class(self, graph: GraphAnalytics, cls: ClassAnalytics) -> dict[str, Any] | None:
-        return {"iri": cls.class_iri}
+    def visit_class(self, graph: GraphAnalytics, cls: ClassAnalytics) -> bool:
+        """Before a class's properties; False skips the class and its properties."""
+        return True
 
-    def visit_property(self, graph: GraphAnalytics, cls: ClassAnalytics, prop: PropertyAnalytics) -> dict[str, Any] | None:
-        return {"iri": prop.property}
+    def visit_property(self, graph: GraphAnalytics, cls: ClassAnalytics, prop: PropertyAnalytics) -> Any:
+        """The view of one property, or None to leave it out."""
+        return None
 
-    def end_graph(self, graph: GraphAnalytics, view: dict[str, Any]) -> None:
-        """Called once a graph's classes are visited, e.g. to declare the prefixes they used."""
+    def end_class(self, graph: GraphAnalytics, cls: ClassAnalytics, properties: list[Any]) -> Any:
+        """The view of one class from its properties' views, or None to leave it out."""
+        return None
+
+    def end_graph(self, graph: GraphAnalytics, classes: list[Any]) -> Any:
+        """The view of one graph from its classes' views, or None to leave it out."""
+        return None
 
     # --- shared rules ---
 
@@ -104,45 +124,48 @@ class Generator:
         self.namespaces[found[0]] = self.prefixes[found[0]]
         return f"{found[0]}:{found[1]}"
 
+    def used_namespaces(self) -> list[PrefixDeclaration]:
+        return [PrefixDeclaration(prefix=p, namespace=ns) for p, ns in sorted(self.namespaces.items())]
+
     # --- the walk ---
 
-    def view(self) -> list[dict[str, Any]]:
-        """One dict per graph, each with "classes", each with "properties"; classes and properties by IRI."""
+    def view(self) -> list[Any]:
+        """One view per graph; classes and properties visited in IRI order."""
         graphs = []
         for graph in self.analytics.graphs or []:
-            graph_view = self.visit_graph(graph)
-            if graph_view is None:
+            if not self.visit_graph(graph):
                 continue
             classes = []
             for cls in sorted(graph.class_partitions or [], key=lambda c: c.class_iri):
-                class_view = self.visit_class(graph, cls)
-                if class_view is None:
+                if not self.visit_class(graph, cls):
                     continue
                 props = sorted(cls.property_partitions or [], key=lambda p: p.property)
-                class_view["properties"] = [v for p in props if (v := self.visit_property(graph, cls, p)) is not None]
-                classes.append(class_view)
-            graph_view["classes"] = classes
-            self.end_graph(graph, graph_view)
-            graphs.append(graph_view)
+                properties = [v for p in props if (v := self.visit_property(graph, cls, p)) is not None]
+                if (class_view := self.end_class(graph, cls, properties)) is not None:
+                    classes.append(class_view)
+            if (graph_view := self.end_graph(graph, classes)) is not None:
+                graphs.append(graph_view)
         return graphs
 
-    def render_graphs(self) -> dict[str, str]:
-        """Slug → text, one per graph (per-graph formats)."""
-        return {g["slug"]: self._render({"graph": g}) for g in self.view()}
+    def render_graphs(self) -> list[RenderedDocument]:
+        """One text per graph, under the graph's slug (per-graph formats); each view lists every IRI skipped."""
+        views = self.view()
+        return [
+            RenderedDocument(file_name=g.slug, text=self._render(g.model_copy(update={"skipped": list(self.skipped)})))
+            for g in views
+        ]
 
-    def serialize(self) -> dict[str, str]:
-        """File name → text: one file per graph, or one file for all graphs."""
-        if self.per_graph:
-            return {self.file_name.format(slug=slug): text for slug, text in self.render_graphs().items()}
-        return {self.file_name: self._render({"graphs": self.view()})}
+    def serialize(self) -> list[RenderedDocument]:
+        """The files: one per graph, or one for all graphs."""
+        return [RenderedDocument(file_name=self.file_name.format(slug=d.file_name), text=d.text) for d in self.render_graphs()]
 
     def write(self, folder: str | Path) -> list[Path]:
         return self.renderer.write(folder, self.serialize(), self.check)
 
-    def _render(self, view: dict[str, Any]) -> str:
+    def _render(self, view: BaseModel) -> str:
         return self.renderer.render(
             self.template_location or self.template_package,
-            view=view | {"skipped": self.skipped},
-            config={"conf": {"profile": self.analytics}},
+            view=view,
+            config={"conf": {"profile": self.analytics}},  # dict-ok: eds4jinja2 configuration
             autoescape=self.autoescape,
         )

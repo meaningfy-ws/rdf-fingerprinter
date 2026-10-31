@@ -7,6 +7,7 @@ from typing import Any
 
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.profile import ProfileAnalytics
+from fingerprint.domain.views import RenderedDocument
 from fingerprint.service_layer.generators.generator import TemplateRenderer
 from fingerprint_report_templates import packaged
 
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_TEMPLATE_LOCATION = packaged("fingerprint_report")
 
 
-def generate_report_builder_config(
+def generate_report_builder_config(  # dict-ok: 1.x API, eds4jinja2 configuration
     sparql_endpoint_url: str, selected_graphs: list[str], external_template_location: str | Path | None
 ) -> dict:
     """
@@ -36,7 +37,7 @@ def render_report(
     analytics: ProfileAnalytics,
     output_location: str | Path,
     template_location: str | Path | None = None,
-    extra_conf: dict[str, Any] | None = None,
+    extra_conf: dict[str, Any] | None = None,  # dict-ok: 1.x API, template constants
     *,
     renderer: TemplateRenderer | None = None,
 ) -> Path:
@@ -44,11 +45,12 @@ def render_report(
     location = Path(output_location)
     profiled = [graph.graph or "" for graph in analytics.graphs or []]
     config = generate_report_builder_config(analytics.endpoint or "", profiled, template_location)
-    config["conf"].update(extra_conf or {})  # after the 1.x keys, so callers may override them, as in 1.x
+    # after the 1.x keys, so callers may override them, as in 1.x
+    config["conf"].update(extra_conf or {})  # dict-ok: 1.x API, eds4jinja2 configuration
     config["conf"]["profile"] = analytics
     # Endpoint data is untrusted and eds4jinja2 disables autoescape: escape the packaged report;
     # custom templates keep 1.x behaviour.
     autoescape = True if template_location is None else None
     renderer = renderer or JinjaTemplateRenderer()
     text = renderer.render(template_location or DEFAULT_TEMPLATE_LOCATION, config=config, autoescape=autoescape)
-    return renderer.write(location, {config["template"]: text})[0]
+    return renderer.write(location, [RenderedDocument(file_name=config["template"], text=text)])[0]

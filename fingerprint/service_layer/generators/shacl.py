@@ -3,7 +3,7 @@
 import re
 import urllib.parse
 from pathlib import Path
-from typing import Any, NamedTuple
+from typing import NamedTuple
 
 from fingerprint import config
 from fingerprint.domain.analytics import label_bounds
@@ -18,12 +18,20 @@ from fingerprint.domain.profile import (
     ProfileAnalytics,
     PropertyAnalytics,
 )
+from fingerprint.domain.views import (
+    Annotation,
+    GeneratorOptions,
+    NodeShape,
+    PrefixDeclaration,
+    PropertyShape,
+    ShapeSeverity,
+    ShapesGraph,
+)
 from fingerprint.domain.vocabulary import FP, RDF, RDF_LANG_STRING, RDFS, SH, XSD
-from fingerprint.service_layer.generators.generator import Generator, TemplateRenderer
+from fingerprint.service_layer.generators.generator import Generator, TemplateRenderer, graph_slug, plain_label
 from fingerprint_report_templates import packaged
 
 FIXED_PREFIXES = {"sh": SH, "xsd": XSD, "rdf": RDF, "rdfs": RDFS, "fp": FP}
-INFO, WARNING = "sh:Info", "sh:Warning"  # sh:Violation is the default: no sh:severity is written
 _PN_PREFIX = re.compile(r"[A-Za-z][A-Za-z0-9_-]*")
 LITERAL, IRI, BLANK_NODE = NodeKind.literal.value, NodeKind.iri.value, NodeKind.blank_node.value
 NODE_KINDS = {
@@ -53,13 +61,13 @@ class ShaclGenerator(Generator):
         analytics: ProfileAnalytics,
         renderer: TemplateRenderer,
         template_location: str | Path | None = None,
-        shapes_namespace: str | None = None,
+        options: GeneratorOptions | None = None,
     ):
-        super().__init__(analytics, renderer, template_location)
-        self.shapes_namespace = shapes_namespace or config.shapes_namespace
+        super().__init__(analytics, renderer, template_location, options)
+        self.shapes_namespace = self.options.shapes_namespace or config.shapes_namespace
         to_iriref(self.shapes_namespace)  # an unwritable namespace is the caller's usage error (IriRefError)
         # Prefixes usable in Turtle, never redefining the ones the shapes themselves need.
-        self.term_prefixes = {
+        self.term_prefixes = {  # dict-ok: prefix table
             p: ns for p, ns in self.prefixes.items() if _PN_PREFIX.fullmatch(p) and FIXED_PREFIXES.get(p, ns) == ns
         }
         self.threshold = analytics.settings.acceptance_threshold
@@ -75,52 +83,64 @@ class ShaclGenerator(Generator):
 
     # --- hooks ---
 
-    def visit_graph(self, graph: GraphAnalytics) -> dict[str, Any] | None:
+    def visit_graph(self, graph: GraphAnalytics) -> bool:
         self._used = set()
         declared = {e.super_class for e in graph.declared_subclass_edges or []}
         declared |= {
             p.parent for c in graph.class_partitions or [] for p in c.parents or [] if p.source == ParentSource.declared
         }
         self._with_subclasses = declared
-        return super().visit_graph(graph)
+        return True
 
-    def visit_class(self, graph: GraphAnalytics, cls: ClassAnalytics) -> dict[str, Any] | None:
-        if not self.accepts(cls.class_iri):
+    def visit_class(self, graph: GraphAnalytics, cls: ClassAnalytics) -> bool:
+        return self.accepts(cls.class_iri)
+
+    def visit_property(self, graph: GraphAnalytics, cls: ClassAnalytics, prop: PropertyAnalytics) -> PropertyShape | None:
+        if not self.accepts(prop.property):
             return None
-        annotations = [(p, turtle_number(v)) for p, v in self.counted(cls) if v is not None]
-        annotations.append(("fp:precisionMode", turtle_string(PrecisionMode(cls.precision_mode).value)))
+        labelled = prop.cardinality_label is not None and not prop.presence_only
+        constraints = self.counts(prop) + (self.value_constraints(prop) if labelled else [])
+        has_class = any(c.startswith("sh:class") or "[ sh:class" in c for c in constraints)
+        annotations = []
+        if prop.confidence is not None:
+            annotations.append(Annotation(predicate="fp:confidence", value=turtle_number(prop.confidence)))
+        if prop.label_support is not None:
+            annotations.append(Annotation(predicate="fp:labelSupport", value=turtle_number(prop.label_support)))
+        return PropertyShape(
+            path=self.term(prop.property),
+            constraints=constraints,
+            severity=self.severity(cls, prop, labelled, has_class),
+            annotations=annotations,
+        )
+
+    def end_class(self, graph: GraphAnalytics, cls: ClassAnalytics, properties: list[PropertyShape]) -> NodeShape:
+        annotations = [Annotation(predicate=p, value=turtle_number(v)) for p, v in self.counted(cls) if v is not None]
+        annotations.append(
+            Annotation(predicate="fp:precisionMode", value=turtle_string(PrecisionMode(cls.precision_mode).value))
+        )
         comments = []
         if cls.precision_mode == PrecisionMode.first_n:
             comments.append(f"Profiled from the first {cls.observed_instances} of {cls.instances} instances.")
         if self.cross_graph:
             comments.append("sh:class constraints assume the object types' graphs are part of the data graph.")
         if comments:
-            annotations.append(("rdfs:comment", turtle_string(" ".join(comments))))
-        return {
-            "shape": to_iriref(self.shapes_namespace + urllib.parse.quote(cls.class_iri, safe="")),
-            "target": self.term(cls.class_iri),
-            "annotations": annotations,
-        }
+            annotations.append(Annotation(predicate="rdfs:comment", value=turtle_string(" ".join(comments))))
+        return NodeShape(
+            shape=to_iriref(self.shapes_namespace + urllib.parse.quote(cls.class_iri, safe="")),
+            target=self.term(cls.class_iri),
+            annotations=annotations,
+            property_shapes=properties,
+        )
 
-    def visit_property(self, graph: GraphAnalytics, cls: ClassAnalytics, prop: PropertyAnalytics) -> dict[str, Any] | None:
-        if not self.accepts(prop.property):
-            return None
-        labelled = prop.cardinality_label is not None and not prop.presence_only
-        constraints = self.counts(prop) + (self.value_constraints(prop) if labelled else [])
-        has_class = any(c.startswith("sh:class") or "[ sh:class" in c for c in constraints)
-        severity = self.severity(cls, prop, labelled, has_class)
-        if severity:
-            constraints.append(f"sh:severity {severity}")
-        annotations = []
-        if prop.confidence is not None:
-            annotations.append(("fp:confidence", turtle_number(prop.confidence)))
-        if prop.label_support is not None:
-            annotations.append(("fp:labelSupport", turtle_number(prop.label_support)))
-        return {"path": self.term(prop.property), "constraints": constraints, "annotations": annotations}
-
-    def end_graph(self, graph: GraphAnalytics, view: dict[str, Any]) -> None:
-        used = {p: self.term_prefixes[p] for p in sorted(self._used)}
-        view["prefixes"] = sorted((FIXED_PREFIXES | used).items())
+    def end_graph(self, graph: GraphAnalytics, classes: list[NodeShape]) -> ShapesGraph:
+        used = [(p, self.term_prefixes[p]) for p in sorted(self._used) if p not in FIXED_PREFIXES]  # fixed: same IRI
+        prefixes = sorted([*FIXED_PREFIXES.items(), *used])
+        return ShapesGraph(
+            graph_label=plain_label(graph.graph),
+            slug=graph_slug(graph.graph),
+            prefixes=[PrefixDeclaration(prefix=p, namespace=ns) for p, ns in prefixes],
+            node_shapes=classes,
+        )
 
     # --- the rules ---
 
@@ -176,15 +196,15 @@ class ShaclGenerator(Generator):
         if untyped:
             alternatives.append(f"sh:nodeKind {NODE_KINDS[frozenset(resource_kinds)]}")
         if len(alternatives) == 1:
-            return list(dict.fromkeys(alternatives + node_kind))
+            return [c for i, c in enumerate(alternatives + node_kind) if c not in (alternatives + node_kind)[:i]]
         return [f"sh:or ( {' '.join(f'[ {a} ]' for a in alternatives)} )"] + node_kind
 
-    def severity(self, cls: ClassAnalytics, prop: PropertyAnalytics, labelled: bool, has_class: bool) -> str | None:
+    def severity(self, cls: ClassAnalytics, prop: PropertyAnalytics, labelled: bool, has_class: bool) -> ShapeSeverity:
         """First matching rule (how-it-works, "How strong is a generated shape?")."""
         if not labelled or (prop.confidence or 0) < self.threshold:
-            return INFO
+            return ShapeSeverity.info
         if (prop.label_support or 0) < 1 or cls.precision_mode == PrecisionMode.first_n:
-            return WARNING
+            return ShapeSeverity.warning
         if cls.class_iri in self._with_subclasses or (self.cross_graph and has_class):
-            return WARNING
-        return None
+            return ShapeSeverity.warning
+        return ShapeSeverity.violation
