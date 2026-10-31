@@ -70,7 +70,7 @@ the value types (`sh:datatype` for one datatype, `sh:class` for one class, `sh:n
 when mixed; a literal without a datatype but with a language counts as `rdf:langString`). Severity
 SHALL follow the first matching rule: no cardinality label, or confidence below the acceptance
 threshold → `sh:Info`; label support below 1, a class read in first-N mode, or `sh:class` under
-cross-graph object types → `sh:Warning`; otherwise the default `sh:Violation`. Shapes SHALL be annotated with confidence and observed/total instances, and a first-N
+cross-graph object types, or a class with declared subclasses → `sh:Warning`; otherwise the default `sh:Violation`. Shapes SHALL be annotated with confidence and observed/total instances, and a first-N
 class marked as sampled.
 
 #### Scenario Outline: Severity from the threshold

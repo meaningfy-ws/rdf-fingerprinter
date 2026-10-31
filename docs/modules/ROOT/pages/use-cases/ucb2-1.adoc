@@ -11,12 +11,24 @@ profile]. The shared contract is stated there. Components are those of the
 xref:glossary.adoc#components[Glossary]. This page states only how the generator commands
 realise it.
 
+== Stakeholders and Interests
+
+As UC-W2.
+
 == Brief Description
 
 `fingerprint-gen-<format> PROFILE -o FOLDER [--threshold T] [--template DIR]` loads the profile
 through the file adapter, re-derives the analytics, lets the format's generator build its view
 through visit hooks (graph, class, property), has the template renderer lay the view out with the
 format's template package, checks every text, then writes them (xref:decisions.adoc#ad-8[AD-8]).
+
+== Preconditions
+
+As UC-W2.
+
+== Trigger
+
+As UC-W2.
 
 == Success Guarantee (Postconditions)
 

@@ -11,11 +11,23 @@ guarantees, scenarios and business rules are stated there and not restated here.
 only how the command line realises them. Components are those of the
 xref:glossary.adoc#components[Glossary].
 
+== Stakeholders and Interests
+
+As UC-W1.
+
 == Brief Description
 
 `fingerprint -e URL -o FOLDER [options]` hands the options to the settings resolver, the resolved
 settings and a SPARQL client to the collector, the raw run to the analyser, and the analytics to the
 template renderer; from 2.1 the profile store saves the raw run. The outcome becomes an exit code.
+
+== Preconditions
+
+As UC-W1.
+
+== Trigger
+
+As UC-W1.
 
 == Success Guarantee (Postconditions)
 

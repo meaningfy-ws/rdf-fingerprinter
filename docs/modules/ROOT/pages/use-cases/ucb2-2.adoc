@@ -9,12 +9,24 @@
 This Blue use case refines xref:use-cases/ucw2.adoc[UC-W2: Publish a fingerprint as an application
 profile]; the collection half is xref:use-cases/ucw1.adoc[UC-W1]. Neither contract is restated here.
 
+== Stakeholders and Interests
+
+As UC-W2.
+
 == Brief Description
 
 `fingerprint -e URL -o FOLDER --format shacl --format puml --format doc` collects as in UC-B1.1,
 writes the report and `profile.json`, then runs the chosen generators on the run in memory, at the
 run's own threshold. The generators render from that run; the file is for later
 regenerations (xref:use-cases/ucb2-1.adoc[UC-B2.1]).
+
+== Preconditions
+
+As UC-W2.
+
+== Trigger
+
+As UC-W2.
 
 == Success Guarantee (Postconditions)
 

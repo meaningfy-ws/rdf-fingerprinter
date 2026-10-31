@@ -14,6 +14,25 @@ what it observed.
 Terms in _italics_ are defined in the xref:glossary.adoc[Glossary]. The statistics themselves are
 specified in xref:statistics.adoc[Statistics and Settings]; this page explains how they come about.
 
+[#data-flow]
+== Through the components
+
+----
+ CLI / caller ──settings──▶ Collector ──SPARQL──▶ endpoint
+                               │ profile run (fingerprint_stats)
+                               ├──────────▶ Profile store ──▶ profile.json            (2.1)
+                               ▼                                 │ (later regenerations)
+                           Analyser (domain, pure) ◀─────────────┘ (+ threshold)
+                               │ analytics (fingerprint_analytics)
+                   ┌───────────┴─────────────────┐
+                   ▼                             ▼
+             report context              Generators: visit hooks → view          (2.1)
+                   └─────────────┬───────────────┘
+                                 ▼
+                 Template renderer (eds4jinja2) ──check──▶ main.html,
+                                 shapes-*.ttl, diagram-*.puml, profile.html (2.1)
+----
+
 == A running example
 
 A graph holds three people and two cities:
@@ -72,7 +91,9 @@ type), marks each property own, inherited or refined, and flags first-N classes 
 
 == 3. Save: the profile file (from 2.1)
 
-The raw run is written to `profile.json` beside the report. Every later representation reads that
+As soon as collection ends, before anything is rendered, the raw run is written to `profile.json`.
+If that write fails (a full disk, no permission), the run ends with an unexpected error (exit 4) and
+nothing else is written. Every later representation reads that
 file, so the endpoint is queried once per fingerprint, however many formats are produced and however
 often they are regenerated (xref:decisions.adoc#ad-7[AD-7]).
 
@@ -109,6 +130,7 @@ the first matching row wins:
 | the label was accepted with exceptions (support below 1) | `sh:Warning`
 | the class was read in first-N mode | `sh:Warning`
 | `sh:class` checks types looked up in other graphs | `sh:Warning`
+| the class has declared subclasses (`sh:targetClass` also reaches their instances, which its statistics did not count) | `sh:Warning`
 | held for every instance | `sh:Violation` (default)
 |===
 

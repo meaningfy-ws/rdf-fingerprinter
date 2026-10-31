@@ -109,32 +109,14 @@ Pure, no I/O.
 Component names are those of the xref:glossary.adoc#components[Glossary], which maps each to its
 module. The layers are enforced by `.importlinter` (`make check-architecture`): the layer order, a
 generated model that imports no project code, a domain that imports no SPARQLWrapper, eds4jinja2 or
-click, and _(2.1)_ a
-service layer that imports no eds4jinja2, rdflib or SPARQLWrapper.
+click, and _(2.1)_ a service layer that imports no eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client).
 
 NOTE: 1.x had only `service_layer` and `entrypoints`; its statistics were computed by SPARQL inside
 the templates. In 2.0 report rendering and the setting sources still sit in the service layer; 2.1
 moves them to adapters (xref:decisions.adoc#ad-4[AD-4]).
 
-=== Data flow
-
-----
- CLI / caller ──settings──▶ Collector ──SPARQL──▶ endpoint
-                               │ profile run (fingerprint_stats)
-                               ├──────────▶ Profile store ──▶ profile.json            (2.1)
-                               ▼                                 │ (later regenerations)
-                           Analyser (domain, pure) ◀─────────────┘ (+ threshold)
-                               │ analytics (fingerprint_analytics)
-                   ┌───────────┴─────────────────┐
-                   ▼                             ▼
-             report context              Generators: visit hooks → view          (2.1)
-                   └─────────────┬───────────────┘
-                                 ▼
-                 Template renderer (eds4jinja2) ──check──▶ main.html,
-                                 shapes-*.ttl, diagram-*.puml, profile.html (2.1)
-----
-
-The step-by-step account, with an example, is xref:how-it-works.adoc[How it works].
+The dynamic view — how a run moves through these components — is in
+xref:how-it-works.adoc#data-flow[How it works].
 
 == L4 — Key abstractions
 

@@ -83,7 +83,9 @@ Considered options::
 . Closed shapes (`sh:closed true`).
 Decision outcome:: Option 1, with open shapes (developer, 2026-10-31; DEC-5 of `profile-representations`).
 The rule kept by every shapes file: validated against the data it was generated from, it reports
-no `sh:Violation`. The table is in xref:how-it-works.adoc#severity[How it works].
+no `sh:Violation`. Because `sh:targetClass` also targets instances of declared subclasses, which the
+parent's statistics never counted, the shapes of a class with declared subclasses are graded
+`sh:Warning` at most. The table is in xref:how-it-works.adoc#severity[How it works].
 Consequences::
 * Good: shapes are usable as-is for validation and as documentation of the usual shape.
 * Good: the threshold a reader chose stays visible in the output.
@@ -162,6 +164,9 @@ when the run starts. The classes of error and their responses are in
 xref:how-it-works.adoc#failure-classes[How it works].
 Consequences::
 * Good: a long run always yields what it could measure, and says what it could not.
+* Limit: only query errors (the error classes) and unwritable IRIs become failures. A response the
+  client cannot interpret as expected — a count that is not a number, say — is an unexpected error:
+  the run stops with exit 4 and nothing is written, since collection did not finish.
 * Bad: a caller must check for failures (exit 1, or `run.failures` in the library); the 1.x library
   call returns only a path.
 Confirmation:: scenario outline "Exit status" (`tests/features/fingerprint_report.feature`);
@@ -189,8 +194,7 @@ Consequences::
   file) sit in the service layer; they move to adapters, and the SPARQL client becomes an injectable
   parameter of the service.
 Confirmation:: `make check-architecture` (`.importlinter`: layers, generated-model isolation, pure
-domain — the domain imports no SPARQLWrapper, eds4jinja2 or click; from 2.1 also a service layer
-that imports no eds4jinja2, rdflib or SPARQLWrapper).
+domain — the domain imports no SPARQLWrapper, eds4jinja2 or click; from 2.1 also a service layer that imports no eds4jinja2, rdflib or SPARQLWrapper itself (`allow_indirect_imports = True`: it may reach them only through adapters, as `handlers` reaches SPARQLWrapper through the default SPARQL client)).
 Pros and cons::
 * Onion layers with a port (chosen) — good: testable without a store, I/O at the edges; bad: more modules.
 * Logic in templates — good: tiny code; bad: untestable, untimed, one full scan per class.
@@ -247,8 +251,8 @@ Consequences::
 * Good: every statistic is available to every format.
 * Bad: `serialize()` returns a file → text map (per-graph outputs), unlike LinkML's single string.
 Confirmation:: scenario "Custom template package" of the `profile-representations` specification;
-`make check-architecture` (generators import no rendering library: rendering is the template
-renderer adapter's).
+`make check-architecture` (generators import no rendering library themselves: rendering is the
+template renderer adapter's).
 Pros and cons::
 * Own LinkML-shaped framework (chosen) — good: one subclass per format, every statistic available; bad: framework code to maintain.
 * LinkML's generators — good: many formats for free; bad: statistics survive only as annotations,

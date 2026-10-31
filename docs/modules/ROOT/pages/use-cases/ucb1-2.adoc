@@ -9,11 +9,23 @@
 This Blue use case refines xref:use-cases/ucw1.adoc[UC-W1: Fingerprint an endpoint]. The
 shared contract is stated there. This page states only how the library call realises it.
 
+== Stakeholders and Interests
+
+As UC-W1.
+
 == Brief Description
 
 The embedding application calls `generate_endpoint_fingerprint_report` with an endpoint and an
 output folder, optionally graphs, a custom template folder and constants. Collection settings travel
 in `additional_config["collection"]`. The function returns the path of the report.
+
+== Preconditions
+
+As UC-W1.
+
+== Trigger
+
+As UC-W1.
 
 == Success Guarantee (Postconditions)
 
@@ -27,8 +39,10 @@ This Blue path adds only:
 
 == Minimal Guarantees (On Failure)
 
-. Exceptions instead of exit codes: `NotADirectoryError` for a missing output folder, a usage error
-  for an invalid setting, `EndpointUnreachable` when the endpoint is unreachable at the start.
+. Exceptions instead of exit codes: `NotADirectoryError` for a missing output folder; `UsageError`
+  (a `ValueError`, from `fingerprint.service_layer.settings`) for an invalid setting;
+  `EndpointUnreachable` (from `fingerprint.adapters.sparql`) when the endpoint is unreachable at the
+  start. From 2.1 both are also importable from their layer's `exceptions` module.
 . Importing the library has no logging side effects.
 
 == Extensions

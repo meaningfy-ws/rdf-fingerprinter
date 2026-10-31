@@ -2,20 +2,20 @@
 = UC-W2: Publish a fingerprint as an application profile
 
 *Use Case Level:* White (Summary) +
-*Primary Actor:* Requester (a data steward; an embedding application through the `generate_representations` service) +
+*Primary Actor:* Requester +
 *Scope:* rdf-fingerprinter (from 2.1)
 
 == Stakeholders and Interests
 
-* The data steward requires the profile in the forms application profiles are published in: shapes
+* The requester requires the profile in the forms application profiles are published in: shapes
   to validate data with, a class diagram, a readable specification.
 * Data consumers require shapes that do not overstate what the data showed.
 * The endpoint operator requires that publishing causes no new queries.
 
 == Brief Description
 
-From a fingerprint, the data steward obtains SHACL shapes and a PlantUML diagram per graph and one
-application-profile document, each rendered from the profile alone. The data steward may re-read the
+From a fingerprint, the requester obtains SHACL shapes and a PlantUML diagram per graph and one
+application-profile document, each rendered from the profile alone. The requester may re-read the
 profile at another acceptance threshold, or render with their own templates, without collecting
 again.
 
@@ -26,15 +26,15 @@ again.
 
 == Trigger
 
-The data steward asks for one or more representations of a fingerprint.
+The requester asks for one or more representations of a fingerprint.
 
 == Success Guarantee (Postconditions)
 
 . Each requested representation is written; SHACL and PlantUML once per profiled graph, the document once.
 . No query is sent to any endpoint.
 . Validated against the data it was profiled from, the generated SHACL reports no `sh:Violation`;
-  constraints that held with exceptions, on a sample or across graphs are graded `sh:Warning` or
-  `sh:Info` (xref:decisions.adoc#ad-10[AD-10]).
+  constraints that held with exceptions, on a sample, across graphs or for a class with declared
+  subclasses are graded `sh:Warning` or `sh:Info` (xref:decisions.adoc#ad-10[AD-10]).
 . Sampled classes, recorded failures and skipped IRIs are stated in the document.
 . Rendering the same profile twice gives identical files.
 
@@ -47,7 +47,7 @@ The data steward asks for one or more representations of a fingerprint.
 
 == Main Success Scenario
 
-. The data steward names the profile, the formats and the output folder.
+. The requester names the profile, the formats and the output folder.
 . The system loads the profile and derives the analytics.
 . The system renders each requested representation.
 . The system checks and writes the files and reports success.
@@ -55,10 +55,10 @@ The data steward asks for one or more representations of a fingerprint.
 == Alternate Scenarios
 
 Another threshold::
-. In step 1 the data steward gives an acceptance threshold; in step 2 the analytics are derived at it.
+. In step 1 the requester gives an acceptance threshold; in step 2 the analytics are derived at it.
 
 Own templates::
-. In step 1 the data steward names a template folder of their own; step 3 renders from it.
+. In step 1 the requester names a template folder of their own; step 3 renders from it.
 
 == Extensions
 

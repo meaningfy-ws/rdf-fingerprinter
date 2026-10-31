@@ -3,7 +3,7 @@
 ## 1. Scaffolding
 
 - [ ] 1.0 Gherkin projected from UC-W2/UC-B2.1/UC-B2.2 (`docs/modules/ROOT/pages/use-cases/`), the spec scenarios and the error matrix: `tests/features/profile_representations.feature`; the two `fingerprint-report` scenarios added to `tests/features/fingerprint_report.feature`; every scenario of every feature, 2.0 ones included, tagged with its use case and the tags registered in `pytest.ini` (DEC-9, P-17)
-- [ ] 1.1 rdflib declared as a runtime dependency, pySHACL added to the `test` group, lock updated; `--cov-fail-under=80` in `make test`; empty modules of the P-12 table; `.importlinter` contract "service layer imports no eds4jinja2, rdflib or SPARQLWrapper" added (expected red until 2.3); `fingerprint.domain.exceptions` in the `generated` contract (P-12, P-17)
+- [ ] 1.1 rdflib declared as a runtime dependency, pySHACL added to the `test` group, lock updated; `--cov-fail-under=80` in `make test`; empty modules of the P-12 table; `.importlinter` contract "service layer imports no eds4jinja2, rdflib or SPARQLWrapper itself" (`allow_indirect_imports = True`) added (expected red until 2.2); `fingerprint.domain.exceptions` in the `generated` contract (P-12, P-17)
 - [ ] 1.2 A fixed test profile `tests/test_data/profiles/sample-profile.json`, collected once from the existing continents and treaties data (`make oxigraph-load-test-data`) with fixed `started_at`/`finished_at`/`tool_version`, plus small hand-built profiles in `tests/unit/fakes.py` for first-N, failures and unusual IRIs (no new RDF data)
 
 ## 2. Layer clean-up of 2.0 (behaviour unchanged, existing tests green)

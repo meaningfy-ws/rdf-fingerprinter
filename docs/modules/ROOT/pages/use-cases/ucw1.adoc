@@ -48,7 +48,10 @@ The requester asks for a fingerprint of the endpoint.
   profiled and the gap is recorded as a failure; when graphs were chosen, those are profiled and a
   warning is logged.
 . If rendering or writing an output fails after collection, the saved profile (2.1) is kept, so
-  nothing collected is lost; the outcome is an unexpected error.
+  nothing collected is lost; the outcome is an unexpected error. If saving the profile itself fails,
+  the outcome is an unexpected error and nothing is written.
+. If the endpoint returns a response that cannot be interpreted (not a query error), the run stops
+  with an unexpected error and nothing is written (xref:decisions.adoc#ad-11[AD-11]).
 . Credentials in the endpoint URL never appear in outputs or logs.
 
 == Main Success Scenario

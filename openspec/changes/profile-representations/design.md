@@ -128,8 +128,10 @@ eds4jinja2 itself.
   | `fingerprint/entrypoints/cli/generate.py` | the three commands: parse, call `generate_from_profile_file`, map exceptions to exit codes |
 
   Moved names stay importable from their old modules (they import them), so callers and tests keep
-  working. `.importlinter` gains a contract: `fingerprint.service_layer` imports no `eds4jinja2`,
-  `rdflib` or `SPARQLWrapper`; `fingerprint.domain.exceptions` joins the `generated` contract list. template packages `fingerprint_report_templates/{shacl_shapes,plantuml_diagram,profile_document}/`
+  working. `.importlinter` gains a forbidden contract: `fingerprint.service_layer` imports no `eds4jinja2`,
+  `rdflib` or `SPARQLWrapper` itself, with `allow_indirect_imports = True` (the default
+  `SparqlWrapperClient` that `handlers` builds reaches SPARQLWrapper through `adapters`, which is the
+  intent); `fingerprint.domain.exceptions` joins the `generated` contract list. template packages `fingerprint_report_templates/{shacl_shapes,plantuml_diagram,profile_document}/`
   (each `config.json` + `templates/`). rdflib becomes a declared runtime dependency (already installed
   via eds4jinja2) for the Turtle check; pySHACL joins the `test` group.
 - **P-13 Exit codes.** Generator commands: 0 written; 2 usage (profile file, threshold, output folder,
@@ -224,6 +226,7 @@ First matching row wins:
 | `confidence` < threshold (most instances lack the property) | `sh:Info` |
 | accepted label has `label_support` < 1 (accepted, with exceptions) | `sh:Warning` |
 | the class was read in first-N mode (unread instances may differ) | `sh:Warning` |
+| the class has declared subclasses (`sh:targetClass` reaches their instances, not counted here) | `sh:Warning` |
 | the run used `object_type_scope = any_graph` and the shape has `sh:class` (types may sit in other graphs) | `sh:Warning` |
 | otherwise (holds for every instance) | default (`sh:Violation`) |
 
@@ -293,7 +296,7 @@ render time, so the golden file is stable.
 | custom `config.json` without `template` or `conf` | `KeyError` while building, caught in `Generator.__init__` | exit 2, "config.json must have `template` and `conf`" |
 | custom template has a Jinja error | `jinja2.TemplateError` | exit 4, message shows template and line |
 | class/property IRI not writable as IRIREF | `to_iriref` raises `IriRefError` in a hook | element skipped from SHACL/PlantUML, WARNING logged, listed in caveats; exit 0 |
-| generated Turtle does not parse | `rdflib.Graph().parse(data=…, format="turtle")` raises in `check` | `GeneratedOutputError`, exit 4, no file of that run written |
+| generated Turtle does not parse | `rdflib.Graph().parse(data=…, format="turtle")` raises in `check` | `GeneratedOutputError`, exit 4, none of that format's files written; formats finished before it kept |
 | profile records collection failures | `run.failures` non-empty | rendered, listed in caveats, exit 0 |
 | `fingerprint --format` generator fails after the report | exception from `write` | report and `profile.json` stay, exit 4 |
 | the report cannot be rendered or written after collection | exception from the template renderer | `profile.json` (saved first) stays, exit 4; regenerate with the generator commands |
