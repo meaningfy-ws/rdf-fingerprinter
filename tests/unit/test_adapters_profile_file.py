@@ -5,8 +5,9 @@ from pathlib import Path
 
 import pytest
 
+from fingerprint import config
 from fingerprint.adapters.exceptions import ProfileFileError
-from fingerprint.adapters.profile_file import PROFILE_FILE, load_profile, save_profile
+from fingerprint.adapters.profile_file import load_profile, save_profile
 from fingerprint.domain.profile import ProfileRun
 
 SAMPLE = Path(__file__).parents[1] / "test_data" / "profiles" / "sample-profile.json"
@@ -15,7 +16,7 @@ SAMPLE = Path(__file__).parents[1] / "test_data" / "profiles" / "sample-profile.
 def test_round_trip(tmp_path):
     run = ProfileRun.model_validate_json(SAMPLE.read_text())
     path = save_profile(run, tmp_path)
-    assert path == tmp_path / PROFILE_FILE and load_profile(path) == run
+    assert path == tmp_path / config.profile_file and load_profile(path) == run
 
 
 @pytest.mark.parametrize(

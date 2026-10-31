@@ -13,7 +13,7 @@ from fingerprint.domain.profile import ProfileAnalytics, ProfileRun
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators import DOC, GENERATORS, PUML
 from fingerprint.service_layer.generators.generator import Generator, TemplateRenderer
-from fingerprint.service_layer.settings import resolve_settings
+from fingerprint.service_layer.settings import resolve_settings, validate_config
 
 
 def with_threshold(run: ProfileRun, threshold: float) -> ProfileRun:
@@ -49,6 +49,7 @@ def generate_representations(
     renderer: TemplateRenderer | None = None,
 ) -> list[Path]:
     """Write each format in the order given; a failing format writes none of its files and stops the rest."""
+    validate_config()
     unknown = [f for f in formats if f not in GENERATORS]
     if unknown:
         raise UsageError(f"unknown formats: {', '.join(unknown)} (known: {', '.join(GENERATORS)})")
@@ -70,6 +71,7 @@ def generate_from_profile_file(
     profile_location: str | Path, output_location: str | Path, formats: Sequence[str], **kwargs: Any
 ) -> list[Path]:
     """The generator commands' service: the saved profile, never the endpoint (DEC-1)."""
+    validate_config()
     if not Path(output_location).is_dir():
         raise UsageError(f"{output_location} is not an existing folder")
     try:

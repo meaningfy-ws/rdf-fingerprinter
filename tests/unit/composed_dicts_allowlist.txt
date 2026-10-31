@@ -1,18 +1,14 @@
 # Composed dicts not yet converted to model objects (domain-object-model P-1): <file> <count>.
 # Each task group lowers its files to 0; task 7.1 leaves this file empty.
-fingerprint/adapters/settings_sources.py 2
 fingerprint/adapters/sparql.py 5
 fingerprint/adapters/template_renderer.py 8
 fingerprint/domain/analytics.py 42
 fingerprint/domain/iri.py 3
 fingerprint/entrypoints/cli/generate.py 1
-fingerprint/entrypoints/cli/main.py 1
 fingerprint/service_layer/collection.py 35
 fingerprint/service_layer/generators/document.py 16
 fingerprint/service_layer/generators/generator.py 20
 fingerprint/service_layer/generators/plantuml.py 12
 fingerprint/service_layer/generators/shacl.py 9
-fingerprint/service_layer/handlers.py 3
 fingerprint/service_layer/report.py 4
 fingerprint/service_layer/representations.py 3
-fingerprint/service_layer/settings.py 7

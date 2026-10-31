@@ -13,9 +13,9 @@
 
 ## 2. Configuration
 
-- [ ] 2.1 `adapters/config_resolver.py` (`ConfigResolverABC`, `EnvConfigResolver`, `DefaultConfigResolver`, instance-resolver `env_property`) with tests (P-7)
-- [ ] 2.2 `FingerprintConfig` + `config` in `fingerprint/__init__.py` with the P-7 variables and `validate()` raising `ConfigError`; constants replaced by `config.X`; `validate()` called at every entry point; import side-effect free (Requirement: Configuration through one typed config; Requirement: Import has no side effects)
-- [ ] 2.3 `SettingsOverride` in `model/fingerprint_stats.yaml` (+ field-name test); `resolve_settings` keeps its signature and builds overrides; `MappingConfigResolver`; CLI options, environment, `selected_graphs`, `--config` and `additional_config["collection"]` as overrides; `settings_sources.py` removed; the CLI modules and `handlers.py` cleared from the allow-list (P-7; Requirement: Settings)
+- [x] 2.1 `adapters/config_resolver.py` (`ConfigResolverABC`, `EnvConfigResolver`, `DefaultConfigResolver`, instance-resolver `env_property`) with tests (P-7)
+- [x] 2.2 `FingerprintConfig` + `config` in `fingerprint/__init__.py` with the P-7 variables and `validate()` raising `ConfigError`; constants replaced by `config.X`; `validate()` called at every entry point; import side-effect free (Requirement: Configuration through one typed config; Requirement: Import has no side effects)
+- [x] 2.3 `SettingsOverride` in `model/fingerprint_stats.yaml` (+ field-name test); `resolve_settings` keeps its signature and builds overrides; `MappingConfigResolver`; CLI options, environment, `selected_graphs`, `--config` and `additional_config["collection"]` as overrides; `settings_sources.py` removed; `main.py` and `handlers.py` cleared from the allow-list (`generate.py` with the generator options in 5.2) (P-7; Requirement: Settings)
 
 ## 3. SPARQL client and collection (together: the row type changes under collection)
 
@@ -45,7 +45,7 @@
 
 ## Roadmap
 
-- [x] 1.1 · [ ] 1.2 · [ ] 1.3 · [x] 0.1 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 4.1 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 0.2 · [ ] 6.1 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4
+- [x] 1.1 · [ ] 1.2 · [ ] 1.3 · [x] 0.1 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 4.1 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 0.2 · [ ] 6.1 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4
 
 ## Verification
 

@@ -25,7 +25,7 @@ from fingerprint.service_layer.report import (  # noqa: F401 — kept importable
     render_report,
 )
 from fingerprint.service_layer.representations import generate_representations
-from fingerprint.service_layer.settings import resolve_settings
+from fingerprint.service_layer.settings import resolve_settings, validate_config
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ def fingerprint_report(
     output_location: Path,
     settings: Settings,
     template_location: str | Path | None = None,
-    extra_conf: dict[str, Any] | None = None,
+    extra_conf: dict[str, Any] | None = None,  # dict-ok: 1.x API, template constants
     *,
     formats: Sequence[str] = (),
     sparql: SparqlPort | None = None,
@@ -44,6 +44,7 @@ def fingerprint_report(
     """Collect, save the profile, analyse and render; returns the report path and the raw run (its failures decide
     the exit code). The profile is saved before rendering, so a rendering failure loses nothing collected;
     the chosen `formats` are rendered from the same run afterwards (UC-B2.2)."""
+    validate_config()
     sparql = sparql or SparqlWrapperClient(sparql_endpoint_url, settings.timeout_seconds)
     renderer = renderer or JinjaTemplateRenderer()
     run = collect(sparql_endpoint_url, settings, sparql)
@@ -62,7 +63,7 @@ def generate_endpoint_fingerprint_report(
     output_location: str | Path,
     selected_graphs: list[str] | None = None,
     external_template_location: str | Path | None = None,
-    additional_config: dict | None = None,
+    additional_config: dict | None = None,  # dict-ok: 1.x API, template constants
 ) -> Path:
     """
         Calculate the fingerprint of a given endpoint and write the report in the output location.
@@ -74,10 +75,11 @@ def generate_endpoint_fingerprint_report(
     :param additional_config: constants for the template; its "collection" key holds collection settings
     :return: path to the main report document
     """
+    validate_config()
     location = Path(output_location)
     if not location.exists() or not location.is_dir():
         raise NotADirectoryError("The output location must be a folder")
 
-    extra_conf = dict(additional_config or {})
+    extra_conf = dict(additional_config or {})  # dict-ok: 1.x API, template constants
     settings = resolve_settings(selected_graphs=selected_graphs, config=extra_conf.pop("collection", None))
     return fingerprint_report(sparql_endpoint_url, location, settings, external_template_location, extra_conf)[0]

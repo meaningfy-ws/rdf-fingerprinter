@@ -283,17 +283,18 @@ class Settings(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
 
-    depth: Depth = Field(default=Depth("values"), description="""How much was collected.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'string(values)'} })
-    precision_policy: PrecisionPolicy = Field(default=PrecisionPolicy("auto"), description="""Allowed precision modes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'string(auto)'} })
-    first_n: int = Field(default=10000, description="""N for the first_n mode.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(10000)'} })
-    top_k: int = Field(default=20, description="""How many top values to keep per class and property.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(20)'} })
-    object_type_scope: ObjectTypeScope = Field(default=ObjectTypeScope("same_graph"), description="""Where object types are looked up.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'string(same_graph)'} })
-    completeness_check: bool = Field(default=False, description="""Whether property presence was checked for first_n classes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'false'} })
-    timeout_seconds: int = Field(default=60, description="""Per-query timeout.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(60)'} })
-    concurrency: int = Field(default=4, description="""Maximum concurrent queries.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'int(4)'} })
-    acceptance_threshold: float = Field(default=0.95, description="""Share of instances a cardinality label must cover.""", ge=0, le=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'float(0.95)'} })
-    graph_statistics: bool = Field(default=False, description="""Whether graph totals, predicate partitions and untyped subjects were collected (full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings'], 'ifabsent': 'false'} })
-    selected_graphs: Optional[list[str]] = Field(default=None, description="""Graphs requested; empty means all.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings']} })
+    depth: Depth = Field(default=Depth("values"), description="""How much was collected.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'string(values)'} })
+    precision_policy: PrecisionPolicy = Field(default=PrecisionPolicy("auto"), description="""Allowed precision modes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'string(auto)'} })
+    first_n: int = Field(default=10000, description="""N for the first_n mode.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'int(10000)'} })
+    top_k: int = Field(default=20, description="""How many top values to keep per class and property.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'int(20)'} })
+    object_type_scope: ObjectTypeScope = Field(default=ObjectTypeScope("same_graph"), description="""Where object types are looked up.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'],
+         'ifabsent': 'string(same_graph)'} })
+    completeness_check: bool = Field(default=False, description="""Whether property presence was checked for first_n classes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'false'} })
+    timeout_seconds: int = Field(default=60, description="""Per-query timeout.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'int(60)'} })
+    concurrency: int = Field(default=4, description="""Maximum concurrent queries.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'int(4)'} })
+    acceptance_threshold: float = Field(default=0.95, description="""Share of instances a cardinality label must cover.""", ge=0, le=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'float(0.95)'} })
+    graph_statistics: bool = Field(default=False, description="""Whether graph totals, predicate partitions and untyped subjects were collected (full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'false'} })
+    selected_graphs: Optional[list[str]] = Field(default=None, description="""Graphs requested; empty means all.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
 
 
 class Failure(ConfiguredBaseModel):
@@ -502,6 +503,25 @@ class IncomingLink(ConfiguredBaseModel):
          'slot_uri': 'void:triples'} })
 
 
+class SettingsOverride(ConfiguredBaseModel):
+    """
+    Collection settings given by one source (command line, environment, parameter, config file); unset ones are absent. The first source that sets a setting wins (domain-object-model P-7).
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema'})
+
+    depth: Optional[Depth] = Field(default=None, description="""How much was collected.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    precision_policy: Optional[PrecisionPolicy] = Field(default=None, description="""Allowed precision modes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    first_n: Optional[int] = Field(default=None, description="""N for the first_n mode.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    top_k: Optional[int] = Field(default=None, description="""How many top values to keep per class and property.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    object_type_scope: Optional[ObjectTypeScope] = Field(default=None, description="""Where object types are looked up.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    completeness_check: Optional[bool] = Field(default=None, description="""Whether property presence was checked for first_n classes.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    timeout_seconds: Optional[int] = Field(default=None, description="""Per-query timeout.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    concurrency: Optional[int] = Field(default=None, description="""Maximum concurrent queries.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    acceptance_threshold: Optional[float] = Field(default=None, description="""Share of instances a cardinality label must cover.""", ge=0, le=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    graph_statistics: Optional[bool] = Field(default=None, description="""Whether graph totals, predicate partitions and untyped subjects were collected (full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    selected_graphs: Optional[list[str]] = Field(default=None, description="""Graphs requested; empty means all.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+
+
 class ProfileAnalytics(ProfileRun):
     """
     A profile run with every level replaced by its analytics.
@@ -654,6 +674,7 @@ CardinalityBin.model_rebuild()
 ValuePartition.model_rebuild()
 ValueCount.model_rebuild()
 IncomingLink.model_rebuild()
+SettingsOverride.model_rebuild()
 ProfileAnalytics.model_rebuild()
 PropertyAnalytics.model_rebuild()
 ParentClass.model_rebuild()

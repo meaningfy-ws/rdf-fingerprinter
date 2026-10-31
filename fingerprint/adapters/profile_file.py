@@ -5,14 +5,13 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from fingerprint import config
 from fingerprint.adapters.exceptions import ProfileFileError
 from fingerprint.domain.profile import ProfileRun
 
-PROFILE_FILE = "profile.json"
-
 
 def save_profile(run: ProfileRun, folder: str | Path) -> Path:
-    path = Path(folder) / PROFILE_FILE
+    path = Path(folder) / config.profile_file
     path.write_text(run.model_dump_json(indent=2, exclude_none=True) + "\n", encoding="utf-8")
     return path
 

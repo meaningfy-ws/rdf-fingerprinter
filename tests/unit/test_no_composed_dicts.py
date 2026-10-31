@@ -79,7 +79,7 @@ class _Finder(ast.NodeVisitor):
     def _visit_expression(self, node: ast.AST) -> None:
         if isinstance(node, ast.Call):
             for keyword in node.keywords:
-                if keyword.arg in (None, "update") and isinstance(keyword.value, ast.Dict):
+                if keyword.arg in (None, "update") and isinstance(keyword.value, (ast.Dict, ast.DictComp)):
                     self.exempt.add(id(keyword.value))
         builds = isinstance(node, (ast.Dict, ast.DictComp)) or (isinstance(node, ast.Call) and _is_dict_call(node))
         if builds and id(node) not in self.exempt:
@@ -137,6 +137,7 @@ def test_the_allowlist_names_existing_files():
         ("TABLE: dict[str, int] = {'a': 1}\n", []),
         ("def f(m):\n    return m.model_copy(update={'a': 1})\n", []),
         ("def f(M):\n    return M(**{'class': 1})\n", []),
+        ("def f(M, p):\n    return M(**{k: 1 for k in p})\n", []),
         ("def f(p):\n    return {'conf': p}  # dict-ok: eds4jinja2 configuration\n", []),
     ],
 )

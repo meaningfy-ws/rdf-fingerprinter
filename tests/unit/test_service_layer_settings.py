@@ -68,3 +68,9 @@ def test_config_file(tmp_path):
     path.write_text("[1]")
     with pytest.raises(UsageError):
         load_config_file(path)
+
+
+def test_each_source_is_checked_on_its_own():
+    """A malformed lower-precedence value fails even when a higher source sets it (domain-object-model P-7)."""
+    with pytest.raises(UsageError):
+        resolve_settings(cli={"concurrency": 2}, env={}, config={"concurrency": 0})

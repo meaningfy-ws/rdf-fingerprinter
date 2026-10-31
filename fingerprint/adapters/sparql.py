@@ -20,6 +20,7 @@ from SPARQLWrapper.SPARQLExceptions import (
     URITooLong,
 )
 
+from fingerprint import config
 from fingerprint.adapters.exceptions import (  # noqa: F401 — also importable from here (2.0)
     EndpointUnreachable,
     PermanentError,
@@ -33,9 +34,6 @@ logger = logging.getLogger(__name__)
 
 Row = dict[str, str | None]
 
-TIMEOUT_MARKERS = ("timeout", "time limit", "timed out", "estimated execution time")
-BACKOFF_SECONDS = (1, 4)
-EXCERPT = 200
 BLANK_NODE_PREFIX = "_:"
 
 
@@ -61,7 +59,7 @@ def query_name(query: str) -> str:
 
 def _excerpt(body: Any) -> str:
     text = body.decode("utf-8", "replace") if isinstance(body, bytes) else str(body)
-    return " ".join(text.split())[:EXCERPT]
+    return " ".join(text.split())[: config.error_excerpt_length]
 
 
 def classify(error: BaseException) -> SparqlError:
@@ -74,7 +72,7 @@ def classify(error: BaseException) -> SparqlError:
         return EndpointUnreachable("401 authentication required", 401)
     if isinstance(error, EndPointInternalError):
         message = _excerpt(error)
-        if any(marker in message.lower() for marker in TIMEOUT_MARKERS):
+        if any(marker in message.lower() for marker in config.timeout_markers):
             return QueryTimeout(f"500 {message}", 500)
         return PermanentError(f"500 {message}", 500)
     if isinstance(error, SPARQLWrapperException):
@@ -137,17 +135,18 @@ class SparqlWrapperClient:
             raise PermanentError(f"unreadable response: missing {error}") from error
 
     def _with_retries(self, query: str, ask: bool) -> dict[str, Any]:
-        for attempt in range(len(BACKOFF_SECONDS) + 1):
+        backoff = config.retry_backoff_seconds
+        for attempt in range(len(backoff) + 1):
             try:
                 return self._once(query, ask)
             except Exception as raw:  # classified below; nothing is swallowed
                 error = classify(raw)
                 if not isinstance(error, TransientError):
                     raise error from raw
-                if attempt == len(BACKOFF_SECONDS):
+                if attempt == len(backoff):
                     raise RetriesExhausted(f"{error} (after {attempt} retries)") from raw
-                logger.info("retrying %s (%d/%d): %s", query_name(query), attempt + 1, len(BACKOFF_SECONDS), error)
-                self._sleep(BACKOFF_SECONDS[attempt])
+                logger.info("retrying %s (%d/%d): %s", query_name(query), attempt + 1, len(backoff), error)
+                self._sleep(backoff[attempt])
         raise AssertionError("unreachable")
 
     def _once(self, query: str, ask: bool) -> dict[str, Any]:

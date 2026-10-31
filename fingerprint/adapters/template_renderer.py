@@ -12,17 +12,15 @@ from typing import Any
 import rdflib
 from eds4jinja2.services.report_builder import ReportBuilder
 
+from fingerprint import config
 from fingerprint.adapters.exceptions import GeneratedOutputError, TemplatePackageError
 from fingerprint.domain.iri import curie, to_iriref, turtle_number, turtle_string, turtle_term
-from fingerprint_report_templates import packaged
-
-# The one prefix list of the package, shared with the report (P-7).
-PREFIXES_FILE = packaged("fingerprint_report") / "templates" / "prefixes.json"
 
 
-def load_prefixes(path: Path = PREFIXES_FILE) -> dict[str, str]:
-    """`{"skos": "http://www.w3.org/2004/02/skos/core#", …}` from the report's `{"skos:": …}` file."""
-    return {prefix.rstrip(":"): namespace for prefix, namespace in json.loads(path.read_text()).items()}
+def load_prefixes(path: Path | None = None) -> dict[str, str]:
+    """`{"skos": "http://www.w3.org/2004/02/skos/core#", …}` from a `{"skos:": …}` file; default: `config.prefixes_file`."""
+    text = (path or config.prefixes_file).read_text()
+    return {prefix.rstrip(":"): namespace for prefix, namespace in json.loads(text).items()}
 
 
 def _parse_turtle(text: str) -> None:

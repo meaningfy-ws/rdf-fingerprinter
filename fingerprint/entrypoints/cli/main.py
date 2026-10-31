@@ -13,15 +13,16 @@ import sys
 from enum import Enum
 
 import click
+from pydantic import ValidationError
 
 from fingerprint.adapters.exceptions import EndpointUnreachable
 from fingerprint.adapters.sparql import redact
-from fingerprint.domain.profile import Depth, ObjectTypeScope, PrecisionPolicy
+from fingerprint.domain.profile import Depth, ObjectTypeScope, PrecisionPolicy, SettingsOverride
 from fingerprint.entrypoints.cli import EXIT_FAILURES, EXIT_UNEXPECTED, EXIT_UNREACHABLE, configure_logging
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.handlers import fingerprint_report
-from fingerprint.service_layer.settings import load_config_file, resolve_settings
+from fingerprint.service_layer.settings import load_config_file, resolve_settings, validate_config
 
 logger = logging.getLogger(__name__)
 
@@ -70,11 +71,12 @@ def fingerprint_endpoint(
     if not output_location.is_dir():
         raise click.BadParameter(f"{output} is not an existing folder", param_hint="--output")
     try:
+        validate_config()
         settings = resolve_settings(
-            cli={**options, "selected_graphs": list(graphs) or None},
+            cli=SettingsOverride(**options, selected_graphs=list(graphs) or None),
             config=load_config_file(config_file) if config_file else None,
         )
-    except UsageError as error:
+    except (UsageError, ValidationError) as error:
         raise click.UsageError(str(error)) from error
 
     try:

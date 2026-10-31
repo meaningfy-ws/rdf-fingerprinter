@@ -43,3 +43,7 @@ class GeneratedOutputError(ValueError):
 
 class ProfileFileError(ValueError):
     """A profile file that is missing, not JSON, or not a profile run."""
+
+
+class ConfigError(ValueError):
+    """An `RDF_FINGERPRINTER_*` value that cannot be read as its type; the message names the variable."""

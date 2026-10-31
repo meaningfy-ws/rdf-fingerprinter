@@ -5,6 +5,7 @@ import urllib.parse
 from pathlib import Path
 from typing import Any, NamedTuple
 
+from fingerprint import config
 from fingerprint.domain.analytics import label_bounds
 from fingerprint.domain.iri import to_iriref, turtle_number, turtle_string, turtle_term
 from fingerprint.domain.profile import (
@@ -22,7 +23,6 @@ from fingerprint.service_layer.generators.generator import Generator, TemplateRe
 from fingerprint_report_templates import packaged
 
 FIXED_PREFIXES = {"sh": SH, "xsd": XSD, "rdf": RDF, "rdfs": RDFS, "fp": FP}
-DEFAULT_SHAPES_NAMESPACE = "urn:fingerprint:shape:"
 INFO, WARNING = "sh:Info", "sh:Warning"  # sh:Violation is the default: no sh:severity is written
 _PN_PREFIX = re.compile(r"[A-Za-z][A-Za-z0-9_-]*")
 LITERAL, IRI, BLANK_NODE = NodeKind.literal.value, NodeKind.iri.value, NodeKind.blank_node.value
@@ -56,7 +56,7 @@ class ShaclGenerator(Generator):
         shapes_namespace: str | None = None,
     ):
         super().__init__(analytics, renderer, template_location)
-        self.shapes_namespace = shapes_namespace or DEFAULT_SHAPES_NAMESPACE
+        self.shapes_namespace = shapes_namespace or config.shapes_namespace
         to_iriref(self.shapes_namespace)  # an unwritable namespace is the caller's usage error (IriRefError)
         # Prefixes usable in Turtle, never redefining the ones the shapes themselves need.
         self.term_prefixes = {

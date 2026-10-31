@@ -12,13 +12,13 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, ClassVar, Protocol
 
+from fingerprint import config
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import split_curie, to_iriref
 from fingerprint.domain.profile import ClassAnalytics, GraphAnalytics, ProfileAnalytics, PropertyAnalytics
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_GRAPH_LABEL = "default graph"
 # Graph names reach PlantUML titles and Turtle comments, where the tools interpret text: keep it plain.
 _NOT_PLAIN = re.compile(r"[^\w:/#.~ -]")
 
@@ -51,7 +51,7 @@ def graph_slug(graph: str | None) -> str:
 
 def plain_label(graph: str | None) -> str:
     """The graph's name for titles and comments: letters, digits and `:/#.~ -` only, anything else `_`."""
-    return _NOT_PLAIN.sub("_", graph) if graph else DEFAULT_GRAPH_LABEL
+    return _NOT_PLAIN.sub("_", graph) if graph else config.default_graph_label
 
 
 class Generator:

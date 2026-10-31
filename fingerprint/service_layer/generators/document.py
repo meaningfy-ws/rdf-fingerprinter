@@ -4,6 +4,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
+from fingerprint import config
 from fingerprint.domain.analytics import multiplicity
 from fingerprint.domain.profile import (
     ClassAnalytics,
@@ -13,7 +14,6 @@ from fingerprint.domain.profile import (
     PropertyAnalytics,
 )
 from fingerprint.service_layer.generators.generator import (
-    DEFAULT_GRAPH_LABEL,
     Generator,
     TemplateRenderer,
     graph_slug,
@@ -44,7 +44,7 @@ class DocumentGenerator(Generator):
 
     def visit_graph(self, graph: GraphAnalytics) -> dict[str, Any] | None:
         slug = graph_slug(graph.graph)
-        return {"slug": slug, "label": graph.graph or DEFAULT_GRAPH_LABEL, "diagram": self.diagrams.get(slug, "")}
+        return {"slug": slug, "label": graph.graph or config.default_graph_label, "diagram": self.diagrams.get(slug, "")}
 
     def visit_class(self, graph: GraphAnalytics, cls: ClassAnalytics) -> dict[str, Any] | None:
         self.accepts(cls.class_iri)
@@ -84,7 +84,7 @@ class DocumentGenerator(Generator):
         ]
         failures = [
             {
-                "graph": f.graph or DEFAULT_GRAPH_LABEL,
+                "graph": f.graph or config.default_graph_label,
                 "class": self.label(f.class_iri) if f.class_iri else ABSENT,
                 "measurement": f.query_kind,
                 "message": f.message,
