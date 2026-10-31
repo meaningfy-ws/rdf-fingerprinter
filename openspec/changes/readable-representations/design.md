@@ -45,7 +45,7 @@
     - `prefix_list` is a `PrefixListSource | None`.
   - It runs in `fingerprint_report` after `collect` and before `save_profile`.
   - The port is `PrefixListSource.fetch() -> list[NamespacePrefix]`. The adapter
-    `fingerprint/adapters/prefix_cc.py:PrefixCcList` tries HTTPS. On `ssl.SSLCertVerificationError`
+    `fingerprint/adapters/prefixes.py:PrefixCcList` tries HTTPS. On `ssl.SSLCertVerificationError`
     (also when it arrives wrapped in `URLError`) it fetches over HTTP and logs the spec's INFO line.
     Every socket operation times out after 10 s; there is no retry. The unit tests use
     `FakePrefixList` (`tests/unit/fakes.py`).
@@ -227,7 +227,7 @@ Modules: the spec's example has classes A–G with module size 3, giving `ex~1` 
 | Automated, unit and Gherkin | every scenario of the four deltas not listed below | pytest-bdd and unit tests; prefix.cc faked |
 | Automated, golden | profile-representations › Golden outputs | the fixed test profile |
 | Automated, readability fixture | "Short names only", "No long IRIs in the diagram", "Search data is present" | `tests/test_data/profiles/readability-profile.json` (new): a fragment-route namespace, a hash namespace, a sub-namespace, a meta class, and an unnamed vocabulary |
-| Manual, once (task 6.2) | "Search narrows the classes", "Namespace switched off", phone width, dark mode, size and time | in a browser, on the brainframe outputs |
+| Manual, once (task 6.2) | "Search narrows the classes", "Namespace switched off", phone width, dark mode, size and time | in a browser, on the brainframe outputs; the search and switch behaviour was also driven once with jsdom 24 outside the project (2026-10-31): `risk` → 3 shown / 49 hidden, every shown class or row matches, contents follow, switches combine with search |
 
 ### Anti-patterns
 | Don't | Do instead | Why |
@@ -282,6 +282,8 @@ Modules: the spec's example has classes A–G with module size 3, giving `ex~1` 
 - [`llm-schema-tools` (a pitch, not shaped) has the no-go "No breaking change to
   `generate_endpoint_fingerprint_report` or the HTML report"] → This change lands first; that
   pitch's no-go must be re-stated against 3.0.0 when it is shaped.
+- [Python's socket timeout does not bound DNS resolution (`getaddrinfo`)] → Accepted: a hung resolver
+  can delay the lookup beyond 10 s; `--no-prefix-lookup` is the way out on such networks.
 - [Tests reaching prefix.cc] → `tests/conftest.py` sets `RDF_FINGERPRINTER_PREFIX_LOOKUP=false` for
   every test (autouse); `make test-e2e` sets it too. Manual scenarios carry `@manual` and are skipped.
 

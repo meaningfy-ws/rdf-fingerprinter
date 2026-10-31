@@ -4,6 +4,7 @@ import re
 
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
+from fingerprint.domain.profile import NamespacePrefix
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer.generators.plantuml import PlantumlGenerator
 from tests.unit.fakes import EX, files, klass, literals, profile_run, prop, resources
@@ -123,3 +124,14 @@ def test_a_graph_label_is_plain_text_in_the_title():
     text, _ = diagram(run)
     (title,) = [line for line in text.splitlines() if line.startswith("title ")]
     assert "%" not in title and '"' not in title and "!include" not in text
+
+
+def test_a_prefix_that_looks_like_a_cluster_name_keeps_its_own_module():
+    namespaces = [
+        NamespacePrefix(prefix="ex", namespace="http://ex.org/", source="user"),
+        NamespacePrefix(prefix="ex-1", namespace="http://ex.org/1/", source="user"),
+    ]
+    big = profile_run(*(klass(f"http://ex.org/C{n}", 1) for n in range(4)), klass("http://ex.org/1/D", 1))
+    texts, _ = outputs(big.model_copy(update={"namespaces": namespaces}), module_size=2)
+    modules = sorted(n for n in texts if "--" in n)
+    assert modules == ["diagram-default--ex-1.puml", "diagram-default--ex~1.puml", "diagram-default--ex~2.puml"]

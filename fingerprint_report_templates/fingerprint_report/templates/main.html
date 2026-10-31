@@ -172,7 +172,7 @@
     {%- if cv.hidden %}
     <h3>Hidden namespaces</h3>
     <p class="note">Their classes are left out of this page; show them with <code>--include-namespace</code>.</p>
-    <ul>{% for h in cv.hidden %}<li><span class="pfx" data-ns="{{ h.prefix }}">{{ h.prefix }}</span> ({{ h.namespace }}): {{ h.classes }} classes</li>{% endfor %}</ul>
+    <ul>{% for h in cv.hidden %}<li><span class="pfx" data-ns="{{ h.prefix }}" title="{{ h.namespace }}">{{ h.prefix }}</span>: {{ h.classes }} classes</li>{% endfor %}</ul>
     {%- endif %}
     {%- if cv.skipped %}
     <h3>IRIs that cannot be written</h3>

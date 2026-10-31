@@ -1,6 +1,7 @@
 """Step definitions for fingerprint_report.feature: the report page, the CLI and the library call over FakeSparql."""
 
 import io
+import re
 import urllib.error
 from pathlib import Path
 
@@ -170,12 +171,13 @@ def readability_profile(ctx):
 @then("no visible text outside the namespace table, the endpoint, the settings, the failures and the caveats holds a full IRI")
 def short_names_only(ctx):
     page = soup(ctx)
-    for exempt in [page.find(id="namespaces"), page.find(id="collection"), page.find(id="caveats"), page.find("header")]:
-        exempt.decompose()
-    for script in page.find_all(["script", "style"]):
-        script.decompose()
-    for overview in page.select("#overview dd"):
-        overview.decompose()
+    # exactly the spec's exemptions: the namespace table, the endpoint, the settings, failure messages, unwritable IRIs
+    exempt = [page.find(id="namespaces"), page.select_one("#collection details"), page.select_one(".bar small")]
+    exempt += page.select("#overview dd")[:1] + page.select("#collection tbody td:last-child")
+    exempt += [h3.find_next("ul") for h3 in page.select("#caveats h3") if "cannot be written" in h3.text]
+    for element in [*exempt, *page.find_all(["script", "style"])]:
+        if element is not None:
+            element.decompose()
     text = page.get_text(" ")
     assert "http://" not in text and "https://" not in text, [t for t in text.split() if "://" in t]
 
@@ -183,7 +185,7 @@ def short_names_only(ctx):
 @then(parsers.parse('the caveats list "{prefix}" as hidden with {count:d} class'))
 def hidden_listed(ctx, prefix, count):
     text = " ".join(soup(ctx).find(id="caveats").get_text(" ").split())
-    assert f"{prefix} (" in text and f"{count} classes" in text
+    assert re.search(rf"{re.escape(prefix)}\s*:\s*{count} classes", text), text
 
 
 @then(parsers.parse('no "{prefix}:" class section exists'))

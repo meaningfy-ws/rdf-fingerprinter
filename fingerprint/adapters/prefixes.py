@@ -39,6 +39,11 @@ def _valid(prefix: str, namespace: Any) -> bool:
     return True
 
 
+def valid_prefix(prefix: str, namespace: str) -> bool:
+    """Whether `prefix` (without its colon) can name `namespace` in every output: a plain name, a writable IRI."""
+    return _valid(prefix + ":", namespace)
+
+
 def load_prefixes(path: Path, source: PrefixSource, origin: str) -> list[NamespacePrefix]:
     """The `{"skos:": "http://…#"}` file at `path`, in file order; `origin` names who gave the path in errors."""
     try:
@@ -93,8 +98,8 @@ class PrefixCcList:
             except (urllib.error.URLError, ssl.SSLError) as error:
                 if not _certificate_failed(error):
                     raise
-                logger.info("prefix.cc certificate not valid; fetched the prefix list over HTTP")
                 body = self._get(f"http://{PREFIX_CC_LIST}")
+                logger.info("prefix.cc certificate not valid; fetched the prefix list over HTTP")
             listing = json.loads(body)
         except (OSError, ValueError, http.client.HTTPException) as error:  # network, broken answers, bad JSON
             raise PrefixLookupError(str(error)) from error

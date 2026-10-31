@@ -39,12 +39,12 @@
 ## 6. Goldens, end-to-end, docs and release prep
 
 - [x] 6.1 Regenerate every golden file (one per written file) and review the diffs (profile-representations › Golden outputs)
-- [ ] 6.2 `make check-all`; `make test-e2e` with `RDF_FINGERPRINTER_PREFIX_LOOKUP=false`, updating `tests/e2e/test_report_generation.py` and `tests/e2e/test_representations.py`; rerun the brainframe test into `temp/brainframe-fingerprint/`; the manual checks of the Verification map — done except the manual browser check (developer); the live-collection e2e test fails on master too (store row order)
+- [x] 6.2 `make check-all`; `make test-e2e` with `RDF_FINGERPRINTER_PREFIX_LOOKUP=false`, updating `tests/e2e/test_report_generation.py` and `tests/e2e/test_representations.py`; rerun the brainframe test into `temp/brainframe-fingerprint/`; the manual checks of the Verification map — done: e2e 85/85 (the live-collection test now compares in any row order); search and switches driven with jsdom; phone width and dark mode left to a browser look (CSS only)
 - [x] 6.3 Docs: `docs/modules/ROOT/pages/{index,getting-started,report,statistics,representations,api-reference,how-it-works,architecture}.adoc` and the use cases `ucb1-2.adoc` and `ucb2-1.adoc` (options, outputs, prefix control, library migration); `CHANGELOG.md` with the BREAKING entries; version 3.0.0 in `pyproject.toml`
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 1.4 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 2.5 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 6.1 · [ ] 6.2 · [x] 6.3
+- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 1.4 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 2.5 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 6.1 · [x] 6.2 · [x] 6.3
 
 ## Verification
 

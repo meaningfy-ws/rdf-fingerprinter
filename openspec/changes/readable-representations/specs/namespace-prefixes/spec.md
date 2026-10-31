@@ -31,7 +31,10 @@ A namespace SHALL take its prefix from the first source that names it, in this o
 5. generation.
 
 The rules for each candidate prefix:
-- A prefix already held in the table by another namespace SHALL be skipped. The exception is a user
+- A prefix already held in the table by another namespace SHALL be skipped; prefixes are compared
+  case-insensitively, since they reach file names. A prefix that is not a plain name (`[A-Za-z][A-Za-z0-9_.-]*`)
+  or whose namespace cannot be written as an IRI SHALL be skipped too, from any source, the saved table
+  included. The exception is a user
   prefix: it displaces the holder, and the displaced namespace is resolved again from sources 3–5.
 - The names `rdf`, `rdfs`, `owl`, `xsd`, `sh` and `fp` SHALL be accepted only for their standard
   namespaces: `http://www.w3.org/1999/02/22-rdf-syntax-ns#`, `http://www.w3.org/2000/01/rdf-schema#`,

@@ -95,3 +95,11 @@ def test_failures_are_lookup_errors_without_retries(answers):
     with pytest.raises(PrefixLookupError):
         PrefixCcList(opener=fake).fetch()
     assert len(fake.calls) <= 2
+
+
+def test_the_http_line_is_logged_only_when_the_http_fetch_succeeds(caplog):
+    expired = urllib.error.URLError(ssl.SSLCertVerificationError("expired"))
+    fake = opener({"https": expired, "http": urllib.error.URLError("down")})
+    with caplog.at_level(logging.INFO), pytest.raises(PrefixLookupError):
+        PrefixCcList(opener=fake).fetch()
+    assert "fetched the prefix list over HTTP" not in caplog.text

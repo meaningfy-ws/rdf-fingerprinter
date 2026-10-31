@@ -117,3 +117,24 @@ def test_resolving_is_idempotent_and_deterministic():
     first = resolve_namespaces(run(BF + "A", "http://ex.org/core/B"), packaged=[])
     assert resolve_namespaces(first, packaged=[]).namespaces == first.namespaces
     assert resolve_namespaces(run("http://ex.org/core/B", BF + "A"), packaged=[]).namespaces == first.namespaces
+
+
+def test_a_skipped_first_prefix_falls_to_the_next_source_not_the_next_alias():
+    ns = "http://ex.org/sh#"
+    user = [e("sh", ns, PrefixSource.user), e("exsh", ns, PrefixSource.user)]
+    resolved = resolve_namespaces(run(ns + "A"), user, packaged=[e("pk", ns), e("pk2", ns)])
+    assert {x.namespace: x.prefix for x in resolved.namespaces}[ns] == "pk"
+    looked_up = resolve_namespaces(
+        run(ns + "A"),
+        packaged=[],
+        prefix_list=FakePrefixList([e("sh", ns, PrefixSource.prefix_cc), e("alias", ns, PrefixSource.prefix_cc)]),
+    )
+    assert {x.namespace: x.source for x in looked_up.namespaces}[ns] == "generated"
+
+
+def test_invalid_saved_prefixes_are_skipped():
+    saved = run("http://ex.org/core/A").model_copy(
+        update={"namespaces": [e("../../escaped", "http://ex.org/core/", PrefixSource.user)]}
+    )
+    resolved = resolve_namespaces(saved, packaged=[])
+    assert {x.namespace: x.prefix for x in resolved.namespaces}["http://ex.org/core/"] == "core"

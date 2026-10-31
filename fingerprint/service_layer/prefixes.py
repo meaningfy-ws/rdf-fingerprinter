@@ -9,7 +9,7 @@ from collections.abc import Iterable, Iterator, Sequence
 from pydantic import BaseModel
 
 from fingerprint import config
-from fingerprint.adapters.prefixes import PrefixListSource, PrefixLookupError, load_packaged_prefixes
+from fingerprint.adapters.prefixes import PrefixListSource, PrefixLookupError, load_packaged_prefixes, valid_prefix
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref
 from fingerprint.domain.prefixes import STANDARD, generate_prefixes, is_reserved, namespace_of
@@ -80,8 +80,17 @@ def resolve_namespaces[Run: ProfileRun](  # a raw run or its analytics: model_co
         return namespace in used or any(u.startswith(namespace) for u in used)
 
     def offer(entries: Iterable[NamespacePrefix]) -> None:
+        """One source: only its first prefix per namespace counts; when that one is skipped, the namespace
+        falls to the next source, never to this source's next alias."""
+        seen: set[str] = set()
         for entry in entries:
+            if entry.namespace in seen:
+                continue
+            seen.add(entry.namespace)
             if entry.namespace in table or not wanted(entry.namespace):
+                continue
+            if not valid_prefix(entry.prefix, entry.namespace):  # e.g. a hand-edited profile.json
+                logger.debug("prefix %r for %s skipped: not a prefix with a writable IRI", entry.prefix, entry.namespace)
                 continue
             if is_reserved(entry.prefix, entry.namespace) or entry.prefix.lower() in holders:
                 logger.debug("prefix %r for %s skipped: reserved or taken", entry.prefix, entry.namespace)

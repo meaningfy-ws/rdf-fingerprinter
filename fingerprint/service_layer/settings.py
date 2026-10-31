@@ -57,7 +57,6 @@ def validate_config() -> None:
         load_packaged_prefixes(fingerprint_config.packaged_prefixes_file)
     except ConfigError as error:
         raise UsageError(str(error)) from error
-    load_user_prefixes()  # RDF_FINGERPRINTER_PREFIXES_FILE: a bad file is a usage error before any query
 
 
 def load_user_prefixes(path: str | Path | None = None) -> list[NamespacePrefix]:
