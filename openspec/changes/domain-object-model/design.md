@@ -147,7 +147,7 @@ State at PR #40 (2.1.0, unreleased), counted in the code:
   for every format (documented for custom templates), and for the report the 1.x keys and the
   caller's `extra_conf` — passed to `ReportBuilder(additional_config={"conf": …})` inside the adapter
   (`# dict-ok: eds4jinja2 configuration`); at the port it is the 1.x mapping for the report (public
-  API) and `{"profile": analytics}` built in the adapter for the generators. The
+  API) and `{"profile": analytics}` built by `Generator` (as `_render` does today) and passed as `conf`. The
   adapter turns the typed `(file name, view)` pairs into eds4jinja2's mapping (`# dict-ok: eds4jinja2
   outputs`). `Generator.serialize()` uses `render`; `Generator.write()` uses `make`. The document gets
   its diagrams as today — `make_generator` calls the PlantUML generator's `serialize()` (in memory) and
