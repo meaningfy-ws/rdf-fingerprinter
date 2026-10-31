@@ -81,9 +81,18 @@ the failures in its Collection section, and the CLI exits with 1.
 
 == Settings
 
-Each setting can be given on the command line, as an environment variable
-`RDF_FINGERPRINTER_<NAME>`, or in a configuration file: `--config FILE` for the CLI,
-`additional_config["collection"]` for the library. The first one found, in that order, wins.
+[#precedence]
+Each setting is taken from the first source that gives it, in this order:
+
+. the command-line option (CLI only);
+. the environment variable `RDF_FINGERPRINTER_<NAME>`;
+. the `selected_graphs` parameter of `generate_endpoint_fingerprint_report` (library, graphs only);
+. the configuration: `--config FILE` for the CLI, `additional_config["collection"]` for the library;
+. the default.
+
+NOTE: For a library caller, an environment variable set in the process *overrides* the same setting
+in `additional_config["collection"]`.
+
 The settings used are recorded in the profile and shown in the report.
 
 [cols="2,2,1,3"]

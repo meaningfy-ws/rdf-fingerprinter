@@ -42,8 +42,11 @@ small questions per class:
   * *value partitions* — `ex:name` on people: 4 literals of `xsd:string`; `ex:livesIn`: 2 resources
     of class `ex:City`;
   * at deeper depths, top values and incoming links.
-. *Escalation.* If a class's query times out, the class is read again from its first N instances
-  (_first-N mode_) and marked so. If that also fails, a failure is recorded and the run goes on.
+. *Escalation.* Under the default policy `auto`, if a class's query times out, the class is read
+  again from its first N instances (_first-N mode_) and marked so. If that also fails, a _failure_
+  is recorded and the run goes on. Policy `exact` records the timeout as a failure at once; policy
+  `first_n` reads every class from its first N directly. How each kind of error is handled is in
+  <<failure-classes>>.
 
 The result is a _profile run_: raw counts only, no judgement.
 
@@ -100,7 +103,7 @@ the first matching row wins:
 |===
 | What the profile knows | Severity
 
-| no cardinality label (presence only), or confidence below the threshold | `sh:Info`
+| no cardinality label (presence only), or _confidence_ below the _acceptance threshold_ | `sh:Info`
 | the label was accepted with exceptions (support below 1) | `sh:Warning`
 | the class was read in first-N mode | `sh:Warning`
 | `sh:class` checks types looked up in other graphs | `sh:Warning`
@@ -109,15 +112,35 @@ the first matching row wins:
 
 In the example at threshold 0.95: `ex:Person`/`ex:name` gets `sh:minCount 1` and `sh:datatype
 xsd:string` at `sh:Violation`; `ex:livesIn` gets `sh:maxCount 1` and `sh:class ex:City` at `sh:Info`,
-because only two people in three use it.
+because its confidence (0.67) is below the threshold (0.95). At the default threshold a property
+used by 90 % of instances is therefore also `sh:Info`: the grade says how far the shape can be
+trusted, not how important the property is.
 Validating the example graph against its own shapes therefore reports no violation — the rule every
 generated shapes file keeps.
 
+[#failure-classes]
 == What can go wrong
 
-* *A query times out or fails:* the class is retried, sampled, or recorded as a failure; the report
-  lists failures and the CLI exits 1. See xref:getting-started.adoc#_exit_status[Exit status].
+Every error the SPARQL client meets is put in one class, and each class has one response:
+
+[cols="2,3,3"]
+|===
+| Class | Raised by | Response
+
+| Transient | HTTP 429, 502, 503; connection reset or refused | retried after 1 s, then 4 s; if it persists, treated as a timeout
+| Timeout | the per-query timeout (`timeout_seconds`), HTTP 504, a 500 whose message says "timeout" | the class escalates (exact → first N, under `auto`); a timeout in first-N mode, or under `exact`, is a failure
+| Permanent | HTTP 400, 404, 414, other 4xx and 500s, unreadable responses | a failure at once, no retry, no escalation
+| Unreachable | HTTP 401, 403, 407 | *on the first query only* (listing the graphs): the run stops, nothing is written, the CLI exits 3. Later in the run it concerns that query alone and is a failure.
+|===
+
+So "the endpoint is unreachable" is decided once, at the start: if listing the graphs fails with a
+connection error after its retries, or with an authorisation refusal, the run stops. A refusal or
+timeout later on becomes a recorded failure; the outputs are still written and the CLI exits 1. If
+listing the graphs times out or is rejected, only the default graph is profiled, and that is recorded
+as a failure (unless the graphs were chosen explicitly).
+
 * *An IRI cannot be written in Turtle* (it contains a space or `>`): from 2.1 it is left out of the
-  shapes and the diagram and listed in the document's caveats.
+  shapes and the diagram and listed in the document's caveats. A class whose IRI cannot be put in a
+  SPARQL query at all is skipped and recorded as a failure.
 * *Sampled numbers:* first-N figures describe the first N instances in the store's order, which is not
   a random sample. Every representation says so.

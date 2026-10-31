@@ -25,7 +25,7 @@ print(report)  # report/main.html
 | `output_location` | `str \| Path` | An existing folder; `NotADirectoryError` otherwise.
 | `selected_graphs` | `list[str] \| None` | Graph IRIs to fingerprint, one section each; `""` is the default graph. `None` means the default graph and every named graph.
 | `external_template_location` | `str \| Path \| None` | A custom template folder (below); `None` uses the packaged template.
-| `additional_config` | `dict \| None` | Extra values merged into the template's `conf` (for example `title`); its `collection` key holds collection settings (xref:statistics.adoc#_settings[Settings]).
+| `additional_config` | `dict \| None` | Extra values merged into the template's `conf` (for example `title`); its `collection` key holds collection settings (xref:statistics.adoc#settings[Settings]).
 |===
 
 Returns the `Path` of the main report document. Failed measurements are listed in the report

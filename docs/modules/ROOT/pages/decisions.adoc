@@ -4,7 +4,8 @@
 Each record states one commitment that shapes the code below it. They are grouped by the C4 level
 they constrain (xref:architecture.adoc[Architecture]). `DEC-n` / `P-n` ids point to the OpenSpec
 change that took the decision: `harden-fingerprinter` (2.0, archived) for AD-1 to AD-6,
-`profile-representations` (2.1) for AD-7 to AD-10. Terms are those of the xref:glossary.adoc[Glossary].
+`profile-representations` (2.1) for AD-7 to AD-11. Each record's *Confirmation* names the test,
+scenario or tool run that checks it. Terms are those of the xref:glossary.adoc[Glossary].
 
 [cols="1,4,1,1"]
 |===
@@ -14,7 +15,8 @@ change that took the decision: `harden-fingerprinter` (2.0, archived) for AD-1 t
 | <<ad-2>> | A library with a CLI, not a service | L1 | Accepted (2.0)
 | <<ad-10>> | Generated shapes grade their strength by what the profile knows | L1 | Accepted (2.1)
 | <<ad-3>> | Bounded work per query: staged discovery, class-scoped queries, precision escalation | L2 | Accepted (2.0)
-| <<ad-7>> | The raw profile is saved and is the input of every representation | L2 | Accepted (2.1)
+| <<ad-11>> | Partial results over all-or-nothing | L2 | Accepted (2.0, recorded 2.1)
+| <<ad-7>> | The raw profile is saved and is the input of every later regeneration | L2 | Accepted (2.1)
 | <<ad-4>> | Onion layers with a SPARQL port | L3 | Accepted (2.0)
 | <<ad-5>> | LinkML profile model as the contract | L3 | Accepted (2.0)
 | <<ad-6>> | eds4jinja2 renders from the model; templates do not query | L3 | Accepted (2.0)
@@ -38,7 +40,9 @@ only `SELECT` and `ASK` are sent (DEC-5).
 Consequences::
 * Good: works on every compliant store; needs read access only.
 * Bad: cannot use store shortcuts, so cost is bounded by query design (<<ad-3>>), not engine tricks.
-Confirmation:: e2e tests on Oxigraph; no store-specific syntax in `fingerprint/adapters/queries/`.
+Confirmation:: `tests/e2e/test_queries.py` runs every query template against Oxigraph; the read-only
+rule is structural (`SparqlPort` has only `select` and `ask`). Portability to other stores is checked
+by review of `fingerprint/adapters/queries/*.rq`, not by a test: only one store runs in CI.
 Pros and cons::
 * Store-specific access — good: faster on its store; bad: one code path per store, breaks portability.
 * Dumps — good: no endpoint limits; bad: needs the dump and a store, not "any endpoint".
@@ -54,20 +58,23 @@ Considered options::
 Decision outcome:: Option 1; the service lives in rdf-fingerprinter-ws.
 Consequences::
 * Good: no runtime to operate; one `pip install`.
-* Bad: the public function's signature is a compatibility contract (kept from 1.x, DEC-8 of 2.1).
-Confirmation:: `pyproject.toml` `[project.scripts]`; the 1.x-call scenario in `fingerprint-report`.
+* Bad: the public function's signature is a compatibility contract, kept from 1.x.
+Confirmation:: scenario "A 1.x call still works" (`tests/features/fingerprint_report.feature`).
 Pros and cons::
 * Service — good: shared runs, a UI; bad: deployment and auth for a tool most people run once.
 
 [#ad-10]
 === AD-10 Generated shapes grade their strength by what the profile knows
 
+Level note:: A guarantee to data consumers about what a published shape means, hence L1; it also
+constrains the SHACL generator (<<ad-8>>).
 Context and problem:: A SHACL shape asserts "every instance must…", but a profile knows only what the
 observed instances did — with an acceptance threshold below 1, on a first-N sample, or with object
 types found in other graphs. Shapes that claim more than that reject the very data they came from.
 Considered options::
 . Grade each property shape: `sh:Violation` only for what held on every instance, `sh:Warning` for
-  what held with exceptions or on a sample, `sh:Info` for what most instances lack.
+  what held with exceptions, on a sample or across graphs, `sh:Info` for a property whose confidence
+  is below the acceptance threshold or that has no cardinality label.
 . Emit every accepted constraint at `sh:Violation`.
 . Emit only constraints that held on every instance; drop the rest.
 . Closed shapes (`sh:closed true`).
@@ -78,8 +85,8 @@ Consequences::
 * Good: shapes are usable as-is for validation and as documentation of the usual shape.
 * Good: the threshold a reader chose stays visible in the output.
 * Bad: a consumer must read severities, not just `sh:conforms`.
-Confirmation:: pySHACL conformance test of generated shapes on the source files; the severity
-scenario outline in `profile-representations`.
+Confirmation:: scenarios "Shapes conform on their own data" (pySHACL on the e2e source files) and
+"Severity from the threshold" of the `profile-representations` specification.
 Pros and cons::
 * All at Violation — good: simple; bad: shapes reject their own data whenever the threshold < 1 or
   a class was sampled.
@@ -103,31 +110,59 @@ concurrently, biggest first. A batched exact mode is a follow-up change (`batche
 Consequences::
 * Good: cost grows with the instances read, not with classes × graph size.
 * Bad: first-N figures follow the store's row order, not a random sample; they are labelled as such.
-Confirmation:: every per-class query text binds the class inside its subject source; the escalation
-scenarios in `statistics-collection`.
+Confirmation:: `test_exact_mode_binds_the_class_inside_the_query`
+(`tests/unit/test_adapters_queries.py`); the escalation scenarios of
+`tests/features/statistics_collection.feature`.
 Pros and cons::
 * Global aggregate — good: one query; bad: the first thing to time out.
 * Client-side counting — good: exact; bad: moves the whole graph over HTTP.
 
 [#ad-7]
-=== AD-7 The raw profile is saved and is the input of every representation
+=== AD-7 The raw profile is saved and is the input of every later regeneration
 
 Context and problem:: Collection is the only expensive step, yet in 2.0 every view of a profile needs
 a new collection, and nothing can be re-read later.
 Considered options::
-. Save the raw profile run as `profile.json`; every generator reads it and re-derives the analytics.
+. Save the raw profile run as `profile.json`; any later regeneration reads it and re-derives the
+  analytics. In the same run (`fingerprint --format`) the generators use the run already in memory.
 . Save the analytics.
 . No file; every format collects again.
 Decision outcome:: Option 1 (DEC-1, DEC-2 of `profile-representations`).
 Consequences::
 * Good: one collection, any number of representations, regenerated at will.
 * Good: the acceptance threshold can change without touching the endpoint.
-* Bad: the file format is the profile model's JSON; a model change can make old files unreadable
-  (they fail with a usage error naming the file).
-Confirmation:: the round-trip scenario; generators run with no endpoint reachable.
+* Bad: the file becomes a public format. Rule: it is the JSON of the `fingerprint_stats` model, with
+  a JSON Schema generated from the same LinkML schema and shipped in the package; minor releases
+  only add optional fields, so a 2.x reader loads every 2.x file; a major release may break it. A
+  file that does not match is a usage error naming the file and the `tool_version` it carries.
+Confirmation:: scenarios "Round-trip" and "Rendering without an endpoint" of the
+`profile-representations` specification; `make check-models` also checks the JSON Schema.
 Pros and cons::
 * Save the analytics — good: no re-analysis; bad: freezes the threshold, duplicates derivable data.
 * No file — good: nothing new; bad: the expensive step repeats per format.
+
+[#ad-11]
+=== AD-11 Partial results over all-or-nothing
+
+Context and problem:: On a large endpoint some queries will time out or be refused. Stopping at the
+first failure throws away hours of collection; hiding failures misleads the reader.
+Considered options::
+. Keep going: record each failure with its graph, class, measurement and error, write every output,
+  list the failures in them, and signal partial success (CLI exit 1).
+. Stop at the first failure.
+. Keep going and drop failed measurements silently.
+Decision outcome:: Option 1 (P-5 of `harden-fingerprinter`). The only stop is an endpoint unreachable
+when the run starts. The classes of error and their responses are in
+xref:how-it-works.adoc#failure-classes[How it works].
+Consequences::
+* Good: a long run always yields what it could measure, and says what it could not.
+* Bad: a caller must check for failures (exit 1, or `run.failures` in the library); the 1.x library
+  call returns only a path.
+Confirmation:: scenario outline "Exit status" (`tests/features/fingerprint_report.feature`);
+`test_discovery_failures_are_recorded` (`tests/unit/test_service_layer_collection.py`).
+Pros and cons::
+* Stop at the first failure — good: simple to reason about; bad: one slow class loses the whole run.
+* Drop silently — good: clean output; bad: breaks the honesty driver.
 
 == L3 — Components
 
@@ -143,7 +178,11 @@ Decision outcome:: Option 1 (DEC-1, DEC-7 of `harden-fingerprinter`).
 Consequences::
 * Good: unit tests use a fake port; another SPARQL client touches only `adapters`.
 * Bad: more modules than 1.0's two.
-Confirmation:: `.importlinter` contracts, `make check-architecture`.
+* Known gap in 2.0, closed in 2.1: report rendering and the setting sources (environment, config
+  file) sit in the service layer; they move to adapters, and the SPARQL client becomes an injectable
+  parameter of the service.
+Confirmation:: `make check-architecture` (`.importlinter`: layers, generated-model isolation, pure
+domain; from 2.1 also a service layer that imports no eds4jinja2, rdflib or SPARQLWrapper).
 Pros and cons::
 * Logic in templates — good: tiny code; bad: untestable, untimed, one full scan per class.
 
@@ -159,7 +198,8 @@ never collected.
 Consequences::
 * Good: one contract for every consumer, including `profile.json` (<<ad-7>>).
 * Bad: a code-generation step and a sync check; LinkML is a development dependency.
-Confirmation:: `make check-models`; the frozen-model test.
+Confirmation:: `make check-models`; `test_profile_objects_are_read_only`
+(`tests/unit/test_service_layer_collection.py`).
 Pros and cons::
 * Dataclasses — good: no codegen; bad: no schema to publish or validate a profile file against.
 
@@ -174,7 +214,7 @@ Decision outcome:: Option 1 (DEC-6 of `harden-fingerprinter`).
 Consequences::
 * Good: custom templates keep working; the packaged template is query-free.
 * Bad: eds4jinja2 brings pandas and rdflib.
-Confirmation:: the report test with a SPARQL client that fails on any call.
+Confirmation:: scenario "No queries while rendering" (`tests/features/fingerprint_report.feature`).
 Pros and cons::
 * Plain Jinja2 — good: lighter; bad: breaks every custom template.
 
@@ -195,8 +235,9 @@ Consequences::
 * Good: a new format is one subclass and one template package.
 * Good: every statistic is available to every format.
 * Bad: `serialize()` returns a file → text map (per-graph outputs), unlike LinkML's single string.
-Confirmation:: one base class in `fingerprint/service_layer/generators/base.py`; one
-`fingerprint-gen-*` command per format.
+Confirmation:: scenario "Custom template package" of the `profile-representations` specification;
+`make check-architecture` (generators import no rendering library: rendering is the template
+renderer adapter's).
 Pros and cons::
 * LinkML's generators — good: many formats for free; bad: statistics survive only as annotations,
   and its PlantUML rendering calls a remote server.
@@ -213,15 +254,18 @@ Considered options::
 . Every format is an eds4jinja2 template package; Turtle-safe filters for IRIs and strings; the
   generated Turtle is parsed before anything is written.
 . Build SHACL as an rdflib graph and serialise it; templates only for text formats.
-Decision outcome:: Option 1 (developer, 2026-10-31; DEC-4 of `profile-representations`). Rendering
-uses the builder's Jinja environment, not `make_document()`, which writes one file and writes it
+Decision outcome:: Option 1 (developer, 2026-10-31; DEC-4 of `profile-representations`). Rendering,
+the check and the writes live in one adapter, the template renderer, shared with the report; it uses
+the builder's Jinja environment, not `make_document()`, which writes one file and writes it
 unchecked.
 Consequences::
 * Good: one rendering engine; a custom template package works the same way for every format.
 * Bad: escaping is ours: IRIs shortened only when the result is a valid Turtle name, unwritable IRIs
   skipped and reported.
 * Bad: relies on `ReportBuilder.template_env`, guarded by a test.
-Confirmation:: the parse check; golden files; the unusual-IRI scenarios.
+Confirmation:: scenarios "Unusual IRIs stay valid", "An IRI that cannot be written is skipped, not
+broken" and "Golden file per format" of the `profile-representations` specification;
+`test_report_builder_exposes_template_env`.
 Pros and cons::
 * rdflib graph — good: escaping is correct by construction; bad: SHACL not customisable by template,
   two rendering paths.

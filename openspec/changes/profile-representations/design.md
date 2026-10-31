@@ -41,9 +41,10 @@ Where the difficulty sits, so effort and review go there:
 | Part | Difficulty | Why |
 |---|---|---|
 | SHACL mapping (task group 4) | high | statistics → constraints: thresholds, samples, cross-graph types, langString; the "conforms on its own data" rule (AD-10) |
-| Turtle and PlantUML escaping (3.1, 3.4) | medium | text templates emit RDF (AD-9); safe local names, unwritable IRIs |
-| Generator base (3.2) | medium | per-graph files through `template_env`, check-then-write |
-| Profile file, threshold override (2.x, 3.3) | low | Pydantic JSON round-trip; `model_copy` |
+| Turtle and PlantUML escaping (3.2, 3.5) | medium | text templates emit RDF (AD-9); safe local names, unwritable IRIs |
+| Template renderer and generator (2.2, 3.3) | medium | per-graph files through `template_env`, check-then-write, shared with the report |
+| Layer clean-up of 2.0 (2.0–2.3) | low–medium | moves only; existing tests must stay green |
+| Profile file, threshold override (3.0, 3.4) | low | Pydantic JSON round-trip; `model_copy` |
 | PlantUML, document (5, 6) | low | layout over a prepared view |
 | Commands (7) | low | click wiring, exit codes as 2.0 |
 
@@ -59,11 +60,14 @@ eds4jinja2 itself.
 
 ## Decisions
 
-- **P-1 Render through `template_env`, write ourselves.** A generator builds a `ReportBuilder` for its
-  template package (config + filters + `conf`) and renders `builder.template_env.get_template(builder.template)`
-  with a `view` variable, once per graph or once in all; `conf.profile` (the analytics) is also set,
-  as for the report, so custom templates may read the whole profile. `serialize()` returns the texts; `write()`
-  checks and writes them. Rejected: `make_document()` (one file, written before the check, DEC-4);
+- **P-1 Render through `template_env`, write ourselves — in one adapter.** The *template renderer*
+  (`fingerprint/adapters/template_renderer.py`) builds a `ReportBuilder` for a template package
+  (config + filters + `conf`), renders `builder.template_env.get_template(builder.template)` with a
+  `view` variable, checks texts (Turtle parse) and writes files, check-then-write. `conf.profile` (the
+  analytics) is also set, as for the report, so custom templates may read the whole profile. The
+  report's `render_report` delegates to the same adapter, which takes eds4jinja2 out of the service
+  layer (AD-4 gap). Generators receive the renderer through a `TemplateRenderer` protocol (as
+  collection receives `SparqlPort`), so their tests need no files. Rejected: `make_document()` (one file, written before the check, DEC-4);
   patching eds4jinja2 (EPIC rabbit-hole).
 - **P-2 LinkML shape, adapted to many files.** `Generator.serialize() -> dict[str, str]` maps a file
   name to its text (LinkML returns one `str`; a per-graph format needs several). The base class walks
@@ -108,10 +112,24 @@ eds4jinja2 itself.
   default graph, else the graph IRI's last non-empty path segment lower-cased to `[a-z0-9-]` (max 40
   chars) + `-` + the first 8 hex of its SHA-1. The document lists file ↔ graph. One document:
   `profile.html`.
-- **P-12 Where code lives.** `fingerprint/service_layer/generators/` (`base.py`, `filters.py`,
-  `shacl.py`, `plantuml.py`, `document.py`, `__init__.py` with `GENERATORS = {"shacl": …, "puml": …, "doc": …}`);
-  `fingerprint/adapters/profile_file.py`; `fingerprint/entrypoints/cli/generate.py` (the three
-  commands); template packages `fingerprint_report_templates/{shacl_shapes,plantuml_diagram,profile_document}/`
+- **P-12 Where code lives** (cosmic-python: I/O at the edges, services orchestrate, CLI only parses).
+  | Module | Holds |
+  |---|---|
+  | `fingerprint/domain/iri.py` | `to_iriref` (existing), `to_turtle_term(iri, prefixes)`, `turtle_string` — pure rules |
+  | `fingerprint/domain/exceptions.py` | `IriRefError` (moved) |
+  | `fingerprint/adapters/template_renderer.py` | `JinjaTemplateRenderer`: eds4jinja2 rendering, prefixes file loading, Turtle check (rdflib), check-then-write |
+  | `fingerprint/adapters/profile_file.py` | `save_profile`, `load_profile` |
+  | `fingerprint/adapters/settings_sources.py` | `load_config_file` (moved), `environment()` |
+  | `fingerprint/adapters/exceptions.py` | the SPARQL error classes (moved), `ProfileFileError`, `GeneratedOutputError` |
+  | `fingerprint/service_layer/generators/generator.py` | `Generator` (hooks, view, `serialize(renderer)`), `TemplateRenderer` protocol |
+  | `fingerprint/service_layer/generators/{shacl,plantuml,document}.py` + `__init__.py` | the three generators, `GENERATORS = {"shacl": …, "puml": …, "doc": …}` |
+  | `fingerprint/service_layer/representations.py` | `generate_representations(run, output, formats, *, threshold=None, template=None, renderer=None) -> list[Path]` and `generate_from_profile_file(path, …)` |
+  | `fingerprint/service_layer/exceptions.py` | `UsageError` (moved) |
+  | `fingerprint/entrypoints/cli/generate.py` | the three commands: parse, call `generate_from_profile_file`, map exceptions to exit codes |
+
+  Moved names stay importable from their old modules (they import them), so callers and tests keep
+  working. `.importlinter` gains a contract: `fingerprint.service_layer` imports no `eds4jinja2`,
+  `rdflib` or `SPARQLWrapper`; `fingerprint.domain.exceptions` joins the `generated` contract list. template packages `fingerprint_report_templates/{shacl_shapes,plantuml_diagram,profile_document}/`
   (each `config.json` + `templates/`). rdflib becomes a declared runtime dependency (already installed
   via eds4jinja2) for the Turtle check; pySHACL joins the `test` group.
 - **P-13 Exit codes.** Generator commands: 0 written; 2 usage (profile file, threshold, output folder,
@@ -123,9 +141,20 @@ eds4jinja2 itself.
   `template_flavour_syntax` (eds4jinja2's default syntax, no `#` line statements, so Turtle comments
   survive); the document package sets `html`. A custom package's choice is its own; the Turtle parse
   check still guards SHACL.
-- **P-15 Service signature.** `fingerprint_report(…, formats: Sequence[str] = ())` keyword-only and
-  appended; it still returns `(report_path, run)`. `generate_endpoint_fingerprint_report` passes no
+- **P-15 Service signature.** `fingerprint_report(…, formats: Sequence[str] = (), sparql: SparqlPort | None = None)`
+  keyword-only and appended; `sparql` defaults to `SparqlWrapperClient` (DIP; the 1.x function is
+  unchanged); it still returns `(report_path, run)`. `generate_endpoint_fingerprint_report` passes no
   formats.
+
+- **P-16 The profile file is a published format** (AD-7). `make generate-models` also runs
+  `gen-json-schema` on `model/fingerprint_stats.yaml` into `fingerprint/domain/generated/profile_run.schema.json`
+  (shipped in the wheel; `make check-models` diffs it too). Compatibility rule: 2.x minor releases only
+  add optional fields; `load_profile` names the file and the `tool_version` it carries when it does
+  not match.
+- **P-17 Gates that back the method.** `make test` gains `--cov-fail-under=80` (today 97 %). Every
+  feature scenario, 2.0 ones included, is tagged with its use case (`@uc_w1`, `@uc_b1_1`, …,
+  `@uc_b2_2`; pytest-bdd turns tags into markers, registered in `pytest.ini` because of
+  `--strict-markers`).
 
 ## Algorithm / approach
 
@@ -133,35 +162,40 @@ eds4jinja2 itself.
 
 ```
 fingerprint -e URL -o out --format shacl          fingerprint-gen-shacl out/profile.json -o out2 --threshold 0.9
-  collect → run                                     load_profile → run → with_threshold(run, 0.9)
-  analyse(run) → render_report → out/main.html      analyse(run) → ShaclGenerator(analytics, …)
-  save_profile(run) → out/profile.json              .write(out2) → serialize() → check → files
-  ShaclGenerator(analytics).write(out)
+  fingerprint_report(…, formats=["shacl"])          generate_from_profile_file(path, out2, ["shacl"], threshold=0.9)
+    collect → run                                     load_profile → run
+    render_report(analyse(run)) → out/main.html       generate_representations(run, out2, ["shacl"], threshold=0.9)
+    save_profile(run) → out/profile.json                with_threshold → analyse → ShaclGenerator(analytics)
+    generate_representations(run, out, ["shacl"])       .serialize(renderer) → renderer.write(out2, texts)
 ```
 
-`fingerprint_report` (service) saves the profile after rendering the report and then runs the chosen
-generators; `generate_endpoint_fingerprint_report` passes no formats, so it only gains `profile.json`.
+The CLI only parses and maps exceptions to exit codes; every step is a service call. Formats run in
+the order given; each generator's texts are all checked before any of its files is written, so a
+failure leaves that format's files unwritten and keeps those of formats finished before it.
 
-### Generator base (P-1, P-2)
+### Generator (P-1, P-2)
 
 ```python
-class Generator:
-    template_package: ClassVar[Path]          # packaged default
+class TemplateRenderer(Protocol):                 # implemented by adapters.template_renderer
+    def render(self, package: Path, view: dict, analytics, autoescape: bool) -> str: ...
+    def write(self, folder: Path, texts: dict[str, str], check: str | None) -> list[Path]: ...  # check="turtle"
+
+class Generator:                                  # service_layer/generators/generator.py
+    template_package: ClassVar[Path]              # packaged default
     per_graph: ClassVar[bool]
-    file_name: ClassVar[str]                  # "shapes-{slug}.ttl" | "profile.html"
-    autoescape: ClassVar[bool] = False        # True only for the document
+    file_name: ClassVar[str]                      # "shapes-{slug}.ttl" | "profile.html"
+    autoescape: ClassVar[bool] = False            # True only for the document
+    check: ClassVar[str | None] = None            # "turtle" for SHACL
 
     def __init__(self, analytics, template_location=None): ...
     def visit_graph(self, graph) -> dict | None: ...
     def visit_class(self, graph, cls) -> dict | None: ...
     def visit_property(self, graph, cls, prop) -> dict | None: ...
-    def view(self) -> list[dict]: ...         # graph dicts, each with "classes", each with "properties"
-    def serialize(self) -> dict[str, str]: ...# render template per graph view or once with all
-    def check(self, name, text) -> None: ...  # SHACL: rdflib parse, else GeneratedOutputError
-    def write(self, folder) -> list[Path]: ...# serialize, check every text, then write all
+    def view(self) -> list[dict]: ...             # graph dicts, each with "classes", each with "properties"
+    def serialize(self, renderer) -> dict[str, str]: ...  # file name → text
 ```
 
-`write` checks every text before writing any, so a failure leaves no partial output. Rendering is
+`renderer.write` checks every text before writing any, so a failure leaves no partial output of that format. Rendering is
 pure; running a generator twice over the same profile overwrites with identical bytes (idempotent).
 Order is deterministic: graphs as in the profile, classes and properties sorted by IRI.
 
@@ -270,7 +304,7 @@ render time, so the golden file is stable.
 - [Turtle from text templates is fragile] → filters for every IRI and string, a parse check on every
   output, golden files, hostile-value scenarios.
 - [`template_env`/`template` are attributes, not a documented eds4jinja2 contract, and eds4jinja2 is
-  a range `>=2.0.0,<3`] → one wrapper in `base.py`; the guard test
+  a range `>=2.0.0,<3`] → one wrapper in `adapters/template_renderer.py`; the guard test
   `test_report_builder_exposes_template_env` fails loudly if a 2.x release renames them.
 - [`sh:class` fails when the data graph lacks the objects' types] → classes only when no object is
   untyped; the `any_graph` comment; conformance is tested on the source data.

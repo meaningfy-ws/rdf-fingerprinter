@@ -2,30 +2,33 @@
 = UC-B1.2: Fingerprint from an embedding application
 
 *Use Case Level:* Blue (User-goal) +
-*Primary Actor:* Embedding application +
-*Supporting Actors:* Public function `generate_endpoint_fingerprint_report` (1.x signature); Settings resolver; Collector; Analyser; Report renderer; Profile file adapter (2.1) +
+*Primary Actor:* Requester (an embedding application) +
+*Supporting Actors:* Public function (the 1.x call); Settings resolver; Collector; SPARQL client; Analyser; Template renderer; Profile store (2.1) +
 *Scope:* rdf-fingerprinter — library API
 
-This Blue use case refines xref:use-cases/ucw1.adoc#uc-w1[UC-W1: Fingerprint an endpoint]. The shared contract
-is stated there. This page states only how the library call realises it.
+This Blue use case refines xref:use-cases/ucw1.adoc[UC-W1: Fingerprint an endpoint]. The
+shared contract is stated there. This page states only how the library call realises it.
 
 == Brief Description
 
-The embedding application calls the 1.x function with an endpoint and an output folder, optionally
-graphs, a custom template folder and constants. Collection settings travel in
-`additional_config["collection"]`. The function returns the path of the report.
+The embedding application calls `generate_endpoint_fingerprint_report` with an endpoint and an
+output folder, optionally graphs, a custom template folder and constants. Collection settings travel
+in `additional_config["collection"]`. The function returns the path of the report.
 
 == Success Guarantee (Postconditions)
 
 This Blue path adds only:
 
-. The return value is the path of the main report document, as in 1.x.
+. The return value is the path of the main report document, as in 1.x. It does not say whether
+  failures were recorded: they show in the report's collection section and in the WARNING log. A
+  caller that must act on them uses the separate steps (`collect`, `analyse`, `render_report`), whose
+  run carries `failures` (xref:api-reference.adoc[API reference]).
 . A custom template folder renders the report instead of the packaged one, with the constants in its context.
 
 == Minimal Guarantees (On Failure)
 
-. An exception instead of an exit code: `NotADirectoryError` for a missing output folder, a usage
-  error for invalid settings, the endpoint error when unreachable.
+. Exceptions instead of exit codes: `NotADirectoryError` for a missing output folder, a usage error
+  for an invalid setting, `EndpointUnreachable` when the endpoint is unreachable at the start.
 . Importing the library has no logging side effects.
 
 == Extensions
@@ -35,3 +38,8 @@ This Blue path adds only:
 == Special Requirements
 
 * The signature is a compatibility contract (xref:decisions.adoc#ad-2[AD-2]).
+
+== Technology and Data Variations
+
+An environment variable `RDF_FINGERPRINTER_<NAME>` set in the calling process overrides the same
+key in `additional_config["collection"]` (xref:statistics.adoc#precedence[Settings]).

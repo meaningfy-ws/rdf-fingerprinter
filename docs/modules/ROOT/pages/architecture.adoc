@@ -8,7 +8,7 @@ structured. It describes release 2.0 (OpenSpec change `harden-fingerprinter`) an
 Reading guide::
 * xref:how-it-works.adoc[How it works] — what a run does, with a worked example.
 * xref:use-cases/index.adoc[Use cases] — the behavioural contract (White) and its realisations (Blue).
-* xref:decisions.adoc[Architecture decisions] — why it is built this way (AD-1 to AD-10).
+* xref:decisions.adoc[Architecture decisions] — why it is built this way (AD-1 to AD-11).
 * xref:glossary.adoc[Glossary] — the terms all of these use.
 * `openspec/specs/` — the normative requirements, with scenarios.
 
@@ -51,76 +51,100 @@ covering the whole graph.
 ----
 
 Services offered::
-* *Fingerprint an endpoint* — profile + report (xref:use-cases/ucw1.adoc#uc-w1[UC-W1]), through
-  the `fingerprint` CLI and the function `generate_endpoint_fingerprint_report`.
-* _(2.1)_ *Publish a fingerprint as an application profile* — SHACL, PlantUML, document from a
-  profile (xref:use-cases/ucw2.adoc#uc-w2[UC-W2]), through `fingerprint --format` and the
-  `fingerprint-gen-*` commands.
+* *Fingerprint an endpoint* — profile + report (xref:use-cases/ucw1.adoc[UC-W1]).
+* _(2.1)_ *Publish a fingerprint as an application profile* — SHACL shapes, a class diagram and a
+  specification document from a profile (xref:use-cases/ucw2.adoc[UC-W2]).
+
+Actors and systems are those of the xref:glossary.adoc#actors-and-stakeholders[Glossary]. The
+interfaces that offer these services are listed at L3.
 
 == L2 — Containers
 
-rdf-fingerprinter has no runtime of its own: it runs inside the caller's Python process. The
-containers around it are the *SPARQL endpoint* (external, read-only use) and the *output folder*
-(files). Communication is synchronous HTTP to the endpoint and file writes to the folder. From 2.1
-the output folder is also an input: `profile.json` is read back by the generators, which never
-contact the endpoint.
+[cols="1,2,2"]
+|===
+| Container | Responsibility | Interaction
+
+| *rdf-fingerprinter* (system under design) | Profiles, analyses and renders. Has no runtime of its own: it runs inside the caller's process (a shell or an embedding application). | —
+| *SPARQL endpoint* (external) | Holds the data. | read-only, synchronous request–response from rdf-fingerprinter
+| *Output folder* (files) | Holds the outputs; _(2.1)_ also the saved profile, read back for later regenerations. | written by rdf-fingerprinter; _(2.1)_ `profile.json` read back
+|===
+
+From 2.1 the generators never contact the endpoint (xref:decisions.adoc#ad-7[AD-7]).
 
 == L3 — Components (inside the library)
 
 [cols="1,2,2"]
 |===
-| Layer (package) | Responsibility | May import
+| Layer (package) | Components | May import
 
-| `fingerprint.entrypoints` (`cli`)
-| Parse options, configure logging, call the service layer, map outcomes to exit codes 0 (clean), 1 (failures recorded), 2 (usage), 3 (endpoint unreachable), 4 (unexpected error). _(2.1)_ the `fingerprint-gen-*` commands and `--format`.
+| `fingerprint.entrypoints`
+| Command line: the `fingerprint` command; _(2.1)_ `--format` and the `fingerprint-gen-*` commands.
+Parses options, configures logging, maps outcomes to exit codes.
 | service layer, adapters, domain
 
 | `fingerprint.service_layer`
-| Settings precedence; the collection algorithm (discovery, per-class queries, precision
-escalation, concurrency); report rendering through eds4jinja2; the public function. _(2.1)_
-`generators/`: the `Generator` base (visit hooks, serialize, check, write) and the SHACL,
-PlantUML and document generators.
+| Public function (`generate_endpoint_fingerprint_report`); Settings resolver; Collector; report
+orchestration; _(2.1)_ Generators (one per format, building its view) and the
+`generate_representations` service the generator commands call.
 | adapters, domain
 
 | `fingerprint.adapters`
-| `SparqlPort` and its SPARQLWrapper implementation (timeout, retry, failure classes); the query
-templates (`queries/*.rq`). _(2.1)_ `profile_file`: save and load `profile.json`.
+| SPARQL client (`SparqlPort` and its SPARQLWrapper implementation) and the query templates;
+_(2.1)_ Template renderer (eds4jinja2 rendering, Turtle check, file writes, shared by the report and
+the generators), Profile store (`profile.json`), setting sources (environment, config file).
 | domain
 
 | `fingerprint.domain`
-| The profile model (generated from LinkML), IRI guard, all analytics
-— pure functions, no I/O.
-| nothing above it; no SPARQLWrapper, eds4jinja2 or click
+| Profile model (generated from LinkML); Analyser; IRI rules (SPARQL and, from 2.1, Turtle).
+Pure, no I/O.
+| nothing above it; no I/O library
 
 | `fingerprint_report_templates`
-| Packaged eds4jinja2 template packages: `fingerprint_report` and _(2.1)_ `shacl_shapes`,
-`plantuml_diagram`, `profile_document`; render the analytics or the generator's view; issue no queries.
+| Template packages: `fingerprint_report`; _(2.1)_ `shacl_shapes`, `plantuml_diagram`,
+`profile_document`. Lay out what they are given; issue no queries.
 | —
 |===
 
-The layers are enforced by `.importlinter` (`make check-architecture`), including two forbidden
-contracts: the generated module imports no project code, and the domain imports no I/O library.
+Component names are those of the xref:glossary.adoc#components[Glossary], which maps each to its
+module. The layers are enforced by `.importlinter` (`make check-architecture`): the layer order, a
+generated model that imports no project code, a domain that imports no I/O library, and _(2.1)_ a
+service layer that imports no eds4jinja2, rdflib or SPARQLWrapper.
 
 NOTE: 1.x had only `service_layer` and `entrypoints`; its statistics were computed by SPARQL inside
-the templates.
+the templates. In 2.0 report rendering and the setting sources still sit in the service layer; 2.1
+moves them to adapters (xref:decisions.adoc#ad-4[AD-4]).
 
 === Data flow
 
 ----
- CLI / caller ──settings──▶ collect() ──SPARQL──▶ endpoint
+ CLI / caller ──settings──▶ Collector ──SPARQL──▶ endpoint
                                │ profile run (fingerprint_stats)
-                               ├──────────▶ save_profile() ──▶ profile.json          (2.1)
-                               ▼                                   │ load_profile()
-                           analyse()  (domain, pure) ◀─────────────┘ (+ threshold)
+                               ├──────────▶ Profile store ──▶ profile.json            (2.1)
+                               ▼                                 │ (later regenerations)
+                           Analyser (domain, pure) ◀─────────────┘ (+ threshold)
                                │ analytics (fingerprint_analytics)
-                   ┌───────────┴────────────────┐
-                   ▼                            ▼
-           render_report()            Generator.write()                        (2.1)
-           ──eds4jinja2──▶ main.html  visit hooks → view ──eds4jinja2──▶ text
-                                      ──check──▶ shapes-*.ttl, diagram-*.puml, profile.html
+                   ┌───────────┴─────────────────┐
+                   ▼                             ▼
+             report context              Generators: visit hooks → view          (2.1)
+                   └─────────────┬───────────────┘
+                                 ▼
+                 Template renderer (eds4jinja2) ──check──▶ main.html,
+                                 shapes-*.ttl, diagram-*.puml, profile.html (2.1)
 ----
 
 The step-by-step account, with an example, is xref:how-it-works.adoc[How it works].
+
+== L4 — Key abstractions
+
+[cols="1,3"]
+|===
+| Abstraction | Contract
+
+| `SparqlPort` | `select(query) -> rows`, `ask(query) -> bool`; raises one of the error classes of xref:how-it-works.adoc#failure-classes[How it works].
+| `ProfileRun`, `ProfileAnalytics` | The generated, frozen profile model (below).
+| _(2.1)_ `Generator` | `visit_graph` / `visit_class` / `visit_property` build the view; `serialize()` returns file name → text (xref:decisions.adoc#ad-8[AD-8]).
+| Exit codes | 0 clean, 1 failures recorded, 2 usage error, 3 endpoint unreachable at the start, 4 unexpected error.
+|===
 
 === Profile model
 

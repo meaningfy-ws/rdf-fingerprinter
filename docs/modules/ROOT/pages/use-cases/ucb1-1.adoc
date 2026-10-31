@@ -2,41 +2,40 @@
 = UC-B1.1: Fingerprint from the command line
 
 *Use Case Level:* Blue (User-goal) +
-*Primary Actor:* Data steward +
-*Supporting Actors:* CLI (options, logging, exit codes); Settings resolver (precedence and checks); Collector (discovery, per-class queries, escalation, concurrency); SPARQL adapter (timeouts, retries, failure classes); Analyser (pure indicators); Report renderer (eds4jinja2); Profile file adapter (2.1) +
+*Primary Actor:* Requester (a data steward at the command line) +
+*Supporting Actors:* Command line (options, logging, exit codes); Settings resolver (sources and checks); Collector (discovery, per-class queries, escalation, concurrency); SPARQL client (timeouts, retries, error classes); Analyser (indicators); Template renderer (the report); Profile store (2.1) +
 *Scope:* rdf-fingerprinter — `fingerprint` command
 
-This Blue use case refines xref:use-cases/ucw1.adoc#uc-w1[UC-W1: Fingerprint an endpoint]. The guarantees,
-scenarios and business rules are stated there and not restated here. This page states only how the
-command line realises them.
+This Blue use case refines xref:use-cases/ucw1.adoc[UC-W1: Fingerprint an endpoint]. The
+guarantees, scenarios and business rules are stated there and not restated here. This page states
+only how the command line realises them. Components are those of the
+xref:glossary.adoc#components[Glossary].
 
 == Brief Description
 
 `fingerprint -e URL -o FOLDER [options]` hands the options to the settings resolver, the resolved
-settings and a SPARQL adapter to the collector, the raw run to the analyser, and the analytics to
-the report renderer; from 2.1 the profile file adapter saves the raw run. The outcome becomes an
-exit code.
+settings and a SPARQL client to the collector, the raw run to the analyser, and the analytics to the
+template renderer; from 2.1 the profile store saves the raw run. The outcome becomes an exit code.
 
 == Success Guarantee (Postconditions)
 
 This Blue path adds only:
 
-. Exit code 0 when no failure was recorded, 1 when the report was written with failures.
-. A WARNING log line per failure and a summary with the count.
+. Exit code 0 when no failure was recorded, 1 when the outputs were written with failures.
+. A summary log line with the number of failures.
 
 == Minimal Guarantees (On Failure)
 
 . Exit 2 for a usage error (bad option or setting, missing output folder), before any query.
-. Exit 3 when the endpoint is unreachable or refuses authentication.
+. Exit 3 when the endpoint is unreachable at the start (UC-W1 minimal guarantee 1).
 . Exit 4 for an unexpected error.
 
 == Extensions
 
-1a. Unknown or malformed option — click usage error, exit 2. +
-2a. Config file unreadable or holding unknown keys — exit 2, the file named. +
-4a. A query times out — retried, then escalated or recorded (`statistics-collection` spec).
+1a. Unknown or malformed option — usage error, exit 2. +
+2a. Config file unreadable or holding unknown keys — exit 2, the file named.
 
 == Technology and Data Variations
 
-Options override environment variables (`RDF_FINGERPRINTER_*`), which override `--config`, which
-overrides defaults (xref:statistics.adoc#_settings[Settings]).
+Options override environment variables, which override `--config`, which overrides the defaults
+(xref:statistics.adoc#precedence[Settings]).

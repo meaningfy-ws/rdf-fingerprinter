@@ -2,31 +2,31 @@
 = UC-W1: Fingerprint an endpoint
 
 *Use Case Level:* White (Summary) +
-*Primary Actor:* Data steward +
+*Primary Actor:* Requester (a data steward or an embedding application) +
 *Scope:* rdf-fingerprinter
 
 == Stakeholders and Interests
 
-* The data steward requires a profile that says, per class and property, what the data does — and
-  how sure each number is.
+* The requester requires a profile that says, per class and property, what the data does — and how
+  sure each number is.
 * The endpoint operator requires that profiling only reads, and that its load per query stays bounded.
-* An embedding application requires a stable call and an outcome it can act on.
+* An embedding application requires a stable call.
 
 == Brief Description
 
-The data steward names an endpoint and an output folder. rdf-fingerprinter profiles the default
-graph and every named graph (or the graphs chosen), class by class, and writes a statistics report
-and, from 2.1, the profile file. Every number states its precision: exact, or a first-N sample.
-Partial results are kept and reported, never hidden.
+The requester names an endpoint and an output folder. rdf-fingerprinter profiles the default graph
+and every named graph (or the graphs chosen), class by class, and writes a statistics report and,
+from 2.1, the profile file. Every number states its precision: exact, or a first-N sample. Partial
+results are kept and reported, never hidden.
 
 == Preconditions
 
-* The endpoint answers SPARQL 1.1 `SELECT` queries for the actor.
+* The endpoint answers SPARQL 1.1 `SELECT` and `ASK` queries for the requester.
 * The output folder exists.
 
 == Trigger
 
-The data steward asks for a fingerprint of the endpoint.
+The requester asks for a fingerprint of the endpoint.
 
 == Success Guarantee (Postconditions)
 
@@ -34,41 +34,50 @@ The data steward asks for a fingerprint of the endpoint.
 . Each class shows its precision mode; first-N figures say "first N of M".
 . The settings used are recorded with the report and, from 2.1, the raw profile is saved as `profile.json`.
 . The endpoint received only read queries.
-. The outcome says whether failures were recorded.
+. Every recorded failure is listed in the report with its graph, class and error, and logged at WARNING.
 
 == Minimal Guarantees (On Failure)
 
-. If the endpoint cannot be reached, nothing is written and the outcome names the endpoint (without credentials).
-. If a setting is invalid, nothing is queried and the outcome names the setting.
-. If some measurements fail, the report and profile are still written, every failure is listed with
-  its graph, class and error, and the outcome reports partial success.
+. If the endpoint cannot be reached when the run starts (the graph listing meets a connection error
+  after its retries, or an authorisation refusal), nothing is written and the outcome names the
+  endpoint without credentials.
+. If a setting is invalid or the output folder is missing, nothing is queried and the outcome names the problem.
+. If measurements fail after the start — timeouts, rejections, a refusal of one query — the report
+  and profile are still written, with the failures listed (success guarantee 5).
+. If the graphs cannot be listed for another reason (timeout, rejection), the default graph is still
+  profiled and the gap is recorded as a failure.
 . Credentials in the endpoint URL never appear in outputs or logs.
 
 == Main Success Scenario
 
-. The data steward names the endpoint, the output folder and optional settings.
+. The requester names the endpoint, the output folder and optional settings.
 . The system resolves the settings.
 . The system discovers the graphs and their classes.
 . The system profiles each class exactly.
 . The system derives the analytics.
-. The system writes the report and the profile file and reports success.
+. The system writes the report and the profile file.
 
 == Alternate Scenarios
 
-Sampled class::
-. In step 4 a class is too big to read exactly in time; the system reads its first N instances,
-  marks the class as first-N, and continues.
+Sampled class (policy `auto`)::
+. In step 4 a class's exact query times out; the system reads its first N instances, marks the
+  class as first-N, and continues.
+
+Preview (policy `first_n`)::
+. In step 4 every class is read from its first N instances.
 
 Chosen graphs::
-. In step 3 the data steward named graphs; only those are profiled.
+. In step 3 the requester named graphs; only those are profiled.
 
 == Extensions
 
-2a. A setting is out of range — refused before any query (minimal guarantee 2). +
-3a. The endpoint refuses connections or authentication — stop (minimal guarantee 1). +
-4a. A class fails exactly and on its first N — recorded as a failure; the other classes go on. +
+1a. The output folder does not exist — refused before any query (minimal guarantee 2). +
+2a. A setting is out of range or unknown — refused before any query (minimal guarantee 2). +
+3a. The graph listing meets a connection error or an authorisation refusal — stop (minimal guarantee 1). +
+3b. The graph listing times out or is rejected — default graph only (minimal guarantee 4). +
+4a. A class fails exactly and on its first N, or fails exactly under policy `exact` — recorded as a failure; the other classes go on. +
 4b. A class's instances are blank nodes — each query takes its own first N; the report warns that the sample may differ between queries. +
-6a. The output folder does not exist — refused before any query.
+4c. A class's IRI cannot be written in a query — the class is skipped and recorded as a failure.
 
 == Out of Scope
 
@@ -76,18 +85,20 @@ Chosen graphs::
 
 == Special Requirements
 
-* Read-only (xref:decisions.adoc#ad-1[AD-1]); bounded work per query (xref:decisions.adoc#ad-3[AD-3]).
+* Read-only (xref:decisions.adoc#ad-1[AD-1]); bounded work per query (xref:decisions.adoc#ad-3[AD-3]);
+  partial results over all-or-nothing (xref:decisions.adoc#ad-11[AD-11]).
 * Honesty: no number without its precision; no silent failure.
 
 == Notes and Business Rules
 
 * `rdf:type` is never a property row; types appear as parents and co-types.
 * Analytics are always derived from the raw counts, never collected.
+* Error classes and their responses: xref:how-it-works.adoc#failure-classes[How it works].
 
 == Technology and Data Variations
 
 * Any SPARQL 1.1 store; the default graph may be the union of named graphs on some stores.
-* Settings come from options, environment, a config file or defaults, in that precedence.
+* Settings come from several sources in a fixed order: xref:statistics.adoc#precedence[Settings].
 
 == Frequency of Occurrence
 

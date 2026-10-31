@@ -11,7 +11,7 @@ IRIs are shortened with the prefixes in the template's `prefixes.json` (for exam
 == Per class
 
 Each class shows its number of instances, its precision (`exact` or `first N of M`, see
-xref:statistics.adoc#_precision_modes[Precision modes]) and its parents, declared or implied.
+xref:statistics.adoc#precision-modes[Precision modes]) and its parents, declared or implied.
 
 == Columns
 

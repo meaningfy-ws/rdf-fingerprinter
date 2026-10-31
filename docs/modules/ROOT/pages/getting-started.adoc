@@ -30,7 +30,7 @@ fingerprint -e https://my.endpoint/sparql -o report
 |===
 
 The other options (`--depth`, `--precision`, `--first-n`, `--timeout`, …) are listed in
-xref:statistics.adoc#_settings[Settings].
+xref:statistics.adoc#settings[Settings].
 
 The command writes `main.html` into the folder and logs its progress (one line per graph and per
 class) to stderr. By default it profiles the default graph and every named graph. To use your own
