@@ -41,7 +41,7 @@
 - [x] 7.1 Allow-list of 1.2 empty; only `# dict-ok:` marks remain, each with its reason
 - [x] 7.2 Docs: architecture (L3/L4, data flow), decisions (AD-12 domain objects and configuration; AD-1, AD-6, AD-9 updated for P-5/P-6), how-it-works (error classes on urllib), statistics (the variables table), api-reference (import paths, `GeneratorOptions`); CHANGELOG 2.1.0 (import path, SPARQLWrapper removed and the new request, the variables, stricter per-source settings checks)
 - [x] 7.3 Pre-PR review (five lenses); act on findings
-- [ ] 7.4 `/opsx:archive` (one ADDED/MODIFIED section per delta; check the merged counts); PR #40 ready to merge
+- [x] 7.4 `/opsx:archive` (one ADDED/MODIFIED section per delta; check the merged counts); PR #40 ready to merge
 
 ## Roadmap
 
