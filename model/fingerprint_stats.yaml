@@ -7,7 +7,7 @@ description: |
   and the precision mode actually used. Holds only what was observed; every computed value
   (min, mean, confidence, cardinality labels, ...) lives in the fingerprint_analytics extension.
   Terms reuse VoID where the meaning matches.
-  DRAFT (2026-10-31) — moves to model/ when harden-fingerprinter is implemented.
+  Source of fingerprint/domain/generated/profile.py (make generate-models).
 version: 0.1.0
 license: Apache-2.0
 prefixes:

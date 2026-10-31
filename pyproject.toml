@@ -30,10 +30,12 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
 ]
-# Only what the code imports directly; eds4jinja2 brings pandas, SPARQLWrapper, rdflib (DEC-12).
+# Only what the code imports directly; eds4jinja2 also brings pandas and rdflib.
 dependencies = [
     "eds4jinja2>=2.0.0,<3",
     "click>=8.5.0,<9",
+    "pydantic>=2.10,<3",
+    "SPARQLWrapper>=2.0.0,<3",
 ]
 
 [project.urls]
@@ -48,11 +50,16 @@ test = [
     "beautifulsoup4==4.15.0",
     "pytest==9.1.1",
     "pytest-cov==7.1.0",
+    "pytest-bdd==8.1.0",
 ]
 lint = [
     "ruff==0.17.3",
     "mypy==2.4.1",
     "import-linter==2.15",
+]
+# Development only: generates fingerprint/domain/generated/ from model/*.yaml (P-10).
+model = [
+    "linkml==1.12.1",
 ]
 
 [tool.poetry]
