@@ -77,11 +77,10 @@ classes:
     slot_usage:
       graphs: { range: GraphAnalytics }
 
-  PropertyAnalytics:
-    is_a: PropertyProfile
-    description: Indicators for one property of one class.
+  CardinalityStatistics:
+    mixin: true
+    description: Values per instance of one property of one class, from its cardinality histogram.
     attributes:
-      # from the cardinality histogram
       subjects_with_property: { range: integer, description: "Σ subjects over bins n ≥ 1." }
       subjects_without_property: { range: integer, description: "Observed instances minus subjects with the property (the n = 0 bin)." }
       total_triples: { range: integer, description: "Σ n × subjects." }
@@ -93,13 +92,22 @@ classes:
       mode: { range: integer, description: "Most frequent n." }
       stddev: { range: float, description: "Standard deviation of values per instance." }
       confidence: { range: float, description: "Share of observed instances having the property (QSE confidence, sheXer frequency)." }
+      is_mandatory: { range: boolean, description: "confidence = 1." }
+      is_functional: { range: boolean, description: "max ≤ 1." }
+
+  CardinalityChoice:
+    mixin: true
+    description: The cardinality label accepted at the threshold, its support and the stricter labels rejected.
+    attributes:
       exact_count: { range: integer, description: "n of an exactly_n label." }
       cardinality_label: { range: CardinalityLabel, description: "Accepted cardinality at the acceptance threshold." }
       label_support: { range: float, description: "Share of instances conforming to the accepted label." }
       alternative_labels: { range: CardinalityLabel, multivalued: true, description: "Labels rejected below the threshold, kept for the reader." }
-      is_mandatory: { range: boolean, description: "confidence = 1." }
-      is_functional: { range: boolean, description: "max ≤ 1." }
-      # from value partitions
+
+  ValueIndicators:
+    mixin: true
+    description: Indicators from the value partitions (Q6, Q7) and top values (Q9) of one property.
+    attributes:
       property_kind: { range: PropertyKind, description: "From node kinds of the objects." }
       value_types: { range: uriorcurie, multivalued: true, description: "Datatypes and object classes, most frequent first." }
       dominant_value_type: { range: uriorcurie, description: "The most frequent datatype or object class." }
@@ -108,12 +116,17 @@ classes:
       languages: { multivalued: true, description: "Language tags seen, most frequent first." }
       language_coverage: { range: float, description: "Share of literal triples carrying a language tag." }
       mean_length: { range: float, description: "Mean lexical length of literals." }
-      # diversity
       distinct_ratio: { range: float, description: "Distinct objects ÷ triples (1 = all different)." }
       is_identifier_like: { range: boolean, description: "Label exactly_one and distinct objects equal subjects with the property." }
       is_enumeration_candidate: { range: boolean, description: "Distinct objects ≤ top_k — candidate for sh:in." }
       top_k_share: { range: float, description: "Share of triples covered by the top values." }
       entropy_estimate: { range: float, description: "Shannon entropy estimated from top values plus the remainder." }
+
+  PropertyAnalytics:
+    is_a: PropertyProfile
+    mixins: [CardinalityStatistics, CardinalityChoice, ValueIndicators]
+    description: Indicators for one property of one class.
+    attributes:
       # hierarchy
       inheritance: { range: Inheritance, description: "Own, inherited or refined relative to the parents." }
       # trust

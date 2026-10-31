@@ -21,7 +21,7 @@ _SAFE_LOCAL = re.compile(r"[A-Za-z0-9_](?:[A-Za-z0-9_.-]*[A-Za-z0-9_-])?")
 _STRING_ESCAPES = str.maketrans({"\\": "\\\\", '"': '\\"', "\n": "\\n", "\r": "\\r", "\t": "\\t"})
 
 
-def split_curie(iri: str, prefixes: Mapping[str, str]) -> tuple[str, str] | None:
+def split_curie(iri: str, prefixes: Mapping[str, str]) -> tuple[str, str] | None:  # dict-ok: prefix table
     """(prefix, local part) for the first prefix whose namespace starts the IRI (the report's rule)."""
     for prefix, namespace in prefixes.items():
         if iri.startswith(namespace):
@@ -29,7 +29,7 @@ def split_curie(iri: str, prefixes: Mapping[str, str]) -> tuple[str, str] | None
     return None
 
 
-def turtle_term(iri: str, prefixes: Mapping[str, str]) -> tuple[str, str | None]:
+def turtle_term(iri: str, prefixes: Mapping[str, str]) -> tuple[str, str | None]:  # dict-ok: prefix table
     """`prefix:local` when that is a valid Turtle name, else `<iri>`; also the prefix used, to declare it."""
     iriref = to_iriref(iri)
     found = split_curie(iri, prefixes)
@@ -52,7 +52,7 @@ def turtle_number(value: float | int | bool) -> str:
     return text + "0" if text.endswith(".") else text
 
 
-def curie(iri: str, prefixes: Mapping[str, str]) -> str:
+def curie(iri: str, prefixes: Mapping[str, str]) -> str:  # dict-ok: prefix table
     """For display only: any matching namespace shortens the IRI, whatever its local part."""
     found = split_curie(iri, prefixes)
     return f"{found[0]}:{found[1]}" if found else iri

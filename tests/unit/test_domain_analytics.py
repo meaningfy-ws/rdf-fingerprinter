@@ -1,7 +1,7 @@
 import pytest
 
 from fingerprint.domain.analytics import analyse, cardinality_label, cardinality_statistics
-from fingerprint.domain.profile import ProfileRun
+from fingerprint.domain.profile import CardinalityBin, ProfileRun
 
 EX = "http://example.org/"
 RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label"
@@ -14,6 +14,11 @@ def prop(name, bins=None, **extra):
     if bins is not None:
         profile["cardinality_histogram"] = [{"values_per_subject": n, "subjects": s} for n, s in bins.items()]
     return profile
+
+
+def histogram(bins):
+    """{values per subject: subjects} as the model's histogram."""
+    return [CardinalityBin(values_per_subject=n, subjects=s) for n, s in bins.items()]
 
 
 def cls(name, instances, properties=(), mode="exact", observed=None, co_types=None):
@@ -62,27 +67,27 @@ def props_of(analysed_class):
     ],
 )
 def test_cardinality_statistics_keep_the_1x_meaning(observed, bins, expected):
-    stats = cardinality_statistics(bins, observed)
+    stats = cardinality_statistics(histogram(bins), observed)
     for key, value in expected.items():
-        assert stats[key] == pytest.approx(value), key
+        assert getattr(stats, key) == pytest.approx(value), key
 
 
 def test_median_mode_and_stddev_include_the_zero_bin():
-    stats = cardinality_statistics({1: 2, 2: 1}, 4)  # values 0, 1, 1, 2
-    assert stats["median"] == 1.0
-    assert stats["mode"] == 1
-    assert stats["stddev"] == pytest.approx(0.7071, abs=1e-4)
-    assert stats["subjects_without_property"] == 1
-    assert stats["total_triples"] == 4
+    stats = cardinality_statistics(histogram({1: 2, 2: 1}), 4)  # values 0, 1, 1, 2
+    assert stats.median == 1.0
+    assert stats.mode == 1
+    assert stats.stddev == pytest.approx(0.7071, abs=1e-4)
+    assert stats.subjects_without_property == 1
+    assert stats.total_triples == 4
 
 
 def test_mode_tie_takes_the_smallest_n():
-    assert cardinality_statistics({1: 2, 2: 2}, 4)["mode"] == 1
+    assert cardinality_statistics(histogram({1: 2, 2: 2}), 4).mode == 1
 
 
 def test_no_observed_instances_gives_no_means():
-    stats = cardinality_statistics({}, 0)
-    assert "mean" not in stats and "confidence" not in stats
+    stats = cardinality_statistics([], 0)
+    assert stats.mean is None and stats.confidence is None
 
 
 # --- cardinality label (2.4) ---
@@ -100,15 +105,19 @@ def test_no_observed_instances_gives_no_means():
     ],
 )
 def test_cardinality_label(observed, bins, label, support, alternatives, exact_count):
-    result = cardinality_label(bins, observed, 0.95)
-    assert result["cardinality_label"] == label
-    assert result["label_support"] == pytest.approx(support)
-    assert result["alternative_labels"] == alternatives
-    assert result.get("exact_count") == exact_count
+    result = cardinality_label(histogram(bins), observed, 0.95)
+    assert result.cardinality_label == label
+    assert result.label_support == pytest.approx(support)
+    assert result.alternative_labels == alternatives
+    assert result.exact_count == exact_count
 
 
 def test_exactly_n_picks_the_smallest_qualifying_k():
-    assert cardinality_label({2: 50, 3: 50}, 100, 0.5)["exact_count"] == 2
+    assert cardinality_label(histogram({2: 50, 3: 50}), 100, 0.5).exact_count == 2
+
+
+def test_no_observed_instances_gives_no_label():
+    assert cardinality_label([], 0, 0.95).cardinality_label is None
 
 
 # --- value profile (2.5) ---

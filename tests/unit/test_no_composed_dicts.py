@@ -46,7 +46,7 @@ def _is_table(statement: ast.stmt) -> bool:
 
 class _Finder(ast.NodeVisitor):
     def __init__(self) -> None:
-        self.lines: list[int] = []
+        self.found: list[tuple[int, int, int]] = []  # (first line, last line, line of the statement)
         self.functions = 0
         self.statement: ast.stmt | None = None
         self.exempt: set[int] = set()
@@ -62,18 +62,19 @@ class _Finder(ast.NodeVisitor):
     def _visit_statement(self, node: ast.stmt) -> None:
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             arguments = node.args
+            header = (node.lineno, node.body[0].lineno - 1, node.lineno)  # the signature, however it is wrapped
             for arg in [*arguments.posonlyargs, *arguments.args, *arguments.kwonlyargs]:
                 if _is_dict_type(arg.annotation):
-                    self.lines.append(arg.lineno)
+                    self.found.append((arg.lineno, *header[1:]))
             if _is_dict_type(node.returns):
-                self.lines.append(node.lineno)
+                self.found.append(header)
             self.functions += 1
             self.generic_visit(node)
             self.functions -= 1
             return
         if isinstance(node, ast.AnnAssign) and _is_dict_type(node.annotation):
             if self.functions or not _is_table(node):
-                self.lines.append(node.lineno)
+                self.found.append((node.lineno, node.end_lineno or node.lineno, node.lineno))
         self.generic_visit(node)
 
     def _visit_expression(self, node: ast.AST) -> None:
@@ -84,17 +85,22 @@ class _Finder(ast.NodeVisitor):
         builds = isinstance(node, (ast.Dict, ast.DictComp)) or (isinstance(node, ast.Call) and _is_dict_call(node))
         if builds and id(node) not in self.exempt:
             at_top = not self.functions and self.statement is not None and _is_table(self.statement)
-            if not at_top:
-                self.lines.append(node.lineno)
+            if not at_top and self.statement is not None:
+                self.found.append((node.lineno, node.end_lineno or node.lineno, self.statement.lineno))
         self.generic_visit(node)
 
 
 def offences(source: str) -> list[int]:
-    """Line numbers of the composed dicts in `source`, `# dict-ok:` lines excepted."""
+    """Line numbers of the composed dicts in `source`; a `# dict-ok:` mark on any line of the dict, the
+    signature or the first line of the statement excepts it."""
     finder = _Finder()
     finder.visit(ast.parse(source))
     text = source.splitlines()
-    return sorted({line for line in finder.lines if MARK not in text[line - 1]})
+
+    def marked(first: int, last: int, statement: int) -> bool:
+        return any(MARK in text[line - 1] for line in {*range(first, last + 1), statement})
+
+    return sorted({first for first, last, statement in finder.found if not marked(first, last, statement)})
 
 
 def _allowed() -> dict[str, int]:
@@ -139,6 +145,9 @@ def test_the_allowlist_names_existing_files():
         ("def f(M):\n    return M(**{'class': 1})\n", []),
         ("def f(M, p):\n    return M(**{k: 1 for k in p})\n", []),
         ("def f(p):\n    return {'conf': p}  # dict-ok: eds4jinja2 configuration\n", []),
+        ("def f(\n    p: dict,\n) -> None:  # dict-ok: 1.x API\n    pass\n", []),
+        ("def f(c):\n    return {  # dict-ok: lookup index\n        k: {v: 1 for v in c}\n        for k in c\n    }\n", []),
+        ("def f(c):\n    x = 1  # dict-ok: not this statement\n    return {}\n", [3]),
     ],
 )
 def test_the_check_finds_composed_dicts(source: str, lines: list[int]):

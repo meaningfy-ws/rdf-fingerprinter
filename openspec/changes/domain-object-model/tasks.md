@@ -24,7 +24,7 @@
 
 ## 4. Analytics builds objects
 
-- [ ] 4.1 `domain/analytics.py` helpers return model objects; `drop_none` removed; `domain/iri.py` prefix tables marked as lookup tables; analytics scenarios unchanged (P-8, P-1)
+- [x] 4.1 `domain/analytics.py` helpers return model objects (`CardinalityStatistics`, `CardinalityChoice`, `ValueIndicators`, mixins of `PropertyAnalytics`); `drop_none` removed; `domain/iri.py` prefix tables marked as lookup tables; analytics scenarios unchanged (P-8, P-1)
 
 ## 5. Views and generators
 
@@ -45,7 +45,7 @@
 
 ## Roadmap
 
-- [x] 1.1 · [ ] 1.2 · [ ] 1.3 · [x] 0.1 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [ ] 4.1 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 0.2 · [ ] 6.1 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4
+- [x] 1.1 · [ ] 1.2 · [ ] 1.3 · [x] 0.1 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [x] 4.1 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 0.2 · [ ] 6.1 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4
 
 ## Verification
 

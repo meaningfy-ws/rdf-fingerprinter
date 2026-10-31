@@ -2,15 +2,26 @@
 
 import math
 from collections import defaultdict
-from typing import Any
 
 from fingerprint.domain.profile import (
+    CardinalityBin,
+    CardinalityChoice,
     CardinalityLabel,
+    CardinalityStatistics,
+    ClassAnalytics,
     ClassProfile,
+    GraphAnalytics,
     GraphProfile,
+    Inheritance,
+    NodeKind,
+    ParentClass,
+    ParentSource,
     ProfileAnalytics,
     ProfileRun,
+    PropertyAnalytics,
+    PropertyKind,
     PropertyProfile,
+    ValueIndicators,
 )
 from fingerprint.domain.vocabulary import RDF_LANG_STRING  # noqa: F401 — also importable from here (2.0)
 
@@ -24,11 +35,11 @@ LABEL_PREDICATES = (
 )
 
 _ALTERNATIVES = {
-    "zero_or_more": ["one_or_more", "zero_or_one"],
-    "zero_or_one": ["exactly_one"],
-    "one_or_more": ["exactly_one"],
-    "exactly_n": ["exactly_one"],
-    "exactly_one": [],
+    CardinalityLabel.zero_or_more: [CardinalityLabel.one_or_more, CardinalityLabel.zero_or_one],
+    CardinalityLabel.zero_or_one: [CardinalityLabel.exactly_one],
+    CardinalityLabel.one_or_more: [CardinalityLabel.exactly_one],
+    CardinalityLabel.exactly_n: [CardinalityLabel.exactly_one],
+    CardinalityLabel.exactly_one: [],
 }
 
 
@@ -47,63 +58,71 @@ def _weighted_value_at(counts: list[tuple[int, int]], position: int) -> int:
     raise IndexError(position)
 
 
-def cardinality_statistics(bins: dict[int, int], observed: int) -> dict[str, Any]:
+def _subjects_per_n(histogram: list[CardinalityBin]) -> dict[int, int]:  # dict-ok: lookup index n → subjects
+    return {b.values_per_subject: b.subjects for b in histogram}  # dict-ok: lookup index
+
+
+def cardinality_statistics(histogram: list[CardinalityBin], observed: int) -> CardinalityStatistics:
     """Statistics of values per instance; the n = 0 bin is the observed instances without the property."""
+    bins = _subjects_per_n(histogram)
     with_property = sum(bins.values())
     without = observed - with_property
     total = sum(n * s for n, s in bins.items())
-    stats: dict[str, Any] = {
-        "subjects_with_property": with_property,
-        "subjects_without_property": without,
-        "total_triples": total,
-    }
-    if bins:
-        stats["max"] = max(bins)
-        stats["min"] = 0 if without > 0 else min(bins)
-        stats["is_functional"] = stats["max"] <= 1
-        stats["mean_when_present"] = total / with_property
-    if observed <= 0:
-        return stats
-    counts = sorted({**bins, 0: without}.items()) if without > 0 else sorted(bins.items())
-    mean = total / observed
-    stats.update(
-        mean=mean,
-        confidence=with_property / observed,
-        is_mandatory=with_property == observed,
-        median=(_weighted_value_at(counts, (observed - 1) // 2) + _weighted_value_at(counts, observed // 2)) / 2,
-        mode=min(counts, key=lambda vc: (-vc[1], vc[0]))[0],
-        stddev=math.sqrt(sum(c * (n - mean) ** 2 for n, c in counts) / observed),
+    shape = CardinalityStatistics(
+        subjects_with_property=with_property,
+        subjects_without_property=without,
+        total_triples=total,
+        max=max(bins) if bins else None,
+        min=(0 if without > 0 else min(bins)) if bins else None,
+        is_functional=max(bins) <= 1 if bins else None,
+        mean_when_present=total / with_property if bins else None,
     )
-    return stats
-
-
-def cardinality_label(bins: dict[int, int], observed: int, threshold: float) -> dict[str, Any]:
-    """The accepted cardinality label at the threshold, with its support and the rejected stricter labels."""
     if observed <= 0:
-        return {}
+        return shape
+    counts = sorted([*bins.items(), (0, without)]) if without > 0 else sorted(bins.items())
+    mean = total / observed
+    return shape.model_copy(
+        update={
+            "mean": mean,
+            "confidence": with_property / observed,
+            "is_mandatory": with_property == observed,
+            "median": (_weighted_value_at(counts, (observed - 1) // 2) + _weighted_value_at(counts, observed // 2)) / 2,
+            "mode": min(counts, key=lambda vc: (-vc[1], vc[0]))[0],
+            "stddev": math.sqrt(sum(c * (n - mean) ** 2 for n, c in counts) / observed),
+        }
+    )
+
+
+def cardinality_label(histogram: list[CardinalityBin], observed: int, threshold: float) -> CardinalityChoice:
+    """The accepted cardinality label at the threshold, with its support and the rejected stricter labels;
+    no label without observed instances."""
+    if observed <= 0:
+        return CardinalityChoice()
+    bins = _subjects_per_n(histogram)
 
     def share(subjects: int) -> float:
         return subjects / observed
 
     present = share(sum(bins.values()))
-    result: dict[str, Any]
+    exact_count = None
     if present >= threshold:
         exactly_k = [k for k in sorted(bins) if k > 1 and share(bins[k]) >= threshold]
         if share(bins.get(1, 0)) >= threshold:
-            result = {"cardinality_label": "exactly_one", "label_support": share(bins.get(1, 0))}
+            label, support = CardinalityLabel.exactly_one, share(bins.get(1, 0))
         elif exactly_k:
-            k = exactly_k[0]
-            result = {"cardinality_label": "exactly_n", "label_support": share(bins[k]), "exact_count": k}
+            exact_count = exactly_k[0]
+            label, support = CardinalityLabel.exactly_n, share(bins[exact_count])
         else:
-            result = {"cardinality_label": "one_or_more", "label_support": present}
+            label, support = CardinalityLabel.one_or_more, present
     else:
         at_most_one = share(observed - sum(s for n, s in bins.items() if n > 1))
         if at_most_one >= threshold:
-            result = {"cardinality_label": "zero_or_one", "label_support": at_most_one}
+            label, support = CardinalityLabel.zero_or_one, at_most_one
         else:
-            result = {"cardinality_label": "zero_or_more", "label_support": 1.0}
-    result["alternative_labels"] = list(_ALTERNATIVES[result["cardinality_label"]])
-    return result
+            label, support = CardinalityLabel.zero_or_more, 1.0
+    return CardinalityChoice(
+        cardinality_label=label, label_support=support, exact_count=exact_count, alternative_labels=_ALTERNATIVES[label]
+    )
 
 
 _BOUNDS: dict[str, tuple[int | None, int | None]] = {
@@ -131,25 +150,26 @@ def multiplicity(label: str | None, exact_count: int | None = None) -> str:
     return f"{low or 0}..{'*' if high is None else high}"
 
 
-def _ordered_by_triples(weights: dict[str, int]) -> list[str]:
+def _ordered_by_triples(weights: dict[str, int]) -> list[str]:  # dict-ok: lookup index key → triples
     return sorted(weights, key=lambda key: (-weights[key], key))
 
 
-def value_profile(profile: PropertyProfile, total: int, with_property: int, label: str | None, top_k: int) -> dict[str, Any]:
+def value_profile(profile: PropertyProfile, total: int, with_property: int, label: str | None, top_k: int) -> ValueIndicators:
     """Indicators from value partitions (Q6/Q7) and top values (Q9); absent when those queries did not run."""
-    result: dict[str, Any] = {}
+    indicators = ValueIndicators()
     partitions = profile.value_partitions
     if partitions:
-        literals = [p for p in partitions if p.node_kind == "literal"]
+        literals = [p for p in partitions if p.node_kind == NodeKind.literal]
         literal_triples = sum(p.triples or 0 for p in literals)
-        result["property_kind"] = (
-            "datatype_property" if len(literals) == len(partitions) else "object_property" if not literals else "mixed"
-        )
-        types: dict[str, int] = defaultdict(int)
-        languages: dict[str, int] = defaultdict(int)
+        if len(literals) == len(partitions):
+            kind = PropertyKind.datatype_property
+        else:
+            kind = PropertyKind.object_property if not literals else PropertyKind.mixed
+        types: dict[str, int] = defaultdict(int)  # dict-ok: lookup index value type → triples
+        languages: dict[str, int] = defaultdict(int)  # dict-ok: lookup index language → triples
         untyped = 0
         for p in partitions:
-            if p.node_kind == "literal":
+            if p.node_kind == NodeKind.literal:
                 types[p.datatype or (RDF_LANG_STRING if p.language else "")] += p.triples or 0
                 if p.language:
                     languages[p.language] += p.triples or 0
@@ -159,74 +179,88 @@ def value_profile(profile: PropertyProfile, total: int, with_property: int, labe
                 untyped += p.triples or 0
         types.pop("", None)
         value_types = _ordered_by_triples(types)
-        if value_types:
-            result.update(
-                value_types=value_types,
-                dominant_value_type=value_types[0],
-                type_purity=_ratio(types[value_types[0]], total),
-            )
-        if languages:
-            result["languages"] = _ordered_by_triples(languages)
-        result["untyped_object_ratio"] = _ratio(untyped, total - literal_triples)
-        result["language_coverage"] = _ratio(sum(languages.values()), literal_triples)
-        result["mean_length"] = _ratio(sum(p.total_length or 0 for p in literals), literal_triples)
+        indicators = ValueIndicators(
+            property_kind=kind,
+            value_types=value_types or None,
+            dominant_value_type=value_types[0] if value_types else None,
+            type_purity=_ratio(types[value_types[0]], total) if value_types else None,
+            languages=_ordered_by_triples(languages) or None,
+            untyped_object_ratio=_ratio(untyped, total - literal_triples),
+            language_coverage=_ratio(sum(languages.values()), literal_triples),
+            mean_length=_ratio(sum(p.total_length or 0 for p in literals), literal_triples),
+        )
     if profile.distinct_objects is not None:
-        result["distinct_ratio"] = _ratio(profile.distinct_objects, total)
-        result["is_identifier_like"] = label == "exactly_one" and profile.distinct_objects == with_property
-        result["is_enumeration_candidate"] = profile.distinct_objects <= top_k
+        indicators = indicators.model_copy(
+            update={
+                "distinct_ratio": _ratio(profile.distinct_objects, total),
+                "is_identifier_like": label == CardinalityLabel.exactly_one and profile.distinct_objects == with_property,
+                "is_enumeration_candidate": profile.distinct_objects <= top_k,
+            }
+        )
     if profile.top_values is not None:
         top = [v.triples or 0 for v in profile.top_values]
-        result["top_k_share"] = _ratio(sum(top), total)
         buckets = [t for t in [*top, total - sum(top)] if t > 0]
-        result["entropy_estimate"] = -sum(t / total * math.log2(t / total) for t in buckets) if total else 0.0
-    return {k: v for k, v in result.items() if v is not None}
+        indicators = indicators.model_copy(
+            update={
+                "top_k_share": _ratio(sum(top), total),
+                "entropy_estimate": -sum(t / total * math.log2(t / total) for t in buckets) if total else 0.0,
+            }
+        )
+    return indicators
 
 
-def property_analytics(profile: PropertyProfile, cls: ClassProfile, threshold: float, top_k: int) -> dict[str, Any]:
+def property_analytics(profile: PropertyProfile, cls: ClassProfile, threshold: float, top_k: int) -> PropertyAnalytics:
     """Every property indicator except inheritance, which needs the parents."""
-    raw = profile.model_dump(exclude_none=True)
-    exact = cls.precision_mode != "first_n" and not profile.presence_only
     if profile.presence_only:
-        return {**raw, "is_exact": False}
+        return PropertyAnalytics(**profile.model_dump(exclude_none=True), is_exact=False)
+    exact = cls.precision_mode != "first_n"
     observed = cls.observed_instances or 0
-    bins = {b.values_per_subject: b.subjects for b in profile.cardinality_histogram or []}
-    stats = cardinality_statistics(bins, observed)
-    label = cardinality_label(bins, observed, threshold)
+    histogram = profile.cardinality_histogram or []
+    stats = cardinality_statistics(histogram, observed)
+    choice = cardinality_label(histogram, observed, threshold)
     values = value_profile(
-        profile, stats["total_triples"], stats["subjects_with_property"], label.get("cardinality_label"), top_k
+        profile, stats.total_triples or 0, stats.subjects_with_property or 0, choice.cardinality_label, top_k
     )
-    return {**raw, **stats, **label, **values, "is_exact": exact}
+    return PropertyAnalytics(
+        **profile.model_dump(exclude_none=True),
+        **stats.model_dump(exclude_none=True),
+        **choice.model_dump(exclude_none=True),
+        **values.model_dump(exclude_none=True),
+        is_exact=exact,
+    )
 
 
-def _parents(cls: ClassProfile, declared: dict[str, set[str]]) -> list[dict[str, Any]]:
+def _parents(cls: ClassProfile, declared: dict[str, set[str]]) -> list[ParentClass]:  # dict-ok: lookup index
     observed = cls.observed_instances or 0
-    co_types = {c.class_iri: c.subjects or 0 for c in cls.co_types or [] if c.class_iri}
+    co_types = {c.class_iri: c.subjects or 0 for c in cls.co_types or [] if c.class_iri}  # dict-ok: lookup index
     declared_here = declared.get(cls.class_iri, set())
     implied = {c for c, s in co_types.items() if observed > 0 and s == observed} - declared_here
     return [
-        {"parent": parent, "source": source, "co_type_ratio": _ratio(co_types.get(parent, 0), observed)}
-        for source, parents in (("declared", declared_here), ("implied", implied))
+        ParentClass(parent=parent, source=source, co_type_ratio=_ratio(co_types.get(parent, 0), observed))
+        for source, parents in ((ParentSource.declared, declared_here), (ParentSource.implied, implied))
         for parent in sorted(parents)
     ]
 
 
-def _depth(cls: str, parents: dict[str, set[str]], path: frozenset[str] = frozenset()) -> int:
+def _depth(cls: str, parents: dict[str, set[str]], path: frozenset[str] = frozenset()) -> int:  # dict-ok: lookup index
     """Longest path to a class without parents; a class already on the path ends the branch (cycles)."""
     ups = parents.get(cls, set()) - path - {cls}
     return 1 + max(_depth(p, parents, path | {cls}) for p in ups) if ups else 0
 
 
-def _inheritance(prop: dict[str, Any], parent_props: list[dict[str, dict[str, Any]]]) -> str:
-    candidates = [props[prop["property"]] for props in parent_props if prop["property"] in props]
+def _inheritance(
+    prop: PropertyAnalytics, parent_props: list[dict[str, PropertyAnalytics]]
+) -> Inheritance:  # dict-ok: lookup index
+    candidates = [props[prop.property] for props in parent_props if prop.property in props]
     if not candidates:
-        return "own"
-    if prop.get("presence_only"):
-        return "inherited"
+        return Inheritance.own
+    if prop.presence_only:
+        return Inheritance.inherited
 
-    def key(p: dict[str, Any]) -> tuple:
-        return p.get("cardinality_label"), p.get("dominant_value_type")
+    def key(p: PropertyAnalytics) -> tuple:
+        return p.cardinality_label, p.dominant_value_type
 
-    return "inherited" if any(key(p) == key(prop) for p in candidates) else "refined"
+    return Inheritance.inherited if any(key(p) == key(prop) for p in candidates) else Inheritance.refined
 
 
 def _namespace(iri: str) -> str:
@@ -234,52 +268,54 @@ def _namespace(iri: str) -> str:
     return iri[: cut + 1] if cut >= 0 else iri
 
 
-def graph_analytics(graph: GraphProfile, threshold: float, top_k: int) -> dict[str, Any]:
+def graph_analytics(graph: GraphProfile, threshold: float, top_k: int) -> GraphAnalytics:
     classes = graph.class_partitions or []
-    declared: dict[str, set[str]] = defaultdict(set)
+    declared: dict[str, set[str]] = defaultdict(set)  # dict-ok: lookup index class → declared parents
     for edge in graph.declared_subclass_edges or []:
         declared[edge.sub_class].add(edge.super_class)
 
-    props_by_class = {
-        c.class_iri: {p.property: property_analytics(p, c, threshold, top_k) for p in c.property_partitions or []}
+    props_by_class = {  # dict-ok: lookup index class → property → analytics
+        c.class_iri: {
+            p.property: property_analytics(p, c, threshold, top_k) for p in c.property_partitions or []
+        }  # dict-ok: lookup index
         for c in classes
     }
-    parents_by_class = {c.class_iri: _parents(c, declared) for c in classes}
-    hierarchy: dict[str, set[str]] = {k: set(v) for k, v in declared.items()}
-    hierarchy.update({c: {p["parent"] for p in ps} for c, ps in parents_by_class.items()})
+    parents_by_class = {c.class_iri: _parents(c, declared) for c in classes}  # dict-ok: lookup index
+    hierarchy = {k: set(v) for k, v in declared.items()}  # dict-ok: lookup index class → parents
+    hierarchy.update({c: {p.parent for p in ps} for c, ps in parents_by_class.items()})  # dict-ok: lookup index
     # Classes that are each other's parent are equivalent: not compared, not counted in depth.
     equivalent = {(a, b) for a, ups in hierarchy.items() for b in ups if a in hierarchy.get(b, set())}
-    acyclic = {a: {b for b in ups if (a, b) not in equivalent} for a, ups in hierarchy.items()}
+    acyclic = {a: {b for b in ups if (a, b) not in equivalent} for a, ups in hierarchy.items()}  # dict-ok: lookup index
 
-    analysed_classes: list[dict[str, Any]] = []
+    analysed_classes: list[ClassAnalytics] = []
     for c in classes:
         observed = c.observed_instances or 0
         compared = [props_by_class[p] for p in acyclic.get(c.class_iri, set()) if p in props_by_class]
-        props = [{**p, "inheritance": _inheritance(p, compared)} for p in props_by_class[c.class_iri].values()]
+        props = [
+            p.model_copy(update={"inheritance": _inheritance(p, compared).value}) for p in props_by_class[c.class_iri].values()
+        ]
         analysed_classes.append(
-            {
-                **c.model_dump(exclude_none=True),
-                "property_partitions": props,
-                "parents": parents_by_class[c.class_iri],
-                "hierarchy_depth": _depth(c.class_iri, acyclic),
-                "own_property_count": sum(p["inheritance"] == "own" for p in props),
-                "mandatory_property_count": sum(p.get("confidence") == 1 for p in props),
-                "mean_out_degree": _ratio(sum(p.get("total_triples", 0) for p in props), observed),
-                "label_coverage": max(
-                    [p.get("confidence", 0) for p in props if p["property"] in LABEL_PREDICATES], default=0.0
-                ),
-                "sample_ratio": _ratio(observed, c.instances),
-                "is_exact": c.precision_mode != "first_n" and all(p["is_exact"] for p in props),
-            }
+            ClassAnalytics(
+                **c.model_dump(exclude_none=True, exclude={"property_partitions"}),
+                property_partitions=props,
+                parents=parents_by_class[c.class_iri],
+                hierarchy_depth=_depth(c.class_iri, acyclic),
+                own_property_count=sum(p.inheritance == Inheritance.own for p in props),
+                mandatory_property_count=sum(p.confidence == 1 for p in props),
+                mean_out_degree=_ratio(sum(p.total_triples or 0 for p in props), observed),
+                label_coverage=max([p.confidence or 0 for p in props if p.property in LABEL_PREDICATES], default=0.0),
+                sample_ratio=_ratio(observed, c.instances),
+                is_exact=c.precision_mode != "first_n" and all(p.is_exact for p in props),
+            )
         )
 
-    weights: dict[str, int] = defaultdict(int)
+    weights: dict[str, int] = defaultdict(int)  # dict-ok: lookup index namespace → weight
     properties: set[str] = set()
     for analysed in analysed_classes:
-        weights[_namespace(analysed["class_iri"])] += analysed["instances"]
-        for p in analysed["property_partitions"]:
-            properties.add(p["property"])
-            weights[_namespace(p["property"])] += p.get("total_triples", 0)
+        weights[_namespace(analysed.class_iri)] += analysed.instances
+        for p in analysed.property_partitions or []:
+            properties.add(p.property)
+            weights[_namespace(p.property)] += p.total_triples or 0
     cross_graph = {
         part.object_class_graph
         for c in classes
@@ -292,33 +328,19 @@ def graph_analytics(graph: GraphProfile, threshold: float, top_k: int) -> dict[s
         if graph.distinct_subjects is not None and graph.untyped_subjects is not None
         else None
     )
-    result = {
-        **graph.model_dump(exclude_none=True),
-        "class_partitions": analysed_classes,
-        "class_count": len(analysed_classes),
-        "property_count": len(properties),
-        "typed_subject_ratio": typed,
-        "vocabularies": _ordered_by_triples(weights),
-        "cross_graph_object_types": sorted(cross_graph),
-    }
-    return result
-
-
-def drop_none(value: Any) -> Any:
-    """Absent values are left out, so the generated models see only what was observed or derived."""
-    if isinstance(value, dict):
-        return {k: drop_none(v) for k, v in value.items() if v is not None}
-    if isinstance(value, list):
-        return [drop_none(v) for v in value]
-    return value
+    return GraphAnalytics(
+        **graph.model_dump(exclude_none=True, exclude={"class_partitions"}),
+        class_partitions=analysed_classes,
+        class_count=len(analysed_classes),
+        property_count=len(properties),
+        typed_subject_ratio=typed,
+        vocabularies=_ordered_by_triples(weights),
+        cross_graph_object_types=sorted(cross_graph),
+    )
 
 
 def analyse(run: ProfileRun) -> ProfileAnalytics:
-    """Derive every analytics value from a raw profile; the raw profile is not modified.
-
-    The helpers above hand plain dicts to each other; they are validated once, here, against the
-    generated (frozen) model rather than at every step.
-    """
+    """Derive every analytics value from a raw profile; the raw profile is not modified."""
     threshold, top_k = run.settings.acceptance_threshold, run.settings.top_k
     graphs = [graph_analytics(g, threshold, top_k) for g in run.graphs or []]
-    return ProfileAnalytics.model_validate(drop_none({**run.model_dump(exclude_none=True), "graphs": graphs}))
+    return ProfileAnalytics(**run.model_dump(exclude_none=True, exclude={"graphs"}), graphs=graphs)
