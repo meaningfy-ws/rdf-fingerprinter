@@ -92,7 +92,8 @@ def render(
 
 def _split_check(query: str) -> tuple[str, str]:
     """(prologue, body): the check's PREFIX/BASE lines, and the rest without its header comments."""
-    prologue, body = [], []
+    prologue: list[str] = []
+    body: list[str] = []
     for line in query.splitlines():
         stripped = line.strip()
         if not body and (not stripped or stripped.startswith("#")):

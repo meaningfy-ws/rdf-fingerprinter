@@ -1,11 +1,11 @@
 """FakeSparql: the real client's classification and retries over an in-memory rdflib store (P-2, P-8)."""
 
-import rdflib.plugins.sparql
 import json
 import threading
 from collections.abc import Callable
 from typing import Any
 
+import rdflib.plugins.sparql
 from rdflib import BNode, Dataset, Literal, URIRef
 
 from fingerprint.adapters.sparql import SparqlHttpClient, query_name

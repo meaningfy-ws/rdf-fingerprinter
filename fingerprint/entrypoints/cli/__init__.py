@@ -10,7 +10,7 @@
 import logging
 
 # Exit codes of every command (P-7, P-13); 2 is click's usage error.
-EXIT_FAILURES, EXIT_UNREACHABLE, EXIT_UNEXPECTED = 1, 3, 4
+EXIT_FAILURES, EXIT_UNREACHABLE, EXIT_UNEXPECTED, EXIT_PITFALLS = 1, 3, 4, 5
 
 
 def configure_logging() -> None:

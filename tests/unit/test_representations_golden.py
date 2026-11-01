@@ -24,24 +24,33 @@ SH = Namespace("http://www.w3.org/ns/shacl#")
 SOURCE = {"default": "continents", "continents": "continents", "treaties": "treaties"}
 
 
-def texts(name, threshold=None):
-    run = load_profile(DATA / "profiles" / "sample-profile.json")
+def texts(name, threshold=None, profile="sample-profile.json"):
+    run = load_profile(DATA / "profiles" / profile)
     if threshold is not None:
         run = with_threshold(run, threshold)
     return files(make_generator(name, analyse(run), JinjaTemplateRenderer()).serialize())
 
 
-@pytest.mark.parametrize("name", sorted(GENERATORS))
-def test_golden_output(name):
-    produced = texts(name)
+def check_golden(produced, folder):
     stem = next(iter(produced)).split("-")[0].split(".")[0]
     if os.environ.get("UPDATE_GOLDEN"):
-        GOLDEN.mkdir(exist_ok=True)
+        folder.mkdir(exist_ok=True)
         for file_name, text in produced.items():
-            (GOLDEN / file_name).write_text(text, encoding="utf-8")
-    assert set(produced) == {p.name for p in GOLDEN.iterdir() if p.name.startswith(stem)}
+            (folder / file_name).write_text(text, encoding="utf-8")
+    assert set(produced) == {p.name for p in folder.iterdir() if p.is_file() and p.name.startswith(stem)}
     for file_name, text in produced.items():
-        assert text == (GOLDEN / file_name).read_text(encoding="utf-8"), f"{file_name} differs from its golden file"
+        assert text == (folder / file_name).read_text(encoding="utf-8"), f"{file_name} differs from its golden file"
+
+
+@pytest.mark.parametrize("name", sorted(set(GENERATORS) - {"pitfalls"}))  # the sample has no scan results
+def test_golden_output(name):
+    check_golden(texts(name), GOLDEN)
+
+
+@pytest.mark.parametrize("name", ["doc", "pitfalls"])
+def test_golden_output_of_a_scanned_profile(name):
+    """The page's Pitfalls section and the TSV, for the test data scanned with continents as the schema graph."""
+    check_golden(texts(name, profile="scanned-profile.json"), GOLDEN / "scanned")
 
 
 @pytest.mark.parametrize("threshold", [None, 0.5, 0.1])  # None: the profile's own (0.95)

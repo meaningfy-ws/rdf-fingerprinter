@@ -1,4 +1,4 @@
-"""The pitfall catalogue: packaged checks, user checks, validation (pitfall-scans › Pitfall check contract, › The packaged catalogue)."""
+"""The pitfall catalogue: packaged and user checks, validation (pitfall-scans › Pitfall check contract)."""
 
 import pytest
 
@@ -48,7 +48,11 @@ def test_skip_and_an_empty_catalogue(tmp_path):
         (HEADER.format(id="a") + "SELECT ?s ?p ?o WHERE { ?s ?p ?o }\n", "select \\?entity"),
         (HEADER.format(id="a") + "SELECT ?entity ?property ?value WHERE { ?entity\n", "SPARQL"),
         (HEADER.format(id="a") + "# severity: high\n" + SELECT, "unknown header key"),
-        (HEADER.format(id="a") + "SELECT ?entity ?property ?value FROM <http://ex.org/g> WHERE { ?entity ?property ?value }\n", "FROM"),
+        (
+            HEADER.format(id="a")
+            + "SELECT ?entity ?property ?value FROM <http://ex.org/g> WHERE { ?entity ?property ?value }\n",
+            "FROM",
+        ),
     ],
     ids=["no-id", "bad-importance", "insert", "delete", "wrong-variables", "unparsable", "unknown-key", "from-clause"],
 )

@@ -1,0 +1,18 @@
+Level	Rule Name	Subject	Property	Value
+WARN	p35_untyped_property	http://data.europa.eu/eli/ontology#date_document	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	83
+WARN	p35_untyped_property	http://data.europa.eu/eli/ontology#first_date_entry_in_force	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	82
+WARN	p35_untyped_property	http://lemon-model.net/lemon#context	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	205
+WARN	p35_untyped_property	http://lexvo.org/ontology#script	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	398
+WARN	p35_untyped_property	http://publications.europa.eu/ontology/euvoc#endDate	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	1294
+WARN	p35_untyped_property	http://publications.europa.eu/ontology/euvoc#officialJournalDate	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	92
+WARN	p35_untyped_property	http://publications.europa.eu/ontology/euvoc#officialJournalNumber	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	92
+WARN	p35_untyped_property	http://publications.europa.eu/ontology/euvoc#officialJournalSeries	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	92
+WARN	p35_untyped_property	http://publications.europa.eu/ontology/euvoc#signatureLocation	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	76
+WARN	p35_untyped_property	http://publications.europa.eu/ontology/euvoc#startDate	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	4512
+INFO	p34_untyped_class	http://publications.europa.eu/ontology/euvoc#Continent	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	used as a class, not declared
+INFO	p34_untyped_class	http://publications.europa.eu/ontology/euvoc#Treaty	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	used as a class, not declared
+INFO	p34_untyped_class	http://publications.europa.eu/ontology/euvoc#XlNotation	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	used as a class, not declared
+INFO	p34_untyped_class	http://publications.europa.eu/ontology/euvoc#XlNote	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	used as a class, not declared
+INFO	p34_untyped_class	http://www.w3.org/2004/02/skos/core#Concept	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	used as a class, not declared
+INFO	p34_untyped_class	http://www.w3.org/2004/02/skos/core#ConceptScheme	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	used as a class, not declared
+INFO	p34_untyped_class	http://www.w3.org/2008/05/skos-xl#Label	http://www.w3.org/1999/02/22-rdf-syntax-ns#type	used as a class, not declared

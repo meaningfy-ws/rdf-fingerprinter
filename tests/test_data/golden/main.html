@@ -58,6 +58,11 @@ th { font-weight: 600; color: var(--muted); white-space: nowrap; }
 td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .plain { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; }
 .note { color: var(--muted); }
+.badge { display: inline-block; padding: 0 .45rem; border-radius: 999px; font-size: .8rem; font-weight: 600;
+         color: #fff; background: var(--muted); text-decoration: none; }
+.badge.critical { background: #b42318; } .badge.important { background: #b54708; } .badge.minor { background: #475467; }
+details.pitfall { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; margin: .5rem 0; }
+details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: baseline; }
 [hidden] { display: none !important; }
 @media (max-width: 760px) {
   .frame { grid-template-columns: minmax(0, 1fr); }
@@ -1302,7 +1307,10 @@ td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowra
           <tr><td>first_n</td><td>10000</td></tr>
           <tr><td>graph_statistics</td><td>False</td></tr>
           <tr><td>object_type_scope</td><td>same_graph</td></tr>
+          <tr><td>pitfall_examples</td><td>10</td></tr>
+          <tr><td>pitfall_scan</td><td>False</td></tr>
           <tr><td>precision_policy</td><td>auto</td></tr>
+          <tr><td>schema_graphs</td><td>—</td></tr>
           <tr><td>selected_graphs</td><td>—</td></tr>
           <tr><td>timeout_seconds</td><td>60</td></tr>
           <tr><td>top_k</td><td>20</td></tr>
@@ -1329,6 +1337,7 @@ td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowra
   var switches = Array.prototype.slice.call(document.querySelectorAll("input[data-switch]"));
   var classes = Array.prototype.slice.call(document.querySelectorAll("details.cls"));
   var entries = Array.prototype.slice.call(document.querySelectorAll("li[data-anchor]"));
+  var pitfalls = Array.prototype.slice.call(document.querySelectorAll("details.pitfall[data-q]"));
   document.querySelectorAll("[data-js]").forEach(function (el) { el.hidden = false; });
 
   function apply() {
@@ -1353,6 +1362,7 @@ td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowra
         if (anyRow && !own) cls.open = true;
       }
     });
+    pitfalls.forEach(function (p) { p.hidden = !!text && p.dataset.q.indexOf(text) < 0; });
     entries.forEach(function (li) {
       var target = document.getElementById(li.dataset.anchor);
       li.hidden = !target || target.hidden;

@@ -381,3 +381,52 @@ def shapes_fail(monkeypatch):
             raise GeneratedOutputError("shapes-default.ttl is not valid turtle")
 
     monkeypatch.setitem(representations.GENERATORS, "shacl", Failing)
+
+
+# --- pitfalls in the report (pitfall-scans) ---
+
+SCANNED = TEST_DATA / "profiles" / "scanned-profile.json"
+
+
+@given("the scanned test profile")
+def scanned_profile(ctx):
+    ctx["profile"] = load_profile(SCANNED)
+
+
+@then(parsers.parse('the Pitfalls section lists "{check_id}" with its count and examples'))
+def section_lists(ctx, check_id):
+    section = soup(ctx).find(id="pitfalls")
+    entry = section.select_one(f'details.pitfall[id$="-{check_id}"]')
+    count = next(r.count for g in ctx["profile"].graphs for r in g.pitfalls or [] if r.check_id == check_id)
+    assert f"{count} found" in entry.get_text(" ") and entry.select("tbody tr")
+
+
+@then("a class section that the check names shows a badge linking to it")
+def badge(ctx):
+    page = soup(ctx)
+    links = [a for a in page.select("details.cls a.badge") if "p34_untyped_class" in a["href"]]
+    assert links and page.find(id=links[0]["href"][1:]) is not None
+
+
+@given(parsers.parse('a scanned profile whose example value is "{value}"'))
+def scanned_with_value(ctx, value):
+    from fingerprint.domain.profile import PitfallExample, PitfallResult, PitfallTerm
+
+    example = PitfallExample(entity=PitfallTerm(text=EX + "Person", kind="iri"), value=PitfallTerm(text=value, kind="literal"))
+    result = PitfallResult(check_id="x", title="T", importance="minor", scope="data", source="s", count=1, examples=[example])
+    base = profile()
+    ctx["profile"] = base.model_copy(update={"graphs": [g.model_copy(update={"pitfalls": [result]}) for g in base.graphs]})
+    ctx["value"] = value
+
+
+@then("the page shows the value as text and has no script element with it")
+def escaped(ctx):
+    page = soup(ctx)
+    assert ctx["value"] in page.find(id="pitfalls").get_text(" ")
+    assert all("alert(1)" not in s.get_text() for s in page.find_all("script"))
+
+
+@then("the page has no Pitfalls section and no pitfall badge")
+def no_section(ctx):
+    page = soup(ctx)
+    assert page.find(id="pitfalls") is None and not page.select("a.badge")

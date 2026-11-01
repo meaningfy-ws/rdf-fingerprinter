@@ -169,3 +169,21 @@ Feature: The fingerprint report and the command line
       When the fingerprint command runs with the format "shacl"
       Then the output folder holds the report and the profile file
       And it exits with 4
+
+  Rule: Pitfalls in the report
+
+    Scenario: Section and badge
+      Given the scanned test profile
+      When the report is rendered
+      Then the Pitfalls section lists "p34_untyped_class" with its count and examples
+      And a class section that the check names shows a badge linking to it
+
+    Scenario: Pitfall values are escaped
+      Given a scanned profile whose example value is "<script>alert(1)</script>"
+      When the report is rendered
+      Then the page shows the value as text and has no script element with it
+
+    Scenario: No scan, no section
+      Given the readability test profile
+      When the report is rendered
+      Then the page has no Pitfalls section and no pitfall badge

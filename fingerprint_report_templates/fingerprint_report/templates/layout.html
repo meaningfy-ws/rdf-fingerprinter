@@ -61,6 +61,11 @@ th { font-weight: 600; color: var(--muted); white-space: nowrap; }
 td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .plain { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; }
 .note { color: var(--muted); }
+.badge { display: inline-block; padding: 0 .45rem; border-radius: 999px; font-size: .8rem; font-weight: 600;
+         color: #fff; background: var(--muted); text-decoration: none; }
+.badge.critical { background: #b42318; } .badge.important { background: #b54708; } .badge.minor { background: #475467; }
+details.pitfall { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; margin: .5rem 0; }
+details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: baseline; }
 [hidden] { display: none !important; }
 @media (max-width: 760px) {
   .frame { grid-template-columns: minmax(0, 1fr); }

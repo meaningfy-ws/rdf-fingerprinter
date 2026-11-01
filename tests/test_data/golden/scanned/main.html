@@ -1,0 +1,624 @@
+<!doctype html><html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="rdf-fingerprinter">
+<title>RDF fingerprint</title>
+<style>
+:root {
+  --paper: #f6f7f5; --panel: #ffffff; --ink: #1d2422; --muted: #5c6764; --rule: #d8ddda; --accent: #1f6b73;
+  --chip-l: 36%; --chip-s: 52%;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --paper: #141a19; --panel: #1b2321; --ink: #e3e9e6; --muted: #98a4a0; --rule: #2d3734; --accent: #74c4cc;
+          --chip-l: 72%; --chip-s: 48%; }
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 4.5rem; }
+body { margin: 0; background: var(--paper); color: var(--ink);
+       font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center;
+       padding: .7rem 1rem; background: var(--panel); border-bottom: 1px solid var(--rule); }
+.bar h1 { margin: 0; font-size: 1.05rem; font-weight: 650; }
+.bar h1 small { font-weight: 400; color: var(--muted); }
+.bar input[type=search] { flex: 1 1 14rem; max-width: 26rem; padding: .4rem .6rem; font: inherit; color: inherit;
+       background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; }
+.count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.frame { display: grid; grid-template-columns: 17rem minmax(0, 1fr); gap: 0 2rem; max-width: 92rem; margin: 0 auto; padding: 0 1rem; }
+nav { position: sticky; top: 3.6rem; align-self: start; max-height: calc(100vh - 3.6rem); overflow: auto; padding: 1rem 0 2rem;
+      font-size: .9rem; }
+nav ul { list-style: none; margin: 0; padding: 0 0 0 .75rem; }
+nav li { margin: .1rem 0; overflow-wrap: anywhere; }
+nav summary { cursor: pointer; font-weight: 600; margin-top: .6rem; }
+nav .group { color: var(--muted); margin-top: .35rem; }
+nav fieldset { border: 0; padding: 0; margin: 1.25rem 0 0; }
+nav legend { font-weight: 600; padding: 0; margin-bottom: .3rem; }
+nav label { display: flex; gap: .4rem; align-items: center; }
+main { padding: 1rem 0 4rem; min-width: 0; }
+h2 { font-size: 1.3rem; margin: 2.2rem 0 .6rem; padding-bottom: .3rem; border-bottom: 1px solid var(--rule); }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: .75rem; margin: 0; }
+.facts div { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: .6rem .8rem; }
+.facts dt { color: var(--muted); font-size: .85rem; }
+.facts dd { margin: 0; font-size: 1.15rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.pfx { color: hsl(var(--h, 190) var(--chip-s) var(--chip-l)); font-weight: 600; }
+.curie { overflow-wrap: anywhere; }
+details.cls { background: var(--panel); border: 1px solid var(--rule); border-left: 4px solid hsl(var(--h, 190) var(--chip-s) var(--chip-l));
+              border-radius: 6px; margin: .7rem 0; }
+details.cls > summary { cursor: pointer; padding: .6rem .9rem; display: flex; flex-wrap: wrap; gap: .25rem 1rem; align-items: baseline; }
+details.cls > summary h3 { margin: 0; font-size: 1.02rem; }
+.meta { color: var(--muted); font-size: .88rem; }
+.scroll { overflow-x: auto; padding: 0 .9rem .8rem; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); white-space: nowrap; }
+td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.plain { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; }
+.note { color: var(--muted); }
+.badge { display: inline-block; padding: 0 .45rem; border-radius: 999px; font-size: .8rem; font-weight: 600;
+         color: #fff; background: var(--muted); text-decoration: none; }
+.badge.critical { background: #b42318; } .badge.important { background: #b54708; } .badge.minor { background: #475467; }
+details.pitfall { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; margin: .5rem 0; }
+details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: baseline; }
+[hidden] { display: none !important; }
+@media (max-width: 760px) {
+  .frame { grid-template-columns: minmax(0, 1fr); }
+  nav { position: static; max-height: none; border-bottom: 1px solid var(--rule); }
+  html { scroll-padding-top: 7rem; }
+}
+@media (prefers-reduced-motion: no-preference) { details.cls[open] > .scroll { animation: open .15s ease-out; } }
+@keyframes open { from { opacity: 0; } to { opacity: 1; } }
+
+[data-ns="authority"] { --h: 190; }
+[data-ns="authority2"] { --h: 327; }
+[data-ns="dcterms"] { --h: 104; }
+[data-ns="eli"] { --h: 241; }
+[data-ns="euvoc"] { --h: 18; }
+[data-ns="lemon"] { --h: 155; }
+[data-ns="lvont"] { --h: 292; }
+[data-ns="owl"] { --h: 69; }
+[data-ns="rdf"] { --h: 206; }
+[data-ns="skos"] { --h: 343; }
+[data-ns="skosxl"] { --h: 120; }
+
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <h1>RDF fingerprint <small>http://localhost:7878/query</small></h1>
+  <input id="q" type="search" placeholder="Search classes and properties" aria-label="Search classes and properties" hidden data-js>
+  <span class="count" id="count" aria-live="polite">11 classes</span>
+</header>
+<div class="frame">
+<nav aria-label="Contents">
+  <a href="#overview">Overview</a> · <a href="#namespaces">Namespaces</a> · <a href="#pitfalls">Pitfalls</a> · <a href="#collection">Collection</a> · <a href="#caveats">Caveats</a>
+  <details open>
+    <summary>authority2:treaties <span class="note">(6)</span></summary>
+    <div class="group"><span class="pfx" data-ns="euvoc">euvoc</span> 3</div>
+    <ul>
+      <li data-anchor="treaties-3b4301a8-treaty-09a01768"><a href="#treaties-3b4301a8-treaty-09a01768">Treaty</a></li>
+      <li data-anchor="treaties-3b4301a8-xlnotation-86ef84a2"><a href="#treaties-3b4301a8-xlnotation-86ef84a2">XlNotation</a></li>
+      <li data-anchor="treaties-3b4301a8-xlnote-d7938f35"><a href="#treaties-3b4301a8-xlnote-d7938f35">XlNote</a></li>
+    </ul>
+    <div class="group"><span class="pfx" data-ns="skos">skos</span> 2</div>
+    <ul>
+      <li data-anchor="treaties-3b4301a8-concept-07819658"><a href="#treaties-3b4301a8-concept-07819658">Concept</a></li>
+      <li data-anchor="treaties-3b4301a8-conceptscheme-6d2ac9e0"><a href="#treaties-3b4301a8-conceptscheme-6d2ac9e0">ConceptScheme</a></li>
+    </ul>
+    <div class="group"><span class="pfx" data-ns="skosxl">skosxl</span> 1</div>
+    <ul>
+      <li data-anchor="treaties-3b4301a8-label-1f1eba51"><a href="#treaties-3b4301a8-label-1f1eba51">Label</a></li>
+    </ul>
+  </details>
+  <details open>
+    <summary>authority2:continents <span class="note">(5)</span></summary>
+    <div class="group"><span class="pfx" data-ns="euvoc">euvoc</span> 2</div>
+    <ul>
+      <li data-anchor="continents-214e8f67-continent-4ed30680"><a href="#continents-214e8f67-continent-4ed30680">Continent</a></li>
+      <li data-anchor="continents-214e8f67-xlnotation-86ef84a2"><a href="#continents-214e8f67-xlnotation-86ef84a2">XlNotation</a></li>
+    </ul>
+    <div class="group"><span class="pfx" data-ns="skos">skos</span> 2</div>
+    <ul>
+      <li data-anchor="continents-214e8f67-concept-07819658"><a href="#continents-214e8f67-concept-07819658">Concept</a></li>
+      <li data-anchor="continents-214e8f67-conceptscheme-6d2ac9e0"><a href="#continents-214e8f67-conceptscheme-6d2ac9e0">ConceptScheme</a></li>
+    </ul>
+    <div class="group"><span class="pfx" data-ns="skosxl">skosxl</span> 1</div>
+    <ul>
+      <li data-anchor="continents-214e8f67-label-1f1eba51"><a href="#continents-214e8f67-label-1f1eba51">Label</a></li>
+    </ul>
+  </details>
+  <fieldset hidden data-js>
+    <legend>Show namespaces</legend>
+    <label><input type="checkbox" checked data-switch value="euvoc"> <span class="pfx" data-ns="euvoc">euvoc</span></label>
+    <label><input type="checkbox" checked data-switch value="skos"> <span class="pfx" data-ns="skos">skos</span></label>
+    <label><input type="checkbox" checked data-switch value="skosxl"> <span class="pfx" data-ns="skosxl">skosxl</span></label>
+  </fieldset>
+</nav>
+<main>
+  <section id="overview">
+    <h2>Overview</h2>
+    <dl class="facts">
+      <div><dt>Endpoint</dt><dd>http://localhost:7878/query</dd></div>
+      <div><dt>Graphs</dt><dd>2</dd></div>
+      <div><dt>Classes shown</dt><dd>11</dd></div>
+      <div><dt>Namespaces</dt><dd>11</dd></div>
+      <div><dt>Started</dt><dd>2026-11-01 12:00:00+00:00</dd></div>
+      <div><dt>Finished</dt><dd>2026-11-01 12:00:05+00:00</dd></div>
+      <div><dt>rdf-fingerprinter</dt><dd>3.1.0</dd></div>
+    </dl>
+    <p class="note">Each class states its precision: exact when every instance was read, or first N of M when only the
+      first N instances the store returned were read. Absent values are shown as —.</p>
+  </section>
+
+  <section id="namespaces">
+    <h2>Namespaces</h2>
+    <div class="scroll plain">
+    <table>
+      <thead><tr><th>Prefix</th><th>Namespace</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pfx" data-ns="authority">authority</span></td><td class="curie">http://publications.europa.eu/resource/authority/</td><td>generated</td></tr>
+        <tr><td><span class="pfx" data-ns="authority2">authority2</span></td><td class="curie">http://publications.europa.eu/resources/authority/</td><td>generated</td></tr>
+        <tr><td><span class="pfx" data-ns="dcterms">dcterms</span></td><td class="curie">http://purl.org/dc/terms/</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="eli">eli</span></td><td class="curie">http://data.europa.eu/eli/ontology#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="euvoc">euvoc</span></td><td class="curie">http://publications.europa.eu/ontology/euvoc#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="lemon">lemon</span></td><td class="curie">http://lemon-model.net/lemon#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="lvont">lvont</span></td><td class="curie">http://lexvo.org/ontology#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="owl">owl</span></td><td class="curie">http://www.w3.org/2002/07/owl#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="rdf">rdf</span></td><td class="curie">http://www.w3.org/1999/02/22-rdf-syntax-ns#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="skos">skos</span></td><td class="curie">http://www.w3.org/2004/02/skos/core#</td><td>packaged</td></tr>
+        <tr><td><span class="pfx" data-ns="skosxl">skosxl</span></td><td class="curie">http://www.w3.org/2008/05/skos-xl#</td><td>packaged</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <section id="graph-treaties-3b4301a8">
+    <h2><a class="curie" href="http://publications.europa.eu/resources/authority/treaties" title="http://publications.europa.eu/resources/authority/treaties"><span class="pfx" data-ns="authority2">authority2:</span>treaties</a></h2>
+    <details class="cls" id="treaties-3b4301a8-treaty-09a01768" open data-ns="euvoc" data-q="euvoc:treaty http://publications.europa.eu/ontology/euvoc#treaty">
+      <summary>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Treaty" title="http://publications.europa.eu/ontology/euvoc#Treaty"><span class="pfx" data-ns="euvoc">euvoc:</span>Treaty</a></h3>
+        <span class="meta">104 instances, exact</span>
+        <a class="badge minor" href="#pitfall-treaties-3b4301a8-p34_untyped_class" title="pitfall p34_untyped_class">p34_untyped_class</a>
+        <span class="meta">parents: <a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="treaties-3b4301a8-xlnotation-86ef84a2" open data-ns="euvoc" data-q="euvoc:xlnotation http://publications.europa.eu/ontology/euvoc#xlnotation">
+      <summary>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></h3>
+        <span class="meta">357 instances, exact</span>
+        <a class="badge minor" href="#pitfall-treaties-3b4301a8-p34_untyped_class" title="pitfall p34_untyped_class">p34_untyped_class</a>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="treaties-3b4301a8-xlnote-d7938f35" open data-ns="euvoc" data-q="euvoc:xlnote http://publications.europa.eu/ontology/euvoc#xlnote">
+      <summary>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNote" title="http://publications.europa.eu/ontology/euvoc#XlNote"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNote</a></h3>
+        <span class="meta">12 instances, exact</span>
+        <a class="badge minor" href="#pitfall-treaties-3b4301a8-p34_untyped_class" title="pitfall p34_untyped_class">p34_untyped_class</a>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="treaties-3b4301a8-concept-07819658" open data-ns="skos" data-q="skos:concept http://www.w3.org/2004/02/skos/core#concept">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a></h3>
+        <span class="meta">104 instances, exact</span>
+        <a class="badge minor" href="#pitfall-treaties-3b4301a8-p34_untyped_class" title="pitfall p34_untyped_class">p34_untyped_class</a>
+        <span class="meta">parents: <a class="curie" href="http://publications.europa.eu/ontology/euvoc#Treaty" title="http://publications.europa.eu/ontology/euvoc#Treaty"><span class="pfx" data-ns="euvoc">euvoc:</span>Treaty</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="treaties-3b4301a8-conceptscheme-6d2ac9e0" open data-ns="skos" data-q="skos:conceptscheme http://www.w3.org/2004/02/skos/core#conceptscheme">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <a class="badge minor" href="#pitfall-treaties-3b4301a8-p34_untyped_class" title="pitfall p34_untyped_class">p34_untyped_class</a>
+        <span class="meta">parents: <a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="treaties-3b4301a8-label-1f1eba51" open data-ns="skosxl" data-q="skosxl:label http://www.w3.org/2008/05/skos-xl#label">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></h3>
+        <span class="meta">4530 instances, exact</span>
+        <a class="badge minor" href="#pitfall-treaties-3b4301a8-p34_untyped_class" title="pitfall p34_untyped_class">p34_untyped_class</a>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+  </section>
+  <section id="graph-continents-214e8f67">
+    <h2><a class="curie" href="http://publications.europa.eu/resources/authority/continents" title="http://publications.europa.eu/resources/authority/continents"><span class="pfx" data-ns="authority2">authority2:</span>continents</a></h2>
+    <details class="cls" id="continents-214e8f67-continent-4ed30680" open data-ns="euvoc" data-q="euvoc:continent http://publications.europa.eu/ontology/euvoc#continent">
+      <summary>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Continent" title="http://publications.europa.eu/ontology/euvoc#Continent"><span class="pfx" data-ns="euvoc">euvoc:</span>Continent</a></h3>
+        <span class="meta">6 instances, exact</span>
+        <span class="meta">parents: <a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="continents-214e8f67-xlnotation-86ef84a2" open data-ns="euvoc" data-q="euvoc:xlnotation http://publications.europa.eu/ontology/euvoc#xlnotation">
+      <summary>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></h3>
+        <span class="meta">6 instances, exact</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="continents-214e8f67-concept-07819658" open data-ns="skos" data-q="skos:concept http://www.w3.org/2004/02/skos/core#concept">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a></h3>
+        <span class="meta">6 instances, exact</span>
+        <span class="meta">parents: <a class="curie" href="http://publications.europa.eu/ontology/euvoc#Continent" title="http://publications.europa.eu/ontology/euvoc#Continent"><span class="pfx" data-ns="euvoc">euvoc:</span>Continent</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="continents-214e8f67-conceptscheme-6d2ac9e0" open data-ns="skos" data-q="skos:conceptscheme http://www.w3.org/2004/02/skos/core#conceptscheme">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">parents: <a class="curie" href="http://www.w3.org/2002/07/owl#Ontology" title="http://www.w3.org/2002/07/owl#Ontology"><span class="pfx" data-ns="owl">owl:</span>Ontology</a> (implied)</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="continents-214e8f67-label-1f1eba51" open data-ns="skosxl" data-q="skosxl:label http://www.w3.org/2008/05/skos-xl#label">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></h3>
+        <span class="meta">145 instances, exact</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+  </section>
+  <section id="pitfalls">
+    <h2>Pitfalls</h2>
+    <p class="note">Modelling pitfalls found by SPARQL checks, most of them after the OOPS! catalogue. Each check shows
+      how many rows it found and its first examples; heuristic checks are hints, not errors.</p>
+    <dl class="facts">
+      <div><dt>Critical</dt><dd><span class="badge critical">0</span> checks with findings</dd></div>
+      <div><dt>Important</dt><dd><span class="badge important">3</span> checks with findings</dd></div>
+      <div><dt>Minor</dt><dd><span class="badge minor">1</span> checks with findings</dd></div>
+    </dl>
+    <h3>authority2:treaties</h3>
+    <details class="pitfall" id="pitfall-treaties-3b4301a8-p35_untyped_property" data-q="p35_untyped_property relation used but never defined">
+      <summary>
+        <span class="badge important">important</span>
+        <strong>Relation used but never defined</strong>
+        <span class="meta">28 found · p35_untyped_property · OOPS! P35</span>
+      </summary>
+      <div class="scroll"><p class="note">an IRI used as a predicate but declared neither an object, datatype, annotation nor rdf property.</p>
+        <table>
+          <thead><tr><th>Entity</th><th>Property</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><a class="curie" href="http://data.europa.eu/eli/ontology#date_document" title="http://data.europa.eu/eli/ontology#date_document"><span class="pfx" data-ns="eli">eli:</span>date_document</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>83</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://data.europa.eu/eli/ontology#first_date_entry_in_force" title="http://data.europa.eu/eli/ontology#first_date_entry_in_force"><span class="pfx" data-ns="eli">eli:</span>first_date_entry_in_force</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>82</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://lemon-model.net/lemon#context" title="http://lemon-model.net/lemon#context"><span class="pfx" data-ns="lemon">lemon:</span>context</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>205</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://lexvo.org/ontology#script" title="http://lexvo.org/ontology#script"><span class="pfx" data-ns="lvont">lvont:</span>script</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>398</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#endDate" title="http://publications.europa.eu/ontology/euvoc#endDate"><span class="pfx" data-ns="euvoc">euvoc:</span>endDate</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>1294</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#officialJournalDate" title="http://publications.europa.eu/ontology/euvoc#officialJournalDate"><span class="pfx" data-ns="euvoc">euvoc:</span>officialJournalDate</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>92</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#officialJournalNumber" title="http://publications.europa.eu/ontology/euvoc#officialJournalNumber"><span class="pfx" data-ns="euvoc">euvoc:</span>officialJournalNumber</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>92</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#officialJournalSeries" title="http://publications.europa.eu/ontology/euvoc#officialJournalSeries"><span class="pfx" data-ns="euvoc">euvoc:</span>officialJournalSeries</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>92</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#signatureLocation" title="http://publications.europa.eu/ontology/euvoc#signatureLocation"><span class="pfx" data-ns="euvoc">euvoc:</span>signatureLocation</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>76</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#startDate" title="http://publications.europa.eu/ontology/euvoc#startDate"><span class="pfx" data-ns="euvoc">euvoc:</span>startDate</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>4512</td>
+            </tr>
+          </tbody>
+        </table><p class="note">First 10 of 28.</p>
+      </div>
+    </details>
+    <details class="pitfall" id="pitfall-treaties-3b4301a8-p34_untyped_class" data-q="p34_untyped_class iri used as a class but never declared">
+      <summary>
+        <span class="badge minor">minor</span>
+        <strong>IRI used as a class but never declared</strong>
+        <span class="meta">7 found · p34_untyped_class · OOPS! P34</span>
+      </summary>
+      <div class="scroll"><p class="note">an IRI used as a class (as the object of rdf:type or rdfs:subClassOf) but never declared a class.</p>
+        <table>
+          <thead><tr><th>Entity</th><th>Property</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Continent" title="http://publications.europa.eu/ontology/euvoc#Continent"><span class="pfx" data-ns="euvoc">euvoc:</span>Continent</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>used as a class, not declared</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Treaty" title="http://publications.europa.eu/ontology/euvoc#Treaty"><span class="pfx" data-ns="euvoc">euvoc:</span>Treaty</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>used as a class, not declared</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>used as a class, not declared</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNote" title="http://publications.europa.eu/ontology/euvoc#XlNote"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNote</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>used as a class, not declared</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>used as a class, not declared</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://www.w3.org/2004/02/skos/core#ConceptScheme" title="http://www.w3.org/2004/02/skos/core#ConceptScheme"><span class="pfx" data-ns="skos">skos:</span>ConceptScheme</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>used as a class, not declared</td>
+            </tr>
+            <tr>
+              <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+              <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"><span class="pfx" data-ns="rdf">rdf:</span>type</a></td>
+              <td>used as a class, not declared</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <p class="note">Nothing found by: x_domain_violation, x_individual_as_predicate, x_punning_class_and_property, x_range_violation.</p>
+    <h3>authority2:continents</h3>
+    <details class="pitfall" id="pitfall-continents-214e8f67-p10_no_disjointness" data-q="p10_no_disjointness no disjointness axiom at all">
+      <summary>
+        <span class="badge important">important</span>
+        <strong>No disjointness axiom at all</strong>
+        <span class="meta">1 found · p10_no_disjointness · OOPS! P10</span>
+      </summary>
+      <div class="scroll"><p class="note">the ontology declares no disjointness at all (OOPS! only reports when there is none).</p>
+        <table>
+          <thead><tr><th>Entity</th><th>Property</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><a class="curie" href="http://publications.europa.eu/resource/authority/continent" title="http://publications.europa.eu/resource/authority/continent"><span class="pfx" data-ns="authority">authority:</span>continent</a></td>
+              <td><a class="curie" href="http://www.w3.org/2002/07/owl#disjointWith" title="http://www.w3.org/2002/07/owl#disjointWith"><span class="pfx" data-ns="owl">owl:</span>disjointWith</a></td>
+              <td>no disjointness axioms</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details class="pitfall" id="pitfall-continents-214e8f67-p41_no_license" data-q="p41_no_license ontology without a licence">
+      <summary>
+        <span class="badge important">important</span>
+        <strong>Ontology without a licence</strong>
+        <span class="meta">1 found · p41_no_license · OOPS! P41</span>
+      </summary>
+      <div class="scroll"><p class="note">the ontology declares no licence (dcterms:license, dc:rights, cc:license, schema:license, xhv:license).</p>
+        <table>
+          <thead><tr><th>Entity</th><th>Property</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><a class="curie" href="http://publications.europa.eu/resource/authority/continent" title="http://publications.europa.eu/resource/authority/continent"><span class="pfx" data-ns="authority">authority:</span>continent</a></td>
+              <td><a class="curie" href="http://purl.org/dc/terms/license" title="http://purl.org/dc/terms/license"><span class="pfx" data-ns="dcterms">dcterms:</span>license</a></td>
+              <td>no licence</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <p class="note">Nothing found by: p04_unconnected_class, p05_wrong_inverse, p06_class_cycle, p07_merged_concepts, p08_missing_comment, p11_missing_domain_or_range, p12_p30_same_name_not_equivalent, p13_missing_inverse, p19_multiple_domains_or_ranges, p20_label_longer_than_comment, p21_miscellaneous_class, p22_class_naming, p24_recursive_definition, p25_inverse_of_itself, p26_inverse_of_symmetric, p27_wrong_equivalent_properties, p28_p29_wrong_symmetric_or_transitive, p32_classes_same_label, p33_single_property_chain, p36_iri_with_file_extension, p38_no_ontology_declaration.</p>
+  </section>
+
+  <section id="collection">
+    <h2>Collection</h2>
+    <p>Every measurement succeeded.</p>
+    <details>
+      <summary>Settings used</summary>
+      <div class="scroll plain">
+      <table>
+        <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>acceptance_threshold</td><td>0.95</td></tr>
+          <tr><td>completeness_check</td><td>False</td></tr>
+          <tr><td>concurrency</td><td>4</td></tr>
+          <tr><td>depth</td><td>classes</td></tr>
+          <tr><td>first_n</td><td>10000</td></tr>
+          <tr><td>graph_statistics</td><td>False</td></tr>
+          <tr><td>object_type_scope</td><td>same_graph</td></tr>
+          <tr><td>pitfall_examples</td><td>10</td></tr>
+          <tr><td>pitfall_scan</td><td>True</td></tr>
+          <tr><td>precision_policy</td><td>auto</td></tr>
+          <tr><td>schema_graphs</td><td>[&#39;http://publications.europa.eu/resources/authority/continents&#39;]</td></tr>
+          <tr><td>selected_graphs</td><td>[&#39;http://publications.europa.eu/resources/authority/treaties&#39;]</td></tr>
+          <tr><td>timeout_seconds</td><td>60</td></tr>
+          <tr><td>top_k</td><td>20</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+  </section>
+
+  <section id="caveats">
+    <h2>Caveats</h2>
+    <h3>Hidden namespaces</h3>
+    <p class="note">Their classes are left out of this page; show them with <code>--include-namespace</code>.</p>
+    <ul><li><span class="pfx" data-ns="owl" title="http://www.w3.org/2002/07/owl#">owl</span>: 1 classes</li></ul>
+  </section>
+</main>
+</div>
+
+
+<script>
+/* Search and namespace switches: they only toggle `hidden`; the page reads fully without this script. */
+(function () {
+  var q = document.getElementById("q"), count = document.getElementById("count");
+  var switches = Array.prototype.slice.call(document.querySelectorAll("input[data-switch]"));
+  var classes = Array.prototype.slice.call(document.querySelectorAll("details.cls"));
+  var entries = Array.prototype.slice.call(document.querySelectorAll("li[data-anchor]"));
+  var pitfalls = Array.prototype.slice.call(document.querySelectorAll("details.pitfall[data-q]"));
+  document.querySelectorAll("[data-js]").forEach(function (el) { el.hidden = false; });
+
+  function apply() {
+    var text = q.value.trim().toLowerCase();
+    var off = {};
+    switches.forEach(function (s) { if (!s.checked) off[s.value] = true; });
+    var shown = 0;
+    classes.forEach(function (cls) {
+      var own = !text || cls.dataset.q.indexOf(text) >= 0;
+      var anyRow = false;
+      cls.querySelectorAll("tbody tr").forEach(function (row) {
+        var link = row.querySelector(".curie");
+        var haystack = (row.cells[0].textContent + " " + (link ? link.title : "")).toLowerCase();
+        var match = text && haystack.indexOf(text) >= 0;
+        anyRow = anyRow || match;
+        row.hidden = !(own || match);
+      });
+      var visible = !off[cls.dataset.ns] && (own || anyRow);
+      cls.hidden = !visible;
+      if (visible) {
+        shown += 1;
+        if (anyRow && !own) cls.open = true;
+      }
+    });
+    pitfalls.forEach(function (p) { p.hidden = !!text && p.dataset.q.indexOf(text) < 0; });
+    entries.forEach(function (li) {
+      var target = document.getElementById(li.dataset.anchor);
+      li.hidden = !target || target.hidden;
+    });
+    count.textContent = shown + " shown, " + (classes.length - shown) + " hidden";
+  }
+
+  q.addEventListener("input", apply);
+  switches.forEach(function (s) { s.addEventListener("change", apply); });
+  apply();
+})();
+</script>
+
+</body>
+</html>

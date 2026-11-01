@@ -4,7 +4,7 @@
 
 - [x] 1.1 Model per design D-3 (stats) and D-6/D-7 (views); `make generate-models`; round-trip a profile with `pitfalls`, and load one without them (pitfall-scans › The pitfall scan stage)
 - [x] 1.2 `fingerprint/domain/pitfalls.py`: `parse_header`, importance order, `robot_level`, `at_or_above`, test-first (design D-1; pitfall-scans › Pitfall check contract)
-- [ ] 1.3 Gherkin `tests/features/pitfall_scans.feature` for the new capability; scenarios added to `fingerprint_report.feature` (section, badge, escaping, exit 5, format, update refused); step stubs
+- [x] 1.3 Gherkin `tests/features/pitfall_scans.feature` for the new capability; scenarios added to `fingerprint_report.feature` (section, badge, escaping, exit 5, format, update refused); step stubs
 
 ## 2. Catalogue
 
@@ -21,14 +21,14 @@
 
 ## 4. Outputs
 
-- [ ] 4.1 Report views and the template: section, contents entry, badges, search over checks (design D-6; fingerprint-report › Pitfalls in the report, › Report content)
-- [ ] 4.2 `PitfallsGenerator`, the `pitfalls_tsv` package and `RepresentationFormat.pitfalls` (design D-7; pitfall-scans › Pitfalls TSV format)
-- [ ] 4.3 Golden files for the page and the TSV with a fixed scanned profile
+- [x] 4.1 Report views and the template: section, contents entry, badges, search over checks (design D-6; fingerprint-report › Pitfalls in the report, › Report content)
+- [x] 4.2 `PitfallsGenerator`, the `pitfalls_tsv` package and `RepresentationFormat.pitfalls` (design D-7; pitfall-scans › Pitfalls TSV format)
+- [x] 4.3 Golden files for the page and the TSV with a fixed scanned profile
 
 ## 5. CLI, library and exit status
 
-- [ ] 5.1 `fingerprint_report(..., checks=None)`; the `main.py` options and usage errors; exit 5 with `--fail-on` (design D-9; pitfall-scans › Scan settings and options, › Fail on findings; fingerprint-report › Exit status, › Read-only and credential-safe, › Formats rendered after collecting)
-- [ ] 5.2 `fingerprint-gen-pitfalls` and the script in `pyproject.toml`
+- [x] 5.1 `fingerprint_report(..., checks=None)`; the `main.py` options and usage errors; exit 5 with `--fail-on` (design D-9; pitfall-scans › Scan settings and options, › Fail on findings; fingerprint-report › Exit status, › Read-only and credential-safe, › Formats rendered after collecting)
+- [x] 5.2 `fingerprint-gen-pitfalls` and the script in `pyproject.toml`
 
 ## 6. Tooling, docs and release prep
 

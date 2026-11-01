@@ -29,7 +29,7 @@
 </header>
 <div class="frame">
 <nav aria-label="Contents">
-  <a href="#overview">Overview</a> · <a href="#namespaces">Namespaces</a> · <a href="#collection">Collection</a> · <a href="#caveats">Caveats</a>
+  <a href="#overview">Overview</a> · <a href="#namespaces">Namespaces</a>{% if view.pitfalls %} · <a href="#pitfalls">Pitfalls</a>{% endif %} · <a href="#collection">Collection</a> · <a href="#caveats">Caveats</a>
   {%- for g in view.graphs or [] %}
   <details open>
     <summary>{{ g.label }} <span class="note">({{ (g.classes or [])|length }})</span></summary>
@@ -96,6 +96,9 @@
       <summary>
         <h3>{{ term(c.label, c.iri) }}</h3>
         <span class="meta">{{ c.instances }} instances, {{ c.precision }}{% if c.sample_note %} {{ c.sample_note }}{% endif %}</span>
+        {%- for b in c.badges or [] %}
+        <a class="badge {{ b.importance }}" href="#{{ b.anchor }}" title="pitfall {{ b.check_id }}">{{ b.check_id }}</a>
+        {%- endfor %}
         {%- if c.parents %}
         <span class="meta">parents: {% for p in c.parents %}{{ term(p.label, p.iri) }} ({{ p.source }}){{ ", " if not loop.last }}{% endfor %}</span>
         {%- endif %}
@@ -122,6 +125,51 @@
     {%- endfor %}
   </section>
   {%- endfor %}
+
+  {%- if view.pitfalls %}
+  <section id="pitfalls">
+    <h2>Pitfalls</h2>
+    <p class="note">Modelling pitfalls found by SPARQL checks, most of them after the OOPS! catalogue. Each check shows
+      how many rows it found and its first examples; heuristic checks are hints, not errors.</p>
+    <dl class="facts">
+      {%- for s in view.pitfalls.summary %}
+      <div><dt>{{ s.importance|capitalize }}</dt><dd><span class="badge {{ s.importance }}">{{ s.checks }}</span> checks with findings</dd></div>
+      {%- endfor %}
+    </dl>
+    {%- for g in view.pitfalls.graphs %}
+    <h3>{{ g.label }}</h3>
+    {%- if not g.checks %}<p>No check found anything in this graph.</p>{% endif %}
+    {%- for k in g.checks %}
+    <details class="pitfall" id="{{ k.anchor }}" data-q="{{ k.q }}">
+      <summary>
+        <span class="badge {{ k.importance }}">{{ k.importance }}</span>
+        <strong>{{ k.title }}</strong>
+        <span class="meta">{{ k.count }} found · {{ k.check_id }} · {{ k.source }}{% if k.heuristic %} · heuristic{% endif %}</span>
+      </summary>
+      <div class="scroll">
+        {%- if k.description %}<p class="note">{{ k.description }}</p>{% endif %}
+        <table>
+          <thead><tr><th>Entity</th><th>Property</th><th>Value</th></tr></thead>
+          <tbody>
+          {%- for e in k.examples or [] %}
+            <tr>
+              {%- for v in [e.entity, e.property, e.value] %}
+              <td>{% if v.iri %}{{ term(v.label, v.iri) }}{% else %}{{ v.label }}{% endif %}</td>
+              {%- endfor %}
+            </tr>
+          {%- endfor %}
+          </tbody>
+        </table>
+        {%- if k.count > (k.examples or [])|length %}<p class="note">First {{ (k.examples or [])|length }} of {{ k.count }}.</p>{% endif %}
+      </div>
+    </details>
+    {%- endfor %}
+    {%- if g.clean %}
+    <p class="note">Nothing found by: {{ g.clean|join(", ") }}.</p>
+    {%- endif %}
+    {%- endfor %}
+  </section>
+  {%- endif %}
 
   <section id="collection">
     <h2>Collection</h2>
@@ -191,6 +239,7 @@
   var switches = Array.prototype.slice.call(document.querySelectorAll("input[data-switch]"));
   var classes = Array.prototype.slice.call(document.querySelectorAll("details.cls"));
   var entries = Array.prototype.slice.call(document.querySelectorAll("li[data-anchor]"));
+  var pitfalls = Array.prototype.slice.call(document.querySelectorAll("details.pitfall[data-q]"));
   document.querySelectorAll("[data-js]").forEach(function (el) { el.hidden = false; });
 
   function apply() {
@@ -215,6 +264,7 @@
         if (anyRow && !own) cls.open = true;
       }
     });
+    pitfalls.forEach(function (p) { p.hidden = !!text && p.dataset.q.indexOf(text) < 0; });
     entries.forEach(function (li) {
       var target = document.getElementById(li.dataset.anchor);
       li.hidden = !target || target.hidden;

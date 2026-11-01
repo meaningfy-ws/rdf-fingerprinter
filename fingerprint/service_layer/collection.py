@@ -485,7 +485,9 @@ class _PitfallScan:
                 answer = run.sparql.select(pitfall_example_query(check.check_id, check.query, graph, joined, limit))
                 examples = [
                     PitfallExample(
-                        entity=_pitfall_term(r["entity"]), property=_pitfall_term(r["property"]), value=_pitfall_term(r["value"])
+                        entity=_pitfall_term(r["entity"]),
+                        property=_pitfall_term(r["property"]),
+                        value=_pitfall_term(r["value"]),
                     )
                     for r in answer
                 ]

@@ -19,7 +19,12 @@ SELECT ?entity ?property ?value WHERE { ?s ?entity ?o }
 
 def test_a_valid_header():
     check = parse_header(GOOD, origin="packaged")
-    assert (check.check_id, check.importance, check.scope, check.source) == ("p35_untyped_property", "important", "data", "OOPS! P35")
+    assert (check.check_id, check.importance, check.scope, check.source) == (
+        "p35_untyped_property",
+        "important",
+        "data",
+        "OOPS! P35",
+    )
     assert check.heuristic is False and check.description == "one line" and check.query == GOOD and check.origin == "packaged"
 
 

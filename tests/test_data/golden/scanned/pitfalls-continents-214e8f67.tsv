@@ -1,0 +1,3 @@
+Level	Rule Name	Subject	Property	Value
+WARN	p10_no_disjointness	http://publications.europa.eu/resource/authority/continent	http://www.w3.org/2002/07/owl#disjointWith	no disjointness axioms
+WARN	p41_no_license	http://publications.europa.eu/resource/authority/continent	http://purl.org/dc/terms/license	no licence

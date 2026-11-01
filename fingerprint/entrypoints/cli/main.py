@@ -17,11 +17,13 @@ from pydantic import ValidationError
 
 from fingerprint import config
 from fingerprint.adapters.exceptions import EndpointUnreachable
+from fingerprint.adapters.pitfall_catalogue import load_catalogue
 from fingerprint.adapters.prefixes import PrefixCcList
 from fingerprint.adapters.sparql import redact
+from fingerprint.domain.pitfalls import PitfallCheckError, at_or_above
 from fingerprint.domain.profile import Depth, ObjectTypeScope, PrecisionPolicy, SettingsOverride
 from fingerprint.domain.views import GeneratorOptions
-from fingerprint.entrypoints.cli import EXIT_FAILURES, EXIT_UNEXPECTED, EXIT_UNREACHABLE, configure_logging
+from fingerprint.entrypoints.cli import EXIT_FAILURES, EXIT_PITFALLS, EXIT_UNEXPECTED, EXIT_UNREACHABLE, configure_logging
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.handlers import fingerprint_report
@@ -71,6 +73,14 @@ def _choice(enum: type[Enum]) -> click.Choice:
 @click.option("--include-namespace", multiple=True, help="show a namespace again, e.g. owl (prefix or IRI; repeatable)")
 @click.option("--module-size", type=click.IntRange(min=1), help="most classes per PlantUML module (default 15)")
 @click.option("--shapes-namespace", help="one namespace for every SHACL shape IRI (default: each class's <ns>/shape/)")
+@click.option("--pitfalls", "pitfall_scan", is_flag=True, default=None, help="also scan each graph for modelling pitfalls")
+@click.option("--schema-graph", "schema_graphs", multiple=True, help="graph holding the ontology (repeatable)")
+@click.option("--pitfall-examples", type=click.IntRange(min=1), help="examples kept per pitfall check (default 10)")
+@click.option("--pitfall-checks", type=click.Path(file_okay=False, exists=True), help="folder of your own .rq checks")
+@click.option("--skip-pitfall", multiple=True, help="pitfall check id to leave out (repeatable)")
+@click.option(
+    "--fail-on", type=click.Choice(["critical", "important", "minor"]), help="exit 5 on pitfalls at this level or above"
+)
 def fingerprint_endpoint(
     sparql_endpoint_url: str,
     output: str,
@@ -83,6 +93,10 @@ def fingerprint_endpoint(
     include_namespace: tuple[str, ...],
     module_size: int | None,
     shapes_namespace: str | None,
+    schema_graphs: tuple[str, ...],
+    pitfall_checks: str | None,
+    skip_pitfall: tuple[str, ...],
+    fail_on: str | None,
     **options,
 ):
     """
@@ -97,7 +111,7 @@ def fingerprint_endpoint(
         validate_config()
         validate_endpoint(sparql_endpoint_url)
         settings = resolve_settings(
-            cli=SettingsOverride(**options, selected_graphs=list(graphs) or None),
+            cli=SettingsOverride(**options, selected_graphs=list(graphs) or None, schema_graphs=list(schema_graphs) or None),
             config=load_config_file(config_file) if config_file else None,
         )
         user_prefixes = load_user_prefixes(prefixes_file)
@@ -109,6 +123,23 @@ def fingerprint_endpoint(
         )
         validate_options(generator_options)
         lookup = None if no_prefix_lookup or not config.prefix_lookup else PrefixCcList()
+        checks = None
+        if settings.pitfall_scan:
+            checks = load_catalogue(pitfall_checks, skip_pitfall)
+        else:
+            given = [
+                name
+                for name, value in (
+                    ("--pitfall-checks", pitfall_checks),
+                    ("--skip-pitfall", skip_pitfall),
+                    ("--fail-on", fail_on),
+                )
+                if value
+            ]
+            if given:
+                raise UsageError(f"{', '.join(given)} needs --pitfalls")
+    except PitfallCheckError as error:
+        raise click.UsageError(str(error)) from error
     except UsageError as error:
         raise click.UsageError(str(error)) from error
     except ValidationError as error:
@@ -123,6 +154,7 @@ def fingerprint_endpoint(
             options=generator_options,
             user_prefixes=user_prefixes,
             prefix_list=lookup,
+            checks=checks,
         )
     except EndpointUnreachable as error:
         logger.error("%s", error)
@@ -132,6 +164,12 @@ def fingerprint_endpoint(
         sys.exit(EXIT_UNEXPECTED)
     if run.failures:
         sys.exit(EXIT_FAILURES)
+    if fail_on:
+        rows, found = at_or_above(run, fail_on)
+        if rows:
+            logger.warning("%d findings in %d checks at or above %s", rows, found, fail_on)
+            sys.exit(EXIT_PITFALLS)
+        logger.info("no pitfall findings at or above %s", fail_on)
 
 
 if __name__ == "__main__":

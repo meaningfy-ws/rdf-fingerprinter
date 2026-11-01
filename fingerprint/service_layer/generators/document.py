@@ -4,18 +4,34 @@ Every value is written as display text here; the template only lays it out (doma
 """
 
 from fingerprint import config
-from fingerprint.domain.profile import ClassAnalytics, GraphAnalytics, PrecisionMode, PropertyAnalytics
+from fingerprint.domain.pitfalls import IMPORTANCE_ORDER, rank
+from fingerprint.domain.profile import (
+    ClassAnalytics,
+    GraphAnalytics,
+    NodeKind,
+    PitfallResult,
+    PitfallTerm,
+    PrecisionMode,
+    PropertyAnalytics,
+)
 from fingerprint.domain.views import (
     Caveats,
     CollectionSection,
+    DocumentBadge,
     DocumentClass,
     DocumentGraph,
+    DocumentPitfallCheck,
+    DocumentPitfallExample,
+    DocumentPitfallGraph,
+    DocumentPitfalls,
     DocumentProperty,
     DocumentTerm,
+    DocumentValue,
     FailureNote,
     HiddenNamespace,
     Overview,
     ParentReference,
+    PitfallLevelCount,
     PrefixDeclaration,
     ProfileDocument,
     SampledClass,
@@ -79,6 +95,72 @@ class DocumentGenerator(Generator):
             language_coverage=number(prop.language_coverage),
         )
 
+    def value(self, term: PitfallTerm | None) -> DocumentValue:
+        """A pitfall term as the page shows it: an IRI as a short name (full IRI kept), anything else as text."""
+        if term is None:
+            return DocumentValue(label="")
+        if term.kind == NodeKind.iri:
+            return DocumentValue(label=self.label(term.text), iri=term.text)
+        return DocumentValue(label=f"_:{term.text}" if term.kind == NodeKind.blank_node else term.text)
+
+    @staticmethod
+    def check_anchor(graph: GraphAnalytics, check_id: str) -> str:
+        return f"pitfall-{graph_slug(graph.graph)}-{check_id}"
+
+    def badges(self, graph: GraphAnalytics, class_iri: str) -> list[DocumentBadge]:
+        """The checks of this graph whose examples name the class (fingerprint-report › Pitfalls in the report)."""
+        found = [
+            r
+            for r in graph.pitfalls or []
+            if any(e.entity and e.entity.kind == NodeKind.iri and e.entity.text == class_iri for e in r.examples or [])
+        ]
+        return [
+            DocumentBadge(check_id=r.check_id, anchor=self.check_anchor(graph, r.check_id), importance=str(r.importance))
+            for r in sorted(found, key=lambda r: (rank(r.importance), r.check_id))
+        ]
+
+    def pitfall_check(self, graph: GraphAnalytics, result: PitfallResult) -> DocumentPitfallCheck:
+        return DocumentPitfallCheck(
+            check_id=result.check_id,
+            anchor=self.check_anchor(graph, result.check_id),
+            title=result.title,
+            description=result.description,
+            importance=str(result.importance),
+            source=result.source,
+            count=result.count,
+            heuristic=bool(result.heuristic),
+            q=f"{result.check_id} {result.title}".lower(),
+            examples=[
+                DocumentPitfallExample(entity=self.value(e.entity), property=self.value(e.property), value=self.value(e.value))
+                for e in result.examples or []
+            ],
+        )
+
+    def pitfalls(self) -> DocumentPitfalls | None:
+        """The Pitfalls section, or None when the profile has no scan results (DEC-5)."""
+        scanned = [g for g in self.analytics.graphs or [] if g.pitfalls is not None]
+        if not scanned:
+            return None
+        graphs = []
+        for g in scanned:
+            found = sorted((r for r in g.pitfalls or [] if r.count), key=lambda r: (rank(r.importance), -r.count, r.check_id))
+            graphs.append(
+                DocumentPitfallGraph(
+                    label=self.graph_label(g.graph),
+                    slug=graph_slug(g.graph),
+                    checks=[self.pitfall_check(g, r) for r in found],
+                    clean=sorted(r.check_id for r in g.pitfalls or [] if not r.count),
+                )
+            )
+        summary = [
+            PitfallLevelCount(
+                importance=level.value,
+                checks=len({r.check_id for g in scanned for r in g.pitfalls or [] if r.count and rank(r.importance) == i}),
+            )
+            for i, level in enumerate(IMPORTANCE_ORDER)
+        ]
+        return DocumentPitfalls(summary=summary, graphs=graphs)
+
     def end_class(self, graph: GraphAnalytics, cls: ClassAnalytics, properties: list[DocumentProperty]) -> DocumentClass:
         sampled = cls.precision_mode == PrecisionMode.first_n
         parents = sorted(cls.parents or [], key=lambda p: p.parent)
@@ -95,6 +177,7 @@ class DocumentGenerator(Generator):
             sampled=sampled,
             parents=[ParentReference(iri=p.parent, label=self.label(p.parent), source=p.source) for p in parents],
             properties=properties,
+            badges=self.badges(graph, cls.class_iri),
         )
 
     def end_graph(self, graph: GraphAnalytics, classes: list[DocumentClass]) -> DocumentGraph:
@@ -120,7 +203,7 @@ class DocumentGenerator(Generator):
                 graph=self.graph_label(f.graph),
                 class_label=self.label(f.class_iri) if f.class_iri else ABSENT,
                 property_label=self.label(f.property) if f.property else ABSENT,
-                measurement=str(f.query_kind),
+                measurement=str(f.query_kind) + (f" {f.check_id}" if f.check_id else ""),
                 attempts=number(f.attempts),
                 message=f.message,
             )
@@ -152,6 +235,7 @@ class DocumentGenerator(Generator):
             ),
             namespaces=namespaces,
             collection=CollectionSection(settings=settings, failures=failures),
+            pitfalls=self.pitfalls(),
             graphs=graphs,
             caveats=Caveats(sampled=sampled, untyped=untyped, hidden=hidden, skipped=list(self.skipped)),
             skipped=list(self.skipped),

@@ -18,7 +18,11 @@ OWL = "http://www.w3.org/2002/07/owl#"
 
 # id: (positive, negative, expected entity)
 FIXTURES = {
-    "p04_unconnected_class": ("ex:Lonely a owl:Class .", "ex:A a owl:Class . ex:B a owl:Class ; rdfs:subClassOf ex:A .", EX + "Lonely"),
+    "p04_unconnected_class": (
+        "ex:Lonely a owl:Class .",
+        "ex:A a owl:Class . ex:B a owl:Class ; rdfs:subClassOf ex:A .",
+        EX + "Lonely",
+    ),
     "p05_wrong_inverse": (
         "ex:p owl:inverseOf ex:q ; rdfs:domain ex:A ; rdfs:range ex:B . ex:q rdfs:domain ex:C ; rdfs:range ex:A .",
         "ex:p owl:inverseOf ex:q ; rdfs:domain ex:A ; rdfs:range ex:B . ex:q rdfs:domain ex:B ; rdfs:range ex:A .",
@@ -53,7 +57,11 @@ FIXTURES = {
     "p22_class_naming": ("ex:thing a owl:Class .", "ex:Thing a owl:Class .", EX + "thing"),
     "p24_recursive_definition": ("ex:A rdfs:subClassOf ex:A .", "ex:A rdfs:subClassOf ex:B .", EX + "A"),
     "p25_inverse_of_itself": ("ex:p owl:inverseOf ex:p .", "ex:p owl:inverseOf ex:q .", EX + "p"),
-    "p26_inverse_of_symmetric": ("ex:p a owl:SymmetricProperty ; owl:inverseOf ex:q .", "ex:p a owl:SymmetricProperty .", EX + "p"),
+    "p26_inverse_of_symmetric": (
+        "ex:p a owl:SymmetricProperty ; owl:inverseOf ex:q .",
+        "ex:p a owl:SymmetricProperty .",
+        EX + "p",
+    ),
     "p27_wrong_equivalent_properties": (
         "ex:p owl:equivalentProperty ex:q ; rdfs:domain ex:A . ex:q rdfs:domain ex:B .",
         "ex:p owl:equivalentProperty ex:q ; rdfs:domain ex:A . ex:q rdfs:domain ex:A .",
@@ -69,10 +77,22 @@ FIXTURES = {
         'ex:A a owl:Class ; rdfs:label "Thing"@en . ex:B a owl:Class ; rdfs:label "Other"@en .',
         EX + "A",
     ),
-    "p33_single_property_chain": ("ex:p owl:propertyChainAxiom ( ex:q ) .", "ex:p owl:propertyChainAxiom ( ex:q ex:r ) .", EX + "p"),
+    "p33_single_property_chain": (
+        "ex:p owl:propertyChainAxiom ( ex:q ) .",
+        "ex:p owl:propertyChainAxiom ( ex:q ex:r ) .",
+        EX + "p",
+    ),
     "p34_untyped_class": ("ex:x a ex:Undeclared .", "ex:x a ex:Declared . ex:Declared a owl:Class .", EX + "Undeclared"),
-    "p35_untyped_property": ("ex:x ex:undeclared ex:y .", "ex:x ex:declared ex:y . ex:declared a owl:ObjectProperty .", EX + "undeclared"),
-    "p36_iri_with_file_extension": ("<http://ex.org/onto.owl> a owl:Ontology .", "<http://ex.org/onto> a owl:Ontology .", EX + "onto.owl"),
+    "p35_untyped_property": (
+        "ex:x ex:undeclared ex:y .",
+        "ex:x ex:declared ex:y . ex:declared a owl:ObjectProperty .",
+        EX + "undeclared",
+    ),
+    "p36_iri_with_file_extension": (
+        "<http://ex.org/onto.owl> a owl:Ontology .",
+        "<http://ex.org/onto> a owl:Ontology .",
+        EX + "onto.owl",
+    ),
     "p38_no_ontology_declaration": ("ex:A a owl:Class .", "ex:o a owl:Ontology .", OWL + "Ontology"),
     "p41_no_license": ("ex:o a owl:Ontology .", "ex:o a owl:Ontology ; dcterms:license <http://x.org/l> .", EX + "o"),
     "x_punning_class_and_property": ("ex:C a owl:Class . ex:i a ex:C . ex:s ex:C ex:o .", "ex:i a ex:C .", EX + "C"),
@@ -81,7 +101,11 @@ FIXTURES = {
         "ex:r a owl:ObjectProperty . ex:s ex:r ex:o .",
         EX + "r",
     ),
-    "x_domain_violation": ("ex:p rdfs:domain ex:A . ex:s ex:p ex:o .", "ex:p rdfs:domain ex:A . ex:s ex:p ex:o ; a ex:A .", EX + "p"),
+    "x_domain_violation": (
+        "ex:p rdfs:domain ex:A . ex:s ex:p ex:o .",
+        "ex:p rdfs:domain ex:A . ex:s ex:p ex:o ; a ex:A .",
+        EX + "p",
+    ),
     "x_range_violation": (
         "ex:p a owl:ObjectProperty ; rdfs:range ex:B . ex:s ex:p ex:o .",
         "ex:p a owl:ObjectProperty ; rdfs:range ex:B . ex:s ex:p ex:o . ex:o a ex:B .",
