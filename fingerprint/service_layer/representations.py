@@ -66,20 +66,16 @@ def validate_options(options: GeneratorOptions | None) -> None:
 
 
 def warn_filters(filters: NamespaceFilter, analytics: ProfileAnalytics) -> None:
-    """A filter value matching no namespace, or an exclude value hiding no term, is warned about and ignored (P-8).
-
-    An exclude value fully re-included hides nothing by design and is not warned about."""
-    notes = [t for g in analytics.graphs or [] for t in g.excluded_terms or []]
+    """A filter value matching no namespace, or an exclude value whose namespaces are all unused, is warned about
+    and ignored (P-8). Use is read from the unfiltered `namespace_uses`, so a namespace whose terms sit only under
+    an excluded class or property does not count as empty. An exclude value fully re-included is not warned about."""
+    uses = {u.namespace: u.uses for u in analytics.namespace_uses or []}  # dict-ok: lookup index
     for match in filters.matches or []:
         flag = f"--{FilterOption(match.option).value}-namespace {match.name}"
         still = [n for n in match.namespaces or [] if n in (filters.excluded or [])]
         if not match.namespaces:
             logger.warning("%s: no such namespace; ignored", flag)
-        elif (
-            match.option == FilterOption.exclude
-            and still
-            and not any(t.classes + t.properties + t.values for t in notes if t.namespace in still)
-        ):
+        elif match.option == FilterOption.exclude and still and not any(uses.get(n) for n in still):
             logger.warning("%s: no term in this namespace; ignored", flag)
 
 

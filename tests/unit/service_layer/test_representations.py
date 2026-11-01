@@ -226,6 +226,14 @@ def test_an_exclude_value_with_one_namespace_that_hides_something_is_not_warned_
     assert caplog.messages == []
 
 
+def test_an_exclude_value_whose_terms_sit_under_an_excluded_class_is_not_warned_about(tmp_path, generators, caplog):
+    # rel's two properties are on ex:Person, which ex removes: rel has uses but no counted term
+    options = GeneratorOptions(exclude_namespaces=["ex", "rel"])
+    with caplog.at_level(logging.WARNING):
+        generate_representations(builders.filter_profile(), tmp_path, ["a"], options=options)
+    assert caplog.messages == []
+
+
 def test_no_warning_is_made_when_the_caller_asks_for_none(filtering, caplog):
     with caplog.at_level(logging.WARNING):
         filtering(exclude=["nope", "foaf"], check_filters=False)
