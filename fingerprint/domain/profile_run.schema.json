@@ -254,6 +254,16 @@
                         "null"
                     ]
                 },
+                "term_annotations": {
+                    "description": "Selected labels and descriptions of the graph's terms; absent in profiles saved before 3.2.",
+                    "items": {
+                        "$ref": "#/$defs/TermAnnotation"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "triples": {
                     "description": "Number of triples.",
                     "minimum": 0,
@@ -302,6 +312,26 @@
                 }
             },
             "title": "IncomingLink",
+            "type": "object"
+        },
+        "LangText": {
+            "additionalProperties": false,
+            "description": "A literal's text and its language tag; no language for an untagged literal.",
+            "properties": {
+                "language": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "text": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "text"
+            ],
+            "title": "LangText",
             "type": "object"
         },
         "NamespacePrefix": {
@@ -757,7 +787,8 @@
                 "incoming_links",
                 "untyped_subjects",
                 "subject_stream",
-                "pitfall"
+                "pitfall",
+                "term_annotations"
             ],
             "title": "QueryKind",
             "type": "string"
@@ -877,6 +908,38 @@
                 "super_class"
             ],
             "title": "SubclassEdge",
+            "type": "object"
+        },
+        "TermAnnotation": {
+            "additionalProperties": false,
+            "description": "The labels and descriptions selected for one class or property (llm-schema-tools DEC-17, DEC-20).",
+            "properties": {
+                "descriptions": {
+                    "items": {
+                        "$ref": "#/$defs/LangText"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "labels": {
+                    "items": {
+                        "$ref": "#/$defs/LangText"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "term": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "term"
+            ],
+            "title": "TermAnnotation",
             "type": "object"
         },
         "ValueCount": {

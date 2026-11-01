@@ -3,6 +3,7 @@
 from hypothesis import strategies as st
 
 from fingerprint.domain.profile import (
+    AnnotationValue,
     CardinalityBin,
     ClassProfile,
     NamespacePrefix,
@@ -10,6 +11,7 @@ from fingerprint.domain.profile import (
     PropertyProfile,
     ValuePartition,
 )
+from fingerprint.domain.vocabulary import ALT_LABEL, RDFS, TERM_DESCRIPTION_PREDICATES, TERM_LABEL_PREDICATES
 from tests import builders
 
 _LABEL = st.text("abcdefghijklmnopqrstuvwxyz0123456789", min_size=1, max_size=6)
@@ -78,3 +80,21 @@ def profiled_properties(draw):
 
 def class_with(observed: int, prop: PropertyProfile) -> ClassProfile:
     return builders.klass("http://ex.org/C", observed, prop)
+
+
+_TERMS = st.sampled_from(["http://ex.org/A", "http://ex.org/B", "http://ex.org/p"])
+_ANNOTATION_PREDICATES = st.sampled_from([*TERM_LABEL_PREDICATES, ALT_LABEL, *TERM_DESCRIPTION_PREDICATES, RDFS + "seeAlso"])
+
+
+def annotation_values():
+    """A list of raw annotation rows over few terms, predicates, languages and texts, so rows collide."""
+    return st.lists(
+        st.builds(
+            AnnotationValue,
+            term=_TERMS,
+            predicate=_ANNOTATION_PREDICATES,
+            text=st.sampled_from(["A", "B", "Zed"]),
+            language=st.sampled_from([None, "en", "fr"]),
+        ),
+        max_size=12,
+    )

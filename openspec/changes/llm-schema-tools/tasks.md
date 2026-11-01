@@ -21,10 +21,10 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 
 ## 1. The schema outputs and labels
 
-- [ ] 1.1 Model: the additions of design "Model changes" to `model/fingerprint_stats.yaml`, `fingerprint_analytics.yaml` and `fingerprint_views.yaml`; `make generate-models`; the three new domain modules (`annotations`, `patterns`, `shex`) added to the `generated` contract in `.importlinter`
+- [x] 1.1 Model: the additions of design "Model changes" to `model/fingerprint_stats.yaml`, `fingerprint_analytics.yaml` and `fingerprint_views.yaml`; `make generate-models`; the three new domain modules (`annotations`, `patterns`, `shex`) added to the `generated` contract in `.importlinter`
   - Layer: domain (model). Depends on: —.
   - Tests: `tests/unit/adapters/test_profile_file.py` round-trip of a run with `term_annotations`, and of the sample profile and `scanned-profile.json` (3.1, no field → `None`); `make check-models` green.
-- [ ] 1.2 `fingerprint/domain/vocabulary.py` constants and `fingerprint/domain/annotations.py` (`select_annotations`, `merge_annotations`, `shown`)
+- [x] 1.2 `fingerprint/domain/vocabulary.py` constants and `fingerprint/domain/annotations.py` (`select_annotations`, `merge_annotations`, `shown`)
   - Layer: domain. Depends on: 1.1.
   - Tests: TC-A1, TC-A2 (Hypothesis, `annotation_values()` in `tests/unit/domain/strategies.py`), TC-A3; 100% branch coverage.
 - [ ] 1.3 Q12 (`q12_term_annotations.rq`, `QUERY_FILES["Q12"]`, `terms_values`, `render(..., terms=)`) and `_Collection.term_annotations` in `profile_graph`; `QUERY_KIND["Q12"]`; step definitions for the statistics-collection scenarios of this change
@@ -78,7 +78,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 
 ## Roadmap
 
-- [ ] 1.1 · [ ] 1.2 · [ ] 1.5 · [ ] 1.6 · [ ] 1.3 · [ ] 1.4 · [ ] 1.7 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
+- [x] 1.1 · [x] 1.2 · [ ] 1.5 · [ ] 1.6 · [ ] 1.3 · [ ] 1.4 · [ ] 1.7 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
 
 ## Verification
 

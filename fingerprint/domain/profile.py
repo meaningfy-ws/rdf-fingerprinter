@@ -223,6 +223,10 @@ class QueryKind(str, Enum):
     """
     A pitfall check query (its emptiness ASK, count or examples) (pitfall-scans).
     """
+    term_annotations = "term_annotations"
+    """
+    The labels and descriptions of a graph's classes and properties (Q12).
+    """
 
 
 class PitfallImportance(str, Enum):
@@ -437,6 +441,28 @@ class GraphProfile(ConfiguredBaseModel):
     declared_subclass_edges: Optional[list[SubclassEdge]] = Field(default=None, description="""rdfs:subClassOf edges declared in the dataset.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     class_partitions: Optional[list[ClassProfile]] = Field(default=None, description="""One profile per instantiated class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile'], 'slot_uri': 'void:classPartition'} })
     pitfalls: Optional[list[PitfallResult]] = Field(default=None, description="""The pitfall checks run on this graph (pitfall-scans); absent when the scan was off or the graph empty.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
+    term_annotations: Optional[list[TermAnnotation]] = Field(default=None, description="""Selected labels and descriptions of the graph's terms; absent in profiles saved before 3.2.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
+
+
+class LangText(ConfiguredBaseModel):
+    """
+    A literal's text and its language tag; no language for an untagged literal.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
+
+    text: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['LangText', 'PitfallTerm', 'AnnotationValue']} })
+    language: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['LangText', 'ValuePartition', 'AnnotationValue']} })
+
+
+class TermAnnotation(ConfiguredBaseModel):
+    """
+    The labels and descriptions selected for one class or property (llm-schema-tools DEC-17, DEC-20).
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
+
+    term: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation', 'AnnotationValue']} })
+    labels: Optional[list[LangText]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
+    descriptions: Optional[list[LangText]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
 
 
 class PitfallResult(ConfiguredBaseModel):
@@ -482,7 +508,7 @@ class PitfallTerm(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
 
-    text: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallTerm']} })
+    text: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['LangText', 'PitfallTerm', 'AnnotationValue']} })
     kind: NodeKind = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallTerm']} })
 
 
@@ -627,7 +653,7 @@ class ValuePartition(ConfiguredBaseModel):
          'slot_uri': 'void:distinctObjects'} })
     distinct_objects_exact: Optional[bool] = Field(default=None, description="""False when the distinct count is a lower bound (reserved for the batched-collection EPIC).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyProfile', 'ValuePartition']} })
     datatype: Optional[str] = Field(default=None, description="""Datatype IRI of literal objects.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValuePartition']} })
-    language: Optional[str] = Field(default=None, description="""Language tag of literal objects; empty for untagged literals.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValuePartition']} })
+    language: Optional[str] = Field(default=None, description="""Language tag of literal objects; empty for untagged literals.""", json_schema_extra = { "linkml_meta": {'domain_of': ['LangText', 'ValuePartition', 'AnnotationValue']} })
     object_class: Optional[str] = Field(default=None, description="""A class of the objects; absent when the objects are untyped.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValuePartition']} })
     object_class_graph: Optional[str] = Field(default=None, description="""Graph in which the object class was asserted, when looked up across graphs.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValuePartition']} })
     min_length: Optional[int] = Field(default=None, description="""Shortest lexical form (STRLEN) among the literals.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['ValuePartition']} })
@@ -672,6 +698,18 @@ class IncomingLink(ConfiguredBaseModel):
                        'ValueCount',
                        'IncomingLink'],
          'slot_uri': 'void:triples'} })
+
+
+class AnnotationValue(ConfiguredBaseModel):
+    """
+    One raw label or description row of a term, before selection (llm-schema-tools DEC-17, DEC-20). Kept out of fingerprint_stats so the published profile.json schema does not list it.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema'})
+
+    term: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation', 'AnnotationValue']} })
+    predicate: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['AnnotationValue']} })
+    text: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['LangText', 'PitfallTerm', 'AnnotationValue']} })
+    language: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['LangText', 'ValuePartition', 'AnnotationValue']} })
 
 
 class SettingsOverride(ConfiguredBaseModel):
@@ -895,6 +933,7 @@ class GraphAnalytics(GraphProfile):
     declared_subclass_edges: Optional[list[SubclassEdge]] = Field(default=None, description="""rdfs:subClassOf edges declared in the dataset.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     class_partitions: Optional[list[ClassAnalytics]] = Field(default=None, description="""One profile per instantiated class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile'], 'slot_uri': 'void:classPartition'} })
     pitfalls: Optional[list[PitfallResult]] = Field(default=None, description="""The pitfall checks run on this graph (pitfall-scans); absent when the scan was off or the graph empty.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
+    term_annotations: Optional[list[TermAnnotation]] = Field(default=None, description="""Selected labels and descriptions of the graph's terms; absent in profiles saved before 3.2.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
 
 
 # Model rebuild
@@ -904,6 +943,8 @@ NamespacePrefix.model_rebuild()
 Settings.model_rebuild()
 Failure.model_rebuild()
 GraphProfile.model_rebuild()
+LangText.model_rebuild()
+TermAnnotation.model_rebuild()
 PitfallResult.model_rebuild()
 PitfallExample.model_rebuild()
 PitfallTerm.model_rebuild()
@@ -917,6 +958,7 @@ CardinalityBin.model_rebuild()
 ValuePartition.model_rebuild()
 ValueCount.model_rebuild()
 IncomingLink.model_rebuild()
+AnnotationValue.model_rebuild()
 SettingsOverride.model_rebuild()
 ProfileAnalytics.model_rebuild()
 CardinalityStatistics.model_rebuild()

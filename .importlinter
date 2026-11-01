@@ -32,6 +32,9 @@ forbidden_modules =
     fingerprint.domain.modules
     fingerprint.domain.shapes
     fingerprint.domain.pitfalls
+    fingerprint.domain.annotations
+    fingerprint.domain.patterns
+    fingerprint.domain.shex
     fingerprint.adapters
     fingerprint.service_layer
     fingerprint.entrypoints

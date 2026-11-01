@@ -58,3 +58,22 @@ def test_a_profile_without_a_namespace_table_still_loads():
     """namespace-prefixes: an old profile (saved before 3.0) loads; its table is resolved later."""
     assert "namespaces" not in json.loads(SAMPLE.read_text())
     assert load_profile(SAMPLE).namespaces is None
+
+
+# --- term annotations (llm-schema-tools P-6, backward compatibility) ---
+
+from fingerprint.domain.profile import LangText, TermAnnotation  # noqa: E402
+from tests.sample_data import SCANNED_PROFILE  # noqa: E402
+
+
+def test_term_annotations_round_trip(tmp_path, sample_run):
+    annotation = TermAnnotation(term="http://ex.org/Person", labels=[LangText(text="Person", language="en")], descriptions=[])
+    graph = sample_run.graphs[0].model_copy(update={"term_annotations": [annotation]})
+    run = sample_run.model_copy(update={"graphs": [graph, *sample_run.graphs[1:]]})
+    assert load_profile(save_profile(run, tmp_path)) == run
+
+
+@pytest.mark.parametrize("path", [SAMPLE, SCANNED_PROFILE])
+def test_a_profile_saved_before_term_annotations_loads_without_them(path):
+    run = load_profile(path)
+    assert all(graph.term_annotations is None for graph in run.graphs)

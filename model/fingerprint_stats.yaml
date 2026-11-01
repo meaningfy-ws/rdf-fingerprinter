@@ -93,6 +93,8 @@ enums:
         description: The instance listing (first N) used by the first_n mode.
       pitfall:
         description: A pitfall check query (its emptiness ASK, count or examples) (pitfall-scans).
+      term_annotations:
+        description: The labels and descriptions of a graph's classes and properties (Q12).
   PitfallImportance:
     description: How serious a pitfall is; critical > important > minor (pitfall-scans DEC-1).
     permissible_values:
@@ -320,6 +322,24 @@ classes:
         multivalued: true
         inlined_as_list: true
         description: The pitfall checks run on this graph (pitfall-scans); absent when the scan was off or the graph empty.
+      term_annotations:
+        range: TermAnnotation
+        multivalued: true
+        inlined_as_list: true
+        description: Selected labels and descriptions of the graph's terms; absent in profiles saved before 3.2.
+
+  LangText:
+    description: A literal's text and its language tag; no language for an untagged literal.
+    attributes:
+      text: { required: true }
+      language: {}
+
+  TermAnnotation:
+    description: The labels and descriptions selected for one class or property (llm-schema-tools DEC-17, DEC-20).
+    attributes:
+      term: { range: uriorcurie, required: true }
+      labels: { range: LangText, multivalued: true, inlined_as_list: true }
+      descriptions: { range: LangText, multivalued: true, inlined_as_list: true }
 
   PitfallResult:
     description: What one pitfall check found in one graph - its metadata, the count and the first examples.

@@ -53,6 +53,14 @@ slots:
     description: A share between 0 and 1.
 
 classes:
+  AnnotationValue:
+    description: One raw label or description row of a term, before selection (llm-schema-tools DEC-17, DEC-20). Kept out of fingerprint_stats so the published profile.json schema does not list it.
+    attributes:
+      term: { range: uriorcurie, required: true }
+      predicate: { range: uriorcurie, required: true }
+      text: { required: true }
+      language: {}
+
   SettingsOverride:
     description: >-
       Collection settings given by one source (command line, environment, parameter, config file);
