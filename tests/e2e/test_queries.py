@@ -2,7 +2,14 @@
 
 import pytest
 
-from fingerprint.adapters.queries import QUERY_FILES, render, subjects_exact, subjects_limit, subjects_values
+from fingerprint.adapters.queries import (
+    QUERY_FILES,
+    render,
+    subjects_exact,
+    subjects_limit,
+    subjects_values,
+    terms_values,
+)
 from fingerprint.adapters.sparql import SparqlHttpClient
 from tests import LOCAL_ENDPOINT
 
@@ -52,3 +59,13 @@ def test_first_n_sources_agree_with_exact_on_a_small_class(sparql, name):
         for s in sources
     ]
     assert results[0] == results[1] == results[2]
+
+
+def test_term_annotations_of_the_scheme(sparql):
+    scheme = "http://publications.europa.eu/resource/authority/continent"
+    rows = sparql.select(render("Q12", "", terms=terms_values([scheme])))
+    found = sorted((str(r["p"]), str(r["v"]), r["v"].language) for r in rows)
+    assert found == [
+        ("http://www.w3.org/2000/01/rdf-schema#comment", "Continent", None),
+        ("http://www.w3.org/2008/05/skos-xl#prefLabel", "Continent", "en"),
+    ]

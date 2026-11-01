@@ -25,6 +25,8 @@ enums:
       puml: { description: "PlantUML class diagrams: per graph an overview and one file per module." }
       doc: { description: "The report page main.html (HTML), from a saved profile." }
       pitfalls: { description: "The pitfall findings as ROBOT-style TSV, one file per scanned graph (pitfall-scans)." }
+      pattern: { description: "The pattern schema: one text file per graph." }
+      shex: { description: "Enriched ShEx compact: one .shex file per graph." }
   ShapeSeverity:
     description: The severity of a property shape; violation is SHACL's default and is not written.
     permissible_values:
@@ -35,6 +37,14 @@ enums:
     description: The check a generated text must pass before any file of its format is written.
     permissible_values:
       turtle: { description: "The text parses as Turtle." }
+  TargetKind:
+    description: What the values of a pattern edge are.
+    permissible_values:
+      group: {}
+      datatype: {}
+      iri: {}
+      blank_node: {}
+      unknown: {}
   DiagramMemberKind:
     description: How a property appears in a diagram class.
     permissible_values:
@@ -83,6 +93,9 @@ classes:
       exclude_namespaces: { multivalued: true, description: "Prefixes or namespace IRIs whose classes are left out, beyond the meta vocabularies." }
       include_namespaces: { multivalued: true, description: "Prefixes or namespace IRIs shown again; wins over exclusion." }
       module_size: { range: integer, minimum_value: 1, ifabsent: "int(15)", description: "Most classes per diagram module (PlantUML only)." }
+      ontology: { description: "Path of an ontology file whose labels and descriptions override the profile's (pattern and ShEx outputs)." }
+      min_instances: { range: integer, minimum_value: 1, description: "Classes with fewer instances are left out (pattern and ShEx outputs)." }
+      max_classes: { range: integer, minimum_value: 1, description: "Most classes shown, the largest first (pattern and ShEx outputs)." }
 
   # --- SHACL ---
   ShapesGraph:
@@ -162,6 +175,106 @@ classes:
     attributes:
       alias: { required: true }
       label: { required: true }
+
+  # --- pattern schema ---
+  EdgeTarget:
+    description: What the values of an edge are.
+    attributes:
+      kind: { range: TargetKind, required: true }
+      name: { required: true, description: "As written." }
+      classes: { range: uriorcurie, multivalued: true, description: "For a group." }
+      graph: { range: uriorcurie, description: "The other graph, when the class is profiled there." }
+      has_shape: { range: boolean }
+      nested: { range: boolean, description: "The group is a nested one (it has no block of its own); whether any edge expands it or not." }
+
+  PatternEdge:
+    description: One edge line of a block.
+    attributes:
+      property: { range: uriorcurie, required: true }
+      name: { required: true }
+      depth: { range: integer, required: true, minimum_value: 1, maximum_value: 3, description: "1 = the block's own edge, one hop per level." }
+      targets: { range: EdgeTarget, multivalued: true, inlined_as_list: true }
+      text: { required: true, description: "The line after the indent." }
+      stats: { description: "The statistics token text." }
+      ending: { description: "Empty, ' ^' or ' …'." }
+      min_count: { range: integer }
+      max_count: { range: integer }
+      presence_only: { range: boolean }
+      edges: { range: PatternEdge, multivalued: true, inlined_as_list: true, description: "Nested edges." }
+
+  ViaLink:
+    description: A group reached through another group's property.
+    attributes:
+      source: { required: true, description: "The group name." }
+      property: { required: true, description: "The property name." }
+
+  CoTypeNote:
+    description: Another type the subjects of a block also have.
+    attributes:
+      name: { required: true }
+      subjects: { range: integer }
+
+  PatternBlock:
+    description: The block of one class group.
+    attributes:
+      name: { required: true }
+      classes: { range: uriorcurie, multivalued: true }
+      shape: { description: "The ShExC label." }
+      instances: { range: integer }
+      observed: { range: integer, description: "Only in first_n mode." }
+      nested: { range: boolean }
+      reaching_edges: { range: integer }
+      co_types: { range: CoTypeNote, multivalued: true, inlined_as_list: true }
+      via: { range: ViaLink, multivalued: true, inlined_as_list: true }
+      header: { description: "As written." }
+      edges: { range: PatternEdge, multivalued: true, inlined_as_list: true }
+
+  GlossaryEntry:
+    description: A term with its label or description line.
+    attributes:
+      term: { range: uriorcurie, required: true }
+      name: { required: true }
+      line: { required: true }
+
+  PatternGraph:
+    description: The pattern schema of one graph.
+    mixins: [GraphView]
+    attributes:
+      graph: { range: uriorcurie }
+      prefixes: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true }
+      hidden_classes: { range: integer }
+      blocks: { range: PatternBlock, multivalued: true, inlined_as_list: true }
+      nested_blocks: { range: PatternBlock, multivalued: true, inlined_as_list: true, description: "Every nested group's own block, edges from depth 1." }
+      glossary: { range: GlossaryEntry, multivalued: true, inlined_as_list: true }
+
+  # --- ShExC ---
+  ShexConstraint:
+    description: One triple constraint of a shape.
+    attributes:
+      predicate: { required: true }
+      value: { required: true }
+      cardinality: {}
+      comment: {}
+      inline: { range: ShexConstraint, multivalued: true, inlined_as_list: true }
+      depth: { range: integer }
+
+  ShexShape:
+    description: One shape.
+    attributes:
+      comment: {}
+      label: { required: true }
+      blank: { range: boolean }
+      constraints: { range: ShexConstraint, multivalued: true, inlined_as_list: true }
+
+  ShexSchema:
+    description: The enriched ShExC of one graph.
+    mixins: [GraphView]
+    attributes:
+      prefixes: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true }
+      hidden_classes: { range: integer }
+      shapes: { range: ShexShape, multivalued: true, inlined_as_list: true }
+      glossary: { multivalued: true }
+      skipped_terms: { multivalued: true }
 
   # --- document ---
   ProfileDocument:

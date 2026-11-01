@@ -13,6 +13,8 @@ profile alone, so the endpoint is queried once, whatever is generated afterwards
 | Report page | `main.html` | the profile as one static page with contents, search and namespace switches
 | SHACL shapes | `shapes-<graph>.ttl`, one per graph with a shown class | a node shape per class with a property shape per property
 | PlantUML diagrams | `diagram-<graph>.puml` (overview) and `diagram-<graph>--<module>.puml` | namespaces and their links; per module the classes, attributes, associations, generalisations — source only
+| Pattern schema | `pattern-<graph>.txt` | a compact, labelled schema for a language model (xref:llm-schema.adoc[Schemas for LLMs])
+| Enriched ShExC | `shex-<graph>.shex` | the same schema as ShEx shapes with statistics in comments (xref:llm-schema.adoc[Schemas for LLMs])
 |===
 
 `<graph>` is `default` for the default graph, else a readable name from the graph IRI plus a short
@@ -51,7 +53,9 @@ Every command takes:
 |===
 
 `fingerprint-gen-shacl` also takes `--shapes-namespace`, and `fingerprint-gen-puml` takes
-`--module-size N` (default 15). The `fingerprint` command takes all of these, and `--no-prefix-lookup`.
+`--module-size N` (default 15). `fingerprint-gen-pattern` and `fingerprint-gen-shex` also take
+`--ontology`, `--min-instances` and `--max-classes`, which the `fingerprint` command does not
+(xref:llm-schema.adoc[Schemas for LLMs]). The `fingerprint` command takes the rest, and `--no-prefix-lookup`.
 
 Exit status: 0 written; 2 for a usage error — a missing or unreadable profile file, a threshold out
 of range, a missing output folder or template package; 4 for an unexpected error, including
@@ -148,6 +152,7 @@ Every format is an eds4jinja2 template package: a folder with `config.json`
 (`{"template": "<file>", "conf": {…}}`) and `templates/`. Pass one with `--template`. A template
 receives `view`, the generator's prepared view — a `ShapesGraph` per graph, a `DiagramOverview` or a
 `DiagramModule` per diagram file (told apart by `view.kind`), the `ProfileDocument` for the page,
+a `PatternGraph` per pattern file, a `ShexSchema` per ShExC file,
 all defined in `model/fingerprint_views.yaml` — and the constants of its `conf`. These filters keep
 the output valid, and shorten IRIs with the profile's namespace table:
 
@@ -161,7 +166,7 @@ the output valid, and shorten IRIs with the profile's namespace table:
 |===
 
 The packaged packages are in `fingerprint_report_templates/` (`fingerprint_report`, `shacl_shapes`,
-`plantuml_diagram`). The SHACL output of a custom package is still parsed before it is written.
+`plantuml_diagram`, `pattern_schema`, `shex_schema`). The SHACL output of a custom package is still parsed before it is written.
 
 WARNING: A template package is code: it runs in an unsandboxed Jinja environment with your
 permissions. Use only packages you trust. The data it renders is not trusted: escape it with the
@@ -182,4 +187,4 @@ generate_representations(run, "out/", ["puml"], options=GeneratorOptions(include
 A run without a namespace table is resolved first, from the files only.
 
 `GeneratorOptions` and the views are in `fingerprint.domain.views`; the formats are the
-`RepresentationFormat` enum (`shacl`, `puml`, `doc`).
+`RepresentationFormat` enum (`shacl`, `puml`, `doc`, `pitfalls`, `pattern`, `shex`).

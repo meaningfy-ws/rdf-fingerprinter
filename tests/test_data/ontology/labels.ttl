@@ -1,0 +1,20 @@
+# Fixture for the term labels (llm-schema-tools design, "Glossary with the label fixture").
+# The texts are test data, not the wording of the published vocabularies.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix skosxl: <http://www.w3.org/2008/05/skos-xl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix euvoc: <http://publications.europa.eu/ontology/euvoc#> .
+@prefix ex: <http://example.org/> .
+
+dcterms:created skos:prefLabel "Date Created"@en ;
+    rdfs:comment "Date of creation of the resource."@en .
+skos:Concept skos:prefLabel "Concept"@en ;
+    skos:definition "An idea or notion; a unit of thought."@en .
+skosxl:Label skos:prefLabel "Label"@en ;
+    skos:definition "A special class of lexical entities."@en .
+skosxl:prefLabel skos:prefLabel "preferred label"@en .
+euvoc:Treaty rdfs:label "Vertrag"@de, "Traité"@fr .
+skosxl:altLabel skos:altLabel "alternative label"@en .
+ex:Widget skosxl:prefLabel [ skosxl:literalForm "Widget"@en ] .
+dcterms:type rdfs:comment "A long description, longer than two hundred characters, so that the glossary has to shorten it: it goes on about the nature or genre of the resource, recommends a controlled vocabulary, and repeats itself on purpose until the limit of two hundred characters is certainly passed."@en .

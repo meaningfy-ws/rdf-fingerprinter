@@ -202,8 +202,8 @@ Feature: Publishing a fingerprint as an application profile
 
     Scenario: Empty default graph
       Given a profile whose default graph is empty
-      When the shapes and the diagram are generated with no filter option
-      Then no shapes or diagram file is written for it
+      When the shapes, the diagram, the pattern schema and the ShExC are generated with no filter option
+      Then no shapes, diagram, pattern schema or ShExC file is written for it
 
   Rule: Every format is checked into a golden file
 
@@ -213,7 +213,191 @@ Feature: Publishing a fingerprint as an application profile
       Then it equals its golden file
 
       Examples:
-        | format   |
-        | shapes   |
-        | diagram  |
-        | document |
+        | format         |
+        | shapes         |
+        | diagram        |
+        | document       |
+        | pattern schema |
+        | ShExC          |
+
+  # llm-schema-tools: the pattern schema (primary) and the enriched ShExC (secondary), one pattern view.
+  Rule: The pattern view follows the profile's links, one hop and through blank nodes
+
+    @uc_b2_1
+    Scenario: A chain deeper than three hops
+      Given a profile where "ex:A" reaches blank nodes of "ex:B" by "ex:p", "ex:B" those of "ex:C" by "ex:q", "ex:C" those of "ex:D" by "ex:r", and "ex:D" those of "ex:E" by "ex:s"
+      When the pattern schema is generated from it
+      Then the "ex:A" block holds "-ex:p->" at level 1, "-ex:q->" at level 2 and "-ex:r-> (:ex:D) bn …" at level 3
+      And no line lies below level 3
+      And neither "ex:D" nor "ex:E" begins a block
+
+    @uc_b2_1
+    Scenario: A blank-node cycle is expanded once
+      Given a profile where "ex:A" reaches blank nodes of "ex:List" by "ex:items", and "ex:List" reaches blank nodes of "ex:List" by "ex:rest"
+      When the pattern schema is generated from it
+      Then "ex:List" is expanded once, under "-ex:items->"
+      And its nested line "-ex:rest-> (:ex:List) bn ^" is followed by no deeper line
+
+    @uc_b2_1
+    Scenario: A class with unreached instances keeps its block
+      Given a profile where 3 distinct blank nodes of "ex:Note" are reached and "ex:Note" has 5 instances
+      When the pattern schema is generated from it
+      Then "ex:Note" begins a block
+      And the edges into "ex:Note" are not followed by nested lines
+
+    @uc_b2_1
+    Scenario: An object type from another graph
+      Given a profile collected across graphs where "ex:knows" points to "ex:Person" typed in graph "http://ex.org/people"
+      When the pattern schema is generated from it
+      Then the "ex:knows" edge target is "(:ex:Person @<http://ex.org/people>)"
+
+  Rule: The pattern schema is compact and reads like triple patterns
+
+    @uc_b2_1
+    Scenario Outline: Lines of the continents pattern schema
+      Given the fixed test profile
+      When the pattern schema is generated from it
+      Then "pattern-continents-214e8f67.txt" holds, at level <level>, the line "<line>"
+
+      Examples:
+        | level | line                                                                                                                                       |
+        | 0     | (:euvoc:Continent&skos:Concept) 6                                                                                                          |
+        | 1     | -euvoc:startDate-> xsd:date =1952-07-24                                                                                                    |
+        | 1     | -euvoc:status-> IRI d1                                                                                                                     |
+        | 1     | -skosxl:prefLabel-> (:skosxl:Label) ×24 bn                                                                                                 |
+        | 2     | -lvont:script-> IRI 12/145 d2                                                                                                              |
+        | 2     | -skosxl:literalForm-> rdf:langString @24                                                                                                   |
+        | 2     | -rdf:value-> xsd:string AFRICA..OCEANIA                                                                                                    |
+        | 0     | (:owl:Ontology&skos:ConceptScheme) 1 via (:euvoc:Continent&skos:Concept)-skos:inScheme, (:euvoc:Continent&skos:Concept)-skos:topConceptOf |
+        | 1     | -skosxl:prefLabel-> (:skosxl:Label) bn ^                                                                                                   |
+        | 0     | # glossary: none                                                                                                                           |
+
+    @uc_b2_1
+    Scenario: One block per class group and one edge per property
+      Given the fixed test profile
+      When the pattern schema is generated from it
+      Then in every file no group name begins two blocks and no property begins two edges at the same place
+      And "skosxl:Label", "euvoc:XlNotation" and "euvoc:XlNote" begin no block
+      And every declared prefix is used
+
+    @uc_b2_1
+    Scenario Outline: Values that need quotes
+      Given a profile where the lowest and highest values of a literal property are both <value>
+      When the pattern schema is generated from it
+      Then the property's edge ends in <written>
+
+      Examples:
+        | value                   | written                                                              |
+        | "Treaty of Rome"        | ="Treaty of Rome"                                                    |
+        | "1..2"                  | ="1..2"                                                              |
+        | the empty string        | =""                                                                  |
+        | 70 times the letter "a" | ="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa…" |
+
+    @uc_b2_1
+    Scenario: A single IRI value is written as a prefixed name
+      Given a profile collected at depth "rich_values" where every object of "ex:status" is the IRI "http://ex.org/status/active", recorded as its top value
+      And the prefix table maps "exs" to "http://ex.org/status/"
+      When the pattern schema is generated from it
+      Then the "ex:status" edge is "-ex:status-> IRI =exs:active"
+      And the prefix "exs" is declared
+      And the same profile without top values gives the edge "-ex:status-> IRI d1"
+
+    @uc_b2_1
+    Scenario: A class read in first-N mode
+      Given a profile where "ex:Big" has 50000 instances, 10000 of them read in first-N mode, and "ex:name" on 9000 of those
+      When the pattern schema is generated from it
+      Then the "ex:Big" block header is "(:ex:Big) 50000 ~10000 first_n"
+      And its "ex:name" edge holds "9000/10000"
+
+    @uc_b2_1
+    Scenario: Unusual IRIs in the LLM outputs
+      Given a profile whose class IRI is "http://ex.org/q?a=1&b='x'"
+      When the pattern schema and the ShExC are generated from it
+      Then the pattern schema writes the class as "<http://ex.org/q?a=1&b='x'>"
+      And the ShExC lists "http://ex.org/q?a=1&b='x'" after "# skipped:"
+      And the ShExC parses
+
+  Rule: The enriched ShExC says the same, where ShExC can
+
+    @uc_b2_1
+    Scenario: The ShExC output parses
+      Given the fixed test profile
+      When the ShExC is generated from it
+      Then each of the three files parses with PyShExC
+
+    @uc_b2_1
+    Scenario Outline: Lines of the continents ShExC
+      Given the fixed test profile
+      When the ShExC is generated from it
+      Then "shex-continents-214e8f67.shex" holds, at level <level>, the line "<line>"
+
+      Examples:
+        | level | line                                                                         |
+        | 0     | euvoc:Continent {                                                            |
+        | 1     | euvoc:startDate xsd:date ;  # =1952-07-24                                    |
+        | 1     | euvoc:xlNotation BNODE {  # (:euvoc:XlNotation) bn                           |
+        | 1     | skosxl:prefLabel BNODE @skosxl:Label {24} ;  # (:skosxl:Label) ×24 bn        |
+        | 1     | skos:inScheme @skos:ConceptScheme ;  # (:owl:Ontology&skos:ConceptScheme) d1 |
+        | 0     | skosxl:Label BNODE {                                                         |
+        | 1     | lvont:script IRI ? ;  # 12/145 d2                                            |
+
+  Rule: Terms carry labels and one description, the ontology first
+
+    @uc_b2_1
+    Scenario: Labels from an ontology file
+      Given the fixed test profile
+      And the label fixture ontology
+      When the pattern schema is generated from it with that ontology
+      Then the glossary holds the line 'skos:Concept "Concept"@en: An idea or notion; a unit of thought.'
+      And the glossary holds the line 'skosxl:prefLabel "preferred label"@en'
+      And the glossary has no line for "euvoc:Continent"
+
+    @uc_b2_1
+    Scenario: The ontology wins for the fields it gives
+      Given a profile whose data labels "ex:Person" '"Persoon"@nl' with the description '"Iemand"@nl'
+      And an ontology that labels "ex:Person" '"Person"@en' with no description
+      When the pattern schema is generated from it with that ontology
+      Then the glossary holds the line 'ex:Person "Person"@en: Iemand'
+
+    @uc_b2_1
+    Scenario Outline: The label shown
+      Given a profile whose data labels "ex:Person" <labels>
+      When the pattern schema is generated from it
+      Then the glossary line of "ex:Person" shows <shown>
+
+      Examples:
+        | labels                              | shown          |
+        | "Begriff"@de, "Concept"@en, "C"     | "C"            |
+        | "Begriff"@de, "Concept"@en          | "Concept"@en   |
+        | "Begriff"@de, "Concept"@fr          | "Begriff"@de   |
+
+    @uc_b2_1
+    Scenario: Unreadable ontology file
+      Given the fixed test profile
+      And an ontology file that is not RDF
+      When the pattern schema is generated from it with that ontology
+      Then it exits 2 with a message naming the ontology file
+      And nothing is written
+
+    @uc_b2_1
+    Scenario: A profile saved before term annotations
+      Given a profile saved before 3.2, with no term annotations
+      When the pattern schema is generated from it
+      Then it is written
+      And its glossary is "# glossary: none"
+
+  Rule: Size filters prune the largest outputs
+
+    @uc_b2_1
+    Scenario: Small classes hidden
+      Given the fixed test profile
+      When the pattern schema is generated from it with "--min-instances 2"
+      Then "pattern-treaties-3b4301a8.txt" has no block "(:owl:Ontology&skos:ConceptScheme)"
+      And it holds the line "# hidden: 2 classes"
+      And it still holds the line "-skos:inScheme-> (:owl:Ontology&skos:ConceptScheme) d1"
+
+    @uc_b2_1
+    Scenario: Only the largest classes
+      Given the fixed test profile
+      When the pattern schema is generated from it with "--max-classes 1"
+      Then each file has one block, the largest named group of its graph

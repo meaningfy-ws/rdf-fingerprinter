@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF
+  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+  xmlns:skosxl="http://www.w3.org/2008/05/skos-xl#"
+  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+>
+  <rdf:Description rdf:about="http://www.w3.org/2008/05/skos-xl#altLabel">
+    <skos:altLabel xml:lang="en">alternative label</skos:altLabel>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.w3.org/2004/02/skos/core#Concept">
+    <skos:prefLabel xml:lang="en">Concept</skos:prefLabel>
+    <skos:definition xml:lang="en">An idea or notion; a unit of thought.</skos:definition>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.w3.org/2008/05/skos-xl#Label">
+    <skos:prefLabel xml:lang="en">Label</skos:prefLabel>
+    <skos:definition xml:lang="en">A special class of lexical entities.</skos:definition>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://publications.europa.eu/ontology/euvoc#Treaty">
+    <rdfs:label xml:lang="de">Vertrag</rdfs:label>
+    <rdfs:label xml:lang="fr">Traité</rdfs:label>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/dc/terms/created">
+    <skos:prefLabel xml:lang="en">Date Created</skos:prefLabel>
+    <rdfs:comment xml:lang="en">Date of creation of the resource.</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://www.w3.org/2008/05/skos-xl#prefLabel">
+    <skos:prefLabel xml:lang="en">preferred label</skos:prefLabel>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://purl.org/dc/terms/type">
+    <rdfs:comment xml:lang="en">A long description, longer than two hundred characters, so that the glossary has to shorten it: it goes on about the nature or genre of the resource, recommends a controlled vocabulary, and repeats itself on purpose until the limit of two hundred characters is certainly passed.</rdfs:comment>
+  </rdf:Description>
+  <rdf:Description rdf:about="http://example.org/Widget">
+    <skosxl:prefLabel>
+      <rdf:Description rdf:nodeID="n4ba28a3018de4b9a9ac81d11f57be155b1">
+        <skosxl:literalForm xml:lang="en">Widget</skosxl:literalForm>
+      </rdf:Description>
+    </skosxl:prefLabel>
+  </rdf:Description>
+</rdf:RDF>

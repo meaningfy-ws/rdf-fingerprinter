@@ -11,10 +11,12 @@ from fingerprint.domain.profile import Settings
 from fingerprint.entrypoints.cli import main as cli
 from fingerprint.service_layer import handlers
 from tests.bdd.steps.analytics import *  # noqa: F403
+from tests.bdd.steps.pattern import *  # noqa: F403
 from tests.bdd.steps.pitfalls import *  # noqa: F403
 from tests.bdd.steps.prefixes import *  # noqa: F403
 from tests.bdd.steps.report import *  # noqa: F403
 from tests.bdd.steps.representations import *  # noqa: F403
+from tests.bdd.steps.shex import *  # noqa: F403
 from tests.bdd.steps.statistics import *  # noqa: F403
 from tests.fakes import FakeSparql
 

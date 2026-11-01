@@ -224,7 +224,7 @@ Feature: Collecting raw statistics from a knowledge graph
     Scenario: Default depth
       Given class "ex:Person" has 2 instances
       When the knowledge graph is fingerprinted
-      Then the endpoint receives the graph list, class count, hierarchy, co-type, vote, value and object-class queries
+      Then the endpoint receives the graph list, class count, hierarchy, co-type, vote, value, object-class and term-annotation queries
       And it receives no graph-total, top-value or incoming-link query
 
     Scenario Outline: Measurements per depth
@@ -234,12 +234,12 @@ Feature: Collecting raw statistics from a knowledge graph
       And the profile contains no <absent>
 
       Examples:
-        | depth       | present                                     | absent                       |
-        | classes     | instance counts, hierarchy and other types  | property histograms          |
-        | properties  | property histograms                         | value groups                 |
-        | values      | value groups and object classes             | top values or incoming links |
-        | rich_values | top values                                  | incoming links               |
-        | links       | incoming links                              | graph totals                 |
+        | depth       | present                                                       | absent                       |
+        | classes     | instance counts, hierarchy, other types and class annotations | property histograms          |
+        | properties  | property histograms and property annotations                  | value groups                 |
+        | values      | value groups and object classes                               | top values or incoming links |
+        | rich_values | top values                                                    | incoming links               |
+        | links       | incoming links                                                | graph totals                 |
 
     Scenario: Graph statistics on
       Given graph statistics are switched on
@@ -282,3 +282,51 @@ Feature: Collecting raw statistics from a knowledge graph
       When the fingerprint command runs with --pitfalls on graph "data" with schema graph "schema"
       Then a failure of kind pitfall names "p35_untyped_property"
       And the profile of "data" has a "p34_untyped_class" result
+
+  # llm-schema-tools (DEC-20, DEC-21): labels and descriptions of the profiled terms.
+  Rule: Labels and descriptions of the profiled terms are collected
+
+    Scenario: Labels and descriptions of a class are stored
+      Given class "ex:Person" has 2 instances
+      And the store holds 'ex:Person rdfs:label "Person"@en'
+      And the store holds 'ex:Person skos:prefLabel "Personne"@fr'
+      And the store holds 'ex:Person rdfs:comment "A human being"@en'
+      When the knowledge graph is fingerprinted
+      Then the term annotations give "ex:Person" the labels '"Person"@en, "Personne"@fr'
+      And the term annotations give "ex:Person" the descriptions '"A human being"@en'
+
+    Scenario Outline: Label predicate priority
+      Given class "ex:Person" has 2 instances
+      And the store holds, for "ex:Person", only <values>
+      When the knowledge graph is fingerprinted
+      Then the term annotations give "ex:Person" the labels '<labels>'
+
+      Examples:
+        | values                                                                        | labels      |
+        | skos:prefLabel "Human"@en and rdfs:label "Person"@en                          | "Human"@en  |
+        | skosxl:prefLabel [ skosxl:literalForm "Human"@en ] and rdfs:label "Person"@en | "Human"@en  |
+        | skos:altLabel "Body"@en                                                       | "Body"@en   |
+        | skos:altLabel "Body"@en and dcterms:title "Person"@de                         | "Person"@de |
+        | rdfs:label "B" and rdfs:label "A"                                             | "A"         |
+
+    Scenario: Annotations from another graph
+      Given class "ex:Person" has 2 instances in graph "http://ex.org/data"
+      And the graph "http://ex.org/ontology" holds 'ex:Person rdfs:label "Person"@en'
+      When the knowledge graph is fingerprinted
+      Then the term annotations of graph "http://ex.org/data" give "ex:Person" the labels '"Person"@en'
+
+    Scenario: Property annotations need depth properties
+      Given class "ex:Person" has 2 instances with "ex:name"
+      And the store holds 'ex:Person rdfs:label "Person"@en'
+      And the store holds 'ex:name rdfs:label "name"@en'
+      When the knowledge graph is fingerprinted at depth "classes" and again at depth "properties"
+      Then at depth "classes" only "ex:Person" has term annotations
+      And at depth "properties" "ex:Person" and "ex:name" have term annotations
+
+    Scenario: A failed annotation query keeps the graph
+      Given class "ex:Person" has 2 instances
+      And the endpoint rejects the term-annotation query with HTTP 400
+      When the knowledge graph is fingerprinted
+      Then "ex:Person" is in the profile
+      And the graph has no term annotations
+      And one failure of kind "term_annotations" is recorded

@@ -4,7 +4,7 @@
 
 [project]
 name = "rdf-fingerprinter"
-version = "3.1.0"
+version = "3.2.0"
 description = "Find out kind of data shapes your RDF dataset instantiates."
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
@@ -48,6 +48,8 @@ fingerprint-gen-shacl = "fingerprint.entrypoints.cli.generate:gen_shacl"
 fingerprint-gen-puml = "fingerprint.entrypoints.cli.generate:gen_puml"
 fingerprint-gen-doc = "fingerprint.entrypoints.cli.generate:gen_doc"
 fingerprint-gen-pitfalls = "fingerprint.entrypoints.cli.generate:gen_pitfalls"
+fingerprint-gen-pattern = "fingerprint.entrypoints.cli.generate:gen_pattern"
+fingerprint-gen-shex = "fingerprint.entrypoints.cli.generate:gen_shex"
 
 [dependency-groups]
 test = [
@@ -56,6 +58,7 @@ test = [
     "pytest-cov==7.1.0",
     "pytest-bdd==8.1.0",
     "pyshacl==0.40.1",
+    "pyshexc==0.10.3.post1",
     "hypothesis==6.170.14",
     "mutmut==3.8.1",
 ]

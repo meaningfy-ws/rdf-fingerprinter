@@ -1,6 +1,7 @@
 """Error-matrix rows and query selection of `collect` (design.md "Error matrix", "Which queries run")."""
 
 import logging
+import re
 import urllib.error
 
 import pytest
@@ -94,7 +95,7 @@ def test_unreachable_endpoint_is_named_without_credentials(fake):
 def test_default_depth_sends_only_its_queries(fake):
     run(fake)
     sent = {q.lstrip("# ").split()[0] for q in fake.queries}
-    assert sent == {"Q0", "Q4", "Q3", "Q5", "Q6", "Q7", "Q8"}
+    assert sent == {"Q0", "Q4", "Q3", "Q5", "Q6", "Q7", "Q8", "Q12"}
 
 
 def test_failures_are_logged(fake, caplog):
@@ -420,3 +421,134 @@ def test_a_blank_node_class_is_skipped_with_its_graph_and_text():
     fake.add("ex:x", "a", "_:anonymous", G)
     kind, message, graph, cls, *_ = failure_of(collected(fake, G))
     assert (kind, graph, cls) == ("class_partitions", G, "_:anonymous") and message.startswith("skipping '_:anonymous'")
+
+
+# --- term annotations (llm-schema-tools TC-C1) ---
+
+
+def annotated_terms(query):
+    """The IRIs in a Q12 query's VALUES block."""
+    return sorted(re.findall(r"<([^>]+)>", query.split("VALUES ?t {")[1].split("}")[0]))
+
+
+def test_term_annotations_are_asked_once_per_graph_after_the_classes_for_the_classes_and_their_properties():
+    fake = people()
+    fake.add("ex:p0", "http://www.w3.org/2004/02/skos/core#prefLabel", Literal("Pip", lang="en"))
+    result = collected(fake, depth="properties")
+    (query,) = fake.sent("Q12")
+    assert annotated_terms(query) == [EX + "Person", EX + "name", "http://www.w3.org/2004/02/skos/core#prefLabel"]
+    assert fake.queries.index(query) > max(i for i, q in enumerate(fake.queries) if q.startswith("# Q8"))
+    assert result.graphs[0].term_annotations == []
+
+
+def test_the_classes_alone_are_annotated_at_depth_classes_and_no_term_is_asked_at_depth_graphs():
+    fake = people()
+    collected(fake, depth="classes")
+    assert [annotated_terms(q) for q in fake.sent("Q12")] == [[EX + "Person"]]
+    none = people()
+    collected(none, depth="graphs")
+    assert not none.sent("Q12")
+
+
+def test_a_graph_with_no_class_stores_an_empty_list_and_sends_no_annotation_query():
+    fake = FakeSparql()
+    fake.add("ex:s", "ex:p", "ex:o")
+    result = collected(fake)
+    assert not fake.sent("Q12") and result.graphs[0].term_annotations == []
+
+
+def test_a_property_that_cannot_be_written_is_left_out_of_the_annotation_query_without_a_failure():
+    fake = people()
+    fake.on("Q5", [{"p": BAD, "n": "1", "subjects": "2"}, {"p": EX + "name", "n": "1", "subjects": "2"}])
+    result = collected(fake, depth="properties")
+    assert annotated_terms(fake.sent("Q12")[0]) == [EX + "Person", EX + "name"]
+    assert not [f for f in result.failures if f.query_kind == "term_annotations"]
+
+
+def test_rows_are_selected_per_term_and_a_failure_leaves_none():
+    fake = people()
+    fake.add("ex:Person", "http://www.w3.org/2000/01/rdf-schema#label", Literal("Person", lang="en"))
+    (annotation,) = collected(fake).graphs[0].term_annotations
+    assert (annotation.term, [(t.text, t.language) for t in annotation.labels]) == (EX + "Person", [("Person", "en")])
+    failing = people()
+    failing.on("Q12", DENIED)
+    result = collected(failing)
+    assert result.graphs[0].term_annotations is None
+    assert failure_of(result)[:2] == ("term_annotations", "graph default: term annotations not read: 400 unsupported")
+
+
+def test_language_tags_of_annotations_are_lower_cased():
+    fake = people()
+    fake.add("ex:Person", "http://www.w3.org/2000/01/rdf-schema#label", Literal("Person", lang="EN"))
+    (annotation,) = collected(fake).graphs[0].term_annotations
+    assert [t.language for t in annotation.labels] == ["en"]
+
+
+def test_two_graphs_send_one_annotation_query_each():
+    fake = people()
+    for i in range(2):
+        fake.add(f"ex:q{i}", "a", "ex:Person", G)
+    result = collected(fake)
+    assert [g.graph for g in result.graphs] == [None, G]
+    assert len(fake.sent("Q12")) == 2
+
+
+@pytest.mark.parametrize("code", [429, 502])
+def test_a_transient_failure_of_the_annotation_query_is_retried(code):
+    fake = people()
+    fake.on("Q12", urllib.error.HTTPError("http://fake", code, "status", {}, None), times=1)  # type: ignore[arg-type]
+    result = collected(fake)
+    assert len(fake.sent("Q12")) == 2
+    assert result.graphs[0].term_annotations == [] and not result.failures
+
+
+def test_a_failure_of_the_annotation_query_names_its_graph():
+    failing = people(G)
+    failing.on("Q12", DENIED)
+    kind, message, graph, *_ = failure_of(collected(failing, G))
+    assert (kind, message, graph) == ("term_annotations", f"graph {G}: term annotations not read: 400 unsupported", G)
+
+
+def test_an_annotation_whose_value_is_an_iri_has_no_language():
+    fake = people()
+    fake.on("Q12", [{"t": PERSON, "p": "http://www.w3.org/2000/01/rdf-schema#label", "v": EX + "Thing"}])
+    (annotation,) = collected(fake).graphs[0].term_annotations
+    assert [(t.text, t.language) for t in annotation.labels] == [(EX + "Thing", None)]
+
+
+# --- what the collection logs (lean-test-suite: the operator's messages are pinned) ---
+
+LOGGER = "fingerprint.service_layer.collection"
+
+
+@pytest.mark.parametrize("graph, label", [(None, "default"), (G, G)])
+def test_a_failed_predicate_listing_is_logged_with_its_graph_and_reason(caplog, graph, label):
+    for error, reason in ((TIMEOUT, "timed out after 60 s"), (DENIED, "rejected by endpoint: 400 unsupported")):
+        caplog.clear()
+        fake = people(graph)
+        fake.on("Q2", error)
+        with caplog.at_level(logging.WARNING, logger=LOGGER):
+            collected(fake, graph, graph_statistics=True)
+        assert f"graph {label}: Q2 {reason}" in caplog.messages
+
+
+@pytest.mark.parametrize("graph, label", [(None, "default"), (G, G)])
+def test_each_graph_and_each_class_is_logged_as_profiled(caplog, graph, label):
+    with caplog.at_level(logging.INFO, logger=LOGGER):
+        collected(people(graph), graph, depth="classes")
+    assert f"graph {label}: profiling" in caplog.messages
+    assert f"class {PERSON}: exact, 2 of 2 instances, 1 queries" in caplog.messages
+
+
+def test_a_class_that_times_out_is_logged_with_the_precision_it_tries_next(caplog):
+    fake = people()
+    fake.on("Q8", TIMEOUT, times=1)
+    with caplog.at_level(logging.INFO, logger=LOGGER):
+        collected(fake)
+    assert f"class {PERSON}: exact timed out after 60 s; trying first_n" in caplog.messages
+    assert f"class {PERSON}: first_n, 2 of 2 instances, 5 queries" in caplog.messages
+    last = people()
+    last.on("Q8", TIMEOUT)
+    with caplog.at_level(logging.WARNING, logger=LOGGER):
+        collected(last)
+    assert f"class {PERSON}: first_n timed out after 60 s; trying nothing" in caplog.messages

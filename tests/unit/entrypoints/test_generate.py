@@ -1,6 +1,7 @@
 """The generator commands (UC-B2.1): parse, call the representations service, exit 0/2/4 (P-3, P-4, P-13)."""
 
 import json
+from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
@@ -103,3 +104,32 @@ def test_a_template_error_exits_4_and_names_the_template(tmp_path):
     (package / "config.json").write_text(json.dumps({"template": "broken.ttl", "conf": {}}))
     result = invoke(generate.gen_shacl, SAMPLE, "-o", tmp_path, "--template", package)
     assert result.exit_code == 4 and "no_such_filter" in result.output
+
+
+# --- llm-schema-tools: the pattern command (TC-E1) ---
+
+LABELS = Path(__file__).parents[2] / "test_data" / "ontology" / "labels.ttl"
+
+
+def test_the_pattern_command_writes_one_file_per_graph(tmp_path):
+    result = invoke(generate.gen_pattern, SAMPLE, "-o", tmp_path)
+    assert result.exit_code == 0, result.output
+    assert (tmp_path / "pattern-continents-214e8f67.txt").is_file()
+
+
+@pytest.mark.parametrize("option", ["--min-instances", "--max-classes"])
+def test_a_size_filter_below_one_exits_2(tmp_path, option):
+    result = invoke(generate.gen_pattern, SAMPLE, "-o", tmp_path, option, "0")
+    assert result.exit_code == 2 and not list(tmp_path.iterdir())
+
+
+def test_the_ontology_option_is_passed_through(tmp_path):
+    result = invoke(generate.gen_pattern, SAMPLE, "-o", tmp_path, "--ontology", LABELS)
+    assert result.exit_code == 0, result.output
+    assert 'skos:Concept "Concept"@en' in (tmp_path / "pattern-continents-214e8f67.txt").read_text()
+
+
+def test_the_size_options_are_passed_through(tmp_path):
+    invoke(generate.gen_pattern, SAMPLE, "-o", tmp_path, "--max-classes", "1")
+    blocks = [ln for ln in (tmp_path / "pattern-continents-214e8f67.txt").read_text().splitlines() if ln.startswith("(:")]
+    assert len(blocks) == 1

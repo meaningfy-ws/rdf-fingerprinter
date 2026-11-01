@@ -30,7 +30,7 @@ version = "4.9.3"
 description = "ANTLR 4.9.3 runtime for Python 3.7"
 optional = false
 python-versions = "*"
-groups = ["model"]
+groups = ["model", "test"]
 files = [
     {file = "antlr4-python3-runtime-4.9.3.tar.gz", hash = "sha256:f224469b4168294902bb1efa80a8bf7855f24c99aef99cbefc1bcd3cce77881b"},
 ]
@@ -178,7 +178,7 @@ version = "2026.10.23"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.7"
-groups = ["main", "model"]
+groups = ["main", "model", "test"]
 files = [
     {file = "certifi-2026.10.23-py3-none-any.whl", hash = "sha256:e9b54de76e530bb6cf0ccd036787103acb58fd42ba930ea8bf948ddbaa2f61d1"},
     {file = "certifi-2026.10.23.tar.gz", hash = "sha256:a9895e6e2758b371e0545e321a3a8fd1fcfd9829ada8824a936dfb16aaaf36cd"},
@@ -204,7 +204,7 @@ version = "7.7.0"
 description = "Universal character encoding detector"
 optional = false
 python-versions = ">=3.10"
-groups = ["model"]
+groups = ["model", "test"]
 files = [
     {file = "chardet-7.7.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:9c6f07e70b4f1ebf7208807fe8b3ce1ea292f15c221dd4c95db21f4fa0a1fa50"},
     {file = "chardet-7.7.0-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:1aaa8238c91698ed3edcec4fd58eb091f765cc000b39e27fd7665511124d8555"},
@@ -260,7 +260,7 @@ version = "3.5.2"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
 optional = false
 python-versions = ">=3.7"
-groups = ["main", "model"]
+groups = ["main", "model", "test"]
 files = [
     {file = "charset_normalizer-3.5.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:195c26fb65950f8fce54e26349852b7bdd7c5f120aeefbcc440b8a20faaed4a3"},
     {file = "charset_normalizer-3.5.2-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:9373ad13ef0d2c0fb761e04e55bfdee5a08b52cef2c882c8fbe9935b1517152e"},
@@ -1041,7 +1041,7 @@ version = "3.20"
 description = "Internationalized Domain Names in Applications (IDNA)"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "model"]
+groups = ["main", "model", "test"]
 files = [
     {file = "idna-3.20-py3-none-any.whl", hash = "sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c"},
     {file = "idna-3.20.tar.gz", hash = "sha256:a7db850025b95ded1eae8a46181a1a6c56c92c96f0e2b005d9ff8dc0210cab44"},
@@ -1162,7 +1162,7 @@ version = "1.3.1"
 description = "JSON as python objects"
 optional = false
 python-versions = "*"
-groups = ["model"]
+groups = ["model", "test"]
 files = [
     {file = "jsonasobj-1.3.1-py3-none-any.whl", hash = "sha256:b9e329dc1ceaae7cf5d5b214684a0b100e0dad0be6d5bbabac281ec35ddeca65"},
     {file = "jsonasobj-1.3.1.tar.gz", hash = "sha256:d52e0544a54a08f6ea3f77fa3387271e3648655e0eace2f21e825c26370e44a2"},
@@ -2629,7 +2629,7 @@ version = "0.12.5"
 description = "Python JSON Schema Grammar interpreter"
 optional = false
 python-versions = ">=3.10"
-groups = ["model"]
+groups = ["model", "test"]
 files = [
     {file = "pyjsg-0.12.5-py3-none-any.whl", hash = "sha256:6cf60375f203dd275db24fb73b0874b6e1f7a90ef3eaa1e4dcded79842a56fcb"},
     {file = "pyjsg-0.12.5.tar.gz", hash = "sha256:7796cde0ce22bf2459f5601c1a2e2cfdcba782855867e8b185364e4be964ae6b"},
@@ -2755,7 +2755,7 @@ version = "0.10.3.post1"
 description = "PyShExC - Python ShEx compiler"
 optional = false
 python-versions = ">=3.10"
-groups = ["model"]
+groups = ["model", "test"]
 files = [
     {file = "pyshexc-0.10.3.post1-py3-none-any.whl", hash = "sha256:5d247f2822ef9864152545935d93a07dce66640608ea9414c96f69da7fe7a168"},
     {file = "pyshexc-0.10.3.post1.tar.gz", hash = "sha256:80d9d067c80af9a796e3c1c47d2207edf2e9a9fc39d3ca0ce5dd2019334ea915"},
@@ -3135,7 +3135,7 @@ version = "0.6.1"
 description = "rdflib extension adding JSON-LD parser and serializer"
 optional = false
 python-versions = "*"
-groups = ["model"]
+groups = ["model", "test"]
 files = [
     {file = "rdflib-jsonld-0.6.1.tar.gz", hash = "sha256:eda5a42a2e09f80d4da78e32b5c684bccdf275368f1541e6b7bcddfb1382a0e0"},
     {file = "rdflib_jsonld-0.6.1-py2.py3-none-any.whl", hash = "sha256:bcf84317e947a661bae0a3f2aee1eced697075fc4ac4db6065a3340ea0f10fc2"},
@@ -3150,7 +3150,7 @@ version = "1.0.3"
 description = "Shim for rdflib 5 and 6 incompatibilities"
 optional = false
 python-versions = ">=3.7"
-groups = ["model"]
+groups = ["model", "test"]
 files = [
     {file = "rdflib_shim-1.0.3-py3-none-any.whl", hash = "sha256:7a853e7750ef1e9bf4e35dea27d54e02d4ed087de5a9e0c329c4a6d82d647081"},
     {file = "rdflib_shim-1.0.3.tar.gz", hash = "sha256:d955d11e2986aab42b6830ca56ac6bc9c893abd1d049a161c6de2f1b99d4fc0d"},
@@ -3183,7 +3183,7 @@ version = "2.34.2"
 description = "Python HTTP for Humans."
 optional = false
 python-versions = ">=3.10"
-groups = ["main", "model"]
+groups = ["main", "model", "test"]
 files = [
     {file = "requests-2.34.2-py3-none-any.whl", hash = "sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0"},
     {file = "requests-2.34.2.tar.gz", hash = "sha256:f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed"},
@@ -3542,7 +3542,7 @@ version = "0.9.0"
 description = "ShExJSG - Astract Syntax Tree Definition for the ShEx 2.0 language"
 optional = false
 python-versions = ">=3.10"
-groups = ["model"]
+groups = ["model", "test"]
 files = [
     {file = "shexjsg-0.9.0-py3-none-any.whl", hash = "sha256:abf18db2d9895bc46740f68ae699b2ccfe08c783f6e0c038e6077293ad01c0a5"},
     {file = "shexjsg-0.9.0.tar.gz", hash = "sha256:750016fabdb5487b27e2e714145f3602cd3ac4eb0dd9b7d7751d0cde62c0d1d8"},
@@ -4026,7 +4026,7 @@ version = "2.8.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
 python-versions = ">=3.10"
-groups = ["main", "model"]
+groups = ["main", "model", "test"]
 files = [
     {file = "urllib3-2.8.0-py3-none-any.whl", hash = "sha256:0cf3cae568d36aa9576b28dfb35f11328f1cb974ca7647d9475ebb86c75ac6e3"},
     {file = "urllib3-2.8.0.tar.gz", hash = "sha256:63bf2ead4c879426ebf22ef2a781eeb4aa3b4ae798a0435506f8687fd5bb9b63"},
@@ -4249,4 +4249,4 @@ dev = ["pytest", "setuptools"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4.0"
-content-hash = "ea459045787d237708524dbbbf3ea23bb6a88571c5cb1e8a57be173603293222"
+content-hash = "8fd12c16c5d5f679a2beb33d4bd082581c65a6f1c57b1eee10b602b3506514c5"

@@ -25,6 +25,7 @@ QUERY_FILES = {
     "Q9": "q9_top_values.rq",
     "Q10": "q10_property_presence.rq",
     "Q11": "q11_incoming_links.rq",
+    "Q12": "q12_term_annotations.rq",
 }
 _TEMPLATES = {name: Template((files(__package__) / file).read_text()) for name, file in QUERY_FILES.items()}
 
@@ -49,6 +50,11 @@ def subjects_values(iris: Iterable[str]) -> str:
     return "VALUES ?s { " + " ".join(to_iriref(iri) for iri in iris) + " }"
 
 
+def terms_values(iris: Iterable[str]) -> str:
+    """The terms whose annotations Q12 reads: their IRIs, space-separated."""
+    return " ".join(to_iriref(iri) for iri in iris)
+
+
 def subjects_limit(graph: str | None, cls: str, limit: int) -> str:
     """Fallback when QS listed blank nodes, which VALUES cannot carry."""
     return f"{{ SELECT {_distinct(graph)}?s {{ {subjects_exact(graph, cls)} }} LIMIT {int(limit)} }}"
@@ -68,6 +74,7 @@ def render(
     cls: str | None = None,
     prop: str | None = None,
     subjects: str = "",
+    terms: str = "",
     scope: str = "same_graph",
     limit: int | None = None,
     k: int | None = None,
@@ -81,6 +88,7 @@ def render(
         cls=to_iriref(cls) if cls else "",
         prop=to_iriref(prop) if prop else "",
         subjects=subjects,
+        terms=terms,
         type_lookup=type_lookup(graph, scope),
         limit=int(limit) if limit is not None else "",
         k=int(k) if k is not None else "",

@@ -8,6 +8,7 @@ from fingerprint.adapters.queries import (
     subjects_exact,
     subjects_limit,
     subjects_values,
+    terms_values,
     type_lookup,
 )
 
@@ -69,3 +70,11 @@ def test_rdf_type_is_not_a_property_row(name):
 def test_unusable_iri_is_refused():
     with pytest.raises(ValueError):
         render("Q3b", G, cls="http://example.org/a b")
+
+
+def test_term_annotation_query_lists_its_terms_and_an_unwritable_term_is_refused():
+    text = render("Q12", G, terms=terms_values(["http://e/a", "http://e/b"]))
+    assert "VALUES ?t { <http://e/a> <http://e/b> }" in compact(text)
+    assert terms_values([]) == "" and "VALUES ?t { }" in compact(render("Q12", G))
+    with pytest.raises(ValueError):
+        terms_values(["http://e/a b"])

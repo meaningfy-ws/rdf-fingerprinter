@@ -180,3 +180,35 @@ def test_a_filter_naming_a_prefix_of_the_table_is_not_unknown(run, caplog):
     with caplog.at_level(logging.WARNING):
         warn_unknown_filters(run, GeneratorOptions(include_namespaces=[entry.prefix], exclude_namespaces=[entry.namespace]))
     assert caplog.messages == []
+
+
+# --- llm-schema-tools: the ontology and the size filters (TC-G1) ---
+
+LABELS = Path(__file__).parents[2] / "test_data" / "ontology" / "labels.ttl"
+CONCEPT = "http://www.w3.org/2004/02/skos/core#Concept"
+
+
+@pytest.mark.parametrize("name", ["min_instances", "max_classes"])
+def test_a_size_filter_below_one_is_a_usage_error_even_when_built_around_the_model(name):
+    with pytest.raises(UsageError) as error:
+        validate_options(GeneratorOptions.model_construct(**{name: 0}))
+    assert str(error.value) == f"--{name.replace('_', '-')} must be at least 1"
+
+
+def test_without_an_ontology_the_run_is_unchanged(run):
+    assert representations.with_ontology(run, None) is run
+
+
+def test_an_ontology_label_is_added_to_every_graph_s_annotations(run):
+    labelled = representations.with_ontology(run, LABELS)
+    for graph in labelled.graphs:
+        concept = next(a for a in graph.term_annotations if a.term == CONCEPT)
+        assert [t.text for t in concept.labels] == ["Concept"]
+
+
+def test_an_unreadable_ontology_is_a_usage_error_naming_the_file(run, tmp_path, generators):
+    bad = tmp_path / "bad.ttl"
+    bad.write_text("this is not turtle")
+    with pytest.raises(UsageError, match="bad.ttl"):
+        generate_representations(run, tmp_path, ["a"], options=GeneratorOptions(ontology=str(bad)))
+    assert not Recording.seen

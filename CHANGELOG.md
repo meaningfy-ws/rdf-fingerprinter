@@ -6,6 +6,37 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-11-01
+
+Schemas for LLMs (OpenSpec change `llm-schema-tools`, stage 1). The fingerprinter can now write a
+dataset's schema in a form compact enough to hand to a language model as context.
+
+### Added
+- **The pattern schema** (`--format pattern`, `fingerprint-gen-pattern`): one `pattern-<graph>.txt`
+  per graph in an arrow notation, `(:Class) -prop-> (:Target)`, with counts, cardinalities, value
+  ranges and top values. Blank nodes are seen through up to three hops, and each block says where it
+  is reached from. A glossary below gives each term one label and one description. Names are
+  prefixed everywhere, and only the prefixes in use are declared. On the sample data it is about a
+  fifth of the size of the SHACL shapes.
+- **Enriched ShExC** (`--format shex`, `fingerprint-gen-shex`): the same view as valid ShExC, with
+  nested `BNODE` shapes and the statistics in `#` comments.
+- **Term labels and descriptions** (query Q12, at every collection depth): `skos:prefLabel`,
+  `skosxl:prefLabel` (through `skosxl:literalForm`), `rdfs:label`, `dcterms:title` (`skos:altLabel`
+  when there is no other), and one description by `skos:definition` > `rdfs:comment` >
+  `dcterms:description` > `skos:scopeNote`, for every class and property; saved as
+  `term_annotations` in `profile.json`.
+- **`--ontology FILE`** on `fingerprint-gen-pattern` and `fingerprint-gen-shex`: labels from an
+  ontology file (Turtle, RDF/XML, TriG, N-Quads, …) win over those found in the data.
+- **`--min-instances N` and `--max-classes N`** on the same commands: leave out rare classes, or
+  keep only the largest groups; the output says how many classes it hid.
+- Docs: the *Schemas for LLMs* page, glossary terms, and Q12 on the statistics page.
+
+### Changed
+- An IRI that is a property's only top value is now written with a prefix, like every other IRI.
+- `make check-wheel` no longer fails at random (SIGPIPE under `pipefail`).
+
+Nothing breaks: `profile.json` gains `term_annotations`, and profiles saved by 3.1 still load.
+
 ## [3.1.0] - 2026-11-01
 
 Pitfall scans (OpenSpec change `pitfall-scans`). The fingerprinter can report what is wrong with how

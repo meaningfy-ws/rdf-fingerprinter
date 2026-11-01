@@ -13,7 +13,7 @@ from fingerprint.adapters.prefixes import PrefixListSource, PrefixLookupError, l
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref
 from fingerprint.domain.prefixes import STANDARD, generate_prefixes, is_reserved, namespace_of
-from fingerprint.domain.profile import NamespacePrefix, NodeKind, PitfallTerm, PrefixSource, ProfileRun
+from fingerprint.domain.profile import NamespacePrefix, NodeKind, PitfallTerm, PrefixSource, ProfileRun, PropertyProfile
 from fingerprint.domain.vocabulary import RDF
 
 logger = logging.getLogger(__name__)
@@ -42,9 +42,9 @@ def _iris(value: object) -> Iterator[tuple[str, bool]]:
             yield value.text, True
         return
     if isinstance(value, BaseModel):
+        if isinstance(value, PropertyProfile) and (single := _single_iri_value(value)):  # written as a name
+            yield single, False
         for name in type(value).model_fields:
-            if name == "settings" or name == "namespaces":
-                continue
             item = getattr(value, name)
             if name in IRI_FIELDS and isinstance(item, str) and item:
                 yield item, False
@@ -53,6 +53,13 @@ def _iris(value: object) -> Iterator[tuple[str, bool]]:
     elif isinstance(value, list):
         for item in value:
             yield from _iris(item)
+
+
+def _single_iri_value(prop: PropertyProfile) -> str | None:
+    """The one IRI every object is, known from the top values (llm-schema-tools DEC-16)."""
+    partitions = prop.value_partitions or []
+    only_iris = bool(partitions) and all(p.node_kind == NodeKind.iri for p in partitions)
+    return prop.top_values[0].value if only_iris and prop.distinct_objects == 1 and prop.top_values else None
 
 
 def _writable(namespace: str) -> bool:
