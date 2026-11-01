@@ -49,7 +49,7 @@ Every command takes:
 | `--threshold` | the acceptance threshold to read the profile at, in (0, 1]; default: the one recorded in the profile. Not read from the environment.
 | `--template` | a template package of your own (below)
 | `--prefixes FILE` | your prefixes, over the saved table (<<prefixes,Prefixes>>)
-| `--exclude-namespace`, `--include-namespace` | hide or show the classes of a namespace, by prefix or IRI; repeatable (<<filters,Namespace filters>>)
+| `--exclude-namespace`, `--include-namespace` | leave out every term of the matching namespaces, or keep them over the exclusion and the default hiding of `rdf`, `rdfs`, `owl`, `sh` classes; by prefix, prefix glob (`'rel*'`) or IRI stem; repeatable (<<filters,Namespace filters>>)
 |===
 
 `fingerprint-gen-shacl` also takes `--shapes-namespace`, and `fingerprint-gen-puml` takes
@@ -87,10 +87,123 @@ outputs shorten each IRI by its longest namespace. `rdf`, `rdfs`, `owl`, `xsd`, 
 [#filters]
 == Namespace filters
 
-By default no output shows the classes of the meta vocabularies `rdf`, `rdfs`, `owl` and `sh`. Add a
-namespace with `--exclude-namespace bf`, bring one back with `--include-namespace owl`. A name that
-matches no namespace logs a warning. The report lists the hidden namespaces and their class counts
-under its caveats; collection is not affected.
+The filters choose what the outputs show; collection and the saved `profile.json` never change, so
+the same profile renders again with other filters. There are two tiers:
+
+[cols="1,2,2"]
+|===
+| Tier | Which namespaces | What the outputs leave out
+
+| hidden | `rdf`, `rdfs`, `owl` and `sh`, by default | their classes only; their properties stay (`rdfs:label` is still written)
+| excluded | every namespace an `--exclude-namespace` value matches | every term of the namespace (below)
+|===
+
+`--include-namespace` wins over both: a namespace it matches is neither hidden nor excluded
+(`--include-namespace owl` shows the `owl:` classes again). Each option is repeatable. Library
+callers pass the same values as `GeneratorOptions(exclude_namespaces=[…], include_namespaces=[…])`.
+The report lists the hidden namespaces and their class counts under its caveats.
+
+=== Matching a value
+
+A value is matched against the profile's namespace table by the first rule that applies:
+
+. a value holding `:` is an *IRI stem*: it matches every namespace whose IRI starts with it;
+. a value holding `*` is a *prefix glob*: `*` stands for any run of characters, possibly none, and
+  must cover the whole prefix; every other character, `?`, `[` and `.` included, stands for itself;
+. any other value is an exact *prefix*.
+
+With the namespaces `ex` = `http://example.org/`, `rel` = `http://example.org/rel/`, `relx` =
+`http://example.org/relx/` and `org` = `http://org.example/`:
+
+[cols="2,1,3"]
+|===
+| Value | Rule | Matches
+
+| `rel` | prefix | `rel`
+| `'rel*'` | glob | `rel`, `relx`
+| `'*lx'` | glob | `relx` (`*x` would also match `ex`)
+| `'Rel*'` | glob | nothing: matching is case-sensitive
+| `http://example.org/rel/` | stem | `rel` (`…/relx/` does not start with `…/rel/`)
+| `http://example.org/` | stem | `ex`, `rel` and `relx`
+| `HTTP://example.org/` | stem | nothing: matching is case-sensitive
+| `http://example.org/*` | stem | nothing: in a stem `*` is a plain character
+| `'*'` | glob | every namespace that has a prefix
+|===
+
+Quote a glob in the shell, or the shell may expand it against your file names first:
+`--exclude-namespace 'rel*'`. Stems and globs are case-sensitive. Prefixes cannot differ only in
+case (the table refuses a second one), so a glob never misses a prefix by its case alone.
+
+NOTE: Since 3.3, a full namespace IRI is a stem. `--exclude-namespace http://example.org/` matched
+only `ex` before; it now also matches `rel` and `relx`. Give the prefix (`ex`) to match one
+namespace.
+
+A glob also reaches the meta vocabularies: `'r*'` excludes `rdf` and `rdfs`, terms included.
+
+=== What an excluded namespace loses
+
+No output writes an IRI of an excluded namespace as a class, a property, an object class, a co-type,
+a parent, a single value (`=v`) or a glossary term. In each output:
+
+[cols="1,3"]
+|===
+| Excluded | Effect
+
+| property | no pattern edge or `via` entry, no ShExC triple constraint, no SHACL property shape, no PlantUML attribute, link or link count, no report row
+| class | no block, shape, box or report section; its properties go with it
+| object class of a kept property | the objects count as untyped resources: `IRI` in the pattern schema and the ShExC, `sh:nodeKind sh:IRI` without `sh:class` in SHACL, `resource` in PlantUML
+| member of a merged class | the group is built from the kept classes only (`A&B` with `B` excluded is `A`); a co-type note names kept classes only
+|===
+
+These are left as they are:
+
+* datatypes: excluding `xsd` keeps `xsd:string` and its `PREFIX xsd:` line;
+* the pitfall findings (the TSV and the report's pitfall part) and the collection failures: they
+  name what is wrong or missing in the data, excluded or not;
+* every count and indicator. The profile is analysed unfiltered, then the excluded terms are removed.
+  Instance, triple and subject counts do not change. The only values that change are the value types,
+  dominant value type, type purity and untyped share of a property that lost an object class;
+* inheritance: a property inherited from an excluded parent stays inherited. The PlantUML diagrams
+  draw an inherited property in its parent's box only, and that box is gone, so the property appears
+  in no box. The report still lists it under the child's inherited properties.
+
+An output declares a prefix only while it still writes a term of that namespace (a datatype; in
+SHACL also the fixed `sh`, `xsd`, `rdf`, `rdfs` and `fp`). A graph left with no class gets no
+per-graph file, as an empty graph.
+
+=== The note and the warnings
+
+Every per-graph file where an excluded namespace hid something carries one comment line, `#` in the
+pattern schema, the ShExC and the SHACL shapes, `'` in every PlantUML file of the graph:
+
+[source,text]
+----
+# excluded namespaces: relationid (classes 0, properties 619, values 0)
+----
+
+One entry per namespace, in prefix order, joined by `; `. The numbers count the distinct IRIs of
+that namespace hidden in that graph: classes (as a class, object class, co-type or parent),
+properties, and single values. The report lists the same line per graph under its caveats and marks
+the namespace `excluded` in its namespace table (xref:report.adoc#namespaces[The Report]).
+
+Each of these warnings is logged once per run, and the value is then ignored:
+
+[cols="2,3"]
+|===
+| Warning | When
+
+| `--exclude-namespace <name>: no such namespace; ignored` (or `--include-namespace`) | the value matches no namespace
+| `--exclude-namespace <name>: no term in this namespace; ignored` | the value matches a namespace, but it has no term in any graph (for example a prefix from your prefix file that the data never uses)
+|===
+
+An exclude value whose namespaces are all included again logs nothing.
+
+=== Scope
+
+The rules above hold for the `fingerprint` command, every `fingerprint-gen-*` command,
+`fingerprint_report`, `generate_from_profile_file` and `generate_representations`, which apply the
+filter once to the analysed profile before any output is built. A `Generator` built directly from
+analytics hides the classes of the hidden and the excluded namespaces only, and writes no note.
 
 == SHACL shapes
 
