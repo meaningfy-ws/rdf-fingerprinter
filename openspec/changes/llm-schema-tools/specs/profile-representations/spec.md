@@ -28,7 +28,8 @@ query (EPIC DEC-2, DEC-14, DEC-18). It SHALL follow rules N1–N9 of the EPIC's
    - `IRI` for untyped IRI objects;
    - `BNODE` for untyped blank-node objects.
    A property without value partitions SHALL have the target `.`. A group typed in another
-   graph SHALL be written `T @<graph name>`.
+   graph SHALL be written `T @<graph IRI>`, the graph always the full `<iri>`; a class typed in a
+   graph whose IRI cannot be written SHALL be written without the graph and the graph reported as skipped.
 5. **Incoming links (N6).** A block's `via` list SHALL name every pair of a source group with a
    block or nested in the view and a property whose objects are in the group, ordered by source
    name, then property. It SHALL write names only; each link's triple count is printed once, on
@@ -42,7 +43,10 @@ query (EPIC DEC-2, DEC-14, DEC-18). It SHALL follow rules N1–N9 of the EPIC's
    with the most triples into the group, then the smallest source name, then the smallest
    property name. Every other edge into an expanded group SHALL end in ` ^`. An edge into a
    nested group that is not expanded anywhere, because every edge reaching it is at level 3,
-   SHALL end in ` …`. A group SHALL NOT be expanded inside its own expansion.
+   SHALL end in ` …`. A group SHALL NOT be expanded inside its own expansion. An edge into several nested groups SHALL
+   expand only the first of the groups chosen for it, by name (the others go to their next best edge),
+   so that no property begins two edges at the same place; it SHALL end in ` …` when another of its nested targets is expanded
+   nowhere.
 7. **Names (DEC-16).** Every IRI SHALL be written as `prefix:local` from the profile's prefix
    table when the local part is a safe Turtle local name, and as `<IRI>` otherwise. An IRI that
    fails the IRIREF guard SHALL be left out of both outputs and reported as skipped.

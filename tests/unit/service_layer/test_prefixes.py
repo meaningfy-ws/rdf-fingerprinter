@@ -3,7 +3,7 @@
 import logging
 
 from fingerprint.adapters.prefixes import PrefixLookupError
-from fingerprint.domain.profile import NamespacePrefix, PrefixSource
+from fingerprint.domain.profile import NamespacePrefix, PrefixSource, ValueCount
 from fingerprint.service_layer.prefixes import resolve_namespaces, used_namespaces
 from tests.builders import klass, literals, profile_run, prop, resources
 
@@ -146,3 +146,24 @@ def test_pitfall_example_iris_are_named():
     scanned = run(BF + "A").model_copy(update={"graphs": [GraphProfile(pitfalls=[result])]})
     namespaces = {x.namespace for x in resolve_namespaces(scanned, packaged=[]).namespaces}
     assert "http://other.org/vocab#" in namespaces and "http://not.an.iri.org/" not in namespaces
+
+
+def single_value_run(value, kind="iri", distinct=1):
+    one = prop("http://ex.org/p", {1: 1}, resources(1, None, kind)).model_copy(
+        update={"distinct_objects": distinct, "top_values": [ValueCount(value=value, triples=1)]}
+    )
+    return profile_run(klass("http://ex.org/A", 1, one))
+
+
+def test_the_one_iri_value_of_a_property_names_its_namespace():
+    value = "http://ex.org/status/active"
+    resolved = resolve_namespaces(single_value_run(value), packaged=[])
+    assert "http://ex.org/status/" in {x.namespace for x in resolved.namespaces}
+
+
+def test_top_values_of_other_properties_name_no_namespace():
+    for run_ in (
+        single_value_run("http://ex.org/status/a", distinct=2),
+        single_value_run("http://ex.org/status/a", "literal"),
+    ):
+        assert "http://ex.org/status/" not in {x.namespace for x in resolve_namespaces(run_, packaged=[]).namespaces}

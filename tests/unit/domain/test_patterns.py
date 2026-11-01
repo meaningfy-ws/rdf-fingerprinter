@@ -1,6 +1,8 @@
 """The pattern view of a graph (llm-schema-tools P-2..P-5, rules §B). Facts from `tests/sample_data.py`, edge cases from
 `tests/builders.py` and `model_copy` (lean-test-suite DEC-4, DEC-5)."""
 
+import re
+
 import pytest
 from hypothesis import given
 
@@ -167,6 +169,11 @@ def test_classes_sharing_only_some_subjects_are_not_grouped():
 def test_a_class_with_more_instances_than_its_co_type_subjects_is_not_grouped():
     shown = view(klass(A, 6, co_types=[(B, 6)]), klass(B, 9))
     assert [b.name for b in shown.blocks] == ["ex:B", "ex:A"]
+
+
+def test_a_class_read_in_first_n_mode_is_never_grouped_with_an_exact_one():
+    shown = view(klass(A, 100, observed=10, co_types=[(B, 100)]), klass(B, 100, co_types=[(A, 100)]))
+    assert sorted(b.name for b in shown.blocks) == ["ex:A", "ex:B"]
 
 
 def test_a_class_read_in_first_n_mode_is_never_grouped():
@@ -440,7 +447,7 @@ def test_coverage_is_written_against_the_instances_when_none_were_observed():
         ("a" * 70, "a" * 70, f' ="{"a" * 64}…"'),
         ("a" * 64, "a" * 64, f" ={'a' * 64}"),
         ("A C", "Z D", ' "A C".."Z D"'),
-        ("x", None, " =x"),
+        ("x", None, ""),
     ],
 )
 def test_one_literal_datatype_gives_the_value_or_the_range_and_quotes_what_needs_it(low, high, written):
@@ -507,9 +514,13 @@ def test_a_class_typed_in_this_graph_and_in_another_is_written_with_its_graph_on
     assert shown.blocks[0].edges[0].text == "-ex:p-> (:ex:B|ex:C @<http://ex.org/there>)"
 
 
-def test_an_object_type_with_an_unwritable_graph_is_left_out():
-    other = resources(2, B).model_copy(update={"object_class_graph": "http://ex.org/bad graph"})
-    assert [t.kind for t in one_edge(other).targets] == [TargetKind.unknown]
+def test_an_object_type_with_an_unwritable_graph_is_written_without_it_and_the_graph_is_skipped():
+    bad = "http://ex.org/bad graph"
+    other = resources(2, B).model_copy(update={"object_class_graph": bad})
+    shown = view(klass(A, 10, prop(P, {1: 10}, other)))
+    (target,) = edge_of(shown).targets
+    assert (edge_of(shown).text, target.graph, target.name) == ("-ex:p-> (:ex:B)", None, "ex:B")
+    assert shown.skipped == [bad]
 
 
 # --- TC-P7: a single IRI value (DEC-16) ---
@@ -645,16 +656,16 @@ def test_a_group_reached_at_levels_one_and_two_is_expanded_at_level_one():
     ]
 
 
-def test_an_edge_into_two_nested_groups_expands_both():
+def test_an_edge_into_two_nested_groups_expands_only_the_first_by_name():
     both = prop(P, {1: 4}, *(resources(4, t, "blank_node").model_copy(update={"distinct_objects": 4}) for t in (B, C)))
     shown = view(
         klass(A, 4, both), klass(B, 4, prop(EX + "x", {1: 4}, literals(4))), klass(C, 4, prop(EX + "y", {1: 4}, literals(4)))
     )
     assert tree(shown.blocks[0].edges) == [
-        "  -ex:p-> (:ex:B|ex:C) bn",
+        "  -ex:p-> (:ex:B|ex:C) bn …",
         "    -ex:x-> xsd:string",
-        "    -ex:y-> xsd:string",
     ]
+    assert (nested_names(shown), shown.hidden_classes) == (["ex:B"], 0)
 
 
 def test_an_edge_into_a_group_expanded_nowhere_wins_over_one_expanded_elsewhere():
@@ -905,6 +916,15 @@ def test_a_prefix_used_only_by_a_value_is_declared():
     assert [p.prefix for p in view(klass(A, 10, value)).prefixes] == ["ex", "exs"]
 
 
+def test_a_value_iri_feeds_the_prefixes_but_gets_no_glossary_line():
+    active = EX + "status/active"
+    value = prop(P, {1: 10}, resources(10)).model_copy(
+        update={"distinct_objects": 1, "top_values": [ValueCount(value=active, triples=10)]}
+    )
+    shown = view(klass(A, 10, value), annotations=[note(active, [("Active", "en")])])
+    assert ([p.prefix for p in shown.prefixes], shown.glossary) == (["ex", "exs"], [])
+
+
 def test_a_prefix_used_only_by_a_co_type_is_declared():
     covered = EX + "status/Co"
     shown = view(klass(A, 4, co_types=[(covered, 3)]))
@@ -938,12 +958,19 @@ def edges_below(edges: list[PatternEdge]) -> list[PatternEdge]:
     return [e for edge in edges for e in (edge, *edges_below(edge.edges))]
 
 
+PREFIXED_NAME = re.compile(r"(?<![\w<])([A-Za-z][\w-]*):[\w-]")
+
+
+def prefixes_written(text: str) -> set[str]:
+    """The prefixes of the whole prefixed names of the text (a name begins at a word boundary, not inside an IRI)."""
+    return set(PREFIXED_NAME.findall(text))
+
+
 @given(pattern_graphs())
 def test_every_declared_prefix_is_used_and_every_name_prefix_is_declared(case):
     shown = view(*case)
-    written = texts_of(shown)
-    assert all(f"{p.prefix}:" in written for p in shown.prefixes)
-    assert ("ex:" in written) == any(p.prefix == "ex" for p in shown.prefixes)
+    written = prefixes_written(texts_of(shown))
+    assert {p.prefix for p in shown.prefixes} == written
 
 
 @given(pattern_graphs())
@@ -951,6 +978,8 @@ def test_no_property_is_written_twice_in_a_block_and_no_group_begins_two_blocks(
     shown = view(*case)
     for one in (*shown.blocks, *shown.nested_blocks):
         assert len({e.name for e in one.edges}) == len(one.edges)
+        for edge in edges_below(one.edges):
+            assert len({e.name for e in edge.edges}) == len(edge.edges)
     names = [b.name for b in (*shown.blocks, *shown.nested_blocks)]
     assert len(set(names)) == len(names)
 

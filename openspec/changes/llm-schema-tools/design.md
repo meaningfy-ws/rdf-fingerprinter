@@ -266,7 +266,8 @@ the whole-graph view. (The one-class view for `describe_class` is `llm-schema-se
    - `targets`, in this order:
      - the groups of the partitions' `object_class`, by name, written together as
        `(:G1|G2)`; a group typed in another graph (`object_class_graph` ≠ `graph.graph`) is
-       written `G @<graph name>`;
+       written `G @<graph IRI>`, a graph reference always the full `<iri>` (an unwritable graph
+       IRI is skipped and the class is written without the `@` part);
      - the datatypes of the literal partitions (`datatype`, or `rdf:langString` with a language,
        or `xsd:string`);
      - `IRI` (iri, no class); `BNODE` (blank, no class).
@@ -294,9 +295,14 @@ the whole-graph view. (The one-class view for `describe_class` is `llm-schema-se
      such group to its best edge, keyed (−triples into the group, source name, property name).
      Triples into a group are the largest partition `triples` over its members. The assigned
      group's edges form the frontier of the next level (2 or 3). Level-3 edges are never assigned.
+   - **One expansion per edge.** An edge into several nested groups expands only the first of
+     the groups it is best for, in name order; each other goes to its next best edge of the level,
+     else stays unassigned (a later level may assign it). So no property begins two edges at the same place (N3).
    - Rendering: an edge into an assigned group carries the group's edges nested one level deeper
      when the assignment is this edge; ` ^` when it is another edge; ` …` when the group is
-     unassigned (every edge reaching it is at level 3). No line lies below level 3.
+     unassigned (every edge reaching it is at level 3). An edge ends ` …` when any of its nested
+     targets is expanded nowhere, even if another target is expanded under it; ` ^` only when no
+     target expands under it and all are expanded elsewhere. No line lies below level 3.
    - `reaching_edges` = the number of distinct (source group, property) edges in the view into the group, set for assigned (expanded) groups only; 0 for a group expanded nowhere (for ShExC, P-9).
    - `nested_blocks` holds every *assigned* nested group as a block of its own, with
      edges from level 1 (for ShExC named shapes, P-9).
@@ -331,7 +337,7 @@ link      ::= "(:" group ")-" name
 edge      ::= INDENT "-" name "-> " target (" " stat)* [" ^" | " …"] NL edge*   (* INDENT = 2 × level, level 1..3; a hop is one edge; nested edges follow only an edge at level 1 or 2; a level-3 edge into a nested group ends " …" or " ^" *)
 target    ::= alt ("|" alt)* | "."
 alt       ::= "(:" gref ("|" gref)* ")" | name | "IRI" | "BNODE"   (* the class part comes first, once *)
-gref      ::= group [" @" name]                       (* @graph: typed in another graph *)
+gref      ::= group [" @<" IRI ">"]                   (* @graph: typed in another graph; always the full IRI *)
 group     ::= name ("&" name)*                        (* & binds tighter than | *)
 pair      ::= name " " INT
 stat      ::= INT "/" INT | "×" INT ["-" INT] | "bn" | "@" (INT | LANG) | "=" VALUE | "=" name | VALUE ".." VALUE | "d" INT | "presence"   (* "=" name: the one IRI value, from top values *)

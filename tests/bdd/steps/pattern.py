@@ -135,10 +135,8 @@ def single_iri_value(ctx, value):
 
 @given(parsers.parse('the prefix table maps "{prefix}" to "{namespace}"'))
 def prefix_maps(ctx, prefix, namespace):
-    # added after resolution: resolve_namespaces scans terms, not top values, so it would drop this namespace
-    resolved = resolve_namespaces(ctx["run"])
     entry = NamespacePrefix(prefix=prefix, namespace=namespace, source=PrefixSource.user)
-    ctx["run"] = resolved.model_copy(update={"namespaces": sorted([*resolved.namespaces, entry], key=lambda e: e.prefix)})
+    ctx["run"] = resolve_namespaces(ctx["run"], [entry])
 
 
 @then(parsers.parse('the "{p}" edge is "{line}"'))
@@ -341,7 +339,9 @@ def glossary_holds(ctx, line):
 
 @then(parsers.parse('the glossary has no line for "{name}"'))
 def glossary_lacks(ctx, name):
-    assert all(not ln.startswith(name + " ") for t in pattern_files(ctx["texts"]).values() for ln in glossary_lines(t))
+    assert all(
+        not ln.startswith((name + " ", name + ":")) for t in pattern_files(ctx["texts"]).values() for ln in glossary_lines(t)
+    )
 
 
 @then(parsers.parse('the glossary line of "{name}" shows {shown}'))

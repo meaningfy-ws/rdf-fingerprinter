@@ -117,7 +117,7 @@ class _Stats:
     tokens: tuple[str, ...]
     low: int | None
     high: int | None
-    terms: tuple[str, ...]  # the IRI a `=name` token writes
+    values: tuple[str, ...]  # the IRI a `=name` token writes
 
 
 @dataclass(frozen=True)
@@ -133,7 +133,8 @@ class _Spec:
     high: int | None
     presence_only: bool
     groups: tuple[tuple[int, int], ...]  # (group reached, the largest triples of a partition reaching it)
-    terms: tuple[str, ...]  # every IRI the line writes
+    terms: tuple[str, ...]  # every IRI the line writes, but a value
+    values: tuple[str, ...]  # the IRI a `=name` token writes: it feeds the prefixes, never the glossary (DEC-16)
 
 
 # --- step 5: stat tokens and value quoting ---
@@ -145,6 +146,10 @@ def quoted(value: str) -> str:
         return value
     cut = value[:VALUE_LIMIT] + ("…" if len(value) > VALUE_LIMIT else "")
     return json.dumps(cut, ensure_ascii=False)
+
+
+def _first_n(*classes: ClassAnalytics) -> bool:
+    return any(c.precision_mode == PrecisionMode.first_n for c in classes)
 
 
 def _objects(partition: ValuePartition) -> int:
@@ -177,10 +182,10 @@ def _datatype(partition: ValuePartition) -> str:
 def _literal_range(partitions: list[ValuePartition]) -> tuple[list[str], bool]:
     """(`=v` or `lo..hi`, whether it is one value): only for one plain literal datatype with a minimum."""
     literals = [p for p in partitions if p.node_kind == NodeKind.literal]
-    if len(literals) != 1 or _datatype(literals[0]) == RDF_LANG_STRING or literals[0].min_value is None:
+    one = literals[0] if len(literals) == 1 else None
+    if one is None or _datatype(one) == RDF_LANG_STRING or one.min_value is None or one.max_value is None:
         return [], False
-    low = literals[0].min_value
-    high = low if literals[0].max_value is None else literals[0].max_value
+    low, high = one.min_value, one.max_value
     if low == high:
         return [f"={quoted(low)}"], True
     return [f"{quoted(low)}..{quoted(high)}"], False
@@ -226,6 +231,7 @@ class _Builder:
         self.excluded = excluded
         self.namer = _Namer(table)
         self.used: set[str] = set()  # the IRIs the view writes: they decide the prefixes and the glossary
+        self.valued: set[str] = set()  # the IRIs it writes as values: prefixes only, no labels (DEC-16)
         classes = [(name, c) for c in graph.class_partitions or [] if (name := self.namer.name(c.class_iri)) is not None]
         self.groups = self._groups(sorted(classes, key=lambda pair: pair[0]))
         self.group_of = _Lookup((member.class_iri, i) for i, g in enumerate(self.groups) for member in g.members)
@@ -255,7 +261,7 @@ class _Builder:
         for i, (_, c) in enumerate(named):
             for co in c.co_types or []:
                 j = index.get(co.class_iri or "")
-                if j is not None and co.subjects == c.instances == named[j][1].instances:
+                if j is not None and co.subjects == c.instances == named[j][1].instances and not _first_n(c, named[j][1]):
                     parent[find(i)] = find(j)
         roots = sorted((find(i), i) for i in range(len(named)))
         groups = [self._group([named[i] for _, i in run]) for _, run in groupby(roots, key=lambda r: r[0])]
@@ -332,8 +338,11 @@ class _Builder:
         iri = partition.object_class or ""
         name = self.namer.name(iri)
         graph = partition.object_class_graph if self._other_graph(partition) else None
-        if name is None or (graph and not _writable(graph)):
+        if name is None:
             return None
+        if graph and not _writable(graph):
+            self.namer.skipped.add(graph)
+            graph = None
         text = f"{name} @{to_iriref(graph)}" if graph else name
         edge_target = EdgeTarget(kind=TargetKind.group, name=name, classes=[iri], graph=graph, has_shape=False)
         return _Alternative(TargetKind.group, text, edge_target, (iri,))
@@ -390,7 +399,8 @@ class _Builder:
             high=stats.high,
             presence_only=bool(prop.presence_only),
             groups=tuple((t, max(triples for _, triples in run)) for t, run in groupby(reached, key=lambda r: r[0])),
-            terms=(prop.property, *(iri for alt in alternatives for iri in alt.terms), *stats.terms),
+            terms=(prop.property, *(iri for alt in alternatives for iri in alt.terms)),
+            values=stats.values,
         )
 
     def _specs(self, group: _Group) -> list[_Spec]:
@@ -408,7 +418,8 @@ class _Builder:
     # step 6
     def _assign(self) -> list[tuple[int, str] | None]:
         """P-5: at levels 1 and 2, each nested group not yet assigned goes under its best reaching edge: the one
-        with the most triples, then by source name, then property name. Level-3 edges never expand a group."""
+        with the most triples, then by source name, then property name. An edge takes one group, the first by
+        name; the others go to their next best edge, or wait for a later level. Level-3 edges never expand a group."""
         owner: list[tuple[int, str] | None] = [None] * len(self.groups)
         frontier = [(i, spec) for i in self.kept for spec in self.specs_of[i]]
         for _ in range(MAX_LEVEL - 1):
@@ -420,9 +431,10 @@ class _Builder:
             )
             assigned = []
             for target, run in groupby(candidates, key=lambda c: c[0]):
-                _, _, _, _, source, prop = next(run)
-                owner[target] = (source, prop)
-                assigned.append(target)
+                free = next(((source, prop) for *_, source, prop in run if (source, prop) not in owner), None)
+                if free is not None:  # an edge expands one group only: the first by name that it is best for
+                    owner[target] = free
+                    assigned.append(target)
             frontier = [(i, spec) for i in assigned for spec in self.specs_of[i]]
         return owner
 
@@ -435,14 +447,13 @@ class _Builder:
         return counts
 
     def _ending(self, nested: list[int], expanded: list[int]) -> str:
-        if expanded:
-            return ""
         if any(self.owner[t] is None for t in nested):
-            return " …"  # expanded nowhere: a level-3 edge into a group no level-1 or level-2 edge reaches
-        return " ^" if nested else ""  # expanded under another edge
+            return " …"  # a target expanded nowhere: a level-3 edge, or a group this edge's first target left out
+        return "" if expanded else " ^" if nested else ""  # else expanded under another edge
 
     def _edge(self, source: int, spec: _Spec, level: int) -> PatternEdge:
         self.used.update(spec.terms)
+        self.valued.update(spec.values)
         nested = [t for t, _ in spec.groups if self.nested[t]]
         expanded = [t for t in nested if self.owner[t] == (source, spec.property)]
         ending = self._ending(nested, expanded)
@@ -546,7 +557,7 @@ class _Builder:
     def prefixes(self) -> list[PrefixDeclaration]:
         """N8: the prefixes of the names written, sorted."""
         declared = set()
-        for iri in self.used:
+        for iri in self.used | self.valued:
             prefix, entry = turtle_term(iri, self.table)[1], self.table.entry_for(iri)
             if prefix is not None and entry is not None:
                 declared.add((prefix, entry.namespace))
