@@ -41,11 +41,11 @@ def test_the_test_target_runs_pytest_with_a_coverage_floor_and_no_recipe_line_ig
     assert not [line for line in recipe.splitlines() if line.lstrip().startswith("-") or "|| true" in line]
 
 
-def test_ci_runs_check_all_on_push_and_pull_request_to_master():
+def test_ci_runs_check_all_on_push_and_pull_request_to_master_and_develop():
     workflow = _workflow("ci")
     triggers = _triggers(workflow)
-    assert triggers["push"]["branches"] == ["master"]
-    assert triggers["pull_request"]["branches"] == ["master"]
+    assert triggers["push"]["branches"] == ["master", "develop"]
+    assert triggers["pull_request"]["branches"] == ["master", "develop"]
     assert any(step.get("run") == "make check-all" for step in _steps(workflow))
 
 
