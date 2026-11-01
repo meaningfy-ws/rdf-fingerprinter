@@ -258,7 +258,6 @@ def test_a_delta_for_a_new_capability_is_traced(tree):
 # the real tree
 
 
-@pytest.mark.xfail(strict=True, reason="titles aligned by tasks 3.2-3.6")
 def test_every_spec_scenario_is_traced():
     # Only planned changes (a tasks.md exists) count; a bare proposal promises no tests yet.
     changes = ROOT / "openspec" / "changes"
