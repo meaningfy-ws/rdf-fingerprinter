@@ -1,5 +1,8 @@
 """Builders returning generated model objects, for tests that need a small hand-made profile (lean-test-suite P-5)."""
 
+from fingerprint.domain.analytics import analyse
+from fingerprint.domain.namespace_filter import exclude_terms, namespace_filter
+from fingerprint.domain.prefixes import PrefixTable
 from fingerprint.domain.profile import (
     CardinalityBin,
     ClassProfile,
@@ -17,6 +20,7 @@ from fingerprint.domain.profile import (
     SubclassEdge,
     ValuePartition,
 )
+from fingerprint.domain.views import GeneratorOptions
 
 XSD = "http://www.w3.org/2001/XMLSchema#"
 RDFS_NS = "http://www.w3.org/2000/01/rdf-schema#"
@@ -97,3 +101,15 @@ def filter_profile(*classes: ClassProfile, edges=(), failures=()) -> ProfileRun:
     unit = klass(ORG + "Unit", 2, prop(EX + "name", {1: 2}, literals(2)))
     run = profile_run(person, unit, *classes, edges=edges, failures=failures)
     return with_namespaces(run, *FILTER_PROFILE_TABLE)
+
+
+REL_NOTE = "rel (classes 0, properties 2, values 0)"  # what excluding `rel` from `filter_profile()` notes
+
+
+def filtered_analytics(*exclude: str, run: ProfileRun | None = None):
+    """The analytics of `run` (default `filter_profile()`) as `generate_representations` hands them to a generator:
+    the terms of the `exclude`d namespaces removed and noted."""
+    analytics = analyse(run or filter_profile())
+    table = PrefixTable(analytics.namespaces)
+    filters = namespace_filter(GeneratorOptions(exclude_namespaces=list(exclude)), table)
+    return exclude_terms(analytics, filters.excluded or [], table)

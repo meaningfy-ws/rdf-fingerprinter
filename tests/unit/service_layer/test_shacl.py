@@ -8,6 +8,7 @@ from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer.generators.shacl import ShaclGenerator
+from tests import builders
 from tests.builders import XSD, klass, literals, profile_run, prop, resources
 from tests.fakes import EX, files
 
@@ -313,3 +314,12 @@ def test_the_header_names_the_graph_in_plain_characters():
     run = run.model_copy(update={"graphs": [run.graphs[0].model_copy(update={"graph": "http://g/%x"})]})
     header = only_text(ShaclGenerator(analyse(run), JinjaTemplateRenderer())).splitlines()[0]
     assert header.endswith("— http://g/_x")
+
+
+def test_the_note_of_the_excluded_namespaces_is_the_second_line_and_absent_without_a_filter():
+    def lines(analytics):
+        (text,) = files(ShaclGenerator(analytics, JinjaTemplateRenderer()).serialize()).values()
+        return text.splitlines()
+
+    assert lines(builders.filtered_analytics("rel"))[1] == f"# excluded namespaces: {builders.REL_NOTE}"
+    assert not any("excluded namespaces" in line for line in lines(builders.filtered_analytics("foaf")))

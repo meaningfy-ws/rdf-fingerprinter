@@ -2,6 +2,9 @@
     is already written as Turtle by the generator (fingerprint/service_layer/generators/shacl.py);
     this template only lays it out. Property shapes are named (readable-representations DEC-6). -#}
 # {{ conf.title }} — {{ view.graph_label }}
+{%- if view.excluded_note %}
+# excluded namespaces: {{ view.excluded_note }}
+{%- endif %}
 {% for p in view.prefixes %}
 @prefix {{ p.prefix }}: {{ p.namespace | turtle_iri }} .
 {%- endfor %}

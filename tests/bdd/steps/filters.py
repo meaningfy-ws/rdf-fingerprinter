@@ -196,6 +196,13 @@ def entry(ctx, cls, name):
     return next((ln.strip() for ln in class_block(fmt, texts, cls) or [] if ln.strip().startswith(marks[fmt])), None)
 
 
+def written_text(fmt, text):
+    """The text of an output as a reader sees it: the report's CURIEs are split across markup, so take their text."""
+    if fmt != "doc":
+        return text
+    return "\n".join(c.get_text() for c in BeautifulSoup(text, "html.parser").select(".curie"))
+
+
 def names(text, prefix):
     return re.findall(rf"(?<![\w/#.:-]){re.escape(prefix)}:", text)
 
@@ -219,6 +226,10 @@ def every_output_writes(ctx, name, cls):
 
 @then(parsers.parse('no output writes "{name}"'))
 def no_output_writes(ctx, name):
+    """Per format, the inverse of `every_output_writes` (the report splits a CURIE across markup, so a text search
+    cannot see it); the raw text search stays for the full IRI of a leak."""
+    for fmt in ctx["formats"]:
+        assert entry(ctx | {"formats": [fmt]}, "ex:Person", name) is None, fmt
     assert all(name not in text for text in ctx["texts"].values())
 
 
@@ -303,7 +314,7 @@ def excluded_are(ctx, excluded):
     """A namespace is excluded when its property `p` is in no output of the class `org:Thing` (and the ones to keep are)."""
     wanted, _, warning = excluded.partition(", and a warning says ")
     expected = set() if wanted == "none" else set(wanted.split(", "))
-    text = "\n".join(t for ts in ctx["by_format"].values() for t in ts.values())
+    text = "\n".join(written_text(fmt, t) for fmt, ts in ctx["by_format"].items() for t in ts.values())
     present = {p for p in ("ex", "rel", "relx", "org") if re.search(rf"(?<![\w/#.:-]){p}:p\b", text)}
     assert {"ex", "rel", "relx", "org"} - present == expected
     if warning:
@@ -326,4 +337,27 @@ def both_list(ctx, name):
     pitfalls = "\n".join(ctx["by_format"]["pitfalls"].values()) if "pitfalls" in ctx["by_format"] else ""
     page = BeautifulSoup(ctx["by_format"]["doc"]["main.html"], "html.parser")
     assert name in pitfalls or REL + "r1" in pitfalls
-    assert name in page.select_one("#caveats").get_text(" ") or any(c.get_text() == name for c in page.select(".curie"))
+    assert any(c.get_text() == name for c in page.select("#pitfalls .curie"))
+
+
+# --- the note of the excluded namespaces ---
+
+
+@then(parsers.re(r'it carries the line "(?P<line>[^"]+)"(?P<every> in every file)?'))
+def carries_line(ctx, line, every):
+    files = [t for ts in ctx["by_format"].values() for t in ts.values()]
+    assert files
+    for text in files if every else files[:1]:
+        assert line in text.splitlines()
+
+
+@then(parsers.parse('it carries the same text for the graph under its caveats and "{prefix}" marked excluded in its table'))
+def carries_in_report(ctx, prefix):
+    page = BeautifulSoup(ctx["by_format"]["doc"]["main.html"], "html.parser")
+    assert "rel (classes 0, properties 2, values 0)" in page.select_one("#caveats").get_text(" ")
+    assert page.select_one(f'#namespaces tr[data-prefix="{prefix}"].excluded') is not None
+
+
+@then("it carries no note of excluded namespaces")
+def carries_no_note(ctx):
+    assert not any("excluded namespaces" in t for ts in ctx["by_format"].values() for t in ts.values())

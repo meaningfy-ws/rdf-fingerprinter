@@ -19,7 +19,7 @@ from pydantic import BaseModel
 from fingerprint import config
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref
-from fingerprint.domain.namespace_filter import namespace_filter
+from fingerprint.domain.namespace_filter import namespace_filter, note_text
 from fingerprint.domain.prefixes import PrefixTable, namespace_of
 from fingerprint.domain.profile import ClassAnalytics, GraphAnalytics, ProfileAnalytics, PropertyAnalytics
 from fingerprint.domain.views import GeneratorOptions, GraphView, OutputCheck, RenderedDocument
@@ -154,6 +154,10 @@ class Generator:
     def shown(self, iri: str) -> bool:
         """Whether a class is shown: its namespace is not excluded (DEC-5, DEC-8)."""
         return self.namespace(iri) not in self.excluded
+
+    def excluded_note(self, graph: GraphAnalytics) -> str | None:
+        """What the excluded namespaces hid in `graph`, as the one line the outputs print; None when nothing (P-6)."""
+        return note_text(graph.excluded_terms, self.table)
 
     def label(self, iri: str) -> str:
         """A CURIE for display; the IRI itself when no prefix covers it."""

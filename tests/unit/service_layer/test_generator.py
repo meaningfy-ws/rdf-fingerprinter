@@ -264,3 +264,14 @@ def test_a_meta_namespace_included_is_no_longer_hidden():
         analyse(builders.filter_profile()), JinjaTemplateRenderer(), options=GeneratorOptions(include_namespaces=["rdfs"])
     )
     assert generator.excluded == set(META_NAMESPACES) - {RDFS}
+
+
+def test_the_excluded_note_of_a_graph_is_the_note_text_of_its_excluded_terms():
+    generator = Listing(builders.filtered_analytics("rel"), JinjaTemplateRenderer())
+    assert generator.excluded_note(generator.analytics.graphs[0]) == builders.REL_NOTE
+
+
+def test_a_graph_without_excluded_terms_has_no_note():
+    generator = Listing(analyse(builders.filter_profile()), JinjaTemplateRenderer())
+    assert generator.analytics.graphs[0].excluded_terms is None
+    assert generator.excluded_note(generator.analytics.graphs[0]) is None

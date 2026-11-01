@@ -26,7 +26,7 @@ class PatternGenerator(Generator):
                 excluded=frozenset(self.excluded),
                 graph_label=plain_label(graph.graph),
                 slug=graph_slug(graph.graph),
-            )
+            ).model_copy(update={"excluded_note": self.excluded_note(graph)})
             self.skipped.extend(iri for iri in view.skipped or [] if iri not in self.skipped)
             if view.blocks:
                 found.append(view)

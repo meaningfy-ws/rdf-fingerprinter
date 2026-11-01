@@ -7,6 +7,7 @@ from fingerprint.domain.analytics import analyse
 from fingerprint.domain.profile import NamespacePrefix
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer.generators.plantuml import PlantumlGenerator
+from tests import builders
 from tests.builders import klass, literals, profile_run, prop, resources
 from tests.fakes import EX, files
 
@@ -288,3 +289,13 @@ def test_value_types_are_joined_and_an_untyped_part_adds_resource():
     assert "ex:a : xsd:integer | xsd:string [1]" in text
     assert "ex:b : ex:City | resource [1]" in text
     assert "ex:c : resource [1]" in text
+
+
+def test_every_diagram_file_notes_the_excluded_namespaces_after_the_start_and_none_without_a_filter():
+    def texts(analytics):
+        return files(PlantumlGenerator(analytics, JinjaTemplateRenderer()).serialize())
+
+    noted = texts(builders.filtered_analytics("rel"))
+    assert len(noted) > 1
+    assert all(t.splitlines()[1] == f"' excluded namespaces: {builders.REL_NOTE}" for t in noted.values())
+    assert not any("excluded namespaces" in t for t in texts(builders.filtered_analytics("foaf")).values())
