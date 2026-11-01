@@ -1,0 +1,5 @@
+# OOPS! P25 (important): a property declared the inverse of itself (should be owl:SymmetricProperty).
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property ?value WHERE { ?entity owl:inverseOf ?entity . BIND(owl:inverseOf AS ?property) BIND(?entity AS ?value) }

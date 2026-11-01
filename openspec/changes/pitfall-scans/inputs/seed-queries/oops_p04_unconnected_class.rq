@@ -1,0 +1,12 @@
+# OOPS! P04 (minor): a class connected to nothing: no super- or subclass, used in no domain or range, never instantiated.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property ?value WHERE {
+  ?entity a owl:Class . FILTER(isIRI(?entity))
+  FILTER NOT EXISTS { ?entity rdfs:subClassOf ?super }
+  FILTER NOT EXISTS { ?sub rdfs:subClassOf ?entity }
+  FILTER NOT EXISTS { ?p rdfs:domain|rdfs:range ?entity }
+  FILTER NOT EXISTS { ?i a ?entity }
+  BIND(rdf:type AS ?property) BIND("unconnected" AS ?value)
+}

@@ -1,0 +1,9 @@
+# OOPS! P32 (minor): two classes with the same label (same text and language).
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?entity ?property ?value WHERE {
+  ?entity a owl:Class ; rdfs:label ?l . ?other a owl:Class ; rdfs:label ?l2 .
+  FILTER(?entity != ?other && LCASE(STR(?l)) = LCASE(STR(?l2)) && LANG(?l) = LANG(?l2))
+  BIND(rdfs:label AS ?property) BIND(CONCAT(STR(?l), " (also ", STR(?other), ")") AS ?value)
+}

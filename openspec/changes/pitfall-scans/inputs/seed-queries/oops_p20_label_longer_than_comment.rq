@@ -1,0 +1,8 @@
+# OOPS! P20 (minor, heuristic): annotations swapped: the label is longer than the comment, or they are equal.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?entity ?property ?value WHERE {
+  ?entity rdfs:label ?l ; rdfs:comment ?c . FILTER(LANG(?l) = LANG(?c))
+  FILTER(STRLEN(STR(?l)) >= STRLEN(STR(?c))) BIND(rdfs:comment AS ?property) BIND(STR(?l) AS ?value)
+}

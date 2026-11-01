@@ -1,0 +1,10 @@
+# OOPS! P41 (important): the ontology declares no licence (dcterms:license, dc:rights, cc:license, schema:license, xhv:license).
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property ?value WHERE {
+  ?entity a owl:Ontology .
+  FILTER NOT EXISTS { VALUES ?p { <http://purl.org/dc/terms/license> <http://purl.org/dc/terms/rights> <http://purl.org/dc/elements/1.1/rights>
+    <http://creativecommons.org/ns#license> <http://schema.org/license> <http://www.w3.org/1999/xhtml/vocab#license> } ?entity ?p ?l }
+  BIND(<http://purl.org/dc/terms/license> AS ?property) BIND("no licence" AS ?value)
+}

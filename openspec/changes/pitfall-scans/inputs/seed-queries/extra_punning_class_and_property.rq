@@ -1,0 +1,8 @@
+# Not in OOPS! (punning): one IRI used both as a class (instantiated) and as a predicate.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?entity ?property ?value WHERE {
+  ?i a ?entity . FILTER EXISTS { ?s ?entity ?o }
+  BIND(rdf:type AS ?property) BIND("used as a class and as a property" AS ?value)
+}

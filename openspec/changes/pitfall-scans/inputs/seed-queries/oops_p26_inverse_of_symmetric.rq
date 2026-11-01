@@ -1,0 +1,8 @@
+# OOPS! P26 (important): a symmetric property that also has an inverse.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?entity ?property ?value WHERE {
+  ?entity a owl:SymmetricProperty . { ?entity owl:inverseOf ?value } UNION { ?value owl:inverseOf ?entity }
+  FILTER(?value != ?entity) BIND(owl:inverseOf AS ?property)
+}
