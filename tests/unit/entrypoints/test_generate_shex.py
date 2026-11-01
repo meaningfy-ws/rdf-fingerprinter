@@ -31,7 +31,7 @@ def test_a_size_filter_below_one_exits_2(tmp_path, option):
 
 
 def test_the_size_options_are_passed_through(tmp_path):
-    invoke(SAMPLE, "-o", tmp_path, "--max-classes", "1")
+    assert invoke(SAMPLE, "-o", tmp_path, "--max-classes", "1").exit_code == 0
     shapes = [ln for ln in (tmp_path / CONTINENTS).read_text().splitlines() if ln.endswith(" {") and not ln.startswith(" ")]
     assert shapes == ["euvoc:Continent {"]  # the other block is gone, and Label, reached once, is inline
 

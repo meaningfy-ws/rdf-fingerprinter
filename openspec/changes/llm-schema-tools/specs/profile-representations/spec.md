@@ -152,7 +152,9 @@ DEC-18 amendment, DEC-27), with this mapping:
   `# comments use the pattern schema's legend: k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured · … deeper than 3 hops`;
   then `# hidden: <n> classes` as in the pattern schema; then the `# skipped:` line (below), if any;
 - per block, the comment `# ` plus the pattern block header, then a shape labelled with the
-  first member of the group, in name order, that the filters show;
+  first member of the group, in name order, that the filters show and whose IRI holds no `=`. A group
+  with no such member gets no shape, and a reference to it is `IRI`. A file is written for each
+  graph with a pattern block, even when every shape is dropped (the header and the glossary only);
 - per edge, a triple constraint `<property> <value> <cardinality> ;`, followed by two spaces and
   `# <comment>` if and only if the comment is non-empty. The comment is, joined by single spaces:
   the pattern target text when a target alternative is a class group; then the edge's statistic
@@ -163,7 +165,8 @@ DEC-18 amendment, DEC-27), with this mapping:
   `.` stays `.`. Two or more alternatives SHALL be joined as `(a OR b …)`, without duplicates;
 - a nested group expanded nowhere in the pattern view (every edge reaching it is at level 3)
   SHALL get no shape, whatever the number of edges reaching it; each of those edges SHALL be
-  `BNODE`, with `… deeper than 3 hops` in its comment. This case wins over the next two;
+  `BNODE`, with `… deeper than 3 hops` in its comment. This case wins over the next two, but only
+  for that group: a hidden or other class on the same edge stays `IRI` (`(BNODE OR IRI)`);
 - an expanded nested group SHALL be written inline when exactly one edge of the view reaches it:
   `<indent><property> BNODE {`, then `  # <comment>` if it is non-empty, then its constraints one
   level deeper, then `<indent>}`, the cardinality if any (`} {0,2}`), and ` ;`. The indent is two

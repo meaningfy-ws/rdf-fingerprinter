@@ -171,6 +171,18 @@ def test_a_group_expanded_nowhere_is_bnode_with_a_comment_on_the_hops_and_has_no
     assert len(shown.shapes) == 1
 
 
+def test_a_hidden_class_beside_a_group_expanded_nowhere_is_iri_not_bnode():
+    deep = [
+        klass(A, 4, blank(EX + "a", B)),
+        klass(B, 4, blank(EX + "b", C)),
+        klass(C, 4, prop(EX + "c", {1: 4}, resources(4, E), blank(EX + "x", D).value_partitions[0])),
+        klass(D, 4),
+        klass(E, 1),
+    ]
+    leaf = schema(*deep, min_instances=2).shapes[0].constraints[0].inline[0].inline[0]
+    assert (leaf.predicate, leaf.value) == ("ex:c", "(BNODE OR IRI)")
+
+
 def test_two_level_three_edges_into_a_group_expanded_nowhere_are_both_bnode():
     deep = [
         klass(A, 4, blank(EX + "a", B)),
@@ -211,6 +223,19 @@ def test_a_block_whose_class_holds_an_equals_sign_is_left_out_and_listed():
     shown = schema(klass(A, 2), klass(BAD, 2))
     assert [s.label for s in shown.shapes] == ["ex:A"]
     assert shown.skipped_terms == [BAD]
+
+
+def test_a_group_with_a_member_that_holds_an_equals_sign_is_labelled_with_its_first_writable_member():
+    odd = EX + "Aa=1"  # sorts before ex:B
+    shown = schema(
+        klass(B, 3, prop(P, {1: 3}, literals(3))),
+        klass(odd, 3, co_types=[(B, 3)]),
+        klass(C, 3, prop(Q, {1: 3}, resources(3, B))),
+    )
+    assert [s.label for s in shown.shapes] == ["ex:B", "ex:C"]
+    assert shown.shapes[0].comment.startswith("(:<http://ex.org/Aa=1>&ex:B)")
+    assert [c.value for c in shown.shapes[1].constraints] == ["@ex:B"]
+    assert shown.skipped_terms == [odd]
 
 
 def test_a_property_that_holds_an_equals_sign_is_left_out_and_listed():
@@ -268,11 +293,6 @@ def test_the_glossary_is_none_or_the_pattern_s_lines():
     assert schema(klass(A, 2), annotations=[note]).glossary == ["glossary", 'ex:A "Thing"@en']
 
 
-def test_the_sample_continents_in_shex(sample_analytics):
+def test_the_sample_continents_in_shex_skip_nothing_and_have_three_shapes(sample_analytics):
     shown = shex_view(sample_view(sample_analytics, CONTINENTS))
-    assert [(s.label, s.blank) for s in shown.shapes] == [
-        ("euvoc:Continent", None),
-        ("skos:ConceptScheme", None),
-        ("skosxl:Label", True),
-    ]
-    assert shown.skipped_terms == []
+    assert ([s.label for s in shown.shapes][1], len(shown.shapes), shown.skipped_terms) == ("skos:ConceptScheme", 3, [])

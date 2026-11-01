@@ -7,7 +7,7 @@ statistics stay in `#` comments, so they cost no syntax; every file has to parse
 from collections.abc import Iterable
 
 from fingerprint.domain.iri import to_iriref
-from fingerprint.domain.patterns import BNODE, IRI, UNKNOWN
+from fingerprint.domain.patterns import BNODE, IRI, REJECTED, UNKNOWN
 from fingerprint.domain.views import (
     EdgeTarget,
     PatternBlock,
@@ -19,7 +19,6 @@ from fingerprint.domain.views import (
     TargetKind,
 )
 
-REJECTED = "="  # PyShExC rejects "=" in an IRIREF, however it is written (design, Dependencies)
 ELLIPSIS = " …"  # the pattern ending of an edge into a group expanded nowhere
 DEEPER = "… deeper than 3 hops"
 GLOSSARY, NO_GLOSSARY = "glossary", "glossary: none"
@@ -69,7 +68,8 @@ class _Shex:
 
     @staticmethod
     def _writable(block: PatternBlock) -> bool:
-        return not any(REJECTED in iri for iri in block.classes or [])
+        """The label is the first shown member without "=" (patterns.py); none such, no shape."""
+        return REJECTED not in (block.shape or "")
 
     def _shape_label(self, name: str) -> str | None:
         """The label of the shape of the group named `name`, if the file has one."""
@@ -94,15 +94,15 @@ class _Shex:
         nested = self._nested(target)
         return nested is not None and self._writable(nested) and nested.reaching_edges == 1
 
-    def _class(self, edge: PatternEdge, target: EdgeTarget) -> str:
+    def _class(self, target: EdgeTarget) -> str:
         if target.graph is not None:
             return IRI
         if target.has_shape:
             label = self._shape_label(target.name)
             return IRI if label is None else f"@{label}"
         nested = self._nested(target)
-        if nested is None:  # a hidden class, or a nested group expanded nowhere
-            return BNODE if edge.ending == ELLIPSIS else IRI
+        if nested is None:  # a nested group expanded nowhere is BNODE; a hidden class is IRI
+            return BNODE if target.nested else IRI
         if self._writable(nested) and (nested.reaching_edges or 0) > 1:
             return f"{BNODE} @{nested.shape}"
         return BNODE
@@ -114,10 +114,10 @@ class _Shex:
             return None
         return target.name
 
-    def _alternative(self, edge: PatternEdge, target: EdgeTarget) -> str | None:
+    def _alternative(self, target: EdgeTarget) -> str | None:
         match target.kind:
             case TargetKind.group:
-                return self._class(edge, target)
+                return self._class(target)
             case TargetKind.datatype:
                 return self._datatype(target)
             case TargetKind.iri:
@@ -129,7 +129,7 @@ class _Shex:
 
     def _value(self, edge: PatternEdge, inline: bool) -> str:
         """One alternative as it is; several as `(a OR b)`, or, before an inline `{`, bare with `BNODE` last."""
-        found = [text for target in edge.targets or [] if (text := self._alternative(edge, target)) is not None]
+        found = [text for target in edge.targets or [] if (text := self._alternative(target)) is not None]
         alternatives = _unique(found) or [UNKNOWN]
         if inline:
             return " OR ".join([*(a for a in alternatives if a != BNODE), BNODE])

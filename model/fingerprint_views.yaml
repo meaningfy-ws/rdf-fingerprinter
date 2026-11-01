@@ -185,6 +185,7 @@ classes:
       classes: { range: uriorcurie, multivalued: true, description: "For a group." }
       graph: { range: uriorcurie, description: "The other graph, when the class is profiled there." }
       has_shape: { range: boolean }
+      nested: { range: boolean, description: "The group is a nested one (it has no block of its own); whether any edge expands it or not." }
 
   PatternEdge:
     description: One edge line of a block.

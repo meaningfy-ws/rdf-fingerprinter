@@ -462,6 +462,7 @@ class EdgeTarget(ConfiguredBaseModel):
                        'SampledClass',
                        'FailureNote']} })
     has_shape: Optional[bool] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['EdgeTarget']} })
+    nested: Optional[bool] = Field(default=None, description="""The group is a nested one (it has no block of its own); whether any edge expands it or not.""", json_schema_extra = { "linkml_meta": {'domain_of': ['EdgeTarget', 'PatternBlock']} })
 
 
 class PatternEdge(ConfiguredBaseModel):
@@ -550,7 +551,7 @@ class PatternBlock(ConfiguredBaseModel):
     shape: Optional[str] = Field(default=None, description="""The ShExC label.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NodeShape', 'PropertyShape', 'PatternBlock']} })
     instances: Optional[int] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternBlock', 'TaxonomyNode', 'DocumentClass']} })
     observed: Optional[int] = Field(default=None, description="""Only in first_n mode.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PatternBlock']} })
-    nested: Optional[bool] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternBlock']} })
+    nested: Optional[bool] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['EdgeTarget', 'PatternBlock']} })
     reaching_edges: Optional[int] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternBlock']} })
     co_types: Optional[list[CoTypeNote]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternBlock']} })
     via: Optional[list[ViaLink]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternBlock']} })

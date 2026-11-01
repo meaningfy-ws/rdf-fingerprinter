@@ -354,16 +354,16 @@ VALUE     ::= a lexical form, non-empty, ≤64 chars, without white space, '"' o
 | `prefixes` | the same `PREFIX` lines |
 | legend | exactly `# comments use the pattern schema's legend: k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured · … deeper than 3 hops` |
 | `hidden_classes` > 0 | `# hidden: n classes`. Header order: `PREFIX` lines, legend, hidden line, skipped line, then the shapes |
-| block | `# ` + header, then `<shape> {`, the constraints, `}`. The shape is the first shown member's name. |
+| block | `# ` + header, then `<shape> {`, the constraints, `}`. The shape is the first shown member's name whose IRI holds no `=`; a block with no such member is dropped (its `=` IRIs go on the `# skipped:` line), and so is every `@<shape>` reference to it (`IRI` instead). A graph with a pattern block gets a file even when every shape is dropped: the header and the glossary only. |
 | edge | `<indent><property> <value>[ <cardinality>] ;`, then `  # <comment>` if and only if the comment is non-empty |
 | inline nested group | `<indent><property> BNODE {` + (`  # <comment>` iff non-empty); its constraints at the next level; then `<indent>}` + (` <cardinality>` if any) + ` ;`, e.g. `  } {0,2} ;`. `<indent>` is 2 × level spaces (level 1 = 2 spaces); PyShExC accepts `p BNODE {  # c … } {0,2} ;` |
-| value | one alternative: group with a block in this file → `@<shape>`; nested group expanded nowhere → `BNODE` (this wins over the next two); assigned nested group with `reaching_edges` = 1 → `BNODE {` … `}` inline; assigned nested group with `reaching_edges` > 1 → `BNODE @<shape>`; other class → `IRI`; datatype → name; `IRI`/`BNODE`/`.` as is. Several, after de-duplication → `(a OR b …)`. |
+| value | one alternative: group with a block in this file → `@<shape>`; nested group expanded nowhere → `BNODE` (this wins over the next two; a hidden class beside it stays `IRI`, so `(BNODE OR IRI)`); assigned nested group with `reaching_edges` = 1 → `BNODE {` … `}` inline; assigned nested group with `reaching_edges` > 1 → `BNODE @<shape>`; other class → `IRI`; datatype → name; `IRI`/`BNODE`/`.` as is. Several, after de-duplication → `(a OR b …)`. |
 | cardinality | from `min_count`, `max_count`: (1,1) → nothing; (0,1) → `?`; a = b > 1 → `{a}`; otherwise `{a,b}`; no histogram → `*` |
 | comment | joined by single spaces: the `target` text when a target alternative is a class group; then the `stats` tokens (`=name` included); then `… deeper than 3 hops` for an edge into a group expanded nowhere. Empty when none applies (e.g. `owl:imports IRI ;`), and then no `#` is written |
 | assigned nested group with `reaching_edges` > 1 | one shape per group after the block shapes: `# (:G) n`, then `<shape> BNODE {` … `}` |
 | an edge at level 3 into a nested group expanded nowhere (pattern ` …`), however many edges reach it | `BNODE`, comment as above; no shape for that group; inline constraints never go below level 3, and a named nested shape's constraints start again at level 1 |
 | glossary | each glossary line, with `# ` before it |
-| a class or property IRI holding `=` | left out; `# skipped: <iri> <iri> …` once, after the legend and the hidden line |
+| a property or datatype IRI holding `=`, or a class IRI holding `=` in a group with no other shown member | left out; `# skipped: <iri> <iri> …` once, after the legend and the hidden line |
 
 ### E. Worked example: whole-graph pattern schema, graph `continents` (the golden file's body)
 

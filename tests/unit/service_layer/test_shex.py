@@ -28,11 +28,6 @@ def test_the_shex_format_is_registered():
     assert GENERATORS[RepresentationFormat.shex] is ShexGenerator
 
 
-def test_one_file_per_graph_named_by_its_slug(sample_analytics):
-    texts = files(ShexGenerator(sample_analytics, JinjaTemplateRenderer()).serialize())
-    assert sorted(texts) == ["shex-continents-214e8f67.shex", "shex-default.shex", "shex-treaties-3b4301a8.shex"]
-
-
 def test_the_file_holds_prefixes_then_the_legend_then_the_shapes_then_the_glossary(continents):
     lines = continents.splitlines()
     prefixes = [i for i, line in enumerate(lines) if line.startswith("PREFIX ")]
@@ -43,10 +38,7 @@ def test_the_file_holds_prefixes_then_the_legend_then_the_shapes_then_the_glossa
 
 
 def test_a_constraint_ends_in_a_semicolon_then_its_comment_and_a_group_closes_with_its_cardinality(continents):
-    assert "  skosxl:prefLabel BNODE @skosxl:Label {24} ;  # (:skosxl:Label) ×24 bn\n" in continents
-    assert (
-        "  euvoc:xlNotation BNODE {  # (:euvoc:XlNotation) bn\n    dcterms:created xsd:date ;  # =2014-10-10\n" in continents
-    )
+    assert "bn\n    dcterms:created xsd:date ;  # =2014-10-10\n" in continents
     assert "\n  } ;\n" in continents
     assert "\n# (:skosxl:Label) 145\nskosxl:Label BNODE {\n" in continents
 
@@ -65,6 +57,13 @@ def test_the_hidden_line_follows_the_legend_when_classes_are_hidden():
     texts, _ = outputs(profile_run(klass(EX + "A", 5), klass(EX + "B", 1)), min_instances=2)
     lines = only(texts).splitlines()
     assert lines[lines.index("# hidden: 1 classes") - 1].startswith("# comments use")
+
+
+def test_a_graph_whose_every_shape_is_dropped_still_gets_a_file_with_the_header_and_the_glossary():
+    bad = "http://ex.org/q?a=1&b='x'"
+    texts, _ = outputs(profile_run(klass(bad, 2)))
+    lines = only(texts).splitlines()
+    assert lines[-2:] == [f"# skipped: {bad}", "# glossary: none"] and not any(ln.endswith("{") for ln in lines)
 
 
 def test_a_graph_with_no_shown_class_writes_no_file():

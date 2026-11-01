@@ -44,6 +44,7 @@ DESCRIPTION_LIMIT = 200  # characters of a glossary description (P-8)
 MAX_LEVEL = 3  # edges sit at levels 1-3 (P-5)
 _BARE_VALUE = re.compile(r'[^\s"]+')
 IRI, BNODE, UNKNOWN = "IRI", "BNODE", "."
+REJECTED = "="  # PyShExC rejects "=" in an IRIREF, however it is written (llm-schema-tools design, Dependencies)
 _ORDER = (TargetKind.group, TargetKind.datatype, TargetKind.iri, TargetKind.blank_node)  # the order targets are written
 
 
@@ -80,7 +81,7 @@ class _Group:
 
     name: str
     members: tuple[ClassAnalytics, ...]  # in name order
-    shape: str  # the ShExC label: the first shown member's name
+    shape: str  # the ShExC label: the first shown member's name without "=" (else the first shown)
     shown: bool  # some member's namespace is not excluded
 
     @property
@@ -269,10 +270,11 @@ class _Builder:
 
     def _group(self, named: list[tuple[str, ClassAnalytics]]) -> _Group:
         shown = [name for name, c in named if self._shown(c.class_iri)]
+        writable = [name for name in shown if REJECTED not in name]  # a name holds "=" only if its IRI does
         return _Group(
             name="&".join(name for name, _ in named),
             members=tuple(c for _, c in named),
-            shape=(shown or [named[0][0]])[0],
+            shape=(writable or shown or [named[0][0]])[0],
             shown=bool(shown),
         )
 
@@ -333,7 +335,9 @@ class _Builder:
         if target is not None:
             group = self.groups[target]
             shape = target in self.kept
-            edge_target = EdgeTarget(kind=TargetKind.group, name=group.name, classes=group.classes, has_shape=shape)
+            edge_target = EdgeTarget(
+                kind=TargetKind.group, name=group.name, classes=group.classes, has_shape=shape, nested=self.nested[target]
+            )
             return _Alternative(TargetKind.group, group.name, edge_target, tuple(group.classes))
         iri = partition.object_class or ""
         name = self.namer.name(iri)
