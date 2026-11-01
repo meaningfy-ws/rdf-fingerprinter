@@ -18,12 +18,12 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## 3. Traceability
 
-- [ ] 3.1 `tests/guards/traceability.py` (`trace()`) with TC-1..TC-3 on `tmp_path` trees; the real-tree test written but marked `xfail(strict=True)` until 3.7 (Requirement: Requirement-traced tests; P-3)
-- [ ] 3.2 Align `fingerprint-report`: feature titles renamed to spec titles; spec-only scenarios get Gherkin; feature-only scenarios deleted or added to the spec through a MODIFIED delta in this change (P-3; design Risks)
-- [ ] 3.3 Align `namespace-prefixes` (as 3.2; 11 spec scenarios lack Gherkin today)
-- [ ] 3.4 Align `profile-analytics` (as 3.2)
-- [ ] 3.5 Align `profile-representations` (as 3.2)
-- [ ] 3.6 Align `statistics-collection` (as 3.2; 1 of 29 titles matches today)
+- [x] 3.1 `tests/guards/traceability.py` (`trace()`) with TC-1..TC-3 on `tmp_path` trees; the real-tree test written but marked `xfail(strict=True)` until 3.7 (Requirement: Requirement-traced tests; P-3)
+- [x] 3.2 Align `fingerprint-report`: feature titles renamed to spec titles; spec-only scenarios get Gherkin; feature-only scenarios deleted or added to the spec through a MODIFIED delta in this change (P-3; design Risks)
+- [x] 3.3 Align `namespace-prefixes` (as 3.2; 11 spec scenarios lack Gherkin today)
+- [x] 3.4 Align `profile-analytics` (as 3.2)
+- [x] 3.5 Align `profile-representations` (as 3.2)
+- [x] 3.6 Align `statistics-collection` (as 3.2; 1 of 29 titles matches today)
 - [ ] 3.7 `tests/guards/untraced_scenarios.txt` for `developer-tooling` (each entry a pytest node id); `xfail` removed; the guard passes (Requirement: Requirement-traced tests)
 
 ## 4. Canonical sample data
@@ -65,7 +65,7 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## Roadmap
 
-- [x] 1.1 · [ ] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 3.4 · [ ] 3.5 · [ ] 3.6 · [ ] 3.7 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 4.5 · [ ] 4.6 · [ ] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
+- [x] 1.1 · [ ] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [ ] 3.7 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 4.5 · [ ] 4.6 · [ ] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
 
 ## Verification
 
