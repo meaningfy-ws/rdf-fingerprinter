@@ -28,10 +28,14 @@ from fingerprint.adapters.queries import (
     subjects_exact,
     subjects_limit,
     subjects_values,
+    terms_values,
 )
 from fingerprint.adapters.sparql import SparqlPort, redact
+from fingerprint.domain.annotations import select_annotations
 from fingerprint.domain.exceptions import IriRefError
+from fingerprint.domain.iri import to_iriref
 from fingerprint.domain.profile import (
+    AnnotationValue,
     CardinalityBin,
     ClassProfile,
     CoTypeCount,
@@ -53,6 +57,7 @@ from fingerprint.domain.profile import (
     QueryKind,
     Settings,
     SubclassEdge,
+    TermAnnotation,
     ValueCount,
     ValuePartition,
 )
@@ -82,6 +87,7 @@ QUERY_KIND = {
     "Q9": QueryKind.top_values,
     "Q10": QueryKind.property_presence,
     "Q11": QueryKind.incoming_links,
+    "Q12": QueryKind.term_annotations,
     "PITFALL": QueryKind.pitfall,
 }
 
@@ -102,6 +108,15 @@ def _term(term: Any) -> str:
 
 def _int(term: Any) -> int | None:
     return int(term) if term is not None and str(term) != "" else None
+
+
+def _writable(iri: str) -> bool:
+    """Whether the IRI can be written into a query."""
+    try:
+        to_iriref(iri)
+    except IriRefError:
+        return False
+    return True
 
 
 class _Collection:
@@ -401,6 +416,29 @@ class _Collection:
         )
         return profile
 
+    def term_annotations(self, graph: str, profiles: list[ClassProfile]) -> list[TermAnnotation] | None:
+        """Q12 over the profiled classes and, from depth properties, their properties; None when it fails."""
+        iris = {p.class_iri for p in profiles}
+        if self.depth_at_least(Depth.properties):
+            iris |= {q.property for p in profiles for q in p.property_partitions or []} - {RDF_TYPE}
+        terms = [iri for iri in sorted(iris) if _writable(iri)]
+        if not terms:  # an empty VALUES block cannot be evaluated by every store
+            return []
+        try:
+            rows = self.select("Q12", graph, terms=terms_values(terms))
+        except SparqlError as error:
+            self.fail("Q12", f"graph {graph or 'default'}: term annotations not read: {error}", graph)
+            return None
+        return select_annotations(
+            AnnotationValue(
+                term=str(r["t"]),
+                predicate=str(r["p"]),
+                text=str(r["v"]),
+                language=(getattr(r["v"], "language", None) or "").lower() or None,  # RDF 1.1: tags compare without case
+            )
+            for r in rows
+        )
+
     def profile_graph(self, graph: str, edges: list[SubclassEdge]) -> GraphProfile:
         label = graph or "default"
         logger.info("graph %s: profiling", label)
@@ -420,7 +458,14 @@ class _Collection:
         ordered = sorted(usable, key=lambda pair: (-pair[1], pair[0]))
         with ThreadPoolExecutor(max_workers=self.settings.concurrency) as pool:
             profiles = list(pool.map(lambda pair: self.profile_class(graph, pair[0], pair[1], predicates), ordered))
-        return result.model_copy(update={"declared_subclass_edges": edges, "class_partitions": [p for p in profiles if p]})
+        profiled = [p for p in profiles if p]
+        return result.model_copy(
+            update={
+                "declared_subclass_edges": edges,
+                "class_partitions": profiled,
+                "term_annotations": self.term_annotations(graph, profiled),
+            }
+        )
 
 
 def _pitfall_term(term: Any) -> PitfallTerm | None:

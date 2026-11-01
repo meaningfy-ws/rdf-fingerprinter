@@ -6,7 +6,7 @@ import re
 import urllib.error
 
 from pytest_bdd import given, parsers, then, when
-from rdflib import Literal, URIRef
+from rdflib import Graph, Literal, URIRef
 
 from fingerprint.adapters.sparql import PermanentError, QueryTimeout, query_name
 from fingerprint.service_layer.collection import collect
@@ -623,6 +623,8 @@ def depth(ctx, depth):
     fake.add("ex:Person1", "a", "ex:Agent")
     fake.add("ex:Person0", "ex:knows", "ex:Person1")
     fake.add("ex:Person", "http://www.w3.org/2000/01/rdf-schema#subClassOf", "ex:Agent")
+    fake.add("ex:Person", "http://www.w3.org/2000/01/rdf-schema#label", Literal("Person", lang="en"))
+    fake.add("ex:name", "http://www.w3.org/2000/01/rdf-schema#label", Literal("name", lang="en"))
     ctx["cli"]["depth"] = depth
 
 
@@ -630,9 +632,19 @@ def _person(run):
     return klass(run, "ex:Person")
 
 
+def _annotated(run, curie, graph_iri=None):
+    return any(a.term == expand(curie) for a in graph(run, graph_iri).term_annotations or [])
+
+
 CONTENTS = {
-    "instance counts, hierarchy and other types": lambda run: (
-        _person(run).instances == 2 and graph(run).declared_subclass_edges and _person(run).co_types
+    "instance counts, hierarchy, other types and class annotations": lambda run: (
+        _person(run).instances == 2
+        and graph(run).declared_subclass_edges
+        and _person(run).co_types
+        and _annotated(run, "ex:Person")
+    ),
+    "property histograms and property annotations": lambda run: (
+        CONTENTS["property histograms"](run) and _annotated(run, "ex:name")
     ),
     "property histograms": lambda run: any(p.cardinality_histogram for p in _person(run).property_partitions or []),
     "value groups and object classes": lambda run: any(
@@ -659,14 +671,18 @@ def contains(ctx, present):
     assert CONTENTS[present](ctx["run"])
 
 
-DEFAULT_QUERIES = {"Q0", "Q3", "Q4", "Q8", "Q5", "Q6", "Q7"}  # graph list, counts, hierarchy, co-types, votes, values, objects
+# graph list, counts, hierarchy, co-types, votes, values, objects, term annotations
+DEFAULT_QUERIES = {"Q0", "Q3", "Q4", "Q8", "Q5", "Q6", "Q7", "Q12"}
 
 
 def sent_names(ctx):
     return {query_name(q).split()[0] for q in ctx["fake"].queries}
 
 
-@then("the endpoint receives the graph list, class count, hierarchy, co-type, vote, value and object-class queries")
+@then(
+    "the endpoint receives the graph list, class count, hierarchy, co-type, vote, value, object-class "
+    "and term-annotation queries"
+)
 def default_queries(ctx):
     assert DEFAULT_QUERIES <= sent_names(ctx)
 
@@ -748,3 +764,110 @@ def top_values_collected(ctx):
 def recorded_top_values(ctx, first, second):
     values = [v.value for v in prop(klass(ctx["run"], "ex:Person"), "ex:name").top_values]
     assert values == [first, second]
+
+
+# --- term labels and descriptions (llm-schema-tools) ---
+
+TURTLE_PREFIXES = "".join(
+    f"@prefix {prefix}: <{ns}> . "
+    for prefix, ns in (
+        ("ex", EX),
+        ("rdfs", "http://www.w3.org/2000/01/rdf-schema#"),
+        ("skos", "http://www.w3.org/2004/02/skos/core#"),
+        ("skosxl", "http://www.w3.org/2008/05/skos-xl#"),
+        ("dcterms", "http://purl.org/dc/terms/"),
+    )
+)
+
+
+def store_holds(fake, turtle, graph_iri=None):
+    """Add the triples of a Turtle statement (without its final dot) to the fake store."""
+    for s, p, o in Graph().parse(data=f"{TURTLE_PREFIXES}{turtle} .", format="turtle"):
+        fake.add(s, p, o, graph_iri)
+
+
+@given(parsers.parse("the store holds '{turtle}'"))
+def holds(ctx, turtle):
+    store_holds(ctx["fake"], turtle)
+
+
+@given(parsers.parse('the store holds, for "{term}", only {values}'))
+def holds_only(ctx, term, values):
+    store_holds(ctx["fake"], f"{term} " + " ; ".join(values.split(" and ")))
+
+
+@given(parsers.parse("the graph \"{graph_iri}\" holds '{turtle}'"))
+def graph_holds(ctx, graph_iri, turtle):
+    store_holds(ctx["fake"], turtle, graph_iri)
+
+
+@given(parsers.parse('class "{cls}" has {n:d} instances in graph "{graph_iri}"'))
+def instances_in_graph(ctx, cls, n, graph_iri):
+    people(ctx["fake"], n, cls=cls, g=graph_iri)
+
+
+@given(parsers.parse('class "{cls}" has {n:d} instances with "{p}"'))
+def instances_with(ctx, cls, n, p):
+    for i in range(n):
+        ctx["fake"].add(f"ex:i{i}", "a", cls)
+        ctx["fake"].add(f"ex:i{i}", p, Literal(f"v{i}"))
+
+
+@given("the endpoint rejects the term-annotation query with HTTP 400")
+def annotations_rejected(ctx):
+    people(ctx["fake"], 2)
+    ctx["fake"].on("Q12", http_error(400))
+
+
+@when(parsers.parse('the knowledge graph is fingerprinted at depth "{first}" and again at depth "{second}"'))
+def at_two_depths(ctx, first, second):
+    ctx["runs"] = {depth: fingerprint(ctx, depth=depth) for depth in (first, second)}
+
+
+def texts(values):
+    """Annotation texts as `"text"@lang` (no tag for an untagged one), comma-separated."""
+    return ", ".join(f'"{v.text}"' + (f"@{v.language}" if v.language else "") for v in values)
+
+
+def annotation(run, term, graph_iri=None):
+    return next(a for a in graph(run, graph_iri).term_annotations if a.term == expand(term))
+
+
+@then(parsers.parse("the term annotations give \"{term}\" the labels '{labels}'"))
+def has_labels(ctx, term, labels):
+    assert texts(annotation(ctx["run"], term).labels) == labels
+
+
+@then(parsers.parse("the term annotations give \"{term}\" the descriptions '{descriptions}'"))
+def has_descriptions(ctx, term, descriptions):
+    assert texts(annotation(ctx["run"], term).descriptions) == descriptions
+
+
+@then(parsers.parse('the term annotations of graph "{graph_iri}" give "{term}" the labels \'{labels}\''))
+def graph_has_labels(ctx, graph_iri, term, labels):
+    assert texts(annotation(ctx["run"], term, graph_iri).labels) == labels
+
+
+@then(parsers.parse('at depth "{depth}" only "{term}" has term annotations'))
+def only_annotated(ctx, depth, term):
+    assert [a.term for a in graph(ctx["runs"][depth]).term_annotations] == [expand(term)]
+
+
+@then(parsers.parse('at depth "{depth}" "{first}" and "{second}" have term annotations'))
+def both_annotated(ctx, depth, first, second):
+    assert {a.term for a in graph(ctx["runs"][depth]).term_annotations} == {expand(first), expand(second)}
+
+
+@then(parsers.parse('"{cls}" is in the profile'))
+def class_in_profile(ctx, cls):
+    assert klass(ctx["run"], cls)
+
+
+@then("the graph has no term annotations")
+def no_annotations(ctx):
+    assert graph(ctx["run"]).term_annotations is None
+
+
+@then(parsers.parse('one failure of kind "{kind}" is recorded'))
+def one_failure_of_kind(ctx, kind):
+    assert [f.query_kind for f in ctx["run"].failures] == [kind]

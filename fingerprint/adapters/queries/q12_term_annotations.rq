@@ -1,0 +1,15 @@
+# Q12 term annotations (llm-schema-tools DEC-20, DEC-21)
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+SELECT DISTINCT ?t ?p ?v {
+  VALUES ?t { $terms }
+  { VALUES ?p { skos:prefLabel rdfs:label dcterms:title skos:altLabel
+                skos:definition rdfs:comment dcterms:description skos:scopeNote }
+    { ?t ?p ?v } UNION { GRAPH ?g { ?t ?p ?v } } }
+  UNION
+  { { ?t skosxl:prefLabel/skosxl:literalForm ?v } UNION { GRAPH ?g { ?t skosxl:prefLabel/skosxl:literalForm ?v } }
+    BIND(skosxl:prefLabel AS ?p) }
+  FILTER(isLiteral(?v))
+}

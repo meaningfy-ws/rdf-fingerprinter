@@ -189,8 +189,9 @@ SELECT DISTINCT ?t ?p ?v {
   no query is sent and the graph stores `[]`: rdflib, behind `FakeSparql`, cannot evaluate an
   empty `VALUES` block (verified: `AttributeError` in `evalMultiset`).
 - **Rows.** Each row becomes `AnnotationValue(term=str(t), predicate=str(p), text=str(v),
-  language=v.language or None)` (typed terms; statistics-collection "Results are read as typed RDF
-  terms").
+  language=v.language.lower() if v.language else None)` (typed terms; statistics-collection "Results are read as typed RDF
+  terms"). Language tags are lower-cased on input (RDF 1.1 compares them without case); the same
+  in `load_ontology`.
 - **Errors.** A `SparqlError` records `Failure(query_kind=term_annotations, graph=…,
   message="graph <g>: term annotations not read: <error>")`, and the graph keeps
   `term_annotations` `None`. Otherwise it gets `select_annotations(rows)`, `[]` when there are none.
