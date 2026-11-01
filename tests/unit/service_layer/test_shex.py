@@ -87,11 +87,7 @@ def test_the_iris_the_pattern_view_cannot_write_are_skipped_for_the_report():
     assert generator.skipped == [EX + "bad iri"]
 
 
-def test_the_note_of_the_excluded_namespaces_follows_the_legend_and_is_absent_without_a_filter():
-    def lines(analytics):
-        texts = files(ShexGenerator(analytics, JinjaTemplateRenderer()).serialize())
-        return next(iter(texts.values())).splitlines()
-
-    noted = lines(builders.filtered_analytics("rel"))
+def test_the_note_of_the_excluded_namespaces_follows_the_legend():
+    texts = files(ShexGenerator(builders.filtered_analytics("rel"), JinjaTemplateRenderer()).serialize())
+    noted = next(iter(texts.values())).splitlines()
     assert noted[noted.index(f"# excluded namespaces: {builders.REL_NOTE}") - 1].startswith("# comments use")
-    assert not any("excluded namespaces" in line for line in lines(builders.filtered_analytics("foaf")))

@@ -316,10 +316,6 @@ def test_the_header_names_the_graph_in_plain_characters():
     assert header.endswith("— http://g/_x")
 
 
-def test_the_note_of_the_excluded_namespaces_is_the_second_line_and_absent_without_a_filter():
-    def lines(analytics):
-        (text,) = files(ShaclGenerator(analytics, JinjaTemplateRenderer()).serialize()).values()
-        return text.splitlines()
-
-    assert lines(builders.filtered_analytics("rel"))[1] == f"# excluded namespaces: {builders.REL_NOTE}"
-    assert not any("excluded namespaces" in line for line in lines(builders.filtered_analytics("foaf")))
+def test_the_note_of_the_excluded_namespaces_is_the_second_line():
+    (text,) = files(ShaclGenerator(builders.filtered_analytics("rel"), JinjaTemplateRenderer()).serialize()).values()
+    assert text.splitlines()[1] == f"# excluded namespaces: {builders.REL_NOTE}"

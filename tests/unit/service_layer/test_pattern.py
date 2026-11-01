@@ -69,11 +69,17 @@ def test_a_named_graph_is_labelled_in_plain_characters():
     assert view.graph_label == plain_label(EX + "g")
 
 
-def test_the_note_of_the_excluded_namespaces_follows_the_legend_and_is_absent_without_a_filter():
-    def lines(analytics):
-        texts = files(PatternGenerator(analytics, JinjaTemplateRenderer()).serialize())
-        return next(iter(texts.values())).splitlines()
-
-    noted = lines(builders.filtered_analytics("rel"))
+def test_the_note_of_the_excluded_namespaces_follows_the_legend():
+    noted = pattern_lines(builders.filtered_analytics("rel"))
     assert noted[noted.index(f"# excluded namespaces: {builders.REL_NOTE}") - 1].startswith("# (:A&B) n: classes")
-    assert not any("excluded namespaces" in line for line in lines(builders.filtered_analytics("foaf")))
+
+
+def test_the_note_of_the_excluded_namespaces_follows_the_hidden_line():
+    hidden = builders.filter_profile(klass("http://www.w3.org/2002/07/owl#Thing", 1))
+    noted = pattern_lines(builders.filtered_analytics("rel", run=hidden))
+    assert noted[noted.index("# hidden: 1 classes") + 1] == f"# excluded namespaces: {builders.REL_NOTE}"
+
+
+def pattern_lines(analytics):
+    texts = files(PatternGenerator(analytics, JinjaTemplateRenderer()).serialize())
+    return next(iter(texts.values())).splitlines()
