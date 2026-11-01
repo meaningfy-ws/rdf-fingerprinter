@@ -179,3 +179,16 @@ After the new tests: 51 left (50 survived + 1 timeout, caught by non-termination
 ### Spec question
 
 - `cardinality_label` at `acceptance_threshold = 0` returns `exactly_one` with support 0.0 even when no instance has exactly one value. The schema allows 0. Not pinned by a test; decide whether 0 should be rejected or the label defined.
+
+## Lead decisions on the domain findings (2026-11-01)
+
+- `analytics._weighted_value_at`: the unreachable `raise IndexError` is deleted (the EPIC's dead-code
+  exception; GitNexus impact LOW, one caller); the function is now a single `next()` over running totals,
+  and the test that only reached the raise is gone.
+- Not changed (outside this EPIC's no-production-change scope; follow-ups for the developer):
+  `modules._by_name` (redundant tie-break key, behaviour pinned by the new tie tests);
+  `analytics._namespace` duplicating `prefixes.namespace_of` with weaker rules;
+  the unused `set()` default in `graph_analytics`; the optional `if without > 0`.
+- Open spec question for the developer: at `acceptance_threshold = 0`, `cardinality_label` returns
+  `exactly_one` with support 0.0 even when no instance has exactly one value; the schema allows 0.
+  Either reject 0 or define the label.

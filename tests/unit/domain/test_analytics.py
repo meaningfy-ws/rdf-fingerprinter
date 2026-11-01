@@ -1,6 +1,6 @@
 import pytest
 
-from fingerprint.domain.analytics import _weighted_value_at, analyse, cardinality_label, cardinality_statistics
+from fingerprint.domain.analytics import analyse, cardinality_label, cardinality_statistics
 from fingerprint.domain.profile import CardinalityBin, ProfileRun, ValueCount
 from tests import builders
 from tests.builders import klass, profile_run
@@ -78,11 +78,6 @@ def test_median_is_the_middle_value_or_the_mean_of_the_two_middle_ones(observed,
 
 def test_mode_tie_takes_the_smallest_n():
     assert cardinality_statistics(histogram({1: 2, 2: 2}), 4).mode == 1
-
-
-def test_a_position_beyond_the_histogram_is_an_index_error():
-    with pytest.raises(IndexError):
-        _weighted_value_at([(1, 2)], 2)
 
 
 def test_no_observed_instances_gives_no_means():

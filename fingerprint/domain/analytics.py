@@ -2,6 +2,7 @@
 
 import math
 from collections import defaultdict
+from itertools import accumulate
 
 from fingerprint.domain.profile import (
     CardinalityBin,
@@ -51,13 +52,9 @@ def _ratio(numerator: float, denominator: float) -> float | None:
 
 
 def _weighted_value_at(counts: list[tuple[int, int]], position: int) -> int:
-    """The value at a 0-based position of the sorted, expanded histogram."""
-    seen = 0
-    for value, count in counts:
-        seen += count
-        if position < seen:
-            return value
-    raise IndexError(position)
+    """The value at a 0-based position of the sorted, expanded histogram (positions stay below its total)."""
+    totals = accumulate(count for _, count in counts)
+    return next(value for (value, _), seen in zip(counts, totals, strict=True) if position < seen)
 
 
 def _subjects_per_n(histogram: list[CardinalityBin]) -> dict[int, int]:  # dict-ok: lookup index n → subjects
