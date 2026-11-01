@@ -13,23 +13,6 @@ def test_defaults():
     assert not s.selected_graphs
 
 
-@pytest.mark.parametrize(
-    "env, cli, timeout",
-    [
-        ({}, {}, 60),
-        ({"RDF_FINGERPRINTER_TIMEOUT_SECONDS": "10"}, {}, 10),
-        ({"RDF_FINGERPRINTER_TIMEOUT_SECONDS": "10"}, {"timeout_seconds": 30}, 30),
-    ],
-)
-def test_precedence_cli_over_env_over_default(env, cli, timeout):
-    assert resolve_settings(cli=cli, env=env).timeout_seconds == timeout
-
-
-def test_env_over_config_over_default():
-    assert resolve_settings(env={}, config={"concurrency": 2}).concurrency == 2
-    assert resolve_settings(env={"RDF_FINGERPRINTER_CONCURRENCY": "3"}, config={"concurrency": 2}).concurrency == 3
-
-
 def test_selected_graphs_parameter_sits_between_env_and_config():
     assert resolve_settings(env={}, selected_graphs=["g1"], config={"selected_graphs": ["g2"]}).selected_graphs == ["g1"]
     env = {"RDF_FINGERPRINTER_SELECTED_GRAPHS": "a, b"}

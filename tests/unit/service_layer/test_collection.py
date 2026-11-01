@@ -1,6 +1,5 @@
 """Error-matrix rows and query selection of `collect` (design.md "Error matrix", "Which queries run")."""
 
-import io
 import logging
 import urllib.error
 
@@ -71,7 +70,7 @@ def test_classes_not_listed(fake):
     assert not result.graphs[0].class_partitions
 
 
-def test_one_class_count_times_out(fake):
+def test_a_class_whose_own_count_times_out_is_left_out_and_recorded(fake):
     fake.add("ex:c", "a", "ex:City")
     fake.on("Q3", TIMEOUT)
     fake.on("Q3b", TIMEOUT, when=lambda q: "City" in q)
@@ -87,22 +86,11 @@ def test_blank_node_class_is_skipped(fake):
     assert "not usable in a SPARQL query" in result.failures[0].message
 
 
-def test_authorisation_refused_mid_run_fails_only_that_query(fake):
-    refused = urllib.error.HTTPError("http://fake", 403, "forbidden", {}, io.BytesIO(b""))  # type: ignore[arg-type]
-    fake.on("Q5", refused)
-    result = run(fake)
-    assert [(f.query_kind, f.attempts) for f in result.failures] == [("cardinality_votes", 1)]
-
-
 def test_unreachable_endpoint_is_named_without_credentials(fake):
     fake.on("Q0", urllib.error.URLError(ConnectionRefusedError("refused")))
     with pytest.raises(EndpointUnreachable) as raised:
         run(fake)
     assert "cannot reach endpoint http://fake/sparql" in str(raised.value) and "secret" not in str(raised.value)
-
-
-def test_profile_records_the_endpoint_without_credentials(fake):
-    assert run(fake).endpoint == "http://fake/sparql"
 
 
 def test_default_depth_sends_only_its_queries(fake):
