@@ -66,10 +66,10 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
   - a README section.
   - Layer: docs. Depends on: 1.10.
   - Tests: `make build-docs` green; links resolve.
-- [ ] 1.14 Gate (design "Stage exit criteria"): `make check-all`, `make oxigraph-load-test-data` + `make test-e2e`, `make check-mutation` (≥ 0.950; survivors get a test in the owning tier, or dead code is deleted and listed here; `mutation_score.txt` raised if higher), `openspec validate llm-schema-tools --strict`
+- [x] 1.14 Gate (design "Stage exit criteria"): `make check-all`, `make oxigraph-load-test-data` + `make test-e2e`, `make check-mutation` (≥ 0.950; survivors get a test in the owning tier, or dead code is deleted and listed here; `mutation_score.txt` raised if higher), `openspec validate llm-schema-tools --strict`
   - Layer: all. Depends on: 1.1–1.13.
   - Tests: IT-1, IT-2, IT-3, IT-4; every scenario of the "Still red until bound" table green.
-- [ ] 1.15 Release 3.2.0 (P-16; DEC-12, confirmed in Round 6; 3.1.0 is already released by `pitfall-scans`):
+- [x] 1.15 Release 3.2.0 (P-16; DEC-12, confirmed in Round 6; 3.1.0 is already released by `pitfall-scans`):
   - `pyproject.toml` version `3.1.0` → `3.2.0`;
   - `CHANGELOG.md`: turn `## [Unreleased]` into `## [3.2.0] - <date>` (keep an empty `## [Unreleased]` above it), with Added (the two generators and their commands, `--format pattern|shex`, `--ontology`, the size filters, Q12 and `term_annotations`) and the note that 3.2 profiles with term annotations do not load in 3.1 or 3.0;
   - PR to `master` with green CI; merge; a bare tag `3.2.0`; `gh release create 3.2.0`; report the release URL (`AGENTS.md` "Release authority").
@@ -78,7 +78,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.8 · [x] 1.9 · [x] 1.10 · [x] 1.11 · [x] 1.12 · [x] 1.13 · [ ] 1.14 · [ ] 1.15
+- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.8 · [x] 1.9 · [x] 1.10 · [x] 1.11 · [x] 1.12 · [x] 1.13 · [x] 1.14 · [ ] 1.15
 
 ## Verification
 
