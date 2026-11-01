@@ -60,7 +60,7 @@ def test_the_prefix_cc_warning_carries_the_failure_reason_and_is_logged_once(cap
     with caplog.at_level(logging.WARNING):
         resolve_namespaces(run(BF + "A"), packaged=[], prefix_list=lookup)
     assert lookup.calls == 1
-    assert caplog.text.count("prefix.cc lookup failed: unreachable; generating prefixes") == 1
+    assert caplog.messages == ["prefix.cc lookup failed: unreachable; generating prefixes"]
 
 
 def test_no_fetch_when_the_files_name_everything():
@@ -98,3 +98,37 @@ def test_invalid_saved_prefixes_are_skipped():
     )
     resolved = resolve_namespaces(saved, packaged=[])
     assert {x.namespace: x.prefix for x in resolved.namespaces}["http://ex.org/core/"] == "core"
+
+
+# --- decisions the first tests left open (lean-test-suite 7.5) ---
+
+RDF_NS = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+USED, OTHER = "http://used.example/", "http://other.example/"
+
+
+def prefix_of(resolved):
+    return {x.namespace: x.prefix for x in resolved.namespaces}
+
+
+def test_a_namespace_that_cannot_be_written_is_not_in_use():
+    assert used_namespaces(profile_run(klass("http://ex.org/a b/Thing", 1))) == {RDF_NS}
+
+
+def test_a_prefix_for_a_namespace_not_in_use_does_not_hold_the_name():
+    """The user's `u` for an unused namespace must not block the saved `u` of a used one."""
+    saved = run(USED + "A").model_copy(update={"namespaces": [e("u", USED, PrefixSource.user)]})
+    resolved = resolve_namespaces(saved, [e("u", "http://unused.example/", PrefixSource.user)], packaged=[])
+    assert prefix_of(resolved)[USED] == "u" and "http://unused.example/" not in prefix_of(resolved)
+
+
+def test_an_invalid_prefix_does_not_end_its_sources_list():
+    user = [e("../../x", OTHER, PrefixSource.user), e("good", USED, PrefixSource.user)]
+    assert prefix_of(resolve_namespaces(run(OTHER + "A", USED + "B"), user, packaged=[]))[USED] == "good"
+
+
+def test_a_reserved_or_taken_prefix_does_not_end_its_sources_list():
+    user = [e("rdf", OTHER, PrefixSource.user), e("good", USED, PrefixSource.user)]  # rdf belongs to the rdf namespace
+    resolved = resolve_namespaces(run(OTHER + "A", USED + "B"), user, packaged=[])
+    assert prefix_of(resolved)[USED] == "good" and prefix_of(resolved)[OTHER] != "rdf"
+    taken = [e("same", OTHER, PrefixSource.user), e("SAME", USED, PrefixSource.user), e("fine", FOAF, PrefixSource.user)]
+    assert prefix_of(resolve_namespaces(run(OTHER + "A", USED + "B"), taken, packaged=[]))[FOAF] == "fine"

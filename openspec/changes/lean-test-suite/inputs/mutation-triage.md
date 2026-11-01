@@ -492,3 +492,292 @@ Dead code: none. The `done[-1] if done else "Q8"` fallback in `profile_class` is
 - collection.x_collect__mutmut_42 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
 - collection.x_collect__mutmut_43 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
 - collection.x_collect__mutmut_47 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+
+## service_layer.generators
+
+Survivors re-checked on the current tree: 146 (the baseline listed 158). After the new tests: 37 left (22 equivalent, 3 cosmetic, 11 dead, 1 killed by timeout, which mutmut lists as survived); every other gap is killed. The dead ones show as `no tests` in mutmut.
+
+| module | before | gap | equivalent | cosmetic | dead |
+|---|---|---|---|---|---|
+| document | 45 | 37 | 3 | 0 | 5 |
+| generator | 39 | 29 | 1 | 3 | 6 |
+| plantuml | 44 | 35 | 9 | 0 | 0 |
+| shacl | 29 | 20 | 9 | 0 | 0 |
+
+### Per mutant (`fingerprint.service_layer.generators.` omitted; the number is the `__mutmut_N` suffix)
+
+- plantuml.xǁPlantumlGeneratorǁ__init____mutmut_3 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁ__init____mutmut_11 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁ__init____mutmut_12 — equivalent — the index is reset in visit_graph / outputs before its first read
+- plantuml.xǁPlantumlGeneratorǁ__init____mutmut_13 — equivalent — the index is reset in visit_graph / outputs before its first read
+- plantuml.xǁPlantumlGeneratorǁ__init____mutmut_14 — equivalent — the index is reset in visit_graph / outputs before its first read
+- plantuml.xǁPlantumlGeneratorǁ__init____mutmut_15 — equivalent — the index is reset in visit_graph / outputs before its first read
+- plantuml.xǁPlantumlGeneratorǁ__init____mutmut_16 — equivalent — the index is reset in visit_graph / outputs before its first read
+- plantuml.xǁPlantumlGeneratorǁ__init____mutmut_17 — equivalent — the index is reset in visit_graph / outputs before its first read
+- plantuml.xǁPlantumlGeneratorǁvisit_graph__mutmut_11 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁvisit_graph__mutmut_12 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁend_class__mutmut_4 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁend_class__mutmut_6 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁend_class__mutmut_8 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁend_class__mutmut_9 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁend_graph__mutmut_2 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁend_graph__mutmut_4 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁend_graph__mutmut_5 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁend_graph__mutmut_18 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁend_graph__mutmut_20 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁend_graph__mutmut_51 — equivalent — names and groups always have equal length, so strict zip never differs
+- plantuml.xǁPlantumlGeneratorǁend_graph__mutmut_54 — equivalent — names and groups always have equal length, so strict zip never differs
+- plantuml.xǁPlantumlGeneratorǁend_graph__mutmut_55 — equivalent — names and groups always have equal length, so strict zip never differs
+- plantuml.xǁPlantumlGeneratorǁprefix__mutmut_4 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁalias__mutmut_2 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁreferences__mutmut_12 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁreferences__mutmut_14 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoverview__mutmut_5 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoverview__mutmut_21 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoverview__mutmut_23 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoverview__mutmut_45 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoverview__mutmut_51 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoverview__mutmut_53 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoverview__mutmut_55 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoverview__mutmut_57 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoverview__mutmut_58 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoutputs__mutmut_2 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoutputs__mutmut_4 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoutputs__mutmut_5 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁoutputs__mutmut_6 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁtypes__mutmut_5 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁtypes__mutmut_9 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁtypes__mutmut_11 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.xǁPlantumlGeneratorǁtypes__mutmut_18 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- plantuml.x__alias_order__mutmut_1 — gap — diagram order, aliases, references, links, types — tests/unit/service_layer/test_plantuml.py
+- document.xǁDocumentGeneratorǁvisit_property__mutmut_6 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁvisit_property__mutmut_7 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁvisit_property__mutmut_8 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁvisit_property__mutmut_9 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_class__mutmut_5 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_class__mutmut_7 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_class__mutmut_9 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_class__mutmut_19 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_class__mutmut_30 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_class__mutmut_37 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_class__mutmut_45 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_class__mutmut_47 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_class__mutmut_48 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_class__mutmut_49 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_class__mutmut_50 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_class__mutmut_51 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_13 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_15 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_19 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_21 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_23 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_25 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_27 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_29 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_31 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_33 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_34 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_35 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_36 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_37 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_38 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_39 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_46 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_64 — equivalent — Settings holds str/int/float/bool/list only: json and python dumps print the same
+- document.xǁDocumentGeneratorǁend_profile__mutmut_65 — equivalent — Settings holds str/int/float/bool/list only: json and python dumps print the same
+- document.xǁDocumentGeneratorǁend_profile__mutmut_66 — equivalent — Settings holds str/int/float/bool/list only: json and python dumps print the same
+- document.xǁDocumentGeneratorǁend_profile__mutmut_80 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_86 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_100 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- document.xǁDocumentGeneratorǁend_profile__mutmut_104 — gap — cardinality, parents, sample note, failures, untyped, hidden, skipped — tests/unit/service_layer/test_document.py
+- shacl.xǁShaclGeneratorǁ__init____mutmut_15 — equivalent — reset in visit_graph before use
+- shacl.xǁShaclGeneratorǁ__init____mutmut_16 — equivalent — reset in visit_graph before use
+- shacl.xǁShaclGeneratorǁ__init____mutmut_17 — equivalent — reset in visit_graph before use
+- shacl.xǁShaclGeneratorǁvisit_graph__mutmut_7 — equivalent — declared parents always mirror graph.declared_subclass_edges; the second union adds nothing (redundant code)
+- shacl.xǁShaclGeneratorǁvisit_graph__mutmut_8 — equivalent — declared parents always mirror graph.declared_subclass_edges; the second union adds nothing (redundant code)
+- shacl.xǁShaclGeneratorǁvisit_graph__mutmut_9 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁvisit_property__mutmut_4 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁvisit_property__mutmut_9 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁvisit_property__mutmut_11 — equivalent — has_class is only read when the property is labelled
+- shacl.xǁShaclGeneratorǁvisit_property__mutmut_32 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁend_class__mutmut_20 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁend_class__mutmut_23 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁend_class__mutmut_24 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁend_class__mutmut_34 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁend_graph__mutmut_14 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁvalues__mutmut_3 — equivalent — None and False are both falsy at the only read
+- shacl.xǁShaclGeneratorǁvalues__mutmut_12 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁvalues__mutmut_13 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁvalues__mutmut_22 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁvalue_constraints__mutmut_4 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁvalue_constraints__mutmut_14 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁvalue_constraints__mutmut_34 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁvalue_constraints__mutmut_39 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁvalue_constraints__mutmut_45 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁseverity__mutmut_4 — equivalent — a labelled property always has confidence and label_support
+- shacl.xǁShaclGeneratorǁseverity__mutmut_5 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- shacl.xǁShaclGeneratorǁseverity__mutmut_8 — equivalent — a labelled property always has confidence and label_support
+- shacl.xǁShaclGeneratorǁseverity__mutmut_14 — gap — severity, annotations, value constraints, comments — tests/unit/service_layer/test_shacl.py
+- generator.x_graph_slug__mutmut_6 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.x_graph_slug__mutmut_8 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.x_graph_slug__mutmut_16 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.x_graph_slug__mutmut_30 — equivalent — the name is lower-cased, so strip("X") strips nothing
+- generator.x_graph_slug__mutmut_31 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.x_graph_slug__mutmut_32 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.x_graph_slug__mutmut_33 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.x_plain_label__mutmut_5 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁaccepts__mutmut_4 — cosmetic — log text; the test pins that the IRI is logged, no contract fixes the wording
+- generator.xǁGeneratorǁaccepts__mutmut_6 — cosmetic — log text; the test pins that the IRI is logged, no contract fixes the wording
+- generator.xǁGeneratorǁaccepts__mutmut_7 — cosmetic — log text; the test pins that the IRI is logged, no contract fixes the wording
+- generator.xǁGeneratorǁnamespace__mutmut_1 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁnamespace__mutmut_3 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁlabel__mutmut_4 — dead — Generator.namespaces / used_namespaces() are never read (grep: no caller in fingerprint/ or tests/)
+- generator.xǁGeneratorǁview__mutmut_5 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁview__mutmut_15 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁview__mutmut_23 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁview__mutmut_36 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁview__mutmut_53 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁoutputs__mutmut_5 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁoutputs__mutmut_8 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁoutputs__mutmut_12 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁoutputs__mutmut_13 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁoutputs__mutmut_14 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁserialize__mutmut_4 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁserialize__mutmut_6 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁserialize__mutmut_9 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁserialize__mutmut_11 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁwrite__mutmut_5 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁwrite__mutmut_7 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁwrite__mutmut_8 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁwrite__mutmut_12 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁwrite__mutmut_14 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- generator.xǁGeneratorǁwrite__mutmut_15 — gap — framework walk, renderer arguments, slug/label rules — tests/unit/service_layer/test_generator.py
+- shacl.xǁShaclGeneratorǁshape__mutmut_14 — gap — `not in` never terminates: killed by timeout, any test of shape names reaches it
+- generator.xǁGeneratorǁused_namespaces__mutmut_1 — dead — Generator.used_namespaces() has no caller in fingerprint/ or tests/
+- generator.xǁGeneratorǁused_namespaces__mutmut_2 — dead — Generator.used_namespaces() has no caller in fingerprint/ or tests/
+- generator.xǁGeneratorǁused_namespaces__mutmut_3 — dead — Generator.used_namespaces() has no caller in fingerprint/ or tests/
+- generator.xǁGeneratorǁused_namespaces__mutmut_4 — dead — Generator.used_namespaces() has no caller in fingerprint/ or tests/
+- generator.xǁGeneratorǁused_namespaces__mutmut_5 — dead — Generator.used_namespaces() has no caller in fingerprint/ or tests/
+- document.xǁDocumentGeneratorǁterm__mutmut_1 — dead — DocumentGenerator.term() has no caller (the document builds DocumentTerm directly)
+- document.xǁDocumentGeneratorǁterm__mutmut_2 — dead — DocumentGenerator.term() has no caller (the document builds DocumentTerm directly)
+- document.xǁDocumentGeneratorǁterm__mutmut_3 — dead — DocumentGenerator.term() has no caller (the document builds DocumentTerm directly)
+- document.xǁDocumentGeneratorǁterm__mutmut_4 — dead — DocumentGenerator.term() has no caller (the document builds DocumentTerm directly)
+- document.xǁDocumentGeneratorǁterm__mutmut_5 — dead — DocumentGenerator.term() has no caller (the document builds DocumentTerm directly)
+
+## service_layer.handlers
+
+Survivors re-checked on the current tree: 30 (before). After the new tests: 1 (equivalent).
+
+| module | before | gap | equivalent | cosmetic | dead |
+|---|---|---|---|---|---|
+| handlers | 30 | 23 | 1 | 6 | 0 |
+
+Log-text mutants are cosmetic (no contract fixes the wording); the new tests pin the messages anyway, so mutmut no longer lists them.
+
+### Per mutant (`fingerprint.service_layer.handlers.x_fingerprint_report__mutmut_N`; tests in tests/unit/service_layer/test_handlers.py)
+
+- handlers.x_fingerprint_report__mutmut_4 — gap — usage message names the folder
+- handlers.x_fingerprint_report__mutmut_6 — gap — options validated before any query
+- handlers.x_fingerprint_report__mutmut_9 — gap — default client gets the endpoint
+- handlers.x_fingerprint_report__mutmut_10 — gap — default client gets the settings timeout
+- handlers.x_fingerprint_report__mutmut_23 — gap — prefix.cc source reaches resolution
+- handlers.x_fingerprint_report__mutmut_25 — gap — user prefixes reach resolution
+- handlers.x_fingerprint_report__mutmut_26 — gap — prefix.cc source reaches resolution
+- handlers.x_fingerprint_report__mutmut_32 — gap — an injected renderer is used
+- handlers.x_fingerprint_report__mutmut_33 — gap — an injected renderer is used
+- handlers.x_fingerprint_report__mutmut_34 — gap — the `doc` format is noted, not rendered twice
+- handlers.x_fingerprint_report__mutmut_35 — cosmetic — log text
+- handlers.x_fingerprint_report__mutmut_36 — cosmetic — log text
+- handlers.x_fingerprint_report__mutmut_37 — cosmetic — log text
+- handlers.x_fingerprint_report__mutmut_43 — gap — options reach the document
+- handlers.x_fingerprint_report__mutmut_44 — gap — renderer reaches the document
+- handlers.x_fingerprint_report__mutmut_49 — gap — options reach the document
+- handlers.x_fingerprint_report__mutmut_50 — gap — renderer reaches the document
+- handlers.x_fingerprint_report__mutmut_56 — gap — options reach the other formats
+- handlers.x_fingerprint_report__mutmut_57 — gap — renderer reaches the other formats
+- handlers.x_fingerprint_report__mutmut_58 — equivalent — check_filters=None is falsy like False (`if check_filters:` only)
+- handlers.x_fingerprint_report__mutmut_62 — gap — options reach the other formats
+- handlers.x_fingerprint_report__mutmut_63 — gap — renderer reaches the other formats
+- handlers.x_fingerprint_report__mutmut_64 — gap — filters are warned once, not per format
+- handlers.x_fingerprint_report__mutmut_65 — gap — filters are warned once, not per format
+- handlers.x_fingerprint_report__mutmut_67 — gap — failure log names the report
+- handlers.x_fingerprint_report__mutmut_72 — cosmetic — log text
+- handlers.x_fingerprint_report__mutmut_75 — gap — outcome log names the report
+- handlers.x_fingerprint_report__mutmut_76 — cosmetic — log text
+- handlers.x_fingerprint_report__mutmut_77 — gap — outcome log names the report
+- handlers.x_fingerprint_report__mutmut_78 — cosmetic — log text
+
+## service_layer.prefixes, settings, representations
+
+Survivors re-checked on the current tree: prefixes 27, settings 19, representations 14 (baseline 27, 19, 18). After the new tests: prefixes 22 (5 equivalent, 17 cosmetic), settings 2 (dead), representations 0.
+
+| module | before | gap | equivalent | cosmetic | dead |
+|---|---|---|---|---|---|
+| prefixes | 27 | 5 | 5 | 17 | 0 |
+| settings | 19 | 17 | 0 | 0 | 2 |
+| representations | 14 | 14 | 0 | 0 | 0 |
+
+User-facing usage and warning messages are gaps (the specs state them); only debug log text is cosmetic.
+
+### Per mutant (`fingerprint.service_layer.` omitted; the number is the `__mutmut_N` suffix)
+
+- prefixes.x__iris__mutmut_2 — equivalent — NamespacePrefix and Settings hold no IRI-named field, so skipping them never changes what is yielded
+- prefixes.x__iris__mutmut_4 — equivalent — NamespacePrefix and Settings hold no IRI-named field, so skipping them never changes what is yielded
+- prefixes.x__iris__mutmut_5 — equivalent — NamespacePrefix and Settings hold no IRI-named field, so skipping them never changes what is yielded
+- prefixes.x__iris__mutmut_7 — equivalent — NamespacePrefix and Settings hold no IRI-named field, so skipping them never changes what is yielded
+- prefixes.x__iris__mutmut_8 — equivalent — NamespacePrefix and Settings hold no IRI-named field, so skipping them never changes what is yielded
+- prefixes.x__writable__mutmut_2 — gap — an unwritable namespace is not in use — tests/unit/service_layer/test_prefixes.py
+- prefixes.x_resolve_namespaces__mutmut_11 — gap — an unused namespace must not hold a prefix — tests/unit/service_layer/test_prefixes.py
+- prefixes.x_resolve_namespaces__mutmut_28 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_29 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_30 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_31 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_32 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_33 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_34 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_35 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_36 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_37 — gap — an invalid, reserved or taken entry must not end its source — tests/unit/service_layer/test_prefixes.py
+- prefixes.x_resolve_namespaces__mutmut_45 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_46 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_47 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_48 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_49 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_50 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_51 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_52 — cosmetic — debug log text and arguments
+- prefixes.x_resolve_namespaces__mutmut_53 — gap — an invalid, reserved or taken entry must not end its source — tests/unit/service_layer/test_prefixes.py
+- prefixes.x_resolve_namespaces__mutmut_76 — gap — the prefix.cc warning wording is asserted exactly — tests/unit/service_layer/test_prefixes.py
+- settings.x_load_config_file__mutmut_2 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_load_config_file__mutmut_3 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_describe__mutmut_2 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_describe__mutmut_3 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_describe__mutmut_5 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_describe__mutmut_12 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_describe__mutmut_13 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_check_acceptance_threshold__mutmut_7 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_validate_endpoint__mutmut_9 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_load_user_prefixes__mutmut_8 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_load_user_prefixes__mutmut_12 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_load_user_prefixes__mutmut_17 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x__override__mutmut_4 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x__environment__mutmut_7 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x__environment__mutmut_8 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_resolve_settings__mutmut_1 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_resolve_settings__mutmut_8 — gap — usage message text, one line per field, origin named — tests/unit/service_layer/test_settings.py
+- settings.x_resolve_settings__mutmut_27 — dead — the merged values were each validated by their own source, so the final Settings(...) cannot fail
+- settings.x_resolve_settings__mutmut_28 — dead — the merged values were each validated by their own source, so the final Settings(...) cannot fail
+- representations.x_validate_options__mutmut_6 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_validate_options__mutmut_7 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_validate_options__mutmut_8 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_validate_options__mutmut_9 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_validate_options__mutmut_10 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_warn_unknown_filters__mutmut_3 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_warn_unknown_filters__mutmut_11 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_warn_unknown_filters__mutmut_13 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_warn_unknown_filters__mutmut_14 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_make_generator__mutmut_9 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_generate_representations__mutmut_2 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_generate_representations__mutmut_7 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_generate_representations__mutmut_9 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+- representations.x_generate_representations__mutmut_11 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py

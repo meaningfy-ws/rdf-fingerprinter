@@ -1,17 +1,24 @@
 """The representations service: load, re-analyse at a threshold, run generators in order (P-6, UC-W2)."""
 
+import logging
 from pathlib import Path
 
 import pytest
 
 from fingerprint.adapters.exceptions import GeneratedOutputError
 from fingerprint.adapters.profile_file import save_profile
+from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
+from fingerprint.domain.profile import NamespacePrefix
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer import representations
 from fingerprint.service_layer.exceptions import UsageError
+from fingerprint.service_layer.prefixes import resolve_namespaces
 from fingerprint.service_layer.representations import (
     generate_from_profile_file,
     generate_representations,
+    make_generator,
+    validate_options,
+    warn_unknown_filters,
     with_threshold,
 )
 
@@ -92,3 +99,84 @@ def test_a_missing_output_folder_is_a_usage_error(run, tmp_path, generators):
     path = save_profile(run, tmp_path)
     with pytest.raises(UsageError, match="not an existing folder"):
         generate_from_profile_file(path, tmp_path / "nowhere", ["a"])
+
+
+# --- usage errors and the namespace table (lean-test-suite 7.5) ---
+
+
+class Namespaces(Recording):
+    """Remembers the namespace table of the analytics it was given."""
+
+    tables: list = []
+
+    def write(self, folder):
+        Namespaces.tables.append(self.analytics.namespaces)
+        return []
+
+
+@pytest.fixture
+def namespaced(monkeypatch):
+    Namespaces.tables = []
+    monkeypatch.setattr(representations, "GENERATORS", {"a": Namespaces})
+
+
+@pytest.mark.parametrize("size", [1, 5, None])
+def test_a_module_size_of_one_or_more_is_accepted(size):
+    validate_options(GeneratorOptions(module_size=size))
+
+
+def test_a_module_size_below_one_is_a_usage_error_even_when_built_around_the_model():
+    with pytest.raises(UsageError) as error:
+        validate_options(GeneratorOptions.model_construct(module_size=0))
+    assert str(error.value) == "--module-size must be at least 1"
+
+
+def test_bad_options_stop_before_any_generator_runs(run, tmp_path, generators):
+    with pytest.raises(UsageError, match="--shapes-namespace 'urn:x y<' cannot be written as an IRI"):
+        generate_representations(run, tmp_path, ["a"], options=GeneratorOptions(shapes_namespace="urn:x y<"))
+    assert Recording.seen == []
+
+
+def test_a_generator_refusing_its_namespace_is_a_usage_error(sample_analytics):
+    with pytest.raises(UsageError) as error:
+        make_generator("shacl", sample_analytics, JinjaTemplateRenderer(), None, GeneratorOptions(shapes_namespace="urn:x y<"))
+    assert str(error.value) == "'urn:x y<' cannot be written as an IRI"
+
+
+def test_unknown_formats_are_all_named_with_the_known_ones(run, tmp_path, generators):
+    with pytest.raises(UsageError) as error:
+        generate_representations(run, tmp_path, ["a", "void", "nope"])
+    assert str(error.value) == "unknown formats: void, nope (known: a, b, c)"
+
+
+def test_a_run_without_a_namespace_table_gets_one_and_a_user_table_is_applied(run, tmp_path, namespaced):
+    assert run.namespaces is None
+    generate_representations(run, tmp_path, ["a"])
+    resolved = resolve_namespaces(run)
+    assert Namespaces.tables[-1] == resolved.namespaces
+    mine = [NamespacePrefix(prefix="mine", namespace=resolved.namespaces[0].namespace, source="user")]
+    generate_representations(resolved, tmp_path, ["a"], user_prefixes=mine)
+    assert "mine" in {e.prefix for e in Namespaces.tables[-1]}
+    generate_representations(resolved, tmp_path, ["a"])
+    assert Namespaces.tables[-1] == resolved.namespaces
+
+
+@pytest.mark.parametrize(
+    "options, message",
+    [
+        (GeneratorOptions(include_namespaces=["nope"]), "--include-namespace nope: no such namespace; ignored"),
+        (GeneratorOptions(exclude_namespaces=["nope", "nope"]), "--exclude-namespace nope: no such namespace; ignored"),
+    ],
+)
+def test_an_unknown_namespace_filter_is_warned_about_once_and_named_by_its_option(run, caplog, options, message):
+    with caplog.at_level(logging.WARNING):
+        warn_unknown_filters(run, options)
+    assert caplog.messages == [message]
+
+
+def test_a_filter_naming_a_prefix_of_the_table_is_not_unknown(run, caplog):
+    run = resolve_namespaces(run)
+    entry = run.namespaces[0]
+    with caplog.at_level(logging.WARNING):
+        warn_unknown_filters(run, GeneratorOptions(include_namespaces=[entry.prefix], exclude_namespaces=[entry.namespace]))
+    assert caplog.messages == []
