@@ -219,10 +219,18 @@ A branch that only a contrived test could reach gets `# pragma: no cover — <re
 
 Layers are enforced by import-linter: `entrypoints` may import `service_layer`, never the reverse.
 
+== Branches
+
+`master` is the default and release branch; `develop` is the integration branch. A feature branch
+starts from `develop` and is merged into it by pull request. A release is a pull request into
+`master`; the tag is set on `master`, and `develop` is then brought level with `master`. Neither
+branch takes direct commits, and CI runs the gate on pull requests into both.
+
 == Releasing
 
 . Update `version` in `pyproject.toml` and the `CHANGELOG.md`.
 . Run `make check-all` and `make test-e2e`.
+. Merge the release into `master` by pull request, then bring `develop` level with `master`.
 . Publish a GitHub Release tagged `X.Y.Z` (no `v` prefix). The `publish` workflow runs the gate, builds, and
 uploads to PyPI with Trusted Publishing (no token).
 

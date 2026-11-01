@@ -1,12 +1,12 @@
 name: ci
 
-# Gate per PR and on merge to master; a PR branch is tested once (via pull_request), not twice.
+# Gate per PR and on merge to master or develop; a PR branch is tested once (via pull_request), not twice.
 # No SPARQL store here: the e2e tests run locally (`make test-e2e`, DEC-10).
 on:
   push:
-    branches: [ master ]
+    branches: [ master, develop ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, develop ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
