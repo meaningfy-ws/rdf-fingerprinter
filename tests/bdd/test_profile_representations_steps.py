@@ -22,7 +22,7 @@ from fingerprint.entrypoints.cli import generate
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.generators.generator import META_NAMESPACES
 from fingerprint.service_layer.representations import generate_from_profile_file, make_generator, with_threshold
-from tests.fakes import EX, XSD, files, klass, literals, profile_run, prop
+from tests.fakes import EX, XSD, files, klass, literals, profile_run, prop, resources
 
 scenarios("profile_representations.feature")
 
@@ -382,10 +382,122 @@ def dashed(ctx, child, parent):
     assert f"{aliases[child]} ..|> {aliases[parent]}" in ctx["diagram"]
 
 
+FOAF = "http://xmlns.com/foaf/0.1/"
+
+
+def diagram_files(ctx, module_size=None):
+    options = GeneratorOptions(module_size=module_size)
+    return files(make_generator("puml", analyse(ctx["run"]), JinjaTemplateRenderer(), options=options).serialize())
+
+
+def module_classes(text):
+    """The classes a module diagram draws in full (reference boxes are not its own)."""
+    return re.findall(r'^class "ex:([^"]+)" as C\d+ \{$', text, re.M)
+
+
+@given(
+    parsers.parse(
+        'the namespace "ex" holds the classes A to G, with A and B linked twice, B and C, C and D, and E and F once, '
+        "and G linked to none"
+    )
+)
+def classes_a_to_g(ctx):
+    links = {"A": ["B", "B"], "B": ["C"], "C": ["D"], "E": ["F"]}
+    ctx["run"] = profile_run(
+        *(
+            klass(
+                EX + name,
+                2,
+                *(prop(EX + f"p{n}", {1: 2}, resources(2, EX + target)) for n, target in enumerate(links.get(name, ()))),
+            )
+            for name in "ABCDEFG"
+        )
+    )
+
+
+@given(parsers.parse('the namespace "ex" holds {count:d} classes, each linked to the next'))
+def chain_of_classes(ctx, count):
+    ctx["run"] = profile_run(
+        *(klass(EX + f"C{n:02}", 2, prop(EX + "next", {1: 2}, resources(2, EX + f"C{n + 1:02}"))) for n in range(count - 1)),
+        klass(EX + f"C{count - 1:02}", 2),
+    )
+
+
+@given(
+    parsers.parse('3 classes of "ex" have object properties whose values are "foaf:Person", and no "foaf" class is profiled')
+)
+def three_link_to_foaf(ctx):
+    ctx["run"] = profile_run(
+        *(klass(EX + f"C{n}", 2, prop(EX + "knows", {1: 2}, resources(2, FOAF + "Person"))) for n in range(3))
+    )
+
+
+@when(parsers.parse("the diagrams are generated with module size {size:d}"))
+def diagrams_with_module_size(ctx, size):
+    ctx["size"], ctx["diagrams"] = size, diagram_files(ctx, size)
+
+
+@when("the diagrams are generated")
+def diagrams_generated(ctx):
+    ctx["diagrams"] = diagram_files(ctx)
+
+
+@then(parsers.parse('the module "{name}" holds {classes}'))
+def module_holds(ctx, name, classes):
+    assert sorted(module_classes(ctx["diagrams"][f"diagram-default--{name}.puml"])) == re.findall(r"[A-Z]", classes)
+
+
+def module_files(ctx):
+    return {n: t for n, t in ctx["diagrams"].items() if "--" in n}
+
+
+@then(parsers.parse("there are at least {count:d} module diagrams of at most {size:d} classes each"))
+def many_small_modules(ctx, count, size):
+    modules = module_files(ctx)
+    assert len(modules) >= count and all(len(module_classes(t)) <= size for t in modules.values())
+
+
+@then("every class is in exactly one of them")
+def each_class_once(ctx):
+    placed = sorted(c for t in module_files(ctx).values() for c in module_classes(t))
+    assert placed == sorted(c.class_iri.removeprefix(EX) for c in ctx["run"].graphs[0].class_partitions)
+
+
+@then("generating again gives the same files with the same contents")
+def deterministic(ctx):
+    assert diagram_files(ctx, ctx["size"]) == ctx["diagrams"]
+
+
+@then(parsers.parse('the overview has the package "{ns}" and the package "{other}" marked referenced'))
+def overview_packages(ctx, ns, other):
+    overview = ctx["diagrams"]["diagram-default.puml"]
+    assert f'package "{ns} (3 classes)"' in overview and f'package "{other} (referenced)"' in overview
+
+
+@then(parsers.parse('one arrow from "{source}" to "{target}" is labelled {count:d}'))
+def overview_arrow(ctx, source, target, count):
+    overview = ctx["diagrams"]["diagram-default.puml"]
+    aliases = dict(re.findall(r'package "(\w+)[^"]*" as (N\d+)', overview))
+    assert f"{aliases[source]} --> {aliases[target]} : {count}" in overview
+
+
 @when("the document is generated")
 def document_generated(ctx):
     run = ctx["run"] if "run" in ctx else load_profile(ctx["profile"])
     ctx["soup"] = BeautifulSoup(only(generated(ctx, "doc", run)), "html.parser")
+
+
+@when("the document command renders it into an empty folder")
+def document_command(ctx):
+    result = CliRunner().invoke(generate.gen_doc, [str(ctx["profile"]), "-o", str(ctx["output"])])
+    assert result.exit_code == 0, result.output
+    ctx["soup"] = BeautifulSoup((ctx["output"] / "main.html").read_text(), "html.parser")
+
+
+@then("the folder holds the report and no profile.html")
+def folder_holds_report(ctx):
+    names = {p.name for p in ctx["output"].iterdir()}
+    assert "main.html" in names and "profile.html" not in names
 
 
 @then("it has an overview, the namespaces, one chapter per graph with a section per class, and caveats")
@@ -444,9 +556,8 @@ def class_and_property(ctx, cls, p):
 
 @when(parsers.parse('the shapes are generated with the shapes namespace "{namespace}"'))
 def shapes_in_namespace(ctx, namespace):
-    generator = make_generator(
-        "shacl", analyse(ctx["run"]), JinjaTemplateRenderer(), options=GeneratorOptions(shapes_namespace=namespace)
-    )
+    options = GeneratorOptions(shapes_namespace=None if namespace == "none" else namespace)
+    generator = make_generator("shacl", analyse(ctx["run"]), JinjaTemplateRenderer(), options=options)
     ctx["graph"] = Graph().parse(data=only(files(generator.serialize())), format="turtle")
 
 
@@ -454,6 +565,21 @@ def shapes_in_namespace(ctx, namespace):
 def shape_names(ctx, node, prop_shape):
     g = ctx["graph"]
     assert (URIRef(node), RDF.type, SH.NodeShape) in g and (URIRef(node), SH.property, URIRef(prop_shape)) in g
+
+
+@given(parsers.parse('a profile holding both the classes "{first}" and "{second}"'))
+def colliding_classes(ctx, first, second):
+    ctx["run"] = profile_run(klass(first, 1), klass(second, 1, prop(EX + "p", {1: 1}, literals(1))))
+
+
+@then(parsers.parse('the node shapes are "{first}" and "{second}", in class IRI order'))
+def colliding_shapes(ctx, first, second):
+    g = ctx["graph"]
+    names = [
+        str(g.value(predicate=SH.targetClass, object=URIRef(c)))
+        for c in sorted(("http://ex.org/a#Thing", "http://ex.org/a/Thing"))
+    ]
+    assert names == [first, second]
 
 
 @given(parsers.parse('a profile holding the classes "{first}" and "{second}"'))
