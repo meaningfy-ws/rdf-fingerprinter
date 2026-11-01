@@ -58,6 +58,14 @@ report SHALL NOT embed diagram sources.
 - **WHEN** the report is generated with the default filters for a profile holding 2 `owl:` classes
 - **THEN** the caveats list `owl` as hidden with 2 classes, and no `owl:` class section exists
 
+#### Scenario: Exact class is labelled
+- **WHEN** a class with 120 instances was read exactly
+- **THEN** its section shows "exact"
+
+#### Scenario: Absent value is a dash
+- **WHEN** a property's language coverage is absent
+- **THEN** its language coverage cell shows `—`
+
 ### Requirement: Exit status
 The `fingerprint` CLI SHALL exit 0 when the profile has no failures, 1 when the outputs were written
 but failures were recorded, 2 on a usage error before any query, 3 when the endpoint is unreachable
@@ -72,6 +80,18 @@ failure (exit 1), not exit 3. **BREAKING** (1.x always exited 0).
 #### Scenario: Endpoint unreachable
 - **WHEN** the endpoint URL refuses connections
 - **THEN** the CLI exits 3, writes no report and logs `cannot reach endpoint <url>`
+
+#### Scenario: Clean run
+- **WHEN** every class is profiled
+- **THEN** the CLI exits 0 and the report is written
+
+#### Scenario: Usage error
+- **WHEN** the output folder does not exist, a setting is invalid, or the prefix file is malformed
+- **THEN** the CLI exits 2 and writes no report
+
+#### Scenario: Unexpected error
+- **WHEN** an unexpected error occurs during collection
+- **THEN** the CLI exits 4 and writes no report
 
 ### Requirement: Read-only and credential-safe
 Collection SHALL send only SPARQL `SELECT` and `ASK` queries. Credentials in the endpoint URL (user
@@ -143,6 +163,10 @@ prefix file, a module size below 1, and an unwritable shapes namespace.
 #### Scenario: Unknown format
 - **WHEN** the fingerprint command runs with a format that does not exist
 - **THEN** it exits 2, names the known formats and queries nothing
+
+#### Scenario: A failing representation keeps the report
+- **WHEN** a selected representation fails to render
+- **THEN** the output folder holds `main.html` and `profile.json`, and the command exits 4
 
 ### Requirement: One self-contained page
 The report SHALL be a single static HTML file, with its CSS and script inline and no `src`, `href`
