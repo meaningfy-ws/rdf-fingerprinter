@@ -9,7 +9,7 @@ import pytest
 from fingerprint.adapters.exceptions import GeneratedOutputError
 from fingerprint.adapters.profile_file import save_profile
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
-from fingerprint.domain.profile import Inheritance, NamespacePrefix
+from fingerprint.domain.profile import Inheritance, NamespacePrefix, ValueCount
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer import representations
 from fingerprint.service_layer.exceptions import UsageError
@@ -232,6 +232,26 @@ def test_an_exclude_value_whose_terms_sit_under_an_excluded_class_is_not_warned_
     with caplog.at_level(logging.WARNING):
         generate_representations(builders.filter_profile(), tmp_path, ["a"], options=options)
     assert caplog.messages == []
+
+
+def test_an_exclude_value_whose_only_term_is_an_object_class_is_not_warned_about(tmp_path, generators, caplog):
+    # foaf has no instance and no property subject (0 uses), but ex:Person points to a foaf class
+    agent = builders.prop(builders.EX + "creator", {1: 2}, builders.resources(2, builders.FOAF + "Agent"))
+    run = builders.filter_profile(builders.klass(builders.EX + "Doc", 2, agent))
+    with caplog.at_level(logging.WARNING):
+        generate_representations(run, tmp_path, ["a"], options=GeneratorOptions(exclude_namespaces=["foaf"]))
+    assert caplog.messages == []
+
+
+def test_an_exclude_value_whose_only_term_is_the_one_value_of_a_property_is_not_warned_about(tmp_path, generators, caplog):
+    hub = builders.prop(builders.EX + "hub", {1: 2}, builders.resources(2)).model_copy(
+        update={"distinct_objects": 1, "top_values": [ValueCount(value=builders.FOAF + "x", triples=2)]}
+    )
+    run = builders.filter_profile(builders.klass(builders.EX + "Thing", 2, hub))
+    with caplog.at_level(logging.WARNING):
+        generate_representations(run, tmp_path, ["a"], options=GeneratorOptions(exclude_namespaces=["foaf"]))
+    assert caplog.messages == []
+    assert [(t.namespace, t.values) for t in Recording.analyses[-1].graphs[0].excluded_terms] == [(builders.FOAF, 1)]
 
 
 def test_no_warning_is_made_when_the_caller_asks_for_none(filtering, caplog):

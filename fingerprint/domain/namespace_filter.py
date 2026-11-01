@@ -71,6 +71,16 @@ def namespace_uses(analytics: ProfileAnalytics, table: PrefixTable) -> list[Name
     return [NamespaceUse(namespace=e.namespace, uses=n) for e, n in zip(table.entries, uses, strict=True)]
 
 
+def namespaces_with_terms(analytics: ProfileAnalytics) -> set[str]:
+    """The namespaces an exclusion has something to remove from: any with uses in the unfiltered `namespace_uses`, or
+    with a class, property or value noted in a graph's `excluded_terms` (one seen only as an object class or a value
+    has no uses). An exclude value whose namespaces are all outside it hides nothing (namespace-filter P-8)."""
+    noted = {
+        t.namespace for g in analytics.graphs or [] for t in g.excluded_terms or [] if t.classes + t.properties + t.values
+    }
+    return noted | {u.namespace for u in analytics.namespace_uses or [] if u.uses}
+
+
 class _Removal:
     """Removes the IRIs of the excluded namespaces from one graph and remembers which, per position."""
 

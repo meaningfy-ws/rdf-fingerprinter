@@ -13,7 +13,7 @@ from fingerprint.domain.analytics import analyse
 from fingerprint.domain.annotations import merge_annotations, select_annotations
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref
-from fingerprint.domain.namespace_filter import exclude_terms, namespace_filter
+from fingerprint.domain.namespace_filter import exclude_terms, namespace_filter, namespaces_with_terms
 from fingerprint.domain.prefixes import PrefixTable
 from fingerprint.domain.profile import NamespacePrefix, ProfileAnalytics, ProfileRun
 from fingerprint.domain.views import FilterOption, GeneratorOptions, NamespaceFilter, RepresentationFormat
@@ -67,15 +67,15 @@ def validate_options(options: GeneratorOptions | None) -> None:
 
 def warn_filters(filters: NamespaceFilter, analytics: ProfileAnalytics) -> None:
     """A filter value matching no namespace, or an exclude value whose namespaces are all unused, is warned about
-    and ignored (P-8). Use is read from the unfiltered `namespace_uses`, so a namespace whose terms sit only under
-    an excluded class or property does not count as empty. An exclude value fully re-included is not warned about."""
-    uses = {u.namespace: u.uses for u in analytics.namespace_uses or []}  # dict-ok: lookup index
+    and ignored (P-8). A namespace counts as unused when `namespaces_with_terms` does not list it.
+    An exclude value fully re-included is not warned about."""
+    used = namespaces_with_terms(analytics)
     for match in filters.matches or []:
         flag = f"--{FilterOption(match.option).value}-namespace {match.name}"
         still = [n for n in match.namespaces or [] if n in (filters.excluded or [])]
         if not match.namespaces:
             logger.warning("%s: no such namespace; ignored", flag)
-        elif match.option == FilterOption.exclude and still and not any(uses.get(n) for n in still):
+        elif match.option == FilterOption.exclude and still and not any(n in used for n in still):
             logger.warning("%s: no term in this namespace; ignored", flag)
 
 

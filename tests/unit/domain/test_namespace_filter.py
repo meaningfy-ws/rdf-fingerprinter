@@ -5,7 +5,14 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.namespace_filter import META_NAMESPACES, exclude_terms, namespace_filter, namespace_uses, note_text
+from fingerprint.domain.namespace_filter import (
+    META_NAMESPACES,
+    exclude_terms,
+    namespace_filter,
+    namespace_uses,
+    namespaces_with_terms,
+    note_text,
+)
 from fingerprint.domain.prefixes import PrefixTable, namespace_of
 from fingerprint.domain.profile import (
     ExcludedTerms,
@@ -285,6 +292,12 @@ def test_the_uses_are_the_unfiltered_ones_whatever_is_excluded():
 
 def test_an_iri_no_namespace_of_the_table_begins_counts_for_nobody():
     assert namespace_uses(filter_world(), PrefixTable([])) == []
+
+
+def test_a_namespace_has_terms_when_it_has_uses_or_a_noted_term_and_none_when_neither():
+    after = exclude_terms(filter_world(), {EX + "relx/", REL}, TABLE)
+    assert namespaces_with_terms(after) == {EX, REL, ORG}  # relx: no use, no term; unfiltered analytics: no note
+    assert namespaces_with_terms(filter_world()) == set()  # not filtered: no uses set, nothing noted
 
 
 def counted(excluded):
