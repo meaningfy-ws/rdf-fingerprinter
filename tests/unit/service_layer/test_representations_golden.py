@@ -8,10 +8,11 @@ import pytest
 from rdflib import Graph, Namespace
 from rdflib.compare import graph_diff, isomorphic, to_isomorphic
 
+from fingerprint.adapters.profile_file import load_profile
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.representations import with_threshold
 from tests.refresh_golden import render
-from tests.sample_data import GOLDEN, TEST_DATA
+from tests.sample_data import GOLDEN, SCANNED_FORMATS, SCANNED_GOLDEN, SCANNED_PROFILE, TEST_DATA
 
 SH = Namespace("http://www.w3.org/ns/shacl#")
 # make oxigraph-load-test-data puts continents in the default graph too; no union default graph.
@@ -31,17 +32,26 @@ def turtle_difference(golden: str, output: str) -> str | None:
     return f"only in the golden file:\n{lines(only_golden)}\nonly in the output:\n{lines(only_output)}"
 
 
-@pytest.mark.parametrize("name", sorted(GENERATORS))
-def test_golden_output(name, sample_outputs):
-    produced = sample_outputs[name]
+def assert_golden(produced, folder):
     stem = next(iter(produced)).split("-")[0].split(".")[0]
-    assert set(produced) == {p.name for p in GOLDEN.iterdir() if p.name.startswith(stem)}
+    assert set(produced) == {p.name for p in folder.iterdir() if p.is_file() and p.name.startswith(stem)}
     for file_name, text in produced.items():
-        golden = (GOLDEN / file_name).read_text(encoding="utf-8")
+        golden = (folder / file_name).read_text(encoding="utf-8")
         if file_name.endswith(".ttl"):
             assert (difference := turtle_difference(golden, text)) is None, f"{file_name} differs:\n{difference}"
         else:
             assert text == golden, f"{file_name} differs from its golden file"
+
+
+@pytest.mark.parametrize("name", sorted(set(GENERATORS) - {"pitfalls"}))  # the sample profile holds no scan results
+def test_golden_output(name, sample_outputs):
+    assert_golden(sample_outputs[name], GOLDEN)
+
+
+@pytest.mark.parametrize("name", SCANNED_FORMATS)
+def test_golden_output_of_the_scanned_profile(name):
+    """The page's Pitfalls section and the TSV, from the test data scanned for pitfalls (pitfall-scans)."""
+    assert_golden(render(load_profile(SCANNED_PROFILE), name), SCANNED_GOLDEN)
 
 
 def shacl_files(run, threshold):

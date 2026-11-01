@@ -1,0 +1,9 @@
+# Not in OOPS!: a typed individual (or a subject with data) used as a predicate (singleton properties, versions as predicates).
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property (COUNT(*) AS ?value) WHERE {
+  ?s ?entity ?o .
+  FILTER EXISTS { ?entity a ?t FILTER(?t NOT IN (owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty, rdf:Property)) }
+  BIND(rdf:type AS ?property)
+} GROUP BY ?entity ?property

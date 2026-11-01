@@ -1,0 +1,10 @@
+# OOPS! P34 (minor): an IRI used as a class (as the object of rdf:type or rdfs:subClassOf) but never declared a class.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?entity ?property ?value WHERE {
+  { ?x rdf:type ?entity BIND(rdf:type AS ?property) } UNION { ?x rdfs:subClassOf ?entity BIND(rdfs:subClassOf AS ?property) }
+  FILTER(isIRI(?entity) && !STRSTARTS(STR(?entity), STR(owl:)) && !STRSTARTS(STR(?entity), STR(rdfs:)) && !STRSTARTS(STR(?entity), STR(rdf:)))
+  FILTER NOT EXISTS { ?entity a owl:Class } FILTER NOT EXISTS { ?entity a rdfs:Class }
+  BIND("used as a class, not declared" AS ?value)
+}

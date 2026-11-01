@@ -1,0 +1,138 @@
+= Pitfalls
+:description: Scan a fingerprinted store for modelling pitfalls: OOPS!-style schema checks and data checks, in SPARQL.
+
+The fingerprint says what a dataset holds. The pitfall scan says what is wrong with how it is
+modelled: relations used but never defined, classes declared twice under one label, properties with
+two domains, individuals used as predicates. It runs in the same pass, against the same endpoint,
+and the findings land next to the profile.
+
+[source,bash]
+----
+fingerprint -e https://my.endpoint/sparql -o out --pitfalls --schema-graph https://ex.org/graph/ontology \
+            --format pitfalls --fail-on critical
+----
+
+== What runs
+
+Each check is one SPARQL `SELECT` file. With `--pitfalls`, every profiled graph is scanned after it is
+profiled, at any `--depth`:
+
+* **Without `--schema-graph`**, every check runs over each graph alone.
+* **With schema graphs** (`--schema-graph`, repeatable), each schema graph is profiled too, and it
+  runs the `schema` checks on its own. Every other graph runs the `data` checks over itself joined
+  with the schema graphs (`FROM <graph> FROM <schema>`), so "is this relation declared?" looks in the
+  ontology. The default graph cannot be joined that way: its data checks run without the schema
+  graphs, so domain and range findings there may be missing. The run logs a warning and the
+  report's caveats say so; keep the data in a named graph to avoid it.
+* A graph with no triple is not scanned.
+
+For each check the scan sends two queries, a count and the first `--pitfall-examples` rows (default
+10, ordered). The checks of a graph run `--concurrency` at a time (default 4), as the classes do. Results are saved in `profile.json` with the check's metadata and the time it took.
+
+The scan is off by default, because several checks scan every triple. A check that times out is a
+recorded failure (exit 1), like any other failed measurement.
+
+== Where the findings show
+
+[cols="1,3"]
+|===
+| Report page | A *Pitfalls* section: checks with findings per importance, one entry per check with its examples as short names, and the checks that found nothing. A class named by a check gets a badge linking to it. The search box filters the checks too.
+| `--format pitfalls` | `pitfalls-<graph>.tsv` per scanned graph, in ROBOT's report columns (`Level`, `Rule Name`, `Subject`, `Property`, `Value`; critical → `ERROR`, important → `WARN`, minor → `INFO`). `fingerprint-gen-pitfalls profile.json -o dir` writes it again offline.
+| `--fail-on LEVEL` | Exit 5 when the run recorded no failure and a check of importance `LEVEL` or higher (`critical` > `important` > `minor`) found something. Useful in CI.
+|===
+
+== Options
+
+[cols="1,1,3"]
+|===
+| Option | Default | Meaning
+
+| `--pitfalls` | off | Run the scan (setting `pitfall_scan`, `RDF_FINGERPRINTER_PITFALL_SCAN`).
+| `--schema-graph IRI` | none | A graph holding the ontology (repeatable; `RDF_FINGERPRINTER_SCHEMA_GRAPHS`, comma-separated).
+| `--pitfall-examples N` | 10 | Example rows kept per check and graph.
+| `--pitfall-checks DIR` | — | Your own `.rq` checks, added to the catalogue; one with a packaged id replaces it.
+| `--skip-pitfall ID` | — | Leave a check out (repeatable).
+| `--fail-on LEVEL` | — | `critical`, `important` or `minor`; see above.
+|===
+
+`--pitfall-checks`, `--skip-pitfall` and `--fail-on` need `--pitfalls`.
+
+== Writing a check
+
+A check is a SPARQL `SELECT` of exactly `?entity ?property ?value`, one row per finding, after a header
+of comment lines:
+
+[source,sparql]
+----
+# id: my_untyped_subject
+# title: Subject without a type
+# importance: minor
+# scope: data
+# source: my team
+# description: optional, one line
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?entity ?property ?value WHERE {
+  ?entity ?p ?o . FILTER NOT EXISTS { ?entity rdf:type ?t }
+  BIND(rdf:type AS ?property) BIND("no rdf:type" AS ?value)
+}
+----
+
+Rules:
+
+* The required keys are `id` (`[a-z0-9_]+`), `title`, `importance`, `scope` and `source`; the optional
+  ones are `heuristic` (`true`/`false`) and `description`. An unknown or repeated key is refused, and
+  `#` lines without a key are comments.
+* Each `PREFIX` or `BASE` goes on its own line before the `SELECT`.
+* There is no `FROM`: the scan sets the dataset.
+* Only `SELECT` is accepted; anything else is refused before any query (exit 2).
+
+The same files work with ROBOT: `robot report --profile p.txt`, where each line of `p.txt` is
+`LEVEL<TAB>file:./check.rq`.
+
+== The catalogue
+
+Most checks follow the https://oops.linkeddata.es/catalogue.jsp[OOPS! pitfall catalogue] (its codes
+are in the *Source* column); the `x_` checks are the fingerprinter's own. Heuristic checks judge by
+names and are hints. The domain and range checks read the declared schema closed-world: OWL would
+infer a type rather than report an error.
+
+[cols="3,1,1,1,1,4"]
+|===
+| Id | Importance | Scope | Heuristic | Source | Title
+
+| `p04_unconnected_class` | minor | schema |  | OOPS! P04 | Class connected to nothing
+| `p05_wrong_inverse` | critical | schema |  | OOPS! P05 | Inverse properties whose domain and range do not mirror each other
+| `p06_class_cycle` | critical | schema |  | OOPS! P06 | Cycle in the class hierarchy
+| `p07_merged_concepts` | minor | schema | yes | OOPS! P07 | Class name joins concepts with And/Or
+| `p08_missing_comment` | minor | schema |  | OOPS! P08 | Class or property without a comment
+| `p10_no_disjointness` | important | schema |  | OOPS! P10 | No disjointness axiom at all
+| `p11_missing_domain_or_range` | important | schema |  | OOPS! P11 | Property without a domain or a range
+| `p12_p30_same_name_not_equivalent` | minor | schema | yes | OOPS! P12/P30 | Same local name in two namespaces, not declared equivalent
+| `p13_missing_inverse` | minor | schema |  | OOPS! P13 | Object property without an inverse
+| `p19_multiple_domains_or_ranges` | critical | schema |  | OOPS! P19 | Several domains or ranges on one property (read as an intersection)
+| `p20_label_longer_than_comment` | minor | schema | yes | OOPS! P20 | Label at least as long as the comment (annotations swapped?)
+| `p21_miscellaneous_class` | minor | schema | yes | OOPS! P21 | Catch-all class (Other, Misc, …)
+| `p22_class_naming` | minor | schema |  | OOPS! P22 | Class name not starting with an upper-case letter
+| `p24_recursive_definition` | important | schema |  | OOPS! P24 | Class or property defined by itself
+| `p25_inverse_of_itself` | important | schema |  | OOPS! P25 | Property declared its own inverse
+| `p26_inverse_of_symmetric` | important | schema |  | OOPS! P26 | Symmetric property that also has an inverse
+| `p27_wrong_equivalent_properties` | critical | schema |  | OOPS! P27 | Equivalent properties with different domains or ranges
+| `p28_p29_wrong_symmetric_or_transitive` | critical | schema |  | OOPS! P28/P29 | Symmetric or transitive property whose domain and range differ
+| `p32_classes_same_label` | minor | schema |  | OOPS! P32 | Two classes with the same label
+| `p33_single_property_chain` | minor | schema |  | OOPS! P33 | Property chain of one property
+| `p34_untyped_class` | minor | data |  | OOPS! P34 | IRI used as a class but never declared
+| `p35_untyped_property` | important | data |  | OOPS! P35 | Relation used but never defined
+| `p36_iri_with_file_extension` | minor | schema |  | OOPS! P36 | IRI with a file extension
+| `p38_no_ontology_declaration` | important | schema |  | OOPS! P38 | No owl:Ontology declaration
+| `p41_no_license` | important | schema |  | OOPS! P41 | Ontology without a licence
+| `x_domain_violation` | important | data |  | rdf-fingerprinter (RDFUnit-style) | Subjects outside a property's declared domain
+| `x_individual_as_predicate` | critical | data |  | rdf-fingerprinter | Typed individual used as a predicate
+| `x_punning_class_and_property` | important | data |  | rdf-fingerprinter | IRI used as a class and as a property
+| `x_range_violation` | important | data |  | rdf-fingerprinter (RDFUnit-style) | IRI objects outside an object property's declared range
+|===
+
+== Scan files
+
+To scan RDF files rather than an endpoint, `make scan-files ONTOLOGY=o.owl [DATA=d.rdf] OUT=dir` loads
+them into a separate in-memory Oxigraph (port `RDF_FINGERPRINTER_SCAN_PORT`, default 7880; the e2e
+test store is never touched) and runs the scan over them. Extra options go in `SCAN_ARGS`.

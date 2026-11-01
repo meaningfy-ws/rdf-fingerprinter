@@ -273,3 +273,12 @@ Feature: Collecting raw statistics from a knowledge graph
       And top values are collected
       When the knowledge graph is fingerprinted
       Then the recorded top values are "2020-01-01T00:00:00Z" and "v"
+
+  Rule: Pitfall check failures are recorded
+
+    Scenario: One pitfall check fails
+      Given a store whose graph "data" uses an undeclared relation and whose graph "schema" holds the ontology
+      And the count query of "p35_untyped_property" times out
+      When the fingerprint command runs with --pitfalls on graph "data" with schema graph "schema"
+      Then a failure of kind pitfall names "p35_untyped_property"
+      And the profile of "data" has a "p34_untyped_class" result

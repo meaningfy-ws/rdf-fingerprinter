@@ -58,7 +58,7 @@ classes:
       Collection settings given by one source (command line, environment, parameter, config file);
       unset ones are absent. The first source that sets a setting wins (domain-object-model P-7).
       Kept out of fingerprint_stats so the published profile.json schema does not list it.
-    slots: [depth, precision_policy, first_n, top_k, object_type_scope, completeness_check, timeout_seconds, concurrency, acceptance_threshold, graph_statistics, selected_graphs]
+    slots: [depth, precision_policy, first_n, top_k, object_type_scope, completeness_check, timeout_seconds, concurrency, acceptance_threshold, graph_statistics, selected_graphs, pitfall_scan, schema_graphs, pitfall_examples]
 
   ProfileAnalytics:
     is_a: ProfileRun

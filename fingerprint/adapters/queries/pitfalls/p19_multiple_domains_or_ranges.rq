@@ -1,0 +1,13 @@
+# id: p19_multiple_domains_or_ranges
+# title: Several domains or ranges on one property (read as an intersection)
+# importance: critical
+# scope: schema
+# source: OOPS! P19
+# description: several rdfs:domain (or rdfs:range) statements on one property: OWL reads them as an intersection.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property (COUNT(?x) AS ?value) WHERE {
+  VALUES ?property { rdfs:domain rdfs:range }
+  ?entity ?property ?x . FILTER(isIRI(?x))
+} GROUP BY ?entity ?property HAVING (COUNT(?x) > 1)

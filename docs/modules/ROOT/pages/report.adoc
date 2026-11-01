@@ -13,10 +13,32 @@ property rows whose names or IRIs match; the switches hide whole namespaces. Cla
 
 `fingerprint-gen-doc profile.json -o out/` writes the same page again from a saved profile.
 
+== Namespaces
+
+The namespace table lists each prefix with its namespace, where the prefix came from, and its uses:
+the instances of its classes plus the subjects of its properties, over every class and graph. It is
+grouped by source (user, packaged, prefix.cc, generated) and, in each group, the most used namespace
+comes first. When a pitfall finding names the ontology itself (for example
+`https://ontology.brainframe.com/2016/04/brainframe` beside the vocabulary
+`…/brainframe#`), that IRI gets no prefix and is shown whole.
+
+== Taxonomy
+
+The *Taxonomy* section draws, per graph, the class tree from declared and implied parents. Each node
+links to its class and shows its instances with a bar against the graph's most popular class. A parent
+that is not profiled in the graph is a grey node without a count; a class with several parents sits
+under the first one and has a "see" link under the others.
+
 == Per class
 
-Each class shows its number of instances, its precision (`exact` or `first N of M`, see
-xref:statistics.adoc#precision-modes[Precision modes]) and its parents, declared or implied.
+Classes are grouped by namespace prefix and, in a namespace, the class with the most instances
+comes first. Each class shows its number of instances, its precision (`exact` or `first N of M`, see
+xref:statistics.adoc#precision-modes[Precision modes]), how many of its properties are data and how
+many are object properties (a `mixed` property counts in both), and its parents, declared or
+implied. The table of contents shows the same counts beside each class, as `12 · 4 d, 2 o`.
+
+The property table is grouped as *Own*, *Refined* and *Inherited*; in each group the property used by
+the most instances comes first, then the more confident one.
 
 == Columns
 
@@ -43,8 +65,9 @@ A value that could not be computed is shown as `—`.
 == Collection
 
 The *Collection* section lists every measurement that failed, and the settings used. A failed
-measurement is missing from the tables above it. The *Caveats* section lists sampled classes,
-subjects without a type, the namespaces the filters hid, and IRIs that could not be written.
+measurement is missing from the tables above it. The *Caveats and pitfalls* section lists sampled
+classes, subjects without a type, the namespaces the filters hid, IRIs that could not be written
+and, after a scan, the pitfall findings (xref:pitfalls.adoc[Pitfalls]).
 
 == Reading it
 

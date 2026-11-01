@@ -1,0 +1,10 @@
+# OOPS! P21 (minor, name heuristic): a catch-all class (Other, Misc, Miscellaneous, General, Various, Unknown, Remaining).
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property ?value WHERE {
+  ?entity a owl:Class . FILTER(isIRI(?entity))
+  BIND(REPLACE(STR(?entity), "^.*[#/]", "") AS ?value)
+  FILTER(REGEX(?value, "(^|[a-z_])(Other|Misc|Miscellaneous|Various|Unknown|Remaining|General)([A-Z_]|$)|^(other|misc)", ""))
+  BIND(rdf:type AS ?property)
+}

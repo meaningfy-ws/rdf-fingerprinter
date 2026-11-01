@@ -14,7 +14,7 @@ import click
 from fingerprint.domain.views import GeneratorOptions, RepresentationFormat
 from fingerprint.entrypoints.cli import EXIT_UNEXPECTED, configure_logging
 from fingerprint.service_layer.exceptions import UsageError
-from fingerprint.service_layer.generators import DOC, PUML, SHACL
+from fingerprint.service_layer.generators import DOC, PITFALLS, PUML, SHACL
 from fingerprint.service_layer.representations import generate_from_profile_file
 from fingerprint.service_layer.settings import load_user_prefixes
 
@@ -102,3 +102,10 @@ def gen_puml(profile: str, output: str, threshold: float | None, template: str |
 def gen_doc(profile: str, output: str, threshold: float | None, template: str | None, **shared):
     """The report page main.html from a saved profile.json."""
     generate_one(DOC, profile, output, threshold, template, shared)
+
+
+@click.command()
+@shared_arguments
+def gen_pitfalls(profile: str, output: str, threshold: float | None, template: str | None, **shared):
+    """The pitfall findings as ROBOT-style TSV, one file per scanned graph, from a saved profile.json."""
+    generate_one(PITFALLS, profile, output, threshold, template, shared)

@@ -1,0 +1,7 @@
+# OOPS! P33 (minor): owl:propertyChainAxiom with a single property.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property ?value WHERE {
+  ?entity owl:propertyChainAxiom ?list . ?list rdf:first ?value ; rdf:rest rdf:nil . BIND(owl:propertyChainAxiom AS ?property)
+}

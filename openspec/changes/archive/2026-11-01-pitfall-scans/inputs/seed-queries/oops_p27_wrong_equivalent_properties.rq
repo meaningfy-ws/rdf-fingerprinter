@@ -1,0 +1,9 @@
+# OOPS! P27 (critical): equivalent properties whose domains or ranges differ.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?entity ?property ?value WHERE {
+  { ?entity owl:equivalentProperty ?value } UNION { ?value owl:equivalentProperty ?entity } FILTER(?entity != ?value)
+  { ?entity rdfs:domain ?a . ?value rdfs:domain ?b } UNION { ?entity rdfs:range ?a . ?value rdfs:range ?b }
+  FILTER(?a != ?b) BIND(owl:equivalentProperty AS ?property)
+}

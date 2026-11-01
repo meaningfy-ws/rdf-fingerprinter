@@ -1,0 +1,13 @@
+# id: p36_iri_with_file_extension
+# title: IRI with a file extension
+# importance: minor
+# scope: schema
+# source: OOPS! P36
+# description: the ontology IRI, or a term IRI, holds a file extension (.owl, .rdf, .ttl, .n3, .xml).
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?entity ?property ?value WHERE {
+  VALUES ?t { owl:Ontology owl:Class owl:ObjectProperty owl:DatatypeProperty } ?entity a ?t .
+  FILTER(REGEX(STR(?entity), "\\.(owl|rdf|ttl|n3|xml|nt|jsonld)([#/]|$)", "i")) BIND(rdf:type AS ?property) BIND(?t AS ?value)
+}

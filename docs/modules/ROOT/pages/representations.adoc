@@ -129,11 +129,12 @@ Render the source with any PlantUML tool; rdf-fingerprinter does not render it.
 `main.html` is one static file with its CSS and script inline and no external request; it reads
 fully with JavaScript off, follows the browser's light or dark mode and fits a phone. It has a table
 of contents by graph, namespace and class; a search box over short names and full IRIs; one switch
-per namespace; an overview with provenance; the namespace table; per class its instances, precision,
+per namespace; an overview with provenance; the namespace table with each namespace's uses; a
+taxonomy per graph; per class its instances, precision, data and object property counts,
 parents and the property table (subjects, min, max, avg, kind, distinct values, value types,
 confidence, cardinality, inheritance, language coverage); the collection section with settings and
-failures; and the caveats: sampled classes, untyped subjects, hidden namespaces and IRIs that
-could not be written. `fingerprint-gen-doc` writes the same page from a saved profile.
+failures; and the caveats and pitfalls: sampled classes, untyped subjects, hidden namespaces, IRIs
+that could not be written and the pitfall findings. `fingerprint-gen-doc` writes the same page from a saved profile.
 
 == IRIs that cannot be written
 

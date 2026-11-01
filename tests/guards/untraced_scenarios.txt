@@ -34,3 +34,8 @@ developer-tooling | A reordered Turtle output | tests/unit/service_layer/test_re
 developer-tooling | A changed triple | tests/unit/service_layer/test_representations_golden.py::test_a_changed_triple | TC-8: one changed literal fails and the diff names the triple on each side
 developer-tooling | An untested domain branch | tests/guards/test_domain_coverage_gate.py::test_an_untested_domain_branch_fails_the_domain_coverage_report | TC-7: the per-layer coverage report on a temporary domain module with an untaken branch exits non-zero and lists it
 developer-tooling | The mutation score drops | tests/guards/test_mutation_score.py::test_the_mutation_score_drops | TC-6: the ratchet exits 1 on a lower score; the hour-long mutmut run itself is the weekly CI job
+
+# --- openspec/changes/pitfall-scans ---
+developer-tooling | Ontology and data | tests/guards/test_scan_files.py::test_scan_files_loads_the_ontology_and_the_data_and_runs_the_scan | needs Docker: reads the scan-files recipe (loads both graphs, runs --pitfalls --schema-graph --format pitfalls); brainframe run recorded in tasks 6.4
+developer-tooling | The test store is untouched | tests/guards/test_scan_files.py::test_scan_files_never_touches_the_e2e_store | needs Docker: the recipe names only the scan store, whose container and port differ from the e2e store's
+pitfall-scans | Each check finds its pitfall and only it | tests/unit/adapters/test_pitfall_checks.py::test_the_check_finds_its_pitfall_and_only_it | 29 positive/negative fixtures, one per packaged check, run with rdflib directly; a Gherkin example table of 29 snippets would only restate the unit table

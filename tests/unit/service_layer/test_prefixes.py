@@ -133,3 +133,16 @@ def test_a_reserved_or_taken_prefix_does_not_end_its_sources_list():
     assert prefix_of(resolved)[USED] == "good" and prefix_of(resolved)[OTHER] != "rdf"
     taken = [e("same", OTHER, PrefixSource.user), e("SAME", USED, PrefixSource.user), e("fine", FOAF, PrefixSource.user)]
     assert prefix_of(resolve_namespaces(run(OTHER + "A", USED + "B"), taken, packaged=[]))[FOAF] == "fine"
+
+
+def test_pitfall_example_iris_are_named():
+    from fingerprint.domain.profile import GraphProfile, PitfallExample, PitfallResult, PitfallTerm
+
+    example = PitfallExample(
+        entity=PitfallTerm(text="http://other.org/vocab#thing", kind="iri"),
+        value=PitfallTerm(text="http://not.an.iri.org/x", kind="literal"),
+    )
+    result = PitfallResult(check_id="c", title="t", importance="minor", scope="data", source="s", count=1, examples=[example])
+    scanned = run(BF + "A").model_copy(update={"graphs": [GraphProfile(pitfalls=[result])]})
+    namespaces = {x.namespace for x in resolve_namespaces(scanned, packaged=[]).namespaces}
+    assert "http://other.org/vocab#" in namespaces and "http://not.an.iri.org/" not in namespaces

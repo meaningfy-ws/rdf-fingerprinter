@@ -1,0 +1,15 @@
+# id: p35_untyped_property
+# title: Relation used but never defined
+# importance: important
+# scope: data
+# source: OOPS! P35
+# description: an IRI used as a predicate but declared neither an object, datatype, annotation nor rdf property.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property (COUNT(*) AS ?value) WHERE {
+  ?s ?entity ?o .
+  FILTER(!STRSTARTS(STR(?entity), STR(rdf:)) && !STRSTARTS(STR(?entity), STR(rdfs:)) && !STRSTARTS(STR(?entity), STR(owl:)))
+  FILTER NOT EXISTS { VALUES ?t { owl:ObjectProperty owl:DatatypeProperty owl:AnnotationProperty rdf:Property } ?entity a ?t }
+  BIND(rdf:type AS ?property)
+} GROUP BY ?entity ?property

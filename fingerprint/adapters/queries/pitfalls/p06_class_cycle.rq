@@ -1,0 +1,13 @@
+# id: p06_class_cycle
+# title: Cycle in the class hierarchy
+# importance: critical
+# scope: schema
+# source: OOPS! P06
+# description: a cycle in the class hierarchy (A subClassOf+ A, through other classes).
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?entity ?property ?value WHERE {
+  ?entity rdfs:subClassOf ?value . FILTER(?entity != ?value && isIRI(?value))
+  ?value rdfs:subClassOf+ ?entity . BIND(rdfs:subClassOf AS ?property)
+}

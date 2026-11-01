@@ -219,6 +219,27 @@ class QueryKind(str, Enum):
     """
     The instance listing (first N) used by the first_n mode.
     """
+    pitfall = "pitfall"
+    """
+    A pitfall check query (its emptiness ASK, count or examples) (pitfall-scans).
+    """
+
+
+class PitfallImportance(str, Enum):
+    """
+    How serious a pitfall is; critical > important > minor (pitfall-scans DEC-1).
+    """
+    critical = "critical"
+    important = "important"
+    minor = "minor"
+
+
+class PitfallScope(str, Enum):
+    """
+    What a pitfall check needs - the ontology only (schema), or the data, optionally joined with the schema.
+    """
+    schema = "schema"
+    data = "data"
 
 
 class CardinalityLabel(str, Enum):
@@ -308,7 +329,10 @@ class NamespacePrefix(ConfiguredBaseModel):
 
     prefix: str = Field(default=..., description="""The prefix name, without the colon.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix']} })
     namespace: str = Field(default=..., description="""The namespace IRI.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix']} })
-    source: PrefixSource = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix', 'ParentClass']} })
+    source: PrefixSource = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix',
+                       'PitfallResult',
+                       'PitfallCheck',
+                       'ParentClass']} })
 
 
 class Settings(ConfiguredBaseModel):
@@ -337,6 +361,12 @@ class Settings(ConfiguredBaseModel):
                         'object_type_scope': {'ifabsent': 'string(same_graph)',
                                               'name': 'object_type_scope',
                                               'required': True},
+                        'pitfall_examples': {'ifabsent': 'int(10)',
+                                             'name': 'pitfall_examples',
+                                             'required': True},
+                        'pitfall_scan': {'ifabsent': 'false',
+                                         'name': 'pitfall_scan',
+                                         'required': True},
                         'precision_policy': {'ifabsent': 'string(auto)',
                                              'name': 'precision_policy',
                                              'required': True},
@@ -359,6 +389,9 @@ class Settings(ConfiguredBaseModel):
     acceptance_threshold: float = Field(default=0.95, description="""Share of instances a cardinality label must cover.""", ge=0, le=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'float(0.95)'} })
     graph_statistics: bool = Field(default=False, description="""Whether graph totals, predicate partitions and untyped subjects were collected (full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'false'} })
     selected_graphs: Optional[list[str]] = Field(default=None, description="""Graphs requested; empty means all.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    pitfall_scan: bool = Field(default=False, description="""Whether the pitfall checks ran (pitfall-scans; some are full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'false'} })
+    schema_graphs: Optional[list[str]] = Field(default=None, description="""Graphs holding the ontology, joined with each data graph for the data checks.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    pitfall_examples: int = Field(default=10, description="""How many example rows are kept per pitfall check and graph.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'int(10)'} })
 
 
 class Failure(ConfiguredBaseModel):
@@ -371,10 +404,12 @@ class Failure(ConfiguredBaseModel):
     class_iri: Optional[str] = Field(default=None, description="""IRI of a class instantiated in the graph.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure', 'ClassProfile', 'CoTypeCount'],
          'slot_uri': 'void:class'} })
     property: Optional[str] = Field(default=None, description="""IRI of a predicate.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
+                       'PitfallExample',
                        'PredicatePartition',
                        'PropertyProfile',
                        'IncomingLink'],
          'slot_uri': 'void:property'} })
+    check_id: Optional[str] = Field(default=None, description="""The id of a pitfall check.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure', 'PitfallResult', 'PitfallCheck']} })
     query_kind: QueryKind = Field(default=..., description="""Which collection query failed.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure']} })
     message: Optional[str] = Field(default=None, description="""The last error message.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure']} })
     attempts: Optional[int] = Field(default=None, description="""How many attempts were made.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Failure']} })
@@ -401,6 +436,75 @@ class GraphProfile(ConfiguredBaseModel):
     predicate_partitions: Optional[list[PredicatePartition]] = Field(default=None, description="""Triples per predicate across the graph.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     declared_subclass_edges: Optional[list[SubclassEdge]] = Field(default=None, description="""rdfs:subClassOf edges declared in the dataset.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     class_partitions: Optional[list[ClassProfile]] = Field(default=None, description="""One profile per instantiated class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile'], 'slot_uri': 'void:classPartition'} })
+    pitfalls: Optional[list[PitfallResult]] = Field(default=None, description="""The pitfall checks run on this graph (pitfall-scans); absent when the scan was off or the graph empty.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
+
+
+class PitfallResult(ConfiguredBaseModel):
+    """
+    What one pitfall check found in one graph - its metadata, the count and the first examples.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema',
+         'slot_usage': {'check_id': {'name': 'check_id', 'required': True}}})
+
+    check_id: str = Field(default=..., description="""The id of a pitfall check.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure', 'PitfallResult', 'PitfallCheck']} })
+    title: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
+    description: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
+    importance: PitfallImportance = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
+    scope: PitfallScope = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
+    source: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix',
+                       'PitfallResult',
+                       'PitfallCheck',
+                       'ParentClass']} })
+    heuristic: bool = Field(default=False, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck'], 'ifabsent': 'false'} })
+    count: int = Field(default=..., description="""Rows the check found.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult']} })
+    examples: Optional[list[PitfallExample]] = Field(default=None, description="""The first rows, ordered by entity, property, value.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult']} })
+    seconds: Optional[float] = Field(default=None, description="""Time taken by the check's queries.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult']} })
+
+
+class PitfallExample(ConfiguredBaseModel):
+    """
+    One row a pitfall check found.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
+
+    entity: Optional[PitfallTerm] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallExample']} })
+    property: Optional[PitfallTerm] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
+                       'PitfallExample',
+                       'PredicatePartition',
+                       'PropertyProfile',
+                       'IncomingLink']} })
+    value: Optional[PitfallTerm] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallExample', 'ValueCount']} })
+
+
+class PitfallTerm(ConfiguredBaseModel):
+    """
+    An RDF term of a pitfall row - an IRI, a blank node label or a literal's lexical form.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
+
+    text: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallTerm']} })
+    kind: NodeKind = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallTerm']} })
+
+
+class PitfallCheck(ConfiguredBaseModel):
+    """
+    One check of the pitfall catalogue, as loaded from its SPARQL file (pitfall-scans DEC-1). Not part of profile.json.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema',
+         'slot_usage': {'check_id': {'name': 'check_id', 'required': True}}})
+
+    check_id: str = Field(default=..., description="""The id of a pitfall check.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure', 'PitfallResult', 'PitfallCheck']} })
+    title: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
+    description: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
+    importance: PitfallImportance = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
+    scope: PitfallScope = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
+    source: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix',
+                       'PitfallResult',
+                       'PitfallCheck',
+                       'ParentClass']} })
+    heuristic: bool = Field(default=False, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck'], 'ifabsent': 'false'} })
+    query: str = Field(default=..., description="""The SPARQL text, header included.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallCheck']} })
+    origin: str = Field(default=..., description="""packaged, or the path of the user's file.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallCheck']} })
 
 
 class PredicatePartition(ConfiguredBaseModel):
@@ -411,6 +515,7 @@ class PredicatePartition(ConfiguredBaseModel):
          'slot_usage': {'property': {'name': 'property', 'required': True}}})
 
     property: str = Field(default=..., description="""IRI of a predicate.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
+                       'PitfallExample',
                        'PredicatePartition',
                        'PropertyProfile',
                        'IncomingLink'],
@@ -478,6 +583,7 @@ class PropertyProfile(ConfiguredBaseModel):
                         'property': {'name': 'property', 'required': True}}})
 
     property: str = Field(default=..., description="""IRI of a predicate.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
+                       'PitfallExample',
                        'PredicatePartition',
                        'PropertyProfile',
                        'IncomingLink'],
@@ -538,7 +644,7 @@ class ValueCount(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
 
-    value: Optional[str] = Field(default=None, description="""An object value, IRI or literal lexical form.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueCount']} })
+    value: Optional[str] = Field(default=None, description="""An object value, IRI or literal lexical form.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallExample', 'ValueCount']} })
     triples: Optional[int] = Field(default=None, description="""Number of triples.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile',
                        'PredicatePartition',
                        'ValuePartition',
@@ -555,6 +661,7 @@ class IncomingLink(ConfiguredBaseModel):
 
     subject_class: Optional[str] = Field(default=None, description="""Class of the subjects that point to the profiled class (incoming links).""", json_schema_extra = { "linkml_meta": {'domain_of': ['IncomingLink']} })
     property: Optional[str] = Field(default=None, description="""IRI of a predicate.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
+                       'PitfallExample',
                        'PredicatePartition',
                        'PropertyProfile',
                        'IncomingLink'],
@@ -584,6 +691,9 @@ class SettingsOverride(ConfiguredBaseModel):
     acceptance_threshold: Optional[float] = Field(default=None, description="""Share of instances a cardinality label must cover.""", ge=0, le=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
     graph_statistics: Optional[bool] = Field(default=None, description="""Whether graph totals, predicate partitions and untyped subjects were collected (full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
     selected_graphs: Optional[list[str]] = Field(default=None, description="""Graphs requested; empty means all.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    pitfall_scan: Optional[bool] = Field(default=None, description="""Whether the pitfall checks ran (pitfall-scans; some are full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    schema_graphs: Optional[list[str]] = Field(default=None, description="""Graphs holding the ontology, joined with each data graph for the data checks.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    pitfall_examples: Optional[int] = Field(default=None, description="""How many example rows are kept per pitfall check and graph.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
 
 
 class ProfileAnalytics(ProfileRun):
@@ -701,6 +811,7 @@ class PropertyAnalytics(ValueIndicators, CardinalityChoice, CardinalityStatistic
     top_k_share: Optional[float] = Field(default=None, description="""Share of triples covered by the top values.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
     entropy_estimate: Optional[float] = Field(default=None, description="""Shannon entropy estimated from top values plus the remainder.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValueIndicators']} })
     property: str = Field(default=..., description="""IRI of a predicate.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
+                       'PitfallExample',
                        'PredicatePartition',
                        'PropertyProfile',
                        'IncomingLink'],
@@ -722,7 +833,10 @@ class ParentClass(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema'})
 
     parent: str = Field(default=..., description="""The parent class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ParentClass']} })
-    source: ParentSource = Field(default=..., description="""Declared or implied.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix', 'ParentClass']} })
+    source: ParentSource = Field(default=..., description="""Declared or implied.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix',
+                       'PitfallResult',
+                       'PitfallCheck',
+                       'ParentClass']} })
     co_type_ratio: Optional[float] = Field(default=None, description="""Share of observed instances also typed with the parent.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ParentClass']} })
 
 
@@ -780,6 +894,7 @@ class GraphAnalytics(GraphProfile):
     predicate_partitions: Optional[list[PredicatePartition]] = Field(default=None, description="""Triples per predicate across the graph.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     declared_subclass_edges: Optional[list[SubclassEdge]] = Field(default=None, description="""rdfs:subClassOf edges declared in the dataset.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     class_partitions: Optional[list[ClassAnalytics]] = Field(default=None, description="""One profile per instantiated class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile'], 'slot_uri': 'void:classPartition'} })
+    pitfalls: Optional[list[PitfallResult]] = Field(default=None, description="""The pitfall checks run on this graph (pitfall-scans); absent when the scan was off or the graph empty.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
 
 
 # Model rebuild
@@ -789,6 +904,10 @@ NamespacePrefix.model_rebuild()
 Settings.model_rebuild()
 Failure.model_rebuild()
 GraphProfile.model_rebuild()
+PitfallResult.model_rebuild()
+PitfallExample.model_rebuild()
+PitfallTerm.model_rebuild()
+PitfallCheck.model_rebuild()
 PredicatePartition.model_rebuild()
 SubclassEdge.model_rebuild()
 ClassProfile.model_rebuild()

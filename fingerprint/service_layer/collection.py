@@ -2,12 +2,14 @@
 
 import logging
 import threading
+import time
+from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from typing import Any
 
 # Only rdflib's term and row types: collection reads the client's typed results, never a graph or store (P-8).
-from rdflib import BNode
+from rdflib import BNode, URIRef
 from rdflib.query import ResultRow
 
 from fingerprint import __version__
@@ -18,7 +20,15 @@ from fingerprint.adapters.exceptions import (
     RetriesExhausted,
     SparqlError,
 )
-from fingerprint.adapters.queries import render, subjects_exact, subjects_limit, subjects_values
+from fingerprint.adapters.queries import (
+    pitfall_ask_query,
+    pitfall_count_query,
+    pitfall_example_query,
+    render,
+    subjects_exact,
+    subjects_limit,
+    subjects_values,
+)
 from fingerprint.adapters.sparql import SparqlPort, redact
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.profile import (
@@ -30,6 +40,11 @@ from fingerprint.domain.profile import (
     GraphProfile,
     IncomingLink,
     NodeKind,
+    PitfallCheck,
+    PitfallExample,
+    PitfallResult,
+    PitfallScope,
+    PitfallTerm,
     PrecisionMode,
     PrecisionPolicy,
     PredicatePartition,
@@ -67,6 +82,7 @@ QUERY_KIND = {
     "Q9": QueryKind.top_values,
     "Q10": QueryKind.property_presence,
     "Q11": QueryKind.incoming_links,
+    "PITFALL": QueryKind.pitfall,
 }
 
 
@@ -109,6 +125,7 @@ class _Collection:
         cls: str | None = None,
         property: str | None = None,
         attempts: int | None = None,
+        check_id: str | None = None,
     ) -> None:
         logger.warning(message)
         failure = Failure(
@@ -118,6 +135,7 @@ class _Collection:
             class_iri=cls,
             property=property,
             attempts=attempts,
+            check_id=check_id,
         )
         with self._lock:
             self.failures.append(failure)
@@ -405,17 +423,116 @@ class _Collection:
         return result.model_copy(update={"declared_subclass_edges": edges, "class_partitions": [p for p in profiles if p]})
 
 
-def collect(endpoint: str, settings: Settings, sparql: SparqlPort) -> ProfileRun:
-    """Collect the raw profile of every graph; raises EndpointUnreachable, records every other failure."""
+def _pitfall_term(term: Any) -> PitfallTerm | None:
+    """A pitfall row's term as text and kind (a literal's lexical form); None when the variable is unbound."""
+    if term is None:
+        return None
+    if isinstance(term, URIRef):
+        return PitfallTerm(text=str(term), kind=NodeKind.iri)
+    if isinstance(term, BNode):
+        return PitfallTerm(text=str(term), kind=NodeKind.blank_node)
+    return PitfallTerm(text=str(term), kind=NodeKind.literal)
+
+
+UNJOINED_DEFAULT = "the default graph's data checks ran without the schema graphs"
+
+
+class _PitfallScan:
+    """The pitfall stage of one run (pitfall-scans design D-4): per graph, the checks its scope selects."""
+
+    def __init__(self, collection: "_Collection", checks: Sequence[PitfallCheck]):
+        self.collection = collection
+        self.checks = list(checks)
+        self.schema_graphs = list(collection.settings.schema_graphs or [])
+
+    def selected(self, graph: str) -> tuple[list[PitfallCheck], list[str]]:
+        """(checks, schema graphs to join): every check alone without schema graphs; else schema checks on a
+        schema graph (alone) and data checks on the others (joined with the schema graphs)."""
+        if not self.schema_graphs:
+            return self.checks, []
+        if graph in self.schema_graphs:
+            return [c for c in self.checks if c.scope == PitfallScope.schema], []
+        return [c for c in self.checks if c.scope == PitfallScope.data], self.schema_graphs
+
+    def scan(self, graph: str) -> list[PitfallResult] | None:
+        """The results of one graph, or None when it holds no triple (or the emptiness check failed)."""
+        run = self.collection
+        label = graph or "default"
+        try:
+            if not run.sparql.ask(pitfall_ask_query(graph)):
+                logger.info("graph %s: empty; no pitfall scan", label)
+                return None
+        except SparqlError as error:
+            run.fail("PITFALL", f"graph {label}: pitfall scan skipped, emptiness check failed: {error}", graph)
+            return None
+        checks, joined = self.selected(graph)
+        if not graph and self.schema_graphs:  # no FROM for the default graph (DEC-20)
+            logger.warning("graph default: %s", UNJOINED_DEFAULT)
+        with ThreadPoolExecutor(max_workers=run.settings.concurrency) as pool:  # map keeps the order (DEC-21)
+            outcomes = list(pool.map(lambda check: self.check(graph, check, joined), checks))
+        results = [r for r in outcomes if r is not None]
+        found = sum(1 for r in results if r.count)
+        logger.info("graph %s: %d pitfall checks, %d with findings", label, len(results), found)
+        return results
+
+    def check(self, graph: str, check: PitfallCheck, joined: list[str]) -> PitfallResult | None:
+        run, label = self.collection, graph or "default"
+        started = time.monotonic()
+        try:
+            rows = run.sparql.select(pitfall_count_query(check.check_id, check.query, graph, joined))
+            count = int(rows[0]["n"]) if rows else 0
+        except (SparqlError, TypeError, ValueError) as error:  # TypeError/ValueError: an unbound or odd ?n
+            message = f"graph {label}: pitfall {check.check_id}: count failed: {error}"
+            run.fail("PITFALL", message, graph, check_id=check.check_id)
+            return None
+        examples: list[PitfallExample] = []
+        if count:
+            limit = run.settings.pitfall_examples
+            try:
+                answer = run.sparql.select(pitfall_example_query(check.check_id, check.query, graph, joined, limit))
+                examples = [
+                    PitfallExample(
+                        entity=_pitfall_term(r["entity"]),
+                        property=_pitfall_term(r["property"]),
+                        value=_pitfall_term(r["value"]),
+                    )
+                    for r in answer
+                ]
+            except SparqlError as error:
+                message = f"graph {label}: pitfall {check.check_id}: examples failed: {error}"
+                run.fail("PITFALL", message, graph, check_id=check.check_id)
+        return PitfallResult(
+            check_id=check.check_id,
+            title=check.title,
+            description=check.description,
+            importance=check.importance,
+            scope=check.scope,
+            source=check.source if check.origin == "packaged" else f"{check.source} ({check.origin})",
+            heuristic=check.heuristic,
+            count=count,
+            examples=examples,
+            seconds=round(time.monotonic() - started, 3),
+        )
+
+
+def collect(endpoint: str, settings: Settings, sparql: SparqlPort, checks: Sequence[PitfallCheck] = ()) -> ProfileRun:
+    """Collect the raw profile of every graph; raises EndpointUnreachable, records every other failure.
+    With `pitfall_scan` on, the `checks` run on every graph after it is profiled (pitfall-scans)."""
     started = datetime.now(UTC)
     run = _Collection(endpoint, settings, sparql)
     named = run.named_graphs()
     graphs = list(settings.selected_graphs or ["", *named])
+    scan = _PitfallScan(run, checks) if settings.pitfall_scan else None
+    if scan:  # schema graphs are always profiled, so their schema findings have a place (design D-4)
+        graphs += [g for g in scan.schema_graphs if g not in graphs]
     edges = run.declared_edges() if run.depth_at_least(Depth.classes) else []
     profiles = []
     for graph in graphs:
         try:
-            profiles.append(run.profile_graph(graph, edges))
+            profile = run.profile_graph(graph, edges)
+            if scan:
+                profile = profile.model_copy(update={"pitfalls": scan.scan(graph)})
+            profiles.append(profile)
         except IriRefError:
             run.fail("Q3", f"skipping {graph!r}: not usable in a SPARQL query", graph)
     return ProfileRun(

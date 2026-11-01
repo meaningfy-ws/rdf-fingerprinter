@@ -37,6 +37,7 @@ print(report)  # report/main.html; run.failures lists what could not be measured
 | `template` | `str \| Path \| None` | A template package of your own for the report page (below).
 | `user_prefixes` | `list[NamespacePrefix] \| None` | Your prefixes, over the packaged ones (xref:representations.adoc#prefixes[Prefixes]).
 | `prefix_list` | `PrefixListSource \| None` | Where to look up unnamed namespaces; `PrefixCcList()` reads prefix.cc, `None` looks up nothing.
+| `checks` | `list[PitfallCheck] \| None` | The pitfall checks when `settings.pitfall_scan` is on; `None` loads the packaged catalogue. Build your own with `fingerprint.adapters.pitfall_catalogue.load_catalogue(user_dir, skip)` (xref:pitfalls.adoc[]).
 | `sparql` | `SparqlPort \| None` | Any SPARQL port, for example a fake in tests.
 |===
 

@@ -1,0 +1,6 @@
+{#- One graph's pitfall examples in ROBOT report columns. `view` is a PitfallsTable; every cell comes ready from
+    fingerprint/service_layer/generators/pitfalls.py (tabs and line breaks already removed). -#}
+Level	Rule Name	Subject	Property	Value
+{%- for l in view.lines %}
+{{ l.level }}	{{ l.rule }}	{{ l.subject }}	{{ l.property }}	{{ l.value }}
+{%- endfor %}

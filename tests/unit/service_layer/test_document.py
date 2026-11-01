@@ -54,7 +54,7 @@ def test_overview_and_namespace_table():
     soup = document(people())
     assert "http://e/sparql" in soup.find(id="overview").get_text(" ")
     rows = [[td.text.strip() for td in tr.find_all("td")] for tr in soup.find(id="namespaces").select("tbody tr")]
-    assert ["ex", EX, "packaged"] in rows
+    assert ["ex", EX, "packaged", "60"] in rows
     assert "acceptance_threshold" in soup.find(id="collection").get_text(" ")
 
 

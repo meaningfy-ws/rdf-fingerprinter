@@ -1,0 +1,9 @@
+# RDFUnit-style (data, closed world): IRI objects of object property p not typed with p's rdfs:range r (or a subclass); per (p, r).
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property (COUNT(DISTINCT ?o) AS ?value) WHERE {
+  ?entity a owl:ObjectProperty ; rdfs:range ?property . FILTER(isIRI(?property))
+  ?s ?entity ?o . FILTER(isIRI(?o))
+  FILTER NOT EXISTS { ?o a ?t . ?t rdfs:subClassOf* ?property }
+} GROUP BY ?entity ?property

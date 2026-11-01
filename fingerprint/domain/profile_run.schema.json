@@ -141,6 +141,13 @@
                         "null"
                     ]
                 },
+                "check_id": {
+                    "description": "The id of a pitfall check.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
                 "class_iri": {
                     "description": "IRI of a class instantiated in the graph.",
                     "type": [
@@ -224,6 +231,16 @@
                     "description": "IRI of the profiled named graph; absent for the default graph.",
                     "type": [
                         "string",
+                        "null"
+                    ]
+                },
+                "pitfalls": {
+                    "description": "The pitfall checks run on this graph (pitfall-scans); absent when the scan was off or the graph empty.",
+                    "items": {
+                        "$ref": "#/$defs/PitfallResult"
+                    },
+                    "type": [
+                        "array",
                         "null"
                     ]
                 },
@@ -329,6 +346,196 @@
             ],
             "title": "ObjectTypeScope",
             "type": "string"
+        },
+        "PitfallCheck": {
+            "additionalProperties": false,
+            "description": "One check of the pitfall catalogue, as loaded from its SPARQL file (pitfall-scans DEC-1). Not part of profile.json.",
+            "properties": {
+                "check_id": {
+                    "description": "The id of a pitfall check.",
+                    "type": "string"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "heuristic": {
+                    "type": "boolean"
+                },
+                "importance": {
+                    "$ref": "#/$defs/PitfallImportance"
+                },
+                "origin": {
+                    "description": "packaged, or the path of the user's file.",
+                    "type": "string"
+                },
+                "query": {
+                    "description": "The SPARQL text, header included.",
+                    "type": "string"
+                },
+                "scope": {
+                    "$ref": "#/$defs/PitfallScope"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "check_id",
+                "title",
+                "importance",
+                "scope",
+                "source",
+                "heuristic",
+                "query",
+                "origin"
+            ],
+            "title": "PitfallCheck",
+            "type": "object"
+        },
+        "PitfallExample": {
+            "additionalProperties": false,
+            "description": "One row a pitfall check found.",
+            "properties": {
+                "entity": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/PitfallTerm"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "property": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/PitfallTerm"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/PitfallTerm"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ]
+                }
+            },
+            "title": "PitfallExample",
+            "type": "object"
+        },
+        "PitfallImportance": {
+            "description": "How serious a pitfall is; critical > important > minor (pitfall-scans DEC-1).",
+            "enum": [
+                "critical",
+                "important",
+                "minor"
+            ],
+            "title": "PitfallImportance",
+            "type": "string"
+        },
+        "PitfallResult": {
+            "additionalProperties": false,
+            "description": "What one pitfall check found in one graph - its metadata, the count and the first examples.",
+            "properties": {
+                "check_id": {
+                    "description": "The id of a pitfall check.",
+                    "type": "string"
+                },
+                "count": {
+                    "description": "Rows the check found.",
+                    "minimum": 0,
+                    "type": "integer"
+                },
+                "description": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "examples": {
+                    "description": "The first rows, ordered by entity, property, value.",
+                    "items": {
+                        "$ref": "#/$defs/PitfallExample"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "heuristic": {
+                    "type": "boolean"
+                },
+                "importance": {
+                    "$ref": "#/$defs/PitfallImportance"
+                },
+                "scope": {
+                    "$ref": "#/$defs/PitfallScope"
+                },
+                "seconds": {
+                    "description": "Time taken by the check's queries.",
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "source": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "check_id",
+                "title",
+                "importance",
+                "scope",
+                "source",
+                "heuristic",
+                "count"
+            ],
+            "title": "PitfallResult",
+            "type": "object"
+        },
+        "PitfallScope": {
+            "description": "What a pitfall check needs - the ontology only (schema), or the data, optionally joined with the schema.",
+            "enum": [
+                "schema",
+                "data"
+            ],
+            "title": "PitfallScope",
+            "type": "string"
+        },
+        "PitfallTerm": {
+            "additionalProperties": false,
+            "description": "An RDF term of a pitfall row - an IRI, a blank node label or a literal's lexical form.",
+            "properties": {
+                "kind": {
+                    "$ref": "#/$defs/NodeKind"
+                },
+                "text": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "text",
+                "kind"
+            ],
+            "title": "PitfallTerm",
+            "type": "object"
         },
         "PrecisionMode": {
             "description": "How the instances of a class were read.",
@@ -549,7 +756,8 @@
                 "property_presence",
                 "incoming_links",
                 "untyped_subjects",
-                "subject_stream"
+                "subject_stream",
+                "pitfall"
             ],
             "title": "QueryKind",
             "type": "string"
@@ -590,9 +798,28 @@
                     "$ref": "#/$defs/ObjectTypeScope",
                     "description": "Where object types are looked up."
                 },
+                "pitfall_examples": {
+                    "description": "How many example rows are kept per pitfall check and graph.",
+                    "minimum": 1,
+                    "type": "integer"
+                },
+                "pitfall_scan": {
+                    "description": "Whether the pitfall checks ran (pitfall-scans; some are full scans).",
+                    "type": "boolean"
+                },
                 "precision_policy": {
                     "$ref": "#/$defs/PrecisionPolicy",
                     "description": "Allowed precision modes."
+                },
+                "schema_graphs": {
+                    "description": "Graphs holding the ontology, joined with each data graph for the data checks.",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
                 },
                 "selected_graphs": {
                     "description": "Graphs requested; empty means all.",
@@ -625,7 +852,9 @@
                 "timeout_seconds",
                 "concurrency",
                 "acceptance_threshold",
-                "graph_statistics"
+                "graph_statistics",
+                "pitfall_scan",
+                "pitfall_examples"
             ],
             "title": "Settings",
             "type": "object"

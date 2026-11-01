@@ -130,3 +130,8 @@ def test_failures_are_logged_with_their_number(store, tmp_path, caplog):
     with caplog.at_level(logging.INFO):
         report, run = fingerprint_report("http://e/sparql", tmp_path, Settings(), sparql=store, renderer=Recorder())
     assert f"report written to {report} with {len(run.failures)} failures" in caplog.messages and run.failures
+
+
+def test_a_library_scan_without_checks_uses_the_packaged_catalogue(store, tmp_path):
+    _, run = fingerprint_report("http://e/sparql", tmp_path, Settings(pitfall_scan=True), sparql=store, renderer=Recorder())
+    assert any(g.pitfalls is not None for g in run.graphs) or store.sent("PITFALL")

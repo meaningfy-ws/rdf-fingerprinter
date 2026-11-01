@@ -1,0 +1,8 @@
+# OOPS! P28/P29 (critical): a symmetric or transitive property whose domain and range differ.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?entity ?property ?value WHERE {
+  VALUES ?value { owl:SymmetricProperty owl:TransitiveProperty }
+  ?entity a ?value ; rdfs:domain ?d ; rdfs:range ?r . FILTER(?d != ?r) BIND(rdf:type AS ?property)
+}

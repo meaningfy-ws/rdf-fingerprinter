@@ -18,6 +18,8 @@ from fingerprint.adapters.config_resolver import MappingConfigResolver
 from fingerprint.adapters.exceptions import ConfigError, ConfigFileError
 from fingerprint.adapters.prefixes import load_packaged_prefixes, load_prefixes
 from fingerprint.adapters.sparql import redact
+from fingerprint.domain.exceptions import IriRefError
+from fingerprint.domain.iri import to_iriref
 from fingerprint.domain.profile import NamespacePrefix, PrefixSource, Settings, SettingsOverride
 from fingerprint.service_layer.exceptions import UsageError
 
@@ -117,4 +119,9 @@ def resolve_settings(
     except ValidationError as error:
         raise UsageError(describe(error)) from error
     check_acceptance_threshold(settings.acceptance_threshold)
+    for graph in settings.schema_graphs or []:
+        try:
+            to_iriref(graph)
+        except IriRefError as error:
+            raise UsageError(f"schema graph {graph!r} cannot be written as an IRI") from error
     return settings

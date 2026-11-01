@@ -106,6 +106,10 @@ class RepresentationFormat(str, Enum):
     """
     The report page main.html (HTML), from a saved profile.
     """
+    pitfalls = "pitfalls"
+    """
+    The pitfall findings as ROBOT-style TSV, one file per scanned graph (pitfall-scans).
+    """
 
 
 class ShapeSeverity(str, Enum):
@@ -167,7 +171,11 @@ class PrefixDeclaration(ConfiguredBaseModel):
                        'DocumentClass',
                        'HiddenNamespace']} })
     namespace: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration', 'HiddenNamespace']} })
-    source: Optional[str] = Field(default=None, description="""Where the prefix came from (user, packaged, prefix_cc, generated); set in the report's table.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration', 'DiagramLink', 'ParentReference']} })
+    source: Optional[str] = Field(default=None, description="""Where the prefix came from (user, packaged, prefix_cc, generated); set in the report's table.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration',
+                       'DiagramLink',
+                       'DocumentPitfallCheck',
+                       'ParentReference']} })
+    uses: Optional[int] = Field(default=None, description="""Instances of the namespace's classes plus subjects of its properties, over every class and graph; set in the report's table (pitfall-scans DEC-18).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration']} })
 
 
 class Annotation(ConfiguredBaseModel):
@@ -177,7 +185,10 @@ class Annotation(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     predicate: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['Annotation']} })
-    value: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['Annotation', 'SettingValue']} })
+    value: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['Annotation',
+                       'SettingValue',
+                       'DocumentPitfallExample',
+                       'PitfallLine']} })
 
 
 class RenderedDocument(ConfiguredBaseModel):
@@ -198,7 +209,7 @@ class GraphView(ConfiguredBaseModel):
          'mixin': True})
 
     graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
-    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph']} })
+    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
     skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
 
 
@@ -224,7 +235,7 @@ class ShapesGraph(GraphView):
     prefixes: Optional[list[PrefixDeclaration]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph']} })
     node_shapes: Optional[list[NodeShape]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph']} })
     graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
-    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph']} })
+    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
     skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
 
 
@@ -264,14 +275,14 @@ class DiagramModule(GraphView):
                        'DiagramOverview',
                        'DiagramMember',
                        'DocumentProperty']} })
-    name: str = Field(default=..., description="""The module's name: a prefix, with ~n for a cluster.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule', 'SettingValue']} })
+    name: str = Field(default=..., description="""The module's name: a prefix, with ~n for a cluster.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule', 'SettingValue', 'DocumentPropertyGroup']} })
     classes: Optional[list[DiagramClass]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
                        'DiagramPackage',
                        'DocumentGraph',
                        'HiddenNamespace']} })
     reference_boxes: Optional[list[DiagramBox]] = Field(default=None, description="""Classes outside the module that its arrows point to.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule']} })
     graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
-    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph']} })
+    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
     skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
 
 
@@ -289,7 +300,7 @@ class DiagramOverview(GraphView):
     packages: Optional[list[DiagramPackage]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramOverview']} })
     links: Optional[list[DiagramLink]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramOverview']} })
     graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
-    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph']} })
+    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
     skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
 
 
@@ -318,9 +329,12 @@ class DiagramLink(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
-    source: str = Field(default=..., description="""The source package alias.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration', 'DiagramLink', 'ParentReference']} })
+    source: str = Field(default=..., description="""The source package alias.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration',
+                       'DiagramLink',
+                       'DocumentPitfallCheck',
+                       'ParentReference']} })
     target: str = Field(default=..., description="""The target package alias.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NodeShape', 'DiagramLink']} })
-    count: int = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramLink', 'UntypedSubjects']} })
+    count: int = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramLink', 'DocumentPitfallCheck', 'UntypedSubjects']} })
 
 
 class DiagramClass(ConfiguredBaseModel):
@@ -333,7 +347,10 @@ class DiagramClass(ConfiguredBaseModel):
     label: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramClass',
                        'DiagramBox',
                        'DocumentGraph',
+                       'TaxonomyNode',
                        'DocumentClass',
+                       'DocumentPitfallGraph',
+                       'DocumentValue',
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
@@ -364,7 +381,10 @@ class DiagramBox(ConfiguredBaseModel):
     label: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramClass',
                        'DiagramBox',
                        'DocumentGraph',
+                       'TaxonomyNode',
                        'DocumentClass',
+                       'DocumentPitfallGraph',
+                       'DocumentValue',
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
@@ -377,9 +397,10 @@ class ProfileDocument(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     overview: Overview = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
-    namespaces: Optional[list[PrefixDeclaration]] = Field(default=None, description="""The profile's namespace table, with sources.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
+    namespaces: Optional[list[PrefixDeclaration]] = Field(default=None, description="""The profile's namespace table, with sources and uses: by source, then uses descending, then prefix.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
     collection: CollectionSection = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
-    graphs: Optional[list[DocumentGraph]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
+    pitfalls: Optional[DocumentPitfalls] = Field(default=None, description="""Present when the profile holds scan results.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
+    graphs: Optional[list[DocumentGraph]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument', 'DocumentPitfalls']} })
     caveats: Caveats = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
     skipped: Optional[list[str]] = Field(default=None, description="""IRIs that cannot be written; the same list as caveats.skipped, kept for custom templates.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
 
@@ -412,8 +433,11 @@ class SettingValue(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
-    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule', 'SettingValue']} })
-    value: str = Field(default=..., description="""The value as text; — when unset.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Annotation', 'SettingValue']} })
+    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule', 'SettingValue', 'DocumentPropertyGroup']} })
+    value: str = Field(default=..., description="""The value as text; — when unset.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Annotation',
+                       'SettingValue',
+                       'DocumentPitfallExample',
+                       'PitfallLine']} })
 
 
 class DocumentGraph(ConfiguredBaseModel):
@@ -422,24 +446,63 @@ class DocumentGraph(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
-    slug: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph']} })
+    slug: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
     label: str = Field(default=..., description="""The graph as a short name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramClass',
                        'DiagramBox',
                        'DocumentGraph',
+                       'TaxonomyNode',
                        'DocumentClass',
+                       'DocumentPitfallGraph',
+                       'DocumentValue',
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
     iri: Optional[str] = Field(default=None, description="""The graph IRI; absent for the default graph.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentGraph',
+                       'TaxonomyNode',
                        'DocumentClass',
+                       'DocumentValue',
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
     empty: bool = Field(default=..., description="""True when the graph has no class partitions.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentGraph']} })
-    classes: Optional[list[DocumentClass]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
+    classes: Optional[list[DocumentClass]] = Field(default=None, description="""Grouped by namespace prefix, then by instances descending, then short name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
                        'DiagramPackage',
                        'DocumentGraph',
                        'HiddenNamespace']} })
+    taxonomy: Optional[list[TaxonomyNode]] = Field(default=None, description="""The root nodes of the class tree.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentGraph']} })
+
+
+class TaxonomyNode(ConfiguredBaseModel):
+    """
+    A class in the taxonomy view, with its popularity (pitfall-scans DEC-15).
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    label: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramClass',
+                       'DiagramBox',
+                       'DocumentGraph',
+                       'TaxonomyNode',
+                       'DocumentClass',
+                       'DocumentPitfallGraph',
+                       'DocumentValue',
+                       'ParentReference',
+                       'DocumentProperty',
+                       'DocumentTerm']} })
+    iri: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentGraph',
+                       'TaxonomyNode',
+                       'DocumentClass',
+                       'DocumentValue',
+                       'ParentReference',
+                       'DocumentProperty',
+                       'DocumentTerm']} })
+    anchor: Optional[str] = Field(default=None, description="""The class section's anchor; absent for a parent not profiled in the graph.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TaxonomyNode',
+                       'DocumentClass',
+                       'DocumentBadge',
+                       'DocumentPitfallCheck']} })
+    instances: Optional[int] = Field(default=None, description="""Absent for a parent not profiled in the graph.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TaxonomyNode', 'DocumentClass']} })
+    bar: int = Field(default=..., description="""The popularity bar width, 0-100, against the graph's largest class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TaxonomyNode']} })
+    see: Optional[str] = Field(default=None, description="""For a class with several parents: the anchor of its full node, drawn under its first parent.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TaxonomyNode']} })
+    children: Optional[list[TaxonomyNode]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['TaxonomyNode']} })
 
 
 class DocumentClass(ConfiguredBaseModel):
@@ -449,14 +512,19 @@ class DocumentClass(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     iri: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentGraph',
+                       'TaxonomyNode',
                        'DocumentClass',
+                       'DocumentValue',
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
     label: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramClass',
                        'DiagramBox',
                        'DocumentGraph',
+                       'TaxonomyNode',
                        'DocumentClass',
+                       'DocumentPitfallGraph',
+                       'DocumentValue',
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
@@ -464,14 +532,178 @@ class DocumentClass(ConfiguredBaseModel):
                        'DiagramPackage',
                        'DocumentClass',
                        'HiddenNamespace']} })
-    anchor: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
-    q: str = Field(default=..., description="""The search text: short name and IRI, lower case.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
-    instances: int = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
+    anchor: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['TaxonomyNode',
+                       'DocumentClass',
+                       'DocumentBadge',
+                       'DocumentPitfallCheck']} })
+    q: str = Field(default=..., description="""The search text: short name and IRI, lower case.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass', 'DocumentPitfallCheck']} })
+    instances: int = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['TaxonomyNode', 'DocumentClass']} })
+    data_properties: int = Field(default=..., description="""Shown properties with datatype or mixed values (pitfall-scans DEC-19).""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
+    object_properties: int = Field(default=..., description="""Shown properties with object or mixed values (pitfall-scans DEC-19).""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
     precision: str = Field(default=..., description="""exact, or first N of M.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass', 'SampledClass']} })
     sample_note: Optional[str] = Field(default=None, description="""(sample may differ between queries), when the sample was not shared.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
     sampled: bool = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass', 'Caveats']} })
     parents: Optional[list[ParentReference]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
-    properties: Optional[list[DocumentProperty]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
+    properties: Optional[list[DocumentProperty]] = Field(default=None, description="""Own, refined, inherited; each by subjects, confidence, short name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass', 'DocumentPropertyGroup']} })
+    property_groups: Optional[list[DocumentPropertyGroup]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
+    badges: Optional[list[DocumentBadge]] = Field(default=None, description="""Pitfall checks whose examples name this class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
+
+
+class DocumentPropertyGroup(ConfiguredBaseModel):
+    """
+    The properties a class gets one way - own, refined or inherited (pitfall-scans DEC-14).
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    name: str = Field(default=..., description="""Own, Refined or Inherited.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule', 'SettingValue', 'DocumentPropertyGroup']} })
+    properties: Optional[list[DocumentProperty]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass', 'DocumentPropertyGroup']} })
+
+
+class DocumentBadge(ConfiguredBaseModel):
+    """
+    A link from a class section to a pitfall check entry.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    check_id: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentBadge', 'DocumentPitfallCheck']} })
+    anchor: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['TaxonomyNode',
+                       'DocumentClass',
+                       'DocumentBadge',
+                       'DocumentPitfallCheck']} })
+    importance: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentBadge', 'PitfallLevelCount', 'DocumentPitfallCheck']} })
+
+
+class DocumentPitfalls(ConfiguredBaseModel):
+    """
+    The Pitfalls section of the report.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    summary: Optional[list[PitfallLevelCount]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentPitfalls']} })
+    graphs: Optional[list[DocumentPitfallGraph]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument', 'DocumentPitfalls']} })
+
+
+class PitfallLevelCount(ConfiguredBaseModel):
+    """
+    The number of distinct checks with findings at one importance.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    importance: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentBadge', 'PitfallLevelCount', 'DocumentPitfallCheck']} })
+    checks: int = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallLevelCount', 'DocumentPitfallGraph']} })
+
+
+class DocumentPitfallGraph(ConfiguredBaseModel):
+    """
+    The pitfall results of one graph.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    label: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramClass',
+                       'DiagramBox',
+                       'DocumentGraph',
+                       'TaxonomyNode',
+                       'DocumentClass',
+                       'DocumentPitfallGraph',
+                       'DocumentValue',
+                       'ParentReference',
+                       'DocumentProperty',
+                       'DocumentTerm']} })
+    slug: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
+    checks: Optional[list[DocumentPitfallCheck]] = Field(default=None, description="""Checks with findings, ordered by importance, count (descending), id.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallLevelCount', 'DocumentPitfallGraph']} })
+    clean: Optional[list[str]] = Field(default=None, description="""Ids of the checks that found nothing.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentPitfallGraph']} })
+
+
+class DocumentPitfallCheck(ConfiguredBaseModel):
+    """
+    One check's entry in the Pitfalls section.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    check_id: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentBadge', 'DocumentPitfallCheck']} })
+    anchor: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['TaxonomyNode',
+                       'DocumentClass',
+                       'DocumentBadge',
+                       'DocumentPitfallCheck']} })
+    title: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentPitfallCheck']} })
+    description: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentPitfallCheck']} })
+    importance: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentBadge', 'PitfallLevelCount', 'DocumentPitfallCheck']} })
+    source: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration',
+                       'DiagramLink',
+                       'DocumentPitfallCheck',
+                       'ParentReference']} })
+    count: int = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramLink', 'DocumentPitfallCheck', 'UntypedSubjects']} })
+    heuristic: bool = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentPitfallCheck']} })
+    q: str = Field(default=..., description="""The search text: id and title, lower case.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass', 'DocumentPitfallCheck']} })
+    examples: Optional[list[DocumentPitfallExample]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentPitfallCheck']} })
+
+
+class DocumentPitfallExample(ConfiguredBaseModel):
+    """
+    One example row, each term as the page shows it.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    entity: Optional[DocumentValue] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentPitfallExample']} })
+    property: Optional[DocumentValue] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentPitfallExample', 'PitfallLine']} })
+    value: Optional[DocumentValue] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Annotation',
+                       'SettingValue',
+                       'DocumentPitfallExample',
+                       'PitfallLine']} })
+
+
+class DocumentValue(ConfiguredBaseModel):
+    """
+    An RDF term as the page shows it - a short name with its IRI, or text.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    label: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramClass',
+                       'DiagramBox',
+                       'DocumentGraph',
+                       'TaxonomyNode',
+                       'DocumentClass',
+                       'DocumentPitfallGraph',
+                       'DocumentValue',
+                       'ParentReference',
+                       'DocumentProperty',
+                       'DocumentTerm']} })
+    iri: Optional[str] = Field(default=None, description="""The full IRI, for an IRI term.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentGraph',
+                       'TaxonomyNode',
+                       'DocumentClass',
+                       'DocumentValue',
+                       'ParentReference',
+                       'DocumentProperty',
+                       'DocumentTerm']} })
+
+
+class PitfallsTable(GraphView):
+    """
+    The TSV of one graph's pitfall examples (ROBOT report columns).
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema',
+         'mixins': ['GraphView']})
+
+    lines: Optional[list[PitfallLine]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallsTable']} })
+    graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
+    slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
+    skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
+
+
+class PitfallLine(ConfiguredBaseModel):
+    """
+    One TSV line - every value already written for TSV.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    level: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallLine']} })
+    rule: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallLine']} })
+    subject: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallLine']} })
+    property: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentPitfallExample', 'PitfallLine']} })
+    value: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['Annotation',
+                       'SettingValue',
+                       'DocumentPitfallExample',
+                       'PitfallLine']} })
 
 
 class ParentReference(ConfiguredBaseModel):
@@ -481,18 +713,26 @@ class ParentReference(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     iri: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentGraph',
+                       'TaxonomyNode',
                        'DocumentClass',
+                       'DocumentValue',
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
     label: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramClass',
                        'DiagramBox',
                        'DocumentGraph',
+                       'TaxonomyNode',
                        'DocumentClass',
+                       'DocumentPitfallGraph',
+                       'DocumentValue',
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
-    source: str = Field(default=..., description="""declared or implied.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration', 'DiagramLink', 'ParentReference']} })
+    source: str = Field(default=..., description="""declared or implied.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration',
+                       'DiagramLink',
+                       'DocumentPitfallCheck',
+                       'ParentReference']} })
 
 
 class DocumentProperty(ConfiguredBaseModel):
@@ -502,14 +742,19 @@ class DocumentProperty(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     iri: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentGraph',
+                       'TaxonomyNode',
                        'DocumentClass',
+                       'DocumentValue',
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
     label: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramClass',
                        'DiagramBox',
                        'DocumentGraph',
+                       'TaxonomyNode',
                        'DocumentClass',
+                       'DocumentPitfallGraph',
+                       'DocumentValue',
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
@@ -536,14 +781,19 @@ class DocumentTerm(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     iri: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentGraph',
+                       'TaxonomyNode',
                        'DocumentClass',
+                       'DocumentValue',
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
     label: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramClass',
                        'DiagramBox',
                        'DocumentGraph',
+                       'TaxonomyNode',
                        'DocumentClass',
+                       'DocumentPitfallGraph',
+                       'DocumentValue',
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
@@ -559,6 +809,7 @@ class Caveats(ConfiguredBaseModel):
     untyped: Optional[list[UntypedSubjects]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Caveats']} })
     hidden: Optional[list[HiddenNamespace]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Caveats']} })
     skipped: Optional[list[str]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
+    unjoined_default: Optional[bool] = Field(default=None, description="""True when schema graphs were given and the default graph was scanned without them (pitfall-scans DEC-20).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Caveats']} })
 
 
 class UntypedSubjects(ConfiguredBaseModel):
@@ -568,7 +819,7 @@ class UntypedSubjects(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     graph: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['UntypedSubjects', 'SampledClass', 'FailureNote']} })
-    count: int = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramLink', 'UntypedSubjects']} })
+    count: int = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramLink', 'DocumentPitfallCheck', 'UntypedSubjects']} })
 
 
 class HiddenNamespace(ConfiguredBaseModel):
@@ -629,7 +880,18 @@ Overview.model_rebuild()
 CollectionSection.model_rebuild()
 SettingValue.model_rebuild()
 DocumentGraph.model_rebuild()
+TaxonomyNode.model_rebuild()
 DocumentClass.model_rebuild()
+DocumentPropertyGroup.model_rebuild()
+DocumentBadge.model_rebuild()
+DocumentPitfalls.model_rebuild()
+PitfallLevelCount.model_rebuild()
+DocumentPitfallGraph.model_rebuild()
+DocumentPitfallCheck.model_rebuild()
+DocumentPitfallExample.model_rebuild()
+DocumentValue.model_rebuild()
+PitfallsTable.model_rebuild()
+PitfallLine.model_rebuild()
 ParentReference.model_rebuild()
 DocumentProperty.model_rebuild()
 DocumentTerm.model_rebuild()

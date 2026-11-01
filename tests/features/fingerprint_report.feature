@@ -215,3 +215,78 @@ Feature: The fingerprint report and the command line
       When the fingerprint command runs with the format "shacl"
       Then the output folder holds the report and the profile file
       And it exits with 4
+
+  Rule: Pitfalls in the report
+
+    Scenario: Section and badge
+      Given the scanned test profile
+      When the report is rendered
+      Then the Pitfalls section lists "p34_untyped_class" with its count and examples
+      And a class section that the check names shows a badge linking to it
+
+    Scenario: Values are escaped
+      Given a scanned profile whose example value is "<script>alert(1)</script>"
+      When the report is rendered
+      Then the page shows the value as text and has no script element with it
+
+    Scenario: No scan, no section
+      Given the readability test profile
+      When the report is rendered
+      Then the page has no Pitfalls section and no pitfall badge
+
+  Rule: Pitfall scans in the command
+
+    Scenario: Pitfalls found with fail-on
+      Given a store whose graph "data" uses an undeclared relation and whose graph "schema" holds the ontology
+      When the fingerprint command runs with --pitfalls and --fail-on critical on graph "data" with schema graph "schema"
+      Then it exits with 5
+      And it logs the findings at or above "critical"
+
+    Scenario: An update in a user check is refused
+      Given a store whose graph "data" uses an undeclared relation and whose graph "schema" holds the ontology
+      And a user check file that holds a DELETE WHERE update
+      When the fingerprint command runs with --pitfalls and that check folder
+      Then it exits with 2 naming the file
+      And no query was sent
+
+    Scenario: Pitfalls format in the run
+      Given a store whose graph "data" uses an undeclared relation and whose graph "schema" holds the ontology
+      When the fingerprint command runs with --pitfalls and --format pitfalls on graph "data" with schema graph "schema"
+      Then the output folder holds one pitfalls TSV per scanned graph
+
+  Rule: The report reads in order of importance
+
+    Scenario: Pitfalls in the caveats section
+      Given the scanned test profile
+      When the report is rendered
+      Then the pitfall findings are inside the caveats section, after the caveats, and there is no separate Pitfalls section
+
+    Scenario: Classes by namespace and popularity
+      Given a graph holding "ex:B" with 5 instances, "ex:A" with 9 and "foaf:Person" with 20
+      When the report is rendered
+      Then the contents and the class sections list "ex:A", "ex:B", "foaf:Person" in that order
+
+    Scenario: Properties by inheritance and use
+      Given a class with the own properties "ex:p" (3 subjects) and "ex:q" (8 subjects) and the inherited property "ex:r" (10 subjects)
+      When the report is rendered
+      Then its table lists "ex:q", "ex:p" under "Own", then "ex:r" under "Inherited"
+
+    Scenario: Namespaces by source and use
+      Given a graph using "foaf" 2 times, "skos" 40 times and the unknown "vocab" 90 times
+      When the report is rendered
+      Then the namespace table lists "skos", "foaf" under "packaged", then "vocab" under "generated"
+
+    Scenario: Instances, data and object properties
+      Given "ex:Person" with 12 instances and a datatype, an object and a mixed property
+      When the report is rendered
+      Then its contents entry and its heading show 12 instances, 2 data properties and 2 object properties
+
+    Scenario: Tree with popularity
+      Given "ex:Agent" with 12 instances and "ex:Person" with 6, whose implied parent is "ex:Agent"
+      When the report is rendered
+      Then the taxonomy shows "ex:Agent" with 12 and a 100% bar, holding "ex:Person" with 6 and a 50% bar, each linked to its section
+
+    Scenario: Unprofiled parent and several parents
+      Given "ex:Person" declares the parents "ex:Agent", not profiled, and "ex:Thing", profiled
+      When the report is rendered
+      Then "ex:Agent" is a root node without count holding "ex:Person", and "ex:Thing" holds a see reference to "ex:Person"

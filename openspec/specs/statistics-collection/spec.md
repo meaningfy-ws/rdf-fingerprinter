@@ -22,8 +22,9 @@ class when that query times out.
 
 ### Requirement: Depth and switches select the queries
 The collector SHALL run only the queries that the configured depth and switches require, as tabled
-in `design.md`; graph totals, predicate partitions and untyped subjects (full scans) SHALL run only
-when `graph_statistics` is on.
+in `openspec/changes/archive/2026-10-31-harden-fingerprinter/design.md` ("Query templates"); graph totals, predicate partitions and untyped subjects (full scans) SHALL run only
+when `graph_statistics` is on, and pitfall check queries only when `pitfall_scan` is on
+(pitfall-scans "The pitfall scan stage").
 
 #### Scenario: Default depth
 - **WHEN** the collector runs with default settings
@@ -117,7 +118,8 @@ A forced policy (`exact`, `first_n`) SHALL use only that mode. A first_n sample 
 
 ### Requirement: Failures are recorded and fail the run
 A query that still fails after retries and fallbacks SHALL be recorded as a `Failure` (query kind,
-graph, class, property, message, attempts); the other classes SHALL still be collected.
+graph, class, property, check id, message, attempts); the other classes, and the other pitfall checks,
+SHALL still be collected.
 
 #### Scenario: Named graphs cannot be listed
 - **WHEN** the endpoint rejects the named-graph listing query with HTTP 400
@@ -126,6 +128,10 @@ graph, class, property, message, attempts); the other classes SHALL still be col
 #### Scenario: One class fails
 - **WHEN** every attempt for one class fails and all other classes succeed
 - **THEN** the profile contains the other classes and one failure naming that class
+
+#### Scenario: One pitfall check fails
+- **WHEN** one pitfall check's count query times out after its retries
+- **THEN** a failure of kind `pitfall` with that check's id is recorded and the other checks' results are in the profile
 
 ### Requirement: Settings
 Every collection parameter SHALL be settable through `resolve_settings`, in this order of

@@ -19,6 +19,7 @@ from fingerprint.entrypoints.cli import generate
 from fingerprint.service_layer import handlers, representations
 from fingerprint.service_layer.generators import DocumentGenerator
 from tests.bdd.steps.common import ENDPOINT, READABILITY, big_failure, person_run, run_fingerprint
+from tests.builders import klass, literals, profile_run, prop, resources
 from tests.fakes import EX
 from tests.sample_data import TEST_DATA
 
@@ -372,3 +373,202 @@ def shapes_fail(monkeypatch):
             raise GeneratedOutputError("shapes-default.ttl is not valid turtle")
 
     monkeypatch.setitem(representations.GENERATORS, "shacl", Failing)
+
+
+# --- pitfalls in the report (pitfall-scans) ---
+
+SCANNED = TEST_DATA / "profiles" / "scanned-profile.json"
+
+
+@given("the scanned test profile")
+def scanned_profile(ctx):
+    ctx["run"] = load_profile(SCANNED)
+
+
+@then(parsers.parse('the Pitfalls section lists "{check_id}" with its count and examples'))
+def section_lists(ctx, check_id):
+    section = soup(ctx).find(id="pitfalls")
+    entry = section.select_one(f'details.pitfall[id$="-{check_id}"]')
+    count = next(r.count for g in ctx["run"].graphs for r in g.pitfalls or [] if r.check_id == check_id)
+    assert f"{count} found" in entry.get_text(" ") and entry.select("tbody tr")
+
+
+@then("a class section that the check names shows a badge linking to it")
+def badge(ctx):
+    page = soup(ctx)
+    links = [a for a in page.select("details.cls a.badge") if "p34_untyped_class" in a["href"]]
+    assert links and page.find(id=links[0]["href"][1:]) is not None
+
+
+@given(parsers.parse('a scanned profile whose example value is "{value}"'))
+def scanned_with_value(ctx, value):
+    from fingerprint.domain.profile import PitfallExample, PitfallResult, PitfallTerm
+
+    example = PitfallExample(entity=PitfallTerm(text=EX + "Person", kind="iri"), value=PitfallTerm(text=value, kind="literal"))
+    result = PitfallResult(check_id="x", title="T", importance="minor", scope="data", source="s", count=1, examples=[example])
+    base = person_run()
+    ctx["run"] = base.model_copy(update={"graphs": [g.model_copy(update={"pitfalls": [result]}) for g in base.graphs]})
+    ctx["value"] = value
+
+
+@then("the page shows the value as text and has no script element with it")
+def escaped(ctx):
+    page = soup(ctx)
+    assert ctx["value"] in page.find(id="pitfalls").get_text(" ")
+    assert all("alert(1)" not in s.get_text() for s in page.find_all("script"))
+
+
+@then("the page has no Pitfalls section and no pitfall badge")
+def no_section(ctx):
+    page = soup(ctx)
+    assert page.find(id="pitfalls") is None and not page.select("a.badge")
+
+
+# --- order and taxonomy (pitfall-scans DEC-13 to DEC-16) ---
+
+FOAF = "http://xmlns.com/foaf/0.1/"
+
+
+def iri(curie: str) -> str:
+    return (FOAF if curie.startswith("foaf:") else EX) + curie.split(":", 1)[1]
+
+
+@then("the pitfall findings are inside the caveats section, after the caveats, and there is no separate Pitfalls section")
+def pitfalls_in_caveats(ctx):
+    page = soup(ctx)
+    caveats = page.find(id="caveats")
+    assert caveats.find(id="pitfalls") is not None and "and pitfalls" in caveats.find("h2").get_text()
+    assert not page.select("section#pitfalls")
+    headings = [h.get_text() for h in caveats.find_all(["h3"])]
+    assert headings[-1] == "Pitfalls"
+
+
+@given(parsers.parse('a graph holding "{b}" with {nb:d} instances, "{a}" with {na:d} and "{c}" with {nc:d}'))
+def three_classes(ctx, b, nb, a, na, c, nc):
+    ctx["run"] = profile_run(klass(iri(b), nb), klass(iri(a), na), klass(iri(c), nc))
+
+
+@then(parsers.parse('the contents and the class sections list "{first}", "{second}", "{third}" in that order'))
+def class_order(ctx, first, second, third):
+    page = soup(ctx)
+    sections = [s.find("h3").get_text() for s in page.select("details.cls")]
+    contents = [li.find("a").get_text(strip=True) for li in page.select("nav li[data-anchor]")]
+    assert sections == [first, second, third]
+    assert contents == [x.split(":", 1)[1] for x in (first, second, third)]
+
+
+@given(
+    parsers.parse(
+        'a class with the own properties "{p}" ({np:d} subjects) and "{q}" ({nq:d} subjects) '
+        'and the inherited property "{r}" ({nr:d} subjects)'
+    )
+)
+def class_with_groups(ctx, p, np, q, nq, r, nr):
+    parent = klass(EX + "Agent", nr, prop(iri(r), {1: nr}, literals(nr)))
+    child = klass(
+        EX + "Person",
+        nr,
+        prop(iri(r), {1: nr}, literals(nr)),
+        prop(iri(p), {1: np}, literals(np)),
+        prop(iri(q), {1: nq}, literals(nq)),
+    )
+    ctx["run"] = profile_run(parent, child, edges=[(EX + "Person", EX + "Agent")])
+
+
+@then(parsers.parse('its table lists "{first}", "{second}" under "{group}", then "{third}" under "{other}"'))
+def grouped_rows(ctx, first, second, group, third, other):
+    section = next(s for s in soup(ctx).select("details.cls") if s.find("h3").get_text() == "ex:Person")
+    rows = [tr.find(["th", "td"]).get_text(strip=True) for tr in section.select("tbody tr")]
+    assert rows == [group, first, second, other, third]
+
+
+@given(parsers.parse('"{agent}" with {na:d} instances and "{person}" with {np:d}, whose implied parent is "{parent}"'))
+def implied_tree(ctx, agent, na, person, np, parent):
+    ctx["run"] = profile_run(klass(iri(agent), na), klass(iri(person), np, co_types=[(iri(parent), np)]))
+
+
+def tree_nodes(ctx):
+    return soup(ctx).find(id="taxonomy")
+
+
+@then(
+    parsers.parse(
+        'the taxonomy shows "{root}" with {nr:d} and a {br:d}% bar, holding "{child}" with {nc:d} and a {bc:d}% bar, '
+        "each linked to its section"
+    )
+)
+def tree_with_popularity(ctx, root, nr, br, child, nc, bc):
+    taxonomy = tree_nodes(ctx)
+    top = taxonomy.select_one("ul.tree > li")
+    root_link = top.find("a")
+    child_li = top.select_one("ul.tree li")
+    assert root_link.get_text() == root and f"width: {br}%" in top.select_one(".bar")["style"]
+    assert str(nr) in top.find(class_="meta").get_text()
+    assert child_li.find("a").get_text() == child and f"width: {bc}%" in child_li.select_one(".bar")["style"]
+    assert str(nc) in child_li.find(class_="meta").get_text()
+    page = soup(ctx)
+    assert page.find(id=root_link["href"][1:]) is not None and page.find(id=child_li.find("a")["href"][1:]) is not None
+
+
+@given(parsers.parse('"{person}" declares the parents "{agent}", not profiled, and "{thing}", profiled'))
+def several_parents(ctx, person, agent, thing):
+    ctx["run"] = profile_run(
+        klass(iri(person), 3), klass(iri(thing), 5), edges=[(iri(person), iri(agent)), (iri(person), iri(thing))]
+    )
+
+
+@then(
+    parsers.parse(
+        '"{agent}" is a root node without count holding "{person}", and "{thing}" holds a see reference to "{other}"'
+    )
+)
+def unprofiled_and_see(ctx, agent, person, thing, other):
+    roots = tree_nodes(ctx).select("ul.tree")[0].find_all("li", recursive=False)
+    by_label = {li.find(["a", "span"]).get_text(): li for li in roots}
+    agent_li, thing_li = by_label[agent], by_label[thing]
+    assert agent_li.find(class_="meta") is None or agent_li.select_one("summary .meta") is None
+    assert agent_li.select_one("ul.tree li a").get_text() == person
+    see = thing_li.select_one("ul.tree li")
+    assert "see" in see.get_text() and see.find("a").get_text() == other
+
+
+# --- namespace table and class indicator (pitfall-scans DEC-18, DEC-19) ---
+
+NAMESPACES = {"foaf": FOAF, "skos": "http://www.w3.org/2004/02/skos/core#", "vocab": "http://unknown.test/vocab#"}
+
+
+@given(parsers.parse('a graph using "{a}" {na:d} times, "{b}" {nb:d} times and the unknown "{c}" {nc:d} times'))
+def namespace_uses(ctx, a, na, b, nb, c, nc):
+    ctx["run"] = profile_run(*(klass(NAMESPACES[p] + "Thing", n) for p, n in ((a, na), (b, nb), (c, nc))))
+
+
+@then(parsers.parse('the namespace table lists "{first}", "{second}" under "{group}", then "{third}" under "{other}"'))
+def namespace_rows(ctx, first, second, group, third, other):
+    rows = [tr.get_text(" ", strip=True) for tr in soup(ctx).find(id="namespaces").select("tbody tr")]
+    wanted = [r.split()[0] for r in rows if r.split()[0] in (first, second, third, group, other)]
+    assert wanted == [group, first, second, other, third]
+
+
+@given(parsers.parse('"{cls}" with {n:d} instances and a datatype, an object and a mixed property'))
+def class_with_kinds(ctx, cls, n):
+    ctx["run"] = profile_run(
+        klass(
+            iri(cls),
+            n,
+            prop(EX + "name", {1: n}, literals(n)),
+            prop(EX + "knows", {1: n}, resources(n)),
+            prop(EX + "note", {1: n}, literals(1), resources(n - 1)),
+        )
+    )
+
+
+@then(
+    parsers.parse("its contents entry and its heading show {n:d} instances, {d:d} data properties and {o:d} object properties")
+)
+def class_indicator(ctx, n, d, o):
+    page = soup(ctx)
+    entry = page.select_one("nav li[data-anchor] .ind")
+    heading = page.select_one("details.cls summary").get_text(" ", strip=True)
+    assert entry.get_text(strip=True) == f"{n} · {d} d, {o} o"
+    assert entry["title"] == f"{n} instances, {d} data properties, {o} object properties"
+    assert f"{n} instances" in heading and f"{d} data and {o} object properties" in heading

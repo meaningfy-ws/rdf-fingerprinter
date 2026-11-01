@@ -13,6 +13,10 @@ from fingerprint.domain.profile import ProfileRun
 TEST_DATA = Path(__file__).parent / "test_data"
 SAMPLE_PROFILE = TEST_DATA / "profiles" / "sample-profile.json"
 GOLDEN = TEST_DATA / "golden"
+# The test data scanned for pitfalls, treaties as data and continents as the schema graph (pitfall-scans).
+SCANNED_PROFILE = TEST_DATA / "profiles" / "scanned-profile.json"
+SCANNED_GOLDEN = GOLDEN / "scanned"
+SCANNED_FORMATS = ("doc", "pitfalls")
 GRAPH_BASE = "http://publications.europa.eu/resources/authority/"
 EUVOC = "http://publications.europa.eu/ontology/euvoc#"
 SKOS = "http://www.w3.org/2004/02/skos/core#"

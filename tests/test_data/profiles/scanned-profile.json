@@ -1,0 +1,864 @@
+{
+  "endpoint": "http://localhost:7878/query",
+  "started_at": "2026-11-01T12:00:00Z",
+  "finished_at": "2026-11-01T12:00:05Z",
+  "tool_version": "3.1.0",
+  "settings": {
+    "depth": "classes",
+    "precision_policy": "auto",
+    "first_n": 10000,
+    "top_k": 20,
+    "object_type_scope": "same_graph",
+    "completeness_check": false,
+    "timeout_seconds": 60,
+    "concurrency": 4,
+    "acceptance_threshold": 0.95,
+    "graph_statistics": false,
+    "selected_graphs": [
+      "http://publications.europa.eu/resources/authority/treaties"
+    ],
+    "pitfall_scan": true,
+    "schema_graphs": [
+      "http://publications.europa.eu/resources/authority/continents"
+    ],
+    "pitfall_examples": 10
+  },
+  "graphs": [
+    {
+      "graph": "http://publications.europa.eu/resources/authority/treaties",
+      "declared_subclass_edges": [],
+      "class_partitions": [
+        {
+          "class_iri": "http://www.w3.org/2008/05/skos-xl#Label",
+          "instances": 4530,
+          "observed_instances": 4530,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://publications.europa.eu/ontology/euvoc#XlNotation",
+          "instances": 357,
+          "observed_instances": 357,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://publications.europa.eu/ontology/euvoc#Treaty",
+          "instances": 104,
+          "observed_instances": 104,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2004/02/skos/core#Concept",
+              "subjects": 104
+            }
+          ],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://www.w3.org/2004/02/skos/core#Concept",
+          "instances": 104,
+          "observed_instances": 104,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://publications.europa.eu/ontology/euvoc#Treaty",
+              "subjects": 104
+            }
+          ],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://publications.europa.eu/ontology/euvoc#XlNote",
+          "instances": 12,
+          "observed_instances": 12,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://www.w3.org/2002/07/owl#Ontology",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+              "subjects": 1
+            }
+          ],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2002/07/owl#Ontology",
+              "subjects": 1
+            }
+          ],
+          "property_partitions": []
+        }
+      ],
+      "pitfalls": [
+        {
+          "check_id": "p34_untyped_class",
+          "title": "IRI used as a class but never declared",
+          "description": "an IRI used as a class (as the object of rdf:type or rdfs:subClassOf) but never declared a class.",
+          "importance": "minor",
+          "scope": "data",
+          "source": "OOPS! P34",
+          "heuristic": false,
+          "count": 7,
+          "examples": [
+            {
+              "entity": {
+                "text": "http://publications.europa.eu/ontology/euvoc#Continent",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "used as a class, not declared",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://publications.europa.eu/ontology/euvoc#Treaty",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "used as a class, not declared",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://publications.europa.eu/ontology/euvoc#XlNotation",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "used as a class, not declared",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://publications.europa.eu/ontology/euvoc#XlNote",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "used as a class, not declared",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://www.w3.org/2004/02/skos/core#Concept",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "used as a class, not declared",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "used as a class, not declared",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://www.w3.org/2008/05/skos-xl#Label",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "used as a class, not declared",
+                "kind": "literal"
+              }
+            }
+          ],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p35_untyped_property",
+          "title": "Relation used but never defined",
+          "description": "an IRI used as a predicate but declared neither an object, datatype, annotation nor rdf property.",
+          "importance": "important",
+          "scope": "data",
+          "source": "OOPS! P35",
+          "heuristic": false,
+          "count": 28,
+          "examples": [
+            {
+              "entity": {
+                "text": "http://data.europa.eu/eli/ontology#date_document",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "83",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://data.europa.eu/eli/ontology#first_date_entry_in_force",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "82",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://lemon-model.net/lemon#context",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "205",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://lexvo.org/ontology#script",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "398",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://publications.europa.eu/ontology/euvoc#endDate",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "1294",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://publications.europa.eu/ontology/euvoc#officialJournalDate",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "92",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://publications.europa.eu/ontology/euvoc#officialJournalNumber",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "92",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://publications.europa.eu/ontology/euvoc#officialJournalSeries",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "92",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://publications.europa.eu/ontology/euvoc#signatureLocation",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "76",
+                "kind": "literal"
+              }
+            },
+            {
+              "entity": {
+                "text": "http://publications.europa.eu/ontology/euvoc#startDate",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "4512",
+                "kind": "literal"
+              }
+            }
+          ],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "x_domain_violation",
+          "title": "Subjects outside a property's declared domain",
+          "description": "subjects of p not typed with p's rdfs:domain d (or a subclass of d); one row per (p, d).",
+          "importance": "important",
+          "scope": "data",
+          "source": "rdf-fingerprinter (RDFUnit-style)",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "x_individual_as_predicate",
+          "title": "Typed individual used as a predicate",
+          "description": "a typed individual (or a subject with data) used as a predicate (singleton properties, versions as predicates).",
+          "importance": "critical",
+          "scope": "data",
+          "source": "rdf-fingerprinter",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "x_punning_class_and_property",
+          "title": "IRI used as a class and as a property",
+          "description": "one IRI used both as a class (instantiated) and as a predicate.",
+          "importance": "important",
+          "scope": "data",
+          "source": "rdf-fingerprinter",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "x_range_violation",
+          "title": "IRI objects outside an object property's declared range",
+          "description": "IRI objects of object property p not typed with p's rdfs:range r (or a subclass); per (p, r).",
+          "importance": "important",
+          "scope": "data",
+          "source": "rdf-fingerprinter (RDFUnit-style)",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        }
+      ]
+    },
+    {
+      "graph": "http://publications.europa.eu/resources/authority/continents",
+      "declared_subclass_edges": [],
+      "class_partitions": [
+        {
+          "class_iri": "http://www.w3.org/2008/05/skos-xl#Label",
+          "instances": 145,
+          "observed_instances": 145,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://publications.europa.eu/ontology/euvoc#Continent",
+          "instances": 6,
+          "observed_instances": 6,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2004/02/skos/core#Concept",
+              "subjects": 6
+            }
+          ],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://publications.europa.eu/ontology/euvoc#XlNotation",
+          "instances": 6,
+          "observed_instances": 6,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://www.w3.org/2004/02/skos/core#Concept",
+          "instances": 6,
+          "observed_instances": 6,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://publications.europa.eu/ontology/euvoc#Continent",
+              "subjects": 6
+            }
+          ],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://www.w3.org/2002/07/owl#Ontology",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+              "subjects": 1
+            }
+          ],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [
+            {
+              "class_iri": "http://www.w3.org/2002/07/owl#Ontology",
+              "subjects": 1
+            }
+          ],
+          "property_partitions": []
+        }
+      ],
+      "pitfalls": [
+        {
+          "check_id": "p04_unconnected_class",
+          "title": "Class connected to nothing",
+          "description": "a class connected to nothing: no super- or subclass, used in no domain or range, never instantiated.",
+          "importance": "minor",
+          "scope": "schema",
+          "source": "OOPS! P04",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p05_wrong_inverse",
+          "title": "Inverse properties whose domain and range do not mirror each other",
+          "description": "p owl:inverseOf q, but p's domain is not q's range (or p's range is not q's domain).",
+          "importance": "critical",
+          "scope": "schema",
+          "source": "OOPS! P05",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p06_class_cycle",
+          "title": "Cycle in the class hierarchy",
+          "description": "a cycle in the class hierarchy (A subClassOf+ A, through other classes).",
+          "importance": "critical",
+          "scope": "schema",
+          "source": "OOPS! P06",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p07_merged_concepts",
+          "title": "Class name joins concepts with And/Or",
+          "description": "a class whose local name joins concepts with And/Or (e.g. ContinuousIntegrationAndDeployment).",
+          "importance": "minor",
+          "scope": "schema",
+          "source": "OOPS! P07",
+          "heuristic": true,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p08_missing_comment",
+          "title": "Class or property without a comment",
+          "description": "a declared class or property without rdfs:label or without rdfs:comment.",
+          "importance": "minor",
+          "scope": "schema",
+          "source": "OOPS! P08",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p10_no_disjointness",
+          "title": "No disjointness axiom at all",
+          "description": "the ontology declares no disjointness at all (OOPS! only reports when there is none).",
+          "importance": "important",
+          "scope": "schema",
+          "source": "OOPS! P10",
+          "heuristic": false,
+          "count": 1,
+          "examples": [
+            {
+              "entity": {
+                "text": "http://publications.europa.eu/resource/authority/continent",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://www.w3.org/2002/07/owl#disjointWith",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "no disjointness axioms",
+                "kind": "literal"
+              }
+            }
+          ],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p11_missing_domain_or_range",
+          "title": "Property without a domain or a range",
+          "description": "an object or datatype property without rdfs:domain or without rdfs:range.",
+          "importance": "important",
+          "scope": "schema",
+          "source": "OOPS! P11",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p12_p30_same_name_not_equivalent",
+          "title": "Same local name in two namespaces, not declared equivalent",
+          "description": "OOPS! P12/P30 (important, approximation): two classes or properties with the same local name in different namespaces, not declared equivalent (OOPS! also uses labels and WordNet synonyms).",
+          "importance": "minor",
+          "scope": "schema",
+          "source": "OOPS! P12/P30",
+          "heuristic": true,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p13_missing_inverse",
+          "title": "Object property without an inverse",
+          "description": "an object property with no inverse, that is neither symmetric nor the inverse of another.",
+          "importance": "minor",
+          "scope": "schema",
+          "source": "OOPS! P13",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p19_multiple_domains_or_ranges",
+          "title": "Several domains or ranges on one property (read as an intersection)",
+          "description": "several rdfs:domain (or rdfs:range) statements on one property: OWL reads them as an intersection.",
+          "importance": "critical",
+          "scope": "schema",
+          "source": "OOPS! P19",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p20_label_longer_than_comment",
+          "title": "Label at least as long as the comment (annotations swapped?)",
+          "description": "annotations swapped: the label is longer than the comment, or they are equal.",
+          "importance": "minor",
+          "scope": "schema",
+          "source": "OOPS! P20",
+          "heuristic": true,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p21_miscellaneous_class",
+          "title": "Catch-all class (Other, Misc, …)",
+          "description": "a catch-all class (Other, Misc, Miscellaneous, General, Various, Unknown, Remaining).",
+          "importance": "minor",
+          "scope": "schema",
+          "source": "OOPS! P21",
+          "heuristic": true,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p22_class_naming",
+          "title": "Class name not starting with an upper-case letter",
+          "description": "naming conventions; here, a class whose local name does not start with an upper-case letter.",
+          "importance": "minor",
+          "scope": "schema",
+          "source": "OOPS! P22",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p24_recursive_definition",
+          "title": "Class or property defined by itself",
+          "description": "OOPS! P24 (important), direct cases: a class or property used in its own subClassOf, equivalentClass or subPropertyOf.",
+          "importance": "important",
+          "scope": "schema",
+          "source": "OOPS! P24",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p25_inverse_of_itself",
+          "title": "Property declared its own inverse",
+          "description": "a property declared the inverse of itself (should be owl:SymmetricProperty).",
+          "importance": "important",
+          "scope": "schema",
+          "source": "OOPS! P25",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p26_inverse_of_symmetric",
+          "title": "Symmetric property that also has an inverse",
+          "description": "a symmetric property that also has an inverse.",
+          "importance": "important",
+          "scope": "schema",
+          "source": "OOPS! P26",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p27_wrong_equivalent_properties",
+          "title": "Equivalent properties with different domains or ranges",
+          "description": "equivalent properties whose domains or ranges differ.",
+          "importance": "critical",
+          "scope": "schema",
+          "source": "OOPS! P27",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p28_p29_wrong_symmetric_or_transitive",
+          "title": "Symmetric or transitive property whose domain and range differ",
+          "description": "OOPS! P28/P29 (critical): a symmetric or transitive property whose domain and range differ.",
+          "importance": "critical",
+          "scope": "schema",
+          "source": "OOPS! P28/P29",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p32_classes_same_label",
+          "title": "Two classes with the same label",
+          "description": "two classes with the same label (same text and language).",
+          "importance": "minor",
+          "scope": "schema",
+          "source": "OOPS! P32",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p33_single_property_chain",
+          "title": "Property chain of one property",
+          "description": "owl:propertyChainAxiom with a single property.",
+          "importance": "minor",
+          "scope": "schema",
+          "source": "OOPS! P33",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p36_iri_with_file_extension",
+          "title": "IRI with a file extension",
+          "description": "the ontology IRI, or a term IRI, holds a file extension (.owl, .rdf, .ttl, .n3, .xml).",
+          "importance": "minor",
+          "scope": "schema",
+          "source": "OOPS! P36",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p38_no_ontology_declaration",
+          "title": "No owl:Ontology declaration",
+          "description": "no owl:Ontology declaration.",
+          "importance": "important",
+          "scope": "schema",
+          "source": "OOPS! P38",
+          "heuristic": false,
+          "count": 0,
+          "examples": [],
+          "seconds": 0.0
+        },
+        {
+          "check_id": "p41_no_license",
+          "title": "Ontology without a licence",
+          "description": "the ontology declares no licence (dcterms:license, dc:rights, cc:license, schema:license, xhv:license).",
+          "importance": "important",
+          "scope": "schema",
+          "source": "OOPS! P41",
+          "heuristic": false,
+          "count": 1,
+          "examples": [
+            {
+              "entity": {
+                "text": "http://publications.europa.eu/resource/authority/continent",
+                "kind": "iri"
+              },
+              "property": {
+                "text": "http://purl.org/dc/terms/license",
+                "kind": "iri"
+              },
+              "value": {
+                "text": "no licence",
+                "kind": "literal"
+              }
+            }
+          ],
+          "seconds": 0.0
+        }
+      ]
+    }
+  ],
+  "failures": [],
+  "namespaces": [
+    {
+      "prefix": "authority",
+      "namespace": "http://publications.europa.eu/resource/authority/",
+      "source": "generated"
+    },
+    {
+      "prefix": "authority2",
+      "namespace": "http://publications.europa.eu/resources/authority/",
+      "source": "generated"
+    },
+    {
+      "prefix": "dcterms",
+      "namespace": "http://purl.org/dc/terms/",
+      "source": "packaged"
+    },
+    {
+      "prefix": "eli",
+      "namespace": "http://data.europa.eu/eli/ontology#",
+      "source": "packaged"
+    },
+    {
+      "prefix": "euvoc",
+      "namespace": "http://publications.europa.eu/ontology/euvoc#",
+      "source": "packaged"
+    },
+    {
+      "prefix": "lemon",
+      "namespace": "http://lemon-model.net/lemon#",
+      "source": "packaged"
+    },
+    {
+      "prefix": "lvont",
+      "namespace": "http://lexvo.org/ontology#",
+      "source": "packaged"
+    },
+    {
+      "prefix": "owl",
+      "namespace": "http://www.w3.org/2002/07/owl#",
+      "source": "packaged"
+    },
+    {
+      "prefix": "rdf",
+      "namespace": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+      "source": "packaged"
+    },
+    {
+      "prefix": "skos",
+      "namespace": "http://www.w3.org/2004/02/skos/core#",
+      "source": "packaged"
+    },
+    {
+      "prefix": "skosxl",
+      "namespace": "http://www.w3.org/2008/05/skos-xl#",
+      "source": "packaged"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 SHELL = /bin/bash -o pipefail
 
 .PHONY: help install install-poetry lock build check-wheel lint format lint-fix typecheck check-architecture \
-	check-spec check-models generate-models test check-mutation test-e2e refresh-sample-profile refresh-golden check-quality check-all start-oxigraph stop-oxigraph oxigraph-load-test-data \
+	check-spec check-models generate-models test check-mutation test-e2e refresh-sample-profile refresh-golden check-quality check-all start-oxigraph stop-oxigraph oxigraph-load-test-data scan-files \
 	install-antora build-docs clean-docs serve-docs preview-docs
 
 include docker/.env
@@ -159,6 +159,25 @@ oxigraph-load-test-data: start-oxigraph ## Load the test graphs into Oxigraph (e
 	@ curl -sf -X POST -H content-type:application/rdf+xml --data-binary @$(TEST_DATA)/continents-source-ap.rdf "$(OXIGRAPH)/store?graph=$(GRAPH_BASE)/continents"
 	@ curl -sf -X POST -H content-type:application/rdf+xml --data-binary @$(TEST_DATA)/treaties-source-ap.rdf "$(OXIGRAPH)/store?graph=$(GRAPH_BASE)/treaties"
 	@ curl -sf -X POST -H content-type:application/rdf+xml --data-binary @$(TEST_DATA)/continents-source-ap.rdf "$(OXIGRAPH)/store?default"
+
+SCAN_STORE = http://localhost:$(RDF_FINGERPRINTER_SCAN_PORT)
+SCAN_SCHEMA = urn:fingerprint:scan:schema
+SCAN_DATA = urn:fingerprint:scan:data
+rdf_type = $(if $(filter %.ttl,$(1)),text/turtle,application/rdf+xml)
+
+scan-files: ## Fingerprint files with the pitfall scan: make scan-files ONTOLOGY=o.owl [DATA=d.rdf] OUT=dir (own store)
+	@ test -n "$(ONTOLOGY)" -a -n "$(OUT)" || { echo "usage: make scan-files ONTOLOGY=<file> [DATA=<file>] OUT=<folder>"; exit 2; }
+	@ echo -e "$(BUILD_PRINT)Scanning $(ONTOLOGY) $(DATA) on the scan store, port $(RDF_FINGERPRINTER_SCAN_PORT)$(END_BUILD_PRINT)"
+	@ $(COMPOSE) up -d oxigraph-scan
+	@ for i in $$(seq 30); do curl -sf -o /dev/null $(SCAN_STORE)/ && break; sleep 1; done
+	@ curl -sf -X DELETE "$(SCAN_STORE)/store?graph=$(SCAN_SCHEMA)" -o /dev/null || true
+	@ curl -sf -X DELETE "$(SCAN_STORE)/store?graph=$(SCAN_DATA)" -o /dev/null || true
+	@ curl -sf -X POST -H content-type:$(call rdf_type,$(ONTOLOGY)) --data-binary @$(ONTOLOGY) "$(SCAN_STORE)/store?graph=$(SCAN_SCHEMA)"
+	@ $(if $(DATA),curl -sf -X POST -H content-type:$(call rdf_type,$(DATA)) --data-binary @$(DATA) "$(SCAN_STORE)/store?graph=$(SCAN_DATA)",true)
+	@ mkdir -p $(OUT)
+	@ poetry run fingerprint -e $(SCAN_STORE)/query -o $(OUT) $(if $(DATA),--graph $(SCAN_DATA)) --graph $(SCAN_SCHEMA) \
+		--pitfalls --schema-graph $(SCAN_SCHEMA) --format pitfalls $(SCAN_ARGS); status=$$?; \
+		echo "fingerprint exit status: $$status (1 = failures recorded, 5 = pitfalls at --fail-on)"; exit $$status
 
 #-----------------------------------------------------------------------------
 # Documentation (AsciiDoc + Antora, Node-based) — published to GitHub Pages (DEC-6)

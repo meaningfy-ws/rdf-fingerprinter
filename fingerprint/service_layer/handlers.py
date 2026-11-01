@@ -14,11 +14,12 @@ import logging
 from collections.abc import Sequence
 from pathlib import Path
 
+from fingerprint.adapters.pitfall_catalogue import load_catalogue
 from fingerprint.adapters.prefixes import PrefixListSource
 from fingerprint.adapters.profile_file import save_profile
 from fingerprint.adapters.sparql import SparqlHttpClient, SparqlPort
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
-from fingerprint.domain.profile import NamespacePrefix, ProfileRun, Settings
+from fingerprint.domain.profile import NamespacePrefix, PitfallCheck, ProfileRun, Settings
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.generators import DOC
@@ -40,6 +41,7 @@ def fingerprint_report(
     template: str | Path | None = None,
     user_prefixes: Sequence[NamespacePrefix] | None = None,
     prefix_list: PrefixListSource | None = None,
+    checks: Sequence[PitfallCheck] | None = None,
     sparql: SparqlPort | None = None,
     renderer: TemplateRenderer | None = None,
 ) -> tuple[Path, ProfileRun]:
@@ -56,7 +58,9 @@ def fingerprint_report(
     validate_endpoint(sparql_endpoint_url)
     validate_options(options)
     sparql = sparql or SparqlHttpClient(sparql_endpoint_url, settings.timeout_seconds)
-    run = collect(sparql_endpoint_url, settings, sparql)
+    if settings.pitfall_scan and checks is None:
+        checks = load_catalogue()  # the packaged catalogue; the adapter does the reading (design D-9)
+    run = collect(sparql_endpoint_url, settings, sparql, checks or ())
     run = resolve_namespaces(run, user_prefixes or (), prefix_list=prefix_list)
     save_profile(run, location)
     renderer = renderer or JinjaTemplateRenderer()
