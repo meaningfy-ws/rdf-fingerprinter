@@ -35,10 +35,11 @@ IRI_FIELDS = frozenset(
 )
 
 
-def _iris(value: object) -> Iterator[str]:
+def _iris(value: object) -> Iterator[tuple[str, bool]]:
+    """Each IRI the value holds, and whether it is a pitfall example's term."""
     if isinstance(value, PitfallTerm):  # a pitfall example's term: only IRIs have a namespace (pitfall-scans DEC-11)
         if value.kind == NodeKind.iri:
-            yield value.text
+            yield value.text, True
         return
     if isinstance(value, BaseModel):
         for name in type(value).model_fields:
@@ -46,7 +47,7 @@ def _iris(value: object) -> Iterator[str]:
                 continue
             item = getattr(value, name)
             if name in IRI_FIELDS and isinstance(item, str) and item:
-                yield item
+                yield item, False
             else:
                 yield from _iris(item)
     elif isinstance(value, list):
@@ -65,7 +66,11 @@ def _writable(namespace: str) -> bool:
 def used_namespaces(run: ProfileRun) -> set[str]:
     """The namespace of every IRI the profile holds, and rdf (types, and the analytics' rdf:langString);
     one that cannot be written as an IRI is left out."""
-    return {ns for ns in {namespace_of(iri) for iri in _iris(run)} | {RDF} if _writable(ns)}
+    iris = list(_iris(run))
+    profiled = {namespace_of(iri) for iri, term in iris if not term} | {RDF}
+    # the ontology's own IRI in a finding (a namespace without its `#` or `/`) adds none (pitfall-scans DEC-17)
+    found = {namespace_of(iri) for iri, term in iris if term and iri + "#" not in profiled and iri + "/" not in profiled}
+    return {ns for ns in profiled | found if _writable(ns)}
 
 
 def resolve_namespaces[Run: ProfileRun](  # a raw run or its analytics: model_copy keeps the type

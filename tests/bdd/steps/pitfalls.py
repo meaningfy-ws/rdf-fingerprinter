@@ -271,3 +271,15 @@ def profile_with_pitfall_entity(ctx, iri):
 def table_holds(ctx, namespace):
     namespaces = {e.namespace for e in ctx["table"]}
     assert namespace in namespaces and "http://not.an.iri.example/" not in namespaces
+
+
+@given(parsers.parse('its pitfall example entity is "{iri}"'))
+def add_pitfall_entity(ctx, iri):
+    (result,) = one_result_profile("x", iri, None, "v").graphs[0].pitfalls
+    run = ctx["run"]
+    ctx["run"] = run.model_copy(update={"graphs": [run.graphs[0].model_copy(update={"pitfalls": [result]})]})
+
+
+@then(parsers.parse('the table has no entry for "{namespace}"'))
+def table_lacks(ctx, namespace):
+    assert namespace not in {e.namespace for e in ctx["table"]}

@@ -175,6 +175,7 @@ class PrefixDeclaration(ConfiguredBaseModel):
                        'DiagramLink',
                        'DocumentPitfallCheck',
                        'ParentReference']} })
+    uses: Optional[int] = Field(default=None, description="""Instances of the namespace's classes plus subjects of its properties, over every class and graph; set in the report's table (pitfall-scans DEC-18).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration']} })
 
 
 class Annotation(ConfiguredBaseModel):
@@ -396,7 +397,7 @@ class ProfileDocument(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     overview: Overview = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
-    namespaces: Optional[list[PrefixDeclaration]] = Field(default=None, description="""The profile's namespace table, with sources.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
+    namespaces: Optional[list[PrefixDeclaration]] = Field(default=None, description="""The profile's namespace table, with sources and uses: by source, then uses descending, then prefix.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
     collection: CollectionSection = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
     pitfalls: Optional[DocumentPitfalls] = Field(default=None, description="""Present when the profile holds scan results.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
     graphs: Optional[list[DocumentGraph]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument', 'DocumentPitfalls']} })
@@ -537,6 +538,8 @@ class DocumentClass(ConfiguredBaseModel):
                        'DocumentPitfallCheck']} })
     q: str = Field(default=..., description="""The search text: short name and IRI, lower case.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass', 'DocumentPitfallCheck']} })
     instances: int = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['TaxonomyNode', 'DocumentClass']} })
+    data_properties: int = Field(default=..., description="""Shown properties with datatype or mixed values (pitfall-scans DEC-19).""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
+    object_properties: int = Field(default=..., description="""Shown properties with object or mixed values (pitfall-scans DEC-19).""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
     precision: str = Field(default=..., description="""exact, or first N of M.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass', 'SampledClass']} })
     sample_note: Optional[str] = Field(default=None, description="""(sample may differ between queries), when the sample was not shared.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass']} })
     sampled: bool = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass', 'Caveats']} })

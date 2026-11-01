@@ -52,7 +52,7 @@
     <div class="group"><span class="pfx" data-ns="{{ prefix }}">{{ prefix }}</span> {{ classes|length }}</div>
     <ul>
       {%- for c in classes %}
-      <li data-anchor="{{ c.anchor }}"><a href="#{{ c.anchor }}">{{ c.label.split(':', 1)[-1] if ':' in c.label and not c.label.startswith('http') else c.label }}</a></li>
+      <li data-anchor="{{ c.anchor }}"><a href="#{{ c.anchor }}">{{ c.label.split(':', 1)[-1] if ':' in c.label and not c.label.startswith('http') else c.label }}</a> <span class="ind" title="{{ c.instances }} instances, {{ c.data_properties }} data properties, {{ c.object_properties }} object properties">{{ c.instances }} · {{ c.data_properties }} d, {{ c.object_properties }} o</span></li>
       {%- endfor %}
     </ul>
     {%- endfor %}
@@ -88,10 +88,14 @@
     <h2>Namespaces</h2>
     <div class="scroll plain">
     <table>
-      <thead><tr><th>Prefix</th><th>Namespace</th><th>Source</th></tr></thead>
+      <thead><tr><th>Prefix</th><th>Namespace</th><th>Source</th><th>Uses</th></tr></thead>
       <tbody>
+      {%- set several = (view.namespaces or [])|map(attribute='source')|unique|list|length > 1 %}
       {%- for p in view.namespaces or [] %}
-        <tr><td><span class="pfx" data-ns="{{ p.prefix }}">{{ p.prefix }}</span></td><td class="curie">{{ p.namespace }}</td><td>{{ (p.source or '')|replace('_', '.') }}</td></tr>
+        {%- if several and loop.changed(p.source) %}
+        <tr class="group"><th colspan="4">{{ (p.source or '')|replace('_', '.') }}</th></tr>
+        {%- endif %}
+        <tr><td><span class="pfx" data-ns="{{ p.prefix }}">{{ p.prefix }}</span></td><td class="curie">{{ p.namespace }}</td><td>{{ (p.source or '')|replace('_', '.') }}</td><td class="n">{{ p.uses if p.uses is not none else '—' }}</td></tr>
       {%- endfor %}
       </tbody>
     </table>
@@ -123,6 +127,7 @@
       <summary>
         <h3>{{ term(c.label, c.iri) }}</h3>
         <span class="meta">{{ c.instances }} instances, {{ c.precision }}{% if c.sample_note %} {{ c.sample_note }}{% endif %}</span>
+        <span class="meta">{{ c.data_properties }} data and {{ c.object_properties }} object properties</span>
         {%- for b in c.badges or [] %}
         <a class="badge {{ b.importance }}" href="#{{ b.anchor }}" title="pitfall {{ b.check_id }}">{{ b.check_id }}</a>
         {%- endfor %}

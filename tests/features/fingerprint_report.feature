@@ -271,6 +271,16 @@ Feature: The fingerprint report and the command line
       When the report is rendered
       Then its table lists "ex:q", "ex:p" under "Own", then "ex:r" under "Inherited"
 
+    Scenario: Namespaces by source and use
+      Given a graph using "foaf" 2 times, "skos" 40 times and the unknown "vocab" 90 times
+      When the report is rendered
+      Then the namespace table lists "skos", "foaf" under "packaged", then "vocab" under "generated"
+
+    Scenario: Instances, data and object properties
+      Given "ex:Person" with 12 instances and a datatype, an object and a mixed property
+      When the report is rendered
+      Then its contents entry and its heading show 12 instances, 2 data properties and 2 object properties
+
     Scenario: Tree with popularity
       Given "ex:Agent" with 12 instances and "ex:Person" with 6, whose implied parent is "ex:Agent"
       When the report is rendered

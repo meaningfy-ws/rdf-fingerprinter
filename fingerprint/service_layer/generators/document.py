@@ -12,7 +12,9 @@ from fingerprint.domain.profile import (
     PitfallResult,
     PitfallTerm,
     PrecisionMode,
+    PrefixSource,
     PropertyAnalytics,
+    PropertyKind,
 )
 from fingerprint.domain.views import (
     Caveats,
@@ -45,6 +47,9 @@ from fingerprint_report_templates import packaged
 
 ABSENT = "—"
 # Property groups of a class table, in display order (pitfall-scans DEC-14); no hierarchy reads as own.
+# Property kinds a class indicator counts as data and as object; mixed counts in both (DEC-19).
+DATA_KINDS = (PropertyKind.datatype_property, PropertyKind.mixed)
+OBJECT_KINDS = (PropertyKind.object_property, PropertyKind.mixed)
 PROPERTY_GROUPS = (("Own", ("own", None)), ("Refined", ("refined",)), ("Inherited", ("inherited",)))
 
 
@@ -167,6 +172,8 @@ class DocumentGenerator(Generator):
         parents = sorted(cls.parents or [], key=lambda p: p.parent)
         entry = self.table.entry_for(cls.class_iri)
         groups = self.property_groups(cls, properties)
+        kinds = {p.property: p.property_kind for p in cls.property_partitions or []}  # dict-ok: lookup index
+        shown = [kinds[p.iri] for p in properties]
         return DocumentClass(
             iri=cls.class_iri,
             label=self.label(cls.class_iri),
@@ -174,6 +181,8 @@ class DocumentGenerator(Generator):
             anchor=f"{graph_slug(graph.graph)}-{graph_slug(cls.class_iri)}",
             q=self.search_text(cls.class_iri),
             instances=cls.instances,
+            data_properties=sum(k in DATA_KINDS for k in shown),
+            object_properties=sum(k in OBJECT_KINDS for k in shown),
             precision=f"first {cls.observed_instances} of {cls.instances}" if sampled else "exact",
             sample_note="(sample may differ between queries)" if sampled and cls.sample_shared is False else None,
             sampled=sampled,
@@ -266,6 +275,27 @@ class DocumentGenerator(Generator):
             children=children or [],
         )
 
+    def namespace_table(self) -> list[PrefixDeclaration]:
+        """By prefix source, then uses descending, then prefix (DEC-18)."""
+        uses = dict.fromkeys((e.namespace for e in self.table.entries), 0)  # dict-ok: lookup index namespace → uses
+
+        def count(iri: str, n: int | None) -> None:
+            entry = self.table.entry_for(iri)
+            if entry:
+                uses[entry.namespace] += n or 0
+
+        for g in self.analytics.graphs or []:
+            for c in g.class_partitions or []:
+                count(c.class_iri, c.instances)
+                for p in c.property_partitions or []:
+                    count(p.property, p.subjects_with_property)
+        order = list(PrefixSource)
+        entries = sorted(self.table.entries, key=lambda e: (order.index(e.source), -uses[e.namespace], e.prefix))
+        return [
+            PrefixDeclaration(prefix=e.prefix, namespace=e.namespace, source=str(e.source), uses=uses[e.namespace])
+            for e in entries
+        ]
+
     def end_profile(self, graphs: list[DocumentGraph]) -> ProfileDocument:
         """The whole page: it covers every graph."""
         analytics = self.analytics
@@ -300,9 +330,7 @@ class DocumentGenerator(Generator):
             SettingValue(name=name, value=ABSENT if value is None else str(value))
             for name, value in sorted(analytics.settings.model_dump(mode="json").items())
         ]
-        namespaces = [
-            PrefixDeclaration(prefix=e.prefix, namespace=e.namespace, source=str(e.source)) for e in self.table.entries
-        ]
+        namespaces = self.namespace_table()
         return ProfileDocument(
             overview=Overview(
                 endpoint=analytics.endpoint,

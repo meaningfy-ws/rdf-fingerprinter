@@ -259,6 +259,21 @@
 - **D-15 One caveats section (DEC-16).** The page's `#caveats` section is titled *Caveats and
   pitfalls*. The pitfall part keeps the id `pitfalls` (on a `div`) for the badges and the contents
   link, and comes after the caveats lists.
+- **D-16 The ontology's own IRI (DEC-17).** `used_namespaces` first takes the namespaces of every
+  IRI outside pitfall examples, then adds a pitfall IRI's namespace unless the IRI plus `#` or `/` is
+  one of them. The display needs nothing new: no namespace begins that IRI, so `PrefixTable.curie`
+  returns it whole.
+- **D-17 Namespace table (DEC-18).** `PrefixDeclaration.uses: integer` is added to the view;
+  `DocumentGenerator.end_profile` sums `instances` of the classes and `subjects_with_property` of the
+  property partitions of every graph by the namespace's entry (`PrefixTable.entry_for`), and sorts by
+  `(source order, -uses, prefix)` with the source order of the `PrefixSource` enum. The template heads
+  each source group with a row (`loop.changed`) when the table has more than one source. The flat
+  `namespaces` list keeps its name for custom templates.
+- **D-18 Class indicator (DEC-19).** `DocumentClass.data_properties` and `.object_properties`
+  (integers) count the class's shown properties by `property_kind`: `datatype_property` and `mixed`
+  count as data, `object_property` and `mixed` as object, an absent kind in neither. The contents
+  entry shows `N · D d, O o` with a title that spells it out; the class heading adds "D data and O
+  object properties" after its instances and precision.
 
 ## Algorithm / approach
 

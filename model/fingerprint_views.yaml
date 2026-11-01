@@ -54,6 +54,7 @@ classes:
       prefix: { required: true }
       namespace: { required: true }
       source: { description: "Where the prefix came from (user, packaged, prefix_cc, generated); set in the report's table." }
+      uses: { range: integer, description: "Instances of the namespace's classes plus subjects of its properties, over every class and graph; set in the report's table (pitfall-scans DEC-18)." }
 
   Annotation:
     description: A predicate and its value, both written as Turtle.
@@ -167,7 +168,7 @@ classes:
     description: The application-profile document.
     attributes:
       overview: { range: Overview, required: true, inlined: true }
-      namespaces: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true, description: "The profile's namespace table, with sources." }
+      namespaces: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true, description: "The profile's namespace table, with sources and uses: by source, then uses descending, then prefix." }
       collection: { range: CollectionSection, required: true, inlined: true }
       pitfalls: { range: DocumentPitfalls, inlined: true, description: "Present when the profile holds scan results." }
       graphs: { range: DocumentGraph, multivalued: true, inlined_as_list: true }
@@ -224,6 +225,8 @@ classes:
       anchor: { required: true }
       q: { required: true, description: "The search text: short name and IRI, lower case." }
       instances: { range: integer, required: true }
+      data_properties: { range: integer, required: true, description: "Shown properties with datatype or mixed values (pitfall-scans DEC-19)." }
+      object_properties: { range: integer, required: true, description: "Shown properties with object or mixed values (pitfall-scans DEC-19)." }
       precision: { required: true, description: "exact, or first N of M." }
       sample_note: { description: "(sample may differ between queries), when the sample was not shared." }
       sampled: { range: boolean, required: true }

@@ -41,3 +41,15 @@ developer answered:
 > the pitfalls section and caveats sections could be merged
 
 > once you are done, update the epc specs with these latest requests
+
+## 2026-11-01, after the regenerated brainframe report (verbatim)
+
+On the doubled `brainframe-brainframe` prefix (the ontology IRI found by p10/p41 made `…/2016/04/`
+a namespace, which took the short name), offered: 1. don't prefix the ontology's own IRI from
+findings; 2. let the more-used namespace take the short name.
+
+> go with 1.
+> add also more ordering (in namespaces list, by popularity and grouping by source), add a small
+> indicator also for each class, humber f instanes and number of distinct properties (two numbers
+> data and object properties)
+> update the spec as well , and work toward the concluding this epic

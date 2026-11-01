@@ -44,6 +44,11 @@ and show them next to the profile.
   - properties are grouped by how a class gets them (own, refined, inherited) and ordered by use;
   - a taxonomy view shows the class hierarchy of each graph, with how popular each class is;
   - the pitfalls join the caveats, in one section (DEC-13 to DEC-16).
+- **Findings that do not rename the vocabulary, and a table that reads by importance** (developer,
+  2026-11-01, after the regenerated brainframe report): the ontology's own IRI in a finding made
+  `…/2016/04/` a namespace, which took the short name `brainframe` and pushed the vocabulary to
+  `brainframe-brainframe`; the namespace table is grouped by source and ordered by use; each class
+  shows its instances and its data and object properties at a glance (DEC-17 to DEC-19).
 
 ## Key decisions
 
@@ -120,6 +125,20 @@ and show them next to the profile.
 - **DEC-16 Pitfalls and caveats in one section.** The *Caveats and pitfalls* section holds the
   caveats, then the pitfall findings. Both say how far the profile can be trusted, and the reader
   looks for them in one place. Rejected: two sections (developer, 2026-11-01).
+
+- **DEC-17 The ontology's own IRI takes no prefix.** A pitfall example IRI that is a namespace of
+  the rest of the profile without its final `#` or `/` (typically the `owl:Ontology` IRI of that
+  vocabulary) adds no namespace; the page and the TSV show it whole. Rejected: letting the more-used
+  namespace take the short name (it changes the durable naming rule for every profile).
+- **DEC-18 The namespace table grouped by source and ordered by use.** The report's namespace table
+  is grouped by prefix source (user, packaged, prefix.cc, generated, in that order, each group headed
+  when there are several) and, within a group, ordered by uses descending, then prefix. A namespace's
+  uses are the instances of its classes plus the subjects of its properties, over every class and
+  graph; the table shows them. Rejected: alphabetical order (today; it hides the main vocabularies).
+- **DEC-19 A class indicator.** Each class, in the contents and in its section heading, shows its
+  instance count and how many of its shown properties are data properties and how many are object
+  properties; a mixed property counts in both. Rejected: one property total (it hides whether a class
+  is described by values or by links).
 
 ## Rabbit-holes
 

@@ -44,9 +44,15 @@
 - [x] 7.3 Template: property group rows, the `#taxonomy` section with popularity bars, pitfalls inside *Caveats and pitfalls* (design D-15; fingerprint-report › Pitfalls in the report)
 - [x] 7.4 Gherkin for the new scenarios (spec titles); refresh the goldens; regenerate the brainframe fingerprint into `../rdf-fingerprinter/temp/brainframe-fingerprint/`
 
+## 8. Findings, namespace table and class indicator (developer requests, 2026-11-01)
+
+- [x] 8.1 `used_namespaces`: the ontology's own IRI from a finding adds no namespace (design D-16; namespace-prefixes › Every namespace has a prefix)
+- [x] 8.2 Views `PrefixDeclaration.uses`, `DocumentClass.data_properties`, `.object_properties`; `make generate-models`; the generator's namespace order and class counts (design D-17, D-18; fingerprint-report › Namespace table order, › Class indicator)
+- [x] 8.3 Template: source group rows and the uses column, the class indicator in the contents and headings; Gherkin for the new scenarios; refresh the goldens; regenerate the brainframe fingerprint
+
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 6.4 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [x] 7.4
+- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 6.4 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [x] 7.4 · [x] 8.1 · [x] 8.2 · [x] 8.3
 
 ## Verification
 

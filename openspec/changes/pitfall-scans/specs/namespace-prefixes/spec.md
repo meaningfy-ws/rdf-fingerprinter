@@ -2,7 +2,9 @@
 ### Requirement: Every namespace has a prefix
 After collection the fingerprinter SHALL give a prefix to the namespace of each profiled graph IRI,
 class, property, value type, parent class and linked class, and of each IRI entity, property and
-value in a pitfall example (pitfall-scans EPIC DEC-11). The namespace of an IRI SHALL be:
+value in a pitfall example (pitfall-scans EPIC DEC-11), except a pitfall example IRI that is a
+namespace of the rest of the profile without its final `#` or `/` (the ontology's own IRI): that IRI
+adds no namespace and is shown whole (EPIC DEC-17). The namespace of an IRI SHALL be:
 - the IRI up to and including its last `#`, when no `/` follows that `#`;
 - otherwise, up to and including its last `/`;
 - for a `urn:` IRI with neither, up to and including its last `:`.
@@ -26,3 +28,7 @@ DEC-1, DEC-2).
 - **WHEN** a pitfall example's entity is `http://other.org/vocab#thing` and nothing else in the profile uses that namespace
 - **THEN** the namespace table holds a prefix for `http://other.org/vocab#`
 
+
+#### Scenario: The ontology's own IRI is not named
+- **WHEN** a profile uses `https://ontology.brainframe.com/2016/04/brainframe#Person` and a pitfall example's entity is `https://ontology.brainframe.com/2016/04/brainframe`
+- **THEN** the namespace table holds `brainframe` for `https://ontology.brainframe.com/2016/04/brainframe#` and no entry for `https://ontology.brainframe.com/2016/04/`

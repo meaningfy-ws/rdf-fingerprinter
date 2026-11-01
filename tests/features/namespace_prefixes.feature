@@ -138,3 +138,10 @@ Feature: Every namespace has a prefix
       Given a profile whose pitfall example entity is "http://other.org/vocab#thing"
       When the namespace table is resolved
       Then the table holds a prefix for "http://other.org/vocab#"
+
+    Scenario: The ontology's own IRI is not named
+      Given a profile uses "https://ontology.brainframe.com/2016/04/brainframe#Person"
+      And its pitfall example entity is "https://ontology.brainframe.com/2016/04/brainframe"
+      When the namespace table is resolved
+      Then the namespace table holds the generated prefix "brainframe" for "https://ontology.brainframe.com/2016/04/brainframe#"
+      And the table has no entry for "https://ontology.brainframe.com/2016/04/"

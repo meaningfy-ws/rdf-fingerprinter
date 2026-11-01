@@ -19,7 +19,7 @@ from fingerprint.entrypoints.cli import generate
 from fingerprint.service_layer import handlers, representations
 from fingerprint.service_layer.generators import DocumentGenerator
 from tests.bdd.steps.common import ENDPOINT, READABILITY, big_failure, person_run, run_fingerprint
-from tests.builders import klass, literals, profile_run, prop
+from tests.builders import klass, literals, profile_run, prop, resources
 from tests.fakes import EX
 from tests.sample_data import TEST_DATA
 
@@ -452,7 +452,7 @@ def three_classes(ctx, b, nb, a, na, c, nc):
 def class_order(ctx, first, second, third):
     page = soup(ctx)
     sections = [s.find("h3").get_text() for s in page.select("details.cls")]
-    contents = [li.get_text(strip=True) for li in page.select("nav li[data-anchor]")]
+    contents = [li.find("a").get_text(strip=True) for li in page.select("nav li[data-anchor]")]
     assert sections == [first, second, third]
     assert contents == [x.split(":", 1)[1] for x in (first, second, third)]
 
@@ -530,3 +530,45 @@ def unprofiled_and_see(ctx, agent, person, thing, other):
     assert agent_li.select_one("ul.tree li a").get_text() == person
     see = thing_li.select_one("ul.tree li")
     assert "see" in see.get_text() and see.find("a").get_text() == other
+
+
+# --- namespace table and class indicator (pitfall-scans DEC-18, DEC-19) ---
+
+NAMESPACES = {"foaf": FOAF, "skos": "http://www.w3.org/2004/02/skos/core#", "vocab": "http://unknown.test/vocab#"}
+
+
+@given(parsers.parse('a graph using "{a}" {na:d} times, "{b}" {nb:d} times and the unknown "{c}" {nc:d} times'))
+def namespace_uses(ctx, a, na, b, nb, c, nc):
+    ctx["run"] = profile_run(*(klass(NAMESPACES[p] + "Thing", n) for p, n in ((a, na), (b, nb), (c, nc))))
+
+
+@then(parsers.parse('the namespace table lists "{first}", "{second}" under "{group}", then "{third}" under "{other}"'))
+def namespace_rows(ctx, first, second, group, third, other):
+    rows = [tr.get_text(" ", strip=True) for tr in soup(ctx).find(id="namespaces").select("tbody tr")]
+    wanted = [r.split()[0] for r in rows if r.split()[0] in (first, second, third, group, other)]
+    assert wanted == [group, first, second, other, third]
+
+
+@given(parsers.parse('"{cls}" with {n:d} instances and a datatype, an object and a mixed property'))
+def class_with_kinds(ctx, cls, n):
+    ctx["run"] = profile_run(
+        klass(
+            iri(cls),
+            n,
+            prop(EX + "name", {1: n}, literals(n)),
+            prop(EX + "knows", {1: n}, resources(n)),
+            prop(EX + "note", {1: n}, literals(1), resources(n - 1)),
+        )
+    )
+
+
+@then(
+    parsers.parse("its contents entry and its heading show {n:d} instances, {d:d} data properties and {o:d} object properties")
+)
+def class_indicator(ctx, n, d, o):
+    page = soup(ctx)
+    entry = page.select_one("nav li[data-anchor] .ind")
+    heading = page.select_one("details.cls summary").get_text(" ", strip=True)
+    assert entry.get_text(strip=True) == f"{n} · {d} d, {o} o"
+    assert entry["title"] == f"{n} instances, {d} data properties, {o} object properties"
+    assert f"{n} instances" in heading and f"{d} data and {o} object properties" in heading

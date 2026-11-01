@@ -2,12 +2,13 @@
 ### Requirement: Report content
 The report SHALL show:
 - an overview with provenance (endpoint, dates, tool version);
-- the namespace table (prefix, namespace, source);
+- the namespace table (prefix, namespace, source, uses), in the order of "Namespace table order",
+  below;
 - a collection section: the settings used, and every recorded failure with its graph, class,
   property, query kind, attempts and message;
 - per graph and class: the class, its instance count, its precision mode ("exact" or "first N of
-  M", followed by "(sample may differ between queries)" when the sample was not shared) and its
-  parents;
+  M", followed by "(sample may differ between queries)" when the sample was not shared), its
+  data and object property counts ("Class indicator", below) and its parents;
 - per property, as today: property, subjects, min, max, avg, kind, distinct values, value types,
   confidence, cardinality (the label; `present` for a presence-only property), inheritance and
   language coverage. Numbers are rounded to 2 decimals, and an absent value is `—`;
@@ -196,3 +197,23 @@ SHALL be ordered by instance count descending, then short name (EPIC DEC-15).
 - **WHEN** `ex:Person` declares the parents `ex:Agent` (not profiled) and `ex:Thing` (profiled)
 - **THEN** `ex:Agent` is a root node without count holding `ex:Person`, and under `ex:Thing` there is a "see" reference to `ex:Person`
 
+
+### Requirement: Namespace table order
+The report's namespace table SHALL be grouped by prefix source in the order user, packaged,
+prefix.cc, generated, each group headed when the table has more than one source, and within a group
+ordered by uses descending, then prefix. A namespace's uses SHALL be the instance count of its
+classes plus the subjects of its properties, summed over every class and graph of the profile, and
+the table SHALL show them (EPIC DEC-18).
+
+#### Scenario: Namespaces by source and use
+- **WHEN** a profile uses the packaged `foaf` (2 uses) and `skos` (40 uses), and the generated `vocab` (90 uses)
+- **THEN** the namespace table lists `skos`, `foaf` under *packaged*, then `vocab` under *generated*
+
+### Requirement: Class indicator
+Each class SHALL show, in the contents and in its section heading, its instance count and how many of
+its shown properties are data properties and how many are object properties; a mixed property SHALL
+count in both, and a property without a kind in neither (EPIC DEC-19).
+
+#### Scenario: Instances, data and object properties
+- **WHEN** `ex:Person` has 12 instances and the properties `ex:name` (datatype), `ex:knows` (object) and `ex:note` (mixed)
+- **THEN** its contents entry and its heading show 12 instances, 2 data properties and 2 object properties
