@@ -42,11 +42,11 @@
 - [x] 7.1 Views: `DocumentPropertyGroup`, `DocumentClass.property_groups`, `TaxonomyNode`, `DocumentGraph.taxonomy`; `make generate-models` (design D-13, D-14)
 - [x] 7.2 `DocumentGenerator`: the class and property order and the taxonomy tree (fingerprint-report › Class and property order, › Taxonomy view)
 - [x] 7.3 Template: property group rows, the `#taxonomy` section with popularity bars, pitfalls inside *Caveats and pitfalls* (design D-15; fingerprint-report › Pitfalls in the report)
-- [ ] 7.4 Gherkin for the new scenarios (spec titles); refresh the goldens; regenerate the brainframe fingerprint into `../rdf-fingerprinter/temp/brainframe-fingerprint/`
+- [x] 7.4 Gherkin for the new scenarios (spec titles); refresh the goldens; regenerate the brainframe fingerprint into `../rdf-fingerprinter/temp/brainframe-fingerprint/`
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 6.4 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [ ] 7.4
+- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 6.4 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [x] 7.4
 
 ## Verification
 
