@@ -35,7 +35,7 @@
   - `parse_header(text) -> PitfallCheck` reads the header, the leading `#` lines up to the first
     non-comment line.
     - A line that matches `# <key>: <value>` sets that key.
-    - A `#` line without a key is ignored (free prose).
+    - A `#` line without a key is ignored (free prose); blank lines are skipped and do not end the header.
     - An unknown key, a repeated key, a missing required key (`id`, `title`, `importance`, `scope`,
       `source`) or an invalid value raises `PitfallCheckError`.
     - The keys are `id`, `title`, `importance`, `scope`, `source`, `heuristic` (`true`/`false`) and
@@ -119,7 +119,7 @@
   field references it, so `profile.json` never holds it; `gen-json-schema` still lists every class
   under `$defs`, which is harmless and accepted. `PitfallResult` also carries `description`
   (optional). The views are in D-6 and D-7. Run `make generate-models`, and add
-  `fingerprint.domain.pitfalls` to the `.importlinter` "generated" contract list.
+  `fingerprint.domain.pitfalls` to the `forbidden_modules` of the `.importlinter` "generated" contract.
 - **D-4 The scan in collection.** In `collect`, right after `run.profile_graph(graph, edges)` (outside
   `profile_graph`, which returns early below `classes` depth, so the scan runs at any depth), when
   `settings.pitfall_scan` is on, the collector calls `run.scan_pitfalls(graph, checks)`. It sets the
@@ -159,7 +159,7 @@
   ```sparql
   # PITFALL <id> count
   <prologue>
-  SELECT (COUNT(*) AS ?n) <dataset> WHERE { { <body> } }
+  SELECT (COUNT(*) AS ?n) <dataset> WHERE { { <body> } FILTER(BOUND(?entity) || BOUND(?property) || BOUND(?value)) }
   ```
   ```sparql
   # PITFALL <id> examples
@@ -167,6 +167,9 @@
   SELECT ?entity ?property ?value <dataset> WHERE { { <body> } } ORDER BY ?entity ?property ?value LIMIT <k>
   ```
 
+  The `BOUND` filter is a no-op on conformant stores. On rdflib, which the unit fake uses, an
+  aggregate body (`GROUP BY`) over no match counts one all-unbound row (verified on rdflib 7.6.0), and
+  the filter drops it, so a clean graph counts 0 everywhere.
   `<dataset>` is `FROM <graph>` followed by `FROM <s>` for each schema graph, for a named graph.
   It is empty for the default graph. The leading name line keeps `query_name`, logs and
   `FakeSparql` rules working. `ORDER BY` makes the examples, and so the golden files, deterministic.
@@ -202,6 +205,8 @@
   (DEC-11).
 - **D-9 CLI and library.**
   - `fingerprint_report(..., checks=None)`: `None` means the packaged catalogue when the scan is on.
+    `handlers.py` calls `adapters.pitfall_catalogue.load_catalogue()` (the adapter does the I/O),
+    and `collect` only receives the checks.
   - `main.py` gains:
     - the settings options `--pitfalls`, `--schema-graph` (repeatable) and `--pitfall-examples`
       (`IntRange(min=1)`);
@@ -211,7 +216,8 @@
     `settings.pitfall_scan` is off.
   - After the run, `main.py` exits 1 if there were failures. Otherwise, with `--fail-on`, it exits
     `EXIT_PITFALLS = 5` when `at_or_above(run, level)` (rows, checks), summed over every graph, has
-    rows > 0, logging at WARNING `<rows> findings in <checks> checks at or above <level>`.
+    rows > 0, logging at WARNING `<rows> findings in <checks> checks at or above <level>`. When
+    nothing reaches the level, it exits 0 and logs at INFO `no pitfall findings at or above <level>`.
   - Settings: `schema_graphs` is split on commas in the environment, like `selected_graphs`, in
     `_setting` (`fingerprint/__init__.py`). Each schema graph IRI passes `to_iriref` in
     `resolve_settings`, so a bad one is a `UsageError` before any query.
@@ -264,7 +270,7 @@ The scan is safe to rerun: it is read-only and deterministic, because the exampl
 | Unit, domain | header parsing, level order and mapping, `at_or_above` | `tests/unit/test_domain_pitfalls.py` |
 | Unit, adapter | catalogue loading, validation (each invalid case, including `FROM`, an unknown key and a duplicate user id), replace, skip, and an empty catalogue after skips | `tests/unit/test_adapters_pitfall_catalogue.py` |
 | Unit, checks | each packaged check over `tests/test_data/pitfalls/<id>.trig`: a `positive` and a `negative` named graph, run with rdflib on each graph's content; the expected entity per id in a table in the test | `tests/unit/test_pitfall_checks.py` |
-| Unit, stage | wrapping (FROM, count, limit, ordering), the schema/data split, empty graphs, count 0 (no example query), blank-node entities, failures, scan off, depth `graphs`, through `FakeSparql` | `tests/unit/test_service_layer_pitfall_scan.py` |
+| Unit, stage | wrapping (FROM, count, limit, ordering), an aggregate check over a clean graph counting 0 through the fake, the schema/data split, empty graphs, count 0 (no example query), blank-node entities, failures, scan off, depth `graphs`, through `FakeSparql` | `tests/unit/test_service_layer_pitfall_scan.py` |
 | Gherkin | `tests/features/pitfall_scans.feature` for the spec scenarios; report, exit and format scenarios in the existing features | `tests/unit/steps/` |
 | Golden | the page and the TSV for a fixed profile with scan results | `tests/test_data/golden/` |
 | e2e | Oxigraph test store (unchanged: continents and treaties; the default graph holds continents). It scans the treaties graph with `--schema-graph <continents graph>` (exercising the `FROM` merge and the schema/data split), checks the structure (results, TSV files, the page section), and exit 5 with `--fail-on minor`. It asserts no counts beyond "at least one check ran" | `tests/e2e/test_pitfall_scan.py` |
@@ -296,6 +302,7 @@ The scan is safe to rerun: it is read-only and deterministic, because the exampl
 | An example value contains markup | Autoescape | Shown as text |
 | A profile is saved without `pitfalls` (older or scan off) | The field is absent | No section, no TSV file; nothing breaks |
 | `--fail-on` with recorded failures | `main.py` | Exit 1 (failures take precedence) |
+| A schema graph the store does not hold | The emptiness `ASK` is false | Profiled as an empty graph; not scanned; no error |
 | `--format pitfalls` without scan results | `PitfallsGenerator.outputs()` is empty | No file; INFO `no pitfall results in the profile` |
 
 ## Risks / Trade-offs
@@ -306,7 +313,8 @@ The scan is safe to rerun: it is read-only and deterministic, because the exampl
   the docs explain the reading.
 - [Heuristic false positives (P07, P20, P21, P12/P30)] → Marked `heuristic`, minor importance.
 - [rdflib `FROM` in the unit fake] → rdflib's `Dataset` evaluates `FROM <g1> FROM <g2>` over its own
-  named graphs, so stage tests can run wrapped queries through `FakeSparql`. It tries an HTTP fetch
+  named graphs, so stage tests can run wrapped queries through `FakeSparql`. Its aggregate-over-nothing
+  row is dropped by the count's `BOUND` filter (D-5). It tries an HTTP fetch
   for a `FROM` graph it does not hold, so `tests/unit/fakes.py` sets
   `rdflib.plugins.sparql.SPARQL_LOAD_GRAPHS = False`. The per-check tests run on graph content
   directly; the wrapping is checked again on Oxigraph in e2e.

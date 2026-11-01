@@ -6,7 +6,7 @@ A pitfall check SHALL be one SPARQL file holding a single `SELECT` query that re
 line that is not a comment) SHALL give `# id: <id>`, `# title: <text>`,
 `# importance: critical|important|minor`, `# scope: schema|data`, `# source: <text>`, and optionally
 `# heuristic: true` and `# description: <text>` (one line). A header comment line without a
-`key:` is ignored; an unknown key, or a key given twice, is refused. The id SHALL match `[a-z0-9_]+`
+`key:`, and a blank line, is ignored; an unknown key, or a key given twice, is refused. The id SHALL match `[a-z0-9_]+`
 and be unique in the catalogue. The query SHALL have no dataset clause (`FROM`, `FROM NAMED`), and each `PREFIX` or `BASE`
 declaration SHALL be on its own line, before the `SELECT`. A file
 that breaks the contract SHALL be a usage error (exit 2) naming the file, before any query (EPIC

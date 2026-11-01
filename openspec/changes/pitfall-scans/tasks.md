@@ -43,4 +43,4 @@
 
 ## Verification
 
-`make check-all`, `make test-e2e` and `openspec validate pitfall-scans --strict` pass, and `make scan-files` on brainframe reproduces the inventory's counts in `inputs/brainframe-modelling-analysis.md`: the "Ontology" column for the schema checks on the schema graph, and the "Ont. + data" column for the data checks on the data graph (`x_domain_violation` may differ by one on the ontology: 4, not 3).
+`make check-all`, `make test-e2e` and `openspec validate pitfall-scans --strict` pass, and `make scan-files` on brainframe reproduces the inventory's counts in `inputs/brainframe-modelling-analysis.md`: the "Ontology" column for the schema checks on the schema graph, and the "Ont. + data" column for the data checks on the data graph.
