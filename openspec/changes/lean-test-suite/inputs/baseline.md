@@ -73,6 +73,23 @@ Measured 2026-11-01 on `master` at `e28cb1c` (after PR #42), Python 3.12.3, loca
 | `tests/e2e/test_collection.py` | 3 |
 | `tests/unit/test_package.py` | 2 |
 
-## Mutation score
+## Mutation score (task 1.2 / 6.4)
 
-Recorded by task 1.2.
+Full `mutmut run` (3.8.1, `--max-children 8`) on `feature/lean-test-suite` at `71d99b0` (after groups
+2–6), 2026-11-01: **3301 s (55 min)** for `fingerprint/domain/` and `fingerprint/service_layer/`.
+
+| Killed | Timeout | Survived | No tests | Total | Score |
+|---|---|---|---|---|---|
+| 2868 | 3 | 676 | 11 | 3558 | **0.807** |
+
+Score = (killed + timeout) / (killed + timeout + survived + no_tests), stored in
+`tests/guards/mutation_score.txt`. The run takes > 10 minutes, so it is a weekly CI job
+(`.github/workflows/mutation.yml`) plus a local run before a PR (design Open Questions rule).
+
+Survivors per module (`inputs/mutation-survivors-baseline.txt`): service_layer.collection 287,
+service_layer.generators 158, domain.analytics 79, domain.prefixes 41, service_layer.handlers 30,
+service_layer.prefixes 27, service_layer.settings 19, service_layer.representations 18,
+domain.modules 16, domain.shapes 9, domain.iri 5, domain.exceptions 1.
+
+Two repeatability bugs surfaced on the way: mutmut runs pytest twice in one process, which exposed a
+consumed `BytesIO` in `test_classify` and a parametrize dict mutated by `test_severity_…` (both fixed).

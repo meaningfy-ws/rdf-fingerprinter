@@ -298,3 +298,5 @@ Integration (local, against Oxigraph):
 - Where does `make check-mutation` run? Rule, set by the team lead while the developer is away: a CI
   job on pull requests if the measured full run (task 6.4) is under 10 minutes; otherwise a weekly
   scheduled CI job; locally before every PR in either case.
+  **Resolved 2026-11-01:** the full run took 55 minutes, so `.github/workflows/mutation.yml` runs it
+  weekly and on demand; baseline score 0.807 (`inputs/baseline.md`).

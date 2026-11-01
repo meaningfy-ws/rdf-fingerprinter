@@ -7,7 +7,7 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 ## 1. Baseline
 
 - [x] 1.1 Record the baseline in `inputs/baseline.md`: tests per file and tier, coverage per layer, run time, spec vs feature titles per capability
-- [ ] 1.2 `hypothesis` and `mutmut` pinned in the Poetry `test` group; `[tool.mutmut]` per P-7; first `mutmut run`; score, survivors, run time and the needed `also_copy` recorded in `inputs/baseline.md` (P-7; DEC-6)
+- [x] 1.2 `hypothesis` and `mutmut` pinned in the Poetry `test` group; `[tool.mutmut]` per P-7; first `mutmut run`; score, survivors, run time and the needed `also_copy` recorded in `inputs/baseline.md` (P-7; DEC-6)
 
 ## 2. Fences and layout (test content unchanged)
 
@@ -47,7 +47,7 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 - [x] 6.1 Hypothesis `ci`/`dev` profiles in `tests/conftest.py`; `tests/unit/domain/strategies.py` (P-9)
 - [x] 6.2 The P-9 properties; the example rows they cover removed per P-6 (DEC-7)
 - [x] 6.3 `make test` with `--cov-branch`, 90% overall and 100% `domain/` (generated excluded); missing tests added in the tier P-2 names; TC-7 (Requirement: Coverage and mutation gate — Scenario: An untested domain branch; P-7)
-- [ ] 6.4 `make check-mutation`, `tests/guards/mutation_score.py` + TC-6, `tests/guards/mutation_score.txt`; full-run time recorded; CI job added per the design's Open Questions rule (Scenario: The mutation score drops; P-7)
+- [x] 6.4 `make check-mutation`, `tests/guards/mutation_score.py` + TC-6, `tests/guards/mutation_score.txt`; full-run time recorded; CI job added per the design's Open Questions rule (Scenario: The mutation score drops; P-7)
 
 ## 7. Remove redundancy (P-6)
 
@@ -65,7 +65,7 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## Roadmap
 
-- [x] 1.1 · [ ] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [x] 3.7 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 4.5 · [x] 4.6 · [x] 4.7 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [ ] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [x] 8.1 · [x] 8.2 · [ ] 8.3
+- [x] 1.1 · [x] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [x] 3.7 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 4.5 · [x] 4.6 · [x] 4.7 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [x] 8.1 · [x] 8.2 · [ ] 8.3
 
 ## Verification
 
