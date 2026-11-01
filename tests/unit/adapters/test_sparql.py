@@ -4,6 +4,7 @@ import io
 import json
 import urllib.error
 import urllib.parse
+from functools import partial
 
 import pytest
 from rdflib import BNode, Literal, URIRef
@@ -32,26 +33,28 @@ def http_error(code: int, body: bytes = b"") -> urllib.error.HTTPError:
         (TimeoutError("timed out"), QueryTimeout),
         (TimeoutError(), QueryTimeout),
         (urllib.error.URLError(TimeoutError("timed out")), QueryTimeout),
-        (http_error(504), QueryTimeout),
-        (http_error(500, b"Query exceeded the Time Limit"), QueryTimeout),
-        (http_error(500, b"estimated execution time 900 s"), QueryTimeout),
-        (http_error(500, b"syntax error"), PermanentError),
-        (http_error(502), TransientError),
-        (http_error(503), TransientError),
-        (http_error(429), TransientError),
+        (partial(http_error, 504), QueryTimeout),
+        (partial(http_error, 500, b"Query exceeded the Time Limit"), QueryTimeout),
+        (partial(http_error, 500, b"estimated execution time 900 s"), QueryTimeout),
+        (partial(http_error, 500, b"syntax error"), PermanentError),
+        (partial(http_error, 502), TransientError),
+        (partial(http_error, 503), TransientError),
+        (partial(http_error, 429), TransientError),
         (urllib.error.URLError(ConnectionRefusedError()), TransientError),
         (ConnectionResetError(), TransientError),
-        (http_error(400, b"bad"), PermanentError),
-        (http_error(413), PermanentError),
-        (http_error(401), EndpointUnreachable),
-        (http_error(403), EndpointUnreachable),
-        (http_error(407), EndpointUnreachable),
+        (partial(http_error, 400, b"bad"), PermanentError),
+        (partial(http_error, 413), PermanentError),
+        (partial(http_error, 401), EndpointUnreachable),
+        (partial(http_error, 403), EndpointUnreachable),
+        (partial(http_error, 407), EndpointUnreachable),
         (ValueError("not json"), PermanentError),
         (ResultException("No boolean or results in json!"), PermanentError),
         (KeyError("head"), PermanentError),
     ],
 )
 def test_classify(error, expected):
+    # An HTTPError's body is a stream classify() reads, so each run builds a fresh one.
+    error = error() if callable(error) else error
     assert type(classify(error)) is expected
 
 
