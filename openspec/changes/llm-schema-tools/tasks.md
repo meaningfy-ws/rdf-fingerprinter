@@ -27,13 +27,13 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 - [x] 1.2 `fingerprint/domain/vocabulary.py` constants and `fingerprint/domain/annotations.py` (`select_annotations`, `merge_annotations`, `shown`)
   - Layer: domain. Depends on: 1.1.
   - Tests: TC-A1, TC-A2 (Hypothesis, `annotation_values()` in `tests/unit/domain/strategies.py`), TC-A3; 100% branch coverage.
-- [ ] 1.3 Q12 (`q12_term_annotations.rq`, `QUERY_FILES["Q12"]`, `terms_values`, `render(..., terms=)`) and `_Collection.term_annotations` in `profile_graph`; `QUERY_KIND["Q12"]`; step definitions for the statistics-collection scenarios of this change
+- [x] 1.3 Q12 (`q12_term_annotations.rq`, `QUERY_FILES["Q12"]`, `terms_values`, `render(..., terms=)`) and `_Collection.term_annotations` in `profile_graph`; `QUERY_KIND["Q12"]`; step definitions for the statistics-collection scenarios of this change
   - Layer: adapters, service_layer. Depends on: 1.2.
   - Tests: TC-Q1, TC-C1; Gherkin `statistics-collection › Term labels and descriptions are collected` (5 scenarios) and `› Depth and switches select the queries › Default depth`, `› Measurements per depth`, through `FakeSparql`; IT-1 (`tests/e2e/test_queries.py::test_term_annotations_of_the_scheme`).
-- [ ] 1.4 `make oxigraph-load-test-data` then `make refresh-sample-profile`; review the diff (expected: `"term_annotations": []` per graph); if labels are found, add them as named facts to `tests/sample_data.py`
+- [x] 1.4 `make oxigraph-load-test-data` then `make refresh-sample-profile`; review the diff (expected: `"term_annotations": []` per graph); if labels are found, add them as named facts to `tests/sample_data.py`
   - Layer: tests (canonical data). Depends on: 1.3.
   - Tests: IT-2 (the drift test) and `tests/guards/test_sample_data.py` green.
-- [ ] 1.5 `fingerprint/adapters/ontology_file.py` (`load_ontology`, `OntologyFileError`); fixture `tests/test_data/ontology/labels.ttl` (design §E, "Glossary with the label fixture") and its RDF/XML twin `labels.rdf`
+- [x] 1.5 `fingerprint/adapters/ontology_file.py` (`load_ontology`, `OntologyFileError`); fixture `tests/test_data/ontology/labels.ttl` (design §E, "Glossary with the label fixture") and its RDF/XML twin `labels.rdf`
   - Layer: adapters. Depends on: 1.1.
   - Tests: TC-O1.
 - [ ] 1.6 `fingerprint/domain/patterns.py`, part 1: names, groups (N2), nested test (P-4), filters (P-3, P-10), edges, stat tokens and value quoting (design §B steps 1–5)
@@ -78,7 +78,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [ ] 1.5 · [ ] 1.6 · [ ] 1.3 · [ ] 1.4 · [ ] 1.7 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
+- [x] 1.1 · [x] 1.2 · [x] 1.5 · [ ] 1.6 · [x] 1.3 · [x] 1.4 · [ ] 1.7 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
 
 ## Verification
 

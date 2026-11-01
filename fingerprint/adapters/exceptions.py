@@ -47,3 +47,7 @@ class ProfileFileError(ValueError):
 
 class ConfigError(ValueError):
     """An `RDF_FINGERPRINTER_*` value that cannot be read as its type; the message names the variable."""
+
+
+class OntologyFileError(ValueError):
+    """An ontology file that is missing or not RDF; the message names it."""
