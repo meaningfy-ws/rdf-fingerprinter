@@ -37,12 +37,14 @@ tier. Tests outside `tests/e2e/` SHALL NOT open a network connection.
 The sample profile `tests/test_data/profiles/sample-profile.json` SHALL be produced by
 `make refresh-sample-profile` from the RDF in `tests/test_data/` loaded into the store at
 `RDF_FINGERPRINTER_TEST_ENDPOINT`, and the golden outputs by `make refresh-golden` from that profile.
-The known facts of the sample datasets SHALL be named once in `tests/sample_data.py`, and `make test-e2e`
+`make refresh-sample-profile` SHALL leave the file untouched when a fresh collection equals it other than
+in timestamps, tool version and row order. The known facts of the sample datasets SHALL be named once
+in `tests/sample_data.py`, and `make test-e2e`
 SHALL fail when a fresh collection differs from the stored profile other than in timestamps and tool version.
 
 #### Scenario: Regenerating without a data change
 - **WHEN** a contributor runs `make oxigraph-load-test-data`, then `make refresh-sample-profile` and `make refresh-golden` on a clean checkout
-- **THEN** `git status` shows no change under `tests/test_data/` other than timestamps and tool version
+- **THEN** `git status` shows no change under `tests/test_data/`
 
 #### Scenario: The stored profile drifts
 - **WHEN** a triple is removed from `tests/test_data/continents-source-ap.rdf`, the store is reloaded and the sample profile is not regenerated
@@ -61,3 +63,15 @@ when it is lower than the score stored in `tests/guards/mutation_score.txt`.
 #### Scenario: The mutation score drops
 - **WHEN** a test that alone kills a mutant in `fingerprint/service_layer/` is deleted
 - **THEN** `make check-mutation` exits non-zero and lists the surviving mutant
+
+### Requirement: Generated outputs compared by meaning
+Golden-file tests of Turtle outputs SHALL compare the produced and the golden file as RDF graphs
+(isomorphism), and on a difference SHALL report the triples found in only one of them.
+
+#### Scenario: A reordered Turtle output
+- **WHEN** a generator emits the same triples as its golden file in a different order and with different prefix names
+- **THEN** the golden test passes
+
+#### Scenario: A changed triple
+- **WHEN** a generator emits one literal different from its golden file
+- **THEN** the golden test fails and reports that triple as only in the output and the original as only in the golden file

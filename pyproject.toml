@@ -55,6 +55,8 @@ test = [
     "pytest-cov==7.1.0",
     "pytest-bdd==8.1.0",
     "pyshacl==0.40.1",
+    "hypothesis==6.170.14",
+    "mutmut==3.8.1",
 ]
 lint = [
     "ruff==0.17.3",

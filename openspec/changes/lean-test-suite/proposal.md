@@ -65,7 +65,7 @@ a no-network rule, so a unit test cannot quietly become an integration test.
   Reason: each test shows only what differs, and a canonical-data change breaks only normal-case
   tests. Rejected: a growing shared fixture holding every edge case.
 - **DEC-6 Gate on branch coverage and a ratcheted mutation score.** Branch coverage: 100% for
-  `fingerprint/domain/`, 90% for the rest of `fingerprint/`. `mutmut` scores `domain/` and
+  `fingerprint/domain/`, 90% for `fingerprint/` as a whole. `mutmut` scores `domain/` and
   `service_layer/`; the score is stored and may not drop. Reason: line coverage cannot tell a test
   that checks from a test that only runs code. Rejected: 80% line only; branch coverage only.
 - **DEC-7 Properties replace example tables for invariants.** `hypothesis` states the domain rules
@@ -91,8 +91,8 @@ a no-network rule, so a unit test cannot quietly become an integration test.
 ## Rabbit-holes
 
 - **Mutation run time.** A full `mutmut` run may take long. Scope it to `domain/` and
-  `service_layer/`, use coverage-guided test selection, and measure before deciding where it runs
-  (see design Open Questions).
+  `service_layer/`, let mutmut run only the tests that cover each mutant, and measure before deciding
+  where it runs (see design Open Questions).
 - **Chasing 100% everywhere.** 100% branch coverage is required for `domain/` only; elsewhere
   unreachable defensive branches get `pragma: no cover` with a reason, not contrived tests.
 - **Renaming spec scenarios to fit tests.** Titles are aligned towards the spec; a spec title

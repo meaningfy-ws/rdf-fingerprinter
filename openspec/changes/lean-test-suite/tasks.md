@@ -1,60 +1,71 @@
 > Derives from: EPIC lean-test-suite (proposal.md)
 
-Starts after `readable-representations` (the namespace-prefixes work) is merged (DEC-10; met 2026-10-31, PR #42). Each group is
-one commit or more; deletions per module are their own commits (design Risks).
+Starts after `readable-representations` (the namespace-prefixes work) is merged (DEC-10; met
+2026-10-31, PR #42). Each task leaves `make test` green; deletions per module are their own commits
+(design Risks). Requirements named below are in `specs/developer-tooling/spec.md` of this change.
 
 ## 1. Baseline
 
-- [x] 1.1 Record the baseline in `inputs/baseline.md`: test count per file and tier, line and branch coverage per layer, unit run time, spec vs feature scenario titles per capability (matched, spec-only, feature-only)
-- [ ] 1.2 Add `mutmut` and `hypothesis` to the Poetry dev group; first `mutmut run` on `fingerprint/domain` and `fingerprint/service_layer`; record score, survivors and run time in `inputs/baseline.md` (P-7)
+- [x] 1.1 Record the baseline in `inputs/baseline.md`: tests per file and tier, coverage per layer, run time, spec vs feature titles per capability
+- [ ] 1.2 `hypothesis` and `mutmut` pinned in the Poetry `test` group; `[tool.mutmut]` per P-7; first `mutmut run`; score, survivors, run time and the needed `also_copy` recorded in `inputs/baseline.md` (P-7; DEC-6)
 
-## 2. Fences and layout (no test content changes)
+## 2. Fences and layout (test content unchanged)
 
-- [ ] 2.1 Move files into the P-1 layout (`tests/unit/<layer>/`, `tests/bdd/` from `tests/unit/steps/`, `tests/guards/`, `tests/fakes.py`); `pytest.ini` paths; the suite passes with the same count as 1.1
-- [ ] 2.2 `.importlinter`: `root_packages = fingerprint tests` and the P-4 test contracts; `make check-architecture` keeps every existing contract and passes the new ones (Requirement: Fenced test tiers)
-- [ ] 2.3 No-network autouse fixture in `tests/conftest.py`, with a guard test proving a socket connect fails under `tests/unit/` (Requirement: Fenced test tiers — Scenario: A unit test reaches the network)
-- [ ] 2.4 Guard tests for the import contracts' scenario (a fixture module that violates a contract, checked through `lint-imports` on a temporary config), or an allow-list entry naming `make check-architecture` if that is not practical (Scenario: A domain test imports the service layer)
+- [ ] 2.1 Move files to the P-1 layout; `pytest.ini`; `make test` runs `pytest tests --ignore=tests/e2e`; the suite passes with the baseline count (Requirement: Fenced test tiers; P-1)
+- [ ] 2.2 `.importlinter`: `root_packages` (one per line) and the P-4 test contracts; the four existing contracts still kept (Requirement: Fenced test tiers; P-4)
+- [ ] 2.3 No-network autouse fixture and TC-4 (Requirement: Fenced test tiers — Scenario: A unit test reaches the network)
+- [ ] 2.4 TC-5: pytest wrapper running `lint-imports` on a temporary tree with a violating domain test (Scenario: A domain test imports the service layer)
 
 ## 3. Traceability
 
-- [ ] 3.1 `tests/guards/test_traceability.py` and `tests/guards/untraced_scenarios.txt` per P-3, including the stale-entry check (Requirement: Requirement-traced tests)
-- [ ] 3.2 Align titles per capability: rename feature scenarios to the spec title; where the spec title is the less clear one, change it in this change's delta of that capability; add missing Gherkin scenarios for spec-only titles; remove or spec feature-only scenarios (`fingerprint-report`, `statistics-collection`, `profile-analytics`, `profile-representations`, and any capability merged before the start)
-- [ ] 3.3 Allow-list entries for `developer-tooling` scenarios, each naming the guard test or check that proves it; the guard passes
+- [ ] 3.1 `tests/guards/traceability.py` (`trace()`) with TC-1..TC-3 on `tmp_path` trees; the real-tree test written but marked `xfail(strict=True)` until 3.7 (Requirement: Requirement-traced tests; P-3)
+- [ ] 3.2 Align `fingerprint-report`: feature titles renamed to spec titles; spec-only scenarios get Gherkin; feature-only scenarios deleted or added to the spec through a MODIFIED delta in this change (P-3; design Risks)
+- [ ] 3.3 Align `namespace-prefixes` (as 3.2; 11 spec scenarios lack Gherkin today)
+- [ ] 3.4 Align `profile-analytics` (as 3.2)
+- [ ] 3.5 Align `profile-representations` (as 3.2)
+- [ ] 3.6 Align `statistics-collection` (as 3.2; 1 of 29 titles matches today)
+- [ ] 3.7 `tests/guards/untraced_scenarios.txt` for `developer-tooling` (each entry a pytest node id); `xfail` removed; the guard passes (Requirement: Requirement-traced tests)
 
 ## 4. Canonical sample data
 
-- [ ] 4.1 `make refresh-sample-profile` and `make refresh-golden` (P-5, replacing `UPDATE_GOLDEN=1`); regenerate and confirm no data change against the stored files (Requirement: Canonical sample data — Scenario: Regenerating without a data change)
-- [ ] 4.2 `tests/sample_data.py` with the `CONTINENTS` and `TREATIES` facts; `tests/conftest.py` session fixtures `sample_run`, `sample_analytics`, `sample_outputs`
-- [ ] 4.3 `tests/builders.py` from the `fakes.py` builders, returning model objects; the nine files with inline raw profiles switched to fixtures and builders; bare numbers about the sample data replaced by `sample_data` names
-- [ ] 4.4 Extend `test_a_live_collection_equals_the_sample_profile` to name the differing class or property on failure (Scenario: The stored profile drifts)
+- [ ] 4.1 `same_profile()` in `tests/sample_data.py`; `tests/refresh_sample_data.py`; `make refresh-sample-profile` and `make refresh-golden` (replacing `UPDATE_GOLDEN=1`); IT-1 (Requirement: Canonical sample data — Scenario: Regenerating without a data change; P-5)
+- [ ] 4.2 `CONTINENTS` and `TREATIES` facts; session fixtures `sample_run`, `sample_analytics`, `sample_outputs` (Requirement: Canonical sample data; P-5)
+- [ ] 4.3 `tests/builders.py` returning model objects; `tests/fakes.py` keeps only the doubles (P-5; DEC-5)
+- [ ] 4.4 Domain-tier tests switched from inline raw profiles and bare numbers to builders, fixtures and named facts (DEC-4, DEC-5)
+- [ ] 4.5 Adapter-, service- and entrypoint-tier tests switched likewise (DEC-4, DEC-5)
+- [ ] 4.6 Gherkin steps switched likewise (DEC-4, DEC-5)
+- [ ] 4.7 The drift test names the differing class or property on failure; IT-2 (Scenario: The stored profile drifts)
 
 ## 5. Shared steps and outputs
 
-- [ ] 5.1 `tests/bdd/conftest.py` as the one step library; duplicated step definitions merged; one `test_<capability>.py` per feature file binding `scenarios()`
-- [ ] 5.2 Turtle golden comparisons by isomorphism with the triple diff on failure (P-8); SHACL-validates-source check kept
+- [ ] 5.1 `tests/bdd/conftest.py` as the one step library: duplicated step definitions merged (P-1; DEC-2)
+- [ ] 5.2 One `tests/bdd/test_<capability>.py` per feature file binding `scenarios()`; old step modules removed (P-1)
+- [ ] 5.3 Turtle golden comparisons by isomorphism with the triple diff; TC-8; SHACL-validates-source kept (Requirement: Generated outputs compared by meaning; P-8)
 
 ## 6. Properties and gate
 
-- [ ] 6.1 Hypothesis `ci` profile and `tests/unit/domain/strategies.py`; the P-9 properties; the parametrised example rows they cover removed per P-6
-- [ ] 6.2 `make test`: `--cov-branch`, 90% overall, 100% `fingerprint/domain/` excluding generated modules (P-7); add the tests the gap list demands, in the tier P-2 names (Requirement: Coverage and mutation gate — Scenario: An untested domain branch)
-- [ ] 6.3 `make check-mutation` and `tests/guards/mutation_score.txt` (P-7); report run time; developer decides where it runs (design Open Questions) and the CI workflow is updated accordingly (Scenario: The mutation score drops)
+- [ ] 6.1 Hypothesis `ci`/`dev` profiles in `tests/conftest.py`; `tests/unit/domain/strategies.py` (P-9)
+- [ ] 6.2 The P-9 properties; the example rows they cover removed per P-6 (DEC-7)
+- [ ] 6.3 `make test` with `--cov-branch`, 90% overall and 100% `domain/` (generated excluded); missing tests added in the tier P-2 names; TC-7 (Requirement: Coverage and mutation gate — Scenario: An untested domain branch; P-7)
+- [ ] 6.4 `make check-mutation`, `tests/guards/mutation_score.py` + TC-6, `tests/guards/mutation_score.txt`; full-run time recorded; CI job added per the design's Open Questions rule (Scenario: The mutation score drops; P-7)
 
-## 7. Remove redundancy
+## 7. Remove redundancy (P-6)
 
-- [ ] 7.1 P-6 per module in `domain/`: delete tests another tier owns; one commit per module, coverage and killed-mutant set unchanged
-- [ ] 7.2 P-6 per module in `adapters/` and `entrypoints/` (coverage unchanged; mutation not scored here)
-- [ ] 7.3 P-6 per module in `service_layer/`
-- [ ] 7.4 Surviving mutants: a test in the owning tier, or the dead code deleted and listed here; `mutation_score.txt` raised
+- [ ] 7.1 `domain/` modules: tests another tier owns deleted, one commit per module, coverage and killed set unchanged
+- [ ] 7.2 `service_layer/` modules, likewise
+- [ ] 7.3 `adapters/` and `entrypoints/` modules (coverage and P-2 ownership)
+- [ ] 7.4 `tests/e2e/`: tests that never reach the store deleted or moved (P-2)
+- [ ] 7.5 Surviving mutants: a test in the owning tier, or the dead code deleted and listed here; `mutation_score.txt` raised
 
 ## 8. Docs and conventions
 
-- [ ] 8.1 `docs/modules/ROOT/pages/development.adoc`: the tiers, the ownership table (P-2), the canonical data and refresh targets, the gate
-- [ ] 8.2 `AGENTS.md` *Working conventions*: one line for the test-tier rule and the sample-data rule, pointing at the docs page
-- [ ] 8.3 Record the outcome in `inputs/baseline.md` (before/after: test count, run time, branch coverage, mutation score)
+- [ ] 8.1 `docs/modules/ROOT/pages/development.adoc`: tiers, the P-2 ownership table, canonical data and refresh targets, the gate
+- [ ] 8.2 `AGENTS.md` *Working conventions*: the test-tier and sample-data rules (pointing at the docs page) and the moved path of `test_no_composed_dicts.py`
+- [ ] 8.3 Outcome in `inputs/baseline.md`: before/after test count, run time, branch coverage, mutation score
 
 ## Roadmap
 
-- [x] 1.1 · [ ] 1.2 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 2.4 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 5.1 · [ ] 5.2 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
+- [x] 1.1 · [ ] 1.2 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 2.4 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 3.4 · [ ] 3.5 · [ ] 3.6 · [ ] 3.7 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 4.5 · [ ] 4.6 · [ ] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
 
 ## Verification
 
