@@ -45,7 +45,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 - [x] 1.8 `PatternGenerator`, template package `fingerprint_report_templates/pattern_schema/`, `RepresentationFormat.pattern`, `GENERATORS`; `representations.with_ontology` and the size checks in `validate_options`; `gen_pattern` with `--ontology`, `--min-instances` and `--max-classes`; script `fingerprint-gen-pattern` in `pyproject.toml`
   - Layer: service_layer, entrypoints, templates. Depends on: 1.5, 1.7.
   - Tests: TC-G1, TC-E1; Gherkin `profile-representations › Pattern view` (4, steps on builder profiles), `› Pattern schema output` (6, `Unusual IRIs…` still red until 1.9), `› Term labels and descriptions in the outputs` (5) and `› Size filters` (2).
-- [ ] 1.9 `fingerprint/domain/shex.py`, `ShexGenerator`, template package `shex_schema/`, `RepresentationFormat.shex`, `gen_shex` (same options), script `fingerprint-gen-shex`; `pyshexc==0.10.3.post1` in the `test` group
+- [x] 1.9 `fingerprint/domain/shex.py`, `ShexGenerator`, template package `shex_schema/`, `RepresentationFormat.shex`, `gen_shex` (same options), script `fingerprint-gen-shex`; `pyshexc==0.10.3.post1` in the `test` group
   - Layer: domain, service_layer, entrypoints, templates. Depends on: 1.8.
   - Tests: TC-S1; Gherkin `profile-representations › Enriched ShExC output` (2) and the ShExC part of `› Pattern schema output › Unusual IRIs in the LLM outputs`.
 - [ ] 1.10 Step definitions for the MODIFIED profile-representations scenarios (`› No files for empty graphs › Empty default graph`, the two new rows of `› Golden outputs › Golden file per output`); `make refresh-golden` writes the six golden files; review them against design §E (the worked example)
@@ -78,7 +78,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
+- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.8 · [x] 1.9 · [ ] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
 
 ## Verification
 

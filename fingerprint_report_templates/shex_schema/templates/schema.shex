@@ -1,0 +1,35 @@
+{#- One enriched ShExC file: `view` is a ShexSchema (model/fingerprint_views.yaml). Shapes, constraints, comments and
+    cardinalities come ready from fingerprint/domain/shex.py; this template only lays them out. -#}
+{% macro constraints(items) -%}
+{% for c in items -%}
+{%- set indent = "  " * c.depth -%}
+{%- set tail = (" " ~ c.cardinality if c.cardinality else "") ~ " ;" -%}
+{%- set note = "  # " ~ c.comment if c.comment else "" -%}
+{%- if c.inline is none -%}
+{{ indent }}{{ c.predicate }} {{ c.value }}{{ tail }}{{ note }}
+{% else -%}
+{{ indent }}{{ c.predicate }} {{ c.value }} {{ "{" }}{{ note }}
+{{ constraints(c.inline) -}}
+{{ indent }}}{{ tail }}
+{% endif -%}
+{% endfor -%}
+{%- endmacro -%}
+{% for p in view.prefixes -%}
+PREFIX {{ p.prefix }}: <{{ p.namespace }}>
+{% endfor -%}
+# comments use the pattern schema's legend: k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured · … deeper than 3 hops
+{% if view.hidden_classes -%}
+# hidden: {{ view.hidden_classes }} classes
+{% endif -%}
+{% if view.skipped_terms -%}
+# skipped: {{ view.skipped_terms | join(" ") }}
+{% endif -%}
+{% for shape in view.shapes -%}
+# {{ shape.comment }}
+{{ shape.label }}{% if shape.blank %} BNODE{% endif %} {
+{{ constraints(shape.constraints) -}}
+}
+{% endfor -%}
+{% for line in view.glossary -%}
+# {{ line }}
+{% endfor -%}

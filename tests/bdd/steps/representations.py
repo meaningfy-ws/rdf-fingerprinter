@@ -30,7 +30,7 @@ from tests.sample_data import GOLDEN, SAMPLE_PROFILE, TEST_DATA
 
 SH = Namespace("http://www.w3.org/ns/shacl#")
 FP = Namespace("https://data.meaningfy.ws/fingerprint/")
-FORMATS = {"shapes": "shacl", "diagram": "puml", "document": "doc"}
+FORMATS = {"shapes": "shacl", "diagram": "puml", "document": "doc", "ShExC": "shex"}
 FOAF = "http://xmlns.com/foaf/0.1/"
 
 

@@ -151,7 +151,7 @@ GraphProfile:        # attributes +=
 | `PatternGraph` (mixin `GraphView`) | `graph` (uriorcurie), `prefixes` (PrefixDeclaration*), `hidden_classes` (int), `blocks` (PatternBlock*), `nested_blocks` (PatternBlock*, every nested group's own block, edges from depth 1), `glossary` (GlossaryEntry*) |
 | `ShexConstraint` | `predicate`, `value`, `cardinality`, `comment`, `inline` (ShexConstraint*), `depth` |
 | `ShexShape` | `comment`, `label`, `blank` (bool), `constraints` (ShexConstraint*) |
-| `ShexSchema` (mixin `GraphView`) | `prefixes`, `shapes` (ShexShape*), `glossary` (text*), `skipped_terms` (text*) |
+| `ShexSchema` (mixin `GraphView`) | `prefixes`, `shapes` (ShexShape*), `glossary` (text*), `skipped_terms` (text*), `hidden_classes` (integer, the `# hidden:` count) |
 
 **Backward compatibility:** `term_annotations` is optional. A 3.0 or 3.1 `profile.json` (including `tests/test_data/profiles/scanned-profile.json`, with pitfall results) validates
 (`extra=forbid` only rejects unknown keys) and loads with `term_annotations` `None`, which every

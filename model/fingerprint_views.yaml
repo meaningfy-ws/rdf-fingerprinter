@@ -270,6 +270,7 @@ classes:
     mixins: [GraphView]
     attributes:
       prefixes: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true }
+      hidden_classes: { range: integer }
       shapes: { range: ShexShape, multivalued: true, inlined_as_list: true }
       glossary: { multivalued: true }
       skipped_terms: { multivalued: true }

@@ -589,7 +589,7 @@ class PatternGraph(GraphView):
                        'SampledClass',
                        'FailureNote']} })
     prefixes: Optional[list[PrefixDeclaration]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph', 'PatternGraph', 'ShexSchema']} })
-    hidden_classes: Optional[int] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternGraph']} })
+    hidden_classes: Optional[int] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternGraph', 'ShexSchema']} })
     blocks: Optional[list[PatternBlock]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternGraph']} })
     nested_blocks: Optional[list[PatternBlock]] = Field(default=None, description="""Every nested group's own block, edges from depth 1.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PatternGraph']} })
     glossary: Optional[list[GlossaryEntry]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternGraph', 'ShexSchema']} })
@@ -646,6 +646,7 @@ class ShexSchema(GraphView):
          'mixins': ['GraphView']})
 
     prefixes: Optional[list[PrefixDeclaration]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ShapesGraph', 'PatternGraph', 'ShexSchema']} })
+    hidden_classes: Optional[int] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternGraph', 'ShexSchema']} })
     shapes: Optional[list[ShexShape]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ShexSchema']} })
     glossary: Optional[list[str]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternGraph', 'ShexSchema']} })
     skipped_terms: Optional[list[str]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ShexSchema']} })

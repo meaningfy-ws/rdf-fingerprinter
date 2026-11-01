@@ -1,4 +1,4 @@
-"""The generator commands `fingerprint-gen-shacl`, `-puml`, `-doc`, `-pitfalls`, `-pattern`: a profile in, one output.
+"""The generator commands `fingerprint-gen-shacl`, `-puml`, `-doc`, `-pitfalls`, `-pattern`, `-shex`: a profile in, one output.
 
 Shaped after LinkML's `gen-*` commands and their shared arguments (P-3, P-4); they only parse and map
 the outcome to an exit code (0 written, 2 usage error, 4 unexpected error, P-13).
@@ -14,7 +14,7 @@ import click
 from fingerprint.domain.views import GeneratorOptions, RepresentationFormat
 from fingerprint.entrypoints.cli import EXIT_UNEXPECTED, configure_logging
 from fingerprint.service_layer.exceptions import UsageError
-from fingerprint.service_layer.generators import DOC, PATTERN, PITFALLS, PUML, SHACL
+from fingerprint.service_layer.generators import DOC, PATTERN, PITFALLS, PUML, SHACL, SHEX
 from fingerprint.service_layer.representations import generate_from_profile_file
 from fingerprint.service_layer.settings import load_user_prefixes
 
@@ -111,11 +111,24 @@ def gen_pitfalls(profile: str, output: str, threshold: float | None, template: s
     generate_one(PITFALLS, profile, output, threshold, template, shared)
 
 
+def size_and_label_options(command: Callable[..., Any]) -> Callable[..., Any]:
+    """The options of the two LLM outputs, the pattern schema and the ShExC."""
+    for decorator in reversed(
+        [
+            click.option(
+                "--ontology", type=click.Path(dir_okay=False), help="an ontology file whose labels and descriptions win"
+            ),
+            click.option("--min-instances", type=click.IntRange(min=1), help="leave out classes with fewer instances"),
+            click.option("--max-classes", type=click.IntRange(min=1), help="show only this many classes, the largest first"),
+        ]
+    ):
+        command = decorator(command)
+    return command
+
+
 @click.command()
 @shared_arguments
-@click.option("--ontology", type=click.Path(dir_okay=False), help="an ontology file whose labels and descriptions win")
-@click.option("--min-instances", type=click.IntRange(min=1), help="leave out classes with fewer instances")
-@click.option("--max-classes", type=click.IntRange(min=1), help="show only this many classes, the largest first")
+@size_and_label_options
 def gen_pattern(
     profile: str,
     output: str,
@@ -129,5 +142,25 @@ def gen_pattern(
     """The pattern schema, one text file per graph with a block, from a saved profile.json."""
     generate_one(
         PATTERN, profile, output, threshold, template, shared,
+        ontology=ontology, min_instances=min_instances, max_classes=max_classes,
+    )  # fmt: skip
+
+
+@click.command()
+@shared_arguments
+@size_and_label_options
+def gen_shex(
+    profile: str,
+    output: str,
+    threshold: float | None,
+    template: str | None,
+    ontology: str | None,
+    min_instances: int | None,
+    max_classes: int | None,
+    **shared,
+):
+    """The enriched ShExC, one .shex file per graph with a block, from a saved profile.json."""
+    generate_one(
+        SHEX, profile, output, threshold, template, shared,
         ontology=ontology, min_instances=min_instances, max_classes=max_classes,
     )  # fmt: skip
