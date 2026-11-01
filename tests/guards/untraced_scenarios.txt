@@ -1,0 +1,24 @@
+# Spec scenarios proven by a pytest test rather than a Gherkin scenario (lean-test-suite P-3).
+# <capability> | <scenario title> | <path>::<module-level test function> | <reason>
+# Only developer-tooling has entries: its scenarios are about the repository, not the product.
+
+# --- openspec/specs/developer-tooling ---
+developer-tooling | Layer violation fails | tests/guards/test_test_fences.py::test_the_real_tree_keeps_every_contract | closest guard: proves the real tree keeps every import contract, not that a service_layer import of entrypoints fails; the tests-tier violation is proven by the fences test below
+developer-tooling | Import from another directory | tests/guards/test_package.py::test_import_from_another_directory_has_no_logging_side_effects | imports the package from a directory without logging.conf and checks the root logger
+developer-tooling | Oxigraph renders the type columns | tests/e2e/test_report_generation.py::test_the_report_page_on_the_test_store | local-only e2e: generates the report against Oxigraph and asserts no td cell reads nan
+developer-tooling | e2e against the local Oxigraph | tests/e2e/test_entrypoints_cli.py::test_fingerprint_execution | local-only e2e: runs the CLI against the local endpoint; does not check that make test-e2e wires it
+developer-tooling | Mutating a profile object | tests/unit/domain/test_views.py::test_a_view_object_cannot_be_changed | checks a generated views object is frozen; profile objects share the generated frozen config
+developer-tooling | Banner present | tests/unit/domain/test_views.py::test_generated_modules_carry_the_banner | parametrised over profile.py and views.py; reads the first line, does not run make generate-models
+developer-tooling | Generated module imports project code | tests/guards/test_test_fences.py::test_the_real_tree_keeps_every_contract | closest guard: the forbidden contract for fingerprint.domain.generated holds on the real tree; no test adds the violating import
+developer-tooling | Domain imports an adapter | tests/guards/test_test_fences.py::test_the_real_tree_keeps_every_contract | closest guard: the domain-isolation contracts hold on the real tree; no test adds the violating import
+developer-tooling | A new dict value is refused | tests/guards/test_no_composed_dicts.py::test_the_check_finds_composed_dicts | feeds the checker a function returning a dict display and expects the offending line
+developer-tooling | A marked library boundary passes | tests/guards/test_no_composed_dicts.py::test_the_check_finds_composed_dicts | one of its cases is a dict-ok marked line that yields no offence
+developer-tooling | A variable changes a default | tests/unit/adapters/test_config.py::test_a_variable_changes_a_default | sets RDF_FINGERPRINTER_PROFILE_FILE and checks the saved profile name
+developer-tooling | A badly typed variable | tests/unit/adapters/test_config.py::test_a_badly_typed_variable_exits_2_before_any_query | runs the command with a bad backoff value; expects exit 2 naming the variable
+
+# --- this change's delta (lean-test-suite) ---
+developer-tooling | A spec scenario without a test | tests/guards/test_traceability.py::test_a_spec_scenario_without_a_feature_scenario_names_the_capability_and_title | TC-1 on a small tree under tmp_path
+developer-tooling | An orphan feature scenario | tests/guards/test_traceability.py::test_an_orphan_feature_scenario_names_the_feature_file_and_title | TC-2 on a small tree under tmp_path
+developer-tooling | A stale allow-list entry | tests/guards/test_traceability.py::test_an_entry_naming_a_missing_function_names_the_entry | TC-3 on a small tree under tmp_path
+developer-tooling | A domain test imports the service layer | tests/guards/test_test_fences.py::test_a_domain_test_importing_a_higher_layer_or_a_double_fails | TC-5 lints a temporary copy of the tree with the violating import; parametrised over three imports
+developer-tooling | A unit test reaches the network | tests/guards/test_no_network.py::test_a_unit_test_cannot_open_a_socket | TC-4 checks the RuntimeError naming the rule
