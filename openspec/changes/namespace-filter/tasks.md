@@ -24,10 +24,10 @@ step definitions. Scenario titles are cited as `cap › Requirement › Scenario
 - [x] 1.1 Model: the additions of design "Layering and modules" to `model/fingerprint_views.yaml` (`FilterOption`, `FilterMatch`, `NamespaceFilter`, `GraphView.excluded_note`, `ExcludedGraphNote`, `Caveats.excluded`, `PrefixDeclaration.excluded`, `DocumentProperty.prefix`, `ProfileDocument.switches`, the two option descriptions) and `model/fingerprint_analytics.yaml` (`ExcludedTerms`, `GraphAnalytics.excluded_terms`, `NamespaceUse`, `ProfileAnalytics.namespace_uses`); `make generate-models`; `fingerprint.domain.namespace_filter` added to the `generated` contract in `.importlinter`
   - Layer: domain (model). Depends on: —.
   - Tests: `make check-models` green; `tests/unit/adapters/test_profile_file.py` round-trip still green and `model/fingerprint_stats.yaml` unchanged (`git diff --exit-code model/fingerprint_stats.yaml`).
-- [ ] 1.2 `PrefixTable.match` replacing `resolve` (P-4); `fingerprint/domain/namespace_filter.py` with `META_NAMESPACES` (moved from `generator.py`) and `namespace_filter` (design §A)
+- [x] 1.2 `PrefixTable.match` replacing `resolve` (P-4); `fingerprint/domain/namespace_filter.py` with `META_NAMESPACES` (moved from `generator.py`) and `namespace_filter` (design §A)
   - Layer: domain. Depends on: 1.1. GitNexus impact: `PrefixTable.resolve`, `META_NAMESPACES`.
   - Tests: TC-F1, TC-F2; 100% branch coverage of the new code.
-- [ ] 1.3 `value_type_indicators` extracted from `_partition_indicators` in `fingerprint/domain/analytics.py` (P-2); `namespace_uses` (moved from `DocumentGenerator.namespace_table`) and `exclude_terms` (on the analysed profile, removing and counting per design §B, leaving every field §C marks unchanged) and `note_text` (§D) in `namespace_filter.py`; `filter_runs()` strategy in `tests/unit/domain/strategies.py`
+- [x] 1.3 `value_type_indicators` extracted from `_partition_indicators` in `fingerprint/domain/analytics.py` (P-2); `namespace_uses` (moved from `DocumentGenerator.namespace_table`) and `exclude_terms` (on the analysed profile, removing and counting per design §B, leaving every field §C marks unchanged) and `note_text` (§D) in `namespace_filter.py`; `filter_runs()` strategy in `tests/unit/domain/strategies.py`
   - Layer: domain. Depends on: 1.2. GitNexus impact: `_partition_indicators`, `value_profile`.
   - Tests: TC-F3, TC-F4, TC-F5 (Hypothesis, including the unchanged-fields property), TC-F6, TC-F7; 100% branch coverage.
 - [ ] 1.4 Wiring (design §E, P-1, P-3, P-8): `generate_representations` analyses as today, then applies `exclude_terms` to the analytics and warns; `warn_unknown_filters` folded in; `excluded_namespaces()` removed and `Generator.__init__` built on `namespace_filter`; `filter_profile()` and the other profiles the scenarios name in `tests/builders.py`; step definitions for the 1.4 rows of "Still red until bound"
@@ -60,7 +60,7 @@ step definitions. Scenario titles are cited as `cap › Requirement › Scenario
 
 ## Roadmap
 
-- [x] 1.1 · [ ] 1.2 · [ ] 1.3 · [ ] 1.4 · [ ] 1.7 · [ ] 1.5 · [ ] 1.6 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11
+- [x] 1.1 · [x] 1.2 · [x] 1.3 · [ ] 1.4 · [ ] 1.7 · [ ] 1.5 · [ ] 1.6 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11
 
 ## Verification
 

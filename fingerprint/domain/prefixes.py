@@ -150,6 +150,15 @@ class PrefixTable:
     def by_namespace(self, namespace: str) -> NamespacePrefix | None:
         return self._by_namespace.get(namespace)
 
-    def resolve(self, name: str) -> NamespacePrefix | None:
-        """A `--exclude-namespace`/`--include-namespace` value: a prefix first, then a namespace IRI."""
-        return self.by_prefix(name) or self.by_namespace(name)
+    def match(self, value: str) -> list[NamespacePrefix]:
+        """The entries a `--exclude-namespace`/`--include-namespace` value names, by the first rule that fits, in
+        namespace order: an IRI stem (the value holds `:`), a prefix glob (`*` for any run of characters), an exact
+        prefix. All three are case-sensitive (namespace-filter DEC-6)."""
+        if ":" in value:
+            found = [e for e in self.entries if e.namespace.startswith(value)]
+        elif "*" in value:
+            glob = re.compile("".join(".*" if part == "*" else re.escape(part) for part in re.split(r"(\*)", value)))
+            found = [e for e in self.entries if glob.fullmatch(e.prefix)]
+        else:
+            found = [entry] if (entry := self.by_prefix(value)) else []
+        return sorted(found, key=lambda e: e.namespace)

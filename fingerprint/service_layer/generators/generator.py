@@ -19,18 +19,16 @@ from pydantic import BaseModel
 from fingerprint import config
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref
+from fingerprint.domain.namespace_filter import META_NAMESPACES
 from fingerprint.domain.prefixes import PrefixTable, namespace_of
 from fingerprint.domain.profile import ClassAnalytics, GraphAnalytics, ProfileAnalytics, PropertyAnalytics
 from fingerprint.domain.views import GeneratorOptions, GraphView, OutputCheck, RenderedDocument
-from fingerprint.domain.vocabulary import OWL, RDF, RDFS, SH
 from fingerprint.service_layer.prefixes import resolve_namespaces
 
 logger = logging.getLogger(__name__)
 
 # Graph names reach PlantUML titles and Turtle comments, where the tools interpret text: keep it plain.
 _NOT_PLAIN = re.compile(r"[^\w:/#.~ -]")
-# The meta vocabularies no output shows by default (readable-representations DEC-8).
-META_NAMESPACES = frozenset({RDF, RDFS, OWL, SH})
 
 
 class TemplateRenderer(Protocol):
@@ -80,13 +78,12 @@ def excluded_namespaces(options: GeneratorOptions, table: PrefixTable) -> tuple[
     unknown: list[str] = []
 
     def namespaces(names: list[str] | None) -> set[str]:
-        found = set()
+        found: set[str] = set()
         for name in names or []:
-            entry = table.resolve(name)
-            if entry is None:
+            entries = table.match(name)
+            if not entries:
                 unknown.append(name)
-            else:
-                found.add(entry.namespace)
+            found.update(entry.namespace for entry in entries)
         return found
 
     excluded = (set(META_NAMESPACES) | namespaces(options.exclude_namespaces)) - namespaces(options.include_namespaces)

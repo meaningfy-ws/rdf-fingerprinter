@@ -60,7 +60,52 @@ def test_table_lookups():
     assert table.by_prefix("ex").namespace == "http://ex.org/"
     assert table.by_namespace("http://ex.org/").prefix == "ex"
     assert table.by_prefix("nope") is None and PrefixTable(None).curie("http://ex.org/a") == "http://ex.org/a"
-    assert table.resolve("ex").namespace == "http://ex.org/" and table.resolve("http://ex.org/").prefix == "ex"
+
+
+EX = "http://example.org/"
+FILTER_TABLE = PrefixTable(
+    [entry("ex", EX), entry("rel", EX + "rel/"), entry("relx", EX + "relx/"), entry("org", "http://org.example/")]
+)
+
+
+@pytest.mark.parametrize(
+    ("value", "prefixes"),
+    [
+        ("rel", ["rel"]),  # exact prefix
+        ("rel*", ["rel", "relx"]),  # glob
+        ("*lx", ["relx"]),
+        ("*x", ["ex", "relx"]),  # `ex` ends with `x` too: the table of the design's §A and the scenario say `relx` only
+        ("*", ["ex", "rel", "relx", "org"]),  # in namespace order
+        ("**", ["ex", "rel", "relx", "org"]),  # repeated stars
+        ("r*l*", ["rel", "relx"]),
+        ("Rel*", []),  # a glob is case-sensitive
+        ("REL", []),
+        ("", []),
+        ("nope", []),
+        (EX + "rel/", ["rel"]),  # stem: `…/relx/` does not start with `…/rel/`
+        (EX, ["ex", "rel", "relx"]),  # a full namespace IRI is a stem: it takes the namespaces under it
+        ("http://org.example/", ["org"]),
+        ("HTTP://example.org/", []),  # a stem is case-sensitive
+        (EX + "*", []),  # `*` is literal in a stem
+        ("http:", ["ex", "rel", "relx", "org"]),
+    ],
+)
+def test_match_applies_the_first_rule_that_fits(value, prefixes):
+    assert [e.prefix for e in FILTER_TABLE.match(value)] == prefixes
+
+
+def test_a_glob_takes_dot_question_mark_and_brackets_literally():
+    table = PrefixTable(
+        [entry("a.bc", "http://a/"), entry("axbc", "http://b/"), entry("a-b", "http://c/"), entry("a[b]", "http://d/")]
+    )
+    assert [e.prefix for e in table.match("a.b*")] == ["a.bc"]
+    assert [e.prefix for e in table.match("a?b*")] == []
+    assert [e.prefix for e in table.match("a[b]*")] == ["a[b]"]
+
+
+def test_match_lists_the_namespaces_in_iri_order():
+    table = PrefixTable([entry("z", "http://a.org/"), entry("a", "http://z.org/")])
+    assert [e.namespace for e in table.match("*")] == ["http://a.org/", "http://z.org/"]
 
 
 def test_the_namespace_of_the_iri_wins_over_a_longer_entry_that_only_starts_the_local_name():

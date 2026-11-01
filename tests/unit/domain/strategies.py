@@ -8,7 +8,10 @@ from fingerprint.domain.profile import (
     ClassProfile,
     NamespacePrefix,
     PrefixSource,
+    ProfileRun,
     PropertyProfile,
+    TermAnnotation,
+    ValueCount,
     ValuePartition,
 )
 from fingerprint.domain.vocabulary import ALT_LABEL, RDFS, TERM_DESCRIPTION_PREDICATES, TERM_LABEL_PREDICATES
@@ -129,3 +132,53 @@ def pattern_graphs(draw):
         ]
         classes.append(builders.klass(_CLASSES[index], instances, *properties))
     return classes
+
+
+# Three namespaces, one of them under another's IRI: the world of the namespace filter's properties.
+FILTER_NAMESPACES = ["http://ex.org/", "http://ex.org/rel/", "http://org.org/"]
+FILTER_TABLE = [
+    NamespacePrefix(prefix=p, namespace=ns, source=PrefixSource.packaged)
+    for p, ns in zip(["ex", "rel", "org"], FILTER_NAMESPACES, strict=True)
+]
+_FILTER_TERMS = st.builds(lambda ns, name: ns + name, st.sampled_from(FILTER_NAMESPACES), st.sampled_from("abcd"))
+
+
+@st.composite
+def _filter_property(draw, iri):
+    """A property whose objects are literals and resources of the namespaces, with top values that are sometimes one IRI."""
+    parts = draw(
+        st.lists(
+            st.one_of(_partitions(), st.builds(builders.resources, st.integers(1, 6), _FILTER_TERMS)), min_size=1, max_size=3
+        )
+    )
+    total = sum(p.triples for p in parts)
+    top = draw(st.lists(st.builds(ValueCount, value=_FILTER_TERMS, triples=st.integers(1, 6)), max_size=2))
+    return builders.prop(iri, {1: total}, *parts).model_copy(
+        update={"distinct_objects": draw(st.integers(1, 2)), "top_values": top or None}
+    )
+
+
+@st.composite
+def filter_runs(draw):
+    """A run of up to two graphs: classes, properties, co-types, declared parents and annotations drawn from three
+    namespaces, so that every position `exclude_terms` filters occurs."""
+    graphs = []
+    for _ in range(draw(st.integers(0, 2))):
+        iris = draw(st.lists(_FILTER_TERMS, unique=True, max_size=4))
+        classes = []
+        for iri in iris:
+            properties = [draw(_filter_property(p)) for p in draw(st.lists(_FILTER_TERMS, unique=True, max_size=3))]
+            classes.append(
+                builders.klass(
+                    iri,
+                    draw(st.integers(1, 6)),
+                    *properties,
+                    co_types=[(c, 1) for c in draw(st.lists(_FILTER_TERMS, max_size=2, unique=True))],
+                )
+            )
+        edges = draw(st.lists(st.tuples(_FILTER_TERMS, _FILTER_TERMS), max_size=2))
+        base = builders.profile_run(*classes, graph=draw(st.sampled_from([None, "http://g.org/g"])), edges=edges).graphs[0]
+        notes = draw(st.one_of(st.none(), st.lists(st.builds(TermAnnotation, term=_FILTER_TERMS), max_size=3)))
+        graphs.append(base.model_copy(update={"term_annotations": notes}))
+    run = builders.profile_run()
+    return ProfileRun(settings=run.settings, graphs=graphs, namespaces=FILTER_TABLE)
