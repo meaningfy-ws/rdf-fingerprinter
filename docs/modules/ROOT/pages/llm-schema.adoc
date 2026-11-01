@@ -1,0 +1,375 @@
+= Schemas for LLMs
+:description: The pattern schema and the enriched ShExC: compact, labelled schemas of a fingerprinted graph for a language model that writes SPARQL.
+
+A language model writes better SPARQL when it knows the shape of the data: which classes exist, which
+properties link them, and what the values look like. The SHACL shapes say this, but at about nine
+times the size. rdf-fingerprinter renders the same saved profile in two compact forms for a model's
+context window:
+
+[cols="1,2,3"]
+|===
+| Format | Files | Content
+
+| Pattern schema (primary) | `pattern-<graph>.txt`, one per graph with a block | triple-pattern lines `(:Class)-property-> (:Target)` with statistics, nested blank nodes and a glossary
+| Enriched ShExC | `shex-<graph>.shex`, one per graph with a block | the same content as ShEx shapes, the statistics in comments; every file parses with PyShExC
+|===
+
+Both are rendered from one <<pattern-view,pattern view>> of the profile, so they never disagree. Like
+every xref:representations.adoc[representation], they are generated from `profile.json` alone and
+send no query.
+
+== Generate
+
+[source,bash]
+----
+fingerprint -e https://my.endpoint/sparql -o out --format pattern --format shex
+fingerprint-gen-pattern out/profile.json -o llm/ --ontology vocab.ttl --max-classes 30
+fingerprint-gen-shex    out/profile.json -o llm/ --min-instances 10
+----
+
+The two `fingerprint-gen-*` commands take the options every generator takes
+(xref:representations.adoc#later-from-the-saved-profile[Representations]: `-o`, `--threshold`,
+`--template`, `--prefixes`, `--exclude-namespace`, `--include-namespace`), plus:
+
+[cols="1,3"]
+|===
+| `--ontology FILE` | an RDF file (Turtle, RDF/XML, TriG, N-Quads, … by its extension) whose labels and descriptions win over the profile's (<<labels,Labels and descriptions>>)
+| `--min-instances N` | hide classes with fewer than N instances; N ≥ 1 (<<size-filters,Size filters>>)
+| `--max-classes K` | show only the K largest classes; K ≥ 1
+|===
+
+`fingerprint --format pattern|shex` renders with the defaults: no ontology file and no size filter;
+the labels come from the store (<<labels,Q12>>). An unreadable ontology file or a value below 1 is a
+usage error (exit 2), and nothing is written.
+
+== Sizes
+
+Measured on the test profile (`tests/test_data/golden/`, Unicode code points). "Body" leaves out the
+`PREFIX` lines and the legend line.
+
+[cols="2,1,1"]
+|===
+| File | Full | Body
+
+| `pattern-continents-214e8f67.txt` | 2,287 | 1,234
+| `shex-continents-214e8f67.shex` | 2,212 | 1,455
+| `shapes-continents-214e8f67.ttl` (SHACL) | 10,950 | —
+| `pattern-treaties-3b4301a8.txt` | 3,931 | 2,782
+| `shex-treaties-3b4301a8.shex` | 4,113 | 3,260
+| `shapes-treaties-3b4301a8.ttl` (SHACL) | 23,647 | —
+|===
+
+The pattern body of `continents` is about nine times smaller than its SHACL, the whole file about
+five times. The pattern legend is 596 code points, the ShExC legend 300.
+
+== The pattern schema
+
+The whole file for the graph `continents` of the test data
+(`tests/test_data/golden/pattern-continents-214e8f67.txt`):
+
+[source,text]
+----
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX euvoc: <http://publications.europa.eu/ontology/euvoc#>
+PREFIX lvont: <http://lexvo.org/ontology#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+# (:A&B) n: classes with the same n instances · ~m first_n: statistics over the first m read · co C k: k also typed C · via (:S)-p: incoming links · -p-> (:T|U) object classes · IRI, BNODE untyped · . not collected · deeper indent: a blank node's own edges, statistics over all its instances, up to 3 hops · ^ expanded under another edge · … deeper than 3 hops · k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured
+(:euvoc:Continent&skos:Concept) 6
+  -dcterms:created-> xsd:date =2014-10-10
+  -euvoc:startDate-> xsd:date =1952-07-24
+  -euvoc:status-> IRI d1
+  -euvoc:xlNotation-> (:euvoc:XlNotation) bn
+    -dcterms:created-> xsd:date =2014-10-10
+    -dcterms:type-> IRI d1
+    -euvoc:startDate-> xsd:date =1952-07-24
+    -euvoc:status-> IRI d1
+    -rdf:value-> xsd:string AFRICA..OCEANIA
+  -skos:inScheme-> (:owl:Ontology&skos:ConceptScheme) d1
+  -skos:topConceptOf-> (:owl:Ontology&skos:ConceptScheme) d1
+  -skosxl:prefLabel-> (:skosxl:Label) ×24 bn
+    -dcterms:created-> xsd:date =2014-10-10
+    -dcterms:type-> IRI d1
+    -euvoc:startDate-> xsd:date 1952-07-24..2014-10-10 d2
+    -euvoc:status-> IRI d1
+    -lvont:script-> IRI 12/145 d2
+    -skosxl:literalForm-> rdf:langString @24
+(:owl:Ontology&skos:ConceptScheme) 1 via (:euvoc:Continent&skos:Concept)-skos:inScheme, (:euvoc:Continent&skos:Concept)-skos:topConceptOf
+  -dcterms:created-> xsd:date =2014-10-10
+  -dcterms:identifier-> xsd:string =http://publications.europa.eu/resource/authority/continent
+  -euvoc:startDate-> xsd:date =2014-10-10
+  -euvoc:status-> IRI
+  -owl:imports-> IRI
+  -rdfs:comment-> rdfs:Literal =Continent
+  -skosxl:prefLabel-> (:skosxl:Label) bn ^
+# glossary: none
+----
+
+Read it as:
+
+* `(:euvoc:Continent&skos:Concept) 6` — a *block*: 6 instances, each typed both classes (a
+  xref:glossary.adoc#merged-group[merged group]). The arrows are SPARQL triple-pattern notation:
+  `?c a euvoc:Continent ; skos:inScheme ?s . ?s a skos:ConceptScheme`.
+* `-skosxl:prefLabel-> (:skosxl:Label) ×24 bn` — every continent has 24 labels, all blank nodes. The
+  indented lines below it are the label nodes' own edges (a xref:glossary.adoc#nested-group[nested group]), with
+  statistics over all 145 `skosxl:Label` instances: `12/145` of them have `lvont:script`.
+* `bn ^` on the scheme's `skosxl:prefLabel` — the same nested group, already expanded under another
+  edge.
+* `owl:Ontology` is a meta class, hidden by default, yet it stays in the group name, because its
+  group has the shown member `skos:ConceptScheme`.
+
+=== Blocks and headers
+
+The file holds, in order: the `PREFIX` lines it uses, sorted; the legend line; `# hidden: <n> classes`
+when filters hid any class; the blocks, by instances (largest first), then by name; the glossary.
+
+A block header is `(:<group>) <instances>`, then:
+
+[cols="1,3"]
+|===
+| ` ~<m> first_n` | the class was read in first-N mode; the statistics cover its first m instances
+| ` co <class> <k>` | k instances are also typed `<class>`, which is not merged into the group
+| ` via (:S)-p, …` | incoming links: the groups and properties that point at this group, by source then property
+|===
+
+=== Edges
+
+An edge is two spaces per level, `-<property>-> <target>`, then its statistics. One edge per property,
+by prefixed name. The target lists, joined by `|`:
+
+. the object classes, by group name, inside one `(:…|…)`, hidden groups included; a class typed in
+  another graph is written `(:ex:Person @<http://ex.org/people>)`;
+. the literal datatypes; a language-tagged literal is `rdf:langString`, a plain one `xsd:string`;
+. `IRI` for untyped IRI objects, `BNODE` for untyped blank nodes.
+
+A property with no recorded values has the target `.`.
+
+The statistics, each after one space, in this order:
+
+[cols="1,3"]
+|===
+| Token | Meaning
+
+| `k/n` | k of the n observed instances have the property; omitted when all do
+| `×a`, `×a-b` | values per instance that has it, fewest to most; omitted when 1
+| `bn` | some objects are blank nodes
+| `@en`, `@24` | the one language, or the number of languages
+| `=v` | one literal datatype, and every value is `v`
+| `lo..hi` | one literal datatype, smallest and largest value
+| `=prefix:local` | every object is the one IRI; only when the profile has top values (depth `rich_values` or deeper)
+| `dN` | N distinct objects, fewer than the triples; omitted with `=v` or `=name`
+| `presence` | found by the completeness check only; no other statistic
+|===
+
+A value is written bare when it is not empty and holds no white space, no `"` and no `..`. Otherwise,
+or when it is longer than 64 characters, it is a JSON string, cut at 64 characters with `…`:
+`="Treaty of Rome"`, `="1..2"`, `=""`.
+
+[#chains]
+=== Nested blank nodes
+
+A class whose instances are reached only as blank-node objects, and by enough of them to cover all its
+instances, gets no block. Its edges are written under the edge that reaches it, one level deeper.
+A hop is one edge; edges sit at levels 1 to 3, so the deepest chain is class → blank node → blank
+node → target.
+
+* Each nested group is expanded once, under the shallowest edge with the most triples into it
+  (ties: source name, then property name). Every other edge into it ends ` ^`.
+* An edge at level 3 into a group expanded nowhere ends ` …` (deeper than 3 hops).
+* A blank-node cycle is expanded once; its edge back to itself ends ` ^`.
+
+The statistics of a nested group are over all its instances, not per path.
+
+[#grammar]
+=== Grammar
+
+[source,ebnf]
+----
+output    ::= prefix* legend [hidden] block* glossary
+prefix    ::= "PREFIX " PNAME_NS " <" IRI ">" NL
+legend    ::= "# " LEGEND NL
+hidden    ::= "# hidden: " INT " classes" NL
+block     ::= header NL edge*
+header    ::= "(:" group ") " INT [" ~" INT " first_n"] [" co " pair (", " pair)*] [" via " link (", " link)*]
+link      ::= "(:" group ")-" name
+edge      ::= INDENT "-" name "-> " target (" " stat)* [" ^" | " …"] NL edge*   (* INDENT = 2 × level, level 1..3 *)
+target    ::= alt ("|" alt)* | "."
+alt       ::= "(:" gref ("|" gref)* ")" | name | "IRI" | "BNODE"   (* the class part comes first, once *)
+gref      ::= group [" @<" IRI ">"]                   (* typed in another graph *)
+group     ::= name ("&" name)*                        (* & binds tighter than | *)
+pair      ::= name " " INT
+stat      ::= INT "/" INT | "×" INT ["-" INT] | "bn" | "@" (INT | LANG) | "=" VALUE | "=" name | VALUE ".." VALUE | "d" INT | "presence"
+glossary  ::= "# glossary: none" NL | "# glossary" NL entry*
+entry     ::= name (" " STRING ["@" LANG] [": " TEXT] | ": " TEXT) NL
+name      ::= PNAME | "<" IRI ">"
+VALUE     ::= a lexical form, non-empty, ≤64 chars, without white space, '"' or ".." | a JSON string (cut at 64 + "…")
+----
+
+== The enriched ShExC
+
+The same view as ShEx Compact Syntax, for tools and models that know ShEx. The block header becomes a
+comment, each edge a triple constraint with its cardinality, and the statistics a comment after it.
+From `tests/test_data/golden/shex-continents-214e8f67.shex` (prefixes left out):
+
+[source,shex]
+----
+# comments use the pattern schema's legend: k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured · … deeper than 3 hops
+# (:euvoc:Continent&skos:Concept) 6
+euvoc:Continent {
+  dcterms:created xsd:date ;  # =2014-10-10
+  euvoc:startDate xsd:date ;  # =1952-07-24
+  euvoc:status IRI ;  # d1
+  euvoc:xlNotation BNODE {  # (:euvoc:XlNotation) bn
+    dcterms:created xsd:date ;  # =2014-10-10
+    dcterms:type IRI ;  # d1
+    euvoc:startDate xsd:date ;  # =1952-07-24
+    euvoc:status IRI ;  # d1
+    rdf:value xsd:string ;  # AFRICA..OCEANIA
+  } ;
+  skos:inScheme @skos:ConceptScheme ;  # (:owl:Ontology&skos:ConceptScheme) d1
+  skos:topConceptOf @skos:ConceptScheme ;  # (:owl:Ontology&skos:ConceptScheme) d1
+  skosxl:prefLabel BNODE @skosxl:Label {24} ;  # (:skosxl:Label) ×24 bn
+}
+# (:owl:Ontology&skos:ConceptScheme) 1 via (:euvoc:Continent&skos:Concept)-skos:inScheme, (:euvoc:Continent&skos:Concept)-skos:topConceptOf
+skos:ConceptScheme {
+  dcterms:created xsd:date ;  # =2014-10-10
+  dcterms:identifier xsd:string ;  # =http://publications.europa.eu/resource/authority/continent
+  euvoc:startDate xsd:date ;  # =2014-10-10
+  euvoc:status IRI ;
+  owl:imports IRI ;
+  rdfs:comment rdfs:Literal ;  # =Continent
+  skosxl:prefLabel BNODE @skosxl:Label ;  # (:skosxl:Label) bn
+}
+# (:skosxl:Label) 145
+skosxl:Label BNODE {
+  dcterms:created xsd:date ;  # =2014-10-10
+  dcterms:type IRI ;  # d1
+  euvoc:startDate xsd:date ;  # 1952-07-24..2014-10-10 d2
+  euvoc:status IRI ;  # d1
+  lvont:script IRI ? ;  # 12/145 d2
+  skosxl:literalForm rdf:langString ;  # @24
+}
+# glossary: none
+----
+
+[cols="1,3"]
+|===
+| Pattern view | ShExC
+
+| block | `# ` + the header, then a shape named after the group's first shown member
+| edge | `<property> <value> <cardinality> ;`, then `  # <comment>` when the comment is not empty: the target text when it names a class group, the statistics, and `… deeper than 3 hops` where the pattern has ` …`
+| value | a group with a shape in the file → `@<shape>`; any other class (hidden, from another graph, not profiled) → `IRI`; a datatype as is; several → `(a OR b)`
+| cardinality | exactly 1 → nothing; 0–1 → `?`; exactly a > 1 → `\{a}`; else `{a,b}`; no histogram → `*`
+| nested group reached by one edge | inline: `p BNODE { … } ;`
+| nested group reached by more edges | one `<label> BNODE { … }` shape after the block shapes, referenced as `BNODE @<label>`
+| nested group expanded nowhere | `BNODE`, no shape
+| glossary | each line commented with `# `
+|===
+
+The cardinalities record what was observed. PyShExC rejects `=` in an IRI, so a class or property whose IRI holds `=` is left out of
+the ShExC and listed on a `# skipped:` line; the pattern schema keeps it as `<IRI>`.
+
+[#labels]
+== Labels and descriptions
+
+A model maps a question's words to terms through their labels. Each class and property can carry
+labels and one description, from two sources:
+
+. **The store.** At every depth from `classes` on, the collector sends one query per graph (Q12,
+  xref:statistics.adoc[Statistics]) for the labels and descriptions of the graph's classes and, from
+  depth `properties`, of its properties. It looks in the default graph and in every named graph, so an
+  ontology loaded in its own graph counts. The selected values are saved in `profile.json`
+  (`term_annotations`).
+. **An ontology file**, `--ontology FILE`, read when generating.
+
+The predicates, in priority order:
+
+[cols="1,3"]
+|===
+| Label | `skos:prefLabel`, `skosxl:prefLabel`/`skosxl:literalForm`, `rdfs:label`, `dcterms:title`; `skos:altLabel` only when none of these is there
+| Description | `skos:definition`, `rdfs:comment`, `dcterms:description`, `skos:scopeNote`
+|===
+
+Only literals count. For each language (untagged counts as one), the value comes from the first
+predicate that has one in that language; among several, the smallest text wins.
+
+Per term and per field (labels, description), the ontology file's values win when it has any, else
+the store's; the two are never mixed. A term labelled `"Persoon"@nl` with the description `"Iemand"@nl`
+in the store, and `"Person"@en` with no description in the ontology, shows as
+`ex:Person "Person"@en: Iemand`.
+
+The *glossary* at the end of each file lists, by name, every term the file uses that has a label or a
+description. It shows one label and one description: the untagged one, else `en`, else the smallest
+language tag. A description is put on one line and cut at 200 characters with `…`. With the test
+fixture `tests/test_data/ontology/labels.ttl`, the treaties file ends with:
+
+[source,text]
+----
+# glossary
+dcterms:created "Date Created"@en: Date of creation of the resource.
+dcterms:type: A long description, longer than two hundred characters, so that the glossary has to shorten it: it goes on about the nature or genre of the resource, recommends a controlled vocabulary, and repeats it…
+euvoc:Treaty "Vertrag"@de
+skos:Concept "Concept"@en: An idea or notion; a unit of thought.
+skosxl:Label "Label"@en: A special class of lexical entities.
+skosxl:altLabel "alternative label"@en
+skosxl:prefLabel "preferred label"@en
+----
+
+Without labels, the glossary is `# glossary: none`. A profile saved before 3.2 has no
+`term_annotations` and renders that way.
+
+[#size-filters]
+== Size filters
+
+A large store can have hundreds of classes. The size filters keep the file within a context window.
+They apply after the xref:representations.adoc#filters[namespace filters], to named groups:
+
+* `--min-instances N` hides groups with fewer than N instances;
+* `--max-classes K` then keeps the K groups with the most instances (ties by name).
+
+A hidden group gets no block and leaves `via` lists, but is still named as an edge target, so no link
+is lost. The file says how many classes it hides. On the test profile, `--min-instances 2` hides the
+scheme (`owl:Ontology` and `skos:ConceptScheme`):
+
+[source,text]
+----
+# hidden: 2 classes
+(:euvoc:Continent&skos:Concept) 6
+  -dcterms:created-> xsd:date =2014-10-10
+  -euvoc:startDate-> xsd:date =1952-07-24
+  -euvoc:status-> IRI d1
+----
+
+and further down the block, `-skos:inScheme-> (:owl:Ontology&skos:ConceptScheme) d1` still names the
+hidden scheme. There is no `(:owl:Ontology&skos:ConceptScheme)` block.
+
+Nested groups are never hidden by size; they show wherever a shown block reaches them.
+
+[#pattern-view]
+== The pattern view
+
+Both files are layouts of one pattern view per graph (`PatternGraph` in
+`fingerprint/domain/views.py`, built by `fingerprint/domain/patterns.py`; the ShExC view `ShexSchema`
+by `fingerprint/domain/shex.py`). A custom template package (`--template`,
+xref:representations.adoc#your-own-templates[Your own templates]) receives that view as `view`. The
+view is built from the profile's analytics and term annotations only, and is deterministic: the same
+profile gives the same files.
+
+The view's terms (pattern view, merged group, nested group, term annotation) are defined in the
+xref:glossary.adoc#llm-schemas[glossary].
+
+== From Python
+
+[source,python]
+----
+from fingerprint.domain.views import GeneratorOptions
+from fingerprint.service_layer.representations import generate_from_profile_file, generate_representations
+
+generate_from_profile_file("out/profile.json", "llm/", ["pattern", "shex"])
+generate_representations(run, "llm/", ["pattern"],
+                         options=GeneratorOptions(ontology="vocab.ttl", min_instances=10, max_classes=30))
+----

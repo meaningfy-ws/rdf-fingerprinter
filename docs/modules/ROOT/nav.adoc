@@ -3,6 +3,7 @@
 * xref:how-it-works.adoc[How It Works]
 * xref:report.adoc[The Report]
 * xref:representations.adoc[Representations]
+* xref:llm-schema.adoc[Schemas for LLMs]
 * xref:pitfalls.adoc[Pitfalls]
 * xref:statistics.adoc[Statistics and Settings]
 * xref:api-reference.adoc[API Reference]

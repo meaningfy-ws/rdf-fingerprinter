@@ -114,6 +114,36 @@ or the run looked up object types across graphs (`object_type_scope = any_graph`
 validator's `sh:conforms` is false as soon as any result exists, whatever its severity; the promise
 of the generated shapes is "no `sh:Violation` on their own data", not "conforms". See xref:how-it-works.adoc#severity[How it works].
 
+[#llm-schemas]
+== Schemas for LLMs
+
+The terms of xref:llm-schema.adoc[Schemas for LLMs].
+
+[#pattern-schema]
+Pattern schema:: A compact text rendering of one graph's profile for a language model:
+`(:Class)-property-> (:Target)` lines with statistics, nested blank nodes and a glossary
+(`pattern-<graph>.txt`). Its sibling, the enriched ShExC, renders the same content as ShEx shapes.
+
+[#pattern-view]
+Pattern view:: The one view of a graph that the pattern schema and the enriched ShExC both lay out:
+blocks, edges, incoming links, nested groups, hidden classes and the glossary. Built from the
+profile's analytics and term annotations only, with no query.
+
+[#merged-group]
+Merged group:: Classes whose instances are always typed together — the co-type count of one for the
+other equals both instance counts — treated as one group, written `(:A&B)`, with one block and the
+union of their properties.
+
+[#nested-group]
+Nested group:: A group whose instances are reached only as blank-node objects, by at least as many
+distinct objects as it has instances. It has no block of its own; its edges are written under the
+edge that reaches it, up to three hops deep.
+
+[#term-annotation]
+Term annotation:: The labels and the description selected for one class or property, each with its
+language, from the store (query Q12, saved in `profile.json`) or from an `--ontology` file. Shown
+in the glossary of the pattern schema and the ShExC.
+
 == Components
 
 The responsibilities the Blue use cases name as supporting actors, and where each lives

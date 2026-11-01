@@ -16,8 +16,8 @@ The depth setting decides how far collection goes; each level includes the previ
 | Depth | Collected
 
 | `graphs` | The list of named graphs.
-| `classes` | Instances per class, `rdfs:subClassOf` statements, and the other types the instances have.
-| `properties` | A histogram per class and property: how many instances have exactly _n_ values.
+| `classes` | Instances per class, `rdfs:subClassOf` statements, the other types the instances have, and the classes' labels and descriptions (<<term-annotations,below>>).
+| `properties` | A histogram per class and property: how many instances have exactly _n_ values; the properties' labels and descriptions.
 | `values` (default) | Value groups per property: literals by datatype and language (with shortest, longest and total length, smallest and largest value), resources by class, untyped resources, distinct values.
 | `rich_values` | The most frequent values per class and property (`top_k`).
 | `links` | Incoming links: which classes point at the instances, through which properties.
@@ -28,6 +28,19 @@ statements per predicate, untyped subjects) and `completeness_check` (below).
 
 `rdf:type` is never reported as a property; type information appears as the class's other types
 and parents.
+
+[#term-annotations]
+=== Labels and descriptions (Q12)
+
+Once a graph's classes are profiled, one more query (Q12) reads the labels and descriptions of its
+classes and, from depth `properties`, of its properties. It matches them in the default graph and in
+every named graph, so an ontology kept in its own graph counts. Labels come from `skos:prefLabel`,
+`skosxl:prefLabel`/`skosxl:literalForm`, `rdfs:label` and `dcterms:title` (then `skos:altLabel`);
+descriptions from `skos:definition`, `rdfs:comment`, `dcterms:description` and `skos:scopeNote`.
+Per term and language, the first predicate in that order with a literal value wins. The selected
+values are saved per graph in `profile.json` (`term_annotations`) and shown in the glossary of the
+xref:llm-schema.adoc#labels[schemas for LLMs]. If the query fails, a failure of kind
+`term_annotations` is recorded and the graph is kept without them.
 
 == What is derived
 

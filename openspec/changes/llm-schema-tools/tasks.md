@@ -57,7 +57,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 - [x] 1.12 Record in `inputs/format-sizes.md` the Unicode code points (`wc -m`) of every golden `pattern-*` and `shex-*` file, with and without the prefix block and legend, and the SHACL golden files for reference (DEC-8)
   - Layer: docs (change inputs). Depends on: 1.10.
   - Tests: none (a record, not a gate).
-- [ ] 1.13 Docs:
+- [x] 1.13 Docs:
   - a new page `docs/modules/ROOT/pages/llm-schema.adoc` (the pattern schema and its grammar, the ShExC form, labels and `--ontology`, the size filters), in `nav.adoc`;
   - pointers from `representations.adoc`;
   - glossary terms: Pattern schema, Pattern view, Merged group, Nested group, Term annotation;
@@ -78,7 +78,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.8 · [x] 1.9 · [x] 1.10 · [x] 1.11 · [x] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
+- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.8 · [x] 1.9 · [x] 1.10 · [x] 1.11 · [x] 1.12 · [x] 1.13 · [ ] 1.14 · [ ] 1.15
 
 ## Verification
 

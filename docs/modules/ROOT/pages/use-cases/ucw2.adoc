@@ -72,7 +72,7 @@ Own templates::
 
 == Out of Scope
 
-* Rendering diagrams to images; VoID, ShEx, OWL or LLM formats; reading representations back.
+* Rendering diagrams to images; VoID or OWL formats; reading representations back.
 
 == Special Requirements
 
@@ -85,7 +85,8 @@ Own templates::
 
 == Technology and Data Variations
 
-* Formats: SHACL (Turtle), PlantUML source, HTML document.
+* Formats: SHACL (Turtle), PlantUML source, HTML document, and for language models the pattern
+  schema (text) and enriched ShExC (xref:llm-schema.adoc[Schemas for LLMs]).
 * One file per graph for SHACL and PlantUML.
 
 == Frequency of Occurrence
