@@ -4,11 +4,13 @@ from fingerprint.domain.profile import (
     CardinalityBin,
     ClassProfile,
     CoTypeCount,
+    Failure,
     GraphProfile,
     NodeKind,
     PrecisionMode,
     ProfileRun,
     PropertyProfile,
+    QueryKind,
     Settings,
     SubclassEdge,
     ValuePartition,
@@ -43,6 +45,10 @@ def klass(iri: str, instances: int, *props: PropertyProfile, observed: int | Non
         property_partitions=list(props),
         co_types=[CoTypeCount(class_iri=c, subjects=s) for c, s in co_types] or None,
     )
+
+
+def failure(class_iri: str, message: str, kind: QueryKind = QueryKind.co_types) -> Failure:
+    return Failure(query_kind=kind, class_iri=class_iri, message=message)
 
 
 def profile_run(*classes: ClassProfile, graph=None, edges=(), failures=(), **settings) -> ProfileRun:
