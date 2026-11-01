@@ -120,6 +120,20 @@ class RepresentationFormat(str, Enum):
     """
 
 
+class FilterOption(str, Enum):
+    """
+    The option a namespace filter value came from.
+    """
+    exclude = "exclude"
+    """
+    --exclude-namespace.
+    """
+    include = "include"
+    """
+    --include-namespace.
+    """
+
+
 class ShapeSeverity(str, Enum):
     """
     The severity of a property shape; violation is SHACL's default and is not written.
@@ -188,6 +202,7 @@ class PrefixDeclaration(ConfiguredBaseModel):
     prefix: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration',
                        'DiagramPackage',
                        'DocumentClass',
+                       'DocumentProperty',
                        'HiddenNamespace']} })
     namespace: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration', 'HiddenNamespace']} })
     source: Optional[str] = Field(default=None, description="""Where the prefix came from (user, packaged, prefix_cc, generated); set in the report's table.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration',
@@ -196,6 +211,7 @@ class PrefixDeclaration(ConfiguredBaseModel):
                        'DocumentPitfallCheck',
                        'ParentReference']} })
     uses: Optional[int] = Field(default=None, description="""Instances of the namespace's classes plus subjects of its properties, over every class and graph; set in the report's table (pitfall-scans DEC-18).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration']} })
+    excluded: Optional[bool] = Field(default=None, description="""True when the namespace is excluded by the filters; set in the report's table (namespace-filter DEC-10).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration', 'NamespaceFilter', 'Caveats']} })
 
 
 class Annotation(ConfiguredBaseModel):
@@ -232,6 +248,52 @@ class GraphView(ConfiguredBaseModel):
     graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
     slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
     skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
+    excluded_note: Optional[str] = Field(default=None, description="""The excluded namespaces and what they hid in this graph, as `prefix (classes c, properties p, values v)` joined by `; `; unset when nothing was hidden (namespace-filter DEC-9).""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
+
+
+class FilterMatch(ConfiguredBaseModel):
+    """
+    One namespace filter value and the namespaces of the profile's table it matches.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    option: FilterOption = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['FilterMatch']} })
+    name: str = Field(default=..., description="""The value as given: a prefix, a prefix glob or an IRI stem.""", json_schema_extra = { "linkml_meta": {'domain_of': ['FilterMatch',
+                       'DiagramModule',
+                       'EdgeTarget',
+                       'PatternEdge',
+                       'CoTypeNote',
+                       'PatternBlock',
+                       'GlossaryEntry',
+                       'SettingValue',
+                       'DocumentPropertyGroup']} })
+    namespaces: Optional[list[str]] = Field(default=None, description="""The matched namespace IRIs, sorted.""", json_schema_extra = { "linkml_meta": {'domain_of': ['FilterMatch', 'ProfileDocument']} })
+
+
+class NamespaceFilter(ConfiguredBaseModel):
+    """
+    The two tiers of the namespace filters (namespace-filter DEC-7).
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    hidden: Optional[list[str]] = Field(default=None, description="""The meta namespaces whose classes are hidden, less those included.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespaceFilter', 'Caveats']} })
+    excluded: Optional[list[str]] = Field(default=None, description="""The namespaces whose every term is excluded: matched by an exclude value, less those included.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration', 'NamespaceFilter', 'Caveats']} })
+    matches: Optional[list[FilterMatch]] = Field(default=None, description="""One match per value, excludes then includes, in the order given.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespaceFilter']} })
+
+
+class ExcludedGraphNote(ConfiguredBaseModel):
+    """
+    The note of one graph whose terms an excluded namespace hid.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
+
+    graph: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ExcludedGraphNote',
+                       'EdgeTarget',
+                       'PatternGraph',
+                       'UntypedSubjects',
+                       'SampledClass',
+                       'FailureNote']} })
+    note: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ExcludedGraphNote']} })
 
 
 class GeneratorOptions(ConfiguredBaseModel):
@@ -241,8 +303,8 @@ class GeneratorOptions(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     shapes_namespace: Optional[str] = Field(default=None, description="""One namespace for every shape IRI (SHACL only); unset: per class namespace.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GeneratorOptions']} })
-    exclude_namespaces: Optional[list[str]] = Field(default=None, description="""Prefixes or namespace IRIs whose classes are left out, beyond the meta vocabularies.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GeneratorOptions']} })
-    include_namespaces: Optional[list[str]] = Field(default=None, description="""Prefixes or namespace IRIs shown again; wins over exclusion.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GeneratorOptions']} })
+    exclude_namespaces: Optional[list[str]] = Field(default=None, description="""Namespaces whose every term is left out: a prefix, a prefix glob (`rel*`) or an IRI stem; the meta vocabularies stay hidden at class level.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GeneratorOptions']} })
+    include_namespaces: Optional[list[str]] = Field(default=None, description="""Namespaces shown again (same syntax as exclusion); wins over exclusion and over the default hiding.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GeneratorOptions']} })
     module_size: Optional[int] = Field(default=15, description="""Most classes per diagram module (PlantUML only).""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['GeneratorOptions'], 'ifabsent': 'int(15)'} })
     ontology: Optional[str] = Field(default=None, description="""Path of an ontology file whose labels and descriptions override the profile's (pattern and ShEx outputs).""", json_schema_extra = { "linkml_meta": {'domain_of': ['GeneratorOptions']} })
     min_instances: Optional[int] = Field(default=None, description="""Classes with fewer instances are left out (pattern and ShEx outputs).""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['GeneratorOptions']} })
@@ -261,6 +323,7 @@ class ShapesGraph(GraphView):
     graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
     slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
     skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
+    excluded_note: Optional[str] = Field(default=None, description="""The excluded namespaces and what they hid in this graph, as `prefix (classes c, properties p, values v)` joined by `; `; unset when nothing was hidden (namespace-filter DEC-9).""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
 
 
 class NodeShape(ConfiguredBaseModel):
@@ -300,7 +363,8 @@ class DiagramModule(GraphView):
                        'DiagramMember',
                        'EdgeTarget',
                        'DocumentProperty']} })
-    name: str = Field(default=..., description="""The module's name: a prefix, with ~n for a cluster.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
+    name: str = Field(default=..., description="""The module's name: a prefix, with ~n for a cluster.""", json_schema_extra = { "linkml_meta": {'domain_of': ['FilterMatch',
+                       'DiagramModule',
                        'EdgeTarget',
                        'PatternEdge',
                        'CoTypeNote',
@@ -318,6 +382,7 @@ class DiagramModule(GraphView):
     graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
     slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
     skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
+    excluded_note: Optional[str] = Field(default=None, description="""The excluded namespaces and what they hid in this graph, as `prefix (classes c, properties p, values v)` joined by `; `; unset when nothing was hidden (namespace-filter DEC-9).""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
 
 
 class DiagramOverview(GraphView):
@@ -337,6 +402,7 @@ class DiagramOverview(GraphView):
     graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
     slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
     skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
+    excluded_note: Optional[str] = Field(default=None, description="""The excluded namespaces and what they hid in this graph, as `prefix (classes c, properties p, values v)` joined by `; `; unset when nothing was hidden (namespace-filter DEC-9).""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
 
 
 class DiagramPackage(ConfiguredBaseModel):
@@ -349,6 +415,7 @@ class DiagramPackage(ConfiguredBaseModel):
     prefix: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration',
                        'DiagramPackage',
                        'DocumentClass',
+                       'DocumentProperty',
                        'HiddenNamespace']} })
     classes: int = Field(default=..., description="""Shown classes of the namespace; 0 when only referenced.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
                        'DiagramPackage',
@@ -442,7 +509,8 @@ class EdgeTarget(ConfiguredBaseModel):
                        'DiagramMember',
                        'EdgeTarget',
                        'DocumentProperty']} })
-    name: str = Field(default=..., description="""As written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
+    name: str = Field(default=..., description="""As written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['FilterMatch',
+                       'DiagramModule',
                        'EdgeTarget',
                        'PatternEdge',
                        'CoTypeNote',
@@ -456,7 +524,8 @@ class EdgeTarget(ConfiguredBaseModel):
                        'PatternBlock',
                        'DocumentGraph',
                        'HiddenNamespace']} })
-    graph: Optional[str] = Field(default=None, description="""The other graph, when the class is profiled there.""", json_schema_extra = { "linkml_meta": {'domain_of': ['EdgeTarget',
+    graph: Optional[str] = Field(default=None, description="""The other graph, when the class is profiled there.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ExcludedGraphNote',
+                       'EdgeTarget',
                        'PatternGraph',
                        'UntypedSubjects',
                        'SampledClass',
@@ -475,7 +544,8 @@ class PatternEdge(ConfiguredBaseModel):
                        'ViaLink',
                        'DocumentPitfallExample',
                        'PitfallLine']} })
-    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
+    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['FilterMatch',
+                       'DiagramModule',
                        'EdgeTarget',
                        'PatternEdge',
                        'CoTypeNote',
@@ -517,7 +587,8 @@ class CoTypeNote(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
-    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
+    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['FilterMatch',
+                       'DiagramModule',
                        'EdgeTarget',
                        'PatternEdge',
                        'CoTypeNote',
@@ -534,7 +605,8 @@ class PatternBlock(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
-    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
+    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['FilterMatch',
+                       'DiagramModule',
                        'EdgeTarget',
                        'PatternEdge',
                        'CoTypeNote',
@@ -566,7 +638,8 @@ class GlossaryEntry(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     term: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['GlossaryEntry']} })
-    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
+    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['FilterMatch',
+                       'DiagramModule',
                        'EdgeTarget',
                        'PatternEdge',
                        'CoTypeNote',
@@ -584,7 +657,8 @@ class PatternGraph(GraphView):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema',
          'mixins': ['GraphView']})
 
-    graph: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['EdgeTarget',
+    graph: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ExcludedGraphNote',
+                       'EdgeTarget',
                        'PatternGraph',
                        'UntypedSubjects',
                        'SampledClass',
@@ -597,6 +671,7 @@ class PatternGraph(GraphView):
     graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
     slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
     skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
+    excluded_note: Optional[str] = Field(default=None, description="""The excluded namespaces and what they hid in this graph, as `prefix (classes c, properties p, values v)` joined by `; `; unset when nothing was hidden (namespace-filter DEC-9).""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
 
 
 class ShexConstraint(ConfiguredBaseModel):
@@ -654,6 +729,7 @@ class ShexSchema(GraphView):
     graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
     slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
     skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
+    excluded_note: Optional[str] = Field(default=None, description="""The excluded namespaces and what they hid in this graph, as `prefix (classes c, properties p, values v)` joined by `; `; unset when nothing was hidden (namespace-filter DEC-9).""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
 
 
 class ProfileDocument(ConfiguredBaseModel):
@@ -663,7 +739,8 @@ class ProfileDocument(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
     overview: Overview = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
-    namespaces: Optional[list[PrefixDeclaration]] = Field(default=None, description="""The profile's namespace table, with sources and uses: by source, then uses descending, then prefix.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
+    namespaces: Optional[list[PrefixDeclaration]] = Field(default=None, description="""The profile's namespace table, with sources and uses: by source, then uses descending, then prefix.""", json_schema_extra = { "linkml_meta": {'domain_of': ['FilterMatch', 'ProfileDocument']} })
+    switches: Optional[list[str]] = Field(default=None, description="""The prefixes that get a namespace switch: those of the shown classes and properties, in prefix order.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
     collection: CollectionSection = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
     pitfalls: Optional[DocumentPitfalls] = Field(default=None, description="""Present when the profile holds scan results.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument']} })
     graphs: Optional[list[DocumentGraph]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileDocument', 'DocumentPitfalls']} })
@@ -699,7 +776,8 @@ class SettingValue(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
-    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
+    name: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['FilterMatch',
+                       'DiagramModule',
                        'EdgeTarget',
                        'PatternEdge',
                        'CoTypeNote',
@@ -810,6 +888,7 @@ class DocumentClass(ConfiguredBaseModel):
     prefix: str = Field(default=..., description="""The prefix of the class's namespace, for the filters.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration',
                        'DiagramPackage',
                        'DocumentClass',
+                       'DocumentProperty',
                        'HiddenNamespace']} })
     anchor: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['TaxonomyNode',
                        'DocumentClass',
@@ -834,7 +913,8 @@ class DocumentPropertyGroup(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
-    name: str = Field(default=..., description="""Own, Refined or Inherited.""", json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
+    name: str = Field(default=..., description="""Own, Refined or Inherited.""", json_schema_extra = { "linkml_meta": {'domain_of': ['FilterMatch',
+                       'DiagramModule',
                        'EdgeTarget',
                        'PatternEdge',
                        'CoTypeNote',
@@ -981,6 +1061,7 @@ class PitfallsTable(GraphView):
     graph_label: str = Field(default=..., description="""The graph's plain name, for the title.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
     slug: str = Field(default=..., description="""The graph's file-safe name.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'DocumentGraph', 'DocumentPitfallGraph']} })
     skipped: Optional[list[str]] = Field(default=None, description="""IRIs left out because they cannot be written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
+    excluded_note: Optional[str] = Field(default=None, description="""The excluded namespaces and what they hid in this graph, as `prefix (classes c, properties p, values v)` joined by `; `; unset when nothing was hidden (namespace-filter DEC-9).""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView']} })
 
 
 class PitfallLine(ConfiguredBaseModel):
@@ -1058,6 +1139,11 @@ class DocumentProperty(ConfiguredBaseModel):
                        'ParentReference',
                        'DocumentProperty',
                        'DocumentTerm']} })
+    prefix: Optional[str] = Field(default=None, description="""The prefix of the property's namespace; empty when no prefix covers it (namespace-filter P-9).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration',
+                       'DiagramPackage',
+                       'DocumentClass',
+                       'DocumentProperty',
+                       'HiddenNamespace']} })
     subjects: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['CoTypeNote', 'DocumentProperty']} })
     min: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentProperty']} })
     max: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentProperty']} })
@@ -1109,7 +1195,8 @@ class Caveats(ConfiguredBaseModel):
 
     sampled: Optional[list[SampledClass]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['DocumentClass', 'Caveats']} })
     untyped: Optional[list[UntypedSubjects]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Caveats']} })
-    hidden: Optional[list[HiddenNamespace]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Caveats']} })
+    hidden: Optional[list[HiddenNamespace]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['NamespaceFilter', 'Caveats']} })
+    excluded: Optional[list[ExcludedGraphNote]] = Field(default=None, description="""The excluded-namespaces note of each graph that has one.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration', 'NamespaceFilter', 'Caveats']} })
     skipped: Optional[list[str]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
     unjoined_default: Optional[bool] = Field(default=None, description="""True when schema graphs were given and the default graph was scanned without them (pitfall-scans DEC-20).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Caveats']} })
 
@@ -1120,7 +1207,8 @@ class UntypedSubjects(ConfiguredBaseModel):
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
-    graph: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['EdgeTarget',
+    graph: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ExcludedGraphNote',
+                       'EdgeTarget',
                        'PatternGraph',
                        'UntypedSubjects',
                        'SampledClass',
@@ -1137,6 +1225,7 @@ class HiddenNamespace(ConfiguredBaseModel):
     prefix: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration',
                        'DiagramPackage',
                        'DocumentClass',
+                       'DocumentProperty',
                        'HiddenNamespace']} })
     namespace: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PrefixDeclaration', 'HiddenNamespace']} })
     classes: int = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['DiagramModule',
@@ -1150,7 +1239,8 @@ class HiddenNamespace(ConfiguredBaseModel):
 class SampledClass(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
-    graph: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['EdgeTarget',
+    graph: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ExcludedGraphNote',
+                       'EdgeTarget',
                        'PatternGraph',
                        'UntypedSubjects',
                        'SampledClass',
@@ -1162,7 +1252,8 @@ class SampledClass(ConfiguredBaseModel):
 class FailureNote(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/views/schema'})
 
-    graph: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['EdgeTarget',
+    graph: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ExcludedGraphNote',
+                       'EdgeTarget',
                        'PatternGraph',
                        'UntypedSubjects',
                        'SampledClass',
@@ -1180,6 +1271,9 @@ PrefixDeclaration.model_rebuild()
 Annotation.model_rebuild()
 RenderedDocument.model_rebuild()
 GraphView.model_rebuild()
+FilterMatch.model_rebuild()
+NamespaceFilter.model_rebuild()
+ExcludedGraphNote.model_rebuild()
 GeneratorOptions.model_rebuild()
 ShapesGraph.model_rebuild()
 NodeShape.model_rebuild()

@@ -21,7 +21,7 @@ step definitions. Scenario titles are cited as `cap › Requirement › Scenario
 
 ## 1. Term-level namespace filters
 
-- [ ] 1.1 Model: the additions of design "Layering and modules" to `model/fingerprint_views.yaml` (`FilterOption`, `FilterMatch`, `NamespaceFilter`, `GraphView.excluded_note`, `ExcludedGraphNote`, `Caveats.excluded`, `PrefixDeclaration.excluded`, `DocumentProperty.prefix`, `ProfileDocument.switches`, the two option descriptions) and `model/fingerprint_analytics.yaml` (`ExcludedTerms`, `GraphAnalytics.excluded_terms`, `NamespaceUse`, `ProfileAnalytics.namespace_uses`); `make generate-models`; `fingerprint.domain.namespace_filter` added to the `generated` contract in `.importlinter`
+- [x] 1.1 Model: the additions of design "Layering and modules" to `model/fingerprint_views.yaml` (`FilterOption`, `FilterMatch`, `NamespaceFilter`, `GraphView.excluded_note`, `ExcludedGraphNote`, `Caveats.excluded`, `PrefixDeclaration.excluded`, `DocumentProperty.prefix`, `ProfileDocument.switches`, the two option descriptions) and `model/fingerprint_analytics.yaml` (`ExcludedTerms`, `GraphAnalytics.excluded_terms`, `NamespaceUse`, `ProfileAnalytics.namespace_uses`); `make generate-models`; `fingerprint.domain.namespace_filter` added to the `generated` contract in `.importlinter`
   - Layer: domain (model). Depends on: —.
   - Tests: `make check-models` green; `tests/unit/adapters/test_profile_file.py` round-trip still green and `model/fingerprint_stats.yaml` unchanged (`git diff --exit-code model/fingerprint_stats.yaml`).
 - [ ] 1.2 `PrefixTable.match` replacing `resolve` (P-4); `fingerprint/domain/namespace_filter.py` with `META_NAMESPACES` (moved from `generator.py`) and `namespace_filter` (design §A)
@@ -60,7 +60,7 @@ step definitions. Scenario titles are cited as `cap › Requirement › Scenario
 
 ## Roadmap
 
-- [ ] 1.1 · [ ] 1.2 · [ ] 1.3 · [ ] 1.4 · [ ] 1.7 · [ ] 1.5 · [ ] 1.6 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11
+- [x] 1.1 · [ ] 1.2 · [ ] 1.3 · [ ] 1.4 · [ ] 1.7 · [ ] 1.5 · [ ] 1.6 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11
 
 ## Verification
 

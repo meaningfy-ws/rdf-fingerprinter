@@ -68,12 +68,28 @@ classes:
       Kept out of fingerprint_stats so the published profile.json schema does not list it.
     slots: [depth, precision_policy, first_n, top_k, object_type_scope, completeness_check, timeout_seconds, concurrency, acceptance_threshold, graph_statistics, selected_graphs, pitfall_scan, schema_graphs, pitfall_examples]
 
+  ExcludedTerms:
+    description: "What an excluded namespace hid in one graph, the distinct IRIs of the namespace removed from class, property and single-value positions (namespace-filter P-5). Kept out of fingerprint_stats so the published profile.json schema does not list it."
+    attributes:
+      namespace: { required: true }
+      classes: { range: integer, required: true, description: "Distinct IRIs of the namespace removed from class positions (classes, object classes, co-types, parents)." }
+      properties: { range: integer, required: true, description: "Distinct IRIs of the namespace removed from property positions." }
+      values: { range: integer, required: true, description: "Distinct IRIs of the namespace removed from single-value positions." }
+
+  NamespaceUse:
+    description: How much a namespace is used on the unfiltered analytics (namespace-filter §B). Kept out of fingerprint_stats so the published profile.json schema does not list it.
+    attributes:
+      namespace: { required: true }
+      uses: { range: integer, required: true, description: "Instances of the namespace's classes plus subjects of its properties, over every class and graph." }
+
   ProfileAnalytics:
     is_a: ProfileRun
     tree_root: true
     description: A profile run with every level replaced by its analytics.
     slot_usage:
       graphs: { range: GraphAnalytics }
+    attributes:
+      namespace_uses: { range: NamespaceUse, multivalued: true, inlined_as_list: true, description: "Uses of each namespace of the table, counted before any term was excluded; unset when no filter ran." }
 
   CardinalityStatistics:
     mixin: true
@@ -163,3 +179,4 @@ classes:
       typed_subject_ratio: { range: float, description: "Share of subjects with at least one type." }
       vocabularies: { multivalued: true, description: "Namespaces of the predicates and classes, by triples." }
       cross_graph_object_types: { range: uriorcurie, multivalued: true, description: "Graphs that supply object types (linksets)." }
+      excluded_terms: { range: ExcludedTerms, multivalued: true, inlined_as_list: true, description: "What the excluded namespaces hid in this graph, one entry per namespace with a non-zero count, sorted by namespace; unset when no filter ran." }

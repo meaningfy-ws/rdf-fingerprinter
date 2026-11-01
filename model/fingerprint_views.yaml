@@ -27,6 +27,11 @@ enums:
       pitfalls: { description: "The pitfall findings as ROBOT-style TSV, one file per scanned graph (pitfall-scans)." }
       pattern: { description: "The pattern schema: one text file per graph." }
       shex: { description: "Enriched ShEx compact: one .shex file per graph." }
+  FilterOption:
+    description: The option a namespace filter value came from.
+    permissible_values:
+      exclude: { description: "--exclude-namespace." }
+      include: { description: "--include-namespace." }
   ShapeSeverity:
     description: The severity of a property shape; violation is SHACL's default and is not written.
     permissible_values:
@@ -65,6 +70,7 @@ classes:
       namespace: { required: true }
       source: { description: "Where the prefix came from (user, packaged, prefix_cc, generated); set in the report's table." }
       uses: { range: integer, description: "Instances of the namespace's classes plus subjects of its properties, over every class and graph; set in the report's table (pitfall-scans DEC-18)." }
+      excluded: { range: boolean, description: "True when the namespace is excluded by the filters; set in the report's table (namespace-filter DEC-10)." }
 
   Annotation:
     description: A predicate and its value, both written as Turtle.
@@ -85,13 +91,34 @@ classes:
       graph_label: { required: true, description: "The graph's plain name, for the title." }
       slug: { required: true, description: "The graph's file-safe name." }
       skipped: { multivalued: true, description: "IRIs left out because they cannot be written." }
+      excluded_note: { description: "The excluded namespaces and what they hid in this graph, as `prefix (classes c, properties p, values v)` joined by `; `; unset when nothing was hidden (namespace-filter DEC-9)." }
+
+  FilterMatch:
+    description: One namespace filter value and the namespaces of the profile's table it matches.
+    attributes:
+      option: { range: FilterOption, required: true }
+      name: { required: true, description: "The value as given: a prefix, a prefix glob or an IRI stem." }
+      namespaces: { multivalued: true, description: "The matched namespace IRIs, sorted." }
+
+  NamespaceFilter:
+    description: The two tiers of the namespace filters (namespace-filter DEC-7).
+    attributes:
+      hidden: { multivalued: true, description: "The meta namespaces whose classes are hidden, less those included." }
+      excluded: { multivalued: true, description: "The namespaces whose every term is excluded: matched by an exclude value, less those included." }
+      matches: { range: FilterMatch, multivalued: true, inlined_as_list: true, description: "One match per value, excludes then includes, in the order given." }
+
+  ExcludedGraphNote:
+    description: The note of one graph whose terms an excluded namespace hid.
+    attributes:
+      graph: { required: true }
+      note: { required: true }
 
   GeneratorOptions:
     description: Options of the generators beyond the shared ones.
     attributes:
       shapes_namespace: { description: "One namespace for every shape IRI (SHACL only); unset: per class namespace." }
-      exclude_namespaces: { multivalued: true, description: "Prefixes or namespace IRIs whose classes are left out, beyond the meta vocabularies." }
-      include_namespaces: { multivalued: true, description: "Prefixes or namespace IRIs shown again; wins over exclusion." }
+      exclude_namespaces: { multivalued: true, description: "Namespaces whose every term is left out: a prefix, a prefix glob (`rel*`) or an IRI stem; the meta vocabularies stay hidden at class level." }
+      include_namespaces: { multivalued: true, description: "Namespaces shown again (same syntax as exclusion); wins over exclusion and over the default hiding." }
       module_size: { range: integer, minimum_value: 1, ifabsent: "int(15)", description: "Most classes per diagram module (PlantUML only)." }
       ontology: { description: "Path of an ontology file whose labels and descriptions override the profile's (pattern and ShEx outputs)." }
       min_instances: { range: integer, minimum_value: 1, description: "Classes with fewer instances are left out (pattern and ShEx outputs)." }
@@ -282,6 +309,7 @@ classes:
     attributes:
       overview: { range: Overview, required: true, inlined: true }
       namespaces: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true, description: "The profile's namespace table, with sources and uses: by source, then uses descending, then prefix." }
+      switches: { multivalued: true, description: "The prefixes that get a namespace switch: those of the shown classes and properties, in prefix order." }
       collection: { range: CollectionSection, required: true, inlined: true }
       pitfalls: { range: DocumentPitfalls, inlined: true, description: "Present when the profile holds scan results." }
       graphs: { range: DocumentGraph, multivalued: true, inlined_as_list: true }
@@ -435,6 +463,7 @@ classes:
     attributes:
       iri: { required: true }
       label: { required: true }
+      prefix: { description: "The prefix of the property's namespace; empty when no prefix covers it (namespace-filter P-9)." }
       subjects: { required: true }
       min: { required: true }
       max: { required: true }
@@ -459,6 +488,7 @@ classes:
       sampled: { range: SampledClass, multivalued: true, inlined_as_list: true }
       untyped: { range: UntypedSubjects, multivalued: true, inlined_as_list: true }
       hidden: { range: HiddenNamespace, multivalued: true, inlined_as_list: true }
+      excluded: { range: ExcludedGraphNote, multivalued: true, inlined_as_list: true, description: "The excluded-namespaces note of each graph that has one." }
       skipped: { multivalued: true }
       unjoined_default: { range: boolean, description: "True when schema graphs were given and the default graph was scanned without them (pitfall-scans DEC-20)." }
 
