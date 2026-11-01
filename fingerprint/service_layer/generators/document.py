@@ -25,6 +25,7 @@ from fingerprint.domain.views import (
     DocumentPitfallGraph,
     DocumentPitfalls,
     DocumentProperty,
+    DocumentPropertyGroup,
     DocumentTerm,
     DocumentValue,
     FailureNote,
@@ -36,12 +37,15 @@ from fingerprint.domain.views import (
     ProfileDocument,
     SampledClass,
     SettingValue,
+    TaxonomyNode,
     UntypedSubjects,
 )
 from fingerprint.service_layer.generators.generator import Generator, graph_slug
 from fingerprint_report_templates import packaged
 
 ABSENT = "—"
+# Property groups of a class table, in display order (pitfall-scans DEC-14); no hierarchy reads as own.
+PROPERTY_GROUPS = (("Own", ("own", None)), ("Refined", ("refined",)), ("Inherited", ("inherited",)))
 
 
 def number(value: float | int | None) -> str:
@@ -162,6 +166,7 @@ class DocumentGenerator(Generator):
         sampled = cls.precision_mode == PrecisionMode.first_n
         parents = sorted(cls.parents or [], key=lambda p: p.parent)
         entry = self.table.entry_for(cls.class_iri)
+        groups = self.property_groups(cls, properties)
         return DocumentClass(
             iri=cls.class_iri,
             label=self.label(cls.class_iri),
@@ -173,17 +178,92 @@ class DocumentGenerator(Generator):
             sample_note="(sample may differ between queries)" if sampled and cls.sample_shared is False else None,
             sampled=sampled,
             parents=[ParentReference(iri=p.parent, label=self.label(p.parent), source=p.source) for p in parents],
-            properties=properties,
+            properties=[p for g in groups for p in g.properties or []],
+            property_groups=groups,
             badges=self.badges(graph, cls.class_iri),
         )
 
+    @staticmethod
+    def property_groups(cls: ClassAnalytics, properties: list[DocumentProperty]) -> list[DocumentPropertyGroup]:
+        """Own, refined, inherited; within each by subjects, confidence (both descending), short name (DEC-14)."""
+        raw = {p.property: p for p in cls.property_partitions or []}  # dict-ok: lookup index IRI → analytics
+
+        def key(row: DocumentProperty) -> tuple[int, float, str]:
+            p = raw[row.iri]
+            return -(p.subjects_with_property or 0), -(p.confidence or 0.0), row.label
+
+        groups = []
+        for name, kinds in PROPERTY_GROUPS:
+            members = sorted((r for r in properties if raw[r.iri].inheritance in kinds), key=key)
+            if members:
+                groups.append(DocumentPropertyGroup(name=name, properties=members))
+        return groups
+
     def end_graph(self, graph: GraphAnalytics, classes: list[DocumentClass]) -> DocumentGraph:
+        ordered = sorted(classes, key=lambda c: (c.prefix, -c.instances, c.label))  # DEC-13
         return DocumentGraph(
             slug=graph_slug(graph.graph),
             label=self.graph_label(graph.graph),
             iri=graph.graph,
             empty=not graph.class_partitions,
-            classes=classes,
+            classes=ordered,
+            taxonomy=self.taxonomy(ordered),
+        )
+
+    def taxonomy(self, classes: list[DocumentClass]) -> list[TaxonomyNode]:
+        """The class tree from declared and implied parents, with popularity bars (DEC-15, design D-14)."""
+        by_iri = {c.iri: c for c in classes}  # dict-ok: lookup index IRI → class
+        largest = max((c.instances for c in classes), default=0)
+        parents = {  # dict-ok: lookup index class → its shown parents, by short name
+            c.iri: sorted({p.iri: p.label for p in c.parents or [] if self.shown(p.iri)}.items(), key=lambda kv: kv[1])
+            for c in classes
+        }
+        children: dict[str, list[str]] = {}  # dict-ok: lookup index parent → child IRIs
+        for iri, shown in parents.items():
+            for parent, _ in shown:
+                children.setdefault(parent, []).append(iri)
+        first = {iri: shown[0][0] for iri, shown in parents.items() if shown}  # dict-ok: lookup index
+
+        def order(iris: list[str]) -> list[str]:
+            return sorted(iris, key=lambda i: (i not in by_iri, -(by_iri[i].instances if i in by_iri else 0), self.label(i)))
+
+        placed: set[str] = set()
+
+        def node(iri: str, path: tuple[str, ...]) -> TaxonomyNode:
+            placed.add(iri)
+            kids = []
+            for child in order(children.get(iri, [])):
+                if child in path or child == iri:
+                    continue  # a cycle ends where it closes
+                if first.get(child) == iri:
+                    kids.append(node(child, (*path, iri)))
+                else:
+                    kids.append(self.taxonomy_node(by_iri[child], largest, see=True))
+            cls = by_iri.get(iri)
+            if cls is None:  # a parent not profiled in this graph
+                return TaxonomyNode(label=self.label(iri), iri=iri, bar=0, children=kids)
+            return self.taxonomy_node(cls, largest, children=kids)
+
+        roots = [iri for iri in by_iri if not parents[iri]] + [p for p in children if p not in by_iri]
+        tree = [node(iri, ()) for iri in order(roots)]
+        for iri in order(list(by_iri)):  # classes reachable only through a cycle
+            if iri not in placed:
+                tree.append(node(iri, ()))
+        return tree
+
+    @staticmethod
+    def taxonomy_node(
+        cls: DocumentClass, largest: int, children: list[TaxonomyNode] | None = None, see: bool = False
+    ) -> TaxonomyNode:
+        bar = max(1, cls.instances * 100 // largest) if cls.instances and largest else 0
+        return TaxonomyNode(
+            label=cls.label,
+            iri=cls.iri,
+            anchor=None if see else cls.anchor,
+            see=cls.anchor if see else None,
+            instances=cls.instances,
+            bar=bar,
+            children=children or [],
         )
 
     def end_profile(self, graphs: list[DocumentGraph]) -> ProfileDocument:

@@ -22,3 +22,22 @@ decisions itself (EPIC DEC-1 to DEC-12), each with its reason and the alternativ
 developer to review on the branch. The developer said the testing strategy will be corrected
 afterwards. Earlier context: the release authority and the conventions in `AGENTS.md`; the
 `readable-representations` change (3.0.0) is the baseline.
+
+## Report requests after the first brainframe scan (2026-11-01)
+
+These requests came in after master's lean-test-suite merge.
+
+> i noticed that in the main html the classes were not groupped, and were not ordered. also i saw there is no taxonomy view. would it be possible to add a taxonomy view, which also indicateas how popular a class is ?
+
+> did you add a logic adnd capability  for similar sorting and groupping of properties per class?
+
+The agent proposed this ordering: classes grouped by namespace, then by instance count descending;
+properties grouped own, then refined, then inherited, and within each group by subjects descending,
+then confidence, then short name. The SHACL, PlantUML and TSV outputs keep their IRI order. The
+developer answered:
+
+> yes, go ahead with that ordering
+
+> the pitfalls section and caveats sections could be merged
+
+> once you are done, update the epc specs with these latest requests

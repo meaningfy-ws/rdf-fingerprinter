@@ -253,3 +253,30 @@ Feature: The fingerprint report and the command line
       Given a store whose graph "data" uses an undeclared relation and whose graph "schema" holds the ontology
       When the fingerprint command runs with --pitfalls and --format pitfalls on graph "data" with schema graph "schema"
       Then the output folder holds one pitfalls TSV per scanned graph
+
+  Rule: The report reads in order of importance
+
+    Scenario: Pitfalls in the caveats section
+      Given the scanned test profile
+      When the report is rendered
+      Then the pitfall findings are inside the caveats section, after the caveats, and there is no separate Pitfalls section
+
+    Scenario: Classes by namespace and popularity
+      Given a graph holding "ex:B" with 5 instances, "ex:A" with 9 and "foaf:Person" with 20
+      When the report is rendered
+      Then the contents and the class sections list "ex:A", "ex:B", "foaf:Person" in that order
+
+    Scenario: Properties by inheritance and use
+      Given a class with the own properties "ex:p" (3 subjects) and "ex:q" (8 subjects) and the inherited property "ex:r" (10 subjects)
+      When the report is rendered
+      Then its table lists "ex:q", "ex:p" under "Own", then "ex:r" under "Inherited"
+
+    Scenario: Tree with popularity
+      Given "ex:Agent" with 12 instances and "ex:Person" with 6, whose implied parent is "ex:Agent"
+      When the report is rendered
+      Then the taxonomy shows "ex:Agent" with 12 and a 100% bar, holding "ex:Person" with 6 and a 50% bar, each linked to its section
+
+    Scenario: Unprofiled parent and several parents
+      Given "ex:Person" declares the parents "ex:Agent", not profiled, and "ex:Thing", profiled
+      When the report is rendered
+      Then "ex:Agent" is a root node without count holding "ex:Person", and "ex:Thing" holds a see reference to "ex:Person"

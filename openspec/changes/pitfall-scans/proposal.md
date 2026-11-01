@@ -38,6 +38,12 @@ and show them next to the profile.
   - an optional `--fail-on` level turns findings into an exit status for CI.
 - **User checks:** a folder of the user's own `.rq` files, with the same contract, extends or
   replaces the catalogue.
+- **A report that reads in order of importance** (developer, 2026-11-01, after the first brainframe
+  scan):
+  - classes are grouped by namespace and ordered by how many instances they have;
+  - properties are grouped by how a class gets them (own, refined, inherited) and ordered by use;
+  - a taxonomy view shows the class hierarchy of each graph, with how popular each class is;
+  - the pitfalls join the caveats, in one section (DEC-13 to DEC-16).
 
 ## Key decisions
 
@@ -94,6 +100,27 @@ and show them next to the profile.
   is cited as the source catalogue, with its pitfall code and a link. Rejected: copying OOPS!'s texts
   (their licence was not checked).
 
+- **DEC-13 Classes grouped by namespace and ordered by popularity.** In the report page and its
+  contents, the classes of a graph are grouped by namespace prefix (alphabetically), and within a
+  namespace ordered by instance count descending, then by short name. Rejected: IRI order (today; it
+  mixes vocabularies and hides the important classes); one global popularity order (it scatters a
+  vocabulary).
+- **DEC-14 Properties grouped by inheritance and ordered by use.** A class table groups its
+  properties as own, then refined, then inherited, each group headed. Within a group the order is
+  subjects descending, then confidence descending, then short name. Only the report page changes:
+  SHACL, PlantUML and TSV keep their deterministic IRI order, for stable diffs and golden files.
+  Rejected: re-ordering every output.
+- **DEC-15 A taxonomy view with popularity.** Each graph gets a collapsible class tree built from the
+  classes' parents (declared and implied). A node shows its short name, links to its class section,
+  and shows its instance count with a bar scaled to the graph's most popular class. A parent that is
+  not profiled appears as a node without a count. A class with several parents is drawn in full under
+  its first parent (by short name) and as a "see" reference under the others; a cycle is cut where it
+  closes. Rejected: a diagram image (needs a renderer; the PlantUML modules already exist); a flat
+  list (no hierarchy).
+- **DEC-16 Pitfalls and caveats in one section.** The *Caveats and pitfalls* section holds the
+  caveats, then the pitfall findings. Both say how far the profile can be trusted, and the reader
+  looks for them in one place. Rejected: two sections (developer, 2026-11-01).
+
 ## Rabbit-holes
 
 - Some checks are inherently expensive on large stores: P35 scans every predicate, P32 compares class
@@ -126,7 +153,9 @@ and show them next to the profile.
 - A packaged catalogue of 29 checks; the seed queries, rewritten to the header contract.
 - Profile model: `GraphProfile.pitfalls` (`PitfallResult` with check id, title, importance, scope,
   source, count, examples and duration); `QueryKind.pitfall`.
-- Report page: a *Pitfalls* section, badges on the class sections, and a contents entry.
+- Report page: the pitfall findings in a *Caveats and pitfalls* section, and badges on the class
+  sections; classes grouped by namespace and ordered by popularity; properties grouped by
+  inheritance and ordered by use; a taxonomy view per graph with popularity bars.
 - A new format `pitfalls` (`--format pitfalls`, `fingerprint-gen-pitfalls`) writing ROBOT-style TSV.
 - Exit status 5 with `--fail-on`.
 - `make scan-files ONTOLOGY=… [DATA=…] OUT=…`: loads files into a separate scan Oxigraph (port 7880)
@@ -143,9 +172,10 @@ and show them next to the profile.
 - `statistics-collection`: "Depth and switches select the queries" gains the scan switch;
   "Failures are recorded and fail the run" gains the check id. The new settings are collection
   settings under the existing "Settings" requirement.
-- `fingerprint-report`: "Report content" gains the Pitfalls section; "Exit status" gains code 5;
+- `fingerprint-report`: "Report content" gains the pitfall findings, the class and property order
+  and the taxonomy view; "Exit status" gains code 5;
   "Read-only and credential-safe" covers the checks; "Formats rendered after collecting" gains
-  `pitfalls`; a new "Pitfalls in the report".
+  `pitfalls`; new "Pitfalls in the report", "Class and property order" and "Taxonomy view".
 - `namespace-prefixes`: "Every namespace has a prefix" gathers the findings' IRIs too.
 - `developer-tooling`: `make scan-files`.
 

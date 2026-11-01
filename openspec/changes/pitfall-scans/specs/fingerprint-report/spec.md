@@ -11,10 +11,13 @@ The report SHALL show:
 - per property, as today: property, subjects, min, max, avg, kind, distinct values, value types,
   confidence, cardinality (the label; `present` for a presence-only property), inheritance and
   language coverage. Numbers are rounded to 2 decimals, and an absent value is `—`;
-- when the profile holds scan results, a *Pitfalls* section ("Pitfalls in the report", below);
-- the caveats: first-N classes, the untyped subjects per graph (when graph statistics were
-  collected), the IRIs that could not be written, and the namespaces the filters hid, with their
-  class counts.
+- a taxonomy view per graph ("Taxonomy view", below);
+- a *Caveats and pitfalls* section: first-N classes, the untyped subjects per graph (when graph
+  statistics were collected), the IRIs that could not be written, the namespaces the filters hid, with
+  their class counts, and, when the profile holds scan results, the pitfall findings ("Pitfalls in the
+  report", below).
+
+The classes and the properties SHALL be in the order of "Class and property order", below.
 
 Every IRI SHALL be shown as `prefix:local`, graph names included, with the full IRI as its
 `title` and link target. A hidden namespace's count is its number of distinct class IRIs. An
@@ -136,8 +139,8 @@ prefix file, a module size below 1, and an unwritable shapes namespace.
 ## ADDED Requirements
 
 ### Requirement: Pitfalls in the report
-When the profile holds scan results, the report SHALL have a *Pitfalls* section with:
-- a contents entry;
+When the profile holds scan results, the *Caveats and pitfalls* section SHALL end with a *Pitfalls*
+part (EPIC DEC-16) holding:
 - a summary of the number of distinct checks (by id, over all graphs) with findings, per importance;
 - per graph, one entry per check, ordered by importance, then by count descending, then by id,
   showing the title, the description (when given), importance, source, count, whether it is a
@@ -148,6 +151,10 @@ A class section whose class is the entity of an example SHALL show one badge per
 to that check's entry. The search box SHALL also filter the check entries by id and title (the
 report's search, extended to the new section).
 
+#### Scenario: Pitfalls in the caveats section
+- **WHEN** the report is generated for a profile with scan results
+- **THEN** the pitfall findings are inside the *Caveats and pitfalls* section, after the caveats, and there is no separate Pitfalls section
+
 #### Scenario: Section and badge
 - **WHEN** the report is generated for a profile whose `x_punning_class_and_property` result has the example entity `bf:factActivity`, a profiled class
 - **THEN** the Pitfalls section lists that check with its count and example `bf:factActivity`, and the `bf:factActivity` class section shows a badge linking to it
@@ -155,3 +162,37 @@ report's search, extended to the new section).
 #### Scenario: Values are escaped
 - **WHEN** an example value is `<script>alert(1)</script>`
 - **THEN** the page shows it as text and contains no `<script>` element with that content
+
+### Requirement: Class and property order
+In the report page and its contents, the classes of each graph SHALL be grouped by namespace prefix
+in alphabetical order and, within a namespace, ordered by instance count descending, then by short
+name. In each class table the properties SHALL be grouped as own, then refined, then inherited, each
+group headed when the class has more than one group; within a group they SHALL be ordered by the
+number of subjects descending, then confidence descending, then short name. SHACL, PlantUML and TSV
+outputs SHALL keep their IRI order (EPIC DEC-13, DEC-14).
+
+#### Scenario: Classes by namespace and popularity
+- **WHEN** a graph holds `ex:B` (5 instances), `ex:A` (9 instances) and `foaf:Person` (20 instances)
+- **THEN** the report lists `ex:A`, `ex:B`, then `foaf:Person`, in its contents and its class sections
+
+#### Scenario: Properties by inheritance and use
+- **WHEN** a class has the own properties `ex:p` (3 subjects) and `ex:q` (8 subjects), and the inherited property `ex:r` (10 subjects)
+- **THEN** its table lists `ex:q`, `ex:p` under *Own*, then `ex:r` under *Inherited*
+
+### Requirement: Taxonomy view
+The report SHALL have a *Taxonomy* section with a contents entry and, per graph, a collapsible tree
+of its shown classes built from their parents, declared and implied. Each node SHALL show the class's
+short name linked to its class section, its instance count, and a bar whose width is the count as a
+share of the graph's largest instance count. A parent that is not profiled in the graph SHALL be a
+node without count or link. A class with several parents SHALL be drawn under its first parent by
+short name and as a "see" reference under the others; a cycle SHALL be cut where it closes. Siblings
+SHALL be ordered by instance count descending, then short name (EPIC DEC-15).
+
+#### Scenario: Tree with popularity
+- **WHEN** a graph holds `ex:Agent` (12 instances) and `ex:Person` (6 instances), whose implied parent is `ex:Agent`
+- **THEN** the taxonomy shows `ex:Agent` (12, a full bar) with the child `ex:Person` (6, a half bar), each linked to its class section
+
+#### Scenario: Unprofiled parent and several parents
+- **WHEN** `ex:Person` declares the parents `ex:Agent` (not profiled) and `ex:Thing` (profiled)
+- **THEN** `ex:Agent` is a root node without count holding `ex:Person`, and under `ex:Thing` there is a "see" reference to `ex:Person`
+

@@ -235,6 +235,31 @@
 - **D-12 Release.** Version 3.1.0, with a CHANGELOG entry ("Added"). Nothing breaking: the scan is
   opt-in, and exit 5 only appears with `--fail-on`.
 
+- **D-13 Report order (DEC-13, DEC-14).** Only `DocumentGenerator` re-orders; the generator walk
+  stays in IRI order for every other format.
+  - `end_graph` sorts its `DocumentClass` list by `(prefix, -instances, label)`. The contents' groups
+    follow, because the template groups consecutive classes by prefix.
+  - `end_class` sorts the properties by `(group, -subjects, -confidence, label)` from the raw
+    `PropertyAnalytics`, with the groups own (and `—`), refined, inherited. It fills `properties`
+    (ordered) and the new `property_groups: DocumentPropertyGroup[name, properties]`.
+  - The template shows a group heading row only when a class has more than one group.
+- **D-14 Taxonomy (DEC-15).** `DocumentGraph.taxonomy: TaxonomyNode[]` is a LinkML view with these
+  fields: `label`, `iri`, `anchor` (absent for an unprofiled parent), `instances` (absent then),
+  `bar` (0–100, `instances × 100 // max instances of the graph`, rounded down, at least 1 when
+  instances > 0), `see` (the anchor of the full node, for a "see" reference) and `children`.
+  - It is built in `end_graph` from the shown classes and their parents (`ClassAnalytics.parents`,
+    declared and implied). Parents in hidden namespaces are left out (`Generator.shown`).
+  - **Roots:** the shown classes with no shown parent, plus the unprofiled parents.
+  - **Placement:** a class is placed in full under its first parent by short name, and as a `see`
+    node under each other parent.
+  - **Cycles:** depth-first with the current path; a class already on the path ends that branch.
+  - **Order:** siblings by `(-instances, label)`, with unprofiled nodes last.
+  - The template renders the tree with a recursive Jinja macro, as nested `<details open>` lists,
+    in a `#taxonomy` section after the namespace table, with one contents link.
+- **D-15 One caveats section (DEC-16).** The page's `#caveats` section is titled *Caveats and
+  pitfalls*. The pitfall part keeps the id `pitfalls` (on a `div`) for the badges and the contents
+  link, and comes after the caveats lists.
+
 ## Algorithm / approach
 
 Worked example (brainframe, from `inputs/`):

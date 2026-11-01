@@ -2,6 +2,21 @@
 {#- The report page. `view` is a ProfileDocument (model/fingerprint_views.yaml); every value comes ready as text
     from fingerprint/service_layer/generators/document.py, so this template only lays it out. -#}
 
+{%- macro tree(nodes) -%}
+<ul class="tree">
+  {%- for n in nodes %}
+  <li>
+    {%- if n.children %}<details open><summary>{% endif %}
+    {%- if n.anchor %}<a href="#{{ n.anchor }}" title="{{ n.iri }}">{{ n.label }}</a>
+    {%- elif n.see %}<span class="note">see</span> <a href="#{{ n.see }}" title="{{ n.iri }}">{{ n.label }}</a>
+    {%- else %}<span class="note" title="{{ n.iri }}">{{ n.label }}</span>{% endif %}
+    {%- if n.instances is not none and not n.see %} <span class="pop"><span class="bar" style="width: {{ n.bar }}%"></span></span> <span class="meta">{{ n.instances }}</span>{% endif %}
+    {%- if n.children %}</summary>{{ tree(n.children) }}</details>{% endif %}
+  </li>
+  {%- endfor %}
+</ul>
+{%- endmacro -%}
+
 {%- macro term(label, iri) -%}
   {%- set parts = label.split(':', 1) if label != iri else [] -%}
   {%- if iri.startswith('http://') or iri.startswith('https://') -%}<a class="curie" href="{{ iri }}" title="{{ iri }}">{%- else -%}<span class="curie" title="{{ iri }}">{%- endif -%}
@@ -29,7 +44,7 @@
 </header>
 <div class="frame">
 <nav aria-label="Contents">
-  <a href="#overview">Overview</a> · <a href="#namespaces">Namespaces</a>{% if view.pitfalls %} · <a href="#pitfalls">Pitfalls</a>{% endif %} · <a href="#collection">Collection</a> · <a href="#caveats">Caveats</a>
+  <a href="#overview">Overview</a> · <a href="#namespaces">Namespaces</a> · <a href="#taxonomy">Taxonomy</a> · <a href="#collection">Collection</a> · <a href="#caveats">Caveats{% if view.pitfalls %} and pitfalls{% endif %}</a>
   {%- for g in view.graphs or [] %}
   <details open>
     <summary>{{ g.label }} <span class="note">({{ (g.classes or [])|length }})</span></summary>
@@ -83,6 +98,18 @@
     </div>
   </section>
 
+  <section id="taxonomy">
+    <h2>Taxonomy</h2>
+    <p class="note">The class hierarchy of each graph, from declared and implied parents. The bar shows how many
+      instances a class has, against the graph's most popular class; grey names are parents not profiled here.</p>
+    {%- for g in view.graphs or [] %}
+    {%- if g.taxonomy %}
+    <h3>{% if g.iri %}{{ term(g.label, g.iri) }}{% else %}{{ g.label|capitalize }}{% endif %}</h3>
+    {{ tree(g.taxonomy) }}
+    {%- endif %}
+    {%- endfor %}
+  </section>
+
   {%- for g in view.graphs or [] %}
   <section id="graph-{{ g.slug }}">
     <h2>{% if g.iri %}{{ term(g.label, g.iri) }}{% else %}{{ g.label|capitalize }}{% endif %}</h2>
@@ -110,13 +137,18 @@
           <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
         </tr></thead>
         <tbody>
-        {%- for p in c.properties or [] %}
+        {%- for g in c.property_groups or [] %}
+        {%- if (c.property_groups or [])|length > 1 %}
+          <tr class="group"><th colspan="12">{{ g.name }}</th></tr>
+        {%- endif %}
+        {%- for p in g.properties or [] %}
           <tr>
             <td>{{ term(p.label, p.iri) }}</td><td class="n">{{ p.subjects }}</td><td class="n">{{ p.min }}</td><td class="n">{{ p.max }}</td>
             <td class="n">{{ p.avg }}</td><td>{{ p.kind }}</td><td class="n">{{ p.distinct }}</td>
             <td>{% for t in p.types or [] %}{{ term(t.label, t.iri) }}{{ ", " if not loop.last }}{% else %}—{% endfor %}</td>
             <td class="n">{{ p.confidence }}</td><td>{{ p.cardinality }}</td><td>{{ p.inheritance }}</td><td class="n">{{ p.language_coverage }}</td>
           </tr>
+        {%- endfor %}
         {%- endfor %}
         </tbody>
       </table>
@@ -126,50 +158,6 @@
   </section>
   {%- endfor %}
 
-  {%- if view.pitfalls %}
-  <section id="pitfalls">
-    <h2>Pitfalls</h2>
-    <p class="note">Modelling pitfalls found by SPARQL checks, most of them after the OOPS! catalogue. Each check shows
-      how many rows it found and its first examples; heuristic checks are hints, not errors.</p>
-    <dl class="facts">
-      {%- for s in view.pitfalls.summary %}
-      <div><dt>{{ s.importance|capitalize }}</dt><dd><span class="badge {{ s.importance }}">{{ s.checks }}</span> checks with findings</dd></div>
-      {%- endfor %}
-    </dl>
-    {%- for g in view.pitfalls.graphs %}
-    <h3>{{ g.label }}</h3>
-    {%- if not g.checks %}<p>No check found anything in this graph.</p>{% endif %}
-    {%- for k in g.checks %}
-    <details class="pitfall" id="{{ k.anchor }}" data-q="{{ k.q }}">
-      <summary>
-        <span class="badge {{ k.importance }}">{{ k.importance }}</span>
-        <strong>{{ k.title }}</strong>
-        <span class="meta">{{ k.count }} found · {{ k.check_id }} · {{ k.source }}{% if k.heuristic %} · heuristic{% endif %}</span>
-      </summary>
-      <div class="scroll">
-        {%- if k.description %}<p class="note">{{ k.description }}</p>{% endif %}
-        <table>
-          <thead><tr><th>Entity</th><th>Property</th><th>Value</th></tr></thead>
-          <tbody>
-          {%- for e in k.examples or [] %}
-            <tr>
-              {%- for v in [e.entity, e.property, e.value] %}
-              <td>{% if v.iri %}{{ term(v.label, v.iri) }}{% else %}{{ v.label }}{% endif %}</td>
-              {%- endfor %}
-            </tr>
-          {%- endfor %}
-          </tbody>
-        </table>
-        {%- if k.count > (k.examples or [])|length %}<p class="note">First {{ (k.examples or [])|length }} of {{ k.count }}.</p>{% endif %}
-      </div>
-    </details>
-    {%- endfor %}
-    {%- if g.clean %}
-    <p class="note">Nothing found by: {{ g.clean|join(", ") }}.</p>
-    {%- endif %}
-    {%- endfor %}
-  </section>
-  {%- endif %}
 
   <section id="collection">
     <h2>Collection</h2>
@@ -204,7 +192,7 @@
   </section>
 
   <section id="caveats">
-    <h2>Caveats</h2>
+    <h2>Caveats{% if view.pitfalls %} and pitfalls{% endif %}</h2>
     {%- set cv = view.caveats %}
     {%- if not (cv.sampled or cv.untyped or cv.hidden or cv.skipped) %}
     <p>Nothing to flag: every class was read exactly and every IRI is shown.</p>
@@ -226,6 +214,50 @@
     <h3>IRIs that cannot be written</h3>
     <ul>{% for s in cv.skipped %}<li>{{ s }}</li>{% endfor %}</ul>
     {%- endif %}
+  {%- if view.pitfalls %}
+    <div id="pitfalls">
+    <h3>Pitfalls</h3>
+    <p class="note">Modelling pitfalls found by SPARQL checks, most of them after the OOPS! catalogue. Each check shows
+      how many rows it found and its first examples; heuristic checks are hints, not errors.</p>
+    <dl class="facts">
+      {%- for s in view.pitfalls.summary %}
+      <div><dt>{{ s.importance|capitalize }}</dt><dd><span class="badge {{ s.importance }}">{{ s.checks }}</span> checks with findings</dd></div>
+      {%- endfor %}
+    </dl>
+    {%- for g in view.pitfalls.graphs %}
+    <h4>{{ g.label }}</h4>
+    {%- if not g.checks %}<p>No check found anything in this graph.</p>{% endif %}
+    {%- for k in g.checks %}
+    <details class="pitfall" id="{{ k.anchor }}" data-q="{{ k.q }}">
+      <summary>
+        <span class="badge {{ k.importance }}">{{ k.importance }}</span>
+        <strong>{{ k.title }}</strong>
+        <span class="meta">{{ k.count }} found · {{ k.check_id }} · {{ k.source }}{% if k.heuristic %} · heuristic{% endif %}</span>
+      </summary>
+      <div class="scroll">
+        {%- if k.description %}<p class="note">{{ k.description }}</p>{% endif %}
+        <table>
+          <thead><tr><th>Entity</th><th>Property</th><th>Value</th></tr></thead>
+          <tbody>
+          {%- for e in k.examples or [] %}
+            <tr>
+              {%- for v in [e.entity, e.property, e.value] %}
+              <td>{% if v.iri %}{{ term(v.label, v.iri) }}{% else %}{{ v.label }}{% endif %}</td>
+              {%- endfor %}
+            </tr>
+          {%- endfor %}
+          </tbody>
+        </table>
+        {%- if k.count > (k.examples or [])|length %}<p class="note">First {{ (k.examples or [])|length }} of {{ k.count }}.</p>{% endif %}
+      </div>
+    </details>
+    {%- endfor %}
+    {%- if g.clean %}
+    <p class="note">Nothing found by: {{ g.clean|join(", ") }}.</p>
+    {%- endif %}
+    {%- endfor %}
+    </div>
+  {%- endif %}
   </section>
 </main>
 </div>
@@ -250,7 +282,7 @@
     classes.forEach(function (cls) {
       var own = !text || cls.dataset.q.indexOf(text) >= 0;
       var anyRow = false;
-      cls.querySelectorAll("tbody tr").forEach(function (row) {
+      cls.querySelectorAll("tbody tr:not(.group)").forEach(function (row) {
         var link = row.querySelector(".curie");
         var haystack = (row.cells[0].textContent + " " + (link ? link.title : "")).toLowerCase();
         var match = text && haystack.indexOf(text) >= 0;

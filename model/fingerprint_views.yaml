@@ -201,7 +201,19 @@ classes:
       label: { required: true, description: "The graph as a short name." }
       iri: { description: "The graph IRI; absent for the default graph." }
       empty: { range: boolean, required: true, description: "True when the graph has no class partitions." }
-      classes: { range: DocumentClass, multivalued: true, inlined_as_list: true }
+      classes: { range: DocumentClass, multivalued: true, inlined_as_list: true, description: "Grouped by namespace prefix, then by instances descending, then short name." }
+      taxonomy: { range: TaxonomyNode, multivalued: true, inlined_as_list: true, description: "The root nodes of the class tree." }
+
+  TaxonomyNode:
+    description: A class in the taxonomy view, with its popularity (pitfall-scans DEC-15).
+    attributes:
+      label: { required: true }
+      iri: { required: true }
+      anchor: { description: "The class section's anchor; absent for a parent not profiled in the graph." }
+      instances: { range: integer, description: "Absent for a parent not profiled in the graph." }
+      bar: { range: integer, required: true, description: "The popularity bar width, 0-100, against the graph's largest class." }
+      see: { description: "For a class with several parents: the anchor of its full node, drawn under its first parent." }
+      children: { range: TaxonomyNode, multivalued: true, inlined_as_list: true }
 
   DocumentClass:
     description: The section of one class.
@@ -216,8 +228,15 @@ classes:
       sample_note: { description: "(sample may differ between queries), when the sample was not shared." }
       sampled: { range: boolean, required: true }
       parents: { range: ParentReference, multivalued: true, inlined_as_list: true }
-      properties: { range: DocumentProperty, multivalued: true, inlined_as_list: true }
+      properties: { range: DocumentProperty, multivalued: true, inlined_as_list: true, description: "Own, refined, inherited; each by subjects, confidence, short name." }
+      property_groups: { range: DocumentPropertyGroup, multivalued: true, inlined_as_list: true }
       badges: { range: DocumentBadge, multivalued: true, inlined_as_list: true, description: "Pitfall checks whose examples name this class." }
+
+  DocumentPropertyGroup:
+    description: The properties a class gets one way - own, refined or inherited (pitfall-scans DEC-14).
+    attributes:
+      name: { required: true, description: "Own, Refined or Inherited." }
+      properties: { range: DocumentProperty, multivalued: true, inlined_as_list: true }
 
   DocumentBadge:
     description: A link from a class section to a pitfall check entry.

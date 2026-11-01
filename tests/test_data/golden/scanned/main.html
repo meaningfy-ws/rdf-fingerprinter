@@ -61,6 +61,12 @@ td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowra
 .badge { display: inline-block; padding: 0 .45rem; border-radius: 999px; font-size: .8rem; font-weight: 600;
          color: #fff; background: var(--muted); text-decoration: none; }
 .badge.critical { background: #b42318; } .badge.important { background: #b54708; } .badge.minor { background: #475467; }
+tr.group th { background: var(--paper); color: var(--ink); text-align: left; padding-top: .5rem; }
+ul.tree { list-style: none; margin: .2rem 0; padding-left: 1.1rem; }
+ul.tree > li { margin: .15rem 0; }
+ul.tree summary { cursor: pointer; }
+.pop { display: inline-block; width: 6rem; height: .55rem; background: var(--rule); border-radius: 3px; vertical-align: middle; }
+.pop .bar { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
 details.pitfall { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; margin: .5rem 0; }
 details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: baseline; }
 [hidden] { display: none !important; }
@@ -95,13 +101,13 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
 </header>
 <div class="frame">
 <nav aria-label="Contents">
-  <a href="#overview">Overview</a> · <a href="#namespaces">Namespaces</a> · <a href="#pitfalls">Pitfalls</a> · <a href="#collection">Collection</a> · <a href="#caveats">Caveats</a>
+  <a href="#overview">Overview</a> · <a href="#namespaces">Namespaces</a> · <a href="#taxonomy">Taxonomy</a> · <a href="#collection">Collection</a> · <a href="#caveats">Caveats and pitfalls</a>
   <details open>
     <summary>authority2:treaties <span class="note">(6)</span></summary>
     <div class="group"><span class="pfx" data-ns="euvoc">euvoc</span> 3</div>
     <ul>
-      <li data-anchor="treaties-3b4301a8-treaty-09a01768"><a href="#treaties-3b4301a8-treaty-09a01768">Treaty</a></li>
       <li data-anchor="treaties-3b4301a8-xlnotation-86ef84a2"><a href="#treaties-3b4301a8-xlnotation-86ef84a2">XlNotation</a></li>
+      <li data-anchor="treaties-3b4301a8-treaty-09a01768"><a href="#treaties-3b4301a8-treaty-09a01768">Treaty</a></li>
       <li data-anchor="treaties-3b4301a8-xlnote-d7938f35"><a href="#treaties-3b4301a8-xlnote-d7938f35">XlNote</a></li>
     </ul>
     <div class="group"><span class="pfx" data-ns="skos">skos</span> 2</div>
@@ -175,14 +181,49 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
     </table>
     </div>
   </section>
+
+  <section id="taxonomy">
+    <h2>Taxonomy</h2>
+    <p class="note">The class hierarchy of each graph, from declared and implied parents. The bar shows how many
+      instances a class has, against the graph's most popular class; grey names are parents not profiled here.</p>
+    <h3><a class="curie" href="http://publications.europa.eu/resources/authority/treaties" title="http://publications.europa.eu/resources/authority/treaties"><span class="pfx" data-ns="authority2">authority2:</span>treaties</a></h3>
+    <ul class="tree">
+  <li><a href="#treaties-3b4301a8-label-1f1eba51" title="http://www.w3.org/2008/05/skos-xl#Label">skosxl:Label</a> <span class="pop"><span class="bar" style="width: 100%"></span></span> <span class="meta">4530</span>
+  </li>
+  <li><a href="#treaties-3b4301a8-xlnotation-86ef84a2" title="http://publications.europa.eu/ontology/euvoc#XlNotation">euvoc:XlNotation</a> <span class="pop"><span class="bar" style="width: 7%"></span></span> <span class="meta">357</span>
+  </li>
+  <li><a href="#treaties-3b4301a8-xlnote-d7938f35" title="http://publications.europa.eu/ontology/euvoc#XlNote">euvoc:XlNote</a> <span class="pop"><span class="bar" style="width: 1%"></span></span> <span class="meta">12</span>
+  </li>
+  <li><a href="#treaties-3b4301a8-conceptscheme-6d2ac9e0" title="http://www.w3.org/2004/02/skos/core#ConceptScheme">skos:ConceptScheme</a> <span class="pop"><span class="bar" style="width: 1%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><details open><summary><a href="#treaties-3b4301a8-treaty-09a01768" title="http://publications.europa.eu/ontology/euvoc#Treaty">euvoc:Treaty</a> <span class="pop"><span class="bar" style="width: 2%"></span></span> <span class="meta">104</span></summary><ul class="tree">
+  <li><a href="#treaties-3b4301a8-concept-07819658" title="http://www.w3.org/2004/02/skos/core#Concept">skos:Concept</a> <span class="pop"><span class="bar" style="width: 2%"></span></span> <span class="meta">104</span>
+  </li>
+</ul></details>
+  </li>
+</ul>
+    <h3><a class="curie" href="http://publications.europa.eu/resources/authority/continents" title="http://publications.europa.eu/resources/authority/continents"><span class="pfx" data-ns="authority2">authority2:</span>continents</a></h3>
+    <ul class="tree">
+  <li><a href="#continents-214e8f67-label-1f1eba51" title="http://www.w3.org/2008/05/skos-xl#Label">skosxl:Label</a> <span class="pop"><span class="bar" style="width: 100%"></span></span> <span class="meta">145</span>
+  </li>
+  <li><a href="#continents-214e8f67-xlnotation-86ef84a2" title="http://publications.europa.eu/ontology/euvoc#XlNotation">euvoc:XlNotation</a> <span class="pop"><span class="bar" style="width: 4%"></span></span> <span class="meta">6</span>
+  </li>
+  <li><a href="#continents-214e8f67-conceptscheme-6d2ac9e0" title="http://www.w3.org/2004/02/skos/core#ConceptScheme">skos:ConceptScheme</a> <span class="pop"><span class="bar" style="width: 1%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><details open><summary><a href="#continents-214e8f67-continent-4ed30680" title="http://publications.europa.eu/ontology/euvoc#Continent">euvoc:Continent</a> <span class="pop"><span class="bar" style="width: 4%"></span></span> <span class="meta">6</span></summary><ul class="tree">
+  <li><a href="#continents-214e8f67-concept-07819658" title="http://www.w3.org/2004/02/skos/core#Concept">skos:Concept</a> <span class="pop"><span class="bar" style="width: 4%"></span></span> <span class="meta">6</span>
+  </li>
+</ul></details>
+  </li>
+</ul>
+  </section>
   <section id="graph-treaties-3b4301a8">
     <h2><a class="curie" href="http://publications.europa.eu/resources/authority/treaties" title="http://publications.europa.eu/resources/authority/treaties"><span class="pfx" data-ns="authority2">authority2:</span>treaties</a></h2>
-    <details class="cls" id="treaties-3b4301a8-treaty-09a01768" open data-ns="euvoc" data-q="euvoc:treaty http://publications.europa.eu/ontology/euvoc#treaty">
+    <details class="cls" id="treaties-3b4301a8-xlnotation-86ef84a2" open data-ns="euvoc" data-q="euvoc:xlnotation http://publications.europa.eu/ontology/euvoc#xlnotation">
       <summary>
-        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Treaty" title="http://publications.europa.eu/ontology/euvoc#Treaty"><span class="pfx" data-ns="euvoc">euvoc:</span>Treaty</a></h3>
-        <span class="meta">104 instances, exact</span>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></h3>
+        <span class="meta">357 instances, exact</span>
         <a class="badge minor" href="#pitfall-treaties-3b4301a8-p34_untyped_class" title="pitfall p34_untyped_class">p34_untyped_class</a>
-        <span class="meta">parents: <a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a> (implied)</span>
       </summary>
       <div class="scroll">
       <table class="props">
@@ -195,11 +236,12 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
       </table>
       </div>
     </details>
-    <details class="cls" id="treaties-3b4301a8-xlnotation-86ef84a2" open data-ns="euvoc" data-q="euvoc:xlnotation http://publications.europa.eu/ontology/euvoc#xlnotation">
+    <details class="cls" id="treaties-3b4301a8-treaty-09a01768" open data-ns="euvoc" data-q="euvoc:treaty http://publications.europa.eu/ontology/euvoc#treaty">
       <summary>
-        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#XlNotation" title="http://publications.europa.eu/ontology/euvoc#XlNotation"><span class="pfx" data-ns="euvoc">euvoc:</span>XlNotation</a></h3>
-        <span class="meta">357 instances, exact</span>
+        <h3><a class="curie" href="http://publications.europa.eu/ontology/euvoc#Treaty" title="http://publications.europa.eu/ontology/euvoc#Treaty"><span class="pfx" data-ns="euvoc">euvoc:</span>Treaty</a></h3>
+        <span class="meta">104 instances, exact</span>
         <a class="badge minor" href="#pitfall-treaties-3b4301a8-p34_untyped_class" title="pitfall p34_untyped_class">p34_untyped_class</a>
+        <span class="meta">parents: <a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a> (implied)</span>
       </summary>
       <div class="scroll">
       <table class="props">
@@ -369,8 +411,44 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
       </div>
     </details>
   </section>
-  <section id="pitfalls">
-    <h2>Pitfalls</h2>
+
+
+  <section id="collection">
+    <h2>Collection</h2>
+    <p>Every measurement succeeded.</p>
+    <details>
+      <summary>Settings used</summary>
+      <div class="scroll plain">
+      <table>
+        <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>acceptance_threshold</td><td>0.95</td></tr>
+          <tr><td>completeness_check</td><td>False</td></tr>
+          <tr><td>concurrency</td><td>4</td></tr>
+          <tr><td>depth</td><td>classes</td></tr>
+          <tr><td>first_n</td><td>10000</td></tr>
+          <tr><td>graph_statistics</td><td>False</td></tr>
+          <tr><td>object_type_scope</td><td>same_graph</td></tr>
+          <tr><td>pitfall_examples</td><td>10</td></tr>
+          <tr><td>pitfall_scan</td><td>True</td></tr>
+          <tr><td>precision_policy</td><td>auto</td></tr>
+          <tr><td>schema_graphs</td><td>[&#39;http://publications.europa.eu/resources/authority/continents&#39;]</td></tr>
+          <tr><td>selected_graphs</td><td>[&#39;http://publications.europa.eu/resources/authority/treaties&#39;]</td></tr>
+          <tr><td>timeout_seconds</td><td>60</td></tr>
+          <tr><td>top_k</td><td>20</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+  </section>
+
+  <section id="caveats">
+    <h2>Caveats and pitfalls</h2>
+    <h3>Hidden namespaces</h3>
+    <p class="note">Their classes are left out of this page; show them with <code>--include-namespace</code>.</p>
+    <ul><li><span class="pfx" data-ns="owl" title="http://www.w3.org/2002/07/owl#">owl</span>: 1 classes</li></ul>
+    <div id="pitfalls">
+    <h3>Pitfalls</h3>
     <p class="note">Modelling pitfalls found by SPARQL checks, most of them after the OOPS! catalogue. Each check shows
       how many rows it found and its first examples; heuristic checks are hints, not errors.</p>
     <dl class="facts">
@@ -378,7 +456,7 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
       <div><dt>Important</dt><dd><span class="badge important">3</span> checks with findings</dd></div>
       <div><dt>Minor</dt><dd><span class="badge minor">1</span> checks with findings</dd></div>
     </dl>
-    <h3>authority2:treaties</h3>
+    <h4>authority2:treaties</h4>
     <details class="pitfall" id="pitfall-treaties-3b4301a8-p35_untyped_property" data-q="p35_untyped_property relation used but never defined">
       <summary>
         <span class="badge important">important</span>
@@ -493,7 +571,7 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
       </div>
     </details>
     <p class="note">Nothing found by: x_domain_violation, x_individual_as_predicate, x_punning_class_and_property, x_range_violation.</p>
-    <h3>authority2:continents</h3>
+    <h4>authority2:continents</h4>
     <details class="pitfall" id="pitfall-continents-214e8f67-p10_no_disjointness" data-q="p10_no_disjointness no disjointness axiom at all">
       <summary>
         <span class="badge important">important</span>
@@ -533,42 +611,7 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
       </div>
     </details>
     <p class="note">Nothing found by: p04_unconnected_class, p05_wrong_inverse, p06_class_cycle, p07_merged_concepts, p08_missing_comment, p11_missing_domain_or_range, p12_p30_same_name_not_equivalent, p13_missing_inverse, p19_multiple_domains_or_ranges, p20_label_longer_than_comment, p21_miscellaneous_class, p22_class_naming, p24_recursive_definition, p25_inverse_of_itself, p26_inverse_of_symmetric, p27_wrong_equivalent_properties, p28_p29_wrong_symmetric_or_transitive, p32_classes_same_label, p33_single_property_chain, p36_iri_with_file_extension, p38_no_ontology_declaration.</p>
-  </section>
-
-  <section id="collection">
-    <h2>Collection</h2>
-    <p>Every measurement succeeded.</p>
-    <details>
-      <summary>Settings used</summary>
-      <div class="scroll plain">
-      <table>
-        <thead><tr><th>Setting</th><th>Value</th></tr></thead>
-        <tbody>
-          <tr><td>acceptance_threshold</td><td>0.95</td></tr>
-          <tr><td>completeness_check</td><td>False</td></tr>
-          <tr><td>concurrency</td><td>4</td></tr>
-          <tr><td>depth</td><td>classes</td></tr>
-          <tr><td>first_n</td><td>10000</td></tr>
-          <tr><td>graph_statistics</td><td>False</td></tr>
-          <tr><td>object_type_scope</td><td>same_graph</td></tr>
-          <tr><td>pitfall_examples</td><td>10</td></tr>
-          <tr><td>pitfall_scan</td><td>True</td></tr>
-          <tr><td>precision_policy</td><td>auto</td></tr>
-          <tr><td>schema_graphs</td><td>[&#39;http://publications.europa.eu/resources/authority/continents&#39;]</td></tr>
-          <tr><td>selected_graphs</td><td>[&#39;http://publications.europa.eu/resources/authority/treaties&#39;]</td></tr>
-          <tr><td>timeout_seconds</td><td>60</td></tr>
-          <tr><td>top_k</td><td>20</td></tr>
-        </tbody>
-      </table>
-      </div>
-    </details>
-  </section>
-
-  <section id="caveats">
-    <h2>Caveats</h2>
-    <h3>Hidden namespaces</h3>
-    <p class="note">Their classes are left out of this page; show them with <code>--include-namespace</code>.</p>
-    <ul><li><span class="pfx" data-ns="owl" title="http://www.w3.org/2002/07/owl#">owl</span>: 1 classes</li></ul>
+    </div>
   </section>
 </main>
 </div>
@@ -592,7 +635,7 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
     classes.forEach(function (cls) {
       var own = !text || cls.dataset.q.indexOf(text) >= 0;
       var anyRow = false;
-      cls.querySelectorAll("tbody tr").forEach(function (row) {
+      cls.querySelectorAll("tbody tr:not(.group)").forEach(function (row) {
         var link = row.querySelector(".curie");
         var haystack = (row.cells[0].textContent + " " + (link ? link.title : "")).toLowerCase();
         var match = text && haystack.indexOf(text) >= 0;

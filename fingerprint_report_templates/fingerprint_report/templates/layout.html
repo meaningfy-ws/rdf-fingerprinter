@@ -64,6 +64,12 @@ td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowra
 .badge { display: inline-block; padding: 0 .45rem; border-radius: 999px; font-size: .8rem; font-weight: 600;
          color: #fff; background: var(--muted); text-decoration: none; }
 .badge.critical { background: #b42318; } .badge.important { background: #b54708; } .badge.minor { background: #475467; }
+tr.group th { background: var(--paper); color: var(--ink); text-align: left; padding-top: .5rem; }
+ul.tree { list-style: none; margin: .2rem 0; padding-left: 1.1rem; }
+ul.tree > li { margin: .15rem 0; }
+ul.tree summary { cursor: pointer; }
+.pop { display: inline-block; width: 6rem; height: .55rem; background: var(--rule); border-radius: 3px; vertical-align: middle; }
+.pop .bar { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
 details.pitfall { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; margin: .5rem 0; }
 details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: baseline; }
 [hidden] { display: none !important; }
