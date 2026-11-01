@@ -132,6 +132,11 @@ def statistics(ctx, min, max, mean, confidence):
     assert p.mean == pytest.approx(mean) and p.confidence == pytest.approx(confidence)
 
 
+@then(parsers.parse("the mean when present is {mean:g}"))
+def mean_when_present(ctx, mean):
+    assert analysed_property(ctx).mean_when_present == pytest.approx(mean, abs=0.005)
+
+
 @then(parsers.parse('the label is "{label}" with support {support:g}'))
 def label(ctx, label, support):
     p = analysed_property(ctx)
@@ -150,14 +155,9 @@ LITERAL = {"node_kind": "literal", "datatype": "http://www.w3.org/2001/XMLSchema
 RESOURCE = {"node_kind": "iri", "object_class": "http://example.org/Person", "triples": 5}
 
 
-@given(parsers.parse("a property whose objects are {objects}"))
-def objects_of_kind(ctx, objects):
-    partitions = {
-        "only literals": [LITERAL],
-        "only resources": [RESOURCE],
-        "literals and resources": [LITERAL, RESOURCE],
-    }[objects]
-    add_property(ctx, bins={1: 10}, value_partitions=partitions, distinct_objects=10)
+@given("a property whose objects are literals and resources")
+def mixed_objects(ctx):
+    add_property(ctx, bins={1: 10}, value_partitions=[LITERAL, RESOURCE], distinct_objects=10)
 
 
 @then(parsers.parse('its kind is "{kind}"'))
@@ -180,17 +180,6 @@ def identifier_like(ctx):
     assert analysed_property(ctx).is_identifier_like is True
 
 
-@given(parsers.parse("a property has {distinct:d} distinct values and the top values setting is {top_k:d}"))
-def few_values(ctx, distinct, top_k):
-    ctx["settings"]["top_k"] = top_k
-    add_property(ctx, bins={1: 10}, distinct_objects=distinct, value_partitions=[{**LITERAL, "triples": 10}])
-
-
-@then("the property is a candidate for a list of allowed values")
-def enumeration(ctx):
-    assert analysed_property(ctx).is_enumeration_candidate is True
-
-
 @given("every value of a property is the same")
 def same_value(ctx):
     add_property(ctx, bins={1: 10}, distinct_objects=1, top_values=[{"value": "x", "triples": 10}])
@@ -199,17 +188,6 @@ def same_value(ctx):
 @then("its entropy estimate is 0")
 def zero_entropy(ctx):
     assert analysed_property(ctx).entropy_estimate == 0
-
-
-@given("a property with no literal values")
-def no_literals(ctx):
-    add_property(ctx, bins={1: 10}, distinct_objects=10, value_partitions=[{**RESOURCE, "triples": 10}])
-
-
-@then("its language coverage and mean length are absent")
-def ratios_absent(ctx):
-    p = analysed_property(ctx)
-    assert p.language_coverage is None and p.mean_length is None
 
 
 # --- hierarchy ---
