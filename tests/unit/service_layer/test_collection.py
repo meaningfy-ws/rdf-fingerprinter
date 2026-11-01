@@ -482,3 +482,21 @@ def test_language_tags_of_annotations_are_lower_cased():
     fake.add("ex:Person", "http://www.w3.org/2000/01/rdf-schema#label", Literal("Person", lang="EN"))
     (annotation,) = collected(fake).graphs[0].term_annotations
     assert [t.language for t in annotation.labels] == ["en"]
+
+
+def test_two_graphs_send_one_annotation_query_each():
+    fake = people()
+    for i in range(2):
+        fake.add(f"ex:q{i}", "a", "ex:Person", G)
+    result = collected(fake)
+    assert [g.graph for g in result.graphs] == [None, G]
+    assert len(fake.sent("Q12")) == 2
+
+
+@pytest.mark.parametrize("code", [429, 502])
+def test_a_transient_failure_of_the_annotation_query_is_retried(code):
+    fake = people()
+    fake.on("Q12", urllib.error.HTTPError("http://fake", code, "status", {}, None), times=1)  # type: ignore[arg-type]
+    result = collected(fake)
+    assert len(fake.sent("Q12")) == 2
+    assert result.graphs[0].term_annotations == [] and not result.failures

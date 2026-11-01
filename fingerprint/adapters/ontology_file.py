@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from rdflib import Graph, Literal, URIRef
+from rdflib import Dataset, Literal, URIRef
 from rdflib.term import Node
 from rdflib.util import guess_format
 
@@ -15,8 +15,10 @@ from fingerprint.domain.vocabulary import (
     TERM_LABEL_PREDICATES,
 )
 
-PREDICATES = {URIRef(p) for p in (*TERM_LABEL_PREDICATES, ALT_LABEL, *TERM_DESCRIPTION_PREDICATES)}
-SKOSXL_PREF_LABEL = URIRef(SKOSXL + "prefLabel")
+SKOSXL_PREF_LABEL = URIRef(SKOSXL + "prefLabel")  # counts only through skosxl:literalForm, as in Q12
+PREDICATES = {
+    URIRef(p) for p in (*TERM_LABEL_PREDICATES, ALT_LABEL, *TERM_DESCRIPTION_PREDICATES) if URIRef(p) != SKOSXL_PREF_LABEL
+}
 SKOSXL_LITERAL_FORM = URIRef(SKOSXL + "literalForm")
 
 
@@ -28,13 +30,18 @@ def _value(term: Node, predicate: Node, literal: Literal) -> AnnotationValue:
 def load_ontology(path: str | Path) -> list[AnnotationValue]:
     """The label and description values of every IRI term in the file; raises OntologyFileError naming it."""
     try:
-        graph = Graph().parse(path, format=guess_format(str(path)) or "turtle")
+        graph = Dataset(default_union=True)  # TriG and N-Quads: named graphs count, as in Q12
+        graph.parse(path, format=guess_format(str(path)) or "turtle")
     except Exception as error:  # noqa: BLE001 - rdflib raises many parser types; a missing file raises OSError
         raise OntologyFileError(f"ontology file {path} cannot be read: {error}") from error
-    values = [_value(s, p, o) for s, p, o in graph if isinstance(s, URIRef) and p in PREDICATES and isinstance(o, Literal)]
+    values = [
+        _value(s, p, o)
+        for s, p, o in graph.triples((None, None, None))
+        if isinstance(s, URIRef) and p in PREDICATES and isinstance(o, Literal)
+    ]
     for s, _, label in graph.triples((None, SKOSXL_PREF_LABEL, None)):
         if isinstance(s, URIRef):
             values += [
                 _value(s, SKOSXL_PREF_LABEL, o) for o in graph.objects(label, SKOSXL_LITERAL_FORM) if isinstance(o, Literal)
             ]
-    return values
+    return sorted(values, key=lambda v: (v.term, v.predicate, v.language or "", v.text))

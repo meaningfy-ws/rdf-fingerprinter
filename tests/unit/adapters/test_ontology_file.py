@@ -50,3 +50,20 @@ def test_a_missing_or_non_rdf_file_names_the_file(tmp_path, content):
         path.write_text(content)
     with pytest.raises(OntologyFileError, match=f"ontology file {path} cannot be read"):
         load_ontology(path)
+
+
+def test_the_values_come_in_a_deterministic_order():
+    values = load_ontology(f"{ONTOLOGY}.ttl")
+    assert values == sorted(values, key=lambda v: (v.term, v.predicate, v.language or "", v.text))
+
+
+def test_a_literal_skosxl_pref_label_is_not_a_label(tmp_path):
+    path = tmp_path / "o.ttl"
+    path.write_text(f'<http://e/a> <{SKOSXL}prefLabel> "Direct" .')
+    assert load_ontology(path) == []
+
+
+def test_triples_in_the_named_graphs_of_a_trig_file_count(tmp_path):
+    path = tmp_path / "o.trig"
+    path.write_text(f'<http://e/g> {{ <http://e/a> <{RDFS}label> "Person"@en . }}')
+    assert load_ontology(path) == [value("http://e/a", RDFS + "label", "Person", "en")]

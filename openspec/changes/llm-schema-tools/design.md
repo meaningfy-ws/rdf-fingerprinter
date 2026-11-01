@@ -172,12 +172,13 @@ PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>
 PREFIX dcterms: <http://purl.org/dc/terms/>
 SELECT DISTINCT ?t ?p ?v {
-  VALUES ?t { $terms }
-  { VALUES ?p { skos:prefLabel rdfs:label dcterms:title skos:altLabel
+  { VALUES ?t { $terms }
+    VALUES ?p { skos:prefLabel rdfs:label dcterms:title skos:altLabel
                 skos:definition rdfs:comment dcterms:description skos:scopeNote }
     { ?t ?p ?v } UNION { GRAPH ?g { ?t ?p ?v } } }
   UNION
-  { { ?t skosxl:prefLabel/skosxl:literalForm ?v } UNION { GRAPH ?g { ?t skosxl:prefLabel/skosxl:literalForm ?v } }
+  { VALUES ?t { $terms }
+    { ?t skosxl:prefLabel/skosxl:literalForm ?v } UNION { GRAPH ?g { ?t skosxl:prefLabel/skosxl:literalForm ?v } }
     BIND(skosxl:prefLabel AS ?p) }
   FILTER(isLiteral(?v))
 }
@@ -214,10 +215,16 @@ The selection is idempotent and order-independent, which a Hypothesis property c
 (TC-A2 below).
 
 **Ontology file** (`ontology_file.load_ontology(path)`):
-- Parse with `rdflib.Graph().parse(path, format=rdflib.util.guess_format(path) or "turtle")`.
-- Every triple `(s, p, o)` with `s` an IRI, `p` among the nine predicates and `o` a literal is
-  one value. `s skosxl:prefLabel ?x . ?x skosxl:literalForm o` gives one value with the predicate
-  `skosxl:prefLabel`.
+- Parse into `rdflib.Dataset(default_union=True)` with
+  `format=rdflib.util.guess_format(path) or "turtle"`, so TriG and N-Quads count and triples in named
+  graphs are read like the default graph (as Q12 does).
+- Every triple `(s, p, o)` with `s` an IRI, `p` among the eight direct predicates (`TERM_LABEL_PREDICATES`
+  without `skosxl:prefLabel`, `skos:altLabel`, `TERM_DESCRIPTION_PREDICATES`) and `o` a literal is
+  one value. `skosxl:prefLabel` counts only through the skosxl path: `s skosxl:prefLabel ?x .
+  ?x skosxl:literalForm o` gives one value with the predicate `skosxl:prefLabel`; a literal object of
+  `skosxl:prefLabel` gives none (Q12 agrees).
+- The values come back sorted by `(term, predicate, language or "", text)`, so the result does not
+  depend on rdflib's iteration order.
 - `OSError` or any parser exception raises `OntologyFileError("ontology file <path> cannot be
   read: <reason>")`.
 

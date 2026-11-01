@@ -815,7 +815,6 @@ def instances_with(ctx, cls, n, p):
 
 @given("the endpoint rejects the term-annotation query with HTTP 400")
 def annotations_rejected(ctx):
-    people(ctx["fake"], 2)
     ctx["fake"].on("Q12", http_error(400))
 
 
