@@ -39,7 +39,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 - [x] 1.6 `fingerprint/domain/patterns.py`, part 1: names, groups (N2), nested test (P-4), filters (P-3, P-10), edges, stat tokens and value quoting (design §B steps 1–5)
   - Layer: domain. Depends on: 1.1.
   - Tests: TC-P1, TC-P2, TC-P4, TC-P5, TC-P7 (`=name` from top values); 100% branch coverage of the new code.
-- [ ] 1.7 `fingerprint/domain/patterns.py`, part 2: chains and their assignment (P-5), `via` (N6), header, glossary (N9), prefixes (N8), `nested_blocks`, `reaching_edges` (design §B steps 6–10)
+- [x] 1.7 `fingerprint/domain/patterns.py`, part 2: chains and their assignment (P-5), `via` (N6), header, glossary (N9), prefixes (N8), `nested_blocks`, `reaching_edges` (design §B steps 6–10)
   - Layer: domain. Depends on: 1.2, 1.6.
   - Tests: TC-P3, TC-P6 (Hypothesis). The `› Pattern view` scenarios need the generator, so they are bound in 1.8.
 - [ ] 1.8 `PatternGenerator`, template package `fingerprint_report_templates/pattern_schema/`, `RepresentationFormat.pattern`, `GENERATORS`; `representations.with_ontology` and the size checks in `validate_options`; `gen_pattern` with `--ontology`, `--min-instances` and `--max-classes`; script `fingerprint-gen-pattern` in `pyproject.toml`
@@ -78,7 +78,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [ ] 1.7 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
+- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
 
 ## Verification
 

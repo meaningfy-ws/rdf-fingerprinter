@@ -11,6 +11,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import groupby
 
+from fingerprint.domain.annotations import shown as shown_text
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref, turtle_term
 from fingerprint.domain.prefixes import PrefixTable, namespace_of
@@ -18,15 +19,29 @@ from fingerprint.domain.profile import (
     CardinalityBin,
     ClassAnalytics,
     GraphAnalytics,
+    LangText,
     NodeKind,
     PrecisionMode,
     PropertyAnalytics,
     ValuePartition,
 )
-from fingerprint.domain.views import EdgeTarget, GeneratorOptions, PatternBlock, PatternEdge, PatternGraph, TargetKind
+from fingerprint.domain.views import (
+    CoTypeNote,
+    EdgeTarget,
+    GeneratorOptions,
+    GlossaryEntry,
+    PatternBlock,
+    PatternEdge,
+    PatternGraph,
+    PrefixDeclaration,
+    TargetKind,
+    ViaLink,
+)
 from fingerprint.domain.vocabulary import RDF_LANG_STRING, XSD_STRING
 
 VALUE_LIMIT = 64  # characters of a value in a stat token (P-8)
+DESCRIPTION_LIMIT = 200  # characters of a glossary description (P-8)
+MAX_LEVEL = 3  # edges sit at levels 1-3 (P-5)
 _BARE_VALUE = re.compile(r'[^\s"]+')
 IRI, BNODE, UNKNOWN = "IRI", "BNODE", "."
 _ORDER = (TargetKind.group, TargetKind.datatype, TargetKind.iri, TargetKind.blank_node)  # the order targets are written
@@ -89,14 +104,25 @@ class _Link:
 
 @dataclass(frozen=True)
 class _Alternative:
+    """One way an edge's values can be written, with the IRIs that way names."""
+
     kind: TargetKind
     text: str
     target: EdgeTarget
+    terms: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class _Stats:
+    tokens: tuple[str, ...]
+    low: int | None
+    high: int | None
+    terms: tuple[str, ...]  # the IRI a `=name` token writes
 
 
 @dataclass(frozen=True)
 class _Spec:
-    """One property of a group, ready to be an edge."""
+    """One property of a group, ready to be an edge at any level."""
 
     property: str
     name: str
@@ -106,6 +132,8 @@ class _Spec:
     low: int | None
     high: int | None
     presence_only: bool
+    groups: tuple[tuple[int, int], ...]  # (group reached, the largest triples of a partition reaching it)
+    terms: tuple[str, ...]  # every IRI the line writes
 
 
 # --- step 5: stat tokens and value quoting ---
@@ -187,6 +215,8 @@ def _tokens(prop: PropertyAnalytics, partitions: list[ValuePartition], bounds, v
 
 # --- the builder ---
 
+# --- the builder ---
+
 
 class _Builder:
     def __init__(self, graph: GraphAnalytics, table: PrefixTable, options: GeneratorOptions, excluded: frozenset[str]):
@@ -195,11 +225,17 @@ class _Builder:
         self.options = options
         self.excluded = excluded
         self.namer = _Namer(table)
+        self.used: set[str] = set()  # the IRIs the view writes: they decide the prefixes and the glossary
         classes = [(name, c) for c in graph.class_partitions or [] if (name := self.namer.name(c.class_iri)) is not None]
         self.groups = self._groups(sorted(classes, key=lambda pair: pair[0]))
         self.group_of = _Lookup((member.class_iri, i) for i, g in enumerate(self.groups) for member in g.members)
         self.nested = self._nested()
         self.kept = self._kept()
+        self.specs_of = [self._specs(group) for group in self.groups]
+        self.owner = self._assign()
+        self.expanded = [i for i, owner in enumerate(self.owner) if owner is not None]
+        self.in_view = sorted([*self.kept, *self.expanded])
+        self.reaching = self._reaching()
 
     # step 2
     def _shown(self, class_iri: str) -> bool:
@@ -281,7 +317,8 @@ class _Builder:
         return named[: self.options.max_classes] if self.options.max_classes else named
 
     def hidden_classes(self) -> int:
-        hidden = [i for i, nested in enumerate(self.nested) if not nested and i not in self.kept]
+        """Members of the named groups without a block, and of the nested groups no edge of the view reaches."""
+        hidden = [i for i, nested in enumerate(self.nested) if (i not in self.kept if not nested else self.reaching[i] == 0)]
         return sum(len(self.groups[i].members) for i in hidden)
 
     # step 5
@@ -290,33 +327,28 @@ class _Builder:
         if target is not None:
             group = self.groups[target]
             shape = target in self.kept
-            return _Alternative(
-                TargetKind.group,
-                group.name,
-                EdgeTarget(kind=TargetKind.group, name=group.name, classes=group.classes, has_shape=shape),
-            )
+            edge_target = EdgeTarget(kind=TargetKind.group, name=group.name, classes=group.classes, has_shape=shape)
+            return _Alternative(TargetKind.group, group.name, edge_target, tuple(group.classes))
         iri = partition.object_class or ""
         name = self.namer.name(iri)
         graph = partition.object_class_graph if self._other_graph(partition) else None
         if name is None or (graph and not _writable(graph)):
             return None
         text = f"{name} @{to_iriref(graph)}" if graph else name
-        return _Alternative(
-            TargetKind.group, text, EdgeTarget(kind=TargetKind.group, name=name, classes=[iri], graph=graph, has_shape=False)
-        )
+        edge_target = EdgeTarget(kind=TargetKind.group, name=name, classes=[iri], graph=graph, has_shape=False)
+        return _Alternative(TargetKind.group, text, edge_target, (iri,))
 
     def _alternative(self, partition: ValuePartition) -> _Alternative | None:
         if partition.object_class:
             return self._class_alternative(partition)
         if partition.node_kind == NodeKind.literal:
-            name = self.namer.name(_datatype(partition))
-            return (
-                None
-                if name is None
-                else _Alternative(TargetKind.datatype, name, EdgeTarget(kind=TargetKind.datatype, name=name))
-            )
+            datatype = _datatype(partition)
+            name = self.namer.name(datatype)
+            if name is None:
+                return None
+            return _Alternative(TargetKind.datatype, name, EdgeTarget(kind=TargetKind.datatype, name=name), (datatype,))
         kind, text = (TargetKind.iri, IRI) if partition.node_kind == NodeKind.iri else (TargetKind.blank_node, BNODE)
-        return _Alternative(kind, text, EdgeTarget(kind=kind, name=text))
+        return _Alternative(kind, text, EdgeTarget(kind=kind, name=text), ())
 
     def _alternatives(self, partitions: list[ValuePartition]) -> list[_Alternative]:
         found = [alt for p in partitions if (alt := self._alternative(p)) is not None]
@@ -330,33 +362,38 @@ class _Builder:
         parts += [alt.text for alt in alternatives if alt.kind != TargetKind.group]
         return "|".join(parts) or UNKNOWN
 
-    def _spec(self, name: str, prop: PropertyAnalytics, owner: ClassAnalytics) -> _Spec:
-        partitions = prop.value_partitions or []
-        alternatives = self._alternatives(partitions)
+    def _stats(self, prop: PropertyAnalytics, owner: ClassAnalytics, partitions: list[ValuePartition]) -> _Stats:
+        if prop.presence_only:
+            return _Stats(("presence",), None, None, ())
         bounds = _values_per_subject(prop.cardinality_histogram)
         seen, observed = prop.subjects_with_property, owner.observed_instances or owner.instances
         partial = seen is not None and seen < observed
         iri = _single_iri(prop, partitions)
-        if prop.presence_only:
-            tokens = ["presence"]
-        else:
-            tokens = ([f"{seen}/{observed}"] if partial else []) + _tokens(
-                prop, partitions, bounds, self.namer.name(iri) if iri else None
-            )
-        stats = " ".join(tokens)
-        line = f"-{name}-> {self._target_text(alternatives)}" + (f" {stats}" if stats else "")
+        value_name = self.namer.name(iri) if iri else None
+        tokens = ([f"{seen}/{observed}"] if partial else []) + _tokens(prop, partitions, bounds, value_name)
+        low = None if bounds is None else (0 if partial else bounds[0])
+        return _Stats(tuple(tokens), low, bounds and bounds[1], (iri,) if iri and value_name else ())
+
+    def _spec(self, name: str, prop: PropertyAnalytics, owner: ClassAnalytics) -> _Spec:
+        partitions = prop.value_partitions or []
+        alternatives = self._alternatives(partitions)
+        stats = self._stats(prop, owner, partitions)
+        text = " ".join(stats.tokens)
+        reached = sorted((t, p.triples or 0) for p in partitions if (t := self._target_group(p)) is not None)
         return _Spec(
             property=prop.property,
             name=name,
             targets=tuple(alt.target for alt in alternatives) or (EdgeTarget(kind=TargetKind.unknown, name=UNKNOWN),),
-            head=line,
-            stats=stats,
-            low=None if bounds is None else (0 if partial else bounds[0]),
-            high=None if bounds is None else bounds[1],
+            head=f"-{name}-> {self._target_text(alternatives)}" + (f" {text}" if text else ""),
+            stats=text,
+            low=stats.low,
+            high=stats.high,
             presence_only=bool(prop.presence_only),
+            groups=tuple((t, max(triples for _, triples in run)) for t, run in groupby(reached, key=lambda r: r[0])),
+            terms=(prop.property, *(iri for alt in alternatives for iri in alt.terms), *stats.terms),
         )
 
-    def specs(self, group: _Group) -> list[_Spec]:
+    def _specs(self, group: _Group) -> list[_Spec]:
         """One spec for each property name of the group, from the first member that has it."""
         rows = [
             (name, order, prop, member)
@@ -365,28 +402,117 @@ class _Builder:
             if (name := self.namer.name(prop.property)) is not None
         ]
         rows.sort(key=lambda row: (row[0], row[1]))
-        return [
-            self._spec(name, prop, member)
-            for name, _, prop, member in (next(run) for _, run in groupby(rows, key=lambda r: r[0]))
-        ]
+        firsts = (next(run) for _, run in groupby(rows, key=lambda row: row[0]))
+        return [self._spec(name, prop, member) for name, _, prop, member in firsts]
 
-    # the blocks
-    def edge(self, spec: _Spec) -> PatternEdge:
+    # step 6
+    def _assign(self) -> list[tuple[int, str] | None]:
+        """P-5: at levels 1 and 2, each nested group not yet assigned goes under its best reaching edge: the one
+        with the most triples, then by source name, then property name. Level-3 edges never expand a group."""
+        owner: list[tuple[int, str] | None] = [None] * len(self.groups)
+        frontier = [(i, spec) for i in self.kept for spec in self.specs_of[i]]
+        for _ in range(MAX_LEVEL - 1):
+            candidates = sorted(
+                (target, -triples, self.groups[i].name, spec.name, i, spec.property)
+                for i, spec in frontier
+                for target, triples in spec.groups
+                if self.nested[target] and owner[target] is None
+            )
+            assigned = []
+            for target, run in groupby(candidates, key=lambda c: c[0]):
+                _, _, _, _, source, prop = next(run)
+                owner[target] = (source, prop)
+                assigned.append(target)
+            frontier = [(i, spec) for i in assigned for spec in self.specs_of[i]]
+        return owner
+
+    def _reaching(self) -> list[int]:
+        """For each group, the distinct (source group, property) edges of the view that reach it."""
+        edges = sorted({(t, i, spec.property) for i in self.in_view for spec in self.specs_of[i] for t, _ in spec.groups})
+        counts = [0] * len(self.groups)
+        for target, run in groupby(edges, key=lambda e: e[0]):
+            counts[target] = len(list(run))
+        return counts
+
+    def _ending(self, nested: list[int], expanded: list[int]) -> str:
+        if expanded:
+            return ""
+        if any(self.owner[t] is None for t in nested):
+            return " …"  # expanded nowhere: a level-3 edge into a group no level-1 or level-2 edge reaches
+        return " ^" if nested else ""  # expanded under another edge
+
+    def _edge(self, source: int, spec: _Spec, level: int) -> PatternEdge:
+        self.used.update(spec.terms)
+        nested = [t for t, _ in spec.groups if self.nested[t]]
+        expanded = [t for t in nested if self.owner[t] == (source, spec.property)]
+        ending = self._ending(nested, expanded)
         return PatternEdge(
             property=spec.property,
             name=spec.name,
-            depth=1,
+            depth=level,
             targets=list(spec.targets),
-            text=spec.head,
+            text=spec.head + ending,
             stats=spec.stats,
-            ending="",
+            ending=ending,
             min_count=spec.low,
             max_count=spec.high,
             presence_only=spec.presence_only,
-            edges=[],
+            edges=[edge for t in expanded for edge in self._edges(t, level + 1)],
         )
 
+    def _edges(self, index: int, level: int) -> list[PatternEdge]:
+        return [self._edge(index, spec, level) for spec in self.specs_of[index]]
+
+    # steps 7 and 8
+    def _via(self, target: int) -> list[tuple[int, _Spec]]:
+        """N6: the (source, property) edges of the view that reach the group, by source name and property."""
+        found = [(i, spec) for i in self.in_view for spec in self.specs_of[i] if any(t == target for t, _ in spec.groups)]
+        return sorted(found, key=lambda pair: (self.groups[pair[0]].name, pair[1].name))
+
+    def _co_types(self, group: _Group) -> list[tuple[str, CoTypeNote]]:
+        """The shown classes outside the group that its subjects also have, most subjects first."""
+        rows = sorted(
+            (co.class_iri, -(co.subjects or 0))
+            for member in group.members
+            for co in member.co_types or []
+            if co.class_iri and co.class_iri not in group.classes and self._shown(co.class_iri)
+        )
+        best = [next(run) for _, run in groupby(rows, key=lambda row: row[0])]
+        named = [(-negative, name, iri) for iri, negative in best if (name := self.namer.name(iri)) is not None]
+        return [
+            (iri, CoTypeNote(name=name, subjects=subjects))
+            for subjects, name, iri in sorted(named, key=lambda n: (-n[0], n[1]))
+        ]
+
+    @staticmethod
+    def _header(group: _Group, notes: list[CoTypeNote], via: list[ViaLink]) -> str:
+        first = group.members[0]
+        text = f"(:{group.name}) {group.instances}"
+        if first.precision_mode == PrecisionMode.first_n:
+            text += f" ~{first.observed_instances} first_n"
+        if notes:
+            text += " co " + ", ".join(f"{note.name} {note.subjects}" for note in notes)
+        if via:
+            text += " via " + ", ".join(f"(:{link.source})-{link.property}" for link in via)
+        return text
+
     def block(self, index: int) -> PatternBlock:
+        """The block of a named group. The IRIs of its header count as written; a via source and edge are
+        written elsewhere, as a block or an expanded group, and as an edge."""
+        group = self.groups[index]
+        co_types = self._co_types(group)
+        via = self._via(index)
+        self.used.update(group.classes)
+        self.used.update(iri for iri, _ in co_types)
+        links = [ViaLink(source=self.groups[i].name, property=spec.name) for i, spec in via]
+        notes = [note for _, note in co_types]
+        return self._block(index, notes, links, nested=False)
+
+    def nested_block(self, index: int) -> PatternBlock:
+        """The own block of an expanded nested group, its edges from level 1 (for the ShExC)."""
+        return self._block(index, [note for _, note in self._co_types(self.groups[index])], [], nested=True)
+
+    def _block(self, index: int, notes: list[CoTypeNote], via: list[ViaLink], *, nested: bool) -> PatternBlock:
         group = self.groups[index]
         first = group.members[0]
         first_n = first.precision_mode == PrecisionMode.first_n
@@ -396,9 +522,50 @@ class _Builder:
             shape=group.shape,
             instances=group.instances,
             observed=first.observed_instances if first_n else None,
-            nested=False,
-            edges=[self.edge(spec) for spec in self.specs(group)],
+            nested=nested,
+            reaching_edges=self.reaching[index] if nested else None,
+            co_types=notes,
+            via=via,
+            header=self._header(group, notes, via),
+            edges=self._edges(index, 1),
         )
+
+    # steps 9 and 10
+    def glossary(self) -> list[GlossaryEntry]:
+        """N9: the labels and descriptions of the terms the view writes, by name."""
+        notes = _Lookup((note.term, note) for note in self.graph.term_annotations or [])
+        written = sorted((name, iri) for iri in self.used if (name := self.namer.name(iri)) is not None)
+        lines = [(name, iri, notes.get(iri)) for name, iri in written]
+        entries = [
+            GlossaryEntry(term=iri, name=name, line=line)
+            for name, iri, note in lines
+            if note is not None and (line := _glossary_line(name, shown_text(note.labels), shown_text(note.descriptions)))
+        ]
+        return entries
+
+    def prefixes(self) -> list[PrefixDeclaration]:
+        """N8: the prefixes of the names written, sorted."""
+        declared = set()
+        for iri in self.used:
+            prefix, entry = turtle_term(iri, self.table)[1], self.table.entry_for(iri)
+            if prefix is not None and entry is not None:
+                declared.add((prefix, entry.namespace))
+        return [PrefixDeclaration(prefix=prefix, namespace=namespace) for prefix, namespace in sorted(declared)]
+
+
+def _one_line(text: str) -> str:
+    return " ".join(text.split())
+
+
+def _glossary_line(name: str, label: LangText | None, description: LangText | None) -> str | None:
+    """`name "label"@lang: description`, either part optional; the description cut at 200 characters."""
+    line = name
+    if label is not None:
+        line += " " + json.dumps(_one_line(label.text), ensure_ascii=False) + (f"@{label.language}" if label.language else "")
+    if description is not None:
+        text = _one_line(description.text)
+        line += ": " + text[:DESCRIPTION_LIMIT] + ("…" if len(text) > DESCRIPTION_LIMIT else "")
+    return None if line == name else line
 
 
 def _writable(iri: str) -> bool:
@@ -422,14 +589,15 @@ def pattern_view(
     `excluded_namespaces`); `graph_label` and `slug` name the graph for the output file."""
     builder = _Builder(graph, table, options, excluded)
     blocks = [builder.block(i) for i in builder.kept]
+    nested_blocks = [builder.nested_block(i) for i in builder.expanded]
     return PatternGraph(
         graph=graph.graph,
         graph_label=graph_label,
         slug=slug,
         hidden_classes=builder.hidden_classes(),
         blocks=blocks,
-        nested_blocks=[],
-        prefixes=[],
-        glossary=[],
+        nested_blocks=nested_blocks,
+        prefixes=builder.prefixes(),
+        glossary=builder.glossary(),
         skipped=sorted(builder.namer.skipped),
     )

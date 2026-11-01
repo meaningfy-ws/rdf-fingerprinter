@@ -98,3 +98,34 @@ def annotation_values():
         ),
         max_size=12,
     )
+
+
+_CLASSES = [f"http://ex.org/C{i}" for i in range(4)]
+_OBJECT_CLASSES = st.sampled_from([*_CLASSES, "http://other.org/X", None])
+
+
+def _partitions():
+    """A literal, or IRIs or blank nodes of one of the classes, each with as many distinct objects as triples."""
+    return st.one_of(
+        st.builds(builders.literals, st.integers(1, 6)),
+        st.builds(
+            lambda n, cls, kind: builders.resources(n, cls, kind).model_copy(update={"distinct_objects": n}),
+            st.integers(1, 6),
+            _OBJECT_CLASSES,
+            st.sampled_from(["iri", "blank_node"]),
+        ),
+    )
+
+
+@st.composite
+def pattern_graphs(draw):
+    """The classes of a small graph: properties p0-p2 reach classes C0-C3 by IRIs, blank nodes or literals."""
+    classes = []
+    for index in draw(st.lists(st.integers(0, 3), unique=True, max_size=4)):
+        instances = draw(st.integers(1, 6))
+        properties = [
+            builders.prop(f"http://ex.org/p{j}", {1: instances}, *draw(st.lists(_partitions(), max_size=3)))
+            for j in draw(st.lists(st.integers(0, 2), unique=True, max_size=3))
+        ]
+        classes.append(builders.klass(_CLASSES[index], instances, *properties))
+    return classes

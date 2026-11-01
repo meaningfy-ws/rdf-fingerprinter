@@ -2,19 +2,30 @@
 `tests/builders.py` and `model_copy` (lean-test-suite DEC-4, DEC-5)."""
 
 import pytest
+from hypothesis import given
 
 from fingerprint.domain.analytics import analyse
+from fingerprint.domain.patterns import pattern_view
 from fingerprint.domain.prefixes import PrefixTable
-from fingerprint.domain.profile import NamespacePrefix, PrefixSource, ValueCount
-from fingerprint.domain.views import GeneratorOptions, PatternBlock, PatternEdge, PatternGraph, TargetKind
+from fingerprint.domain.profile import LangText, NamespacePrefix, PrefixSource, TermAnnotation, ValueCount
+from fingerprint.domain.views import (
+    GeneratorOptions,
+    PatternBlock,
+    PatternEdge,
+    PatternGraph,
+    PrefixDeclaration,
+    TargetKind,
+    ViaLink,
+)
 from tests.builders import klass, literals, profile_run, prop, resources
 from tests.sample_data import CONTINENTS, TREATIES, DatasetFacts
+from tests.unit.domain.strategies import pattern_graphs
 
 EX = "http://ex.org/"
 XSD = "http://www.w3.org/2001/XMLSchema#"
 RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 LANG_STRING = RDF + "langString"
-A, B, C, D = (EX + letter for letter in "ABCD")
+A, B, C, D, E = (EX + letter for letter in "ABCDE")
 P, Q = EX + "p", EX + "q"
 
 
@@ -30,8 +41,6 @@ NOT_EXCLUDED: frozenset[str] = frozenset()
 
 
 def view(*classes, table=TABLE, excluded=NOT_EXCLUDED, annotations=None, graph=None, **options) -> PatternGraph:
-    from fingerprint.domain.patterns import pattern_view
-
     analysed = analyse(profile_run(*classes, graph=graph)).graphs[0]
     if annotations:
         analysed = analysed.model_copy(update={"term_annotations": annotations})
@@ -84,8 +93,6 @@ META = frozenset({"http://www.w3.org/2002/07/owl#", "http://www.w3.org/2000/01/r
 
 
 def sample_view(sample_analytics, facts: DatasetFacts, **options) -> PatternGraph:
-    from fingerprint.domain.patterns import pattern_view
-
     graph = next(g for g in sample_analytics.graphs if g.graph == facts.graphs[-1])
     return pattern_view(
         graph, TABLE_OF_SAMPLE, GeneratorOptions(**options), excluded=META, graph_label=facts.name, slug=facts.name
@@ -204,6 +211,11 @@ def test_a_property_that_cannot_be_written_is_skipped_and_left_out():
     shown = view(klass(A, 2, prop(bad, {1: 2}, literals(2)), prop(P, {1: 2}, literals(2))))
     assert shown.skipped == [bad]
     assert [e.name for e in shown.blocks[0].edges] == ["ex:p"]
+
+
+def test_a_datatype_that_cannot_be_written_is_left_out_of_the_targets():
+    edge = one_edge(literals(5, XSD + "bad type"), resources(5))
+    assert [t.kind for t in edge.targets] == [TargetKind.iri]
 
 
 def test_an_object_type_that_cannot_be_written_is_left_out_of_the_targets():
@@ -412,8 +424,6 @@ def test_coverage_counts_against_the_instances_read_in_first_n_mode():
 def test_coverage_is_written_against_the_instances_when_none_were_observed():
     uncounted = klass(A, 10, prop(P, {1: 4}, literals(4))).model_copy(update={"observed_instances": None})
     analysed = analyse(profile_run(uncounted)).graphs[0]
-    from fingerprint.domain.patterns import pattern_view
-
     shown = pattern_view(analysed, TABLE, GeneratorOptions(), excluded=NOT_EXCLUDED, graph_label="g", slug="g")
     assert shown.blocks[0].edges[0].text == "-ex:p-> xsd:string 4/10"
 
@@ -545,3 +555,416 @@ def test_a_literal_property_keeps_its_value_from_the_minimum():
     assert one_edge(part, distinct_objects=1, top_values=[ValueCount(value="2014", triples=10)]).text == (
         "-ex:p-> xsd:date =2014"
     )
+
+
+# --- part 2: chains, via, header, glossary, prefixes ---
+
+
+def blank(property_iri, target, distinct=4, subjects=4, triples=None):
+    """A property reaching blank nodes of `target`: `distinct` objects, found on `subjects` subjects."""
+    reached = resources(triples or distinct, target, "blank_node").model_copy(update={"distinct_objects": distinct})
+    return prop(property_iri, {1: subjects}, reached)
+
+
+def tree(edges: list[PatternEdge]) -> list[str]:
+    return [line for edge in edges for line in ["  " * edge.depth + edge.text, *tree(edge.edges)]]
+
+
+def lines(one: PatternBlock) -> list[str]:
+    return [one.header, *tree(one.edges)]
+
+
+def nested_names(shown: PatternGraph) -> list[str]:
+    return [b.name for b in shown.nested_blocks]
+
+
+# --- TC-P3: chains (P-5) ---
+
+
+def test_a_chain_deeper_than_three_hops_ends_in_an_ellipsis_and_hides_the_rest():
+    shown = view(
+        klass(A, 4, blank(EX + "p", B)),
+        klass(B, 4, blank(EX + "q", C)),
+        klass(C, 4, blank(EX + "r", D)),
+        klass(D, 4, blank(EX + "s", E)),
+        klass(E, 4),
+    )
+    assert [b.name for b in shown.blocks] == ["ex:A"]
+    assert lines(shown.blocks[0]) == [
+        "(:ex:A) 4",
+        "  -ex:p-> (:ex:B) bn",
+        "    -ex:q-> (:ex:C) bn",
+        "      -ex:r-> (:ex:D) bn …",
+    ]
+    assert nested_names(shown) == ["ex:B", "ex:C"]
+    assert shown.hidden_classes == 1
+
+
+def test_a_blank_node_cycle_is_expanded_once():
+    shown = view(klass(A, 4, blank(EX + "items", B, 3, 3)), klass(B, 4, blank(EX + "rest", B, 3, 3)))
+    assert lines(shown.blocks[0]) == [
+        "(:ex:A) 4",
+        "  -ex:items-> (:ex:B) 3/4 bn",
+        "    -ex:rest-> (:ex:B) 3/4 bn ^",
+    ]
+    assert [(b.name, b.reaching_edges) for b in shown.nested_blocks] == [("ex:B", 2)]
+    assert shown.nested_blocks[0].header == "(:ex:B) 4"
+    assert tree(shown.nested_blocks[0].edges) == ["  -ex:rest-> (:ex:B) 3/4 bn ^"]
+    assert shown.hidden_classes == 0
+
+
+def test_the_edge_with_the_most_triples_expands_a_nested_group():
+    shown = view(klass(A, 4, blank(P, C, 4)), klass(B, 5, blank(P, C, 5, 5)), klass(C, 4, prop(Q, {1: 4}, literals(4))))
+    assert tree(block(shown, "ex:A").edges) == ["  -ex:p-> (:ex:C) bn ^"]
+    assert tree(block(shown, "ex:B").edges) == ["  -ex:p-> (:ex:C) bn", "    -ex:q-> xsd:string"]
+
+
+def test_equal_triples_go_to_the_source_name_then_the_property_name():
+    shown = view(klass(B, 4, blank(P, C)), klass(A, 4, blank(Q, C), blank(P, C)), klass(C, 4))
+    expanded = [(b.name, e.name, e.ending) for b in shown.blocks for e in b.edges]
+    assert expanded == [("ex:A", "ex:p", ""), ("ex:A", "ex:q", " ^"), ("ex:B", "ex:p", " ^")]
+
+
+def test_the_source_name_decides_before_the_property_name():
+    shown = view(klass(B, 4, blank(P, C)), klass(A, 4, blank(Q, C)), klass(C, 4))
+    assert [(b.name, e.ending) for b in shown.blocks for e in b.edges] == [("ex:A", ""), ("ex:B", " ^")]
+
+
+def test_a_group_reached_at_levels_one_and_two_is_expanded_at_level_one():
+    shown = view(
+        klass(A, 4, blank(EX + "a", D, 3, 3), blank(EX + "b", B, 3, 3)),
+        klass(B, 3, blank(EX + "m", D, 3, 3, triples=100)),
+        klass(D, 3, prop(Q, {1: 3}, literals(3))),
+    )
+    assert lines(shown.blocks[0]) == [
+        "(:ex:A) 4",
+        "  -ex:a-> (:ex:D) 3/4 bn",
+        "    -ex:q-> xsd:string",
+        "  -ex:b-> (:ex:B) 3/4 bn",
+        "    -ex:m-> (:ex:D) bn ^",
+    ]
+
+
+def test_an_edge_into_two_nested_groups_expands_both():
+    both = prop(P, {1: 4}, *(resources(4, t, "blank_node").model_copy(update={"distinct_objects": 4}) for t in (B, C)))
+    shown = view(
+        klass(A, 4, both), klass(B, 4, prop(EX + "x", {1: 4}, literals(4))), klass(C, 4, prop(EX + "y", {1: 4}, literals(4)))
+    )
+    assert tree(shown.blocks[0].edges) == [
+        "  -ex:p-> (:ex:B|ex:C) bn",
+        "    -ex:x-> xsd:string",
+        "    -ex:y-> xsd:string",
+    ]
+
+
+def test_an_edge_into_a_group_expanded_nowhere_wins_over_one_expanded_elsewhere():
+    shown = view(
+        klass(A, 4, blank(P, B), blank(Q, D)),
+        klass(B, 4, blank(EX + "q", C)),
+        klass(C, 4, prop(EX + "r", {1: 4}, *(resources(4, t, "blank_node") for t in (D, E)))),
+        klass(D, 4),
+        klass(E, 4),
+    )
+    assert "      -ex:r-> (:ex:D|ex:E) bn …" in tree(shown.blocks[0].edges)
+    assert shown.hidden_classes == 0
+
+
+def test_a_nested_group_reached_only_from_a_class_without_a_block_is_hidden():
+    hidden = META_NS + "H"
+    shown = view(klass(A, 1), klass(hidden, 4, blank(P, B)), klass(B, 4), excluded=excluded_ex())
+    assert (shown.nested_blocks, shown.hidden_classes) == ([], 2)
+
+
+def test_a_nested_group_reached_only_through_its_own_cycle_is_hidden():
+    shown = view(klass(A, 1), klass(B, 4, blank(P, B)))
+    assert (shown.nested_blocks, shown.hidden_classes) == ([], 1)
+
+
+def test_a_nested_group_reached_only_by_level_three_edges_is_not_hidden():
+    shown = view(
+        klass(A, 4, blank(EX + "a", B)),
+        klass(B, 4, blank(EX + "b", C)),
+        klass(C, 4, blank(EX + "c", D)),
+        klass(D, 4),
+    )
+    assert (nested_names(shown), shown.hidden_classes) == (["ex:B", "ex:C"], 0)
+
+
+def test_the_sample_nested_groups_and_the_edges_reaching_them(sample_analytics):
+    reached = {}
+    for facts in (CONTINENTS, TREATIES):
+        shown = sample_view(sample_analytics, facts)
+        reached[facts.name] = [(b.name, b.reaching_edges, b.nested) for b in shown.nested_blocks]
+        assert shown.hidden_classes == 0
+    assert reached[CONTINENTS.name] == [("euvoc:XlNotation", 1, True), ("skosxl:Label", 2, True)]
+    assert reached[TREATIES.name] == [("euvoc:XlNotation", 1, True), ("euvoc:XlNote", 3, True), ("skosxl:Label", 3, True)]
+
+
+def test_the_continents_block_reads_as_the_worked_example(sample_analytics):
+    shown = sample_view(sample_analytics, CONTINENTS)
+    assert lines(shown.blocks[0]) == [
+        "(:euvoc:Continent&skos:Concept) 6",
+        "  -dcterms:created-> xsd:date =2014-10-10",
+        "  -euvoc:startDate-> xsd:date =1952-07-24",
+        "  -euvoc:status-> IRI d1",
+        "  -euvoc:xlNotation-> (:euvoc:XlNotation) bn",
+        "    -dcterms:created-> xsd:date =2014-10-10",
+        "    -dcterms:type-> IRI d1",
+        "    -euvoc:startDate-> xsd:date =1952-07-24",
+        "    -euvoc:status-> IRI d1",
+        "    -rdf:value-> xsd:string AFRICA..OCEANIA",
+        "  -skos:inScheme-> (:owl:Ontology&skos:ConceptScheme) d1",
+        "  -skos:topConceptOf-> (:owl:Ontology&skos:ConceptScheme) d1",
+        "  -skosxl:prefLabel-> (:skosxl:Label) ×24 bn",
+        "    -dcterms:created-> xsd:date =2014-10-10",
+        "    -dcterms:type-> IRI d1",
+        "    -euvoc:startDate-> xsd:date 1952-07-24..2014-10-10 d2",
+        "    -euvoc:status-> IRI d1",
+        "    -lvont:script-> IRI 12/145 d2",
+        "    -skosxl:literalForm-> rdf:langString @24",
+    ]
+    assert lines(shown.blocks[1]) == [
+        "(:owl:Ontology&skos:ConceptScheme) 1 via (:euvoc:Continent&skos:Concept)-skos:inScheme, "
+        "(:euvoc:Continent&skos:Concept)-skos:topConceptOf",
+        "  -dcterms:created-> xsd:date =2014-10-10",
+        "  -dcterms:identifier-> xsd:string =http://publications.europa.eu/resource/authority/continent",
+        "  -euvoc:startDate-> xsd:date =2014-10-10",
+        "  -euvoc:status-> IRI",
+        "  -owl:imports-> IRI",
+        "  -rdfs:comment-> rdfs:Literal =Continent",
+        "  -skosxl:prefLabel-> (:skosxl:Label) bn ^",
+    ]
+    assert [p.prefix for p in shown.prefixes] == [
+        "dcterms",
+        "euvoc",
+        "lvont",
+        "owl",
+        "rdf",
+        "rdfs",
+        "skos",
+        "skosxl",
+        "xsd",
+    ]
+    assert shown.glossary == []
+
+
+def test_the_treaty_block_reads_as_the_worked_example_excerpt(sample_analytics):
+    shown = sample_view(sample_analytics, TREATIES)
+    written = lines(block(shown, "euvoc:Treaty&skos:Concept"))
+    excerpt = [
+        "(:euvoc:Treaty&skos:Concept) 104 via (:euvoc:Treaty&skos:Concept)-dcterms:isReplacedBy, "
+        "(:euvoc:Treaty&skos:Concept)-dcterms:replaces",
+        "  -dcterms:created-> xsd:date 2011-05-19..2018-05-17 d10",
+        "  -dcterms:replaces-> (:euvoc:Treaty&skos:Concept) 22/104",
+        "  -euvoc:xlChangeNote-> (:euvoc:XlNote) 1/104 bn ^",
+        "  -euvoc:xlDefinition-> (:euvoc:XlNote) 6/104 ×1-2 bn",
+        "    -dcterms:source-> rdf:langString 10/12 @2 d3",
+        "    -rdf:value-> rdf:langString @2",
+        "  -euvoc:xlNotation-> (:euvoc:XlNotation) ×1-6 bn",
+        "    -rdf:value-> xsd:string 11951K..UNION d317",
+        "  -lemon:context-> IRI ×1-2 d2",
+        "  -skosxl:altLabel-> (:skosxl:Label) 56/104 ×1-74 bn ^",
+        "  -skosxl:prefLabel-> (:skosxl:Label) ×23-24 bn",
+        "    -lvont:script-> IRI 386/4530 d2",
+        "    -skosxl:literalForm-> rdf:langString @24 d4176",
+    ]
+    position = iter(written)
+    assert all(line in position for line in excerpt), written
+
+
+# --- the header (step 8) and via (N6) ---
+
+
+def test_the_header_names_the_co_types_outside_the_group_by_subjects_then_name():
+    shown = view(
+        klass(A, 6, co_types=[(B, 6), (C, 3), (D, 3), (E, 5)]),
+        klass(B, 6, co_types=[(A, 6)]),
+        klass(C, 6),
+        klass(D, 6),
+        klass(E, 6),
+    )
+    assert shown.blocks[0].header == "(:ex:A&ex:B) 6 co ex:E 5, ex:C 3, ex:D 3"
+    assert [(n.name, n.subjects) for n in shown.blocks[0].co_types] == [("ex:E", 5), ("ex:C", 3), ("ex:D", 3)]
+
+
+def test_the_header_counts_a_co_type_once_with_its_most_subjects_and_names_shown_classes_only():
+    hidden = META_NS + "H"
+    shown = view(
+        klass(A, 6, co_types=[(B, 6), (C, 2), (hidden, 4)]),
+        klass(B, 6, co_types=[(A, 6), (C, 5)]),
+        klass(C, 6),
+        klass(hidden, 6),
+        excluded=excluded_ex(),
+    )
+    assert shown.blocks[0].header == "(:ex:A&ex:B) 6 co ex:C 5"
+
+
+def test_a_co_type_that_cannot_be_written_is_left_out_and_skipped():
+    bad = EX + "bad co"
+    shown = view(klass(A, 6, co_types=[(bad, 3)]))
+    assert (shown.blocks[0].header, shown.skipped) == ("(:ex:A) 6", [bad])
+
+
+def test_a_class_read_in_first_n_mode_says_how_many_instances_were_read():
+    shown = view(klass(A, 50000, prop(P, {1: 9000}, literals(9000)), observed=10000))
+    assert shown.blocks[0].header == "(:ex:A) 50000 ~10000 first_n"
+    assert shown.blocks[0].observed == 10000
+
+
+def test_via_names_the_edges_of_blocks_and_expanded_groups_that_reach_the_class():
+    iri = resources(4, D)
+    shown = view(
+        klass(A, 4, blank(P, B), prop(EX + "r", {1: 4}, iri)),
+        klass(B, 4, prop(Q, {1: 4}, iri)),
+        klass(C, 4, prop(Q, {1: 4}, iri)),
+        klass(D, 4, prop(EX + "self", {1: 4}, iri)),
+    )
+    assert block(shown, "ex:D").header == "(:ex:D) 4 via (:ex:A)-ex:r, (:ex:B)-ex:q, (:ex:C)-ex:q, (:ex:D)-ex:self"
+    assert block(shown, "ex:D").via == [
+        ViaLink(source="ex:A", property="ex:r"),
+        ViaLink(source="ex:B", property="ex:q"),
+        ViaLink(source="ex:C", property="ex:q"),
+        ViaLink(source="ex:D", property="ex:self"),
+    ]
+
+
+def test_via_leaves_out_a_source_without_a_block_or_nesting():
+    hidden = META_NS + "H"
+    shown = view(klass(hidden, 4, prop(P, {1: 4}, resources(4, A))), klass(A, 4), excluded=excluded_ex())
+    assert (shown.blocks[0].via, shown.blocks[0].header) == ([], "(:ex:A) 4")
+
+
+def test_a_nested_block_has_no_via():
+    shown = view(klass(A, 4, blank(P, B)), klass(B, 4))
+    assert shown.nested_blocks[0].via == []
+
+
+# --- the glossary (N9) ---
+
+
+def note(term, labels=(), descriptions=()):
+    texts = lambda pairs: [LangText(text=t, language=lang) for t, lang in pairs]  # noqa: E731
+    return TermAnnotation(term=term, labels=texts(labels), descriptions=texts(descriptions))
+
+
+def glossary(*annotations):
+    return [g.line for g in view(klass(A, 3, prop(P, {1: 3}, literals(3))), annotations=list(annotations)).glossary]
+
+
+def test_the_glossary_has_the_label_and_the_description_of_each_term_the_view_writes_sorted_by_name():
+    assert glossary(note(P, [("has p", "en")], [("The p.", "en")]), note(A, [("A thing", "en")], [("Something.", "fr")])) == [
+        'ex:A "A thing"@en: Something.',
+        'ex:p "has p"@en: The p.',
+    ]
+
+
+def test_an_untagged_label_has_no_language_and_a_missing_part_is_left_out():
+    assert glossary(note(A, [("Thing", None)]), note(P, descriptions=[("Only text", "en")])) == [
+        'ex:A "Thing"',
+        "ex:p: Only text",
+    ]
+
+
+def test_the_glossary_shows_the_untagged_then_english_then_the_smallest_language():
+    assert glossary(note(A, [("Begriff", "de"), ("Concept", "fr"), ("Idea", "en")])) == ['ex:A "Idea"@en']
+    assert glossary(note(A, [("Begriff", "de"), ("Concept", "fr")])) == ['ex:A "Begriff"@de']
+
+
+def test_a_description_is_one_line_cut_at_two_hundred_characters():
+    long = "x" * 250
+    assert glossary(note(A, descriptions=[(long, None)])) == ["ex:A: " + "x" * 200 + "…"]
+    assert glossary(note(A, descriptions=[("two\n  lines", None)])) == ["ex:A: two lines"]
+
+
+def test_a_label_is_quoted_as_a_json_string():
+    assert glossary(note(A, [('He said "hi"\n', None)])) == ['ex:A "He said \\"hi\\""']
+
+
+def test_a_term_the_view_does_not_write_or_without_text_has_no_entry():
+    assert glossary(note(B, [("Other", "en")]), note(A), note(P)) == []
+
+
+# --- the prefixes (N8) ---
+
+
+def test_only_the_prefixes_of_the_names_written_are_declared_sorted():
+    shown = view(klass(A, 3, prop(P, {1: 3}, literals(3))))
+    assert shown.prefixes == [PrefixDeclaration(prefix="ex", namespace=EX), PrefixDeclaration(prefix="xsd", namespace=XSD)]
+
+
+def test_a_name_written_in_full_declares_no_prefix():
+    other = "http://other.org/Thing"
+    assert view(klass(other, 1)).prefixes == []
+    assert view(klass(EX + "a%20b", 1)).prefixes == []
+
+
+def test_a_prefix_used_only_by_a_value_is_declared():
+    value = prop(P, {1: 10}, resources(10)).model_copy(
+        update={"distinct_objects": 1, "top_values": [ValueCount(value=EX + "status/active", triples=10)]}
+    )
+    assert [p.prefix for p in view(klass(A, 10, value)).prefixes] == ["ex", "exs"]
+
+
+def test_a_prefix_used_only_by_a_co_type_is_declared():
+    covered = EX + "status/Co"
+    shown = view(klass(A, 4, co_types=[(covered, 3)]))
+    assert [p.prefix for p in shown.prefixes] == ["ex", "exs"]
+
+
+def test_a_prefix_used_only_by_an_edge_target_without_a_block_is_declared_and_its_term_is_glossed():
+    hidden = META_NS + "H"
+    reaches = klass(A, 2, prop(P, {1: 2}, resources(2, hidden, "iri")))
+    shown = view(reaches, klass(hidden, 2), excluded=excluded_ex(), annotations=[note(hidden, [("Hidden", "en")])])
+    assert [p.prefix for p in shown.prefixes] == ["ex", "meta"]
+    assert [g.line for g in shown.glossary] == ['meta:H "Hidden"@en']
+
+
+def test_a_prefix_used_only_by_a_hidden_member_of_a_group_name_is_declared():
+    hidden = META_NS + "H"
+    shown = view(klass(A, 2, co_types=[(hidden, 2)]), klass(hidden, 2, co_types=[(A, 2)]), excluded=excluded_ex())
+    assert [p.prefix for p in shown.prefixes] == ["ex", "meta"]
+
+
+# --- TC-P6: properties of the whole view ---
+
+
+def texts_of(shown: PatternGraph) -> str:
+    return "\n".join(
+        [*(line for b in (*shown.blocks, *shown.nested_blocks) for line in lines(b)), *(g.line for g in shown.glossary)]
+    )
+
+
+def edges_below(edges: list[PatternEdge]) -> list[PatternEdge]:
+    return [e for edge in edges for e in (edge, *edges_below(edge.edges))]
+
+
+@given(pattern_graphs())
+def test_every_declared_prefix_is_used_and_every_name_prefix_is_declared(case):
+    shown = view(*case)
+    written = texts_of(shown)
+    assert all(f"{p.prefix}:" in written for p in shown.prefixes)
+    assert ("ex:" in written) == any(p.prefix == "ex" for p in shown.prefixes)
+
+
+@given(pattern_graphs())
+def test_no_property_is_written_twice_in_a_block_and_no_group_begins_two_blocks(case):
+    shown = view(*case)
+    for one in (*shown.blocks, *shown.nested_blocks):
+        assert len({e.name for e in one.edges}) == len(one.edges)
+    names = [b.name for b in (*shown.blocks, *shown.nested_blocks)]
+    assert len(set(names)) == len(names)
+
+
+@given(pattern_graphs())
+def test_chains_stop_at_three_levels_and_a_nested_group_is_expanded_once(case):
+    shown = view(*case)
+    every = edges_below([e for b in shown.blocks for e in b.edges])
+    assert all(e.depth <= 3 for e in every)
+    assert all(not e.edges for e in every if e.ending or e.depth == 3)
+    assert sum(1 for e in every if e.edges) <= len(shown.nested_blocks)
+    assert all(b.reaching_edges >= 1 for b in shown.nested_blocks)
+
+
+@given(pattern_graphs())
+def test_the_view_is_deterministic(case):
+    assert view(*case) == view(*case)
