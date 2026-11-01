@@ -80,9 +80,13 @@ a no-network rule, so a unit test cannot quietly become an integration test.
   contracts, `check-models`, `check-spec`, `make test-e2e` and the release rules are kept unchanged;
   this change adds guards and removes none. Reason: the change must not weaken the gate to make
   itself fit.
-- **DEC-10 Runs after the in-flight work.** Implementation starts once the namespace-prefixes work
-  and `batched-collection` are merged into `master`; their tests migrate with everything else.
-  Reason: avoid restructuring a suite that other sessions are editing in the shared checkout.
+- **DEC-10 Runs after the namespace-prefixes work.** Implementation starts once
+  `readable-representations` (the namespace-prefixes work) is merged into `master`; its tests migrate
+  with everything else. Reason: avoid restructuring a suite that another session was editing.
+  Rejected: also waiting for `batched-collection`, which has only a proposal and could block this
+  change indefinitely; when it is planned, it writes its tests in this change's layout.
+  *Re-shaped 2026-11-01 (logged in `inputs/seeds-2026-11-01.md`, Q&A round 2): originally named both
+  changes.*
 
 ## Rabbit-holes
 

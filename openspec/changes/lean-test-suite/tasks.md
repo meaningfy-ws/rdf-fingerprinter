@@ -1,11 +1,11 @@
 > Derives from: EPIC lean-test-suite (proposal.md)
 
-Starts after the namespace-prefixes work and `batched-collection` are merged (DEC-10). Each group is
+Starts after `readable-representations` (the namespace-prefixes work) is merged (DEC-10; met 2026-10-31, PR #42). Each group is
 one commit or more; deletions per module are their own commits (design Risks).
 
 ## 1. Baseline
 
-- [ ] 1.1 Record the baseline in `inputs/baseline.md`: test count per file and tier, line and branch coverage per layer, unit run time, spec vs feature scenario titles per capability (matched, spec-only, feature-only)
+- [x] 1.1 Record the baseline in `inputs/baseline.md`: test count per file and tier, line and branch coverage per layer, unit run time, spec vs feature scenario titles per capability (matched, spec-only, feature-only)
 - [ ] 1.2 Add `mutmut` and `hypothesis` to the Poetry dev group; first `mutmut run` on `fingerprint/domain` and `fingerprint/service_layer`; record score, survivors and run time in `inputs/baseline.md` (P-7)
 
 ## 2. Fences and layout (no test content changes)
@@ -54,7 +54,7 @@ one commit or more; deletions per module are their own commits (design Risks).
 
 ## Roadmap
 
-- [ ] 1.1 · [ ] 1.2 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 2.4 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 5.1 · [ ] 5.2 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
+- [x] 1.1 · [ ] 1.2 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 2.4 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 5.1 · [ ] 5.2 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
 
 ## Verification
 

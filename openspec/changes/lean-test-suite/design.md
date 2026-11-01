@@ -8,8 +8,7 @@ building sample data, byte-exact golden files, and an 80% line-coverage gate. Tw
 exist and are reused: `tests/e2e/test_collection.py::test_a_live_collection_equals_the_sample_profile`
 (the drift guard of DEC-4) and the SHACL-validates-source check in
 `tests/unit/test_representations_golden.py`. Implementation starts after the namespace-prefixes
-work and `batched-collection` are merged (DEC-10), so the scenario counts below are taken again at
-the start (task 1.1).
+work is merged (DEC-10; met by PR #42), and the counts are taken again at the start (task 1.1).
 
 ## Goals / Non-Goals
 
