@@ -77,7 +77,13 @@ Divergence). Commit only on explicit developer consent.
   Pydantic classes and enums (`model/*.yaml` → `make generate-models`); never build a dict as a
   value. Allowed: keyword arguments to a model constructor or `model_copy(update=…)`, module-level
   UPPER_CASE lookup tables, and dicts at an external library's boundary marked
-  `# dict-ok: <reason>`. Checked by `tests/unit/test_no_composed_dicts.py` (domain-object-model DEC-1).
+  `# dict-ok: <reason>`. Checked by `tests/guards/test_no_composed_dicts.py` (domain-object-model DEC-1).
+- **Each check has one test tier.** A spec scenario is a Gherkin scenario with the same title; other
+  tests go in the tier that owns the check (`tests/unit/<layer>/`, `tests/e2e/`, `tests/guards/`).
+  See *Tests* in `docs/modules/ROOT/pages/development.adoc` (lean-test-suite DEC-1, DEC-2).
+- **Tests use the canonical sample data.** Assert the named facts in `tests/sample_data.py`; derive
+  edge cases with `tests/builders.py` or `model_copy`; regenerate with `make refresh-sample-profile`
+  / `make refresh-golden`, never by hand. See *Canonical data* in the same page (DEC-4, DEC-5).
 - Run Python tooling through Poetry (`poetry run pytest`, `poetry run ruff`, …). Never invoke
   bare `python`/`pytest` — prefer the `make` targets below.
 - **Subagents** — before spawning one, follow *Subagent dispatch* in the `guardrails` skill: spawn

@@ -1,5 +1,7 @@
 [importlinter]
-root_package = fingerprint
+root_packages =
+    fingerprint
+    tests
 # Needed by the external-packages contract below.
 include_external_packages = True
 
@@ -59,3 +61,67 @@ forbidden_modules =
 allow_indirect_imports = True
 ignore_imports =
     fingerprint.service_layer.collection -> rdflib
+
+# Test fences (lean-test-suite P-4): each tier imports only the layers it tests, and the shared
+# support modules know no tier. Indirect imports count.
+[importlinter:contract:tests-domain]
+name = domain tests import no higher layer or test double
+type = forbidden
+source_modules =
+    tests.unit.domain
+forbidden_modules =
+    fingerprint.adapters
+    fingerprint.service_layer
+    fingerprint.entrypoints
+    tests.fakes
+
+[importlinter:contract:tests-adapters]
+name = adapter tests import no service layer or entrypoint
+type = forbidden
+source_modules =
+    tests.unit.adapters
+forbidden_modules =
+    fingerprint.service_layer
+    fingerprint.entrypoints
+
+[importlinter:contract:tests-service-layer]
+name = service-layer tests import no entrypoint
+type = forbidden
+source_modules =
+    tests.unit.service_layer
+forbidden_modules =
+    fingerprint.entrypoints
+
+[importlinter:contract:tests-data]
+name = sample data and builders build model objects only
+type = forbidden
+source_modules =
+    tests.builders
+    tests.sample_data
+forbidden_modules =
+    fingerprint.adapters
+    fingerprint.service_layer
+    fingerprint.entrypoints
+
+[importlinter:contract:tests-support]
+name = shared test support imports no test tier
+type = forbidden
+source_modules =
+    tests.conftest
+    tests.sample_data
+    tests.builders
+    tests.fakes
+forbidden_modules =
+    tests.unit
+    tests.bdd
+    tests.e2e
+    tests.guards
+
+[importlinter:contract:tests-independence]
+name = test tiers are independent
+type = independence
+modules =
+    tests.unit
+    tests.bdd
+    tests.e2e
+    tests.guards

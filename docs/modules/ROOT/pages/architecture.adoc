@@ -162,7 +162,7 @@ under `model/`:
   severities and diagram members.
 
 Values are these classes and enums throughout the code, never composed dicts; the check
-`tests/unit/test_no_composed_dicts.py` fails on a new one unless its line gives a reason
+`tests/guards/test_no_composed_dicts.py` fails on a new one unless its line gives a reason
 (`# dict-ok: <reason>`, kept for library boundaries, prefix tables and lookup indexes).
 
 Rules for the generated code (P-10): `make generate-models` writes

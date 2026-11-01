@@ -113,6 +113,10 @@ class marked as sampled.
 - **WHEN** a class was read in first-N mode
 - **THEN** its node shape is annotated with the observed and total instance counts and marked as sampled
 
+#### Scenario: A class with declared subclasses is graded at most Warning
+- **WHEN** a class with a declared subclass has a property that every instance has
+- **THEN** its property shape has severity `sh:Warning`
+
 ### Requirement: PlantUML class diagram
 The PlantUML generator SHALL write, for each non-empty profiled graph, an overview diagram
 `diagram-<graph slug>.puml` and one diagram per module, `diagram-<graph slug>--<module>.puml`. Each

@@ -17,20 +17,20 @@ Feature: Publishing a fingerprint as an application profile
       And the endpoint was never queried
 
     @uc_b2_1
-    Scenario: The threshold changes without collecting again
+    Scenario: Threshold changed without collecting
       Given a saved profile with a property whose label support is 0.8
       And an endpoint that fails on any query
       When the shapes are generated at threshold 1.0 and again at 0.5
       Then the property has its accepted counts only at threshold 0.5
       And the endpoint was never queried
 
-    Scenario: A saved profile loads back unchanged
+    Scenario: Round-trip
       Given a profile run
       When it is saved and loaded again
       Then the loaded run equals the saved one
 
     @uc_b2_1
-    Scenario Outline: An unusable profile file is refused
+    Scenario Outline: Unusable profile file
       Given <file>
       When the shapes are generated from it
       Then the command exits with 2
@@ -44,7 +44,7 @@ Feature: Publishing a fingerprint as an application profile
         | a JSON file that does not match a profile |
 
     @uc_b2_1
-    Scenario: A custom template package
+    Scenario: Custom template package
       Given a custom template package that reads a constant from its configuration
       When the shapes are generated with that template package
       Then the output shows the constant
@@ -72,7 +72,7 @@ Feature: Publishing a fingerprint as an application profile
 
   Rule: Shapes say no more than the profile observed
 
-    Scenario Outline: Counts follow the cardinality label
+    Scenario Outline: Counts from the cardinality label
       Given a property whose accepted label is <label>
       When the shapes are generated
       Then its property shape has minimum count <min> and maximum count <max>
@@ -85,7 +85,7 @@ Feature: Publishing a fingerprint as an application profile
         | zero or more  | none | none |
         | exactly 3     | 3    | 3    |
 
-    Scenario Outline: Severity follows what the profile knows
+    Scenario Outline: Severity from the threshold
       Given at threshold 0.8 a property of a class read in <mode> with <usage>
       When the shapes are generated
       Then its property shape has severity <severity>
@@ -108,7 +108,7 @@ Feature: Publishing a fingerprint as an application profile
       When the shapes are generated
       Then its property shape allows language-tagged strings
 
-    Scenario: A sampled class is marked
+    Scenario: Sampled class is marked
       Given a class read from its first 10 of 50 instances
       When the shapes are generated
       Then its node shape records 10 observed of 50 instances and the first-N mode
@@ -126,10 +126,31 @@ Feature: Publishing a fingerprint as an application profile
       Then the diagram declares "ex:Person" once with attribute "ex:name" of multiplicity "1"
       And it draws a dashed generalisation from "ex:Person" to "ex:Agent"
 
-    Scenario: Document sections
+    Scenario: Document written from a profile file
       Given a saved profile of the test data
-      When the document is generated
-      Then it has an overview, the namespaces, one chapter per graph with a section per class, and caveats
+      When the document command renders it into an empty folder
+      Then the folder holds the report and no profile.html
+      And it has an overview, the namespaces, one chapter per graph with a section per class, and caveats
+
+    Scenario: Clusters of a small namespace
+      Given the namespace "ex" holds the classes A to G, with A and B linked twice, B and C, C and D, and E and F once, and G linked to none
+      When the diagrams are generated with module size 3
+      Then the module "ex~1" holds A, B and C
+      And the module "ex~2" holds E and F
+      And the module "ex~3" holds D and G
+
+    Scenario: Big namespace is split
+      Given the namespace "ex" holds 40 classes, each linked to the next
+      When the diagrams are generated with module size 15
+      Then there are at least 3 module diagrams of at most 15 classes each
+      And every class is in exactly one of them
+      And generating again gives the same files with the same contents
+
+    Scenario: Overview
+      Given 3 classes of "ex" have object properties whose values are "foaf:Person", and no "foaf" class is profiled
+      When the diagrams are generated
+      Then the overview has the package "ex" and the package "foaf" marked referenced
+      And one arrow from "ex" to "foaf" is labelled 3
 
     Scenario: Failures and samples are flagged
       Given a profile with a class read from its first 10 of 50 instances and one recorded failure
@@ -145,8 +166,15 @@ Feature: Publishing a fingerprint as an application profile
       Then the node shape is "<node>" and the property shape is "<shape>"
 
       Examples:
-        | class                                                    | property                                                | given                 | node                                                            | shape                                                                       |
-        | https://ontology.brainframe.com/2016/04/brainframe#Asset | https://ontology.brainframe.com/2016/04/brainframe#name | http://ex.org/shapes/ | http://ex.org/shapes/brainframe-Asset                           | http://ex.org/shapes/brainframe-Asset-brainframe-name                       |
+        | class                                                    | property                                                | given                 | node                                                         | shape                                                                       |
+        | https://ontology.brainframe.com/2016/04/brainframe#Asset | https://ontology.brainframe.com/2016/04/brainframe#name | none                  | https://ontology.brainframe.com/2016/04/brainframe/shape/Asset | https://ontology.brainframe.com/2016/04/brainframe/shape/Asset-brainframe-name |
+        | https://ontology.brainframe.com/2016/04/brainframe#Asset | https://ontology.brainframe.com/2016/04/brainframe#name | http://ex.org/shapes/ | http://ex.org/shapes/brainframe-Asset                        | http://ex.org/shapes/brainframe-Asset-brainframe-name                       |
+        | urn:x:Asset                                              | urn:x:name                                              | none                  | urn:x:shape:Asset                                            | urn:x:shape:Asset-x-name                                                    |
+
+    Scenario: Colliding shape names
+      Given a profile holding both the classes "http://ex.org/a#Thing" and "http://ex.org/a/Thing"
+      When the shapes are generated
+      Then the node shapes are "http://ex.org/a/shape/Thing" and "http://ex.org/a/shape/Thing-2", in class IRI order
 
   Rule: Namespace filters choose the classes shown
 
@@ -179,7 +207,7 @@ Feature: Publishing a fingerprint as an application profile
 
   Rule: Every format is checked into a golden file
 
-    Scenario Outline: Golden output
+    Scenario Outline: Golden file per output
       Given the fixed test profile
       When the <format> is generated from it
       Then it equals its golden file
