@@ -16,9 +16,12 @@ Measured tool facts this plan relies on (2026-11-01, Python 3.12.3):
 - coverage 7.17 cannot measure branches with `core = sysmon` on Python 3.12 and falls back to the
   default tracer: the unit tier takes about 74 s with `--cov-branch` against 32 s without. Accepted
   (DEC-6); `.coveragerc` keeps `core = sysmon`, which still applies to non-branch runs and to 3.14+.
-- mutmut 3.8.1 is configured only through `[tool.mutmut]` in `pyproject.toml` (keys
-  `paths_to_mutate`, `do_not_mutate`, `also_copy`, `tests_dir`, `pytest_add_cli_args_test_selection`,
-  `mutate_only_covered_lines`); counts come from `mutmut export-cicd-stats`.
+- mutmut 3.8.1 is configured only through `[tool.mutmut]` in `pyproject.toml` (keys `source_paths`,
+  `do_not_mutate`, `also_copy`, `pytest_add_cli_args`, `pytest_add_cli_args_test_selection`,
+  `mutate_only_covered_lines`; `paths_to_mutate` and `tests_dir` are deprecated). It copies
+  `also_copy` with `copytree(dirs_exist_ok=True)` on every run, so `also_copy` must not contain the
+  mutated paths. Counts come from `mutmut export-cicd-stats` (counts only); survivor names from
+  `mutmut results`.
 - import-linter 2.15 reads list options one entry per line.
 - The `fingerprint` CLI has no option to save the profile elsewhere; the service function
   `fingerprint.service_layer.collection.collect(endpoint, settings, sparql)` returns the `ProfileRun`.
@@ -65,6 +68,9 @@ Moves of the files without an obvious layer:
 | `tests/unit/fakes.py` | `tests/fakes.py` (doubles) and `tests/builders.py` (builders) | shared support |
 
 Every other `tests/unit/test_<layer>_<module>.py` moves to `tests/unit/<layer>/test_<module>.py`.
+Every new test directory gets an `__init__.py`: three modules become `test_prefixes.py` (domain,
+adapters, service layer), which pytest's default import mode only accepts in distinct packages, and
+import-linter needs each tier to be a package.
 
 ### P-2 Ownership rule (DEC-2)
 
@@ -93,14 +99,16 @@ stripping surrounding whitespace. Problems:
 2. a feature scenario whose title is in no spec scenario of that capability (orphan);
 3. a title appearing twice in one spec file or one feature file;
 4. an allow-list line that is malformed (not 4 `|`-separated fields), names a missing spec
-   scenario, or names a pytest node id whose file does not exist or does not define the named test
-   function (checked by parsing the file with `ast`; no subprocess).
+   scenario, or names a node id whose file does not exist or does not define the named test
+   function at module level (checked by parsing the file with `ast`; no subprocess).
 
 A capability with no feature file (today `developer-tooling`) is valid only if every one of its
 scenarios is allow-listed. The allow-list `tests/guards/untraced_scenarios.txt` has one entry per
 line, `<capability> | <scenario title> | <pytest node id> | <reason>`; `#` starts a comment. Every
-entry names a pytest test, never a make target; a check that is a make target gets a thin pytest
-wrapper (e.g. TC-5 runs `lint-imports` in a subprocess).
+entry names a plain module-level test function as `<path>::<function>` — no class, no
+parametrisation suffix, no `scenarios()`-generated test (those are traced by title already) and never
+a make target; a check that is a make target gets a thin pytest wrapper (e.g. TC-5 runs
+`lint-imports` in a subprocess).
 
 ### P-4 Fences (DEC-3)
 
@@ -169,16 +177,19 @@ listed in tasks.md (the EPIC's only production-code exception).
   `--cov-fail-under=90` and `--hypothesis-profile=ci`, then
   `coverage report --include='fingerprint/domain/*' --omit='fingerprint/domain/profile.py,fingerprint/domain/views.py' --fail-under=100`.
 - `[tool.mutmut]` in `pyproject.toml`:
-  `paths_to_mutate = ["fingerprint/domain/", "fingerprint/service_layer/"]`,
+  `source_paths = ["fingerprint/domain/", "fingerprint/service_layer/"]`,
   `do_not_mutate = ["fingerprint/domain/profile.py", "fingerprint/domain/views.py"]`,
-  `also_copy` = what the first run proves necessary (expected: `fingerprint/`,
-  `fingerprint_report_templates/`, `tests/`, `pytest.ini`),
-  `pytest_add_cli_args_test_selection = ["tests/unit", "tests/bdd"]`, `mutate_only_covered_lines = false`.
+  `also_copy` = the unmutated rest (`fingerprint/__init__.py`, `fingerprint/adapters/`,
+  `fingerprint/entrypoints/`, `fingerprint_report_templates/`, `tests/`, `pytest.ini`),
+  `pytest_add_cli_args_test_selection = ["tests/unit", "tests/bdd"]` (guards read the source mutmut
+  rewrites, so they are never selected), `mutate_only_covered_lines = false`.
 - `make check-mutation` runs `mutmut run`, then `mutmut export-cicd-stats`;
   `tests/guards/mutation_score.py` reads the stats JSON and computes
   score = (killed + timeout) / (killed + timeout + survived + no_tests), three decimals (a mutant no
-  test covers counts as not caught). Score < `tests/guards/mutation_score.txt` → exit 1 and list
-  survivors; score > stored → rewrite the file (the ratchet), which the implementer commits.
+  test covers counts as not caught). `check_was_interrupted_by_user > 0` or zero mutants → exit 2
+  with an error, no score. Score < `tests/guards/mutation_score.txt` → exit 1, and the target prints
+  the survivors with `mutmut results`; score > stored → rewrite the file (the ratchet), which the
+  implementer commits.
 
 ### P-8 Golden outputs (DEC-8)
 
@@ -237,7 +248,7 @@ The new guards; each proves a scenario of this change's spec delta (allow-listed
 | TC-3 | `trace()` | allow-list entry whose node id names a missing function | one problem naming the entry | missing scenario; 3-field line; duplicate title in one spec |
 | TC-4 | no-network fixture | `socket.create_connection(("localhost", 1))` in a `tests/unit/` test | `RuntimeError` naming the rule | not raised under `tests/e2e/`; `FakeSparql` still works |
 | TC-5 | test fences | `lint-imports` on a temporary copy of the tree with a domain test importing `fingerprint.service_layer` | non-zero exit naming the contract | a domain test importing `tests.fakes` also fails |
-| TC-6 | `mutation_score.py` | stats JSON giving 0.840, stored 0.850 | exit 1 | 0.850 → file unchanged; 0.860 → file rewritten; zero mutants → error, not division by zero |
+| TC-6 | `mutation_score.py` | stats JSON giving 0.840, stored 0.850 | exit 1 | 0.850 → file unchanged; 0.860 → file rewritten; zero mutants or an interrupted run → exit 2, no division by zero |
 | TC-7 | per-layer coverage | a domain module with an untaken branch | `make test` exits non-zero listing the branch | generated `profile.py`/`views.py` excluded |
 | TC-8 | isomorphic golden | same graph, triples reordered and prefixes renamed | passes | one changed literal → fails with a one-triple diff; blank nodes |
 
@@ -279,6 +290,8 @@ Integration (local, against Oxigraph):
   same four existing contracts kept before and after.
 - [Deleting tests feels risky] → each deletion is confirmed by P-6 and lands in a per-module commit.
 - [Hypothesis flakiness] → `derandomize=True` in the `ci` profile.
+- Second review (9.0/10, 2026-11-01): mutmut key names, survivor listing, `__init__.py` per test
+  directory, plain-function allow-list entries and the `also_copy` overwrite risk fixed here.
 
 ## Open Questions
 

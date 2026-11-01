@@ -3,9 +3,9 @@
 ### Requirement: Requirement-traced tests
 Every scenario in `openspec/specs/<capability>/spec.md` SHALL be proven by exactly one Gherkin
 scenario with the identical title in `tests/features/<capability>.feature` (hyphens as underscores),
-or by a test named in `tests/guards/untraced_scenarios.txt` with a reason. `make check-all` SHALL fail
+or by a module-level test function named in `tests/guards/untraced_scenarios.txt` with a reason. `make check-all` SHALL fail
 when a spec scenario is unproven, when a feature scenario has no spec scenario of that title, or when
-an allow-list entry names a missing scenario or a test that cannot be collected.
+an allow-list entry names a missing scenario or a test function its file does not define.
 
 #### Scenario: A spec scenario without a test
 - **WHEN** a scenario is added to `openspec/specs/fingerprint-report/spec.md` and no feature scenario or allow-list entry has its title
@@ -16,7 +16,7 @@ an allow-list entry names a missing scenario or a test that cannot be collected.
 - **THEN** `make check-all` exits non-zero and names the feature file and the scenario title
 
 #### Scenario: A stale allow-list entry
-- **WHEN** an entry in `tests/guards/untraced_scenarios.txt` names a test node id that pytest cannot collect
+- **WHEN** an entry in `tests/guards/untraced_scenarios.txt` names a test function its file does not define
 - **THEN** `make check-all` exits non-zero and names the entry
 
 ### Requirement: Fenced test tiers
@@ -40,7 +40,8 @@ The sample profile `tests/test_data/profiles/sample-profile.json` SHALL be produ
 `make refresh-sample-profile` SHALL leave the file untouched when a fresh collection equals it other than
 in timestamps, tool version and row order. The known facts of the sample datasets SHALL be named once
 in `tests/sample_data.py`, and `make test-e2e`
-SHALL fail when a fresh collection differs from the stored profile other than in timestamps and tool version.
+SHALL fail when a fresh collection differs from the stored profile other than in timestamps, tool version
+and row order.
 
 #### Scenario: Regenerating without a data change
 - **WHEN** a contributor runs `make oxigraph-load-test-data`, then `make refresh-sample-profile` and `make refresh-golden` on a clean checkout

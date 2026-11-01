@@ -11,7 +11,7 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## 2. Fences and layout (test content unchanged)
 
-- [ ] 2.1 Move files to the P-1 layout; `pytest.ini`; `make test` runs `pytest tests --ignore=tests/e2e`; the suite passes with the baseline count (Requirement: Fenced test tiers; P-1)
+- [ ] 2.1 Move files to the P-1 layout, with an `__init__.py` in every new test directory; `pytest.ini`; `make test` runs `pytest tests --ignore=tests/e2e`; the suite passes with the baseline count (Requirement: Fenced test tiers; P-1)
 - [ ] 2.2 `.importlinter`: `root_packages` (one per line) and the P-4 test contracts; the four existing contracts still kept (Requirement: Fenced test tiers; P-4)
 - [ ] 2.3 No-network autouse fixture and TC-4 (Requirement: Fenced test tiers — Scenario: A unit test reaches the network)
 - [ ] 2.4 TC-5: pytest wrapper running `lint-imports` on a temporary tree with a violating domain test (Scenario: A domain test imports the service layer)
