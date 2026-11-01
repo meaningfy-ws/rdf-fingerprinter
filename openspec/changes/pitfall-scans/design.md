@@ -32,18 +32,69 @@
 ## Decisions
 
 - **D-1 Domain: `fingerprint/domain/pitfalls.py`** (pure):
-  - `parse_header(text) -> PitfallCheck` reads the `# key: value` lines up to the first non-comment
-    line. It raises `PitfallCheckError` on a missing or invalid key.
+  - `parse_header(text) -> PitfallCheck` reads the header, the leading `#` lines up to the first
+    non-comment line.
+    - A line that matches `# <key>: <value>` sets that key.
+    - A `#` line without a key is ignored (free prose).
+    - An unknown key, a repeated key, a missing required key (`id`, `title`, `importance`, `scope`,
+      `source`) or an invalid value raises `PitfallCheckError`.
+    - The keys are `id`, `title`, `importance`, `scope`, `source`, `heuristic` (`true`/`false`) and
+      `description` (one line).
   - `IMPORTANCE_ORDER = (critical, important, minor)`.
   - `robot_level(importance)` → `ERROR` / `WARN` / `INFO`.
   - `at_or_above(results, level) -> int`.
   - `PitfallCheck` is a LinkML model (D-3) holding the metadata plus `query` (the text) and `origin`
     (`packaged` | the user file path).
+- **D-1a The catalogue** (normative for the packaged files; the ids, importance, scope and heuristic
+  flag are observable through the TSV levels, `--fail-on`, `--skip-pitfall` and the docs):
+
+  | id | seed file (`inputs/seed-queries/`) | importance | scope | heuristic | source | title |
+  |---|---|---|---|---|---|---|
+| `p04_unconnected_class` | `oops_p04_unconnected_class` | minor | schema |  | OOPS! P04 | Class connected to nothing |
+| `p05_wrong_inverse` | `oops_p05_wrong_inverse` | critical | schema |  | OOPS! P05 | Inverse properties whose domain and range do not mirror each other |
+| `p06_class_cycle` | `oops_p06_class_cycle` | critical | schema |  | OOPS! P06 | Cycle in the class hierarchy |
+| `p07_merged_concepts` | `oops_p07_merged_concepts` | minor | schema | yes | OOPS! P07 | Class name joins concepts with And/Or |
+| `p08_missing_comment` | `oops_p08_missing_label_or_comment` | minor | schema |  | OOPS! P08 | Class or property without a comment |
+| `p10_no_disjointness` | `oops_p10_no_disjointness` | important | schema |  | OOPS! P10 | No disjointness axiom at all |
+| `p11_missing_domain_or_range` | `oops_p11_missing_domain_or_range` | important | schema |  | OOPS! P11 | Property without a domain or a range |
+| `p12_p30_same_name_not_equivalent` | `oops_p12_p30_same_name_not_equivalent` | minor | schema | yes | OOPS! P12/P30 | Same local name in two namespaces, not declared equivalent |
+| `p13_missing_inverse` | `oops_p13_missing_inverse` | minor | schema |  | OOPS! P13 | Object property without an inverse |
+| `p19_multiple_domains_or_ranges` | `oops_p19_multiple_domains_or_ranges` | critical | schema |  | OOPS! P19 | Several domains or ranges on one property (read as an intersection) |
+| `p20_label_longer_than_comment` | `oops_p20_label_longer_than_comment` | minor | schema | yes | OOPS! P20 | Label at least as long as the comment (annotations swapped?) |
+| `p21_miscellaneous_class` | `oops_p21_miscellaneous_class` | minor | schema | yes | OOPS! P21 | Catch-all class (Other, Misc, …) |
+| `p22_class_naming` | `oops_p22_class_naming` | minor | schema |  | OOPS! P22 | Class name not starting with an upper-case letter |
+| `p24_recursive_definition` | `oops_p24_recursive_definition` | important | schema |  | OOPS! P24 | Class or property defined by itself |
+| `p25_inverse_of_itself` | `oops_p25_inverse_of_itself` | important | schema |  | OOPS! P25 | Property declared its own inverse |
+| `p26_inverse_of_symmetric` | `oops_p26_inverse_of_symmetric` | important | schema |  | OOPS! P26 | Symmetric property that also has an inverse |
+| `p27_wrong_equivalent_properties` | `oops_p27_wrong_equivalent_properties` | critical | schema |  | OOPS! P27 | Equivalent properties with different domains or ranges |
+| `p28_p29_wrong_symmetric_or_transitive` | `oops_p28_p29_wrong_symmetric_or_transitive` | critical | schema |  | OOPS! P28/P29 | Symmetric or transitive property whose domain and range differ |
+| `p32_classes_same_label` | `oops_p32_classes_same_label` | minor | schema |  | OOPS! P32 | Two classes with the same label |
+| `p33_single_property_chain` | `oops_p33_single_property_chain` | minor | schema |  | OOPS! P33 | Property chain of one property |
+| `p34_untyped_class` | `oops_p34_untyped_class` | minor | data |  | OOPS! P34 | IRI used as a class but never declared |
+| `p35_untyped_property` | `oops_p35_untyped_property` | important | data |  | OOPS! P35 | Relation used but never defined |
+| `p36_iri_with_file_extension` | `oops_p36_iri_with_file_extension` | minor | schema |  | OOPS! P36 | IRI with a file extension |
+| `p38_no_ontology_declaration` | `oops_p38_no_ontology_declaration` | important | schema |  | OOPS! P38 | No owl:Ontology declaration |
+| `p41_no_license` | `oops_p41_no_license` | important | schema |  | OOPS! P41 | Ontology without a licence |
+| `x_domain_violation` | `data_domain_violation` | important | data |  | rdf-fingerprinter (RDFUnit-style) | Subjects outside a property's declared domain |
+| `x_individual_as_predicate` | `extra_individual_as_predicate` | critical | data |  | rdf-fingerprinter | Typed individual used as a predicate |
+| `x_punning_class_and_property` | `extra_punning_class_and_property` | important | data |  | rdf-fingerprinter | IRI used as a class and as a property |
+| `x_range_violation` | `data_range_violation` | important | data |  | rdf-fingerprinter (RDFUnit-style) | IRI objects outside an object property's declared range |
+
+  - **The id rule:** an OOPS!-derived check is the seed name without `oops_`; the extra checks start
+    with `x_`. `p08_missing_comment` is the seed `oops_p08_missing_label_or_comment`, renamed
+    because it only checks comments; labels are left to the report's label caveats.
+  - **The scope rule:** `schema` checks need only the ontology. `data` checks need the data,
+    optionally joined with the schema.
+  - **Heuristics** are always `minor`.
+
 - **D-2 Adapter: `fingerprint/adapters/pitfall_catalogue.py`.**
   - `load_catalogue(user_dir=None, skip=()) -> list[PitfallCheck]` reads the packaged files under
     `fingerprint/adapters/queries/pitfalls/`, then the user's.
   - Each file is validated with rdflib's `prepareQuery`. It must parse, its algebra must be a
-    `SelectQuery`, and its projected variables must be exactly `{entity, property, value}`.
+    `SelectQuery`, and its projected variables, read from `algebra.PV` (not `algebra.p.PV`, which
+    fails on `SELECT DISTINCT`), must be exactly `{entity, property, value}`.
+  - Its parsed query must have no `datasetClause`, so no `FROM` or `FROM NAMED`: the wrapping adds
+    the dataset, and a user `FROM` inside the subquery would not parse.
   - A user id equal to a packaged id replaces it. An unknown `skip` id raises
     `PitfallCheckError`, which the CLI maps to `UsageError` (exit 2).
   - rdflib is an adapter-layer dependency; the domain stays free of it.
@@ -59,15 +110,26 @@
   - the settings slots `pitfall_scan` (default false), `schema_graphs` (uriorcurie, multivalued) and
     `pitfall_examples` (default 10, minimum 1), on `Settings` and `SettingsOverride`.
 
-  The class `PitfallCheck` is a view-free model in `fingerprint_stats.yaml` too, kept out of the
-  published `profile.json` schema because nothing references it from `ProfileRun`. The views are in
-  D-6 and D-7. Run `make generate-models`.
-- **D-4 The scan in collection.** At the end of `_Collection.profile_graph(graph)`, when
-  `settings.pitfall_scan` is on, the collector calls `scan_pitfalls(graph)`. It runs the checks one
-  after the other (concurrency stays per class) and returns `list[PitfallResult]`:
+  The class `PitfallCheck` is a view-free model in `fingerprint_stats.yaml` too. No `ProfileRun`
+  field references it, so `profile.json` never holds it; `gen-json-schema` still lists every class
+  under `$defs`, which is harmless and accepted. `PitfallResult` also carries `description`
+  (optional). The views are in D-6 and D-7. Run `make generate-models`, and add
+  `fingerprint.domain.pitfalls` to the `.importlinter` "generated" contract list.
+- **D-4 The scan in collection.** In `collect`, right after `run.profile_graph(graph, edges)` (outside
+  `profile_graph`, which returns early below `classes` depth, so the scan runs at any depth), when
+  `settings.pitfall_scan` is on, the collector calls `run.scan_pitfalls(graph, checks)`. It sets the
+  graph profile's `pitfalls` with `model_copy`:
+  - **Empty graph:** first an `ASK { <dataset> ?s ?p ?o }` (the name line `# PITFALL ask`); a graph
+    without triples is not scanned.
+  - **Which checks:** without schema graphs, all of them. With schema graphs, `schema`-scope checks
+    on a schema graph (over itself), and `data`-scope checks on the other graphs (with the
+    `FROM <schema>` clauses).
+  - The checks run one after the other; concurrency stays per class. The result is
+    `list[PitfallResult]`.
   - **Count query:** `pitfall_count_query(check, graph, schema_graphs)`.
   - **Example query:** `pitfall_example_query(…, limit)`.
   - Both builders live in `adapters/queries/__init__.py` (D-5).
+  - **A count of 0:** no example query; the result has empty `examples`.
   - **On a count failure:** record a `Failure(query_kind=pitfall, graph, check_id, message,
     attempts)` and skip the examples.
   - **On an example failure:** record a failure; the result keeps its count and has no examples.
@@ -118,8 +180,9 @@
     overrides `outputs()`: one file per graph with results.
   - Its view is `PitfallsTable` (`GraphView` mixin; `lines: PitfallLine[level, rule, subject,
     property, value]`).
-  - Values are full IRIs or lexical forms, with `\t`, `\r` and `\n` replaced by spaces; there is no
-    autoescape.
+  - Values are full IRIs, `_:<id>` for blank nodes, or lexical forms (datatype and language dropped),
+    with an empty cell for an unbound variable, and `\t`, `\r` and `\n` replaced by spaces. There
+    is no autoescape.
   - `RepresentationFormat.pitfalls` is registered in `GENERATORS`.
 - **D-8 Namespaces.** `_iris` also yields the `text` of every `PitfallTerm` whose kind is `iri`
   (DEC-11).
@@ -133,12 +196,16 @@
   - Inside the usage `try`, `main.py` loads the catalogue and refuses the CLI-only options when
     `settings.pitfall_scan` is off.
   - After the run, `main.py` exits 1 if there were failures. Otherwise, with `--fail-on`, it exits
-    `EXIT_PITFALLS = 5` when `at_or_above(results, level) > 0`, logging
-    `<n> pitfall checks found issues at or above <level>`.
+    `EXIT_PITFALLS = 5` when `at_or_above(run, level)` (rows, checks), summed over every graph, has
+    rows > 0, logging at WARNING `<rows> findings in <checks> checks at or above <level>`.
+  - Settings: `schema_graphs` is split on commas in the environment, like `selected_graphs`, in
+    `_setting` (`fingerprint/__init__.py`). Each schema graph IRI passes `to_iriref` in
+    `resolve_settings`, so a bad one is a `UsageError` before any query.
   - `generate.py` gains `gen_pitfalls`, and `pyproject.toml` the script `fingerprint-gen-pitfalls`.
 - **D-10 Dev tooling.**
   - `docker/docker-compose.yml` gains the service `oxigraph-scan`, in memory, on
-    `${RDF_FINGERPRINTER_SCAN_PORT}`, with the default `7879` in `docker/.env`.
+    `${RDF_FINGERPRINTER_SCAN_PORT}`, with the default `7880` in `docker/.env` (7879 is often used by a
+    hand-started store) and the `container_name` `oxigraph-fingerprinter-scan`.
   - The `scan-files` target in the `Makefile` starts it, `DELETE`s and `POST`s the two graphs (the
     content type from the extension), and runs `poetry run fingerprint -e … --graph … --pitfalls
     --schema-graph urn:fingerprint:scan:schema --format pitfalls -o $(OUT)`.
@@ -177,9 +244,9 @@ The scan is safe to rerun: it is read-only and deterministic, because the exampl
 | Level | What | Where |
 |---|---|---|
 | Unit, domain | header parsing, level order and mapping, `at_or_above` | `tests/unit/test_domain_pitfalls.py` |
-| Unit, adapter | catalogue loading, validation (each invalid case), replace and skip | `tests/unit/test_adapters_pitfall_catalogue.py` |
+| Unit, adapter | catalogue loading, validation (each invalid case, including `FROM`, an unknown key and a duplicate user id), replace, skip, and an empty catalogue after skips | `tests/unit/test_adapters_pitfall_catalogue.py` |
 | Unit, checks | each packaged check over `tests/test_data/pitfalls/<id>.trig`: a `positive` and a `negative` named graph, run with rdflib on each graph's content; the expected entity per id in a table in the test | `tests/unit/test_pitfall_checks.py` |
-| Unit, stage | wrapping (FROM, count, limit, ordering), results, failures, scan off, through `FakeSparql` | `tests/unit/test_service_layer_pitfall_scan.py` |
+| Unit, stage | wrapping (FROM, count, limit, ordering), the schema/data split, empty graphs, count 0 (no example query), blank-node entities, failures, scan off, depth `graphs`, through `FakeSparql` | `tests/unit/test_service_layer_pitfall_scan.py` |
 | Gherkin | `tests/features/pitfall_scans.feature` for the spec scenarios; report, exit and format scenarios in the existing features | `tests/unit/steps/` |
 | Golden | the page and the TSV for a fixed profile with scan results | `tests/test_data/golden/` |
 | e2e | Oxigraph: a schema graph plus data, `--pitfalls --format pitfalls`, and exit 5 with `--fail-on` | `tests/e2e/test_pitfall_scan.py` |
@@ -220,8 +287,11 @@ The scan is safe to rerun: it is read-only and deterministic, because the exampl
 - [Closed-world data checks flag OWL-legal data] → Titled as data checks against the declared schema;
   the docs explain the reading.
 - [Heuristic false positives (P07, P20, P21, P12/P30)] → Marked `heuristic`, minor importance.
-- [rdflib `FROM` semantics in the unit fake] → The per-check unit tests run on graph content without
-  `FROM`. The `FROM` wrapping is asserted on the query text, and once against Oxigraph in e2e.
+- [rdflib `FROM` in the unit fake] → rdflib's `Dataset` evaluates `FROM <g1> FROM <g2>` over its own
+  named graphs, so stage tests can run wrapped queries through `FakeSparql`. It tries an HTTP fetch
+  for a `FROM` graph it does not hold, so `tests/unit/fakes.py` sets
+  `rdflib.plugins.sparql.SPARQL_LOAD_GRAPHS = False`. The per-check tests run on graph content
+  directly; the wrapping is checked again on Oxigraph in e2e.
 - [The checks change the profile size] → At most `pitfall_examples` examples per check per graph:
   29 × 10 rows.
 

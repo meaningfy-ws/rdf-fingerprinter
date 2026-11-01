@@ -16,7 +16,7 @@
 
 - [ ] 3.1 The query builders in `adapters/queries/__init__.py` (design D-5)
 - [ ] 3.2 `_Collection.scan_pitfalls`, `collect(..., checks=())`, failures of kind `pitfall` with `check_id` (design D-4; pitfall-scans › The pitfall scan stage)
-- [ ] 3.3 The settings `pitfall_scan`, `schema_graphs` and `pitfall_examples` through `resolve_settings` and the environment (pitfall-scans › Scan settings and options)
+- [ ] 3.3 The settings `pitfall_scan`, `schema_graphs` (comma-split in the environment; each IRI checked) and `pitfall_examples` through `resolve_settings` (pitfall-scans › Scan settings and options; statistics-collection › Depth and switches select the queries)
 - [ ] 3.4 The findings' IRIs in the namespace table (design D-8; namespace-prefixes › Every namespace has a prefix)
 
 ## 4. Outputs
@@ -43,4 +43,4 @@
 
 ## Verification
 
-`make check-all`, `make test-e2e` and `openspec validate pitfall-scans --strict` pass, and `make scan-files` on brainframe reproduces the inventory's counts in `inputs/brainframe-modelling-analysis.md`.
+`make check-all`, `make test-e2e` and `openspec validate pitfall-scans --strict` pass, and `make scan-files` on brainframe reproduces the inventory's counts in `inputs/brainframe-modelling-analysis.md`: the "Ontology" column for the schema checks on the schema graph, and the "Ont. + data" column for the data checks on the data graph (`x_domain_violation` may differ by one on the ontology: 4, not 3).

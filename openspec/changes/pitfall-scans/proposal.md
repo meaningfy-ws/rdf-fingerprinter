@@ -51,11 +51,12 @@ and show them next to the profile.
 - **DEC-2 Opt-in, a new setting.** `pitfall_scan` (`--pitfalls`, `RDF_FINGERPRINTER_PITFALL_SCAN`) is
   false by default, like `graph_statistics`: several checks scan every triple. Rejected: on by default
   (it would surprise users of large endpoints with full scans).
-- **DEC-3 The scan dataset: each profiled graph plus the schema graphs.** `--schema-graph IRI`
-  (repeatable; setting `schema_graphs`) names the graphs that hold the ontology. For a named graph,
-  each check runs with `FROM <graph>` plus one `FROM <schema>` per schema graph. For the default
-  graph, it runs with no `FROM`, which is the store's default graph. A schema graph that is itself
-  profiled is scanned on its own, too. Rejected: one scan over a union of every graph (it can't
+- **DEC-3 The scan dataset: each profiled graph, joined with the schema graphs.** `--schema-graph IRI`
+  (repeatable; setting `schema_graphs`) names the graphs that hold the ontology. With schema graphs,
+  `schema`-scope checks run once on each schema graph, and `data`-scope checks run on every other
+  graph, over `FROM <graph>` plus the `FROM <schema>` clauses. Without them, every check runs on
+  every graph by itself. The default graph is scanned without `FROM`, and a graph with no triple is
+  not scanned at all, so an empty default graph raises no finding. Rejected: one scan over a union of every graph (it can't
   include the default graph portably, and it mixes unrelated graphs); `GRAPH` blocks (a pattern
   can't join across two graphs).
 - **DEC-4 Count plus a bounded sample per check.** The check body runs twice: wrapped as
@@ -126,8 +127,8 @@ and show them next to the profile.
 - Report page: a *Pitfalls* section, badges on the class sections, and a contents entry.
 - A new format `pitfalls` (`--format pitfalls`, `fingerprint-gen-pitfalls`) writing ROBOT-style TSV.
 - Exit status 5 with `--fail-on`.
-- `make scan-files ONTOLOGY=… [DATA=…] OUT=…`: loads files into the dev Oxigraph and fingerprints
-  them with the scan (developer tooling).
+- `make scan-files ONTOLOGY=… [DATA=…] OUT=…`: loads files into a separate scan Oxigraph (port 7880)
+  and fingerprints them with the scan (developer tooling).
 - Docs: a *Pitfalls* page with the catalogue; the CLI, settings and exit-status tables.
 
 ## Capabilities
@@ -137,10 +138,12 @@ and show them next to the profile.
   checks, the TSV format, and `--fail-on`.
 
 ### Modified Capabilities
-- `statistics-collection`: "Settings" gains the scan settings; "Read-only and credential-safe"
-  covers the checks.
+- `statistics-collection`: "Depth and switches select the queries" gains the scan switch;
+  "Failures are recorded and fail the run" gains the check id. The new settings are collection
+  settings under the existing "Settings" requirement.
 - `fingerprint-report`: "Report content" gains the Pitfalls section; "Exit status" gains code 5;
-  "Formats rendered after collecting" gains `pitfalls`.
+  "Read-only and credential-safe" covers the checks; "Formats rendered after collecting" gains
+  `pitfalls`; a new "Pitfalls in the report".
 - `namespace-prefixes`: "Every namespace has a prefix" gathers the findings' IRIs too.
 - `developer-tooling`: `make scan-files`.
 

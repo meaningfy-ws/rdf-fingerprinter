@@ -2,7 +2,7 @@
 
 ### Requirement: Scan files locally
 `make scan-files ONTOLOGY=<file> [DATA=<file>] OUT=<folder>` SHALL start a separate in-memory scan
-Oxigraph (the compose service `oxigraph-scan` on `RDF_FINGERPRINTER_SCAN_PORT`, default 7879), never
+Oxigraph (the compose service `oxigraph-scan` on `RDF_FINGERPRINTER_SCAN_PORT`, default 7880, container `oxigraph-fingerprinter-scan`), never
 the e2e test store, load the
 ontology into the graph `urn:fingerprint:scan:schema` and the data (when given) into
 `urn:fingerprint:scan:data`, after clearing both, and run `fingerprint --pitfalls --schema-graph

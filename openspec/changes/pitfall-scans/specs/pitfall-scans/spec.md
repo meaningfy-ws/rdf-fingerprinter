@@ -2,11 +2,14 @@
 
 ### Requirement: Pitfall check contract
 A pitfall check SHALL be one SPARQL file holding a single `SELECT` query that returns the variables
-`?entity`, `?property` and `?value`, one row per finding. Its leading comment lines SHALL give
-`# id: <id>`, `# title: <text>`, `# importance: critical|important|minor`, `# scope: schema|data`,
-`# source: <text>` and optionally `# heuristic: true`. The id SHALL match `[a-z0-9_]+` and be unique
-in the catalogue. A file that breaks the contract SHALL be a usage error (exit 2) naming the file,
-before any query (EPIC DEC-1, DEC-7).
+`?entity`, `?property` and `?value`, one row per finding. Its leading comment lines (the header, up to the first
+line that is not a comment) SHALL give `# id: <id>`, `# title: <text>`,
+`# importance: critical|important|minor`, `# scope: schema|data`, `# source: <text>`, and optionally
+`# heuristic: true` and `# description: <text>` (one line). A header comment line without a
+`key:` is ignored; an unknown key, or a key given twice, is refused. The id SHALL match `[a-z0-9_]+`
+and be unique in the catalogue. The query SHALL have no dataset clause (`FROM`, `FROM NAMED`). A file
+that breaks the contract SHALL be a usage error (exit 2) naming the file, before any query (EPIC
+DEC-1, DEC-7).
 
 #### Scenario: A valid check loads
 - **WHEN** the catalogue loads a file whose header gives id `p35_untyped_property`, importance `important`, scope `data`, and whose query selects `?entity ?property ?value`
@@ -23,6 +26,8 @@ before any query (EPIC DEC-1, DEC-7).
     | holds an `INSERT DATA` update                   |
     | selects `?s ?p ?o` instead of the three variables |
     | does not parse as SPARQL                        |
+    | has the unknown header key `# severity: high`   |
+    | has a `FROM <http://ex.org/g>` clause            |
 
 ### Requirement: The packaged catalogue
 The fingerprinter SHALL ship a catalogue of checks covering these OOPS! pitfalls: P04, P05, P06, P07, P08,
@@ -31,7 +36,8 @@ P28/P29, P32, P33, P34, P35, P36, P38 and P41. It SHALL also ship four checks be
 as a class and as a property, a typed individual used as a predicate, subjects outside a property's
 declared domain, and IRI objects outside an object property's declared range. Each check's `source`
 SHALL name its OOPS! pitfall code where it has one, and its title and description SHALL be the
-fingerprinter's own words (EPIC DEC-12).
+fingerprinter's own words (EPIC DEC-12). The catalogue's ids, importance, scope and heuristic flags
+SHALL be those of design.md's catalogue table.
 
 #### Scenario: Catalogue size
 - **WHEN** the packaged catalogue is loaded
@@ -46,9 +52,16 @@ fingerprinter's own words (EPIC DEC-12).
     | every packaged check (one row each)  |
 
 ### Requirement: The pitfall scan stage
-With `pitfall_scan` on, the collector SHALL run every selected check after profiling a graph, once
-per profiled graph. For a named graph the scan dataset SHALL be `FROM <graph>` plus one `FROM <s>`
-per schema graph `s`; for the default graph it SHALL be the store's default graph, without `FROM`.
+With `pitfall_scan` on, the collector SHALL scan every profiled graph after profiling it, at any
+depth (also `graphs`). A graph that holds no triple (an `ASK`) SHALL NOT be scanned. Which checks
+run, and over which dataset:
+- **No schema graph given:** every selected check runs over the graph alone: `FROM <graph>` for a
+  named graph; the store's default graph, without `FROM`, for the default graph.
+- **Schema graphs given:** a graph that is one of the schema graphs runs only the `schema`-scope
+  checks, over itself. Every other graph runs only the `data`-scope checks, over `FROM <graph>`
+  plus one `FROM <s>` per schema graph (the default graph: without `FROM`, so without the schema
+  graphs).
+
 For each check it SHALL send a count query (the check wrapped in `SELECT (COUNT(*) AS ?n)`) and an
 example query (the check with `LIMIT pitfall_examples`). It SHALL record the result in
 `GraphProfile.pitfalls`, with the check's metadata, the count, the examples, and the seconds both
@@ -58,6 +71,18 @@ recorded (EPIC DEC-2, DEC-3, DEC-4, DEC-5).
 #### Scenario: Scan with a schema graph
 - **WHEN** a run profiles graph `ex:data` with `--pitfalls --schema-graph ex:schema`, and `ex:data` uses the predicate `ex:undeclared`, which `ex:schema` does not declare
 - **THEN** the profile of `ex:data` holds a `p35_untyped_property` result with count ≥ 1 and an example whose entity is `ex:undeclared`
+
+#### Scenario: Schema checks run once, on the schema graph
+- **WHEN** a run profiles `ex:data` and `ex:schema` with `--pitfalls --schema-graph ex:schema`
+- **THEN** `ex:schema` has results only for schema-scope checks, `ex:data` only for data-scope checks
+
+#### Scenario: Empty graph not scanned
+- **WHEN** the default graph holds no triple and a run uses `--pitfalls`
+- **THEN** no check query is sent for the default graph and it has no `pitfalls`
+
+#### Scenario: A check that finds nothing
+- **WHEN** a check's count query returns 0
+- **THEN** its result has count 0 and no examples, and no example query is sent
 
 #### Scenario: Bounded examples
 - **WHEN** a check finds 1,100 rows and `pitfall_examples` is 10
@@ -81,8 +106,10 @@ in the profile. The `fingerprint` command SHALL also accept:
 - `--skip-pitfall ID` (repeatable): checks left out;
 - `--fail-on critical|important|minor`.
 
-An unknown id in `--skip-pitfall`, a missing directory, or `--pitfall-checks`, `--skip-pitfall` or
-`--fail-on` given without `--pitfalls` SHALL be usage errors (exit 2) before any query (EPIC DEC-8).
+An unknown id in `--skip-pitfall`, a missing directory, a schema graph that cannot be written as an
+IRI, or `--pitfall-checks`, `--skip-pitfall` or `--fail-on` given while the scan is off SHALL be
+usage errors (exit 2) before any query. In the environment, `RDF_FINGERPRINTER_SCHEMA_GRAPHS` is a
+comma-separated list (EPIC DEC-8).
 
 #### Scenario: A user check replaces a packaged one
 - **WHEN** `--pitfall-checks my/` holds a valid check with id `p22_class_naming`
@@ -95,7 +122,9 @@ An unknown id in `--skip-pitfall`, a missing directory, or `--pitfall-checks`, `
 ### Requirement: Fail on findings
 A run SHALL exit 5 when `--fail-on LEVEL` is given, its outputs were written, it recorded no failure,
 and a check of importance LEVEL or higher (`critical` > `important` > `minor`) counted at least one
-row. A recorded failure SHALL still exit 1 (EPIC DEC-10).
+row in any scanned graph. It SHALL log `<rows> findings in <checks> checks at or above <level>` at
+WARNING, counting rows and checks over all graphs. A recorded failure SHALL still exit 1 (EPIC
+DEC-10).
 
 #### Scenario Outline: Exit status from findings
 - **WHEN** a run with `--fail-on <level>` finds only pitfalls of importance <found>, with no failure
@@ -111,7 +140,9 @@ row. A recorded failure SHALL still exit 1 (EPIC DEC-10).
 The `pitfalls` format SHALL write, per profiled graph with a scan result, `pitfalls-<graph slug>.tsv`
 with the header `Level`, `Rule Name`, `Subject`, `Property`, `Value`, and one line per example. The
 level maps critical → `ERROR`, important → `WARN` and minor → `INFO`; the rule name is the check id;
-IRIs are written in full. A tab or line break inside a value SHALL be written as a space.
+IRIs are written in full, a blank node as `_:<id>`, a literal as its lexical form (datatype and
+language dropped), and an unbound variable as an empty cell. A tab or line break inside a value
+SHALL be written as a space.
 `fingerprint-gen-pitfalls` SHALL write it from a saved profile. A profile without scan results SHALL
 produce no file (EPIC DEC-9).
 

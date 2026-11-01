@@ -3,7 +3,7 @@
 ### Requirement: Every namespace has a prefix
 After collection the fingerprinter SHALL give a prefix to the namespace of each profiled graph IRI,
 class, property, value type, parent class and linked class, and of each IRI entity, property and
-value in a pitfall example (pitfall-scans DEC-11). The namespace of an IRI SHALL be:
+value in a pitfall example (pitfall-scans EPIC DEC-11). The namespace of an IRI SHALL be:
 - the IRI up to and including its last `#`, when no `/` follows that `#`;
 - otherwise, up to and including its last `/`;
 - for a `urn:` IRI with neither, up to and including its last `:`.

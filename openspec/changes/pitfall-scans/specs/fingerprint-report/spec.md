@@ -12,7 +12,7 @@ The report SHALL show:
 - per property, as today: property, subjects, min, max, avg, kind, distinct values, value types,
   confidence, cardinality (the label; `present` for a presence-only property), inheritance and
   language coverage. Numbers are rounded to 2 decimals, and an absent value is `—`;
-- when the profile holds scan results, a *Pitfalls* section (pitfall-scans "Pitfalls in the report");
+- when the profile holds scan results, a *Pitfalls* section ("Pitfalls in the report", below);
 - the caveats: first-N classes, the untyped subjects per graph (when graph statistics were
   collected), the IRIs that could not be written, and the namespaces the filters hid, with their
   class counts.
@@ -36,7 +36,7 @@ report SHALL NOT embed diagram sources.
 
 #### Scenario: Short names only
 - **WHEN** the report is generated for the readability test profile
-- **THEN** no text node outside the namespace table, the provenance endpoint, the setting values, the failure messages and the unwritable-IRI caveats holds `http://` or `https://`
+- **THEN** no text node outside the namespace table, the provenance endpoint, the setting values, the failure messages, the unwritable-IRI caveats and the pitfall literal values holds `http://` or `https://`
 
 #### Scenario: Hidden namespaces are listed
 - **WHEN** the report is generated with the default filters for a profile holding 2 `owl:` classes
@@ -64,7 +64,7 @@ after the start SHALL be a recorded failure (exit 1), not exit 3. **BREAKING** (
 
 #### Scenario: Pitfalls found with fail-on
 - **WHEN** a run with `--pitfalls --fail-on critical` records no failure and finds a critical pitfall
-- **THEN** the CLI exits 5 and logs the number of findings at or above `critical`
+- **THEN** the CLI exits 5 and logs `<rows> findings in <checks> checks at or above critical`
 
 ### Requirement: Read-only and credential-safe
 Collection SHALL send only SPARQL `SELECT` and `ASK` queries; every pitfall check, packaged or the
@@ -117,15 +117,16 @@ When the profile holds scan results, the report SHALL have a *Pitfalls* section 
 - a contents entry;
 - a summary of the number of checks with findings, per importance;
 - per graph, one entry per check, ordered by importance, then by count descending, then by id,
-  showing the title, importance, source, count, whether it is a heuristic, and the examples as short
-  names (`prefix:local`, full IRI as title; literal values as escaped text);
+  showing the title, the description (when given), importance, source, count, whether it is a
+  heuristic, and the examples as short names (`prefix:local`, full IRI as title; literal values as escaped text);
 - the checks that found nothing, listed by id.
 
 A class section whose class is the entity of an example SHALL show one badge per such check, linking
-to that check's entry. The search SHALL also match check ids and titles (EPIC DEC-11).
+to that check's entry. The search box SHALL also filter the check entries by id and title (the
+report's search, extended to the new section).
 
 #### Scenario: Section and badge
-- **WHEN** the report is generated for a profile whose `extra_punning_class_and_property` result has the example entity `bf:factActivity`, a profiled class
+- **WHEN** the report is generated for a profile whose `x_punning_class_and_property` result has the example entity `bf:factActivity`, a profiled class
 - **THEN** the Pitfalls section lists that check with its count and example `bf:factActivity`, and the `bf:factActivity` class section shows a badge linking to it
 
 #### Scenario: Values are escaped
