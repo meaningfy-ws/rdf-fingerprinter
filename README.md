@@ -53,7 +53,21 @@ fingerprint-gen-shex    my/output/folder/profile.json -o llm/ --min-instances 10
 ```
 
 On the test data, the pattern schema of a graph is about nine times smaller than its SHACL shapes
-(1,234 against 10,950 characters, prefixes and legend left out). See
+(1,234 against 10,950 characters, prefixes and legend left out).
+
+Leave out whole namespaces, in every output (report, SHACL, ShExC, PlantUML, pattern schema),
+by prefix, prefix glob or IRI stem; repeat the option to combine them, and use
+`--include-namespace` to bring one back:
+
+```shell script
+fingerprint-gen-pattern profile.json -o llm/ --exclude-namespace relationid --exclude-namespace 'prv*'
+fingerprint-gen-doc     profile.json -o out/ --exclude-namespace 'https://my.brainframe.com/#/knowledge/'
+```
+
+The report keeps every namespace in its table, marks the excluded ones, and has a switch per
+namespace that hides its classes and property rows on the page. See
+[Namespace filters](https://meaningfy-ws.github.io/rdf-fingerprinter/rdf-fingerprinter/representations.html#filters)
+and
 [Schemas for LLMs](https://meaningfy-ws.github.io/rdf-fingerprinter/rdf-fingerprinter/llm-schema.html).
 
 # Development

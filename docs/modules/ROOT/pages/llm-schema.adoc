@@ -386,6 +386,39 @@ Neither filtered file holds `relationid:`; each says what it left out, in one co
 # excluded namespaces: relationid (classes 0, properties 619, values 0)
 ----
 
+Filters combine: repeat the option, name several namespaces at once by an IRI stem or a prefix
+glob, and bring one back with `--include-namespace` (it wins over an exclude):
+
+[source,bash]
+----
+# four prefixes
+fingerprint-gen-pattern profile.json -o llm/ --exclude-namespace relationid \
+  --exclude-namespace foaf --exclude-namespace prv --exclude-namespace dcterms
+# every instance namespace under one IRI stem
+fingerprint-gen-pattern profile.json -o llm/ --exclude-namespace 'https://my.brainframe.com/#/knowledge/'
+# the same, keeping one of them
+fingerprint-gen-pattern profile.json -o llm/ --exclude-namespace 'https://my.brainframe.com/#/knowledge/' \
+  --include-namespace document
+----
+
+[cols="3,1,1"]
+|===
+| Filters | Pattern schema | ShExC
+
+| none | 221,523 | 249,854
+| `relationid` | 98,323 | 110,555
+| `relationid`, `foaf`, `prv`, `dcterms` | 79,825 | 89,828
+| the `https://my.brainframe.com/#/knowledge/` stem | 68,308 | 78,339
+| the stem, `--include-namespace document` | 68,487 | 78,526
+|===
+
+The note then lists each namespace in prefix order:
+
+[source,text]
+----
+# excluded namespaces: dcterms (classes 0, properties 11, values 0); foaf (classes 0, properties 1, values 0); prv (classes 0, properties 2, values 0); relationid (classes 0, properties 619, values 0)
+----
+
 The statement nodes of those relations are typed `brainframe:RelationId`, in the same namespace as
 the real classes, so a namespace filter cannot hide them.
 
