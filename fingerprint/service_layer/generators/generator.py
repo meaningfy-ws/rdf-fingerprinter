@@ -103,8 +103,10 @@ class Generator:
         self.table = PrefixTable(analytics.namespaces)
         self.template_location = template_location
         self.options = options or GeneratorOptions()
-        filters = namespace_filter(self.options, self.table)
-        self.excluded = set(filters.hidden or []) | set(filters.excluded or [])  # class-level hiding only (DEC-7, P-3)
+        self.filters = namespace_filter(self.options, self.table)
+        self.excluded = set(self.filters.hidden or []) | set(
+            self.filters.excluded or []
+        )  # class-level hiding only (DEC-7, P-3)
         self.skipped: list[str] = []  # IRIs left out because they cannot be written (P-8)
         self.hidden: dict[str, set[str]] = {}  # dict-ok: lookup index namespace → hidden class IRIs
 

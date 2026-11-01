@@ -343,11 +343,11 @@ def both_list(ctx, name):
 # --- the note of the excluded namespaces ---
 
 
-@then(parsers.re(r'it carries the line "(?P<line>[^"]+)"(?P<every> in every file)?'))
-def carries_line(ctx, line, every):
+@then(parsers.re(r'it carries the line "(?P<line>[^"]+)"(?: in every file)?'))
+def carries_line(ctx, line):
     files = [t for ts in ctx["by_format"].values() for t in ts.values()]
     assert files
-    for text in files if every else files[:1]:
+    for text in files:
         assert line in text.splitlines()
 
 
@@ -361,3 +361,24 @@ def carries_in_report(ctx, prefix):
 @then("it carries no note of excluded namespaces")
 def carries_no_note(ctx):
     assert not any("excluded namespaces" in t for ts in ctx["by_format"].values() for t in ts.values())
+
+
+# --- a graph whose every class is excluded ---
+
+
+@given(parsers.parse('a profile whose only graph holds only "{prefix}:" classes'))
+def only_one_namespace(ctx, prefix):
+    ctx["run"] = with_namespaces(
+        builders.profile_run(klass(ORG + "Unit", 2, prop(ORG + "name", {1: 2}, literals(2)))), ("org", ORG)
+    )
+
+
+@then("no shapes, diagram, pattern schema or ShExC file is written for that graph")
+def no_graph_files(ctx):
+    assert not any(n.startswith(("shapes-", "diagram-", "pattern-", "shex-")) for n in ctx["texts"])
+
+
+@then("the report says the graph's classes are hidden, not that it is empty")
+def report_says_hidden(ctx):
+    text = BeautifulSoup(ctx["by_format"]["doc"]["main.html"], "html.parser").get_text(" ")
+    assert "hidden or excluded namespace" in text and "no typed instances" not in text
