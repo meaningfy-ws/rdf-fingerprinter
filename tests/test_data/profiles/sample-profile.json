@@ -13,7 +13,9 @@
     "timeout_seconds": 60,
     "concurrency": 4,
     "acceptance_threshold": 0.95,
-    "graph_statistics": false
+    "graph_statistics": false,
+    "pitfall_scan": false,
+    "pitfall_examples": 10
   },
   "graphs": [
     {
@@ -27,7 +29,7 @@
           "co_types": [],
           "property_partitions": [
             {
-              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "property": "http://purl.org/dc/terms/type",
               "distinct_objects": 1,
               "cardinality_histogram": [
                 {
@@ -44,7 +46,7 @@
               ]
             },
             {
-              "property": "http://purl.org/dc/terms/created",
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
               "distinct_objects": 1,
               "cardinality_histogram": [
                 {
@@ -56,13 +58,7 @@
                 {
                   "triples": 145,
                   "distinct_objects": 1,
-                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
-                  "min_length": 10,
-                  "max_length": 10,
-                  "total_length": 1450,
-                  "min_value": "2014-10-10",
-                  "max_value": "2014-10-10",
-                  "node_kind": "literal"
+                  "node_kind": "iri"
                 }
               ]
             },
@@ -384,7 +380,7 @@
               ]
             },
             {
-              "property": "http://purl.org/dc/terms/type",
+              "property": "http://purl.org/dc/terms/created",
               "distinct_objects": 1,
               "cardinality_histogram": [
                 {
@@ -396,7 +392,13 @@
                 {
                   "triples": 145,
                   "distinct_objects": 1,
-                  "node_kind": "iri"
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1450,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
                 }
               ]
             },
@@ -594,7 +596,7 @@
           "co_types": [],
           "property_partitions": [
             {
-              "property": "http://purl.org/dc/terms/type",
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
               "distinct_objects": 1,
               "cardinality_histogram": [
                 {
@@ -611,7 +613,7 @@
               ]
             },
             {
-              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "property": "http://purl.org/dc/terms/type",
               "distinct_objects": 1,
               "cardinality_histogram": [
                 {
@@ -651,29 +653,6 @@
               ]
             },
             {
-              "property": "http://purl.org/dc/terms/created",
-              "distinct_objects": 1,
-              "cardinality_histogram": [
-                {
-                  "values_per_subject": 1,
-                  "subjects": 6
-                }
-              ],
-              "value_partitions": [
-                {
-                  "triples": 6,
-                  "distinct_objects": 1,
-                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
-                  "min_length": 10,
-                  "max_length": 10,
-                  "total_length": 60,
-                  "min_value": "2014-10-10",
-                  "max_value": "2014-10-10",
-                  "node_kind": "literal"
-                }
-              ]
-            },
-            {
               "property": "http://publications.europa.eu/ontology/euvoc#startDate",
               "distinct_objects": 1,
               "cardinality_histogram": [
@@ -692,6 +671,29 @@
                   "total_length": 60,
                   "min_value": "1952-07-24",
                   "max_value": "1952-07-24",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/created",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "2014-10-10",
+                  "max_value": "2014-10-10",
                   "node_kind": "literal"
                 }
               ]
@@ -1175,7 +1177,8 @@
             }
           ]
         }
-      ]
+      ],
+      "term_annotations": []
     },
     {
       "graph": "http://publications.europa.eu/resources/authority/continents",
@@ -1189,8 +1192,8 @@
           "co_types": [],
           "property_partitions": [
             {
-              "property": "http://publications.europa.eu/ontology/euvoc#status",
-              "distinct_objects": 1,
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 2,
               "cardinality_histogram": [
                 {
                   "values_per_subject": 1,
@@ -1200,13 +1203,19 @@
               "value_partitions": [
                 {
                   "triples": 145,
-                  "distinct_objects": 1,
-                  "node_kind": "iri"
+                  "distinct_objects": 2,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 1450,
+                  "min_value": "1952-07-24",
+                  "max_value": "2014-10-10",
+                  "node_kind": "literal"
                 }
               ]
             },
             {
-              "property": "http://purl.org/dc/terms/type",
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
               "distinct_objects": 1,
               "cardinality_histogram": [
                 {
@@ -1540,29 +1549,6 @@
               ]
             },
             {
-              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
-              "distinct_objects": 2,
-              "cardinality_histogram": [
-                {
-                  "values_per_subject": 1,
-                  "subjects": 145
-                }
-              ],
-              "value_partitions": [
-                {
-                  "triples": 145,
-                  "distinct_objects": 2,
-                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
-                  "min_length": 10,
-                  "max_length": 10,
-                  "total_length": 1450,
-                  "min_value": "1952-07-24",
-                  "max_value": "2014-10-10",
-                  "node_kind": "literal"
-                }
-              ]
-            },
-            {
               "property": "http://purl.org/dc/terms/created",
               "distinct_objects": 1,
               "cardinality_histogram": [
@@ -1582,6 +1568,23 @@
                   "min_value": "2014-10-10",
                   "max_value": "2014-10-10",
                   "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/type",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 145
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 145,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
                 }
               ]
             }
@@ -1756,7 +1759,7 @@
           "co_types": [],
           "property_partitions": [
             {
-              "property": "http://publications.europa.eu/ontology/euvoc#status",
+              "property": "http://purl.org/dc/terms/type",
               "distinct_objects": 1,
               "cardinality_histogram": [
                 {
@@ -1773,7 +1776,7 @@
               ]
             },
             {
-              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "property": "http://publications.europa.eu/ontology/euvoc#status",
               "distinct_objects": 1,
               "cardinality_histogram": [
                 {
@@ -1785,13 +1788,7 @@
                 {
                   "triples": 6,
                   "distinct_objects": 1,
-                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
-                  "min_length": 10,
-                  "max_length": 10,
-                  "total_length": 60,
-                  "min_value": "1952-07-24",
-                  "max_value": "1952-07-24",
-                  "node_kind": "literal"
+                  "node_kind": "iri"
                 }
               ]
             },
@@ -1819,23 +1816,6 @@
               ]
             },
             {
-              "property": "http://purl.org/dc/terms/type",
-              "distinct_objects": 1,
-              "cardinality_histogram": [
-                {
-                  "values_per_subject": 1,
-                  "subjects": 6
-                }
-              ],
-              "value_partitions": [
-                {
-                  "triples": 6,
-                  "distinct_objects": 1,
-                  "node_kind": "iri"
-                }
-              ]
-            },
-            {
               "property": "http://purl.org/dc/terms/created",
               "distinct_objects": 1,
               "cardinality_histogram": [
@@ -1854,6 +1834,29 @@
                   "total_length": 60,
                   "min_value": "2014-10-10",
                   "max_value": "2014-10-10",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 6
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 6,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 60,
+                  "min_value": "1952-07-24",
+                  "max_value": "1952-07-24",
                   "node_kind": "literal"
                 }
               ]
@@ -2337,7 +2340,8 @@
             }
           ]
         }
-      ]
+      ],
+      "term_annotations": []
     },
     {
       "graph": "http://publications.europa.eu/resources/authority/treaties",
@@ -2368,6 +2372,29 @@
               ]
             },
             {
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 40,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 4080
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 4080,
+                  "distinct_objects": 40,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 40800,
+                  "min_value": "1950-12-31",
+                  "max_value": "2016-06-07",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
               "property": "http://purl.org/dc/terms/created",
               "distinct_objects": 11,
               "cardinality_histogram": [
@@ -2386,29 +2413,6 @@
                   "total_length": 40800,
                   "min_value": "2011-05-19",
                   "max_value": "2018-05-17",
-                  "node_kind": "literal"
-                }
-              ]
-            },
-            {
-              "property": "http://publications.europa.eu/ontology/euvoc#endDate",
-              "distinct_objects": 13,
-              "cardinality_histogram": [
-                {
-                  "values_per_subject": 1,
-                  "subjects": 1216
-                }
-              ],
-              "value_partitions": [
-                {
-                  "triples": 1216,
-                  "distinct_objects": 13,
-                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
-                  "min_length": 10,
-                  "max_length": 10,
-                  "total_length": 12160,
-                  "min_value": "1951-01-01",
-                  "max_value": "2016-06-06",
                   "node_kind": "literal"
                 }
               ]
@@ -2731,29 +2735,6 @@
               ]
             },
             {
-              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
-              "distinct_objects": 40,
-              "cardinality_histogram": [
-                {
-                  "values_per_subject": 1,
-                  "subjects": 4080
-                }
-              ],
-              "value_partitions": [
-                {
-                  "triples": 4080,
-                  "distinct_objects": 40,
-                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
-                  "min_length": 10,
-                  "max_length": 10,
-                  "total_length": 40800,
-                  "min_value": "1950-12-31",
-                  "max_value": "2016-06-07",
-                  "node_kind": "literal"
-                }
-              ]
-            },
-            {
               "property": "http://purl.org/dc/terms/type",
               "distinct_objects": 5,
               "cardinality_histogram": [
@@ -2767,6 +2748,29 @@
                   "triples": 4530,
                   "distinct_objects": 5,
                   "node_kind": "iri"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#endDate",
+              "distinct_objects": 13,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1216
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1216,
+                  "distinct_objects": 13,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 12160,
+                  "min_value": "1951-01-01",
+                  "max_value": "2016-06-06",
+                  "node_kind": "literal"
                 }
               ]
             }
@@ -2797,29 +2801,6 @@
               ]
             },
             {
-              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
-              "distinct_objects": 39,
-              "cardinality_histogram": [
-                {
-                  "values_per_subject": 1,
-                  "subjects": 157
-                }
-              ],
-              "value_partitions": [
-                {
-                  "triples": 157,
-                  "distinct_objects": 39,
-                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
-                  "min_length": 10,
-                  "max_length": 10,
-                  "total_length": 1570,
-                  "min_value": "1950-12-31",
-                  "max_value": "2016-06-07",
-                  "node_kind": "literal"
-                }
-              ]
-            },
-            {
               "property": "http://purl.org/dc/terms/created",
               "distinct_objects": 10,
               "cardinality_histogram": [
@@ -2838,6 +2819,29 @@
                   "total_length": 1570,
                   "min_value": "2011-05-19",
                   "max_value": "2018-05-17",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://publications.europa.eu/ontology/euvoc#endDate",
+              "distinct_objects": 13,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 56
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 56,
+                  "distinct_objects": 13,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#date",
+                  "min_length": 10,
+                  "max_length": 10,
+                  "total_length": 560,
+                  "min_value": "1951-01-01",
+                  "max_value": "2016-06-06",
                   "node_kind": "literal"
                 }
               ]
@@ -2883,24 +2887,24 @@
               ]
             },
             {
-              "property": "http://publications.europa.eu/ontology/euvoc#endDate",
-              "distinct_objects": 13,
+              "property": "http://publications.europa.eu/ontology/euvoc#startDate",
+              "distinct_objects": 39,
               "cardinality_histogram": [
                 {
                   "values_per_subject": 1,
-                  "subjects": 56
+                  "subjects": 157
                 }
               ],
               "value_partitions": [
                 {
-                  "triples": 56,
-                  "distinct_objects": 13,
+                  "triples": 157,
+                  "distinct_objects": 39,
                   "datatype": "http://www.w3.org/2001/XMLSchema#date",
                   "min_length": 10,
                   "max_length": 10,
-                  "total_length": 560,
-                  "min_value": "1951-01-01",
-                  "max_value": "2016-06-06",
+                  "total_length": 1570,
+                  "min_value": "1950-12-31",
+                  "max_value": "2016-06-07",
                   "node_kind": "literal"
                 }
               ]
@@ -4687,7 +4691,8 @@
             }
           ]
         }
-      ]
+      ],
+      "term_annotations": []
     }
   ],
   "failures": []

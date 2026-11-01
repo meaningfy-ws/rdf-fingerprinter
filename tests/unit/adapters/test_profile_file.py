@@ -73,7 +73,6 @@ def test_term_annotations_round_trip(tmp_path, sample_run):
     assert load_profile(save_profile(run, tmp_path)) == run
 
 
-@pytest.mark.parametrize("path", [SAMPLE, SCANNED_PROFILE])
-def test_a_profile_saved_before_term_annotations_loads_without_them(path):
-    run = load_profile(path)
+def test_a_profile_saved_before_term_annotations_loads_without_them():
+    run = load_profile(SCANNED_PROFILE)  # the sample profile is a 3.2 file since task 1.4
     assert all(graph.term_annotations is None for graph in run.graphs)
