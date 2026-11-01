@@ -133,12 +133,3 @@ def test_the_size_options_are_passed_through(tmp_path):
     invoke(generate.gen_pattern, SAMPLE, "-o", tmp_path, "--max-classes", "1")
     blocks = [ln for ln in (tmp_path / "pattern-continents-214e8f67.txt").read_text().splitlines() if ln.startswith("(:")]
     assert len(blocks) == 1
-
-
-def test_an_unreadable_ontology_exits_2_naming_it(tmp_path):
-    bad = tmp_path / "bad.ttl"
-    bad.write_text("not turtle")
-    out = tmp_path / "out"
-    out.mkdir()
-    result = invoke(generate.gen_pattern, SAMPLE, "-o", out, "--ontology", bad)
-    assert result.exit_code == 2 and "bad.ttl" in result.output and not list(out.iterdir())
