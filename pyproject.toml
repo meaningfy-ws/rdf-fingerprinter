@@ -90,6 +90,6 @@ also_copy = [
     "pytest.ini",
 ]
 pytest_add_cli_args_test_selection = ["tests/unit", "tests/bdd"]
-# Guards read the source, which mutmut rewrites; they are not mutation killers.
-pytest_add_cli_args = ["-p", "no:cacheprovider"]
+# The ci Hypothesis profile is derandomised, so a mutant killed once stays killed.
+pytest_add_cli_args = ["-p", "no:cacheprovider", "--hypothesis-profile=ci"]
 mutate_only_covered_lines = false

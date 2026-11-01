@@ -56,6 +56,7 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 - [x] 7.3 `adapters/` and `entrypoints/` modules (coverage and P-2 ownership)
 - [x] 7.4 `tests/e2e/`: tests that never reach the store deleted or moved (P-2)
 - [ ] 7.5 Surviving mutants: a test in the owning tier, or the dead code deleted and listed here; `mutation_score.txt` raised
+  - Dead code deleted (no caller in `fingerprint/`, `tests/` or the templates; GitNexus impact 0 callers, LOW): `Generator.used_namespaces()` with the `Generator.namespaces` dict it read, and `DocumentGenerator.term()` (770505c). The unreachable `raise IndexError` in `analytics._weighted_value_at` is kept as a defensive guard (a rewrite in 7dc83a4 was reverted). Other findings are follow-ups in `inputs/mutation-triage.md`.
 
 ## 8. Docs and conventions
 

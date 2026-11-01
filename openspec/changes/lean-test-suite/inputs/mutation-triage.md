@@ -182,9 +182,11 @@ After the new tests: 51 left (50 survived + 1 timeout, caught by non-termination
 
 ## Lead decisions on the domain findings (2026-11-01)
 
-- `analytics._weighted_value_at`: the unreachable `raise IndexError` is deleted (the EPIC's dead-code
-  exception; GitNexus impact LOW, one caller); the function is now a single `next()` over running totals,
-  and the test that only reached the raise is gone.
+- `analytics._weighted_value_at`: the final `raise IndexError` is unreachable within the precondition
+  (positions stay below the histogram total) but is kept as a defensive guard. A first version replaced it
+  with a `next()` over running totals (7dc83a4); the final review found that went beyond the dead-code
+  exception and could leak a bare `StopIteration`, so it was reverted. The mutant is classed **dead,
+  kept on purpose**.
 - Not changed (outside this EPIC's no-production-change scope; follow-ups for the developer):
   `modules._by_name` (redundant tie-break key, behaviour pinned by the new tie tests);
   `analytics._namespace` duplicating `prefixes.namespace_of` with weaker rules;
