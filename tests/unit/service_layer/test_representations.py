@@ -1,6 +1,7 @@
 """The representations service: load, re-analyse at a threshold, run generators in order (P-6, UC-W2)."""
 
 import logging
+import re
 from pathlib import Path
 
 import pytest
@@ -8,7 +9,7 @@ import pytest
 from fingerprint.adapters.exceptions import GeneratedOutputError
 from fingerprint.adapters.profile_file import save_profile
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
-from fingerprint.domain.profile import NamespacePrefix
+from fingerprint.domain.profile import Inheritance, NamespacePrefix
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer import representations
 from fingerprint.service_layer.exceptions import UsageError
@@ -18,9 +19,9 @@ from fingerprint.service_layer.representations import (
     generate_representations,
     make_generator,
     validate_options,
-    warn_unknown_filters,
     with_threshold,
 )
+from tests import builders
 
 
 @pytest.fixture
@@ -33,10 +34,13 @@ class Recording:
 
     seen: list = []
 
+    analyses: list = []
+
     def __init__(self, analytics, renderer, template_location=None, options=None):
         self.analytics, self.options = analytics, options
 
     def write(self, folder):
+        Recording.analyses.append(self.analytics)
         Recording.seen.append((self.analytics.settings.acceptance_threshold, self.options))
         path = Path(folder) / f"ok-{len(Recording.seen)}"
         path.write_text("x")
@@ -50,7 +54,7 @@ class Failing(Recording):
 
 @pytest.fixture
 def generators(monkeypatch):
-    Recording.seen = []
+    Recording.seen, Recording.analyses = [], []
     monkeypatch.setattr(representations, "GENERATORS", {"a": Recording, "b": Failing, "c": Recording})
 
 
@@ -161,31 +165,120 @@ def test_a_run_without_a_namespace_table_gets_one_and_a_user_table_is_applied(ru
     assert Namespaces.tables[-1] == resolved.namespaces
 
 
+@pytest.fixture
+def filtering(filter_run, tmp_path, generators):
+    """Runs `generate_representations` on the filter profile with a recording generator, returning what it saw."""
+
+    def generate(exclude=(), include=(), **kwargs):
+        options = GeneratorOptions(exclude_namespaces=list(exclude), include_namespaces=list(include))
+        generate_representations(filter_run, tmp_path, ["a"], options=options, **kwargs)
+        return Recording.analyses[-1]
+
+    return generate
+
+
+@pytest.fixture
+def filter_run():
+    return builders.filter_profile(
+        builders.klass(builders.EX + "Agent", 5, builders.prop(builders.EX + "name", {1: 5}, builders.literals(5))),
+        builders.klass(builders.REL + "Base", 5, builders.prop(builders.EX + "name", {1: 5}, builders.literals(5))),
+        edges=[(builders.EX + "Agent", builders.REL + "Base")],
+    )
+
+
 @pytest.mark.parametrize(
-    "options, message",
+    "option, message",
     [
-        (GeneratorOptions(include_namespaces=["nope"]), "--include-namespace nope: no such namespace; ignored"),
-        (GeneratorOptions(exclude_namespaces=["nope", "nope"]), "--exclude-namespace nope: no such namespace; ignored"),
+        ("include_namespaces", "--include-namespace nope: no such namespace; ignored"),
+        ("exclude_namespaces", "--exclude-namespace nope: no such namespace; ignored"),
     ],
 )
-def test_an_unknown_namespace_filter_is_warned_about_once_and_named_by_its_option(run, caplog, options, message):
+def test_an_unknown_namespace_filter_is_warned_about_once_and_named_by_its_option(
+    option, message, filter_run, tmp_path, generators, caplog
+):
+    options = GeneratorOptions(**{option: ["nope", "nope"]})
     with caplog.at_level(logging.WARNING):
-        warn_unknown_filters(run, options)
+        generate_representations(filter_run, tmp_path, ["a"], options=options)
     assert caplog.messages == [message]
 
 
-def test_a_filter_naming_a_prefix_of_the_table_is_not_unknown(run, caplog):
-    run = resolve_namespaces(run)
-    entry = run.namespaces[0]
+def test_a_filter_naming_a_prefix_or_namespace_of_the_table_is_not_unknown(filtering, caplog):
     with caplog.at_level(logging.WARNING):
-        warn_unknown_filters(run, GeneratorOptions(include_namespaces=[entry.prefix], exclude_namespaces=[entry.namespace]))
+        filtering(include=["ex"], exclude=[builders.REL])
     assert caplog.messages == []
+
+
+def test_an_exclude_value_that_hides_nothing_is_warned_about_once(filtering, caplog):
+    with caplog.at_level(logging.WARNING):
+        filtering(exclude=["foaf", "foaf", "rel"])
+    assert caplog.messages == ["--exclude-namespace foaf: no term in this namespace; ignored"]
+
+
+def test_an_exclude_value_fully_re_included_is_not_warned_about(filtering, caplog):
+    with caplog.at_level(logging.WARNING):
+        filtering(exclude=["foaf"], include=["foaf"])
+    assert caplog.messages == []
+
+
+def test_an_exclude_value_with_one_namespace_that_hides_something_is_not_warned_about(filtering, caplog):
+    with caplog.at_level(logging.WARNING):
+        filtering(exclude=["*o*"])  # foaf (no term) and org (a class)
+    assert caplog.messages == []
+
+
+def test_no_warning_is_made_when_the_caller_asks_for_none(filtering, caplog):
+    with caplog.at_level(logging.WARNING):
+        filtering(exclude=["nope", "foaf"], check_filters=False)
+    assert caplog.messages == []
+
+
+def test_the_filters_are_warned_about_before_any_format_runs(filter_run, tmp_path, generators, caplog):
+    with caplog.at_level(logging.WARNING), pytest.raises(GeneratedOutputError):
+        generate_representations(filter_run, tmp_path, ["a", "b"], options=GeneratorOptions(exclude_namespaces=["nope"]))
+    assert caplog.messages == ["--exclude-namespace nope: no such namespace; ignored"]
+
+
+def test_a_run_without_a_namespace_table_is_filtered_by_the_resolved_one(run, tmp_path, generators):
+    assert run.namespaces is None
+    generate_representations(run, tmp_path, ["a"], options=GeneratorOptions(exclude_namespaces=["skos"]))
+    graph = Recording.analyses[-1].graphs[0]
+    assert [t.namespace for t in graph.excluded_terms] == [SKOS]
+
+
+def test_the_excluded_terms_are_noted_on_each_graph_and_nothing_excluded_gives_none(filtering):
+    graphs = filtering(exclude=["rel"]).graphs
+    assert [(t.namespace, t.properties) for t in graphs[0].excluded_terms] == [(builders.REL, 2)]
+    assert filtering().graphs[0].excluded_terms == []
+
+
+def test_an_excluded_term_s_ontology_label_does_not_reach_the_generators(run, tmp_path, generators):
+    options = GeneratorOptions(ontology=str(LABELS), exclude_namespaces=["skos"])
+    generate_representations(run, tmp_path, ["a"], options=options)
+    assert all(a.term != CONCEPT for g in Recording.analyses[-1].graphs for a in g.term_annotations)
+    generate_representations(run, tmp_path, ["a"], options=GeneratorOptions(ontology=str(LABELS)))
+    assert any(a.term == CONCEPT for g in Recording.analyses[-1].graphs for a in g.term_annotations)
+
+
+def test_a_property_inherited_from_an_excluded_parent_stays_inherited(filtering):
+    agent = next(c for c in filtering(exclude=["rel"]).graphs[0].class_partitions if c.class_iri.endswith("Agent"))
+    assert [(p.property, p.inheritance) for p in agent.property_partitions] == [(builders.EX + "name", Inheritance.inherited)]
+
+
+def test_the_inherited_property_is_left_out_of_the_diagram_box_with_or_without_the_exclusion(filter_run, tmp_path):
+    for exclude in ([], ["rel"]):
+        out = tmp_path / f"out{len(exclude)}"
+        out.mkdir()
+        generate_representations(filter_run, out, ["puml"], options=GeneratorOptions(exclude_namespaces=exclude))
+        text = "\n".join(p.read_text() for p in out.iterdir())
+        agent = re.search(r'class "ex:Agent" as \w+ \{(.*?)\n\}', text, re.S)
+        assert agent is not None and "ex:name" not in agent.group(1)
 
 
 # --- llm-schema-tools: the ontology and the size filters (TC-G1) ---
 
 LABELS = Path(__file__).parents[2] / "test_data" / "ontology" / "labels.ttl"
-CONCEPT = "http://www.w3.org/2004/02/skos/core#Concept"
+SKOS = "http://www.w3.org/2004/02/skos/core#"
+CONCEPT = SKOS + "Concept"
 
 
 @pytest.mark.parametrize("name", ["min_instances", "max_classes"])

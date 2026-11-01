@@ -11,6 +11,7 @@ from fingerprint.domain.profile import Settings
 from fingerprint.entrypoints.cli import main as cli
 from fingerprint.service_layer import handlers
 from tests.bdd.steps.analytics import *  # noqa: F403
+from tests.bdd.steps.filters import *  # noqa: F403
 from tests.bdd.steps.pattern import *  # noqa: F403
 from tests.bdd.steps.pitfalls import *  # noqa: F403
 from tests.bdd.steps.prefixes import *  # noqa: F403

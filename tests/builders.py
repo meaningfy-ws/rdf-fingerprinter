@@ -6,8 +6,10 @@ from fingerprint.domain.profile import (
     CoTypeCount,
     Failure,
     GraphProfile,
+    NamespacePrefix,
     NodeKind,
     PrecisionMode,
+    PrefixSource,
     ProfileRun,
     PropertyProfile,
     QueryKind,
@@ -17,6 +19,11 @@ from fingerprint.domain.profile import (
 )
 
 XSD = "http://www.w3.org/2001/XMLSchema#"
+RDFS_NS = "http://www.w3.org/2000/01/rdf-schema#"
+EX = "http://example.org/"
+REL = EX + "rel/"
+ORG = "http://org.example/"
+FOAF = "http://xmlns.com/foaf/0.1/"
 
 
 def literals(triples: int, datatype: str | None = XSD + "string", language: str | None = None) -> ValuePartition:
@@ -60,3 +67,33 @@ def profile_run(*classes: ClassProfile, graph=None, edges=(), failures=(), **set
     return ProfileRun(
         endpoint="http://e/sparql", settings=Settings(**settings), graphs=[graph_profile], failures=list(failures)
     )
+
+
+def with_namespaces(run: ProfileRun, *entries: tuple[str, str]) -> ProfileRun:
+    """The run with a namespace table of (prefix, namespace) pairs, so a prefix can name a namespace no term uses."""
+    table = [NamespacePrefix(prefix=p, namespace=n, source=PrefixSource.user) for p, n in entries]
+    return run.model_copy(update={"namespaces": table})
+
+
+FILTER_PROFILE_TABLE = (("ex", EX), ("org", ORG), ("rel", REL), ("foaf", FOAF), ("rdfs", RDFS_NS), ("xsd", XSD))
+
+
+def filter_profile(*classes: ClassProfile, edges=(), failures=()) -> ProfileRun:
+    """The namespace-filter test profile (namespace-filter design, section I) with `classes` added.
+
+    `ex:Person` (10 instances) has `ex:name`, `rdfs:label`, `ex:knows` to itself, `ex:memberOf` to the two `org:Unit`
+    instances (two distinct objects, so no single-value position), and `rel:r1`, `rel:r2`; `org:Unit` has `ex:name`.
+    The table also holds `foaf`, which no term uses."""
+    person = klass(
+        EX + "Person",
+        10,
+        prop(EX + "name", {1: 10}, literals(10)),
+        prop(RDFS_NS + "label", {1: 10}, literals(10, datatype=None, language="en")),
+        prop(EX + "knows", {1: 10}, resources(10, EX + "Person")),
+        prop(EX + "memberOf", {1: 10}, resources(10, ORG + "Unit")).model_copy(update={"distinct_objects": 2}),
+        prop(REL + "r1", {1: 1}, resources(1, EX + "Person")),
+        prop(REL + "r2", {1: 1}, resources(1, EX + "Person")),
+    )
+    unit = klass(ORG + "Unit", 2, prop(EX + "name", {1: 2}, literals(2)))
+    run = profile_run(person, unit, *classes, edges=edges, failures=failures)
+    return with_namespaces(run, *FILTER_PROFILE_TABLE)

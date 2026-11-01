@@ -30,7 +30,7 @@ step definitions. Scenario titles are cited as `cap › Requirement › Scenario
 - [x] 1.3 `value_type_indicators` extracted from `_partition_indicators` in `fingerprint/domain/analytics.py` (P-2); `namespace_uses` (moved from `DocumentGenerator.namespace_table`) and `exclude_terms` (on the analysed profile, removing and counting per design §B, leaving every field §C marks unchanged) and `note_text` (§D) in `namespace_filter.py`; `filter_runs()` strategy in `tests/unit/domain/strategies.py`
   - Layer: domain. Depends on: 1.2. GitNexus impact: `_partition_indicators`, `value_profile`.
   - Tests: TC-F3, TC-F4, TC-F5 (Hypothesis, including the unchanged-fields property), TC-F6, TC-F7; 100% branch coverage.
-- [ ] 1.4 Wiring (design §E, P-1, P-3, P-8): `generate_representations` analyses as today, then applies `exclude_terms` to the analytics and warns; `warn_unknown_filters` folded in; `excluded_namespaces()` removed and `Generator.__init__` built on `namespace_filter`; `filter_profile()` and the other profiles the scenarios name in `tests/builders.py`; step definitions for the 1.4 rows of "Still red until bound"
+- [x] 1.4 Wiring (design §E, P-1, P-3, P-8): `generate_representations` analyses as today, then applies `exclude_terms` to the analytics and warns; `warn_unknown_filters` folded in; `excluded_namespaces()` removed and `Generator.__init__` built on `namespace_filter`; `filter_profile()` and the other profiles the scenarios name in `tests/builders.py`; step definitions for the 1.4 rows of "Still red until bound"
   - Layer: service_layer, tests. Depends on: 1.3. GitNexus impact: `generate_representations`, `warn_unknown_filters`, `excluded_namespaces`, `Generator.__init__`.
   - Tests: TC-R1, TC-R2 (including the inherited property of an excluded parent), TC-G1 (first half); Gherkin: the 25 items of the 1.4 row.
 - [ ] 1.5 The note in the per-graph outputs (P-6, design §D and §F): `Generator.excluded_note`; `excluded_note` set by `PatternGenerator.views`, `ShaclGenerator.end_graph`, `PlantumlGenerator.end_graph` (overview and modules) and copied by `fingerprint/domain/shex.py`; the `#`/`'` line in the pattern, ShExC, SHACL and PlantUML templates
@@ -60,7 +60,7 @@ step definitions. Scenario titles are cited as `cap › Requirement › Scenario
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.3 · [ ] 1.4 · [ ] 1.7 · [ ] 1.5 · [ ] 1.6 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11
+- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 1.4 · [ ] 1.7 · [ ] 1.5 · [ ] 1.6 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11
 
 ## Verification
 

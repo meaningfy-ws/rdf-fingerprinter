@@ -9,7 +9,9 @@ import pytest
 from fingerprint import config
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.views import NodeShape, OutputCheck, PropertyShape, ShapesGraph
+from fingerprint.domain.namespace_filter import META_NAMESPACES
+from fingerprint.domain.views import GeneratorOptions, NodeShape, OutputCheck, PropertyShape, ShapesGraph
+from fingerprint.domain.vocabulary import RDFS
 from fingerprint.service_layer.generators.generator import Generator, graph_slug, plain_label
 from tests import builders
 from tests.builders import profile_run
@@ -242,3 +244,23 @@ def test_a_hook_left_alone_keeps_every_class():
 
     ((_, view),) = Bare(analyse(run(klass(EX + "A"), klass(EX + "B"))), Recorder()).outputs()
     assert [c.target for c in view.node_shapes] == [EX + "A", EX + "B"]
+
+
+# --- namespace-filter: a Generator built directly hides what the filter names, class by class (TC-G1) ---
+
+
+def test_a_generator_built_directly_hides_the_meta_and_the_excluded_namespaces():
+    profile = builders.filter_profile()
+    analytics = analyse(profile)
+    plain = Listing(analytics, JinjaTemplateRenderer())
+    excluded = Listing(analytics, JinjaTemplateRenderer(), options=GeneratorOptions(exclude_namespaces=["org"]))
+    assert plain.excluded == set(META_NAMESPACES)
+    assert excluded.excluded == set(META_NAMESPACES) | {builders.ORG}
+    assert [(c.target) for c in excluded.view()[0].node_shapes] == [builders.EX + "Person"]
+
+
+def test_a_meta_namespace_included_is_no_longer_hidden():
+    generator = Listing(
+        analyse(builders.filter_profile()), JinjaTemplateRenderer(), options=GeneratorOptions(include_namespaces=["rdfs"])
+    )
+    assert generator.excluded == set(META_NAMESPACES) - {RDFS}

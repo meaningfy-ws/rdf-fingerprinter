@@ -19,7 +19,7 @@ from pydantic import BaseModel
 from fingerprint import config
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref
-from fingerprint.domain.namespace_filter import META_NAMESPACES
+from fingerprint.domain.namespace_filter import namespace_filter
 from fingerprint.domain.prefixes import PrefixTable, namespace_of
 from fingerprint.domain.profile import ClassAnalytics, GraphAnalytics, ProfileAnalytics, PropertyAnalytics
 from fingerprint.domain.views import GeneratorOptions, GraphView, OutputCheck, RenderedDocument
@@ -73,29 +73,16 @@ def graph_slug(graph: str | None) -> str:
     return f"{readable}-{hashlib.sha1(graph.encode()).hexdigest()[:8]}"
 
 
-def excluded_namespaces(options: GeneratorOptions, table: PrefixTable) -> tuple[set[str], list[str]]:
-    """The namespaces whose classes are left out (meta defaults + excludes − includes), and the unknown names."""
-    unknown: list[str] = []
-
-    def namespaces(names: list[str] | None) -> set[str]:
-        found: set[str] = set()
-        for name in names or []:
-            entries = table.match(name)
-            if not entries:
-                unknown.append(name)
-            found.update(entry.namespace for entry in entries)
-        return found
-
-    excluded = (set(META_NAMESPACES) | namespaces(options.exclude_namespaces)) - namespaces(options.include_namespaces)
-    return excluded, unknown
-
-
 def plain_label(graph: str | None) -> str:
     """The graph's name for titles and comments: letters, digits and `:/#.~ -` only, anything else `_`."""
     return _NOT_PLAIN.sub("_", graph or config.default_graph_label)
 
 
 class Generator:
+    """Walks the analytics it is given into views. Built directly, it hides the classes of the hidden and excluded
+    namespaces only; the terms of an excluded namespace are removed by `exclude_terms`, which
+    `generate_representations` applies first (namespace-filter P-3)."""
+
     template_package: ClassVar[Path]
     file_name: ClassVar[str]  # "{slug}" is replaced per graph when per_graph
     per_graph: ClassVar[bool] = True
@@ -116,7 +103,8 @@ class Generator:
         self.table = PrefixTable(analytics.namespaces)
         self.template_location = template_location
         self.options = options or GeneratorOptions()
-        self.excluded, _ = excluded_namespaces(self.options, self.table)
+        filters = namespace_filter(self.options, self.table)
+        self.excluded = set(filters.hidden or []) | set(filters.excluded or [])  # class-level hiding only (DEC-7, P-3)
         self.skipped: list[str] = []  # IRIs left out because they cannot be written (P-8)
         self.hidden: dict[str, set[str]] = {}  # dict-ok: lookup index namespace → hidden class IRIs
 
