@@ -152,10 +152,10 @@ def _filter_property(draw, iri):
         )
     )
     total = sum(p.triples for p in parts)
-    top = draw(st.lists(st.builds(ValueCount, value=_FILTER_TERMS, triples=st.integers(1, 6)), max_size=2))
-    return builders.prop(iri, {1: total}, *parts).model_copy(
-        update={"distinct_objects": draw(st.integers(1, 2)), "top_values": top or None}
-    )
+    distinct = draw(st.integers(1, 2))
+    values = st.lists(_FILTER_TERMS, unique=True, max_size=distinct)  # no more top values than distinct objects
+    top = [ValueCount(value=v, triples=draw(st.integers(1, 6))) for v in draw(values)]
+    return builders.prop(iri, {1: total}, *parts).model_copy(update={"distinct_objects": distinct, "top_values": top or None})
 
 
 @st.composite

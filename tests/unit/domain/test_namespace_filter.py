@@ -13,6 +13,7 @@ from fingerprint.domain.profile import (
     Inheritance,
     NamespacePrefix,
     NamespaceUse,
+    NodeKind,
     PitfallResult,
     PredicatePartition,
     PrefixSource,
@@ -113,7 +114,7 @@ def filter_world(**graph) -> ProfileAnalytics:
         with_value(
             builders.prop(EX + "hub", {1: 10}, builders.resources(10)),
             distinct_objects=1,
-            top_values=[ValueCount(value=REL + "hub", triples=10), ValueCount(value=REL + "other", triples=1)],
+            top_values=[ValueCount(value=REL + "hub", triples=10)],
         ),
         with_value(
             builders.prop(EX + "ref", {1: 10}, builders.resources(8), builders.literals(2)),
@@ -173,6 +174,8 @@ def test_excluding_nothing_changes_only_the_notes_and_the_uses():
     after = exclude_terms(before, set(), TABLE)
     assert terms(after) == []
     assert after.namespace_uses == namespace_uses(before, TABLE)
+    assert after.model_copy(update={"namespace_uses": None, "graphs": before.graphs}) == before
+    assert after.graphs[0].model_copy(update={"excluded_terms": None}) == before.graphs[0]
     assert (
         after.model_copy(update={"namespace_uses": None}).graphs[0].model_copy(update={"excluded_terms": None})
         == (before.graphs[0])
@@ -227,9 +230,14 @@ def test_a_graph_without_annotations_stays_without():
     assert exclude_terms(filter_world(term_annotations=None), {REL}, TABLE).graphs[0].term_annotations is None
 
 
-def test_the_single_value_of_an_all_iri_property_is_dropped_but_not_the_other_top_values():
+def test_an_excluded_single_value_leaves_the_property_no_top_value():
     person = properties(classes(exclude_terms(filter_world(), {REL}, TABLE))[EX + "Person"])
-    assert [v.value for v in person[EX + "hub"].top_values] == [REL + "other"]
+    assert person[EX + "hub"].top_values == []
+
+
+def test_a_single_value_that_is_not_excluded_is_kept():
+    person = properties(classes(exclude_terms(filter_world(), {ORG}, TABLE))[EX + "Person"])
+    assert [v.value for v in person[EX + "hub"].top_values] == [REL + "hub"]
 
 
 @pytest.mark.parametrize("name", ["ref", "pair", "blank"])
@@ -310,9 +318,25 @@ def test_each_graph_counts_its_own_terms():
     assert terms(after, 0)[0].properties == 2 and terms(after, 1) == []
 
 
-def test_an_empty_run_has_no_terms_to_exclude():
-    after = exclude_terms(ProfileAnalytics(settings=builders.profile_run().settings), {REL}, TABLE)
-    assert after.graphs == [] and after.namespace_uses == namespace_uses(after, TABLE)
+def test_a_run_with_no_graphs_has_no_terms_to_exclude():
+    empty = ProfileAnalytics(settings=builders.profile_run().settings)
+    after = exclude_terms(empty, {REL}, TABLE)
+    assert after.graphs == [] and {u.uses for u in after.namespace_uses} == {0}
+
+
+def test_absent_class_and_property_lists_stay_absent():
+    bare = filter_world().graphs[0].model_copy(update={"class_partitions": None})
+    assert exclude_terms(filter_world().model_copy(update={"graphs": [bare]}), {REL}, TABLE).graphs[0].class_partitions is None
+    person = classes(filter_world())[EX + "Person"].model_copy(update={"property_partitions": None})
+    graph = filter_world().graphs[0].model_copy(update={"class_partitions": [person]})
+    kept = exclude_terms(filter_world().model_copy(update={"graphs": [graph]}), {REL}, TABLE)
+    assert kept.graphs[0].class_partitions[0].property_partitions is None
+
+
+def test_uses_already_set_are_kept_by_a_second_pass():
+    once = exclude_terms(filter_world(), {EX}, TABLE)
+    assert once.namespace_uses != namespace_uses(once, TABLE)
+    assert exclude_terms(once, {EX}, TABLE).namespace_uses == once.namespace_uses
 
 
 # --- note_text (TC-F6) ---
@@ -393,16 +417,16 @@ def test_no_excluded_iri_is_left_at_a_filtered_position(run, excluded):
                 assert not any(
                     is_excluded(v.object_class, excluded, table) for v in prop.value_partitions or [] if v.object_class
                 )
+                parts = prop.value_partitions or []
+                if parts and all(v.node_kind == NodeKind.iri for v in parts) and prop.distinct_objects == 1:
+                    assert not any(is_excluded(v.value, excluded, table) for v in prop.top_values or [])
 
 
 @given(filter_runs(), excluded_sets)
-def test_filtering_twice_is_filtering_once_but_for_the_notes_and_the_uses(run, excluded):
+def test_filtering_twice_is_filtering_once_but_for_the_notes(run, excluded):
     once = exclude_terms(*analysed(run)[:1], excluded, PrefixTable(run.namespaces))
     twice = exclude_terms(once, excluded, PrefixTable(run.namespaces))
-    forget = {"namespace_uses": None}
-    assert twice.model_copy(update=forget).model_dump(exclude={"graphs"}) == once.model_copy(update=forget).model_dump(
-        exclude={"graphs"}
-    )
+    assert twice.model_dump(exclude={"graphs"}) == once.model_dump(exclude={"graphs"})
     for graph_once, graph_twice in zip(once.graphs, twice.graphs, strict=True):
         assert graph_twice.model_dump(exclude={"excluded_terms"}) == graph_once.model_dump(exclude={"excluded_terms"})
         assert graph_twice.excluded_terms == []
@@ -451,7 +475,7 @@ def test_a_property_keeps_its_value_types_unless_it_lost_an_object_class(run, ex
                 assert prop_after.model_dump(include=FOLLOWS["property"] - {"top_values"}) == prop_before.model_dump(
                     include=FOLLOWS["property"] - {"top_values"}
                 )
-            assert prop_after.top_values in (prop_before.top_values, (prop_before.top_values or [])[1:])
+            assert prop_after.top_values in (prop_before.top_values, [])
             assert [p.triples for p in prop_after.value_partitions or []] == [
                 p.triples for p in prop_before.value_partitions or []
             ]

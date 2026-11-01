@@ -125,25 +125,25 @@ class _Removal:
                 update={"value_partitions": partitions, **indicators.model_dump(include=_VALUE_TYPE_FIELDS)}
             )
         if prop.top_values and _is_single_iri(prop) and self.gone(prop.top_values[0].value, self.values):
-            prop = prop.model_copy(update={"top_values": prop.top_values[1:]})
+            prop = prop.model_copy(update={"top_values": []})  # the one value is excluded: no other is written
         return prop
 
     def cls(self, cls: ClassAnalytics) -> ClassAnalytics:
         """A kept class: excluded properties, co-types and parents dropped."""
-        props = self.keep(cls.property_partitions, lambda p: p.property, self.properties) or []
+        props = self.keep(cls.property_partitions, lambda p: p.property, self.properties)
         return cls.model_copy(
             update={
-                "property_partitions": [self.prop(p) for p in props],
+                "property_partitions": None if props is None else [self.prop(p) for p in props],
                 "co_types": self.keep(cls.co_types, lambda c: c.class_iri, self.classes),
                 "parents": self.keep(cls.parents, lambda p: p.parent, self.classes),
             }
         )
 
     def graph(self, graph: GraphAnalytics) -> GraphAnalytics:
-        kept = self.keep(graph.class_partitions, lambda c: c.class_iri, self.classes) or []
+        kept = self.keep(graph.class_partitions, lambda c: c.class_iri, self.classes)
         return graph.model_copy(
             update={
-                "class_partitions": [self.cls(c) for c in kept],
+                "class_partitions": None if kept is None else [self.cls(c) for c in kept],
                 "term_annotations": self.keep(graph.term_annotations, lambda a: a.term, set()),
                 "excluded_terms": self.terms(),
             }
@@ -163,9 +163,11 @@ def exclude_terms(analytics: ProfileAnalytics, excluded: Collection[str], table:
     Every other value stays as analysed, except the four value-type fields of a property that lost an object class.
     Each graph notes what was removed (`excluded_terms`): the distinct IRIs per namespace and position, those under
     a dropped class or property not counted since no output would write them. `namespace_uses` is set from the
-    analytics before anything is removed. Returns copies; the input is unchanged."""
+    analytics before anything is removed (kept when already set, so a second pass keeps the unfiltered uses). Returns
+    copies; the input is unchanged."""
     graphs = [_Removal(excluded, table).graph(graph) for graph in analytics.graphs or []]
-    return analytics.model_copy(update={"graphs": graphs, "namespace_uses": namespace_uses(analytics, table)})
+    uses = analytics.namespace_uses if analytics.namespace_uses is not None else namespace_uses(analytics, table)
+    return analytics.model_copy(update={"graphs": graphs, "namespace_uses": uses})
 
 
 def note_text(terms: list[ExcludedTerms] | None, table: PrefixTable) -> str | None:
