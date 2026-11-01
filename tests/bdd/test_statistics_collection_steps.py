@@ -7,9 +7,9 @@ import urllib.error
 
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
-from rdflib import Literal
+from rdflib import Literal, URIRef
 
-from fingerprint.adapters.sparql import PermanentError, QueryTimeout
+from fingerprint.adapters.sparql import PermanentError, QueryTimeout, query_name
 from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.settings import UsageError, load_config_file, resolve_settings
 from tests.fakes import EX, FakeSparql
@@ -500,6 +500,19 @@ def others_profiled(ctx):
     assert EX + "Person" in [c.class_iri for c in graph(ctx["run"]).class_partitions]
 
 
+@given("the endpoint refuses one class's cardinality measurement as forbidden after the graphs were listed")
+def forbidden(ctx):
+    people(ctx["fake"], 2)
+    people(ctx["fake"], 2, cls="ex:Place")
+    ctx["fake"].on("Q5", http_error(403), when=lambda q: "<http://example.org/Place>" in q)
+
+
+@then("that measurement is recorded as a failure with one attempt")
+def one_attempt(ctx):
+    (failure,) = ctx["run"].failures
+    assert failure.attempts == 1 and failure.query_kind == "cardinality_votes"
+
+
 @given('the endpoint answers a measurement with "service unavailable" once')
 def unavailable_once(ctx):
     people(ctx["fake"], 2)
@@ -544,20 +557,17 @@ def suggests_lower(ctx):
 
 # --- settings ---
 
-
-@given(parsers.parse("the default timeout is {seconds:d} seconds"))
-def default_timeout(ctx, seconds):
-    assert resolve_settings(env={}).timeout_seconds == seconds
-
-
-@given("no environment variable is set")
-def no_env(ctx):
-    ctx["env"] = {}
+SETTING_NAMES = {
+    "the timeout": "timeout_seconds",
+    "timeout": "timeout_seconds",
+    "concurrency": "concurrency",
+    "top K": "top_k",
+}
 
 
-@given(parsers.parse("the environment sets the timeout to {seconds:d}"))
-def env_timeout(ctx, seconds):
-    ctx["env"] = {"RDF_FINGERPRINTER_TIMEOUT_SECONDS": str(seconds)}
+@given(parsers.parse("the environment sets {setting} to {value:d}"))
+def env_sets(ctx, setting, value):
+    ctx["env"][f"RDF_FINGERPRINTER_{SETTING_NAMES[setting].upper()}"] = str(value)
 
 
 @given("no command-line option is given")
@@ -565,42 +575,54 @@ def no_cli(ctx):
     ctx["cli"] = {}
 
 
-@given(parsers.parse("the command line sets it to {seconds:d}"))
-def cli_timeout(ctx, seconds):
-    ctx["cli"] = {"timeout_seconds": seconds}
+@given(parsers.parse("the command line sets {setting} to {value:d}"))
+def cli_sets(ctx, setting, value):
+    ctx["cli"][SETTING_NAMES[setting]] = value
 
 
-@then(parsers.parse("the recorded timeout is {seconds:d} seconds"))
-def recorded_timeout(ctx, seconds):
-    assert ctx["run"].settings.timeout_seconds == seconds
+@given(parsers.parse("a library caller passes the configuration setting {setting} as {value:d}"))
+def library_config(ctx, setting, value):
+    ctx["config"] = {SETTING_NAMES[setting]: value}
+
+
+@then(parsers.parse("the recorded {setting} is {value:d}"))
+def recorded(ctx, setting, value):
+    assert getattr(ctx["run"].settings, SETTING_NAMES[setting]) == value
 
 
 @given(parsers.parse("a configuration file setting concurrency to {n:d}"))
 def config_file(ctx, n, tmp_path):
-    path = tmp_path / "config.json"
-    path.write_text(json.dumps({"concurrency": n}))
-    ctx["config_path"] = path
+    ctx["config_path"] = write_config(tmp_path, {"concurrency": n})
+
+
+@given(parsers.parse('a configuration file holding the key "{key}"'))
+def config_file_with_key(ctx, key, tmp_path):
+    ctx["config_path"] = write_config(tmp_path, {key: 1})
+
+
+def write_config(directory, content):
+    path = directory / "config.json"
+    path.write_text(json.dumps(content))
+    return path
 
 
 @when("the knowledge graph is fingerprinted with that file")
 def with_file(ctx):
-    ctx["config"] = load_config_file(ctx["config_path"])
-    ctx["run"] = fingerprint(ctx)
+    try:
+        ctx["config"] = load_config_file(ctx["config_path"])
+        ctx["run"] = fingerprint(ctx)
+    except UsageError as error:
+        ctx["error"] = error
 
 
-@then(parsers.parse("the recorded concurrency is {n:d}"))
-def recorded_concurrency(ctx, n):
-    assert ctx["run"].settings.concurrency == n
+@then(parsers.parse('a usage error names "{key}"'))
+def usage_error_names(ctx, key):
+    assert isinstance(ctx.get("error"), UsageError) and key in str(ctx["error"])
 
 
-@given("the acceptance threshold is set to 0")
-def zero_threshold(ctx):
-    ctx["cli"]["acceptance_threshold"] = 0
-
-
-@then("the run is refused as a usage error")
-def refused(ctx):
-    assert isinstance(ctx.get("error"), UsageError)
+@then("no query is sent")
+def no_query(ctx):
+    assert ctx["fake"].queries == []
 
 
 # --- depth and switches ---
@@ -650,6 +672,23 @@ def contains(ctx, present):
     assert CONTENTS[present](ctx["run"])
 
 
+DEFAULT_QUERIES = {"Q0", "Q3", "Q4", "Q8", "Q5", "Q6", "Q7"}  # graph list, counts, hierarchy, co-types, votes, values, objects
+
+
+def sent_names(ctx):
+    return {query_name(q).split()[0] for q in ctx["fake"].queries}
+
+
+@then("the endpoint receives the graph list, class count, hierarchy, co-type, vote, value and object-class queries")
+def default_queries(ctx):
+    assert DEFAULT_QUERIES <= sent_names(ctx)
+
+
+@then("it receives no graph-total, top-value or incoming-link query")
+def no_deeper_queries(ctx):
+    assert not sent_names(ctx) & {"Q1", "Q9", "Q11"}
+
+
 @given("graph statistics are switched on")
 def graph_stats(ctx):
     people(ctx["fake"], 2)
@@ -679,3 +718,46 @@ def rare(ctx, p):
 def present_only(ctx, p):
     found = prop(klass(ctx["run"], ctx["class"]), p)
     assert found.presence_only is True and not found.cardinality_histogram
+
+
+# --- results are read as typed RDF terms ---
+
+
+@given(parsers.parse("the endpoint answers the class count as the integer {n:d}"))
+def count_as_integer(ctx, n):
+    ctx["fake"].on("Q3", [{"c": URIRef(EX + "Person"), "instances": Literal(n)}])
+
+
+@then(parsers.parse('the instance count of "{cls}" is {n:d}'))
+def instance_count(ctx, cls, n):
+    assert klass(ctx["run"], cls).instances == n
+
+
+@given("the endpoint does not answer an exact read within the timeout")
+def no_answer(ctx):
+    ctx["fake"].on("Q8", TimeoutError("timed out"), when=exact)
+
+
+@given(parsers.parse('the endpoint answers the top values "{first}" as a dateTime and "{second}" in language "{lang}"'))
+def raw_top_values(ctx, first, second, lang):
+    """rdflib refuses the tag `en_US`, so the answer is written as the endpoint's JSON text."""
+    fake = ctx["fake"]
+    fake.add("ex:i0", "ex:name", Literal("x"))
+    bindings = [
+        {"o": {"type": "literal", "value": first, "datatype": XSD + "dateTime"}, "triples": {"type": "literal", "value": "1"}},
+        {"o": {"type": "literal", "value": second, "xml:lang": lang}, "triples": {"type": "literal", "value": "1"}},
+    ]
+    body = json.dumps({"head": {"vars": ["o", "triples"]}, "results": {"bindings": bindings}}).encode()
+    once = fake._once
+    fake._once = lambda query: (fake.queries.append(query) or body) if query_name(query).startswith("Q9") else once(query)
+
+
+@given("top values are collected")
+def top_values_collected(ctx):
+    ctx["cli"]["depth"] = "rich_values"
+
+
+@then(parsers.parse('the recorded top values are "{first}" and "{second}"'))
+def recorded_top_values(ctx, first, second):
+    values = [v.value for v in prop(klass(ctx["run"], "ex:Person"), "ex:name").top_values]
+    assert values == [first, second]
