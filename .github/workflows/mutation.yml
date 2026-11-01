@@ -1,0 +1,31 @@
+name: mutation
+
+# The full mutmut run takes about an hour (lean-test-suite task 6.4), so it is weekly and on demand,
+# not per pull request; developers also run `make check-mutation` locally before a PR.
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+# One run at a time: a manual run waits for the scheduled one instead of competing for the runner.
+concurrency:
+  group: mutation
+  cancel-in-progress: false
+
+jobs:
+  check-mutation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install Poetry
+        run: pipx install "poetry>=2.0.0,<3.0.0"
+      - name: Install dependencies
+        run: |
+          poetry env use python
+          make install
+      - name: Mutation score ratchet
+        run: make check-mutation

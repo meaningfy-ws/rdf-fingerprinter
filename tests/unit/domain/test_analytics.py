@@ -1,6 +1,6 @@
 import pytest
 
-from fingerprint.domain.analytics import analyse, cardinality_label, cardinality_statistics
+from fingerprint.domain.analytics import _weighted_value_at, analyse, cardinality_label, cardinality_statistics
 from fingerprint.domain.profile import CardinalityBin, ProfileRun, ValueCount
 from tests import builders
 from tests.builders import klass, profile_run
@@ -73,6 +73,11 @@ def test_median_mode_and_stddev_include_the_zero_bin():
 
 def test_mode_tie_takes_the_smallest_n():
     assert cardinality_statistics(histogram({1: 2, 2: 2}), 4).mode == 1
+
+
+def test_a_position_beyond_the_histogram_is_an_index_error():
+    with pytest.raises(IndexError):
+        _weighted_value_at([(1, 2)], 2)
 
 
 def test_no_observed_instances_gives_no_means():
@@ -308,3 +313,10 @@ def test_label_bounds_and_multiplicity(label, exact, bounds, uml):
     from fingerprint.domain.analytics import label_bounds, multiplicity
 
     assert label_bounds(label, exact) == bounds and multiplicity(label, exact) == uml
+
+
+def test_presence_only_property_of_a_child_is_inherited_when_a_parent_has_it():
+    person = cls("Person", 20, [prop("name", {1: 20})])
+    student = cls("Student", 50000, [builders.prop(EX + "name", presence_only=True)], observed=10000)
+    c = classes_of(run(person, student, edges=[("Student", "Person")]))
+    assert props_of(c["Student"])["name"].inheritance == "inherited"

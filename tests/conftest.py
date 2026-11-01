@@ -4,6 +4,7 @@ import socket
 from pathlib import Path
 
 import pytest
+from hypothesis import settings
 
 from fingerprint.adapters.profile_file import load_profile
 from fingerprint.domain.analytics import analyse
@@ -12,6 +13,10 @@ from tests.refresh_golden import render
 from tests.sample_data import SAMPLE_PROFILE
 
 E2E = Path(__file__).parent / "e2e"
+
+settings.register_profile("ci", derandomize=True, deadline=None)
+settings.register_profile("dev", deadline=None)
+settings.load_profile("dev")
 
 
 @pytest.fixture(autouse=True)

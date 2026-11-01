@@ -1,4 +1,4 @@
-# Coverage is reported, not gated — a floor is a later change.
+# Protocol method stubs (`def ...: ...`) are signatures, not branches.
 [run]
 relative_files = True
 # sys.monitoring tracer: the default tracer makes the pandas-heavy report runs ~12x slower
@@ -10,4 +10,5 @@ omit = */__init__.py
 show_missing = true
 exclude_lines =
     pragma: no cover
+    ^\s*def .*: \.\.\.$
     if __name__ == .__main__.:

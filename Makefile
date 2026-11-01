@@ -1,7 +1,7 @@
 SHELL = /bin/bash -o pipefail
 
 .PHONY: help install install-poetry lock build check-wheel lint format lint-fix typecheck check-architecture \
-	check-spec check-models generate-models test test-e2e refresh-sample-profile refresh-golden check-quality check-all start-oxigraph stop-oxigraph oxigraph-load-test-data \
+	check-spec check-models generate-models test check-mutation test-e2e refresh-sample-profile refresh-golden check-quality check-all start-oxigraph stop-oxigraph oxigraph-load-test-data \
 	install-antora build-docs clean-docs serve-docs preview-docs
 
 include docker/.env
@@ -18,7 +18,6 @@ TEST_DATA = tests/test_data
 GRAPH_BASE = http://publications.europa.eu/resources/authority
 OXIGRAPH = http://localhost:$(RDF_FINGERPRINTER_OXIGRAPH_PORT)
 # Coverage is reported, not gated.
-COV_FLAGS = --cov=$(PACKAGE_NAME) --cov-report=term --cov-report=xml:coverage.xml --cov-fail-under=80
 
 .DEFAULT_GOAL := help
 
@@ -81,7 +80,16 @@ check-spec: ## Validate the OpenSpec spine strictly (needs Node.js)
 
 test: ## Unit, bdd and guard tests with coverage (no SPARQL store needed)
 	@ echo -e "$(BUILD_PRINT)Running the unit tests$(END_BUILD_PRINT)"
-	@ poetry run pytest $(TEST_PATH) --ignore=$(TEST_PATH)/e2e $(COV_FLAGS) --junitxml=junit_report.xml
+	@ poetry run pytest $(TEST_PATH) --ignore=$(TEST_PATH)/e2e --hypothesis-profile=ci --cov=$(PACKAGE_NAME) --cov-branch --cov-report=term --cov-report=xml:coverage.xml --cov-fail-under=90 --junitxml=junit_report.xml
+	@ echo -e "$(BUILD_PRINT)Checking 100% branch coverage of the domain layer$(END_BUILD_PRINT)"
+	@ poetry run coverage report --include='fingerprint/domain/*' --omit='fingerprint/domain/profile.py,fingerprint/domain/views.py' --fail-under=100
+
+check-mutation: ## Mutation score ratchet over domain and service_layer (slow, ~1 h; not part of check-all)
+	@ echo -e "$(BUILD_PRINT)Running mutmut (about an hour)$(END_BUILD_PRINT)"
+	@ poetry run mutmut run
+	@ poetry run mutmut export-cicd-stats
+	@ poetry run python $(TEST_PATH)/guards/mutation_score.py mutants/mutmut-cicd-stats.json $(TEST_PATH)/guards/mutation_score.txt \
+		|| { status=$$?; [ $$status -ne 1 ] || poetry run mutmut results; exit $$status; }
 
 test-e2e: ## End-to-end tests against the loaded test store (run oxigraph-load-test-data first); local only
 	@ echo -e "$(BUILD_PRINT)Running the e2e tests against $${RDF_FINGERPRINTER_TEST_ENDPOINT:-$(OXIGRAPH)/query}$(END_BUILD_PRINT)"

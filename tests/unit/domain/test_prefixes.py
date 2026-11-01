@@ -32,36 +32,10 @@ def test_fragment_segments_count_as_path_segments():
     assert path_segments("urn:x:thing:") == ["x", "thing"]
 
 
-@pytest.mark.parametrize(
-    ("namespace", "known", "prefix"),
-    [
-        (BF, [], "brainframe"),
-        ("https://ontology.brainframe.com/2016/04/brainframe/sub/", [entry("brainframe", BF)], "brainframe-sub"),
-        ("https://my.brainframe.com/#/knowledge/RelationId/", [], "relationid"),
-        ("http://ex.org/core/", [entry("ex", "http://ex.org/")], "ex-core"),
-        ("http://data.ex.org/", [entry("ex", "http://ex.org/")], "ex-data"),
-        ("http://a.b.ex.org/", [entry("ex", "http://ex.org/")], "ex-a-b"),
-        ("http://ex.org/v2/", [], "ex"),
-        ("http://other.org/ex/", [entry("ex", "http://ex.org/")], "ex2"),
-        ("http://www.legislation.gov.uk/", [], "legislation"),
-        ("http://ex.org/My_Vocab.v1/", [], "my-vocab-v1"),
-        ("http://ex.org/2020/", [], "ex"),
-        ("http://ex.org/sh/", [], "sh2"),
-        ("http://ex.org/bf/shape/", [entry("bf", "http://ex.org/bf/")], "bf-shape2"),
-        (BF + "blueprint/", [entry("brainframe", BF)], "brainframe-blueprint"),
-        ("https://ontology.brainframe.com/2016/04/brainframe/", [entry("brainframe", BF)], "brainframe2"),
-        ("http://store.ex.org:9999/", [], "store"),
-        ("urn:x:thing:", [], "thing"),
-        ("http://ex.org/core/", [entry("EX", "http://ex.org/")], "ex-core"),
-        ("http://xmlns.com/foaf/0.1/", [], "foaf"),
-        ("http://localhost:8890/", [], "ns"),
-        ("http://10.0.0.1/", [], "n0"),
-        ("http://other.org/ex/", [entry("EX", "http://ex.org/")], "ex2"),
-    ],
-)
-def test_generated_names(namespace, known, prefix):
-    generated = generate_prefixes([namespace], known)
-    assert generated == [entry(prefix, namespace, PrefixSource.generated)]
+@pytest.mark.parametrize("known_order", [1, -1])
+def test_the_most_specific_named_parent_gives_the_name_whatever_the_table_order(known_order):
+    known = [entry("ex", "http://ex.org/"), entry("ex-core", "http://ex.org/core/")][::known_order]
+    assert [e.prefix for e in generate_prefixes(["http://ex.org/core/x/"], known)] == ["ex-core-x"]
 
 
 def test_parents_are_named_before_children_and_clashes_count_up():

@@ -24,7 +24,7 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 - [x] 3.4 Align `profile-analytics` (as 3.2)
 - [x] 3.5 Align `profile-representations` (as 3.2)
 - [x] 3.6 Align `statistics-collection` (as 3.2; 1 of 29 titles matches today)
-- [ ] 3.7 `tests/guards/untraced_scenarios.txt` for `developer-tooling` (each entry a pytest node id); `xfail` removed; the guard passes (Requirement: Requirement-traced tests)
+- [x] 3.7 `tests/guards/untraced_scenarios.txt` for `developer-tooling` (each entry a pytest node id); `xfail` removed; the guard passes (Requirement: Requirement-traced tests)
 
 ## 4. Canonical sample data
 
@@ -44,9 +44,9 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## 6. Properties and gate
 
-- [ ] 6.1 Hypothesis `ci`/`dev` profiles in `tests/conftest.py`; `tests/unit/domain/strategies.py` (P-9)
-- [ ] 6.2 The P-9 properties; the example rows they cover removed per P-6 (DEC-7)
-- [ ] 6.3 `make test` with `--cov-branch`, 90% overall and 100% `domain/` (generated excluded); missing tests added in the tier P-2 names; TC-7 (Requirement: Coverage and mutation gate — Scenario: An untested domain branch; P-7)
+- [x] 6.1 Hypothesis `ci`/`dev` profiles in `tests/conftest.py`; `tests/unit/domain/strategies.py` (P-9)
+- [x] 6.2 The P-9 properties; the example rows they cover removed per P-6 (DEC-7)
+- [x] 6.3 `make test` with `--cov-branch`, 90% overall and 100% `domain/` (generated excluded); missing tests added in the tier P-2 names; TC-7 (Requirement: Coverage and mutation gate — Scenario: An untested domain branch; P-7)
 - [ ] 6.4 `make check-mutation`, `tests/guards/mutation_score.py` + TC-6, `tests/guards/mutation_score.txt`; full-run time recorded; CI job added per the design's Open Questions rule (Scenario: The mutation score drops; P-7)
 
 ## 7. Remove redundancy (P-6)
@@ -65,7 +65,7 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## Roadmap
 
-- [x] 1.1 · [ ] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [ ] 3.7 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 4.5 · [x] 4.6 · [x] 4.7 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
+- [x] 1.1 · [ ] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [x] 3.7 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 4.5 · [x] 4.6 · [x] 4.7 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [ ] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
 
 ## Verification
 
