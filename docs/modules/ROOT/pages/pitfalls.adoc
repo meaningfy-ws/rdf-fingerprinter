@@ -21,11 +21,13 @@ profiled, at any `--depth`:
 * **With schema graphs** (`--schema-graph`, repeatable), each schema graph is profiled too, and it
   runs the `schema` checks on its own. Every other graph runs the `data` checks over itself joined
   with the schema graphs (`FROM <graph> FROM <schema>`), so "is this relation declared?" looks in the
-  ontology.
+  ontology. The default graph cannot be joined that way: its data checks run without the schema
+  graphs, so domain and range findings there may be missing. The run logs a warning and the
+  report's caveats say so; keep the data in a named graph to avoid it.
 * A graph with no triple is not scanned.
 
 For each check the scan sends two queries, a count and the first `--pitfall-examples` rows (default
-10, ordered). Results are saved in `profile.json` with the check's metadata and the time it took.
+10, ordered). The checks of a graph run `--concurrency` at a time (default 4), as the classes do. Results are saved in `profile.json` with the check's metadata and the time it took.
 
 The scan is off by default, because several checks scan every triple. A check that times out is a
 recorded failure (exit 1), like any other failed measurement.

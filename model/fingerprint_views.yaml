@@ -347,6 +347,7 @@ classes:
       untyped: { range: UntypedSubjects, multivalued: true, inlined_as_list: true }
       hidden: { range: HiddenNamespace, multivalued: true, inlined_as_list: true }
       skipped: { multivalued: true }
+      unjoined_default: { range: boolean, description: "True when schema graphs were given and the default graph was scanned without them (pitfall-scans DEC-20)." }
 
   UntypedSubjects:
     description: The subjects without rdf:type in one graph (only when graph statistics were collected).

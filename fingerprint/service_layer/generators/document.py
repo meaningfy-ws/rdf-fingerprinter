@@ -342,6 +342,13 @@ class DocumentGenerator(Generator):
             collection=CollectionSection(settings=settings, failures=failures),
             pitfalls=self.pitfalls(),
             graphs=graphs,
-            caveats=Caveats(sampled=sampled, untyped=untyped, hidden=hidden, skipped=list(self.skipped)),
+            caveats=Caveats(
+                sampled=sampled,
+                untyped=untyped,
+                hidden=hidden,
+                skipped=list(self.skipped),
+                unjoined_default=bool(analytics.settings.schema_graphs)
+                and any(not g.graph and g.pitfalls is not None for g in analytics.graphs or []),
+            ),
             skipped=list(self.skipped),
         )

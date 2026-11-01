@@ -53,3 +53,13 @@ findings; 2. let the more-used namespace take the short name.
 > indicator also for each class, humber f instanes and number of distinct properties (two numbers
 > data and object properties)
 > update the spec as well , and work toward the concluding this epic
+
+## 2026-11-01, on the pre-PR review findings (verbatim)
+
+Offered for finding #3 (the default graph's data checks run without the schema graphs): a warning
+now, joining later; for #8 (checks run in series): a follow-up change.
+
+> yes go ahead with 3 and 8, in this epic, an dthen release
+
+Recorded after the archive as DEC-20, DEC-21 (a logged addition, not a re-shape); the durable specs
+were edited in place.

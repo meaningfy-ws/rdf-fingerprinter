@@ -809,6 +809,7 @@ class Caveats(ConfiguredBaseModel):
     untyped: Optional[list[UntypedSubjects]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Caveats']} })
     hidden: Optional[list[HiddenNamespace]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Caveats']} })
     skipped: Optional[list[str]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['GraphView', 'ProfileDocument', 'Caveats']} })
+    unjoined_default: Optional[bool] = Field(default=None, description="""True when schema graphs were given and the default graph was scanned without them (pitfall-scans DEC-20).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Caveats']} })
 
 
 class UntypedSubjects(ConfiguredBaseModel):

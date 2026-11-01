@@ -50,9 +50,14 @@
 - [x] 8.2 Views `PrefixDeclaration.uses`, `DocumentClass.data_properties`, `.object_properties`; `make generate-models`; the generator's namespace order and class counts (design D-17, D-18; fingerprint-report › Namespace table order, › Class indicator)
 - [x] 8.3 Template: source group rows and the uses column, the class indicator in the contents and headings; Gherkin for the new scenarios; refresh the goldens; regenerate the brainframe fingerprint
 
+## 9. Pre-PR review follow-ups (developer, 2026-11-01, after the archive)
+
+- [x] 9.1 The unjoined default graph: the log warning and the caveat (design D-19; pitfall-scans › The pitfall scan stage)
+- [x] 9.2 The checks of a graph run on the worker pool (design D-20; pitfall-scans › The pitfall scan stage)
+
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 6.4 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [x] 7.4 · [x] 8.1 · [x] 8.2 · [x] 8.3
+- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 6.4 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [x] 7.4 · [x] 8.1 · [x] 8.2 · [x] 8.3 · [x] 9.1 · [x] 9.2
 
 ## Verification
 

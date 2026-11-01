@@ -199,7 +199,7 @@
   <section id="caveats">
     <h2>Caveats{% if view.pitfalls %} and pitfalls{% endif %}</h2>
     {%- set cv = view.caveats %}
-    {%- if not (cv.sampled or cv.untyped or cv.hidden or cv.skipped) %}
+    {%- if not (cv.sampled or cv.untyped or cv.hidden or cv.skipped or cv.unjoined_default) %}
     <p>Nothing to flag: every class was read exactly and every IRI is shown.</p>
     {%- endif %}
     {%- if cv.sampled %}
@@ -218,6 +218,11 @@
     {%- if cv.skipped %}
     <h3>IRIs that cannot be written</h3>
     <ul>{% for s in cv.skipped %}<li>{{ s }}</li>{% endfor %}</ul>
+    {%- endif %}
+    {%- if cv.unjoined_default %}
+    <h3>Default graph scanned without the schema</h3>
+    <p>The default graph's data checks ran without the schema graphs: a store cannot join them to it, so
+      domain and range findings there may be missing.</p>
     {%- endif %}
   {%- if view.pitfalls %}
     <div id="pitfalls">

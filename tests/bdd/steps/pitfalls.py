@@ -2,7 +2,10 @@
 features): the fingerprint command over FakeSparql with a data graph and a schema graph."""
 
 import logging
+import threading
+import time
 
+from bs4 import BeautifulSoup
 from click.testing import CliRunner
 from pytest_bdd import given, parsers, then, when
 
@@ -15,7 +18,9 @@ from fingerprint.domain.profile import GraphProfile, PitfallExample, PitfallResu
 from fingerprint.entrypoints.cli import generate
 from fingerprint.entrypoints.cli import main as cli
 from fingerprint.service_layer import handlers
+from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.generators import GENERATORS
+from fingerprint.service_layer.settings import resolve_settings
 from tests.fakes import EX, FakeSparql
 
 OWL = "http://www.w3.org/2002/07/owl#"
@@ -283,3 +288,62 @@ def add_pitfall_entity(ctx, iri):
 @then(parsers.parse('the table has no entry for "{namespace}"'))
 def table_lacks(ctx, namespace):
     assert namespace not in {e.namespace for e in ctx["table"]}
+
+
+# --- review follow-ups (pitfall-scans DEC-20, DEC-21) ---
+
+UNJOINED = "the default graph's data checks ran without the schema graphs"
+
+
+@given("the default graph holds data too")
+def default_data(ctx):
+    ctx["fake"].add("ex:c", "ex:undeclared", "ex:d")
+
+
+@then("a warning says the default graph's data checks ran without the schema graphs")
+def unjoined_warning(ctx):
+    assert ctx["result"].exit_code == 0 and UNJOINED in ctx["log"]
+
+
+@then("the report's caveats say so")
+def unjoined_caveat(ctx):
+    page = BeautifulSoup((ctx["output"] / "main.html").read_text(), "html.parser")
+    assert UNJOINED in " ".join(page.find(id="caveats").get_text(" ").lower().split())
+
+
+@when(parsers.parse('graph "{name}" is scanned with concurrency {n:d}'))
+def scanned_concurrently(ctx, name, n):
+    fake, lock, state = ctx["fake"], threading.Lock(), {"now": 0, "peak": 0}
+    select = fake.select
+
+    def tracked(query, *args, **kwargs):
+        if not query.startswith("# PITFALL") or "ask" in query.split("\n", 1)[0]:
+            return select(query, *args, **kwargs)
+        with lock:
+            state["now"] += 1
+            state["peak"] = max(state["peak"], state["now"])
+        try:
+            time.sleep(0.01)
+            return select(query, *args, **kwargs)
+        finally:
+            with lock:
+                state["now"] -= 1
+
+    fake.select = tracked
+    settings = resolve_settings(
+        cli={"pitfall_scan": True, "depth": "graphs", "concurrency": n, "selected_graphs": [GRAPHS[name]]}, env={}
+    )
+    ctx["run"] = collect("http://fake/sparql", settings, fake, packaged_checks())
+    ctx["peak"], ctx["limit"] = state["peak"], n
+
+
+@then(
+    parsers.parse(
+        "at most {n:d} check queries were in flight at once, more than one at some point, "
+        "and the results are in catalogue order"
+    )
+)
+def pool_bounded(ctx, n):
+    assert 1 < ctx["peak"] <= n
+    (graph,) = ctx["run"].graphs
+    assert [r.check_id for r in graph.pitfalls] == [c.check_id for c in packaged_checks()]

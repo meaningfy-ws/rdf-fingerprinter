@@ -67,7 +67,10 @@ run, and over which dataset:
 - **Schema graphs given:** a graph that is one of the schema graphs runs only the `schema`-scope
   checks, over itself. Every other graph runs only the `data`-scope checks, over `FROM <graph>`
   plus one `FROM <s>` per schema graph (the default graph: without `FROM`, so without the schema
-  graphs).
+  graphs; the run SHALL then log a warning and the report SHALL say so in its caveats, EPIC DEC-20).
+
+The checks of one graph SHALL run concurrently on at most `concurrency` workers, and the results
+SHALL keep the catalogue order (EPIC DEC-21).
 
 For each check it SHALL send a count query (the check wrapped in `SELECT (COUNT(*) AS ?n)`) and an
 example query (the check with `LIMIT pitfall_examples`). It SHALL record the result in
@@ -82,6 +85,14 @@ recorded (EPIC DEC-2, DEC-3, DEC-4, DEC-5).
 #### Scenario: Schema checks run once, on the schema graph
 - **WHEN** a run profiles `--graph ex:data` with `--pitfalls --schema-graph ex:schema`
 - **THEN** `ex:schema` is profiled too, `ex:schema` has results only for schema-scope checks, and `ex:data` only for data-scope checks
+
+#### Scenario: The default graph runs without the schema
+- **WHEN** a run scans the default graph, which holds data, with `--pitfalls --schema-graph ex:schema`
+- **THEN** a warning is logged, and the report's caveats say the default graph's data checks ran without the schema graphs
+
+#### Scenario: Checks run on the worker pool
+- **WHEN** a graph is scanned with `concurrency` 4
+- **THEN** at most 4 check queries are in flight at once, and the results are in catalogue order
 
 #### Scenario: Empty graph not scanned
 - **WHEN** the default graph holds no triple and a run uses `--pitfalls`

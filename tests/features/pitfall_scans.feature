@@ -48,6 +48,16 @@ Feature: Scanning a fingerprinted store for modelling pitfalls
       And the profile of "schema" has results only for schema checks
       And the profile of "data" has results only for data checks
 
+    Scenario: The default graph runs without the schema
+      Given the default graph holds data too
+      When the fingerprint command runs with --pitfalls on every graph with schema graph "schema"
+      Then a warning says the default graph's data checks ran without the schema graphs
+      And the report's caveats say so
+
+    Scenario: Checks run on the worker pool
+      When graph "data" is scanned with concurrency 4
+      Then at most 4 check queries were in flight at once, more than one at some point, and the results are in catalogue order
+
     Scenario: Empty graph not scanned
       When the fingerprint command runs with --pitfalls on every graph
       Then the default graph has no pitfall results and no check query was sent for it

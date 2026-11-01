@@ -140,6 +140,14 @@ and show them next to the profile.
   properties; a mixed property counts in both. Rejected: one property total (it hides whether a class
   is described by values or by links).
 
+- **DEC-20 The default graph's unjoined data checks are a caveat** (pre-PR review, 2026-11-01). With
+  schema graphs given, the default graph's data checks run without them (no `FROM`, see the
+  rabbit-hole on default-graph semantics), so a domain or range finding can be missed. The run logs a
+  warning and the report's caveats say so. Rejected for now: joining the schema graphs into the
+  default graph (stores disagree on what the default graph is).
+- **DEC-21 The checks of a graph run concurrently** (pre-PR review, 2026-11-01): over at most
+  `concurrency` workers, as class profiling does; the results keep the catalogue order.
+
 ## Rabbit-holes
 
 - Some checks are inherently expensive on large stores: P35 scans every predicate, P32 compares class

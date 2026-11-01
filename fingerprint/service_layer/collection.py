@@ -434,6 +434,9 @@ def _pitfall_term(term: Any) -> PitfallTerm | None:
     return PitfallTerm(text=str(term), kind=NodeKind.literal)
 
 
+UNJOINED_DEFAULT = "the default graph's data checks ran without the schema graphs"
+
+
 class _PitfallScan:
     """The pitfall stage of one run (pitfall-scans design D-4): per graph, the checks its scope selects."""
 
@@ -463,7 +466,11 @@ class _PitfallScan:
             run.fail("PITFALL", f"graph {label}: pitfall scan skipped, emptiness check failed: {error}", graph)
             return None
         checks, joined = self.selected(graph)
-        results = [r for check in checks if (r := self.check(graph, check, joined)) is not None]
+        if not graph and self.schema_graphs:  # no FROM for the default graph (DEC-20)
+            logger.warning("graph default: %s", UNJOINED_DEFAULT)
+        with ThreadPoolExecutor(max_workers=run.settings.concurrency) as pool:  # map keeps the order (DEC-21)
+            outcomes = list(pool.map(lambda check: self.check(graph, check, joined), checks))
+        results = [r for r in outcomes if r is not None]
         found = sum(1 for r in results if r.count)
         logger.info("graph %s: %d pitfall checks, %d with findings", label, len(results), found)
         return results

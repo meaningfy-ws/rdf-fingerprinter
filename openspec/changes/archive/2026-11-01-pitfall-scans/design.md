@@ -275,6 +275,13 @@
   entry shows `N · D d, O o` with a title that spells it out; the class heading adds "D data and O
   object properties" after its instances and precision.
 
+- **D-19 Unjoined default graph (DEC-20).** `_PitfallScan.scan` logs a warning when it scans the
+  default graph with schema graphs given. `DocumentGenerator` sets `Caveats.unjoined_default`
+  (boolean) when the settings name schema graphs and the default graph has `pitfalls`; the template
+  prints one caveat line. Nothing new in the profile: the settings and the results already say it.
+- **D-20 Concurrent checks (DEC-21).** `scan` maps `check` over a `ThreadPoolExecutor(max_workers=
+  settings.concurrency)`; `Executor.map` keeps the order, and `fail` is already lock-guarded.
+
 ## Algorithm / approach
 
 Worked example (brainframe, from `inputs/`):

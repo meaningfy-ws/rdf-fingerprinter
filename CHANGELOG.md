@@ -25,6 +25,8 @@ a dataset is modelled, next to what it holds.
 - **Class indicators**: each class shows its instances and its data and object property counts, in
   the contents and its heading. The namespace table shows each namespace's uses.
 - **`--fail-on critical|important|minor`**: exit status 5 when pitfalls reach the level.
+- The checks of a graph run `--concurrency` at a time. A default graph scanned with schema graphs
+  given (it cannot be joined with them) is a logged warning and a report caveat.
 - **`--pitfall-checks DIR`** (your own `.rq` checks, same contract) and `--skip-pitfall ID`.
 - **`make scan-files ONTOLOGY=… [DATA=…] OUT=…`**: scan RDF files on a separate in-memory Oxigraph.
 - Docs: the Pitfalls page with the catalogue; the settings and exit-status tables.
