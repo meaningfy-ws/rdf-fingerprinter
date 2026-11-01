@@ -93,3 +93,22 @@ domain.modules 16, domain.shapes 9, domain.iri 5, domain.exceptions 1.
 
 Two repeatability bugs surfaced on the way: mutmut runs pytest twice in one process, which exposed a
 consumed `BytesIO` in `test_classify` and a parametrize dict mutated by `test_severity_…` (both fixed).
+
+## Outcome (task 8.3, 2026-11-01, branch at a1e30d0 + the raised score)
+
+| Measure | Before (master e28cb1c) | After |
+|---|---|---|
+| Spec scenarios traced to exactly one test | 35 of 102 (by identical title) | all, enforced by `tests/guards/test_traceability.py` |
+| Non-e2e tests (`make test`) | 583 passed, 2 skipped (unit tier only) | 851 passed, 2 skipped (unit, bdd, guards) |
+| e2e tests | 85 | 83 |
+| `make test` wall time | 32 s (line coverage) | 86 s (branch coverage; sysmon cannot trace branches on 3.12) |
+| Branch coverage, `fingerprint/` | 98% (gate: 80% line) | 99% (gate: 90% branch) |
+| Branch coverage, `domain/` (generated excluded) | 99% | 100% (gate: 100%) |
+| Mutation score, `domain/` + `service_layer/` | 0.807 (687 not caught) | **0.950** (179 survivors, all triaged in `inputs/mutation-triage.md`) |
+| Full mutation run | 55 min | 31 min |
+| Import contracts | 4 (code only) | 10 (code + test tiers), no test ignores |
+
+Why the count went up although redundancy went down: group 7 removed 28 tests that another tier
+already owned (coverage and killed-mutant sets unchanged), while the mutation triage added tests for
+about 500 surviving mutants that were real gaps — behaviour no test checked before. Every added test
+kills at least one mutant; every removed one killed none that another test did not.

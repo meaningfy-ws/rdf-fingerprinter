@@ -55,18 +55,18 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 - [x] 7.2 `service_layer/` modules, likewise
 - [x] 7.3 `adapters/` and `entrypoints/` modules (coverage and P-2 ownership)
 - [x] 7.4 `tests/e2e/`: tests that never reach the store deleted or moved (P-2)
-- [ ] 7.5 Surviving mutants: a test in the owning tier, or the dead code deleted and listed here; `mutation_score.txt` raised
+- [x] 7.5 Surviving mutants: a test in the owning tier, or the dead code deleted and listed here; `mutation_score.txt` raised
   - Dead code deleted (no caller in `fingerprint/`, `tests/` or the templates; GitNexus impact 0 callers, LOW): `Generator.used_namespaces()` with the `Generator.namespaces` dict it read, and `DocumentGenerator.term()` (770505c). The unreachable `raise IndexError` in `analytics._weighted_value_at` is kept as a defensive guard (a rewrite in 7dc83a4 was reverted). Other findings are follow-ups in `inputs/mutation-triage.md`.
 
 ## 8. Docs and conventions
 
 - [x] 8.1 `docs/modules/ROOT/pages/development.adoc`: tiers, the P-2 ownership table, canonical data and refresh targets, the gate
 - [x] 8.2 `AGENTS.md` *Working conventions*: the test-tier and sample-data rules (pointing at the docs page) and the moved path of `test_no_composed_dicts.py`
-- [ ] 8.3 Outcome in `inputs/baseline.md`: before/after test count, run time, branch coverage, mutation score
+- [x] 8.3 Outcome in `inputs/baseline.md`: before/after test count, run time, branch coverage, mutation score
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [x] 3.7 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 4.5 · [x] 4.6 · [x] 4.7 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 6.4 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [x] 7.4 · [ ] 7.5 · [x] 8.1 · [x] 8.2 · [ ] 8.3
+- [x] 1.1 · [x] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [x] 3.7 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 4.5 · [x] 4.6 · [x] 4.7 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 6.4 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [x] 7.4 · [x] 7.5 · [x] 8.1 · [x] 8.2 · [ ] 8.3
 
 ## Verification
 
