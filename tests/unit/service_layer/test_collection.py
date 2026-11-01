@@ -500,3 +500,55 @@ def test_a_transient_failure_of_the_annotation_query_is_retried(code):
     result = collected(fake)
     assert len(fake.sent("Q12")) == 2
     assert result.graphs[0].term_annotations == [] and not result.failures
+
+
+def test_a_failure_of_the_annotation_query_names_its_graph():
+    failing = people(G)
+    failing.on("Q12", DENIED)
+    kind, message, graph, *_ = failure_of(collected(failing, G))
+    assert (kind, message, graph) == ("term_annotations", f"graph {G}: term annotations not read: 400 unsupported", G)
+
+
+def test_an_annotation_whose_value_is_an_iri_has_no_language():
+    fake = people()
+    fake.on("Q12", [{"t": PERSON, "p": "http://www.w3.org/2000/01/rdf-schema#label", "v": EX + "Thing"}])
+    (annotation,) = collected(fake).graphs[0].term_annotations
+    assert [(t.text, t.language) for t in annotation.labels] == [(EX + "Thing", None)]
+
+
+# --- what the collection logs (lean-test-suite: the operator's messages are pinned) ---
+
+LOGGER = "fingerprint.service_layer.collection"
+
+
+@pytest.mark.parametrize("graph, label", [(None, "default"), (G, G)])
+def test_a_failed_predicate_listing_is_logged_with_its_graph_and_reason(caplog, graph, label):
+    for error, reason in ((TIMEOUT, "timed out after 60 s"), (DENIED, "rejected by endpoint: 400 unsupported")):
+        caplog.clear()
+        fake = people(graph)
+        fake.on("Q2", error)
+        with caplog.at_level(logging.WARNING, logger=LOGGER):
+            collected(fake, graph, graph_statistics=True)
+        assert f"graph {label}: Q2 {reason}" in caplog.messages
+
+
+@pytest.mark.parametrize("graph, label", [(None, "default"), (G, G)])
+def test_each_graph_and_each_class_is_logged_as_profiled(caplog, graph, label):
+    with caplog.at_level(logging.INFO, logger=LOGGER):
+        collected(people(graph), graph, depth="classes")
+    assert f"graph {label}: profiling" in caplog.messages
+    assert f"class {PERSON}: exact, 2 of 2 instances, 1 queries" in caplog.messages
+
+
+def test_a_class_that_times_out_is_logged_with_the_precision_it_tries_next(caplog):
+    fake = people()
+    fake.on("Q8", TIMEOUT, times=1)
+    with caplog.at_level(logging.INFO, logger=LOGGER):
+        collected(fake)
+    assert f"class {PERSON}: exact timed out after 60 s; trying first_n" in caplog.messages
+    assert f"class {PERSON}: first_n, 2 of 2 instances, 5 queries" in caplog.messages
+    last = people()
+    last.on("Q8", TIMEOUT)
+    with caplog.at_level(logging.WARNING, logger=LOGGER):
+        collected(last)
+    assert f"class {PERSON}: first_n timed out after 60 s; trying nothing" in caplog.messages

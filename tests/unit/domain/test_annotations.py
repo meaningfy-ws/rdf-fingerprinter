@@ -172,3 +172,9 @@ def test_the_text_shown_is_untagged_then_english_then_the_smallest_language(give
 @pytest.mark.parametrize("empty", [None, []])
 def test_nothing_is_shown_without_texts(empty):
     assert shown(empty) is None
+
+
+def test_a_term_repeated_within_one_source_keeps_the_first_that_gives_texts():
+    first, second = (TermAnnotation(term=PERSON, labels=texts((name, None))) for name in ("First", "Second"))
+    merged = merge_annotations([first, second], [])
+    assert [t.text for t in merged[0].labels] == ["First"]

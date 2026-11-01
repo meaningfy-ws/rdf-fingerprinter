@@ -1,10 +1,16 @@
 """The pitfall scan stage over FakeSparql (pitfall-scans › The pitfall scan stage; design D-4, D-5)."""
 
+import logging
+from types import SimpleNamespace
+
 import pytest
+from rdflib import URIRef
 
 from fingerprint.adapters.exceptions import PermanentError
 from fingerprint.adapters.pitfall_catalogue import packaged_checks
 from fingerprint.adapters.queries import pitfall_count_query, pitfall_example_query
+from fingerprint.domain.profile import NodeKind
+from fingerprint.service_layer import collection
 from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.settings import resolve_settings
 from tests.fakes import FakeSparql
@@ -118,3 +124,89 @@ def test_an_unbound_example_term_is_left_out():
     profile = run(fake, checks=[CHECKS["p35_untyped_property"]], selected_graphs=[DATA])
     (example, *_) = results(profile, DATA)["p35_untyped_property"].examples
     assert example.entity is None and example.property is None and example.value is None
+
+
+# --- what a result, a failure and the log say (lean-test-suite: every field of the record is pinned) ---
+
+LOGGER = "fingerprint.service_layer.collection"
+ONE = CHECKS["p35_untyped_property"]
+COUNT, EXAMPLES, ASK = (lambda q: " count\n" in q), (lambda q: " examples\n" in q), (lambda q: "PITFALL ask" in q)
+
+
+def only_default_graph():
+    fake = FakeSparql()
+    fake.add("ex:a", "ex:undeclared", "ex:b")
+    return fake
+
+
+def test_a_result_carries_the_check_its_origin_its_examples_and_its_duration(monkeypatch):
+    clock = iter([100.0, 100.1234567] * 4)
+    monkeypatch.setattr(collection, "time", SimpleNamespace(monotonic=lambda: next(clock)))
+    rows = [{"entity": URIRef(EX + "a"), "property": URIRef(EX + "p"), "value": "text"}]
+    for origin, source in (("packaged", ONE.source), ("my/checks.rq", f"{ONE.source} (my/checks.rq)")):
+        fake = store()
+        fake.on("PITFALL", rows, when=EXAMPLES)
+        check = ONE.model_copy(update={"description": "Describes it", "heuristic": True, "origin": origin})
+        (result,) = run(fake, checks=[check], selected_graphs=[DATA], concurrency=1).graphs[0].pitfalls
+        assert (result.title, result.description, result.importance, result.scope) == (
+            ONE.title,
+            "Describes it",
+            ONE.importance,
+            ONE.scope,
+        )
+        assert (result.source, result.heuristic, result.count, result.seconds) == (source, True, 2, 0.123)
+        (example,) = result.examples
+        assert (example.entity.text, example.entity.kind) == (EX + "a", NodeKind.iri)
+        assert (example.property.text, example.value.text, example.value.kind) == (EX + "p", "text", NodeKind.literal)
+
+
+def test_a_check_with_no_row_counts_zero_and_sends_no_example_query():
+    fake = store()
+    fake.on("PITFALL", [], when=COUNT)
+    (result,) = run(fake, checks=[ONE], selected_graphs=[DATA]).graphs[0].pitfalls
+    assert result.count == 0 and not [q for q in fake.sent("PITFALL") if EXAMPLES(q)]
+
+
+def test_the_queries_of_a_check_name_it_and_join_the_schema_graphs():
+    fake = store()
+    run(fake, checks=[ONE], selected_graphs=[DATA], schema_graphs=[SCHEMA])
+    count, examples = (next(q for q in fake.sent("PITFALL") if kind(q)) for kind in (COUNT, EXAMPLES))
+    assert count.startswith(f"# PITFALL {ONE.check_id} count") and examples.startswith(f"# PITFALL {ONE.check_id} examples")
+    assert f"FROM <{DATA}> FROM <{SCHEMA}>" in count and f"FROM <{SCHEMA}>" in examples
+
+
+@pytest.mark.parametrize("graph, label", [(DATA, DATA), (None, "default")])
+def test_a_failed_count_or_examples_is_recorded_with_its_graph_and_check(graph, label):
+    for failing, step in ((COUNT, "count"), (EXAMPLES, "examples")):
+        fake = store() if graph else only_default_graph()
+        fake.on("PITFALL", PermanentError("denied"), when=failing)
+        profile = run(fake, checks=[ONE], **({"selected_graphs": [graph]} if graph else {}))
+        (failure,) = profile.failures
+        assert failure.message == f"graph {label}: pitfall {ONE.check_id}: {step} failed: denied"
+        assert (failure.query_kind, failure.graph, failure.check_id) == ("pitfall", graph, ONE.check_id)
+
+
+def test_a_failed_emptiness_check_is_recorded_with_its_graph(caplog):
+    fake = store()
+    fake.on("PITFALL", PermanentError("denied"), when=ASK)
+    (failure,) = run(fake, checks=[ONE], selected_graphs=[DATA]).failures
+    assert failure.message == f"graph {DATA}: pitfall scan skipped, emptiness check failed: denied"
+    assert (failure.graph, failure.check_id) == (DATA, None)
+
+
+def test_the_scan_logs_an_empty_graph_and_the_findings_of_a_scanned_one(caplog):
+    with caplog.at_level(logging.INFO, logger=LOGGER):
+        run(only_default_graph(), checks=[ONE, CHECKS["p19_multiple_domains_or_ranges"]])
+        run(FakeSparql(), checks=[ONE])
+    assert "graph default: 2 pitfall checks, 1 with findings" in caplog.messages
+    assert "graph default: empty; no pitfall scan" in caplog.messages
+
+
+def test_only_the_default_graph_warns_that_it_ran_without_the_schema_graphs(caplog):
+    unjoined = f"graph default: {collection.UNJOINED_DEFAULT}"
+    for schema_graphs, graph, warns in (([SCHEMA], None, True), ([], None, False), ([SCHEMA], DATA, False)):
+        caplog.clear()
+        fake = only_default_graph() if graph is None else store()
+        with caplog.at_level(logging.WARNING, logger=LOGGER):
+            run(fake, checks=[ONE], schema_graphs=schema_graphs, **({"selected_graphs": [graph]} if graph else {}))
+        assert (unjoined in caplog.messages) is warns

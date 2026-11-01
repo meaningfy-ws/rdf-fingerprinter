@@ -383,7 +383,6 @@ class _Collection:
         self, graph: str, cls: str, instances: int, predicates: list[PredicatePartition] | None
     ) -> ClassProfile | None:
         modes = MODES[self.settings.precision_policy]
-        last = "QS"
         for index, mode in enumerate(modes):
             done: list[str] = []
             try:
@@ -393,13 +392,13 @@ class _Collection:
                 self.fail(done[-1] if done else "Q8", f"skipping {error.iri!r}: not usable in a SPARQL query", graph, cls)
                 return None
             except QueryTimeout:
-                last = done[-1] if done else "Q8"
+                last = done[-1]
                 following = modes[index + 1].value if index + 1 < len(modes) else "nothing"
                 logger.warning(
                     "class %s: %s timed out after %s s; trying %s", cls, mode.value, self.settings.timeout_seconds, following
                 )
             except PermanentError as error:
-                name = done[-1] if done else "Q8"
+                name = done[-1]
                 if mode == FIRST_N and name != "QS" and error.status in TOO_LARGE:
                     message = f"class {cls}: endpoint rejected {self.settings.first_n}-IRI query; lower --first-n"
                 else:
@@ -425,7 +424,7 @@ class _Collection:
         if not terms:  # an empty VALUES block cannot be evaluated by every store
             return []
         try:
-            rows = self.select("Q12", graph, terms=terms_values(terms))
+            rows = self.select("Q12", terms=terms_values(terms))  # dataset-wide: the query ignores the graph (DEC-20)
         except SparqlError as error:
             self.fail("Q12", f"graph {graph or 'default'}: term annotations not read: {error}", graph)
             return None

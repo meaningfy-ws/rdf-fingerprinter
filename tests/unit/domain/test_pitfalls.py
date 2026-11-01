@@ -74,3 +74,13 @@ def test_blank_lines_do_not_end_the_header_and_a_header_only_text_still_parses()
     assert parse_header(spaced, origin="x").importance == "important"
     header_only = "".join(line + "\n" for line in GOOD.splitlines() if line.startswith("#"))
     assert parse_header(header_only, origin="x").check_id == "p35_untyped_property"
+
+
+def test_the_heuristic_flag_is_read_whatever_its_case():
+    flagged = GOOD.replace("# description: one line\n", "# description: one line\n# heuristic: True\n")
+    assert parse_header(flagged, origin="x").heuristic is True
+
+
+def test_every_missing_key_is_named_in_the_header_order():
+    with pytest.raises(PitfallCheckError, match=r"x: missing header key\(s\): id, title"):
+        parse_header("\n".join(line for line in GOOD.splitlines() if not line.startswith(("# id", "# title"))), "x")

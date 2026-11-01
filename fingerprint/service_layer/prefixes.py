@@ -45,8 +45,6 @@ def _iris(value: object) -> Iterator[tuple[str, bool]]:
         if isinstance(value, PropertyProfile) and (single := _single_iri_value(value)):  # written as a name
             yield single, False
         for name in type(value).model_fields:
-            if name == "settings" or name == "namespaces":
-                continue
             item = getattr(value, name)
             if name in IRI_FIELDS and isinstance(item, str) and item:
                 yield item, False

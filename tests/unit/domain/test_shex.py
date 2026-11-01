@@ -269,6 +269,24 @@ def test_a_nested_group_that_holds_an_equals_sign_is_plain_bnode():
     assert [c.value for c in twice.shapes[0].constraints] == ["BNODE", "BNODE"]
 
 
+def test_a_datatype_in_a_prefixed_namespace_that_holds_an_equals_sign_is_left_out():
+    table = PrefixTable(
+        [NamespacePrefix(prefix=p, namespace=ns, source=PrefixSource.packaged) for p, ns in (("ex", EX), ("q", EX + "q?a="))]
+    )
+    datatype = EX + "q?a=int"
+    shown = schema(klass(A, 2, prop(P, {1: 2}, literals(2, datatype))), table=table)
+    assert (shown.shapes[0].constraints[0].value, shown.skipped_terms) == (".", [datatype])
+
+
+def test_a_bound_known_on_one_side_only_stars_the_cardinality():
+    built = pattern(klass(A, 10, prop(P, {1: 10}, literals(10))))
+    block = built.blocks[0]
+    for bound in ("min_count", "max_count"):
+        edge = block.edges[0].model_copy(update={bound: None})
+        stripped = built.model_copy(update={"blocks": [block.model_copy(update={"edges": [edge]})]})
+        assert shex_view(stripped).shapes[0].constraints[0].cardinality == "*"
+
+
 def test_a_prefix_whose_namespace_holds_an_equals_sign_is_not_declared():
     table = PrefixTable(
         [NamespacePrefix(prefix="ex", namespace=EX, source=PrefixSource.packaged)]

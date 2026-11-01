@@ -7,7 +7,7 @@ import pytest
 from hypothesis import given
 
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.patterns import pattern_view
+from fingerprint.domain.patterns import pattern_view, quoted
 from fingerprint.domain.prefixes import PrefixTable
 from fingerprint.domain.profile import LangText, NamespacePrefix, PrefixSource, TermAnnotation, ValueCount
 from fingerprint.domain.views import (
@@ -885,10 +885,19 @@ def test_a_description_is_one_line_cut_at_two_hundred_characters():
     long = "x" * 250
     assert glossary(note(A, descriptions=[(long, None)])) == ["ex:A: " + "x" * 200 + "…"]
     assert glossary(note(A, descriptions=[("two\n  lines", None)])) == ["ex:A: two lines"]
+    assert glossary(note(A, descriptions=[("x" * 200, None)])) == ["ex:A: " + "x" * 200]  # at the limit: not cut
 
 
 def test_a_label_is_quoted_as_a_json_string():
     assert glossary(note(A, [('He said "hi"\n', None)])) == ['ex:A "He said \\"hi\\""']
+    assert glossary(note(A, [("Größe", "de")])) == ['ex:A "Größe"@de']  # not escaped to ASCII
+
+
+def test_a_value_is_cut_at_sixty_four_characters_and_json_quoted_unless_it_is_one_bare_word():
+    assert [quoted(v) for v in ("plain", "a b", "é x")] == ["plain", '"a b"', '"é x"']
+    at_limit = "a " * 32
+    assert quoted(at_limit) == '"' + at_limit + '"'  # 64 characters: not cut
+    assert quoted(at_limit + "b") == '"' + at_limit + '…"'
 
 
 def test_a_term_the_view_does_not_write_or_without_text_has_no_entry():

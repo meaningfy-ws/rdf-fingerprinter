@@ -61,7 +61,7 @@ def test_the_prefix_cc_warning_carries_the_failure_reason_and_is_logged_once(cap
         resolve_namespaces(run(BF + "A"), packaged=[], prefix_list=lookup)
     assert lookup.calls == 1
     (message,) = caplog.messages
-    assert "prefix.cc" in message and "unreachable" in message
+    assert message == "prefix.cc lookup failed: unreachable; generating prefixes"
 
 
 def test_no_fetch_when_the_files_name_everything():
@@ -167,3 +167,21 @@ def test_top_values_of_other_properties_name_no_namespace():
         single_value_run("http://ex.org/status/a", "literal"),
     ):
         assert "http://ex.org/status/" not in {x.namespace for x in resolve_namespaces(run_, packaged=[]).namespaces}
+
+
+def test_a_namespace_written_as_a_name_is_profiled_not_a_finding():
+    """The single value `http://ex.org/status` names `http://ex.org/`; a finding's term would be left out
+    when the profile already holds `http://ex.org/status/`."""
+    one = single_value_run("http://ex.org/status").graphs[0].class_partitions[0].property_partitions[0]
+    both = profile_run(klass("http://ex.org/status/A", 1, one))
+    assert {"http://ex.org/", "http://ex.org/status/"} <= used_namespaces(both)
+
+
+def test_a_skipped_prefix_is_logged_with_its_reason(caplog):
+    user = [e("../../x", OTHER, PrefixSource.user), e("rdf", USED, PrefixSource.user)]
+    with caplog.at_level(logging.DEBUG, logger="fingerprint.service_layer.prefixes"):
+        resolve_namespaces(run(OTHER + "A", USED + "B"), user, packaged=[])
+    assert caplog.messages == [
+        f"prefix '../../x' for {OTHER} skipped: not a prefix with a writable IRI",
+        f"prefix 'rdf' for {USED} skipped: reserved or taken",
+    ]

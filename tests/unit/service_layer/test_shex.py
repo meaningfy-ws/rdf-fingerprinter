@@ -77,7 +77,7 @@ def test_a_class_iri_with_an_equals_sign_is_listed_after_the_hidden_line_and_war
         texts, generator = outputs(profile_run(klass(bad, 2), klass(EX + "B", 1)), min_instances=2)
     lines = only(texts).splitlines()
     assert lines[lines.index("# hidden: 1 classes") + 1] == f"# skipped: {bad}"
-    assert "PyShExC rejects '=' in an IRI" in caplog.text and bad in caplog.text
+    assert caplog.messages == [f"skipping {bad!r} in ShExC: PyShExC rejects '=' in an IRI"]
     assert generator.skipped == []
 
 

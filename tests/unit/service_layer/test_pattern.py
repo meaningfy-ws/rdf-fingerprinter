@@ -6,6 +6,7 @@ from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.views import GeneratorOptions, RepresentationFormat
 from fingerprint.service_layer.generators import GENERATORS
+from fingerprint.service_layer.generators.generator import plain_label
 from fingerprint.service_layer.generators.pattern import PatternGenerator
 from tests.builders import klass, literals, profile_run, prop
 from tests.fakes import EX, files
@@ -60,3 +61,8 @@ def test_the_hidden_line_is_written_only_when_classes_are_hidden():
 def test_a_graph_with_no_shown_class_writes_no_file():
     texts, _ = outputs(profile_run())
     assert texts == {}
+
+
+def test_a_named_graph_is_labelled_in_plain_characters():
+    (view,) = PatternGenerator(analyse(profile_run(klass(EX + "A", 1), graph=EX + "g")), JinjaTemplateRenderer()).views()
+    assert view.graph_label == plain_label(EX + "g")

@@ -73,7 +73,11 @@ def test_a_hook_returning_none_drops_the_element_and_records_it(tmp_path, caplog
         generator = listing(tmp_path, run(klass(bad), klass(EX + "A", "http://ex.org/a b")))
         texts = files(generator.serialize())
     assert texts == {"list-default.txt": f"{EX}A:;"}
-    assert generator.skipped == [bad, "http://ex.org/a b"] and bad in caplog.text
+    assert generator.skipped == [bad, "http://ex.org/a b"]
+    assert caplog.messages == [
+        f"skipping {bad!r}: it cannot be written as an IRI",
+        "skipping 'http://ex.org/a b': it cannot be written as an IRI",
+    ]
 
 
 def test_custom_template_reads_its_configuration(tmp_path):
