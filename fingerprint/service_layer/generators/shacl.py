@@ -154,6 +154,7 @@ class ShaclGenerator(Generator):
         return ShapesGraph(
             graph_label=plain_label(graph.graph),
             slug=graph_slug(graph.graph),
+            excluded_note=self.excluded_note(graph),
             prefixes=[PrefixDeclaration(prefix=p, namespace=ns) for p, ns in prefixes],
             node_shapes=classes,
         )

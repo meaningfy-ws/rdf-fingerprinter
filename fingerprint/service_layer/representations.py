@@ -13,12 +13,13 @@ from fingerprint.domain.analytics import analyse
 from fingerprint.domain.annotations import merge_annotations, select_annotations
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref
+from fingerprint.domain.namespace_filter import exclude_terms, namespace_filter, namespaces_with_terms
 from fingerprint.domain.prefixes import PrefixTable
 from fingerprint.domain.profile import NamespacePrefix, ProfileAnalytics, ProfileRun
-from fingerprint.domain.views import GeneratorOptions, RepresentationFormat
+from fingerprint.domain.views import FilterOption, GeneratorOptions, NamespaceFilter, RepresentationFormat
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators import GENERATORS
-from fingerprint.service_layer.generators.generator import Generator, TemplateRenderer, excluded_namespaces
+from fingerprint.service_layer.generators.generator import Generator, TemplateRenderer
 from fingerprint.service_layer.prefixes import resolve_namespaces
 from fingerprint.service_layer.settings import check_acceptance_threshold, validate_config
 
@@ -64,15 +65,18 @@ def validate_options(options: GeneratorOptions | None) -> None:
             raise UsageError(f"--{name.replace('_', '-')} must be at least 1")
 
 
-def warn_unknown_filters(run: ProfileRun, options: GeneratorOptions | None) -> None:
-    """A filter name matching no namespace is warned about once per run and ignored (DEC-5)."""
-    if options is None:
-        return
-    table = PrefixTable(run.namespaces)
-    _, unknown = excluded_namespaces(options, table)
-    for name in dict.fromkeys(unknown):  # dict-ok: ordered de-duplication
-        option = "--include-namespace" if name in (options.include_namespaces or []) else "--exclude-namespace"
-        logger.warning("%s %s: no such namespace; ignored", option, name)
+def warn_filters(filters: NamespaceFilter, analytics: ProfileAnalytics) -> None:
+    """A filter value matching no namespace, or an exclude value whose namespaces are all unused, is warned about
+    and ignored (P-8). A namespace counts as unused when `namespaces_with_terms` does not list it.
+    An exclude value fully re-included is not warned about."""
+    used = namespaces_with_terms(analytics)
+    for match in filters.matches or []:
+        flag = f"--{FilterOption(match.option).value}-namespace {match.name}"
+        still = [n for n in match.namespaces or [] if n in (filters.excluded or [])]
+        if not match.namespaces:
+            logger.warning("%s: no such namespace; ignored", flag)
+        elif match.option == FilterOption.exclude and still and not any(n in used for n in still):
+            logger.warning("%s: no term in this namespace; ignored", flag)
 
 
 def make_generator(
@@ -111,11 +115,14 @@ def generate_representations(
         raise UsageError(f"unknown formats: {', '.join(unknown)} (known: {', '.join(GENERATORS)})")
     if run.namespaces is None or user_prefixes:
         run = resolve_namespaces(run, user_prefixes or ())
-    if check_filters:
-        warn_unknown_filters(run, options)
     if threshold is not None:
         run = with_threshold(run, threshold)
     analytics = analyse(with_ontology(run, options.ontology if options else None))
+    table = PrefixTable(run.namespaces)
+    filters = namespace_filter(options or GeneratorOptions(), table)
+    analytics = exclude_terms(analytics, filters.excluded or [], table)
+    if check_filters:
+        warn_filters(filters, analytics)
     renderer = renderer or JinjaTemplateRenderer()
     paths: list[Path] = []
     for name in formats:

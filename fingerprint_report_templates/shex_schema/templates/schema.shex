@@ -21,6 +21,9 @@ PREFIX {{ p.prefix }}: <{{ p.namespace }}>
 {% if view.hidden_classes -%}
 # hidden: {{ view.hidden_classes }} classes
 {% endif -%}
+{% if view.excluded_note -%}
+# excluded namespaces: {{ view.excluded_note }}
+{% endif -%}
 {% if view.skipped_terms -%}
 # skipped: {{ view.skipped_terms | join(" ") }}
 {% endif -%}

@@ -8,6 +8,7 @@ from fingerprint.domain.views import GeneratorOptions, RepresentationFormat
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.generators.generator import plain_label
 from fingerprint.service_layer.generators.pattern import PatternGenerator
+from tests import builders
 from tests.builders import klass, literals, profile_run, prop
 from tests.fakes import EX, files
 
@@ -66,3 +67,19 @@ def test_a_graph_with_no_shown_class_writes_no_file():
 def test_a_named_graph_is_labelled_in_plain_characters():
     (view,) = PatternGenerator(analyse(profile_run(klass(EX + "A", 1), graph=EX + "g")), JinjaTemplateRenderer()).views()
     assert view.graph_label == plain_label(EX + "g")
+
+
+def test_the_note_of_the_excluded_namespaces_follows_the_legend():
+    noted = pattern_lines(builders.filtered_analytics("rel"))
+    assert noted[noted.index(f"# excluded namespaces: {builders.REL_NOTE}") - 1].startswith("# (:A&B) n: classes")
+
+
+def test_the_note_of_the_excluded_namespaces_follows_the_hidden_line():
+    hidden = builders.filter_profile(klass("http://www.w3.org/2002/07/owl#Thing", 1))
+    noted = pattern_lines(builders.filtered_analytics("rel", run=hidden))
+    assert noted[noted.index("# hidden: 1 classes") + 1] == f"# excluded namespaces: {builders.REL_NOTE}"
+
+
+def pattern_lines(analytics):
+    texts = files(PatternGenerator(analytics, JinjaTemplateRenderer()).serialize())
+    return next(iter(texts.values())).splitlines()

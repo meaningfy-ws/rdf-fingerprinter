@@ -332,7 +332,7 @@ class NamespacePrefix(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
 
     prefix: str = Field(default=..., description="""The prefix name, without the colon.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix']} })
-    namespace: str = Field(default=..., description="""The namespace IRI.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix']} })
+    namespace: str = Field(default=..., description="""The namespace IRI.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix', 'ExcludedTerms', 'NamespaceUse']} })
     source: PrefixSource = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix',
                        'PitfallResult',
                        'PitfallCheck',
@@ -734,6 +734,28 @@ class SettingsOverride(ConfiguredBaseModel):
     pitfall_examples: Optional[int] = Field(default=None, description="""How many example rows are kept per pitfall check and graph.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
 
 
+class ExcludedTerms(ConfiguredBaseModel):
+    """
+    What an excluded namespace hid in one graph, the distinct IRIs of the namespace removed from class, property and single-value positions (namespace-filter P-5). Kept out of fingerprint_stats so the published profile.json schema does not list it.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema'})
+
+    namespace: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix', 'ExcludedTerms', 'NamespaceUse']} })
+    classes: int = Field(default=..., description="""Distinct IRIs of the namespace removed from class positions (classes, object classes, co-types, parents).""", json_schema_extra = { "linkml_meta": {'domain_of': ['ExcludedTerms']} })
+    properties: int = Field(default=..., description="""Distinct IRIs of the namespace removed from property positions.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ExcludedTerms']} })
+    values: int = Field(default=..., description="""Distinct IRIs of the namespace removed from single-value positions.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ExcludedTerms']} })
+
+
+class NamespaceUse(ConfiguredBaseModel):
+    """
+    How much a namespace is used on the unfiltered analytics (namespace-filter §B). Kept out of fingerprint_stats so the published profile.json schema does not list it.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/analytics/schema'})
+
+    namespace: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['NamespacePrefix', 'ExcludedTerms', 'NamespaceUse']} })
+    uses: int = Field(default=..., description="""Instances of the namespace's classes plus subjects of its properties, over every class and graph.""", json_schema_extra = { "linkml_meta": {'domain_of': ['NamespaceUse']} })
+
+
 class ProfileAnalytics(ProfileRun):
     """
     A profile run with every level replaced by its analytics.
@@ -742,6 +764,7 @@ class ProfileAnalytics(ProfileRun):
          'slot_usage': {'graphs': {'name': 'graphs', 'range': 'GraphAnalytics'}},
          'tree_root': True})
 
+    namespace_uses: Optional[list[NamespaceUse]] = Field(default=None, description="""Uses of each namespace of the table, counted before any term was excluded; unset when no filter ran.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileAnalytics']} })
     endpoint: Optional[str] = Field(default=None, description="""The SPARQL endpoint URL that was profiled.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileRun']} })
     started_at: Optional[datetime ] = Field(default=None, description="""When the run started.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileRun'], 'slot_uri': 'prov:startedAtTime'} })
     finished_at: Optional[datetime ] = Field(default=None, description="""When the run finished.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ProfileRun'], 'slot_uri': 'prov:endedAtTime'} })
@@ -918,6 +941,7 @@ class GraphAnalytics(GraphProfile):
     typed_subject_ratio: Optional[float] = Field(default=None, description="""Share of subjects with at least one type.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphAnalytics']} })
     vocabularies: Optional[list[str]] = Field(default=None, description="""Namespaces of the predicates and classes, by triples.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphAnalytics']} })
     cross_graph_object_types: Optional[list[str]] = Field(default=None, description="""Graphs that supply object types (linksets).""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphAnalytics']} })
+    excluded_terms: Optional[list[ExcludedTerms]] = Field(default=None, description="""What the excluded namespaces hid in this graph, one entry per namespace with a non-zero count, sorted by namespace; unset when no filter ran.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphAnalytics']} })
     graph: Optional[str] = Field(default=None, description="""IRI of the profiled named graph; absent for the default graph.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure', 'GraphProfile']} })
     triples: Optional[int] = Field(default=None, description="""Number of triples.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile',
                        'PredicatePartition',
@@ -960,6 +984,8 @@ ValueCount.model_rebuild()
 IncomingLink.model_rebuild()
 AnnotationValue.model_rebuild()
 SettingsOverride.model_rebuild()
+ExcludedTerms.model_rebuild()
+NamespaceUse.model_rebuild()
 ProfileAnalytics.model_rebuild()
 CardinalityStatistics.model_rebuild()
 CardinalityChoice.model_rebuild()

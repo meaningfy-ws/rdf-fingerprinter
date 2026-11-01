@@ -1,6 +1,12 @@
 import pytest
 
-from fingerprint.domain.analytics import _weighted_value_at, analyse, cardinality_label, cardinality_statistics
+from fingerprint.domain.analytics import (
+    _weighted_value_at,
+    analyse,
+    cardinality_label,
+    cardinality_statistics,
+    value_type_indicators,
+)
 from fingerprint.domain.profile import CardinalityBin, ProfileRun, ValueCount
 from tests import builders
 from tests.builders import klass, profile_run
@@ -449,3 +455,32 @@ def test_presence_only_property_of_a_child_is_inherited_when_a_parent_has_it():
     student = cls("Student", 50000, [builders.prop(EX + "name", presence_only=True)], observed=10000)
     c = classes_of(run(person, student, edges=[("Student", "Person")]))
     assert props_of(c["Student"])["name"].inheritance == "inherited"
+
+
+# --- value-type indicators, shared with the namespace filter (namespace-filter P-2, TC-F7) ---
+
+VALUE_TYPE_FIELDS = {"value_types", "dominant_value_type", "type_purity", "untyped_object_ratio"}
+
+
+@pytest.mark.parametrize(
+    "partitions",
+    [
+        [builders.literals(4), builders.resources(6, EX + "Unit")],
+        [builders.literals(3, language="en"), builders.resources(1, EX + "Unit"), builders.resources(2, EX + "Team")],
+        [builders.resources(5)],  # all untyped
+        [builders.literals(7)],  # no resource partition
+        [builders.resources(2, EX + "Unit"), builders.resources(3), builders.resources(1, kind="blank_node")],
+    ],
+)
+def test_value_type_indicators_equal_the_four_fields_the_analysis_gives(partitions):
+    total = sum(p.triples for p in partitions)
+    analysed = props_of(classes_of(run(cls("C", 1, [prop("p", {total: 1}, value_partitions=partitions)])))["C"])["p"]
+    derived = value_type_indicators(partitions, total)
+    assert derived.model_dump(include=VALUE_TYPE_FIELDS) == analysed.model_dump(include=VALUE_TYPE_FIELDS)
+    assert derived.model_dump(exclude=VALUE_TYPE_FIELDS, exclude_none=True) == {}
+
+
+def test_value_type_indicators_of_untyped_objects_leave_no_type():
+    derived = value_type_indicators([builders.resources(5)], 5)
+    assert (derived.value_types, derived.dominant_value_type, derived.type_purity) == (None, None, None)
+    assert derived.untyped_object_ratio == 1.0

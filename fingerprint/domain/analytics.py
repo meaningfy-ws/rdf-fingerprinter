@@ -156,6 +156,29 @@ def _ordered_by_triples(weights: dict[str, int]) -> list[str]:  # dict-ok: looku
     return sorted(weights, key=lambda key: (-weights[key], key))
 
 
+def value_type_indicators(partitions: list[ValuePartition], total: int) -> ValueIndicators:
+    """The value types (datatypes and object classes), the dominant one with its purity, and the untyped share of
+    the resource objects (Q6/Q7); the other indicators stay absent."""
+    literal_triples = sum(p.triples or 0 for p in partitions if p.node_kind == NodeKind.literal)
+    types: dict[str, int] = defaultdict(int)  # dict-ok: lookup index value type → triples
+    untyped = 0
+    for p in partitions:
+        if p.node_kind == NodeKind.literal:
+            types[p.datatype or (RDF_LANG_STRING if p.language else "")] += p.triples or 0
+        elif p.object_class:
+            types[p.object_class] += p.triples or 0
+        else:
+            untyped += p.triples or 0
+    types.pop("", None)
+    value_types = _ordered_by_triples(types)
+    return ValueIndicators(
+        value_types=value_types or None,
+        dominant_value_type=value_types[0] if value_types else None,
+        type_purity=_ratio(types[value_types[0]], total) if value_types else None,
+        untyped_object_ratio=_ratio(untyped, total - literal_triples),
+    )
+
+
 def _partition_indicators(partitions: list[ValuePartition], total: int) -> ValueIndicators:
     """Kind, value types, languages and lengths from the value partitions (Q6/Q7)."""
     literals = [p for p in partitions if p.node_kind == NodeKind.literal]
@@ -164,29 +187,17 @@ def _partition_indicators(partitions: list[ValuePartition], total: int) -> Value
         kind = PropertyKind.datatype_property
     else:
         kind = PropertyKind.object_property if not literals else PropertyKind.mixed
-    types: dict[str, int] = defaultdict(int)  # dict-ok: lookup index value type → triples
     languages: dict[str, int] = defaultdict(int)  # dict-ok: lookup index language → triples
-    untyped = 0
-    for p in partitions:
-        if p.node_kind == NodeKind.literal:
-            types[p.datatype or (RDF_LANG_STRING if p.language else "")] += p.triples or 0
-            if p.language:
-                languages[p.language] += p.triples or 0
-        elif p.object_class:
-            types[p.object_class] += p.triples or 0
-        else:
-            untyped += p.triples or 0
-    types.pop("", None)
-    value_types = _ordered_by_triples(types)
-    return ValueIndicators(
-        property_kind=kind,
-        value_types=value_types or None,
-        dominant_value_type=value_types[0] if value_types else None,
-        type_purity=_ratio(types[value_types[0]], total) if value_types else None,
-        languages=_ordered_by_triples(languages) or None,
-        untyped_object_ratio=_ratio(untyped, total - literal_triples),
-        language_coverage=_ratio(sum(languages.values()), literal_triples),
-        mean_length=_ratio(sum(p.total_length or 0 for p in literals), literal_triples),
+    for p in literals:
+        if p.language:
+            languages[p.language] += p.triples or 0
+    return value_type_indicators(partitions, total).model_copy(
+        update={
+            "property_kind": kind,
+            "languages": _ordered_by_triples(languages) or None,
+            "language_coverage": _ratio(sum(languages.values()), literal_triples),
+            "mean_length": _ratio(sum(p.total_length or 0 for p in literals), literal_triples),
+        }
     )
 
 

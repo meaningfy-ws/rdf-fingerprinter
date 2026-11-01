@@ -168,18 +168,18 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
       <thead><tr><th>Prefix</th><th>Namespace</th><th>Source</th><th>Uses</th></tr></thead>
       <tbody>
         <tr class="group"><th colspan="4">packaged</th></tr>
-        <tr><td><span class="pfx" data-ns="skosxl">skosxl</span></td><td class="curie">http://www.w3.org/2008/05/skos-xl#</td><td>packaged</td><td class="n">4675</td></tr>
-        <tr><td><span class="pfx" data-ns="euvoc">euvoc</span></td><td class="curie">http://publications.europa.eu/ontology/euvoc#</td><td>packaged</td><td class="n">485</td></tr>
-        <tr><td><span class="pfx" data-ns="skos">skos</span></td><td class="curie">http://www.w3.org/2004/02/skos/core#</td><td>packaged</td><td class="n">112</td></tr>
-        <tr><td><span class="pfx" data-ns="owl">owl</span></td><td class="curie">http://www.w3.org/2002/07/owl#</td><td>packaged</td><td class="n">2</td></tr>
-        <tr><td><span class="pfx" data-ns="dcterms">dcterms</span></td><td class="curie">http://purl.org/dc/terms/</td><td>packaged</td><td class="n">0</td></tr>
-        <tr><td><span class="pfx" data-ns="eli">eli</span></td><td class="curie">http://data.europa.eu/eli/ontology#</td><td>packaged</td><td class="n">0</td></tr>
-        <tr><td><span class="pfx" data-ns="lemon">lemon</span></td><td class="curie">http://lemon-model.net/lemon#</td><td>packaged</td><td class="n">0</td></tr>
-        <tr><td><span class="pfx" data-ns="lvont">lvont</span></td><td class="curie">http://lexvo.org/ontology#</td><td>packaged</td><td class="n">0</td></tr>
-        <tr><td><span class="pfx" data-ns="rdf">rdf</span></td><td class="curie">http://www.w3.org/1999/02/22-rdf-syntax-ns#</td><td>packaged</td><td class="n">0</td></tr>
+        <tr data-prefix="skosxl"><td><span class="pfx" data-ns="skosxl">skosxl</span></td><td class="curie">http://www.w3.org/2008/05/skos-xl#</td><td>packaged</td><td class="n">4675</td></tr>
+        <tr data-prefix="euvoc"><td><span class="pfx" data-ns="euvoc">euvoc</span></td><td class="curie">http://publications.europa.eu/ontology/euvoc#</td><td>packaged</td><td class="n">485</td></tr>
+        <tr data-prefix="skos"><td><span class="pfx" data-ns="skos">skos</span></td><td class="curie">http://www.w3.org/2004/02/skos/core#</td><td>packaged</td><td class="n">112</td></tr>
+        <tr data-prefix="owl"><td><span class="pfx" data-ns="owl">owl</span></td><td class="curie">http://www.w3.org/2002/07/owl#</td><td>packaged</td><td class="n">2</td></tr>
+        <tr data-prefix="dcterms"><td><span class="pfx" data-ns="dcterms">dcterms</span></td><td class="curie">http://purl.org/dc/terms/</td><td>packaged</td><td class="n">0</td></tr>
+        <tr data-prefix="eli"><td><span class="pfx" data-ns="eli">eli</span></td><td class="curie">http://data.europa.eu/eli/ontology#</td><td>packaged</td><td class="n">0</td></tr>
+        <tr data-prefix="lemon"><td><span class="pfx" data-ns="lemon">lemon</span></td><td class="curie">http://lemon-model.net/lemon#</td><td>packaged</td><td class="n">0</td></tr>
+        <tr data-prefix="lvont"><td><span class="pfx" data-ns="lvont">lvont</span></td><td class="curie">http://lexvo.org/ontology#</td><td>packaged</td><td class="n">0</td></tr>
+        <tr data-prefix="rdf"><td><span class="pfx" data-ns="rdf">rdf</span></td><td class="curie">http://www.w3.org/1999/02/22-rdf-syntax-ns#</td><td>packaged</td><td class="n">0</td></tr>
         <tr class="group"><th colspan="4">generated</th></tr>
-        <tr><td><span class="pfx" data-ns="authority">authority</span></td><td class="curie">http://publications.europa.eu/resource/authority/</td><td>generated</td><td class="n">0</td></tr>
-        <tr><td><span class="pfx" data-ns="authority2">authority2</span></td><td class="curie">http://publications.europa.eu/resources/authority/</td><td>generated</td><td class="n">0</td></tr>
+        <tr data-prefix="authority"><td><span class="pfx" data-ns="authority">authority</span></td><td class="curie">http://publications.europa.eu/resource/authority/</td><td>generated</td><td class="n">0</td></tr>
+        <tr data-prefix="authority2"><td><span class="pfx" data-ns="authority2">authority2</span></td><td class="curie">http://publications.europa.eu/resources/authority/</td><td>generated</td><td class="n">0</td></tr>
       </tbody>
     </table>
     </div>
@@ -643,7 +643,7 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
 
   function apply() {
     var text = q.value.trim().toLowerCase();
-    var off = {};
+    var off = Object.create(null);
     switches.forEach(function (s) { if (!s.checked) off[s.value] = true; });
     var shown = 0;
     classes.forEach(function (cls) {
@@ -653,8 +653,9 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
         var link = row.querySelector(".curie");
         var haystack = (row.cells[0].textContent + " " + (link ? link.title : "")).toLowerCase();
         var match = text && haystack.indexOf(text) >= 0;
-        anyRow = anyRow || match;
-        row.hidden = !(own || match);
+        var on = !off[row.dataset.ns];
+        anyRow = anyRow || (match && on);
+        row.hidden = !on || !(own || match);
       });
       var visible = !off[cls.dataset.ns] && (own || anyRow);
       cls.hidden = !visible;

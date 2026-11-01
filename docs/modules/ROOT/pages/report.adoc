@@ -11,14 +11,24 @@ contents on the left lists graphs, namespaces and classes; the search box keeps 
 property rows whose names or IRIs match; the switches hide whole namespaces. Classes of `rdf`,
 `rdfs`, `owl` and `sh` are hidden by default (xref:representations.adoc#filters[Namespace filters]).
 
+There is one switch per prefix of a shown class or a shown property, so a namespace that holds only
+properties gets one too. Switching a namespace off hides its class sections and its property rows in
+every class section. Search and switches combine: a class shown only because some of its rows match
+the search needs one such row whose switch is on. A property without a prefix has no switch and is
+never hidden by one. The counts of shown and hidden classes follow the search and the switches. The
+switches only hide parts of the page; to leave a namespace out of the page and every other output,
+use `--exclude-namespace`.
+
 `fingerprint-gen-doc profile.json -o out/` writes the same page again from a saved profile.
 
+[#namespaces]
 == Namespaces
 
 The namespace table lists each prefix with its namespace, where the prefix came from, and its uses:
 the instances of its classes plus the subjects of its properties, over every class and graph. It is
 grouped by source (user, packaged, prefix.cc, generated) and, in each group, the most used namespace
-comes first. When a pitfall finding names the ontology itself (for example
+comes first. A namespace excluded by `--exclude-namespace` that holds a term keeps its row, its uses
+(counted before the exclusion) and its place, and is marked `excluded`. When a pitfall finding names the ontology itself (for example
 `https://ontology.brainframe.com/2016/04/brainframe` beside the vocabulary
 `…/brainframe#`), that IRI gets no prefix and is shown whole.
 
@@ -66,8 +76,13 @@ A value that could not be computed is shown as `—`.
 
 The *Collection* section lists every measurement that failed, and the settings used. A failed
 measurement is missing from the tables above it. The *Caveats and pitfalls* section lists sampled
-classes, subjects without a type, the namespaces the filters hid, IRIs that could not be written
-and, after a scan, the pitfall findings (xref:pitfalls.adoc[Pitfalls]).
+classes, subjects without a type, the namespaces hidden by default with their class counts, the
+excluded namespaces (the note line of each graph, xref:representations.adoc#filters[Namespace filters]),
+IRIs that could not be written and, after a scan, the pitfall findings (xref:pitfalls.adoc[Pitfalls]).
+Neither the collection failures nor the pitfall findings are filtered: they still name excluded
+terms. A graph whose classes were all hidden or excluded reads _Every class of this graph is in a
+hidden or excluded namespace (see caveats)._ Only a graph with no typed instance reads _This graph
+has no typed instances._
 
 == Reading it
 

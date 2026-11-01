@@ -6,6 +6,41 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-11-02
+
+Namespace filters that work (OpenSpec change `namespace-filter`). Excluding a namespace now leaves
+out every term of it in every output, so a crowd of generated terms (brainframe's 619 singleton
+properties `relationid:<uuid>`) no longer swamps the schema, the shapes or the report.
+
+### Changed
+- **`--exclude-namespace` now leaves out every term of the matching namespaces in every output**
+  (report, SHACL, ShExC, PlantUML, pattern schema), not only their classes: properties, edge
+  targets, co-types, subclass parents, single written values and glossary lines. The meta
+  vocabularies (rdf, rdfs, owl, sh) are still hidden at class level only, unless you name them.
+- **A full namespace IRI is now a stem**: given to `--exclude-namespace` or `--include-namespace`,
+  it also matches the namespaces under it, so `http://example.org/` now also catches
+  `http://example.org/rel/`.
+
+### Added
+- **Prefix globs and IRI stems**: `--exclude-namespace 'relation*'` or
+  `--exclude-namespace 'https://my.brainframe.com/#/knowledge/'` cover several namespaces at once.
+  Matching is case-sensitive; `--include-namespace` still wins over an exclude.
+- **An `excluded namespaces` note** in each text output, e.g.
+  `# excluded namespaces: relationid (classes 0, properties 619, values 0)`.
+- **A warning when a name hides nothing**:
+  `--exclude-namespace <name>: no term in this namespace; ignored`.
+- **Report**: a switch per namespace now also hides its property rows; the namespace table lists
+  every namespace, marks the excluded ones and keeps their real uses; a caveat lists what was left
+  out.
+- Docs: combined filters with measured sizes; a *Branches* section for the new `develop`
+  integration branch.
+
+On the brainframe workspace graph, `--exclude-namespace relationid` takes the pattern schema from
+221,523 to 98,323 characters and the report from 1.34 MB to 0.82 MB.
+
+Nothing breaks: `profile.json` is unchanged, and datatypes, pitfall findings and collection failures
+are never filtered.
+
 ## [3.2.0] - 2026-11-01
 
 Schemas for LLMs (OpenSpec change `llm-schema-tools`, stage 1). The fingerprinter can now write a

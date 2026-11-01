@@ -33,10 +33,20 @@ def shared_arguments(command: Callable[..., Any]) -> Callable[..., Any]:
                 "--prefixes", "prefixes_file", type=click.Path(dir_okay=False), help="your prefix file, over the saved table"
             ),
             click.option(
-                "--exclude-namespace", multiple=True, help="leave out a namespace's classes (prefix or IRI; repeatable)"
+                "--exclude-namespace",
+                multiple=True,
+                help=(
+                    "leave out every term of the matching namespaces: "
+                    "a prefix, a prefix glob ('rel*') or an IRI stem (repeatable)"
+                ),
             ),
             click.option(
-                "--include-namespace", multiple=True, help="show a namespace again, e.g. owl (prefix or IRI; repeatable)"
+                "--include-namespace",
+                multiple=True,
+                help=(
+                    "keep the matching namespaces, over --exclude-namespace "
+                    "and the default hiding of rdf, rdfs, owl, sh classes (repeatable)"
+                ),
             ),
         ]
     ):

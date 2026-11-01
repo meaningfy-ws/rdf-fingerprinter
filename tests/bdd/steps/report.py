@@ -170,6 +170,20 @@ def no_external_resources(ctx):
     assert "url(" not in " ".join(s.get_text() for s in page.find_all("style"))
 
 
+@then("each property row carries its property's prefix")
+def property_rows_have_prefix(ctx):
+    rows = soup(ctx).select("details.cls tbody tr:not(.group)")
+    assert rows
+    for row in rows:
+        assert row["data-ns"] == row.select_one(".curie").get_text().split(":")[0]
+
+
+@then(parsers.parse("there is one switch for each of {names}"))
+def one_switch_each(ctx, names):
+    expected = re.findall(r'"([^"]+)"', names)
+    assert [i["value"] for i in soup(ctx).select("input[data-switch]")] == expected
+
+
 @then("without its scripts the page still has the table of contents, every class section and every table")
 def readable_without_script(ctx):
     page = soup(ctx)

@@ -314,3 +314,9 @@ def test_the_glossary_is_none_or_the_pattern_s_lines():
 def test_the_sample_continents_in_shex_skip_nothing_and_have_three_shapes(sample_analytics):
     shown = shex_view(sample_view(sample_analytics, CONTINENTS))
     assert ([s.label for s in shown.shapes][1], len(shown.shapes), shown.skipped_terms) == ("skos:ConceptScheme", 3, [])
+
+
+def test_the_schema_carries_the_excluded_note_of_its_pattern_view():
+    noted = pattern(klass(A, 1)).model_copy(update={"excluded_note": "rel (classes 0, properties 2, values 0)"})
+    assert shex_view(noted).excluded_note == noted.excluded_note
+    assert schema(klass(A, 1)).excluded_note is None

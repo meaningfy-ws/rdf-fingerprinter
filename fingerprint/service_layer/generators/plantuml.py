@@ -105,6 +105,7 @@ class PlantumlGenerator(Generator):
     def end_graph(self, graph: GraphAnalytics, classes: list[DiagramClass]) -> None:
         """Queue the graph's overview and module files (see `outputs`)."""
         slug = graph_slug(graph.graph)
+        note = self.excluded_note(graph)
         title = plain_label(self.label(graph.graph) if graph.graph else None)
         by_namespace: dict[str, list[DiagramClass]] = {}  # dict-ok: lookup index namespace → its class boxes
         for box in classes:
@@ -125,12 +126,14 @@ class PlantumlGenerator(Generator):
                     kind=DiagramKind.module,
                     graph_label=title,
                     slug=slug,
+                    excluded_note=note,
                     name=name,
                     classes=members,
                     reference_boxes=self.references(members),
                 )
                 modules.append((f"diagram-{slug}--{name}.puml", view))
-        self._files.append((f"diagram-{slug}.puml", self.overview(title, slug, by_namespace, modules_of)))
+        overview = self.overview(title, slug, by_namespace, modules_of).model_copy(update={"excluded_note": note})
+        self._files.append((f"diagram-{slug}.puml", overview))
         self._files += modules
 
     # --- diagram parts ---

@@ -167,6 +167,7 @@ class _Shex:
             graph_label=self.view.graph_label,
             slug=self.view.slug,
             skipped=self.view.skipped,
+            excluded_note=self.view.excluded_note,
             hidden_classes=self.view.hidden_classes,
             prefixes=[p for p in self.view.prefixes or [] if REJECTED not in p.namespace],
             shapes=shapes,

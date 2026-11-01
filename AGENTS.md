@@ -89,8 +89,10 @@ Divergence). Commit only on explicit developer consent.
 - **Subagents** — before spawning one, follow *Subagent dispatch* in the `guardrails` skill: spawn
   only when it pays, brief it fresh, take the base report back, and have finished work checked by a
   second subagent.
-- Default branch is **`master`** (the PR target). Branch off it; never commit to it
-  directly.
+- **Branches (developer, 2026-11-01):** `master` is the default and release branch; `develop` is
+  the integration branch. Branch features off `develop` and open their PR into `develop`; a release
+  is a PR into `master`, tagged from `master`, after which `develop` is brought level with `master`.
+  Never commit to either directly. CI gates PRs into both.
 
 ## `.claude/` is a regenerable index — the truth is `openspec/specs/`
 
@@ -116,7 +118,7 @@ artifacts above; do not reintroduce parallel epic files under `.claude/`.
 - **Make targets:** `make install` (Poetry), `make check-all` (the gate), `make test`, `make build`,
   `make test-e2e`, `make oxigraph-load-test-data`, `make build-docs`. Releases publish from a
   GitHub Release via Trusted Publishing (`publish.yml`); docs deploy to GitHub Pages (`docs.yml`).
-- **Release authority (developer, 2026-10-31):** an agent MAY merge a PR to `master` and publish a
+- **Release authority (developer, 2026-10-31):** an agent MAY merge a PR to `master` (or `develop`) and publish a
   release without asking again, when all of these hold: the PR's CI checks are green; `make
   check-all` and `make test-e2e` (against `make oxigraph-load-test-data`) pass locally; the version
   in `pyproject.toml` is bumped per SemVer and `CHANGELOG.md` has its entry. A release is a

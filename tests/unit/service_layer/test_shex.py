@@ -9,6 +9,7 @@ from fingerprint.domain.analytics import analyse
 from fingerprint.domain.views import GeneratorOptions, RepresentationFormat
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.generators.shex import ShexGenerator
+from tests import builders
 from tests.builders import klass, literals, profile_run, prop, resources
 from tests.fakes import EX, files
 
@@ -84,3 +85,9 @@ def test_a_class_iri_with_an_equals_sign_is_listed_after_the_hidden_line_and_war
 def test_the_iris_the_pattern_view_cannot_write_are_skipped_for_the_report():
     _, generator = outputs(profile_run(klass(EX + "bad iri", 2, prop(EX + "p", {1: 2}, literals(2))), klass(EX + "B", 2)))
     assert generator.skipped == [EX + "bad iri"]
+
+
+def test_the_note_of_the_excluded_namespaces_follows_the_legend():
+    texts = files(ShexGenerator(builders.filtered_analytics("rel"), JinjaTemplateRenderer()).serialize())
+    noted = next(iter(texts.values())).splitlines()
+    assert noted[noted.index(f"# excluded namespaces: {builders.REL_NOTE}") - 1].startswith("# comments use")

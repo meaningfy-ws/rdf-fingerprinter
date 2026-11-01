@@ -2,6 +2,9 @@
     (model/fingerprint_views.yaml), told apart by `view.kind`; names, multiplicities and arrows come ready from the
     generator (fingerprint/service_layer/generators/plantuml.py); this template only lays them out. -#}
 @startuml
+{%- if view.excluded_note %}
+' excluded namespaces: {{ view.excluded_note }}
+{%- endif %}
 {%- if view.kind == "overview" %}
 title {{ conf.title }} — {{ view.graph_label }} — overview
 {% for p in view.packages %}

@@ -4,6 +4,7 @@ Every value is written as display text here; the template only lays it out (doma
 """
 
 from fingerprint import config
+from fingerprint.domain.namespace_filter import namespace_uses, namespaces_with_terms
 from fingerprint.domain.pitfalls import IMPORTANCE_ORDER, rank
 from fingerprint.domain.profile import (
     ClassAnalytics,
@@ -30,6 +31,7 @@ from fingerprint.domain.views import (
     DocumentPropertyGroup,
     DocumentTerm,
     DocumentValue,
+    ExcludedGraphNote,
     FailureNote,
     HiddenNamespace,
     Overview,
@@ -85,9 +87,11 @@ class DocumentGenerator(Generator):
         for value_type in prop.value_types or []:
             self.accepts(value_type)
         cardinality = prop.cardinality_label or ("present" if prop.presence_only else ABSENT)
+        entry = self.table.entry_for(prop.property)
         return DocumentProperty(
             iri=prop.property,
             label=self.label(prop.property),
+            prefix=entry.prefix if entry else "",
             subjects=number(prop.subjects_with_property),
             min=number(prop.min),
             max=number(prop.max),
@@ -214,7 +218,7 @@ class DocumentGenerator(Generator):
             slug=graph_slug(graph.graph),
             label=self.graph_label(graph.graph),
             iri=graph.graph,
-            empty=not graph.class_partitions,
+            empty=not graph.class_partitions and not any(t.classes for t in graph.excluded_terms or []),
             classes=ordered,
             taxonomy=self.taxonomy(ordered),
         )
@@ -277,22 +281,19 @@ class DocumentGenerator(Generator):
 
     def namespace_table(self) -> list[PrefixDeclaration]:
         """By prefix source, then uses descending, then prefix (DEC-18)."""
-        uses = dict.fromkeys((e.namespace for e in self.table.entries), 0)  # dict-ok: lookup index namespace → uses
-
-        def count(iri: str, n: int | None) -> None:
-            entry = self.table.entry_for(iri)
-            if entry:
-                uses[entry.namespace] += n or 0
-
-        for g in self.analytics.graphs or []:
-            for c in g.class_partitions or []:
-                count(c.class_iri, c.instances)
-                for p in c.property_partitions or []:
-                    count(p.property, p.subjects_with_property)
+        counted = self.analytics.namespace_uses or namespace_uses(self.analytics, self.table)
+        uses = {u.namespace: u.uses for u in counted}  # dict-ok: lookup index namespace → uses
+        excluded = set(self.filters.excluded or []) & namespaces_with_terms(self.analytics)  # an ignored value is no mark
         order = list(PrefixSource)
         entries = sorted(self.table.entries, key=lambda e: (order.index(e.source), -uses[e.namespace], e.prefix))
         return [
-            PrefixDeclaration(prefix=e.prefix, namespace=e.namespace, source=str(e.source), uses=uses[e.namespace])
+            PrefixDeclaration(
+                prefix=e.prefix,
+                namespace=e.namespace,
+                source=str(e.source),
+                uses=uses[e.namespace],
+                excluded=e.namespace in excluded,
+            )
             for e in entries
         ]
 
@@ -331,6 +332,8 @@ class DocumentGenerator(Generator):
             for name, value in sorted(analytics.settings.model_dump(mode="json").items())
         ]
         namespaces = self.namespace_table()
+        shown = [c for g in graphs for c in g.classes or []]
+        prefixes = {c.prefix for c in shown} | {p.prefix for c in shown for p in c.properties or []}
         return ProfileDocument(
             overview=Overview(
                 endpoint=analytics.endpoint,
@@ -339,6 +342,7 @@ class DocumentGenerator(Generator):
                 tool_version=analytics.tool_version,
             ),
             namespaces=namespaces,
+            switches=sorted(p for p in prefixes if p),
             collection=CollectionSection(settings=settings, failures=failures),
             pitfalls=self.pitfalls(),
             graphs=graphs,
@@ -346,6 +350,11 @@ class DocumentGenerator(Generator):
                 sampled=sampled,
                 untyped=untyped,
                 hidden=hidden,
+                excluded=[
+                    ExcludedGraphNote(graph=self.graph_label(g.graph), note=note)
+                    for g in analytics.graphs or []
+                    if (note := self.excluded_note(g))
+                ],
                 skipped=list(self.skipped),
                 unjoined_default=bool(analytics.settings.schema_graphs)
                 and any(not g.graph and g.pitfalls is not None for g in analytics.graphs or []),

@@ -125,7 +125,8 @@ Read it as:
 === Blocks and headers
 
 The file holds, in order: the `PREFIX` lines it uses, sorted; the legend line; `# hidden: <n> classes`
-when filters hid any class; the blocks, by instances (largest first), then by name; the glossary.
+when filters hid any class; `# excluded namespaces: …` when `--exclude-namespace` left out a term
+(<<excluding-namespaces,Excluding a namespace>>); the blocks, by instances (largest first), then by name; the glossary.
 
 A block header is `(:<group>) <instances>`, then:
 
@@ -189,10 +190,12 @@ The statistics of a nested group are over all its instances, not per path.
 
 [source,ebnf]
 ----
-output    ::= prefix* legend [hidden] block* glossary
+output    ::= prefix* legend [hidden] [excluded] block* glossary
 prefix    ::= "PREFIX " PNAME_NS " <" IRI ">" NL
 legend    ::= "# " LEGEND NL
 hidden    ::= "# hidden: " INT " classes" NL
+excluded  ::= "# excluded namespaces: " count ("; " count)* NL
+count     ::= PN_PREFIX " (classes " INT ", properties " INT ", values " INT ")"
 block     ::= header NL edge*
 header    ::= "(:" group ") " INT [" ~" INT " first_n"] [" co " pair (", " pair)*] [" via " link (", " link)*]
 link      ::= "(:" group ")-" name
@@ -348,6 +351,76 @@ and further down the block, `-skos:inScheme-> (:owl:Ontology&skos:ConceptScheme)
 hidden scheme. There is no `(:owl:Ontology&skos:ConceptScheme)` block.
 
 Nested groups are never hidden by size; they show wherever a shown block reaches them.
+
+[#excluding-namespaces]
+== Excluding a namespace
+
+A size filter hides classes; `--exclude-namespace` leaves out every term of a namespace: its
+classes, its edges and `via` entries, and its glossary lines
+(xref:representations.adoc#filters[Namespace filters]). It is the tool for a namespace of
+generated terms that crowds the file.
+
+The brainframe workspace graph models each relation as an RDF singleton property
+`relationid:<uuid>` (`https://my.brainframe.com/#/knowledge/RelationId/`): 619 distinct properties,
+one class each, on 17 of its 51 classes. They fill more than half of the pattern file. Measured on
+its saved profile (Unicode code points):
+
+[source,bash]
+----
+fingerprint-gen-pattern profile.json -o llm/ --exclude-namespace relationid
+fingerprint-gen-shex    profile.json -o llm/ --exclude-namespace relationid
+----
+
+[cols="2,1,1"]
+|===
+| Workspace file | Full | `--exclude-namespace relationid`
+
+| pattern schema (`pattern-workspace-34f17ca3.txt`) | 221,523 | 98,323
+| ShExC (`shex-workspace-34f17ca3.shex`) | 249,854 | 110,555
+|===
+
+Neither filtered file holds `relationid:`; each says what it left out, in one comment line near the top:
+
+[source,text]
+----
+# excluded namespaces: relationid (classes 0, properties 619, values 0)
+----
+
+Filters combine: repeat the option, name several namespaces at once by an IRI stem or a prefix
+glob, and bring one back with `--include-namespace` (it wins over an exclude):
+
+[source,bash]
+----
+# four prefixes
+fingerprint-gen-pattern profile.json -o llm/ --exclude-namespace relationid \
+  --exclude-namespace foaf --exclude-namespace prv --exclude-namespace dcterms
+# every instance namespace under one IRI stem
+fingerprint-gen-pattern profile.json -o llm/ --exclude-namespace 'https://my.brainframe.com/#/knowledge/'
+# the same, keeping one of them
+fingerprint-gen-pattern profile.json -o llm/ --exclude-namespace 'https://my.brainframe.com/#/knowledge/' \
+  --include-namespace document
+----
+
+[cols="3,1,1"]
+|===
+| Filters | Pattern schema | ShExC
+
+| none | 221,523 | 249,854
+| `relationid` | 98,323 | 110,555
+| `relationid`, `foaf`, `prv`, `dcterms` | 79,825 | 89,828
+| the `https://my.brainframe.com/#/knowledge/` stem | 68,308 | 78,339
+| the stem, `--include-namespace document` | 68,487 | 78,526
+|===
+
+The note then lists each namespace in prefix order:
+
+[source,text]
+----
+# excluded namespaces: dcterms (classes 0, properties 11, values 0); foaf (classes 0, properties 1, values 0); prv (classes 0, properties 2, values 0); relationid (classes 0, properties 619, values 0)
+----
+
+The statement nodes of those relations are typed `brainframe:RelationId`, in the same namespace as
+the real classes, so a namespace filter cannot hide them.
 
 [#pattern-view]
 == The pattern view

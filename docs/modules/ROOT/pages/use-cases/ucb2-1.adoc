@@ -46,7 +46,7 @@ This Blue path adds only:
 
 1a. `--shapes-namespace` given (SHACL only) — every shape is minted under it instead of under each class's `<namespace>/shape/`.
 1b. `--prefixes FILE` given — its prefixes replace the saved ones for the namespaces it names.
-1c. `--exclude-namespace` / `--include-namespace` given — the classes of those namespaces are hidden or shown again.
+1c. `--exclude-namespace` / `--include-namespace` given — every term of the matching namespaces is left out, or the matching namespaces are kept over the exclusion and the default hiding of meta classes; each output notes what it left out.
 
 == Technology and Data Variations
 

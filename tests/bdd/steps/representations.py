@@ -12,18 +12,17 @@ from rdflib import RDF, Graph, Literal, Namespace, URIRef
 from fingerprint.adapters.profile_file import load_profile, save_profile
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
+from fingerprint.domain.namespace_filter import META_NAMESPACES
 from fingerprint.domain.prefixes import namespace_of
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.entrypoints.cli import generate
-from fingerprint.service_layer.generators.generator import META_NAMESPACES
-from fingerprint.service_layer.prefixes import resolve_namespaces
 from fingerprint.service_layer.representations import (
     generate_from_profile_file,
     make_generator,
-    warn_unknown_filters,
     with_threshold,
 )
 from tests.bdd.steps.common import big_failure
+from tests.bdd.steps.filters import run_filtered
 from tests.builders import klass, literals, profile_run, prop, resources
 from tests.fakes import EX, files
 from tests.sample_data import GOLDEN, SAMPLE_PROFILE, TEST_DATA
@@ -567,19 +566,7 @@ def filtered_with_schemas(ctx, how, caplog):
 
 
 def generate_formats(ctx, formats, how, caplog):
-    names = re.findall(r'"([^"]+)"', how)
-    options = GeneratorOptions(
-        include_namespaces=names if "include" in how else [], exclude_namespaces=names if "exclude" in how else []
-    )
-    with caplog.at_level(logging.WARNING):
-        texts = {}
-        for name in formats:
-            texts.update(
-                files(make_generator(name, analyse(ctx["run"]), JinjaTemplateRenderer(), options=options).serialize())
-            )
-        if "exclude" in how or "include" in how:
-            warn_unknown_filters(resolve_namespaces(ctx["run"]), options)
-    ctx["texts"], ctx["log"] = texts, caplog.text
+    run_filtered(ctx, caplog, formats, how)
 
 
 @then(parsers.parse('"{cls}" has a node shape and a box'))

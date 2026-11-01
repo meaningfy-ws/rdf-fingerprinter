@@ -6,8 +6,9 @@ from bs4 import BeautifulSoup
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.profile import Failure, QueryKind
+from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer.representations import make_generator
-from tests.builders import klass, literals, profile_run, prop
+from tests.builders import ORG, REL, REL_NOTE, filtered_analytics, klass, literals, profile_run, prop, with_namespaces
 from tests.fakes import EX, files
 
 
@@ -158,3 +159,66 @@ def test_the_page_view_lists_the_skipped_iris_in_the_page_and_in_the_view():
     generator = generator_of(profile_run(klass(bad, 1), klass(EX + "A", 1)))
     ((_, view),) = generator.outputs()
     assert view.skipped == [bad] and view.caveats.skipped == [bad]
+
+
+# --- namespace-filter: the report under the term filter (TC-D1) ---
+
+
+def filtered_page(*exclude, run=None):
+    """The document view and the page of the filter profile (or `run`) with `exclude`d namespaces."""
+    generator = make_generator(
+        "doc",
+        filtered_analytics(*exclude, run=run),
+        JinjaTemplateRenderer(),
+        options=GeneratorOptions(exclude_namespaces=list(exclude)),
+    )
+    ((name, view),) = generator.outputs()
+    (text,) = files(generator.serialize()).values()
+    return view, BeautifulSoup(text, "html.parser")
+
+
+def test_property_rows_carry_their_prefix_and_the_switches_list_the_prefixes_in_use():
+    view, soup = filtered_page()
+    rows = {p.iri: p.prefix for c in view.graphs[0].classes for p in c.properties}
+    assert rows[EX + "name"] == "ex" and rows[REL + "r1"] == "rel"
+    assert view.switches == ["ex", "org", "rdfs", "rel"]
+    assert {tr["data-ns"] for tr in soup.select("details.cls tbody tr:not(.group)")} == {"ex", "rdfs", "rel"}
+    assert [i["value"] for i in soup.select("input[data-switch]")] == view.switches
+
+
+def test_a_property_no_prefix_covers_has_no_prefix_and_no_switch():
+    run = profile_run(klass(EX + "A", 1, prop("urn:x:p", {1: 1}, literals(1))))
+    view, soup = filtered_page(run=run.model_copy(update={"namespaces": []}))
+    assert [p.prefix for p in view.graphs[0].classes[0].properties] == [""]
+    assert view.switches == [] and not soup.select("input[data-switch]")
+
+
+def test_the_excluded_namespace_keeps_its_uses_and_its_place_and_is_marked_in_the_table():
+    view, soup = filtered_page("rel")
+    plain, _ = filtered_page()
+    assert [(p.prefix, p.uses) for p in view.namespaces] == [(p.prefix, p.uses) for p in plain.namespaces]
+    assert {p.prefix: p.uses for p in view.namespaces}["rel"] == 2
+    assert [p.prefix for p in view.namespaces if p.excluded] == ["rel"]
+    assert [tr["data-prefix"] for tr in soup.select("#namespaces tr.excluded")] == ["rel"]
+    assert "rel" not in view.switches and view.switches == ["ex", "org", "rdfs"]
+
+
+def test_an_excluded_namespace_that_hides_nothing_is_not_marked():
+    view, soup = filtered_page("foaf")
+    assert not any(p.excluded for p in view.namespaces) and not soup.select("#namespaces tr.excluded")
+
+
+def test_the_caveats_note_the_excluded_namespaces_of_each_graph():
+    view, soup = filtered_page("rel")
+    ((note,),) = [[(n.graph, n.note)] for n in view.caveats.excluded]
+    assert note == (view.graphs[0].label, REL_NOTE)
+    assert REL_NOTE in soup.find(id="caveats").get_text(" ")
+    assert filtered_page()[0].caveats.excluded == []
+
+
+def test_a_graph_whose_classes_are_all_excluded_is_not_empty():
+    only_org = profile_run(klass(ORG + "Unit", 2, prop(ORG + "name", {1: 2}, literals(2))))
+    view, soup = filtered_page("org", run=with_namespaces(only_org, ("org", ORG)))
+    assert view.graphs[0].empty is False and view.graphs[0].classes == []
+    assert "Every class of this graph is in a hidden or excluded namespace (see caveats)." in soup.get_text(" ")
+    assert document(profile_run()).get_text(" ").count("no typed instances") == 1

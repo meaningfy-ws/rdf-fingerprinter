@@ -24,10 +24,9 @@
   {%- if iri.startswith('http://') or iri.startswith('https://') -%}</a>{%- else -%}</span>{%- endif -%}
 {%- endmacro -%}
 
-{%- set totals = namespace(classes=0, prefixes=[]) -%}
+{%- set totals = namespace(classes=0) -%}
 {%- for g in view.graphs or [] -%}{%- for c in g.classes or [] -%}
   {%- set totals.classes = totals.classes + 1 -%}
-  {%- if c.prefix not in totals.prefixes -%}{%- set totals.prefixes = totals.prefixes + [c.prefix] -%}{%- endif -%}
 {%- endfor -%}{%- endfor -%}
 
 {% block style %}
@@ -59,10 +58,10 @@
     {%- if g.empty %}<p class="note">No classes.</p>{% endif %}
   </details>
   {%- endfor %}
-  {%- if totals.prefixes %}
+  {%- if view.switches %}
   <fieldset hidden data-js>
     <legend>Show namespaces</legend>
-    {%- for prefix in totals.prefixes|sort %}
+    {%- for prefix in view.switches %}
     <label><input type="checkbox" checked data-switch value="{{ prefix }}"> <span class="pfx" data-ns="{{ prefix }}">{{ prefix }}</span></label>
     {%- endfor %}
   </fieldset>
@@ -95,7 +94,7 @@
         {%- if several and loop.changed(p.source) %}
         <tr class="group"><th colspan="4">{{ (p.source or '')|replace('_', '.') }}</th></tr>
         {%- endif %}
-        <tr><td><span class="pfx" data-ns="{{ p.prefix }}">{{ p.prefix }}</span></td><td class="curie">{{ p.namespace }}</td><td>{{ (p.source or '')|replace('_', '.') }}</td><td class="n">{{ p.uses if p.uses is not none else '—' }}</td></tr>
+        <tr data-prefix="{{ p.prefix }}"{% if p.excluded %} class="excluded"{% endif %}><td><span class="pfx" data-ns="{{ p.prefix }}">{{ p.prefix }}</span>{% if p.excluded %} <span class="note">excluded</span>{% endif %}</td><td class="curie">{{ p.namespace }}</td><td>{{ (p.source or '')|replace('_', '.') }}</td><td class="n">{{ p.uses if p.uses is not none else '—' }}</td></tr>
       {%- endfor %}
       </tbody>
     </table>
@@ -120,7 +119,7 @@
     {%- if g.empty %}
     <p class="note">This graph has no typed instances.</p>
     {%- elif not g.classes %}
-    <p class="note">Every class of this graph is in a hidden namespace (see caveats).</p>
+    <p class="note">Every class of this graph is in a hidden or excluded namespace (see caveats).</p>
     {%- endif %}
     {%- for c in g.classes or [] %}
     <details class="cls" id="{{ c.anchor }}" open data-ns="{{ c.prefix }}" data-q="{{ c.q }}">
@@ -147,7 +146,7 @@
           <tr class="group"><th colspan="12">{{ g.name }}</th></tr>
         {%- endif %}
         {%- for p in g.properties or [] %}
-          <tr>
+          <tr data-ns="{{ p.prefix }}">
             <td>{{ term(p.label, p.iri) }}</td><td class="n">{{ p.subjects }}</td><td class="n">{{ p.min }}</td><td class="n">{{ p.max }}</td>
             <td class="n">{{ p.avg }}</td><td>{{ p.kind }}</td><td class="n">{{ p.distinct }}</td>
             <td>{% for t in p.types or [] %}{{ term(t.label, t.iri) }}{{ ", " if not loop.last }}{% else %}—{% endfor %}</td>
@@ -199,7 +198,7 @@
   <section id="caveats">
     <h2>Caveats{% if view.pitfalls %} and pitfalls{% endif %}</h2>
     {%- set cv = view.caveats %}
-    {%- if not (cv.sampled or cv.untyped or cv.hidden or cv.skipped or cv.unjoined_default) %}
+    {%- if not (cv.sampled or cv.untyped or cv.hidden or cv.excluded or cv.skipped or cv.unjoined_default) %}
     <p>Nothing to flag: every class was read exactly and every IRI is shown.</p>
     {%- endif %}
     {%- if cv.sampled %}
@@ -214,6 +213,11 @@
     <h3>Hidden namespaces</h3>
     <p class="note">Their classes are left out of this page; show them with <code>--include-namespace</code>.</p>
     <ul>{% for h in cv.hidden %}<li><span class="pfx" data-ns="{{ h.prefix }}" title="{{ h.namespace }}">{{ h.prefix }}</span>: {{ h.classes }} classes</li>{% endfor %}</ul>
+    {%- endif %}
+    {%- if cv.excluded %}
+    <h3>Excluded namespaces</h3>
+    <p class="note">Every term of these namespaces is left out of this page and the other outputs; show them by removing <code>--exclude-namespace</code>.</p>
+    <ul>{% for e in cv.excluded %}<li>{{ e.graph }}: {{ e.note }}</li>{% endfor %}</ul>
     {%- endif %}
     {%- if cv.skipped %}
     <h3>IRIs that cannot be written</h3>
@@ -286,7 +290,7 @@
 
   function apply() {
     var text = q.value.trim().toLowerCase();
-    var off = {};
+    var off = Object.create(null);
     switches.forEach(function (s) { if (!s.checked) off[s.value] = true; });
     var shown = 0;
     classes.forEach(function (cls) {
@@ -296,8 +300,9 @@
         var link = row.querySelector(".curie");
         var haystack = (row.cells[0].textContent + " " + (link ? link.title : "")).toLowerCase();
         var match = text && haystack.indexOf(text) >= 0;
-        anyRow = anyRow || match;
-        row.hidden = !(own || match);
+        var on = !off[row.dataset.ns];
+        anyRow = anyRow || (match && on);
+        row.hidden = !on || !(own || match);
       });
       var visible = !off[cls.dataset.ns] && (own || anyRow);
       cls.hidden = !visible;

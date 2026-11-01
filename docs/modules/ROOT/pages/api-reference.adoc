@@ -25,6 +25,11 @@ report, run = fingerprint_report(
 print(report)  # report/main.html; run.failures lists what could not be measured
 ----
 
+`exclude_namespaces=["skos"]` leaves out every `skos:` term of the report and the shapes and
+diagrams: the `skos:` classes, properties such as `skos:prefLabel`, and `skos:` object classes. Up to
+3.2 it hid the `skos:` classes only. Values are matched as prefixes, prefix globs or IRI stems
+(xref:representations.adoc#filters[Namespace filters]).
+
 [cols="2,2,4"]
 |===
 | Parameter | Type | Meaning
@@ -45,6 +50,12 @@ It returns the path of `main.html` and the raw run. Every usage error — an inv
 unwritable shapes namespace, a module size below 1 — is a `UsageError` (a `ValueError`) raised before
 any query; an endpoint unreachable at the start raises `EndpointUnreachable`. `profile.json`, with its
 namespace table, is saved before anything is rendered.
+
+The filters are applied once, to the analysed profile, by `generate_representations`, which
+`fingerprint_report` and `generate_from_profile_file` call. A `Generator`
+(`fingerprint.service_layer.generators`) built directly from analytics hides the classes of the
+hidden and excluded namespaces only: it keeps their other terms and writes no `excluded namespaces`
+note.
 
 The steps are also available separately: `collect`, `resolve_namespaces`
 (`fingerprint.service_layer.prefixes`), `save_profile` and `generate_representations`
