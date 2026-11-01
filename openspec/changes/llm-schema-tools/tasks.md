@@ -51,7 +51,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 - [x] 1.10 Step definitions for the MODIFIED profile-representations scenarios (`› No files for empty graphs › Empty default graph`, the two new rows of `› Golden outputs › Golden file per output`); `make refresh-golden` writes the six golden files; review them against design §E (the worked example)
   - Layer: tests. Depends on: 1.9.
   - Tests: IT-3; Gherkin `› Generators share one framework › Custom template package` still green.
-- [ ] 1.11 `Makefile` `check-wheel`: grep for `pattern_schema/templates/schema.txt`, `shex_schema/templates/schema.shex` and `q12_term_annotations.rq`
+- [x] 1.11 `Makefile` `check-wheel`: grep for `pattern_schema/templates/schema.txt`, `shex_schema/templates/schema.shex` and `q12_term_annotations.rq`
   - Layer: build. Depends on: 1.9.
   - Tests: `make build` green; `tests/guards/test_repository_wiring.py` green.
 - [ ] 1.12 Record in `inputs/format-sizes.md` the Unicode code points (`wc -m`) of every golden `pattern-*` and `shex-*` file, with and without the prefix block and legend, and the SHACL golden files for reference (DEC-8)
@@ -78,7 +78,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.8 · [x] 1.9 · [x] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
+- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.8 · [x] 1.9 · [x] 1.10 · [x] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
 
 ## Verification
 
