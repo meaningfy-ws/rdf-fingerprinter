@@ -76,3 +76,27 @@ Golden-file tests of Turtle outputs SHALL compare the produced and the golden fi
 #### Scenario: A changed triple
 - **WHEN** a generator emits one literal different from its golden file
 - **THEN** the golden test fails and reports that triple as only in the output and the original as only in the golden file
+
+## MODIFIED Requirements
+
+### Requirement: Tokenless release
+Publishing to PyPI SHALL use Trusted Publishing (OIDC); the repository MUST NOT need a PyPI token secret.
+
+#### Scenario: Release publishes the package
+- **WHEN** a release is published on GitHub
+- **THEN** the workflow builds the sdist and wheel with Poetry and uploads them to PyPI via OIDC
+- **AND** the wheel contains `fingerprint_report_templates` with its templates and `fingerprint/adapters/queries` with its SPARQL queries
+
+### Requirement: Onion layers are enforced
+`.importlinter` SHALL enforce the layers `entrypoints` > `service_layer` > `adapters` > `domain`
+(each importing only layers below it), SHALL forbid the generated modules `fingerprint.domain.profile`
+and `fingerprint.domain.views` from importing any other `fingerprint` module, and SHALL forbid
+`fingerprint.domain` from importing `rdflib`, `jinja2`, `eds4jinja2` or `click`.
+
+#### Scenario: Generated module imports project code
+- **WHEN** `fingerprint/domain/profile.py` imports `fingerprint.domain.analytics`
+- **THEN** `make check-architecture` exits non-zero
+
+#### Scenario: Domain imports an adapter
+- **WHEN** a module in `fingerprint.domain` imports `fingerprint.adapters`
+- **THEN** `make check-architecture` exits non-zero and names the broken contract

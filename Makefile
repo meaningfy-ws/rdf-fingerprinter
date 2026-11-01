@@ -46,9 +46,11 @@ build: ## Build the sdist and wheel into dist/ and check the wheel
 	@ poetry build
 	@ $(MAKE) --no-print-directory check-wheel
 
-check-wheel: ## Fail when the wheel lacks the report templates
+check-wheel: ## Fail when the wheel lacks the report templates or the SPARQL queries
 	@ unzip -l dist/*.whl | grep -q "$(TEMPLATES_PACKAGE)/fingerprint_report/templates/main.html" \
 		|| (echo "wheel is missing the report templates" && exit 1)
+	@ unzip -l dist/*.whl | grep -q "fingerprint/adapters/queries/q0_named_graphs.rq" \
+		|| (echo "wheel is missing the SPARQL queries" && exit 1)
 
 #-----------------------------------------------------------------------------
 # Quality gates — `make check-all` is the gate CI runs
