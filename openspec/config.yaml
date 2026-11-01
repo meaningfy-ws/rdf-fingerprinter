@@ -17,7 +17,7 @@ context: |
   queries; the report main.html is the document generator's page (3.0).
   Layers + purity contracts in .importlinter (`make check-architecture`). Poetry; Python 3.12–3.14.
   Living specs: openspec/specs/ (statistics-collection, profile-analytics, fingerprint-report,
-  profile-representations, namespace-prefixes, developer-tooling). Gherkin in tests/features/, steps in tests/bdd/steps/ (pytest-bdd); tests by tier per docs development.adoc "Tests".
+  profile-representations, namespace-prefixes, developer-tooling, pitfall-scans; checks in fingerprint/adapters/queries/pitfalls/). Gherkin in tests/features/, steps in tests/bdd/steps/ (pytest-bdd); tests by tier per docs development.adoc "Tests".
   Gate: `make check-all` (unit tests, no store; what CI runs). tests/e2e need a SPARQL store:
   Oxigraph (`make oxigraph-load-test-data`, then `make test-e2e`), local only; endpoint from
   RDF_FINGERPRINTER_TEST_ENDPOINT. Docs: Antora in docs/, GitHub Pages (`make build-docs`).
