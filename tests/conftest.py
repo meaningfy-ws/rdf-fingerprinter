@@ -30,10 +30,11 @@ def _no_network(request, monkeypatch):
     if E2E in request.path.parents:
         return
 
-    def refuse(self, *args, **kwargs):
+    def refuse(*args, **kwargs):
         raise RuntimeError("network access is not allowed outside tests/e2e/")
 
     monkeypatch.setattr(socket.socket, "connect", refuse)
+    monkeypatch.setattr(socket, "getaddrinfo", refuse)  # a name lookup is network access too
 
 
 @pytest.fixture(scope="session")

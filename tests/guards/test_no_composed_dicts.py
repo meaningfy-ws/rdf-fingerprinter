@@ -159,3 +159,11 @@ def test_the_allowlist_names_existing_files():
 )
 def test_the_check_finds_composed_dicts(source: str, lines: list[int]):
     assert offences(source) == lines
+
+
+def test_a_new_dict_value_is_an_offence():
+    assert offences("def f(p):\n    return {'path': p}\n") == [2]
+
+
+def test_a_dict_marked_with_its_library_boundary_reason_is_no_offence():
+    assert offences("def f(p):\n    return {'conf': p}  # dict-ok: eds4jinja2 configuration\n") == []

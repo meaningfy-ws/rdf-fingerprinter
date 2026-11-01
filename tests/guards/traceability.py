@@ -13,7 +13,8 @@ from pytest_bdd.feature import get_features
 
 SCENARIO_LINE = re.compile(r"^#### Scenario(?: Outline)?:\s*(.*?)\s*$")
 REQUIREMENT_LINE = re.compile(r"^### Requirement:\s*(.*?)\s*$")
-SECTION_LINE = re.compile(r"^## (ADDED|MODIFIED|REMOVED) Requirements\b")
+SECTION_LINE = re.compile(r"^## (ADDED|MODIFIED|REMOVED|RENAMED) Requirements\b")
+RENAME_LINE = re.compile(r"^-?\s*(FROM|TO):\s*`?(?:### Requirement:)?\s*(.*?)`?\s*$")
 FEATURE_SCENARIO_LINE = re.compile(r"^\s*(?:Scenario Outline|Scenario Template|Scenario|Example):\s*(.*?)\s*$")
 ALLOW_LIST_FIELDS = 4
 
@@ -52,14 +53,32 @@ def _parse_spec(path: Path, sections: tuple[str, ...] | None = None) -> dict[str
     return found
 
 
+def _renames(path: Path) -> list[tuple[str, str]]:
+    """The (FROM, TO) requirement names under `## RENAMED Requirements`, in file order."""
+    names: list[str] = []
+    in_section = False
+    for line in path.read_text().splitlines():
+        if section := SECTION_LINE.match(line):
+            in_section = section.group(1) == "RENAMED"
+        elif line.startswith("## "):
+            in_section = False
+        elif in_section and (match := RENAME_LINE.match(line)):
+            names.append(match.group(2))
+    return list(zip(names[0::2], names[1::2], strict=False))
+
+
 def _spec_titles(base: Path, capability: str, delta_roots: tuple[Path, ...]) -> Requirements:
-    """The scenarios of a capability: the durable spec, then each delta (MODIFIED replaces, ADDED adds)."""
+    """A capability's scenarios: the durable spec, then each delta (RENAMED, MODIFIED replaces, ADDED adds, REMOVED drops)."""
     spec = base / capability / "spec.md"
     requirements = _parse_spec(spec) if spec.exists() else {}
     for root in delta_roots:
         delta = root / capability / "spec.md"
         if delta.exists():
+            for old, new in _renames(delta):
+                requirements[new] = requirements.pop(old, [])
             requirements.update(_parse_spec(delta, ("ADDED", "MODIFIED")))
+            for removed in _parse_spec(delta, ("REMOVED",)):
+                requirements.pop(removed, None)
     return Requirements(requirements)
 
 

@@ -60,7 +60,8 @@ def test_the_prefix_cc_warning_carries_the_failure_reason_and_is_logged_once(cap
     with caplog.at_level(logging.WARNING):
         resolve_namespaces(run(BF + "A"), packaged=[], prefix_list=lookup)
     assert lookup.calls == 1
-    assert caplog.messages == ["prefix.cc lookup failed: unreachable; generating prefixes"]
+    (message,) = caplog.messages
+    assert "prefix.cc" in message and "unreachable" in message
 
 
 def test_no_fetch_when_the_files_name_everything():

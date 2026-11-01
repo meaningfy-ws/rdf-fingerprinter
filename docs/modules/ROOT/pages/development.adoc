@@ -175,7 +175,9 @@ test: a live collection must equal the sample profile.
 | `make check-mutation` (about 1 h; weekly CI and on demand, locally before a PR)
 | mutmut over `fingerprint/domain/` and `fingerprint/service_layer/`. The score,
 (killed + timeout) / all counted mutants, must not fall below `tests/guards/mutation_score.txt`. A
-drop exits 1 and lists the surviving mutants; a rise rewrites the file: commit it.
+drop exits 1 and lists the surviving mutants; a rise rewrites the file: commit it. A score raised by
+the weekly CI run is not committed automatically; a developer commits it after a local
+`make check-mutation`.
 |===
 
 Locally, Hypothesis uses the `dev` profile (random, no deadline); pass

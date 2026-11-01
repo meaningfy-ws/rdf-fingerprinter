@@ -16,6 +16,11 @@ def test_a_unit_test_cannot_open_a_socket():
         socket.create_connection(("localhost", 1))
 
 
+def test_a_unit_test_cannot_resolve_a_name():
+    with pytest.raises(RuntimeError, match="network access is not allowed outside tests/e2e/"):
+        socket.getaddrinfo("example.org", 80)
+
+
 def test_an_e2e_test_may_open_a_socket(pytester):
     """Run the real conftest over a copy of the tier layout: e2e reaches the network, unit does not."""
     pytester.makeconftest(CONFTEST.read_text())

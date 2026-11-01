@@ -17,7 +17,6 @@ COMPOSE = docker compose --file docker/docker-compose.yml --env-file docker/.env
 TEST_DATA = tests/test_data
 GRAPH_BASE = http://publications.europa.eu/resources/authority
 OXIGRAPH = http://localhost:$(RDF_FINGERPRINTER_OXIGRAPH_PORT)
-# Coverage is reported, not gated.
 
 .DEFAULT_GOAL := help
 

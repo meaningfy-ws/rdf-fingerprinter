@@ -8,19 +8,11 @@ from pathlib import Path
 
 import yaml
 
+from tests.guards.makefile import MAKEFILE
+from tests.guards.makefile import recipe as _recipe
+
 ROOT = Path(__file__).parents[2]
 GATES = ("lint", "typecheck", "check-architecture", "check-models", "check-spec")
-
-
-def _makefile() -> str:
-    return (ROOT / "Makefile").read_text()
-
-
-def _recipe(target: str) -> tuple[list[str], str]:
-    """The prerequisites and the recipe text of a Makefile target."""
-    match = re.search(rf"^{re.escape(target)}:([^\n#]*)(?:##[^\n]*)?\n((?:\t[^\n]*\n)*)", _makefile(), re.MULTILINE)
-    assert match, f"Makefile has no target {target}"
-    return match.group(1).split(), match.group(2)
 
 
 def _workflow(name: str) -> dict:  # dict-ok: parsed YAML
@@ -38,13 +30,15 @@ def _steps(workflow: dict) -> list[dict]:  # dict-ok: parsed YAML
 def test_check_all_runs_every_static_check_and_the_tests():
     check_all, _ = _recipe("check-all")
     check_quality, _ = _recipe("check-quality")
-    assert "test" in check_all and "check-quality" in check_all
+    assert {"check-quality", "test"} <= set(check_all)  # whole prerequisites: `test-e2e` would not count
     assert set(GATES) <= set(check_quality)
 
 
-def test_the_test_target_runs_pytest_and_fails_on_a_failing_test():
+def test_the_test_target_runs_pytest_with_a_coverage_floor_and_no_recipe_line_ignores_failure():
     _, recipe = _recipe("test")
     assert "poetry run pytest" in recipe
+    assert re.search(r"--cov-fail-under=\d+", recipe)
+    assert not [line for line in recipe.splitlines() if line.lstrip().startswith("-") or "|| true" in line]
 
 
 def test_ci_runs_check_all_on_push_and_pull_request_to_master():
@@ -73,15 +67,18 @@ def test_the_release_workflow_builds_with_poetry_and_checks_the_wheel():
     assert "check-wheel" in build_recipe + " ".join(build_prereqs)
     assert "$(TEMPLATES_PACKAGE)" in _recipe("check-wheel")[1]
     assert "fingerprint/adapters/queries/" in _recipe("check-wheel")[1]
-    assert "TEMPLATES_PACKAGE = fingerprint_report_templates" in _makefile()
+    assert "TEMPLATES_PACKAGE = fingerprint_report_templates" in MAKEFILE.read_text()
 
 
-def test_the_docs_workflow_builds_on_pull_requests_and_deploys_only_from_master():
+def test_the_docs_workflow_builds_with_antora_on_pull_requests():
     workflow = _workflow("docs")
     assert "pull_request" in _triggers(workflow)
     assert any(step.get("run") == "make build-docs" for step in workflow["jobs"]["build"]["steps"])
     assert "antora" in _recipe("build-docs")[1]
-    deploy = workflow["jobs"]["deploy"]
+
+
+def test_the_docs_workflow_deploys_only_after_the_build_and_only_from_master():
+    deploy = _workflow("docs")["jobs"]["deploy"]
     assert deploy["needs"] == "build"
     assert "refs/heads/master" in deploy["if"] and "pull_request" in deploy["if"]
 

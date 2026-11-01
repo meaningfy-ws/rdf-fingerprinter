@@ -248,6 +248,25 @@ def test_a_modified_requirement_replaces_its_base_scenarios(tree):
     assert tree.trace((delta_root(tree),)) == []
 
 
+def test_a_removed_requirement_drops_its_scenarios(tree):
+    tree.add_spec(CAP, spec("Gone", requirement="R") + "### Requirement: S\n#### Scenario: Stays\n")
+    tree.add_feature(CAP, feature("Stays"))
+    assert len(tree.trace()) == 1  # without the delta 'Gone' is untraced
+    tree.add_spec(CAP, "## REMOVED Requirements\n### Requirement: R\n**Reason**: obsolete\n", delta_root(tree))
+    assert tree.trace((delta_root(tree),)) == []
+
+
+def test_a_renamed_requirement_keeps_the_identity_a_modification_then_replaces(tree):
+    tree.add_spec(CAP, spec("Old", requirement="R"))
+    tree.add_feature(CAP, feature("New"))
+    delta = (
+        "## RENAMED Requirements\n- FROM: `### Requirement: R`\n- TO: `### Requirement: R2`\n\n"
+        "## MODIFIED Requirements\n### Requirement: R2\n#### Scenario: New\n"
+    )
+    tree.add_spec(CAP, delta, delta_root(tree))
+    assert tree.trace((delta_root(tree),)) == []
+
+
 def test_a_delta_for_a_new_capability_is_traced(tree):
     tree.add_spec("fresh", "## ADDED Requirements\n### Requirement: N\n#### Scenario: New\n", delta_root(tree))
     problems = tree.trace((delta_root(tree),))
