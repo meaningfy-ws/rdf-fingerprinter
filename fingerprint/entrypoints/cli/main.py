@@ -69,8 +69,19 @@ def _choice(enum: type[Enum]) -> click.Choice:
 )
 @click.option("--prefixes", "prefixes_file", type=click.Path(dir_okay=False), help="your prefix file, over the packaged one")
 @click.option("--no-prefix-lookup", is_flag=True, help="do not read prefix.cc's prefix list")
-@click.option("--exclude-namespace", multiple=True, help="leave out a namespace's classes (prefix or IRI; repeatable)")
-@click.option("--include-namespace", multiple=True, help="show a namespace again, e.g. owl (prefix or IRI; repeatable)")
+@click.option(
+    "--exclude-namespace",
+    multiple=True,
+    help="leave out every term of the matching namespaces: a prefix, a prefix glob ('rel*') or an IRI stem (repeatable)",
+)
+@click.option(
+    "--include-namespace",
+    multiple=True,
+    help=(
+        "keep the matching namespaces, over --exclude-namespace "
+        "and the default hiding of rdf, rdfs, owl, sh classes (repeatable)"
+    ),
+)
 @click.option("--module-size", type=click.IntRange(min=1), help="most classes per PlantUML module (default 15)")
 @click.option("--shapes-namespace", help="one namespace for every SHACL shape IRI (default: each class's <ns>/shape/)")
 @click.option("--pitfalls", "pitfall_scan", is_flag=True, default=None, help="also scan each graph for modelling pitfalls")

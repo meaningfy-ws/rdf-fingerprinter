@@ -39,7 +39,7 @@ step definitions. Scenario titles are cited as `cap › Requirement › Scenario
 - [x] 1.6 The report (P-9, design §B "Namespace uses" and §H): `namespace_uses` read by `namespace_table`, `DocumentProperty.prefix`, row `data-ns`, the switch list from the non-empty class and property prefixes (no switch for `""`), the script change, `PrefixDeclaration.excluded` in the namespace table, `Caveats.excluded`, the `empty` rule, and the sentence `Every class of this graph is in a hidden or excluded namespace (see caveats).` in place of `Every class of this graph is in a hidden namespace (see caveats).`; then checks M-1 to M-5 of `inputs/manual-checks.md` run by hand with its commands (they cover the four `@manual` scenarios), each result recorded there with date and browser
   - Layer: service_layer, templates. Depends on: 1.5. GitNexus impact: `DocumentGenerator.visit_property`, `end_graph`, `namespace_table`, `end_profile`.
   - Tests: TC-D1; Gherkin `› Excluded namespaces are noted` row report, `› Every class of a graph excluded`, fingerprint-report `› Property rows carry their prefix`.
-- [ ] 1.7 Help texts of `--exclude-namespace` and `--include-namespace` in `fingerprint/entrypoints/cli/main.py` and `generate.py` (design §G)
+- [x] 1.7 Help texts of `--exclude-namespace` and `--include-namespace` in `fingerprint/entrypoints/cli/main.py` and `generate.py` (design §G)
   - Layer: entrypoints. Depends on: 1.4.
   - Tests: `tests/unit/entrypoints/` green.
 - [x] 1.8 `make refresh-golden`; review the diff: only `tests/test_data/golden/main.html` and `golden/scanned/main.html` change, and only by row `data-ns` attributes and switches (P-10); any other diff is a defect to fix before going on
@@ -60,7 +60,7 @@ step definitions. Scenario titles are cited as `cap › Requirement › Scenario
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 1.4 · [ ] 1.7 · [x] 1.5 · [x] 1.6 · [x] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11
+- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.5 · [x] 1.6 · [x] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11
 
 ## Verification
 
