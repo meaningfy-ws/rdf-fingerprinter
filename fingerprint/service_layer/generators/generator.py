@@ -21,7 +21,7 @@ from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref
 from fingerprint.domain.prefixes import PrefixTable, namespace_of
 from fingerprint.domain.profile import ClassAnalytics, GraphAnalytics, ProfileAnalytics, PropertyAnalytics
-from fingerprint.domain.views import GeneratorOptions, GraphView, OutputCheck, PrefixDeclaration, RenderedDocument
+from fingerprint.domain.views import GeneratorOptions, GraphView, OutputCheck, RenderedDocument
 from fingerprint.domain.vocabulary import OWL, RDF, RDFS, SH
 from fingerprint.service_layer.prefixes import resolve_namespaces
 
@@ -122,7 +122,6 @@ class Generator:
         self.excluded, _ = excluded_namespaces(self.options, self.table)
         self.skipped: list[str] = []  # IRIs left out because they cannot be written (P-8)
         self.hidden: dict[str, set[str]] = {}  # dict-ok: lookup index namespace → hidden class IRIs
-        self.namespaces: dict[str, str] = {}  # dict-ok: lookup index of the prefixes the labels used
 
     # --- hooks, overridden per format ---
 
@@ -172,15 +171,11 @@ class Generator:
         return self.namespace(iri) not in self.excluded
 
     def label(self, iri: str) -> str:
-        """A CURIE for display, remembering the namespace it used."""
+        """A CURIE for display; the IRI itself when no prefix covers it."""
         entry = self.table.entry_for(iri)
         if entry is None:
             return iri
-        self.namespaces[entry.prefix] = entry.namespace
         return f"{entry.prefix}:{iri[len(entry.namespace) :]}"
-
-    def used_namespaces(self) -> list[PrefixDeclaration]:
-        return [PrefixDeclaration(prefix=p, namespace=ns) for p, ns in sorted(self.namespaces.items())]
 
     # --- the walk ---
 

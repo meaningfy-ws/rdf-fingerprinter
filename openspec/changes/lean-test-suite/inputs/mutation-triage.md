@@ -781,3 +781,13 @@ User-facing usage and warning messages are gaps (the specs state them); only deb
 - representations.x_generate_representations__mutmut_7 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
 - representations.x_generate_representations__mutmut_9 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
 - representations.x_generate_representations__mutmut_11 — gap — usage message, option bounds, namespace table and filters — tests/unit/service_layer/test_representations.py
+
+## Lead decisions on the service-layer findings (2026-11-01)
+
+- Deleted as dead (no caller in `fingerprint/`, `tests/` or the templates; GitNexus impact: 0 callers,
+  LOW): `Generator.used_namespaces()` with the `Generator.namespaces` dict it read, and
+  `DocumentGenerator.term()`.
+- Not changed (defensive or redundant rather than unreachable; follow-ups for the developer): the final
+  `ValidationError` handler in `resolve_settings`; the declared-parents union in
+  `ShaclGenerator.visit_graph` (mirrors `declared_subclass_edges`); the `module_size < 1` guard in
+  `validate_options` (only reachable through `model_construct`).
