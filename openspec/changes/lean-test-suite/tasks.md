@@ -51,10 +51,10 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## 7. Remove redundancy (P-6)
 
-- [ ] 7.1 `domain/` modules: tests another tier owns deleted, one commit per module, coverage and killed set unchanged
-- [ ] 7.2 `service_layer/` modules, likewise
-- [ ] 7.3 `adapters/` and `entrypoints/` modules (coverage and P-2 ownership)
-- [ ] 7.4 `tests/e2e/`: tests that never reach the store deleted or moved (P-2)
+- [x] 7.1 `domain/` modules: tests another tier owns deleted, one commit per module, coverage and killed set unchanged
+- [x] 7.2 `service_layer/` modules, likewise
+- [x] 7.3 `adapters/` and `entrypoints/` modules (coverage and P-2 ownership)
+- [x] 7.4 `tests/e2e/`: tests that never reach the store deleted or moved (P-2)
 - [ ] 7.5 Surviving mutants: a test in the owning tier, or the dead code deleted and listed here; `mutation_score.txt` raised
 
 ## 8. Docs and conventions
@@ -65,7 +65,7 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [x] 3.7 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 4.5 · [x] 4.6 · [x] 4.7 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [x] 8.1 · [x] 8.2 · [ ] 8.3
+- [x] 1.1 · [x] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [x] 3.7 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 4.5 · [x] 4.6 · [x] 4.7 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [x] 6.4 · [x] 7.1 · [x] 7.2 · [x] 7.3 · [x] 7.4 · [ ] 7.5 · [x] 8.1 · [x] 8.2 · [ ] 8.3
 
 ## Verification
 
