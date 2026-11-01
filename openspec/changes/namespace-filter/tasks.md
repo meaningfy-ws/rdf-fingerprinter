@@ -36,7 +36,7 @@ step definitions. Scenario titles are cited as `cap › Requirement › Scenario
 - [x] 1.5 The note in the per-graph outputs (P-6, design §D and §F): `Generator.excluded_note`; `excluded_note` set by `PatternGenerator.views`, `ShaclGenerator.end_graph`, `PlantumlGenerator.end_graph` (overview and modules) and copied by `fingerprint/domain/shex.py`; the `#`/`'` line in the pattern, ShExC, SHACL and PlantUML templates
   - Layer: domain, service_layer, templates. Depends on: 1.4. GitNexus impact: `PatternGenerator.views`, `ShaclGenerator.end_graph`, `PlantumlGenerator.end_graph`, `shex_view`.
   - Tests: TC-G1 (second half); Gherkin `› Excluded namespaces are noted` rows pattern schema, ShExC, shapes, diagram; `› Golden file per output` still green for every format except the report.
-- [ ] 1.6 The report (P-9, design §B "Namespace uses" and §H): `namespace_uses` read by `namespace_table`, `DocumentProperty.prefix`, row `data-ns`, the switch list from the non-empty class and property prefixes (no switch for `""`), the script change, `PrefixDeclaration.excluded` in the namespace table, `Caveats.excluded`, the `empty` rule, and the sentence `Every class of this graph is in a hidden or excluded namespace (see caveats).` in place of `Every class of this graph is in a hidden namespace (see caveats).`; then checks M-1 to M-5 of `inputs/manual-checks.md` run by hand with its commands (they cover the four `@manual` scenarios), each result recorded there with date and browser
+- [x] 1.6 The report (P-9, design §B "Namespace uses" and §H): `namespace_uses` read by `namespace_table`, `DocumentProperty.prefix`, row `data-ns`, the switch list from the non-empty class and property prefixes (no switch for `""`), the script change, `PrefixDeclaration.excluded` in the namespace table, `Caveats.excluded`, the `empty` rule, and the sentence `Every class of this graph is in a hidden or excluded namespace (see caveats).` in place of `Every class of this graph is in a hidden namespace (see caveats).`; then checks M-1 to M-5 of `inputs/manual-checks.md` run by hand with its commands (they cover the four `@manual` scenarios), each result recorded there with date and browser
   - Layer: service_layer, templates. Depends on: 1.5. GitNexus impact: `DocumentGenerator.visit_property`, `end_graph`, `namespace_table`, `end_profile`.
   - Tests: TC-D1; Gherkin `› Excluded namespaces are noted` row report, `› Every class of a graph excluded`, fingerprint-report `› Property rows carry their prefix`.
 - [x] 1.7 Help texts of `--exclude-namespace` and `--include-namespace` in `fingerprint/entrypoints/cli/main.py` and `generate.py` (design §G)
@@ -60,7 +60,7 @@ step definitions. Scenario titles are cited as `cap › Requirement › Scenario
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.5 · [ ] 1.6 · [x] 1.8 · [x] 1.9 · [ ] 1.10 · [ ] 1.11
+- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.5 · [x] 1.6 · [x] 1.8 · [x] 1.9 · [ ] 1.10 · [ ] 1.11
 
 ## Verification
 

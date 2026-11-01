@@ -52,4 +52,19 @@ Expected: the filtered pattern file is at most 100 000 characters (221 799 befor
 
 ## Results
 
-(none yet)
+Run 2026-11-01 on branch `feature/namespace-filter` at 247a08e+ (pages regenerated with the commands
+above), in HeadlessChrome 156.0.8078.4 (Playwright's chrome-headless-shell) driven by puppeteer-core:
+real `input` and `change` events on `#q` and the switch checkboxes, no page errors and no failed
+requests. The Claude in Chrome extension was not connected, so no headed browser was used.
+T = 52 classes.
+
+| # | Result | Observed |
+|---|---|---|
+| M-1 | pass | `risk`: `3 shown, 49 hidden`; every shown class matches by name or IRI, or has a matching row |
+| M-2 | pass | `brainframe` off: `0 shown, 52 hidden`, no `brainframe:` contents entry visible; with `risk` still `0 shown`. Every class of this graph is `brainframe:`, so "typing still filters the rest" is shown only as nothing reappearing |
+| M-3 | pass | `relationid` off: `52 shown, 0 hidden`; 619 `relationid:` rows, 0 visible; with `label`: `46 shown, 6 hidden`, 50 rows visible, all matching `label`, 0 `relationid:` |
+| M-4 | pass | `2822a123`: `brainframe:CloudInfrastructure` alone with one `relationid:` row, `1 shown, 51 hidden`; `relationid` off: `0 shown, 52 hidden` |
+| M-5 | pass | 14 switches, no `relationid`; the table row `relationid` is marked `excluded`; caveat `graph:workspace: relationid (classes 0, properties 619, values 0)` |
+
+Acceptance (`wc -c` of the regenerated files): pattern workspace 221,799 → 98,587 bytes; ShExC
+250,121 → 110,810; report 1,336,056 → 821,816. The filtered pattern file holds no `relationid:`.
