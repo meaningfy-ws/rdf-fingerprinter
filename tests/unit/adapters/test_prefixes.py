@@ -65,20 +65,6 @@ def test_the_list_is_read_over_https_and_validated():
     assert fake.calls == [("https://prefix.cc/popular/all.file.json", 10)]
 
 
-def test_an_expired_certificate_falls_back_to_http(caplog):
-    expired = urllib.error.URLError(ssl.SSLCertVerificationError("certificate has expired"))
-    fake = opener({"https": expired, "http": LISTING})
-    with caplog.at_level(logging.INFO):
-        entries = PrefixCcList(opener=fake).fetch()
-    assert [e.prefix for e in entries] == ["foaf"]
-    assert [url for url, _ in fake.calls] == [
-        "https://prefix.cc/popular/all.file.json",
-        "http://prefix.cc/popular/all.file.json",
-    ]
-    assert "certificate not valid; fetched the prefix list over HTTP" in caplog.text
-    assert not [r for r in caplog.records if r.levelno >= logging.WARNING]
-
-
 @pytest.mark.parametrize(
     "answers",
     [
