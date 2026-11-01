@@ -112,7 +112,7 @@ if repeated. Worked examples on the table `ex` = `http://example.org/`, `rel` =
 |---|---|---|
 | `rel` | exact prefix | `rel` |
 | `rel*` | glob | `rel`, `relx` |
-| `*x` | glob | `relx` |
+| `*lx` | glob | `relx` (`*x` would also match `ex`) |
 | `Rel*` | glob, case-sensitive | none → unknown warning |
 | `http://example.org/rel/` | stem | `rel` (`…/relx/` does not start with `…/rel/`) |
 | `http://example.org/` | stem | `ex`, `rel`, `relx` (in 3.2.0 this value matched `ex` only) |

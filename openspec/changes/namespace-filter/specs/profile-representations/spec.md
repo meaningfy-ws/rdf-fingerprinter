@@ -1,7 +1,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Namespace filters
-This requirement holds for outputs rendered through `generate_representations`, the path of the
+The rules below SHALL hold for outputs rendered through `generate_representations`, the path of the
 `fingerprint` command, every `fingerprint-gen-*` command, `fingerprint_report` and
 `generate_from_profile_file`. A `Generator` built directly from analytics SHALL apply the hidden set
 and hide the classes of the excluded set only.
@@ -115,7 +115,7 @@ Each warning SHALL be logged once per run (EPIC DEC-9).
     | value                   | excluded                                         |
     | rel                     | `rel`                                            |
     | rel*                    | `rel` and `relx`                                 |
-    | *x                      | `relx`                                           |
+    | *lx                     | `relx`                                           |
     | http://example.org/rel/ | `rel`                                            |
     | http://example.org/     | `ex`, `rel` and `relx`                           |
     | Rel*                    | none, and a warning says `Rel*` is no namespace  |

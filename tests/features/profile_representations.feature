@@ -257,7 +257,7 @@ Feature: Publishing a fingerprint as an application profile
         | value                   | excluded                                  |
         | rel                     | rel                                       |
         | rel*                    | rel, relx                                 |
-        | *x                      | relx                                      |
+        | *lx                     | relx                                      |
         | http://example.org/rel/ | rel                                       |
         | http://example.org/     | ex, rel, relx                             |
         | Rel*                    | none, and a warning says Rel* is no namespace |
