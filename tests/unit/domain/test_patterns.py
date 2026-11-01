@@ -989,7 +989,9 @@ def test_chains_stop_at_three_levels_and_a_nested_group_is_expanded_once(case):
     shown = view(*case)
     every = edges_below([e for b in shown.blocks for e in b.edges])
     assert all(e.depth <= 3 for e in every)
-    assert all(not e.edges for e in every if e.ending or e.depth == 3)
+    assert all(not e.edges for e in every if e.ending == " ^" or e.depth == 3)
+    # an edge that expands one target may still end " …" for another target expanded nowhere (§B step 6)
+    assert all(sum(bool(t.nested) for t in e.targets or []) > 1 for e in every if e.edges and e.ending)
     assert sum(1 for e in every if e.edges) <= len(shown.nested_blocks)
     assert all(b.reaching_edges >= 1 for b in shown.nested_blocks)
 
