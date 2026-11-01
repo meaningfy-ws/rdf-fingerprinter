@@ -138,6 +138,7 @@ def test_a_term_in_one_source_is_kept_and_terms_are_sorted():
     other = "http://ex.org/A"
     merged = merge_annotations([entry(labels=[("P", None)])], [entry(descriptions=[("d", None)], term=other)])
     assert [a.term for a in merged] == [other, PERSON]
+    assert merged[0] == entry(descriptions=[("d", None)], term=other)
     assert merged[1] == entry(labels=[("P", None)])
 
 
@@ -161,6 +162,7 @@ def test_merging_nothing_gives_nothing():
         ([("Begriff", "de"), ("Concept", "en"), ("C", None)], ("C", None)),
         ([("Begriff", "de"), ("Concept", "en")], ("Concept", "en")),
         ([("Begriff", "de"), ("Concept", "fr")], ("Begriff", "de")),
+        ([("Concept", "fr"), ("Begriff", "de")], ("Begriff", "de")),
     ],
 )
 def test_the_text_shown_is_untagged_then_english_then_the_smallest_language(given, expected):
