@@ -474,7 +474,7 @@ class _PitfallScan:
         try:
             rows = run.sparql.select(pitfall_count_query(check.check_id, check.query, graph, joined))
             count = int(rows[0]["n"]) if rows else 0
-        except SparqlError as error:
+        except (SparqlError, TypeError, ValueError) as error:  # TypeError/ValueError: an unbound or odd ?n
             message = f"graph {label}: pitfall {check.check_id}: count failed: {error}"
             run.fail("PITFALL", message, graph, check_id=check.check_id)
             return None

@@ -11,7 +11,7 @@ IMPORTANCE_ORDER = (PitfallImportance.critical, PitfallImportance.important, Pit
 ROBOT_LEVELS = {"critical": "ERROR", "important": "WARN", "minor": "INFO"}  # dict-ok: module-level lookup table
 REQUIRED = ("id", "title", "importance", "scope", "source")
 OPTIONAL = ("heuristic", "description")
-_KEY_LINE = re.compile(r"#\s*([A-Za-z_]+)\s*:\s*(.*?)\s*$")
+_KEY_LINE = re.compile(r"#\s*([A-Za-z_]+)\s*:(?!//)\s*(.*?)\s*$")  # `# https://…` is prose, not a key
 _ID = re.compile(r"[a-z0-9_]+")
 
 
@@ -22,8 +22,8 @@ class PitfallCheckError(ValueError):
 def parse_header(text: str, origin: str) -> PitfallCheck:
     """The check described by the leading `# key: value` lines of `text`; `#` lines without a key are prose."""
     values: dict[str, str] = {}  # dict-ok: header being parsed
-    for line in text.splitlines():
-        if not line.strip():
+    for line in (raw.strip() for raw in text.splitlines()):
+        if not line:
             continue  # blank lines do not end the header
         if not line.startswith("#"):
             break

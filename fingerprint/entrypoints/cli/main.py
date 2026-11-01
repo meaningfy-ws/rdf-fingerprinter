@@ -130,6 +130,7 @@ def fingerprint_endpoint(
             given = [
                 name
                 for name, value in (
+                    ("--pitfall-examples", options.get("pitfall_examples")),
                     ("--pitfall-checks", pitfall_checks),
                     ("--skip-pitfall", skip_pitfall),
                     ("--fail-on", fail_on),

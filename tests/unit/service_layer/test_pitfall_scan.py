@@ -2,6 +2,7 @@
 
 import pytest
 
+from fingerprint.adapters.exceptions import PermanentError
 from fingerprint.adapters.pitfall_catalogue import packaged_checks
 from fingerprint.adapters.queries import pitfall_count_query, pitfall_example_query
 from fingerprint.service_layer.collection import collect
@@ -88,3 +89,32 @@ def test_an_unwritable_schema_graph_is_a_usage_error(value):
 def test_schema_graphs_from_the_environment_are_comma_separated():
     settings = resolve_settings(env={"RDF_FINGERPRINTER_SCHEMA_GRAPHS": f"{SCHEMA}, {EX}other"})
     assert settings.schema_graphs == [SCHEMA, EX + "other"]
+
+
+def test_an_unbound_count_is_a_recorded_failure_not_a_crash():
+    """Review: some stores answer an aggregate over nothing with one unbound row."""
+    fake = store()
+    fake.on("PITFALL", [{"n": None}], when=lambda q: " count\n" in q)
+    profile = run(fake, checks=[CHECKS["p35_untyped_property"]], selected_graphs=[DATA])
+    assert results(profile, DATA) == {}
+    assert [f.check_id for f in profile.failures] == ["p35_untyped_property"]
+
+
+def test_a_failed_emptiness_check_skips_the_graph_and_failed_examples_keep_the_count():
+    fake = store()
+    fake.add("ex:c", "ex:undeclared", "ex:d", graph=SCHEMA)  # a finding in the graph that is scanned
+    fake.on("PITFALL", PermanentError("no"), when=lambda q: "PITFALL ask" in q, times=1)
+    fake.on("PITFALL", PermanentError("no"), when=lambda q: " examples\n" in q)
+    profile = run(fake, checks=[CHECKS["p35_untyped_property"]], selected_graphs=[DATA, SCHEMA])
+    skipped, scanned = (next(g for g in profile.graphs if g.graph == iri) for iri in (DATA, SCHEMA))
+    assert skipped.pitfalls is None
+    assert scanned.pitfalls[0].count and not scanned.pitfalls[0].examples
+    assert len(profile.failures) == 2
+
+
+def test_an_unbound_example_term_is_left_out():
+    fake = store()
+    fake.on("PITFALL", [{"entity": None, "property": None, "value": None}], when=lambda q: " examples\n" in q)
+    profile = run(fake, checks=[CHECKS["p35_untyped_property"]], selected_graphs=[DATA])
+    (example, *_) = results(profile, DATA)["p35_untyped_property"].examples
+    assert example.entity is None and example.property is None and example.value is None

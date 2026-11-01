@@ -51,3 +51,8 @@ def test_the_lookup_stays_off_when_the_environment_says_false(tmp_path, fake, lo
 def test_bad_generator_options_exit_2_before_any_query(tmp_path, fake, args):
     result = run(tmp_path, *args)
     assert result.exit_code == 2 and fake.queries == []
+
+
+def test_pitfall_examples_without_the_scan_is_a_usage_error(tmp_path, fake):
+    result = run(tmp_path, "--pitfall-examples", "50")
+    assert result.exit_code == 2 and "--pitfall-examples needs --pitfalls" in result.output and fake.queries == []

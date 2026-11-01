@@ -11,6 +11,7 @@ from pathlib import Path
 
 from rdflib.plugins.sparql import prepareQuery
 
+from fingerprint.adapters.queries import pitfall_count_query
 from fingerprint.domain.pitfalls import PitfallCheckError, parse_header
 from fingerprint.domain.profile import PitfallCheck
 
@@ -32,6 +33,10 @@ def validate(text: str, origin: str) -> PitfallCheck:
     projected = {str(v) for v in algebra.get("PV") or []}
     if projected != VARIABLES:
         raise PitfallCheckError(f"{origin}: must select ?entity ?property ?value, not {' '.join(sorted(projected))}")
+    try:  # the scan wraps the check: e.g. a PREFIX sharing the SELECT line leaves no body to wrap
+        prepareQuery(pitfall_count_query(check.check_id, text, None))
+    except Exception as error:
+        raise PitfallCheckError(f"{origin}: PREFIX and BASE lines must each stand alone before the query: {error}") from error
     return check
 
 
@@ -61,7 +66,8 @@ def load_catalogue(user_dir: str | Path | None = None, skip: Iterable[str] = ())
                 raise PitfallCheckError(f"{path}: id {check.check_id!r} is used by another user check")
             seen.add(check.check_id)
             checks[check.check_id] = check
-    unknown = sorted(set(skip) - checks.keys())
+    skipped = set(skip)
+    unknown = sorted(skipped - checks.keys())
     if unknown:
         raise PitfallCheckError(f"--skip-pitfall: unknown check(s) {', '.join(unknown)} (known: {', '.join(sorted(checks))})")
-    return [c for c_id, c in sorted(checks.items()) if c_id not in set(skip)]
+    return [c for c_id, c in sorted(checks.items()) if c_id not in skipped]

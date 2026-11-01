@@ -45,3 +45,27 @@ def test_a_duplicate_user_id_and_a_missing_folder(tmp_path):
 def test_select_distinct_is_accepted(tmp_path):
     folder = write(tmp_path / "u", "d.rq", HEADER.format(id="d") + SELECT.replace("SELECT", "SELECT DISTINCT"))
     assert "d" in [c.check_id for c in load_catalogue(folder)]
+
+
+def test_a_prefix_on_the_select_line_is_refused_at_load(tmp_path):
+    """Review: the scan moves PREFIX lines whole, so one sharing the SELECT line would leave no body."""
+    text = HEADER.format(id="inline") + "PREFIX ex: <http://ex.org/> " + SELECT
+    with pytest.raises(PitfallCheckError, match="inline.rq"):
+        load_catalogue(write(tmp_path / "u", "inline.rq", text))
+
+
+def test_a_trailing_comment_and_prose_header_lines_load(tmp_path):
+    text = (
+        "  # id: commented\n# https://oops.linkeddata.es/catalogue.jsp\n"
+        + HEADER.format(id="commented").split("\n", 1)[1]
+        + SELECT.rstrip("\n").replace("WHERE {", "WHERE {\n").replace(" }", "\n}  # one row per triple")
+        + "\n"
+    )
+    folder = write(tmp_path / "u", "commented.rq", text)
+    assert "commented" in [c.check_id for c in load_catalogue(folder)]
+
+
+def test_an_ask_check_is_refused(tmp_path):
+    folder = write(tmp_path / "u", "ask.rq", HEADER.format(id="ask") + "ASK { ?s ?p ?o }\n")
+    with pytest.raises(PitfallCheckError, match="must be a SELECT"):
+        load_catalogue(folder)

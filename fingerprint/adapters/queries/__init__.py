@@ -119,9 +119,9 @@ def pitfall_ask_query(graph: str | None) -> str:
 
 def pitfall_count_query(check_id: str, query: str, graph: str | None, schema_graphs: Iterable[str] = ()) -> str:
     prologue, body = _split_check(query)
-    return (
+    return (  # the \n after the body ends a trailing comment of the check
         f"# PITFALL {check_id} count\n{prologue}\n"
-        f"SELECT (COUNT(*) AS ?n) {_dataset(graph, schema_graphs)} WHERE {{ {{ {body} }}"
+        f"SELECT (COUNT(*) AS ?n) {_dataset(graph, schema_graphs)} WHERE {{ {{ {body}\n}}"
         # rdflib counts the one empty row of an aggregate over no match; conformant stores do not (no-op there)
         " FILTER(BOUND(?entity) || BOUND(?property) || BOUND(?value)) }"
     )
@@ -133,6 +133,6 @@ def pitfall_example_query(
     prologue, body = _split_check(query)
     return (
         f"# PITFALL {check_id} examples\n{prologue}\n"
-        f"SELECT ?entity ?property ?value {_dataset(graph, schema_graphs)} WHERE {{ {{ {body} }} }}"
+        f"SELECT ?entity ?property ?value {_dataset(graph, schema_graphs)} WHERE {{ {{ {body}\n}} }}"
         f" ORDER BY ?entity ?property ?value LIMIT {int(limit)}"
     )
