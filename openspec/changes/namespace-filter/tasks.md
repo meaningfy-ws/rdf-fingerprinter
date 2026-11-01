@@ -48,10 +48,10 @@ step definitions. Scenario titles are cited as `cap › Requirement › Scenario
 - [x] 1.9 Docs: `docs/modules/ROOT/pages/representations.adoc` "Namespace filters" rewritten (two tiers; the matching rule with the §A examples and shell quoting of `'rel*'`; that stems and globs are case-sensitive while no two prefixes differ only in case, so a glob never misses a prefix by case; that a full namespace IRI is now a stem; what "every term" covers; the note; the warnings; that datatypes, pitfalls and collection failures are not filtered; that only the four value-type fields of §C change; that a `Generator` built directly hides classes only; that a property inherited from an excluded parent appears in no diagram box (design "Risks / Trade-offs")); the options table row; `api-reference.adoc` (the `exclude_namespaces=["skos"]` example now leaves out every `skos:` term, and the scope sentence on `Generator`); `report.adoc` (switches for property rows, the marked table); `llm-schema.adoc` (a pointer and the brainframe example); `how-it-works.adoc` line on switches if it names classes only
   - Layer: docs. Depends on: 1.6.
   - Tests: `make build-docs` green; links resolve.
-- [ ] 1.10 Gate (design "Exit criteria"): `make check-all`; `make oxigraph-load-test-data` + `make test-e2e`; `make check-mutation` (≥ 0.950; survivors get a test in the owning tier, or dead code is deleted and listed here; `mutation_score.txt` raised if higher); `openspec validate --all --strict`; IT-4, the brainframe acceptance (commands in `inputs/manual-checks.md`, "Acceptance measurement"), recorded in `inputs/brainframe-evidence.md` ("After the change": pattern, ShExC and report sizes with and without `--exclude-namespace relationid`, the note line, and `grep -c relationid:` = 0 in the filtered pattern file)
+- [x] 1.10 Gate (design "Exit criteria"): `make check-all`; `make oxigraph-load-test-data` + `make test-e2e`; `make check-mutation` (≥ 0.950; survivors get a test in the owning tier, or dead code is deleted and listed here; `mutation_score.txt` raised if higher); `openspec validate --all --strict`; IT-4, the brainframe acceptance (commands in `inputs/manual-checks.md`, "Acceptance measurement"), recorded in `inputs/brainframe-evidence.md` ("After the change": pattern, ShExC and report sizes with and without `--exclude-namespace relationid`, the note line, and `grep -c relationid:` = 0 in the filtered pattern file)
   - Layer: all. Depends on: 1.1–1.9.
   - Tests: IT-1 to IT-4; every row of "Still red until bound" green; the manual checks of 1.6 recorded.
-- [ ] 1.11 Release 3.3.0 (P-11; DEC-3, DEC-5):
+- [x] 1.11 Release 3.3.0 (P-11; DEC-3, DEC-5):
   - `pyproject.toml` version `3.2.0` → `3.3.0`;
   - `CHANGELOG.md`: turn `## [Unreleased]` into `## [3.3.0] - <date>` (keep an empty `## [Unreleased]` above it), with **Changed** (1. `--exclude-namespace` now leaves out every term of the matching namespaces in every output, not only their classes; the meta vocabularies are still hidden at class level only. 2. A full namespace IRI given to `--exclude-namespace` or `--include-namespace` is now a stem: it also matches the namespaces under it, so `http://example.org/` now also catches `http://example.org/rel/`), **Added** (prefix globs and IRI stems; the `excluded namespaces` note; the hides-nothing warning; report switches for property rows and the marked namespace table), and the note that `profile.json` is unchanged;
   - PR to `master` with green CI; merge; a bare tag `3.3.0`; `gh release create 3.3.0`; report the release URL (`AGENTS.md` "Release authority").
@@ -60,7 +60,7 @@ step definitions. Scenario titles are cited as `cap › Requirement › Scenario
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.5 · [x] 1.6 · [x] 1.8 · [x] 1.9 · [ ] 1.10 · [ ] 1.11
+- [x] 1.1 · [x] 1.2 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.5 · [x] 1.6 · [x] 1.8 · [x] 1.9 · [x] 1.10 · [ ] 1.11
 
 ## Verification
 

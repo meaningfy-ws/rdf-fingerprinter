@@ -6,7 +6,7 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
-## [3.3.0] - 2026-11-01
+## [3.3.0] - 2026-11-02
 
 Namespace filters that work (OpenSpec change `namespace-filter`). Excluding a namespace now leaves
 out every term of it in every output, so a crowd of generated terms (brainframe's 619 singleton

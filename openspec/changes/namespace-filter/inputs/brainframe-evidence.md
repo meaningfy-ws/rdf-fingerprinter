@@ -52,3 +52,18 @@ relationid:fd12ce57-57b5-4c85-3e06-493cee0cb5c1 "..."
 
 `brainframe:RelationId` (the singleton statement nodes) is in the `brainframe` namespace, with the
 real classes; a namespace filter cannot hide it without hiding them. See the question round.
+
+## Acceptance measurement (task 1.10, 2026-11-02)
+
+A fresh `fingerprint -e http://localhost:7879/query --depth values --precision exact` run of the
+brainframe store with the namespace-filter code, outputs written by the same command (code points,
+`wc -m`; report in bytes):
+
+| Filter | Pattern schema | ShExC | `main.html` | `relationid:` in pattern |
+|---|---|---|---|---|
+| none | 221,523 | 249,854 | 1,336,056 | 1,143 |
+| `relationid` | 98,323 | 110,555 | 821,816 | 0 |
+| the `https://my.brainframe.com/#/knowledge/` stem | 68,308 | 78,339 | 583,065 | 0 |
+
+The filtered pattern file is under the 100,000-character target. Gate: `make check-all` 1427
+passed, `make test-e2e` 91 passed, `make check-mutation` 0.969 (stored 0.969).
