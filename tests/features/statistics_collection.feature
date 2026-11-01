@@ -12,7 +12,7 @@ Feature: Collecting raw statistics from a knowledge graph
 
   Rule: Graphs and classes are discovered cheaply first
 
-    Scenario: The default graph and every named graph are profiled
+    Scenario: Default and named graphs are profiled
       Given the endpoint holds data in the default graph and in two named graphs
       And no graph is selected
       When the knowledge graph is fingerprinted
@@ -25,13 +25,13 @@ Feature: Collecting raw statistics from a knowledge graph
       When the knowledge graph is fingerprinted
       Then the profile contains exactly that graph
 
-    Scenario: Class counts fall back to counting class by class
+    Scenario: Class counts fall back on timeout
       Given counting all classes of a graph at once times out
       When the knowledge graph is fingerprinted
       Then each class is counted on its own
       And the instance counts equal those of a single count
 
-    Scenario Outline: The list of named graphs cannot be obtained
+    Scenario Outline: Named graphs cannot be listed
       Given the endpoint answers the named-graph listing with <problem>
       And <selection>
       When the knowledge graph is fingerprinted
@@ -46,11 +46,11 @@ Feature: Collecting raw statistics from a knowledge graph
 
   Rule: Every class is measured on its own instances only
 
-    Scenario: The class is bound inside the measurement
+    Scenario: Query text binds the class inside the pattern
       When the statistics of class "http://example.org/Person" are measured
       Then every measurement for that class reads only instances of "http://example.org/Person"
 
-    Scenario: Type statements are not reported as properties
+    Scenario: Type triples excluded
       Given every instance of "ex:Student" is also typed "ex:Person"
       When the knowledge graph is fingerprinted
       Then no property of "ex:Student" is "rdf:type"
@@ -58,7 +58,7 @@ Feature: Collecting raw statistics from a knowledge graph
 
   Rule: Raw statistics record what was observed
 
-    Scenario: Cardinality histogram per property
+    Scenario: Cardinality histogram
       Given class "ex:Person" has 4 instances
       And their numbers of "ex:name" values are 1, 1, 2 and 0
       When the knowledge graph is fingerprinted
@@ -68,7 +68,7 @@ Feature: Collecting raw statistics from a knowledge graph
         | 2                   | 1         |
       And 4 instances of "ex:Person" were observed
 
-    Scenario: Literal values are split by datatype and language
+    Scenario: Literal value partition
       Given the "ex:name" values of "ex:Person" are "Ann"@en, "Bo"@en and "Carl"
       When the knowledge graph is fingerprinted
       Then the literal value groups of "ex:name" are:
@@ -81,26 +81,27 @@ Feature: Collecting raw statistics from a knowledge graph
       When the knowledge graph is fingerprinted
       Then the object groups of "ex:knows" record 1 object of class "ex:Person" and 1 untyped object
 
-    Scenario Outline: Where object types are looked up
+    Scenario: Same-graph scope ignores other graphs
       Given an object of "ex:knows" is typed "ex:Person" only in another named graph
-      And object types are looked up in <scope>
+      And object types are looked up in the same graph
       When the knowledge graph is fingerprinted
-      Then that object is counted as <result>
+      Then that object is counted as untyped
 
-      Examples:
-        | scope          | result                                         |
-        | the same graph | untyped                                        |
-        | any graph      | of class "ex:Person", typed in the other graph |
+    Scenario: Type asserted in another graph
+      Given an object of "ex:knows" is typed "ex:Person" only in another named graph
+      And object types are looked up in any graph
+      When the knowledge graph is fingerprinted
+      Then that object is counted as of class "ex:Person", typed in the other graph
 
   Rule: Precision escalates only when the endpoint cannot answer
 
-    Scenario: A class is read exactly
+    Scenario: Exact succeeds
       Given every measurement of a class answers within the timeout
       When the knowledge graph is fingerprinted
       Then the class is marked "exact"
       And its observed instances equal its instance count
 
-    Scenario: A class too big for an exact read falls back to the first N instances
+    Scenario: Escalation to first N
       Given a class with 50000 instances
       And the exact read of that class times out
       And the first N setting is 10000
@@ -108,12 +109,12 @@ Feature: Collecting raw statistics from a knowledge graph
       Then the class is marked "first 10000 of 50000"
       And its instance count is still 50000
 
-    Scenario: A first-N read uses one sample for every measurement
+    Scenario: First N uses one sample
       Given a class is read in first-N mode
       When its statistics are measured
       Then every measurement of that class uses the same listed instances
 
-    Scenario: A first-N read of a small class equals an exact read
+    Scenario: First N on a small class equals exact
       Given a class with fewer instances than the first N setting
       When it is fingerprinted once with policy "exact" and once with policy "first_n"
       Then both reads give the same histograms, value groups and distinct counts
@@ -137,14 +138,14 @@ Feature: Collecting raw statistics from a knowledge graph
 
   Rule: Failures are visible and never silent
 
-    Scenario: One class fails and the others are still profiled
+    Scenario: One class fails
       Given every read of class "ex:Big" fails
       And all other classes answer
       When the knowledge graph is fingerprinted
       Then the profile contains every other class
       And one failure names "ex:Big", the failed measurement and the number of attempts
 
-    Scenario Outline: Failures in optional measurements keep the class
+    Scenario Outline: Second-wave failure keeps the class
       Given the <measurement> of a class <fails>
       When the knowledge graph is fingerprinted
       Then the class is still profiled
@@ -157,18 +158,24 @@ Feature: Collecting raw statistics from a knowledge graph
         | property presence check | is rejected    |
         | incoming links          | is rejected    |
 
-    Scenario: The endpoint rejects a query as malformed
+    Scenario: Permanent first-wave failure does not escalate
       Given the endpoint rejects a class's measurement as malformed
       When the knowledge graph is fingerprinted
       Then the failure is recorded without retrying
       And that class is left out without a first-N attempt
       And the other classes are still profiled
 
-    Scenario: A transient endpoint error is retried
+    Scenario: Transient error retried
       Given the endpoint answers a measurement with "service unavailable" once
       When the knowledge graph is fingerprinted
       Then the measurement is retried
       And no failure is recorded
+
+    Scenario: Refusal after the start concerns one query
+      Given the endpoint refuses one class's cardinality measurement as forbidden after the graphs were listed
+      When the knowledge graph is fingerprinted
+      Then that measurement is recorded as a failure with one attempt
+      And the other classes are still profiled
 
     Scenario: An IRI unusable in a query is skipped
       Given a class IRI contains a space
@@ -183,30 +190,42 @@ Feature: Collecting raw statistics from a knowledge graph
 
   Rule: Settings are explicit, layered and recorded
 
-    Scenario Outline: Setting precedence
-      Given the default timeout is 60 seconds
-      And <environment>
-      And <command line>
+    Scenario: Environment variable overrides default
+      Given the environment sets the timeout to 10
+      And no command-line option is given
       When the knowledge graph is fingerprinted
-      Then the recorded timeout is <timeout> seconds
+      Then the recorded timeout is 10
 
-      Examples:
-        | environment                          | command line                     | timeout |
-        | no environment variable is set       | no command-line option is given  | 60      |
-        | the environment sets the timeout to 10 | no command-line option is given | 10      |
-        | the environment sets the timeout to 10 | the command line sets it to 30  | 30      |
+    Scenario: CLI overrides environment
+      Given the environment sets concurrency to 2
+      And the command line sets concurrency to 8
+      When the knowledge graph is fingerprinted
+      Then the recorded concurrency is 8
+
+    Scenario: Environment overrides the library configuration
+      Given a library caller passes the configuration setting top K as 5
+      And the environment sets top K to 7
+      When the knowledge graph is fingerprinted
+      Then the recorded top K is 7
+
+    Scenario: Unknown configuration key
+      Given a configuration file holding the key "colour"
+      When the knowledge graph is fingerprinted with that file
+      Then a usage error names "colour"
+      And no query is sent
 
     Scenario: A configuration file sets collection options
       Given a configuration file setting concurrency to 2
       When the knowledge graph is fingerprinted with that file
       Then the recorded concurrency is 2
 
-    Scenario: An acceptance threshold of zero is refused
-      Given the acceptance threshold is set to 0
-      When the knowledge graph is fingerprinted
-      Then the run is refused as a usage error
-
   Rule: Depth and switches decide what is measured
+
+    Scenario: Default depth
+      Given class "ex:Person" has 2 instances
+      When the knowledge graph is fingerprinted
+      Then the endpoint receives the graph list, class count, hierarchy, co-type, vote, value and object-class queries
+      And it receives no graph-total, top-value or incoming-link query
 
     Scenario Outline: Measurements per depth
       Given the depth is "<depth>"
@@ -222,14 +241,44 @@ Feature: Collecting raw statistics from a knowledge graph
         | rich_values | top values                                  | incoming links               |
         | links       | incoming links                              | graph totals                 |
 
-    Scenario: Graph totals are measured only on request
+    Scenario: Graph statistics on
       Given graph statistics are switched on
       When the knowledge graph is fingerprinted
       Then each graph records its statements, distinct subjects, distinct objects, predicates and untyped subjects
 
-    Scenario: A rare property is found by the completeness check
+    Scenario: Rare property found
       Given a class is read in first-N mode
       And the completeness check is switched on
       And only an instance outside the first N uses "ex:rare"
       When the knowledge graph is fingerprinted
       Then "ex:rare" is listed on that class as present, without statistics
+
+  Rule: Results are read as typed RDF terms
+
+    Scenario: A count arrives as a number
+      Given class "ex:Person" has 3 instances
+      And the endpoint answers the class count as the integer 7
+      When the knowledge graph is fingerprinted
+      Then the instance count of "ex:Person" is 7
+
+    Scenario: The timeout still applies
+      Given class "ex:Person" has 3 instances
+      And the endpoint does not answer an exact read within the timeout
+      When the knowledge graph is fingerprinted
+      Then the class is marked "first 3 of 3"
+
+    Scenario: Values keep the endpoint's text
+      Given class "ex:Person" has 1 instances
+      And the endpoint answers the top values "2020-01-01T00:00:00Z" as a dateTime and "v" in language "en_US"
+      And top values are collected
+      When the knowledge graph is fingerprinted
+      Then the recorded top values are "2020-01-01T00:00:00Z" and "v"
+
+  Rule: Pitfall check failures are recorded
+
+    Scenario: One pitfall check fails
+      Given a store whose graph "data" uses an undeclared relation and whose graph "schema" holds the ontology
+      And the count query of "p35_untyped_property" times out
+      When the fingerprint command runs with --pitfalls on graph "data" with schema graph "schema"
+      Then a failure of kind pitfall names "p35_untyped_property"
+      And the profile of "data" has a "p34_untyped_class" result

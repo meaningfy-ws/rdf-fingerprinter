@@ -1,5 +1,4 @@
 ## MODIFIED Requirements
-
 ### Requirement: Report content
 The report SHALL show:
 - an overview with provenance (endpoint, dates, tool version);
@@ -36,11 +35,19 @@ report SHALL NOT embed diagram sources.
 
 #### Scenario: Short names only
 - **WHEN** the report is generated for the readability test profile
-- **THEN** no text node outside the namespace table, the provenance endpoint, the setting values, the failure messages, the unwritable-IRI caveats and the pitfall literal values holds `http://` or `https://`
+- **THEN** no text node outside the namespace table, the provenance endpoint, the setting values, the failure messages and the unwritable-IRI caveats holds `http://` or `https://`
 
 #### Scenario: Hidden namespaces are listed
 - **WHEN** the report is generated with the default filters for a profile holding 2 `owl:` classes
 - **THEN** the caveats list `owl` as hidden with 2 classes, and no `owl:` class section exists
+
+#### Scenario: Exact class is labelled
+- **WHEN** a class with 120 instances was read exactly
+- **THEN** its section shows "exact"
+
+#### Scenario: Absent value is a dash
+- **WHEN** a property's language coverage is absent
+- **THEN** its language coverage cell shows `—`
 
 #### Scenario: No scan, no section
 - **WHEN** the report is generated for a profile without scan results
@@ -61,6 +68,18 @@ after the start SHALL be a recorded failure (exit 1), not exit 3. **BREAKING** (
 #### Scenario: Endpoint unreachable
 - **WHEN** the endpoint URL refuses connections
 - **THEN** the CLI exits 3, writes no report and logs `cannot reach endpoint <url>`
+
+#### Scenario: Clean run
+- **WHEN** every class is profiled
+- **THEN** the CLI exits 0 and the report is written
+
+#### Scenario: Usage error
+- **WHEN** the output folder does not exist, a setting is invalid, or the prefix file is malformed
+- **THEN** the CLI exits 2 and writes no report
+
+#### Scenario: Unexpected error
+- **WHEN** an unexpected error occurs during collection
+- **THEN** the CLI exits 4 and writes no report
 
 #### Scenario: Pitfalls found with fail-on
 - **WHEN** a run with `--pitfalls --fail-on critical` records no failure and finds a critical pitfall
@@ -105,6 +124,10 @@ prefix file, a module size below 1, and an unwritable shapes namespace.
 #### Scenario: Unknown format
 - **WHEN** the fingerprint command runs with a format that does not exist
 - **THEN** it exits 2, names the known formats and queries nothing
+
+#### Scenario: A failing representation keeps the report
+- **WHEN** a selected representation fails to render
+- **THEN** the output folder holds `main.html` and `profile.json`, and the command exits 4
 
 #### Scenario: Pitfalls format in the run
 - **WHEN** the fingerprint command runs with `--pitfalls --format pitfalls`

@@ -16,6 +16,10 @@ class when that query times out.
 - **WHEN** the grouped class-count query times out
 - **THEN** the collector lists the distinct classes and counts each one, and the profile has the same instance counts
 
+#### Scenario: Only the selected graphs are profiled
+- **WHEN** the endpoint holds triples in the default graph and in two named graphs and only one named graph is selected
+- **THEN** the profile contains only that graph
+
 ### Requirement: Depth and switches select the queries
 The collector SHALL run only the queries that the configured depth and switches require, as tabled
 in `design.md`; graph totals, predicate partitions and untyped subjects (full scans) SHALL run only
@@ -28,6 +32,10 @@ when `graph_statistics` is on.
 #### Scenario: Graph statistics on
 - **WHEN** `graph_statistics` is on
 - **THEN** each graph profile records triples, distinct subjects, distinct objects, predicate partitions and untyped subjects
+
+#### Scenario: Measurements per depth
+- **WHEN** the depth is `classes`, `properties`, `values`, `rich_values` or `links`
+- **THEN** each depth adds its measurements to those of the shallower ones (instance counts, hierarchy and co-types; property histograms; value partitions and object classes; top values; incoming links) and the profile holds nothing of the deeper ones
 
 ### Requirement: rdf:type is not a property row
 Per-class property statistics SHALL exclude `rdf:type`; type information SHALL be recorded as
@@ -81,7 +89,7 @@ graph is used.
 Under policy `auto` the collector SHALL read each class exactly first and, when a per-class query
 times out, retry the class in `first_n` mode, then record a failure.
 Partial results of a failed attempt MUST be discarded. The mode used SHALL be stored per class.
-A forced policy (`exact`, `first_n`) SHALL use only that mode.
+A forced policy (`exact`, `first_n`) SHALL use only that mode. A first_n sample whose listed instances include blank nodes SHALL be recorded with `sample_shared` false.
 
 #### Scenario: Exact succeeds
 - **WHEN** every query for a class answers within the timeout
@@ -98,6 +106,14 @@ A forced policy (`exact`, `first_n`) SHALL use only that mode.
 #### Scenario: First N on a small class equals exact
 - **WHEN** a class with fewer instances than N is collected once with policy `exact` and once with policy `first_n`
 - **THEN** the histograms, value partitions and distinct counts are equal
+
+#### Scenario: A forced policy uses only its mode
+- **WHEN** the exact read of a class times out under policy `exact`, or under policy `first_n`
+- **THEN** under `exact` the class is recorded as a failure, and under `first_n` the class is read in `first_n` mode with no exact attempt
+
+#### Scenario: Blank-node instances weaken the first-N sample
+- **WHEN** a class read in first_n mode has blank nodes among its listed instances
+- **THEN** its profile records `sample_shared` as false, because blank-node labels may differ between queries
 
 ### Requirement: Failures are recorded and fail the run
 A query that still fails after retries and fallbacks SHALL be recorded as a `Failure` (query kind,
@@ -141,6 +157,10 @@ completeness check SHALL be switchable by configuration property or environment 
 - **WHEN** the configuration holds the key `colour`
 - **THEN** a usage error names `colour` and no query is sent
 
+#### Scenario: A configuration file sets collection options
+- **WHEN** the configuration file sets `concurrency` to 2 and no CLI option or environment variable sets it
+- **THEN** the recorded settings have `concurrency` 2
+
 ### Requirement: Completeness check for first-N classes
 When the completeness check is on and a class was read in `first_n` mode, the collector SHALL ask,
 for every predicate of the graph not seen in the class's sample, whether any instance uses it, and
@@ -175,7 +195,7 @@ failure in a class's first wave (instance listing, histograms, value partitions,
 under `auto` on a timeout and otherwise leaves the class out with a recorded failure; a failure in its
 second wave (top values, completeness check, incoming links) is recorded and the class is kept. A
 class whose IRI cannot be put in a query SHALL be skipped and recorded. A well-formed response
-holding a value the collector cannot interpret SHALL end the run as an unexpected error.
+holding a value the collector cannot interpret SHALL end the run as an unexpected error. A first-N instance query that the endpoint rejects as too large SHALL be recorded as a failure whose message suggests lowering first N.
 
 #### Scenario: Second-wave failure keeps the class
 - **WHEN** the top-values query of a class times out
@@ -184,6 +204,14 @@ holding a value the collector cannot interpret SHALL end the run as an unexpecte
 #### Scenario: Permanent first-wave failure does not escalate
 - **WHEN** the histogram query of a class is rejected with HTTP 400
 - **THEN** the class is left out, one failure is recorded and no first-N attempt is made
+
+#### Scenario: An IRI unusable in a query is skipped
+- **WHEN** a class IRI contains a character that cannot be written in a query, such as a space
+- **THEN** that class is skipped with a failure naming the IRI and the other classes are still profiled
+
+#### Scenario: A first-N query too large for the endpoint
+- **WHEN** the endpoint rejects the first-N instance query of a class as too large
+- **THEN** a failure for that class suggests lowering the first N setting
 
 ### Requirement: Results are read as typed RDF terms
 The SPARQL client SHALL send each query with its per-query timeout and SHALL return the results as

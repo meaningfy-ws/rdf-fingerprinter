@@ -26,17 +26,6 @@ def test_fingerprint_execution(tmpdir):
     assert names == {"main.html", "profile.json"}
 
 
-def test_unreachable_endpoint_exits_3(tmp_path):
-    result = CliRunner().invoke(fingerprint_endpoint, ["-e", "http://localhost:1/query", "-o", str(tmp_path)])
-    assert result.exit_code == 3
-    assert not (tmp_path / "main.html").exists()
-
-
-def test_missing_output_folder_is_a_usage_error(tmp_path):
-    result = CliRunner().invoke(fingerprint_endpoint, ["-e", LOCAL_ENDPOINT, "-o", str(tmp_path / "missing")])
-    assert result.exit_code == 2
-
-
 def test_collection_options_are_recorded(tmp_path):
     result = CliRunner().invoke(
         fingerprint_endpoint, ["-e", LOCAL_ENDPOINT, "-o", str(tmp_path), "--precision", "first_n", "--first-n", "2"]

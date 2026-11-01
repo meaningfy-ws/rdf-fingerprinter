@@ -119,7 +119,7 @@ Consequences::
 * Good: cost grows with the instances read, not with classes × graph size.
 * Bad: first-N figures follow the store's row order, not a random sample; they are labelled as such.
 Confirmation:: `test_exact_mode_binds_the_class_inside_the_query`
-(`tests/unit/test_adapters_queries.py`); the escalation scenarios of
+(`tests/unit/adapters/test_queries.py`); the escalation scenarios of
 `tests/features/statistics_collection.feature`.
 Pros and cons::
 * Staged, class-scoped queries with escalation (chosen) — good: bounded cost per query; bad: more queries, first-N samples follow store order.
@@ -174,7 +174,7 @@ Consequences::
 * Bad: a caller must check for failures (exit 1, or `run.failures` in the library); the 1.x library
   call returns only a path.
 Confirmation:: scenario outline "Exit status" (`tests/features/fingerprint_report.feature`);
-`test_discovery_failures_are_recorded` (`tests/unit/test_service_layer_collection.py`).
+`test_discovery_failures_are_recorded` (`tests/unit/service_layer/test_collection.py`).
 Pros and cons::
 * Partial results (chosen) — good: nothing measured is lost, nothing failed is hidden; bad: callers must check for failures.
 * Stop at the first failure — good: simple to reason about; bad: one slow class loses the whole run.
@@ -216,7 +216,7 @@ Consequences::
 * Good: one contract for every consumer, including `profile.json` (<<ad-7>>).
 * Bad: a code-generation step and a sync check; LinkML is a development dependency.
 Confirmation:: `make check-models`; `test_profile_objects_are_read_only`
-(`tests/unit/test_service_layer_collection.py`).
+(`tests/unit/service_layer/test_collection.py`).
 Pros and cons::
 * LinkML + generated Pydantic (chosen) — good: one published contract for every consumer; bad: a codegen step.
 * Dataclasses — good: no codegen; bad: no schema to publish or validate a profile file against.
@@ -291,7 +291,7 @@ Consequences::
 * Good: no reliance on eds4jinja2 internals; the parallel pre-fetch applies to every format.
 Confirmation:: scenarios "Unusual IRIs stay valid", "An IRI that cannot be written is skipped, not
 broken" and "Golden file per format" of the `profile-representations` specification;
-`tests/unit/test_adapters_template_renderer.py` (a failed check writes nothing).
+`tests/unit/adapters/test_template_renderer.py` (a failed check writes nothing).
 Pros and cons::
 * eds4jinja2 for every format (chosen) — good: one engine, customisable everywhere; bad: Turtle escaping is ours.
 * rdflib graph — good: escaping is correct by construction; bad: SHACL not customisable by template,
@@ -319,8 +319,8 @@ Consequences::
   any query.
 * Bad: a dict is still built at a library's boundary (eds4jinja2's configuration, JSON being
   parsed); each such line is marked with its reason.
-Confirmation:: `tests/unit/test_no_composed_dicts.py` (part of `make check-all`); `make check-models`;
-`tests/unit/test_config.py`; the golden files and every scenario unchanged.
+Confirmation:: `tests/guards/test_no_composed_dicts.py` (part of `make check-all`); `make check-models`;
+`tests/unit/adapters/test_config.py`; the golden files and every scenario unchanged.
 Pros and cons::
 * Generated objects everywhere (chosen) — good: one modelling language, checked shapes; bad: more
   generated code.

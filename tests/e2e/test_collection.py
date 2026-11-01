@@ -1,14 +1,12 @@
 """Collection and analysis of the loaded test store (`make oxigraph-load-test-data`)."""
 
-import json
-from pathlib import Path
-
 from fingerprint.adapters.profile_file import load_profile
 from fingerprint.adapters.sparql import SparqlHttpClient
 from fingerprint.domain.analytics import analyse
 from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.settings import resolve_settings
 from tests import LOCAL_ENDPOINT
+from tests.sample_data import SAMPLE_PROFILE, differences
 
 
 def fingerprint(**cli):
@@ -30,19 +28,8 @@ def test_first_n_reads_at_most_n_instances():
 
 
 def test_a_live_collection_equals_the_sample_profile():
-    """Typed rdflib rows build the same profile the 2.1 sample holds (domain-object-model P-8)."""
-    sample = load_profile(Path(__file__).parents[1] / "test_data" / "profiles" / "sample-profile.json")
+    """Typed rdflib rows build the same profile the stored sample holds; a difference names its class or property."""
+    sample = load_profile(SAMPLE_PROFILE)
     run = collect(LOCAL_ENDPOINT, sample.settings, SparqlHttpClient(LOCAL_ENDPOINT, sample.settings.timeout_seconds))
-    varying = {"started_at", "finished_at", "tool_version"}
-    assert ordered(run.model_dump(exclude_none=True, exclude=varying)) == ordered(
-        sample.model_dump(exclude_none=True, exclude=varying)
-    )
-
-
-def ordered(value):
-    """Lists sorted by their JSON text: stores may return rows (e.g. property partitions) in any order."""
-    if isinstance(value, dict):
-        return {key: ordered(item) for key, item in value.items()}  # dict-ok: comparing JSON dumps
-    if isinstance(value, list):
-        return sorted((ordered(item) for item in value), key=lambda item: json.dumps(item, sort_keys=True, default=str))
-    return value
+    found = differences(sample, run)
+    assert not found, "the stored sample profile drifted (make refresh-sample-profile):\n" + "\n".join(found)

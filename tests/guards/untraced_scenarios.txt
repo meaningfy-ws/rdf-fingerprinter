@@ -1,0 +1,41 @@
+# Spec scenarios proven by a pytest test rather than a Gherkin scenario (lean-test-suite P-3).
+# <capability> | <scenario title> | <path>::<module-level test function> | <reason>
+# Only developer-tooling has entries: its scenarios are about the repository, not the product.
+
+# --- openspec/specs/developer-tooling ---
+developer-tooling | Layer violation fails | tests/guards/test_architecture_contracts.py::test_a_service_layer_module_importing_an_entrypoint_breaks_the_layers_contract | lints a tmp copy with the violating import and expects the "fingerprint layers" contract named; runs lint-imports directly, not through make
+developer-tooling | Import from another directory | tests/guards/test_package.py::test_import_from_another_directory_has_no_logging_side_effects | imports the package from a directory without logging.conf and checks the root logger
+developer-tooling | Oxigraph renders the type columns | tests/e2e/test_report_generation.py::test_the_report_page_on_the_test_store | local-only e2e: generates the report against Oxigraph and asserts no td cell reads nan
+developer-tooling | e2e against the local Oxigraph | tests/e2e/test_entrypoints_cli.py::test_fingerprint_execution | local-only e2e: runs the CLI against the local endpoint; does not check that make test-e2e wires it
+developer-tooling | Mutating a profile object | tests/guards/test_architecture_contracts.py::test_assigning_a_field_of_a_profile_object_raises_a_validation_error | assigns a field of a generated profile.py object and expects a ValidationError
+developer-tooling | Banner present | tests/guards/test_architecture_contracts.py::test_generated_modules_state_they_are_generated_on_the_first_line | reads the first line of the committed profile.py and views.py; does not run make generate-models
+developer-tooling | Generated module imports project code | tests/guards/test_architecture_contracts.py::test_a_generated_module_importing_project_code_breaks_its_contract | lints a tmp copy where profile.py imports fingerprint.domain.analytics; the spec path fingerprint/domain/generated no longer exists, the contract covers profile.py and views.py
+developer-tooling | Domain imports an adapter | tests/guards/test_architecture_contracts.py::test_a_domain_module_importing_an_adapter_breaks_the_layers_contract | lints a tmp copy with a domain module importing fingerprint.adapters and expects the layers contract named
+developer-tooling | A new dict value is refused | tests/guards/test_no_composed_dicts.py::test_a_new_dict_value_is_an_offence | feeds the checker a function returning a dict display and expects the offending line
+developer-tooling | A marked library boundary passes | tests/guards/test_no_composed_dicts.py::test_a_dict_marked_with_its_library_boundary_reason_is_no_offence | feeds the checker a dict-ok marked line and expects no offence
+developer-tooling | A variable changes a default | tests/unit/service_layer/test_config.py::test_a_variable_changes_a_default | sets RDF_FINGERPRINTER_PROFILE_FILE and checks the saved profile name
+developer-tooling | A badly typed variable | tests/unit/entrypoints/test_config.py::test_a_badly_typed_variable_exits_2_before_any_query | runs the command with a bad backoff value; expects exit 2 naming the variable
+developer-tooling | Clean tree passes | tests/guards/test_repository_wiring.py::test_check_all_runs_every_static_check_and_the_tests | checks the Makefile wiring (check-all runs lint, typecheck, architecture, models, spec and the tests); does not run the gate
+developer-tooling | Failing gate blocks the PR | tests/guards/test_repository_wiring.py::test_ci_runs_check_all_on_push_and_pull_request_to_master | checks ci.yml runs make check-all on push and pull_request to master; GitHub's execution and branch protection are not tested
+developer-tooling | Release publishes the package | tests/guards/test_repository_wiring.py::test_the_release_workflow_publishes_through_oidc_without_a_token | checks publish.yml: release trigger, id-token write, PyPI action without password or secret, Poetry build and wheel check; no upload is made
+developer-tooling | Docs deploy on merge | tests/guards/test_repository_wiring.py::test_the_docs_workflow_deploys_only_after_the_build_and_only_from_master | checks docs.yml wiring (deploy needs the build, runs only off pull requests and from master); Pages deployment is not tested
+developer-tooling | Broken docs block the PR | tests/guards/test_repository_wiring.py::test_the_docs_workflow_builds_with_antora_on_pull_requests | checks docs.yml builds with Antora on pull_request; a failing build is not simulated
+developer-tooling | Schema edited without regeneration | tests/guards/test_repository_wiring.py::test_check_models_regenerates_and_diffs_every_generated_module_inside_the_gate | checks check-models diffs profile, views and schema against a fresh generation and runs in check-quality; does not edit a schema
+
+# --- this change's delta (lean-test-suite) ---
+developer-tooling | A spec scenario without a test | tests/guards/test_traceability.py::test_a_spec_scenario_without_a_feature_scenario_names_the_capability_and_title | TC-1 on a small tree under tmp_path
+developer-tooling | An orphan feature scenario | tests/guards/test_traceability.py::test_an_orphan_feature_scenario_names_the_feature_file_and_title | TC-2 on a small tree under tmp_path
+developer-tooling | A stale allow-list entry | tests/guards/test_traceability.py::test_an_entry_naming_a_missing_function_names_the_entry | TC-3 on a small tree under tmp_path
+developer-tooling | A domain test imports the service layer | tests/guards/test_test_fences.py::test_a_domain_test_importing_a_higher_layer_or_a_double_fails | TC-5 lints a temporary copy of the tree with the violating import; parametrised over three imports
+developer-tooling | A unit test reaches the network | tests/guards/test_no_network.py::test_a_unit_test_cannot_open_a_socket | TC-4 checks the RuntimeError naming the rule
+developer-tooling | Regenerating without a data change | tests/guards/test_sample_data.py::test_the_refresh_leaves_an_equal_profile_alone | the refresh decision leaves an equal profile untouched; the make target against Oxigraph was run by hand (IT-1), not in CI
+developer-tooling | The stored profile drifts | tests/e2e/test_collection.py::test_a_live_collection_equals_the_sample_profile | runs in make test-e2e against the local store; naming the difference is unit-tested by test_a_changed_property_is_named_with_its_class
+developer-tooling | A reordered Turtle output | tests/unit/service_layer/test_representations_golden.py::test_a_reordered_turtle_output | TC-8: the golden comparison is graph isomorphism, so reordered triples and renamed prefixes pass
+developer-tooling | A changed triple | tests/unit/service_layer/test_representations_golden.py::test_a_changed_triple | TC-8: one changed literal fails and the diff names the triple on each side
+developer-tooling | An untested domain branch | tests/guards/test_domain_coverage_gate.py::test_an_untested_domain_branch_fails_the_domain_coverage_report | TC-7: the per-layer coverage report on a temporary domain module with an untaken branch exits non-zero and lists it
+developer-tooling | The mutation score drops | tests/guards/test_mutation_score.py::test_the_mutation_score_drops | TC-6: the ratchet exits 1 on a lower score; the hour-long mutmut run itself is the weekly CI job
+
+# --- openspec/changes/pitfall-scans ---
+developer-tooling | Ontology and data | tests/guards/test_scan_files.py::test_scan_files_loads_the_ontology_and_the_data_and_runs_the_scan | needs Docker: reads the scan-files recipe (loads both graphs, runs --pitfalls --schema-graph --format pitfalls); brainframe run recorded in tasks 6.4
+developer-tooling | The test store is untouched | tests/guards/test_scan_files.py::test_scan_files_never_touches_the_e2e_store | needs Docker: the recipe names only the scan store, whose container and port differ from the e2e store's
+pitfall-scans | Each check finds its pitfall and only it | tests/unit/adapters/test_pitfall_checks.py::test_the_check_finds_its_pitfall_and_only_it | 29 positive/negative fixtures, one per packaged check, run with rdflib directly; a Gherkin example table of 29 snippets would only restate the unit table

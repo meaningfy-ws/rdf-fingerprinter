@@ -1,5 +1,4 @@
 ## MODIFIED Requirements
-
 ### Requirement: Every namespace has a prefix
 After collection the fingerprinter SHALL give a prefix to the namespace of each profiled graph IRI,
 class, property, value type, parent class and linked class, and of each IRI entity, property and
@@ -26,3 +25,4 @@ DEC-1, DEC-2).
 #### Scenario: Pitfall examples are named
 - **WHEN** a pitfall example's entity is `http://other.org/vocab#thing` and nothing else in the profile uses that namespace
 - **THEN** the namespace table holds a prefix for `http://other.org/vocab#`
+

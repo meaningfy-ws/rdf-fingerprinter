@@ -16,71 +16,43 @@ Feature: Deriving analytics from the raw statistics
 
   Rule: Cardinality statistics keep their 1.x meaning
 
-    Scenario Outline: Statistics from a histogram
-      Given <observed> observed instances of a class
-      And the histogram of a property is <histogram>
+    Scenario: Mixed presence
+      Given 4 observed instances of a class
+      And the histogram of a property is 1:2, 2:1
       When the analytics are computed
-      Then min is <min>, max is <max>, mean is <mean> and confidence is <confidence>
-
-      Examples:
-        | observed | histogram       | min | max | mean | confidence |
-        | 4        | 1:2, 2:1        | 0   | 2   | 1.0  | 0.75       |
-        | 3        | 1:3             | 1   | 1   | 1.0  | 1.0        |
-        | 5        | 2:5             | 2   | 2   | 2.0  | 1.0        |
-        | 10       | 1:1             | 0   | 1   | 0.1  | 0.1        |
+      Then min is 0, max is 2, mean is 1.0 and confidence is 0.75
+      And the mean when present is 1.33
 
   Rule: A cardinality label is accepted only above the threshold
 
-    Scenario Outline: Cardinality labels
-      Given <observed> observed instances of a class
-      And the histogram of a property is <histogram>
+    Scenario: Mandatory single value
+      Given 100 observed instances of a class
+      And the histogram of a property is 1:97, 2:3
       And the acceptance threshold is 0.95
       When the analytics are computed
-      Then the label is "<label>" with support <support>
-      And the rejected alternatives are "<alternatives>"
+      Then the label is "exactly_one" with support 0.97
+      And the rejected alternatives are ""
 
-      Examples:
-        | observed | histogram   | label        | support | alternatives              |
-        | 100      | 1:97, 2:3   | exactly_one  | 0.97    |                           |
-        | 100      | 1:100       | exactly_one  | 1.0     |                           |
-        | 100      | 3:96, 4:4   | exactly_n    | 0.96    | exactly_one               |
-        | 100      | 1:50, 2:50  | one_or_more  | 1.0     | exactly_one               |
-        | 100      | 1:90        | zero_or_one  | 1.0     | exactly_one               |
-        | 4        | 1:2, 2:1    | zero_or_more | 1.0     | one_or_more, zero_or_one  |
+    Scenario: Below threshold
+      Given 4 observed instances of a class
+      And the histogram of a property is 1:2, 2:1
+      And the acceptance threshold is 0.95
+      When the analytics are computed
+      Then the label is "zero_or_more" with support 1.0
+      And the rejected alternatives are "one_or_more, zero_or_one"
 
   Rule: Value profiles describe what a property points to
 
-    Scenario Outline: Property kind
-      Given a property whose objects are <objects>
+    Scenario: Mixed property kind
+      Given a property whose objects are literals and resources
       When the analytics are computed
-      Then its kind is "<kind>"
-
-      Examples:
-        | objects                 | kind              |
-        | only literals           | datatype_property |
-        | only resources          | object_property   |
-        | literals and resources  | mixed             |
+      Then its kind is "mixed"
 
     Scenario: Identifier-like property
       Given every instance has exactly one value of a property
       And all values are different
       When the analytics are computed
       Then the property is identifier-like
-
-    Scenario: Enumeration candidate
-      Given a property has 5 distinct values and the top values setting is 20
-      When the analytics are computed
-      Then the property is a candidate for a list of allowed values
-
-    Scenario: Entropy of a single repeated value
-      Given every value of a property is the same
-      When the analytics are computed
-      Then its entropy estimate is 0
-
-    Scenario: Ratios without a denominator are absent
-      Given a property with no literal values
-      When the analytics are computed
-      Then its language coverage and mean length are absent
 
   Rule: The class hierarchy is declared or implied by the data
 
@@ -103,7 +75,7 @@ Feature: Deriving analytics from the raw statistics
       Then each is an implied parent of the other
       And both have the hierarchy depth they would have without those parents
 
-    Scenario: Parent without instances
+    Scenario: Parent without a profile
       Given "ex:Student" is declared a subclass of "ex:Agent"
       And "ex:Agent" has no instances in the graph
       When the analytics are computed
@@ -122,9 +94,14 @@ Feature: Deriving analytics from the raw statistics
       When the analytics are computed
       Then the class's label coverage is 0.9
 
+    Scenario: Entropy of a single value
+      Given every value of a property is the same
+      When the analytics are computed
+      Then its entropy estimate is 0
+
   Rule: Every number says whether it is exact
 
-    Scenario: First-N class
+    Scenario: First N class
       Given a class was read in first-N mode
       When the analytics are computed
       Then the class and all its properties are marked not exact

@@ -120,6 +120,10 @@ comma-separated list (EPIC DEC-8).
 - **WHEN** `--pitfall-checks my/` holds a valid check with id `p22_class_naming`
 - **THEN** the run uses the user's query for `p22_class_naming`, and the result's source is the user's
 
+#### Scenario: Scan options need the scan
+- **WHEN** the fingerprint command runs with `--fail-on critical` but without `--pitfalls`
+- **THEN** it exits 2 naming `--fail-on`, and sends no query
+
 #### Scenario: Skipped check
 - **WHEN** a run uses `--pitfalls --skip-pitfall p13_missing_inverse`
 - **THEN** no query of check `p13_missing_inverse` is sent and the profile has no result for it

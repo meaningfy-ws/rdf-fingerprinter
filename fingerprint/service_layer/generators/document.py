@@ -65,9 +65,6 @@ class DocumentGenerator(Generator):
         self.accepts(cls.class_iri)
         return True
 
-    def term(self, iri: str) -> DocumentTerm:
-        return DocumentTerm(iri=iri, label=self.label(iri))
-
     def search_text(self, iri: str) -> str:
         return f"{self.label(iri)} {iri}".lower()
 
