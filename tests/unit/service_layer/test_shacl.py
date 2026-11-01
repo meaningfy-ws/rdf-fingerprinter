@@ -99,7 +99,8 @@ def test_a_language_tagged_literal_without_datatype_is_a_lang_string():
     ],
 )
 def test_severity_follows_what_the_profile_knows(props, kwargs, severity):
-    run = profile_run(klass(EX + "Person", kwargs.pop("instances", 4), *props, **kwargs), acceptance_threshold=0.8)
+    options = {**kwargs}  # dict-ok: copy, so the shared parametrize value survives a second run
+    run = profile_run(klass(EX + "Person", options.pop("instances", 4), *props, **options), acceptance_threshold=0.8)
     g = shapes(run)
     assert g.value(property_shape(g, EX + "Person", EX + "p"), SH.severity) == severity
 
