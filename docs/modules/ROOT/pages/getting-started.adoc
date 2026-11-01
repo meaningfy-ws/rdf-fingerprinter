@@ -27,7 +27,8 @@ fingerprint -e https://my.endpoint/sparql -o report
 | `-o`, `--output` | `./output` | Folder the report is written to; it must exist.
 | `--graph` | all graphs | A graph to profile (repeatable); `""` is the default graph.
 | `--config` | — | A JSON file with collection settings.
-| `--format` | — | Also write `shacl`, `puml` or `doc` (repeatable); see xref:representations.adoc[].
+| `--format` | — | Also write `shacl`, `puml`, `doc` or `pitfalls` (repeatable); see xref:representations.adoc[].
+| `--pitfalls` | off | Also scan for modelling pitfalls; see xref:pitfalls.adoc[].
 |===
 
 The other options (`--depth`, `--precision`, `--first-n`, `--timeout`, …) are listed in
@@ -52,6 +53,7 @@ template, call the library (xref:api-reference.adoc[]).
 | 2 | Usage error: a bad option or setting, or the output folder does not exist.
 | 3 | The endpoint cannot be reached (no connection, or authentication required). No report.
 | 4 | An unexpected error; the traceback is logged. No report.
+| 5 | With `--fail-on`: the run succeeded, but pitfalls at or above the level were found (xref:pitfalls.adoc[]).
 |===
 
 TIP: Any SPARQL 1.1 store works. The templates are tested against

@@ -6,3 +6,10 @@ services:
     command: serve --bind 0.0.0.0:7878
     ports:
       - ${RDF_FINGERPRINTER_OXIGRAPH_PORT}:7878
+  oxigraph-scan:
+    container_name: oxigraph-fingerprinter-scan
+    image: ghcr.io/oxigraph/oxigraph:0.5.13
+    # a separate in-memory store for `make scan-files`: the e2e test store is never touched (pitfall-scans D-10)
+    command: serve --bind 0.0.0.0:7878
+    ports:
+      - ${RDF_FINGERPRINTER_SCAN_PORT}:7878

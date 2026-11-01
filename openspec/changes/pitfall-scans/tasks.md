@@ -32,10 +32,10 @@
 
 ## 6. Tooling, docs and release prep
 
-- [ ] 6.1 The `oxigraph-scan` compose service, `RDF_FINGERPRINTER_SCAN_PORT` and `make scan-files` (design D-10; developer-tooling › Scan files locally)
-- [ ] 6.2 e2e `tests/e2e/test_pitfall_scan.py` on Oxigraph (schema graph plus data, `--format pitfalls`, exit 5)
-- [ ] 6.3 Docs: `pitfalls.adoc` with the catalogue, the nav, and the CLI, settings and exit-status tables; a unit test that every packaged id is in the docs table (design D-11)
-- [ ] 6.4 CHANGELOG 3.1.0, `pyproject.toml` 3.1.0; `make check-all` and `make test-e2e`; `make scan-files` on brainframe into `../rdf-fingerprinter/temp/brainframe-fingerprint/pitfalls/` (design D-12)
+- [x] 6.1 The `oxigraph-scan` compose service, `RDF_FINGERPRINTER_SCAN_PORT` and `make scan-files` (design D-10; developer-tooling › Scan files locally)
+- [x] 6.2 e2e `tests/e2e/test_pitfall_scan.py` on Oxigraph (schema graph plus data, `--format pitfalls`, exit 5)
+- [x] 6.3 Docs: `pitfalls.adoc` with the catalogue, the nav, and the CLI, settings and exit-status tables; a unit test that every packaged id is in the docs table (design D-11)
+- [x] 6.4 CHANGELOG 3.1.0, `pyproject.toml` 3.1.0; `make check-all` and `make test-e2e`; `make scan-files` on brainframe into `../rdf-fingerprinter/temp/brainframe-fingerprint/pitfalls/` (design D-12)
 
 ## Roadmap
 

@@ -114,6 +114,9 @@ its own: a malformed value fails even when a source with higher precedence sets 
 | `timeout_seconds` | `--timeout` | 60 | Per-query timeout.
 | `concurrency` | `--concurrency` | 4 | Classes profiled at once.
 | `selected_graphs` | `--graph` (repeatable) | all | Graphs to profile; `""` is the default graph. Comma-separated in the environment variable.
+| `pitfall_scan` | `--pitfalls` | off | Scan each graph for modelling pitfalls (xref:pitfalls.adoc[]).
+| `schema_graphs` | `--schema-graph` (repeatable) | none | Graphs holding the ontology. Comma-separated in the environment variable.
+| `pitfall_examples` | `--pitfall-examples` | 10 | Example rows kept per pitfall check and graph.
 |===
 
 Booleans in environment variables are `1/true/yes/on` or `0/false/no/off`. An unknown key in a

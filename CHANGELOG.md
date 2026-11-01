@@ -6,6 +6,27 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-11-01
+
+Pitfall scans (OpenSpec change `pitfall-scans`). The fingerprinter can report what is wrong with how
+a dataset is modelled, next to what it holds.
+
+### Added
+- **`--pitfalls`**: after profiling each graph, run a catalogue of 29 SPARQL checks. 25 follow the
+  OOPS! pitfall catalogue (P04–P41 where SPARQL can express them); 4 are the fingerprinter's own:
+  punning, individuals as predicates, and subjects or objects outside the declared domain or range.
+  `--schema-graph` names the ontology graphs: they get the schema checks, and every other graph runs
+  the data checks joined with them. Counts and the first `--pitfall-examples` rows are saved in
+  `profile.json`.
+- **A *Pitfalls* section** in the report page, with class badges, and the **`pitfalls` format**:
+  ROBOT-style TSV per scanned graph (`--format pitfalls`, `fingerprint-gen-pitfalls`).
+- **`--fail-on critical|important|minor`**: exit status 5 when pitfalls reach the level.
+- **`--pitfall-checks DIR`** (your own `.rq` checks, same contract) and `--skip-pitfall ID`.
+- **`make scan-files ONTOLOGY=… [DATA=…] OUT=…`**: scan RDF files on a separate in-memory Oxigraph.
+- Docs: the Pitfalls page with the catalogue; the settings and exit-status tables.
+
+Nothing breaks: the scan is off by default, and exit 5 only appears with `--fail-on`.
+
 ## [3.0.0] - 2026-10-31
 
 Readable representations (OpenSpec change `readable-representations`). Every IRI in every output is
