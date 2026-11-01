@@ -1,6 +1,7 @@
 """Step definitions for fingerprint_report.feature: the report page, the CLI and the library call over FakeSparql."""
 
 import io
+import logging
 import re
 import urllib.error
 from pathlib import Path
@@ -16,6 +17,7 @@ from fingerprint.adapters.sparql import QueryTimeout, SparqlHttpClient
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.profile import ProfileRun, Settings
+from fingerprint.entrypoints.cli import generate
 from fingerprint.entrypoints.cli import main as cli
 from fingerprint.service_layer import handlers
 from fingerprint.service_layer.generators import DocumentGenerator
@@ -267,10 +269,50 @@ def situation(ctx, fake, situation):
     SITUATIONS[situation](fake, ctx)
 
 
+@given(parsers.parse('the endpoint address "{url}"'))
+def endpoint_address(ctx, fake, url):
+    ctx["fake"], ctx["url"] = fake, url
+
+
 @when("the fingerprint command runs")
-def command_runs(ctx):
-    args = ["-e", "http://fake/sparql", "-o", str(ctx["output"]), *ctx.get("args", [])]
+def command_runs(ctx, caplog):
+    caplog.set_level(logging.INFO)
+    args = ["-e", ctx.get("url", "http://fake/sparql"), "-o", str(ctx["output"]), *ctx.get("args", [])]
     ctx["result"] = CliRunner().invoke(cli.fingerprint_endpoint, args)
+
+
+@when("the document is rendered again from the saved profile file")
+def document_again(ctx, tmp_path):
+    again = tmp_path / "again"
+    again.mkdir()
+    ctx["again"] = again
+    CliRunner().invoke(generate.gen_doc, [str(ctx["output"] / "profile.json"), "-o", str(again)])
+
+
+@then("the two pages are equal")
+def pages_equal(ctx):
+    assert (ctx["again"] / "main.html").read_text() == (ctx["output"] / "main.html").read_text()
+
+
+@then("it logs the number of failures")
+def logs_failures(ctx, caplog):
+    assert "with 1 failures" in caplog.text
+
+
+@then("it logs that the endpoint cannot be reached")
+def logs_unreachable(ctx, caplog):
+    assert "cannot reach endpoint" in caplog.text
+
+
+@then(parsers.parse('no output file and no log line holds the user info "{userinfo}" or the query string "{query}"'))
+def no_secrets(ctx, caplog, userinfo, query):
+    texts = [p.read_text() for p in ctx["output"].iterdir()] + [caplog.text, ctx["result"].output]
+    assert not any(token in text for text in texts for token in (userinfo, query))
+
+
+@then(parsers.parse('the outputs and logs show "{shown}"'))
+def shows_redacted(ctx, caplog, shown):
+    assert shown in (ctx["output"] / "profile.json").read_text() and shown in (ctx["output"] / "main.html").read_text()
 
 
 @then(parsers.parse("it exits with {code:d}"))
