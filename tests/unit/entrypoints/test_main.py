@@ -7,7 +7,7 @@ from rdflib import Literal
 from fingerprint.entrypoints.cli import generate
 from fingerprint.entrypoints.cli import main as cli
 from fingerprint.service_layer import handlers
-from tests.unit.fakes import FakeSparql
+from tests.fakes import FakeSparql
 
 
 @pytest.fixture

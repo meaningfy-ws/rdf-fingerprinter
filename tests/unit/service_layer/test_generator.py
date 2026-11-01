@@ -10,7 +10,7 @@ from fingerprint.domain.analytics import analyse
 from fingerprint.domain.profile import ProfileRun
 from fingerprint.domain.views import NodeShape, PropertyShape, ShapesGraph
 from fingerprint.service_layer.generators.generator import Generator, graph_slug
-from tests.unit.fakes import files
+from tests.fakes import files
 
 EX = "http://ex.org/"
 

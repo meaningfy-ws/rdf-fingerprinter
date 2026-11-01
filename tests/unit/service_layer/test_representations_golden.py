@@ -15,9 +15,9 @@ from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.representations import make_generator, with_threshold
-from tests.unit.fakes import files
+from tests.fakes import files
 
-DATA = Path(__file__).parents[1] / "test_data"
+DATA = Path(__file__).parents[2] / "test_data"
 GOLDEN = DATA / "golden"
 SH = Namespace("http://www.w3.org/ns/shacl#")
 # make oxigraph-load-test-data puts continents in the default graph too; no union default graph.

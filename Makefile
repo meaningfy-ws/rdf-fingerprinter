@@ -77,9 +77,9 @@ check-spec: ## Validate the OpenSpec spine strictly (needs Node.js)
 	@ echo -e "$(BUILD_PRINT)openspec validate --strict$(END_BUILD_PRINT)"
 	@ $(OPENSPEC) validate --all --strict
 
-test: ## Unit tests with coverage (no SPARQL store needed)
+test: ## Unit, bdd and guard tests with coverage (no SPARQL store needed)
 	@ echo -e "$(BUILD_PRINT)Running the unit tests$(END_BUILD_PRINT)"
-	@ poetry run pytest $(TEST_PATH)/unit $(COV_FLAGS) --junitxml=junit_report.xml
+	@ poetry run pytest $(TEST_PATH) --ignore=$(TEST_PATH)/e2e $(COV_FLAGS) --junitxml=junit_report.xml
 
 test-e2e: ## End-to-end tests against the loaded test store (run oxigraph-load-test-data first); local only
 	@ echo -e "$(BUILD_PRINT)Running the e2e tests against $${RDF_FINGERPRINTER_TEST_ENDPOINT:-$(OXIGRAPH)/query}$(END_BUILD_PRINT)"

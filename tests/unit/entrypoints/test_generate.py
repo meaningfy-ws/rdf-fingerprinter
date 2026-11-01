@@ -8,7 +8,7 @@ from click.testing import CliRunner
 
 from fingerprint.entrypoints.cli import generate
 
-SAMPLE = Path(__file__).parents[1] / "test_data" / "profiles" / "sample-profile.json"
+SAMPLE = Path(__file__).parents[2] / "test_data" / "profiles" / "sample-profile.json"
 COMMANDS = {"shacl": generate.gen_shacl, "puml": generate.gen_puml, "doc": generate.gen_doc}
 FIRST_FILE = {"shacl": "shapes-default.ttl", "puml": "diagram-default.puml", "doc": "main.html"}
 
@@ -85,7 +85,7 @@ def test_an_unwritable_shapes_namespace_is_a_usage_error(tmp_path):
 
 def test_a_profile_with_failures_still_generates(tmp_path):
     from fingerprint.adapters.profile_file import save_profile
-    from tests.unit.fakes import EX, klass, profile_run
+    from tests.fakes import EX, klass, profile_run
 
     failure = {"query_kind": "co_types", "class_iri": EX + "Big", "message": "not profiled"}
     path = save_profile(profile_run(klass(EX + "Person", 2), failures=[failure]), tmp_path)

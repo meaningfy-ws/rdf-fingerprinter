@@ -142,3 +142,4 @@ junit_report.xml
 docs/build/
 node_modules/
 package-lock.json
+mutants/

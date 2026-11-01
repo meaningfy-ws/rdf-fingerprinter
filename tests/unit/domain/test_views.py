@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from fingerprint.domain.views import NodeShape, PropertyShape
 
-DOMAIN = Path(__file__).parents[2] / "fingerprint" / "domain"
+DOMAIN = Path(__file__).parents[3] / "fingerprint" / "domain"
 
 
 def test_a_view_object_cannot_be_changed():

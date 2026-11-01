@@ -16,7 +16,7 @@ from fingerprint.service_layer.representations import (
     with_threshold,
 )
 
-SAMPLE = Path(__file__).parents[1] / "test_data" / "profiles" / "sample-profile.json"
+SAMPLE = Path(__file__).parents[2] / "test_data" / "profiles" / "sample-profile.json"
 
 
 @pytest.fixture

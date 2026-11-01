@@ -75,3 +75,21 @@ packages = [{ include = "fingerprint" }, { include = "fingerprint_report_templat
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.mutmut]
+# Mutation testing of the decision-making layers (lean-test-suite P-7); run by `make check-mutation`.
+source_paths = ["fingerprint/domain/", "fingerprint/service_layer/"]
+do_not_mutate = ["fingerprint/domain/profile.py", "fingerprint/domain/views.py"]
+# Only what is not mutated: copytree(dirs_exist_ok) would overwrite mutated files on a re-run.
+also_copy = [
+    "fingerprint/__init__.py",
+    "fingerprint/adapters/",
+    "fingerprint/entrypoints/",
+    "fingerprint_report_templates/",
+    "tests/",
+    "pytest.ini",
+]
+pytest_add_cli_args_test_selection = ["tests/unit", "tests/bdd"]
+# Guards read the source, which mutmut rewrites; they are not mutation killers.
+pytest_add_cli_args = ["-p", "no:cacheprovider"]
+mutate_only_covered_lines = false

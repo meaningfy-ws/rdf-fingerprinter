@@ -9,7 +9,7 @@ from fingerprint.domain.profile import Settings
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.handlers import fingerprint_report
-from tests.unit.fakes import FakeSparql
+from tests.fakes import FakeSparql
 
 
 def test_the_report_package_is_packaged():

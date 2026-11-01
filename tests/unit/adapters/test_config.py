@@ -17,9 +17,9 @@ from fingerprint.service_layer import handlers
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators.generator import plain_label
 from fingerprint.service_layer.settings import load_user_prefixes, resolve_settings
-from tests.unit.fakes import FakeSparql
+from tests.fakes import FakeSparql
 
-PACKAGE = Path(__file__).parents[2] / "fingerprint"
+PACKAGE = Path(__file__).parents[3] / "fingerprint"
 
 
 def test_defaults_are_todays_constants():

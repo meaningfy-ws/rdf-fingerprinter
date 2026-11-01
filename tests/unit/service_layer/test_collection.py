@@ -11,7 +11,7 @@ from rdflib import Literal
 from fingerprint.adapters.sparql import EndpointUnreachable, PermanentError, QueryTimeout, redact
 from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.settings import UsageError, resolve_settings
-from tests.unit.fakes import EX, FakeSparql
+from tests.fakes import EX, FakeSparql
 
 TIMEOUT, REJECTED = QueryTimeout("timed out"), PermanentError("400 unsupported", 400)
 

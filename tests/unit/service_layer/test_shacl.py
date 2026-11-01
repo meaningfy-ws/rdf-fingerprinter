@@ -8,7 +8,7 @@ from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer.generators.shacl import ShaclGenerator
-from tests.unit.fakes import EX, XSD, files, klass, literals, profile_run, prop, resources
+from tests.fakes import EX, XSD, files, klass, literals, profile_run, prop, resources
 
 SH = Namespace("http://www.w3.org/ns/shacl#")
 FP = Namespace("https://data.meaningfy.ws/fingerprint/")

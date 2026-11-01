@@ -19,11 +19,11 @@ from fingerprint.domain.profile import ProfileRun, Settings
 from fingerprint.entrypoints.cli import main as cli
 from fingerprint.service_layer import handlers
 from fingerprint.service_layer.generators import DocumentGenerator
-from tests.unit.fakes import EX, FakeSparql
+from tests.fakes import EX, FakeSparql
 
 scenarios("fingerprint_report.feature")
 
-TEST_DATA = Path(__file__).parents[2] / "test_data"
+TEST_DATA = Path(__file__).parents[1] / "test_data"
 CUSTOM_TEMPLATE = TEST_DATA / "custom_template"
 READABILITY = TEST_DATA / "profiles" / "readability-profile.json"
 

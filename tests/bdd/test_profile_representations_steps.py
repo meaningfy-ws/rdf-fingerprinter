@@ -22,11 +22,11 @@ from fingerprint.entrypoints.cli import generate
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.generators.generator import META_NAMESPACES
 from fingerprint.service_layer.representations import generate_from_profile_file, make_generator, with_threshold
-from tests.unit.fakes import EX, XSD, files, klass, literals, profile_run, prop
+from tests.fakes import EX, XSD, files, klass, literals, profile_run, prop
 
 scenarios("profile_representations.feature")
 
-DATA = Path(__file__).parents[2] / "test_data"
+DATA = Path(__file__).parents[1] / "test_data"
 SAMPLE = DATA / "profiles" / "sample-profile.json"
 SH = Namespace("http://www.w3.org/ns/shacl#")
 FP = Namespace("https://data.meaningfy.ws/fingerprint/")

@@ -15,12 +15,12 @@ from fingerprint.domain.prefixes import PrefixTable, generate_prefixes
 from fingerprint.domain.profile import NamespacePrefix, PrefixSource
 from fingerprint.service_layer.generators.plantuml import PlantumlGenerator
 from fingerprint.service_layer.prefixes import resolve_namespaces
-from tests.unit.fakes import files, klass, profile_run, prop, resources
+from tests.fakes import files, klass, profile_run, prop, resources
 
 scenarios("namespace_prefixes.feature")
 
 FOAF = "http://xmlns.com/foaf/0.1/"
-SAMPLE = Path(__file__).parents[2] / "test_data" / "profiles" / "sample-profile.json"
+SAMPLE = Path(__file__).parents[1] / "test_data" / "profiles" / "sample-profile.json"
 
 
 def entry(prefix, namespace, source):

@@ -12,7 +12,7 @@ from rdflib import Literal
 from fingerprint.adapters.sparql import PermanentError, QueryTimeout
 from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.settings import UsageError, load_config_file, resolve_settings
-from tests.unit.fakes import EX, FakeSparql
+from tests.fakes import EX, FakeSparql
 
 scenarios("statistics_collection.feature")
 

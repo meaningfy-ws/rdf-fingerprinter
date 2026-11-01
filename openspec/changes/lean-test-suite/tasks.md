@@ -11,10 +11,10 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## 2. Fences and layout (test content unchanged)
 
-- [ ] 2.1 Move files to the P-1 layout, with an `__init__.py` in every new test directory; `pytest.ini`; `make test` runs `pytest tests --ignore=tests/e2e`; the suite passes with the baseline count (Requirement: Fenced test tiers; P-1)
-- [ ] 2.2 `.importlinter`: `root_packages` (one per line) and the P-4 test contracts; the four existing contracts still kept (Requirement: Fenced test tiers; P-4)
-- [ ] 2.3 No-network autouse fixture and TC-4 (Requirement: Fenced test tiers — Scenario: A unit test reaches the network)
-- [ ] 2.4 TC-5: pytest wrapper running `lint-imports` on a temporary tree with a violating domain test (Scenario: A domain test imports the service layer)
+- [x] 2.1 Move files to the P-1 layout, with an `__init__.py` in every new test directory; `pytest.ini`; `make test` runs `pytest tests --ignore=tests/e2e`; the suite passes with the baseline count (Requirement: Fenced test tiers; P-1)
+- [x] 2.2 `.importlinter`: `root_packages` (one per line) and the P-4 test contracts; the four existing contracts still kept (Requirement: Fenced test tiers; P-4)
+- [x] 2.3 No-network autouse fixture and TC-4 (Requirement: Fenced test tiers — Scenario: A unit test reaches the network)
+- [x] 2.4 TC-5: pytest wrapper running `lint-imports` on a temporary tree with a violating domain test (Scenario: A domain test imports the service layer)
 
 ## 3. Traceability
 
@@ -65,7 +65,7 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## Roadmap
 
-- [x] 1.1 · [ ] 1.2 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 2.4 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 3.4 · [ ] 3.5 · [ ] 3.6 · [ ] 3.7 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 4.5 · [ ] 4.6 · [ ] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
+- [x] 1.1 · [ ] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 3.4 · [ ] 3.5 · [ ] 3.6 · [ ] 3.7 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 4.5 · [ ] 4.6 · [ ] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
 
 ## Verification
 
