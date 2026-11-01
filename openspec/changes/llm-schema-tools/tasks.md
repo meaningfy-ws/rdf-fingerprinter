@@ -48,7 +48,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 - [x] 1.9 `fingerprint/domain/shex.py`, `ShexGenerator`, template package `shex_schema/`, `RepresentationFormat.shex`, `gen_shex` (same options), script `fingerprint-gen-shex`; `pyshexc==0.10.3.post1` in the `test` group
   - Layer: domain, service_layer, entrypoints, templates. Depends on: 1.8.
   - Tests: TC-S1; Gherkin `profile-representations › Enriched ShExC output` (2) and the ShExC part of `› Pattern schema output › Unusual IRIs in the LLM outputs`.
-- [ ] 1.10 Step definitions for the MODIFIED profile-representations scenarios (`› No files for empty graphs › Empty default graph`, the two new rows of `› Golden outputs › Golden file per output`); `make refresh-golden` writes the six golden files; review them against design §E (the worked example)
+- [x] 1.10 Step definitions for the MODIFIED profile-representations scenarios (`› No files for empty graphs › Empty default graph`, the two new rows of `› Golden outputs › Golden file per output`); `make refresh-golden` writes the six golden files; review them against design §E (the worked example)
   - Layer: tests. Depends on: 1.9.
   - Tests: IT-3; Gherkin `› Generators share one framework › Custom template package` still green.
 - [ ] 1.11 `Makefile` `check-wheel`: grep for `pattern_schema/templates/schema.txt`, `shex_schema/templates/schema.shex` and `q12_term_annotations.rq`
@@ -78,7 +78,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.8 · [x] 1.9 · [ ] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
+- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.8 · [x] 1.9 · [x] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
 
 ## Verification
 

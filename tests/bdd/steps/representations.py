@@ -558,13 +558,22 @@ def two_classes(ctx, first, second):
 
 @when(parsers.parse("the shapes and the diagram are generated {how}"))
 def filtered(ctx, how, caplog):
+    generate_formats(ctx, ("shacl", "puml"), how, caplog)
+
+
+@when(parsers.parse("the shapes, the diagram, the pattern schema and the ShExC are generated {how}"))
+def filtered_with_schemas(ctx, how, caplog):
+    generate_formats(ctx, ("shacl", "puml", "pattern", "shex"), how, caplog)
+
+
+def generate_formats(ctx, formats, how, caplog):
     names = re.findall(r'"([^"]+)"', how)
     options = GeneratorOptions(
         include_namespaces=names if "include" in how else [], exclude_namespaces=names if "exclude" in how else []
     )
     with caplog.at_level(logging.WARNING):
         texts = {}
-        for name in ("shacl", "puml"):
+        for name in formats:
             texts.update(
                 files(make_generator(name, analyse(ctx["run"]), JinjaTemplateRenderer(), options=options).serialize())
             )
@@ -595,6 +604,6 @@ def empty_default(ctx):
     ctx["run"] = profile_run()
 
 
-@then("no shapes or diagram file is written for it")
+@then("no shapes, diagram, pattern schema or ShExC file is written for it")
 def no_files_for_empty(ctx):
     assert ctx["texts"] == {}

@@ -1,0 +1,75 @@
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX eli: <http://data.europa.eu/eli/ontology#>
+PREFIX euvoc: <http://publications.europa.eu/ontology/euvoc#>
+PREFIX lemon: <http://lemon-model.net/lemon#>
+PREFIX lvont: <http://lexvo.org/ontology#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+# comments use the pattern schema's legend: k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured · … deeper than 3 hops
+# (:euvoc:Treaty&skos:Concept) 104 via (:euvoc:Treaty&skos:Concept)-dcterms:isReplacedBy, (:euvoc:Treaty&skos:Concept)-dcterms:replaces
+euvoc:Treaty {
+  dcterms:created xsd:date ;  # 2011-05-19..2018-05-17 d10
+  dcterms:dateAccepted xsd:date ;  # 2012-06-27..2018-06-06 d8
+  dcterms:dateSubmitted xsd:date ;  # 2011-10-06..2018-05-23 d8
+  dcterms:isReplacedBy @euvoc:Treaty ? ;  # (:euvoc:Treaty&skos:Concept) 22/104
+  dcterms:replaces @euvoc:Treaty ? ;  # (:euvoc:Treaty&skos:Concept) 22/104
+  dcterms:type IRI ;  # d6
+  eli:date_document xsd:date ? ;  # 83/104 1951-04-18..2012-02-02 d30
+  eli:first_date_entry_in_force xsd:date ? ;  # 82/104 1952-07-23..2013-07-01 d27
+  euvoc:endDate xsd:date ? ;  # 22/104 1951-01-01..2016-06-06 d13
+  euvoc:officialJournalDate xsd:date ? ;  # 92/104 1964-10-01..2016-06-07 d31
+  euvoc:officialJournalNumber xsd:string ? ;  # 92/104 1..91 d32
+  euvoc:officialJournalSeries xsd:string ? ;  # 92/104 C..P d3
+  euvoc:signatureLocation IRI {0,2} ;  # 74/104 ×1-2 d13
+  euvoc:startDate xsd:date ;  # 1950-12-31..2016-06-07 d39
+  euvoc:status IRI ;  # d3
+  euvoc:xlChangeNote BNODE @euvoc:XlNote ? ;  # (:euvoc:XlNote) 1/104 bn
+  euvoc:xlDefinition BNODE @euvoc:XlNote {0,2} ;  # (:euvoc:XlNote) 6/104 ×1-2 bn
+  euvoc:xlHistoryNote BNODE @euvoc:XlNote ? ;  # (:euvoc:XlNote) 1/104 bn
+  euvoc:xlNotation BNODE {  # (:euvoc:XlNotation) ×1-6 bn
+    dcterms:created xsd:date ? ;  # 157/357 2011-05-19..2018-05-17 d10
+    dcterms:type IRI ;  # d5
+    euvoc:endDate xsd:date ? ;  # 56/357 1951-01-01..2016-06-06 d13
+    euvoc:startDate xsd:date ? ;  # 157/357 1950-12-31..2016-06-07 d39
+    euvoc:status IRI ? ;  # 157/357 d3
+    rdf:value xsd:string ;  # 11951K..UNION d317
+  } {1,6} ;
+  lemon:context IRI {1,2} ;  # ×1-2 d2
+  skos:inScheme @skos:ConceptScheme ;  # (:owl:Ontology&skos:ConceptScheme) d1
+  skos:topConceptOf @skos:ConceptScheme ;  # (:owl:Ontology&skos:ConceptScheme) d1
+  skosxl:altLabel BNODE @skosxl:Label {0,74} ;  # (:skosxl:Label) 56/104 ×1-74 bn
+  skosxl:prefLabel BNODE @skosxl:Label {23,24} ;  # (:skosxl:Label) ×23-24 bn
+}
+# (:owl:Ontology&skos:ConceptScheme) 1 via (:euvoc:Treaty&skos:Concept)-skos:inScheme, (:euvoc:Treaty&skos:Concept)-skos:topConceptOf
+skos:ConceptScheme {
+  dcterms:created xsd:date ;  # =2011-09-23
+  dcterms:identifier xsd:string ;  # =http://publications.europa.eu/resource/authority/treaty
+  euvoc:startDate xsd:date ;  # =2011-09-23
+  euvoc:status IRI ;
+  owl:imports IRI {2} ;  # ×2
+  rdfs:comment rdfs:Literal ;  # =Treaty
+  skosxl:prefLabel BNODE @skosxl:Label ;  # (:skosxl:Label) bn
+}
+# (:euvoc:XlNote) 12
+euvoc:XlNote BNODE {
+  dcterms:created xsd:date ;  # 2014-10-20..2018-05-17 d3
+  dcterms:source rdf:langString ? ;  # 10/12 @2 d3
+  euvoc:startDate xsd:date ;  # 1951-04-18..1993-03-25 d6
+  euvoc:status IRI ;  # d2
+  rdf:value rdf:langString ;  # @2
+}
+# (:skosxl:Label) 4530
+skosxl:Label BNODE {
+  dcterms:created xsd:date ? ;  # 4080/4530 2011-05-19..2018-05-17 d11
+  dcterms:type IRI ;  # d5
+  euvoc:endDate xsd:date ? ;  # 1216/4530 1951-01-01..2016-06-06 d13
+  euvoc:startDate xsd:date ? ;  # 4080/4530 1950-12-31..2016-06-07 d40
+  euvoc:status IRI ;  # d3
+  lvont:script IRI ? ;  # 386/4530 d2
+  skosxl:literalForm rdf:langString ;  # @24 d4176
+}
+# glossary: none
