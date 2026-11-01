@@ -8,7 +8,7 @@
 
 ## 2. Catalogue
 
-- [ ] 2.1 The 29 packaged checks in `fingerprint/adapters/queries/pitfalls/`, rewritten from `inputs/seed-queries/` to the header contract, in our own words (pitfall-scans › The packaged catalogue)
+- [ ] 2.1 Verify and adjust the 29 packaged checks already written in `fingerprint/adapters/queries/pitfalls/` (from `inputs/seed-queries/`) against the header contract and the D-1a table (pitfall-scans › The packaged catalogue)
 - [ ] 2.2 `fingerprint/adapters/pitfall_catalogue.py:load_catalogue` with validation, replace and skip (design D-2)
 - [ ] 2.3 One `.trig` fixture per check (positive and negative graphs) and `tests/unit/test_pitfall_checks.py` (design Test strategy)
 

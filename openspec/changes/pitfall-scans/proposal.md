@@ -54,7 +54,8 @@ and show them next to the profile.
 - **DEC-3 The scan dataset: each profiled graph, joined with the schema graphs.** `--schema-graph IRI`
   (repeatable; setting `schema_graphs`) names the graphs that hold the ontology. With schema graphs,
   `schema`-scope checks run once on each schema graph, and `data`-scope checks run on every other
-  graph, over `FROM <graph>` plus the `FROM <schema>` clauses. Without them, every check runs on
+  graph, over `FROM <graph>` plus the `FROM <schema>` clauses. A schema graph not selected for
+  profiling is added to the profiled graphs when the scan is on. Without them, every check runs on
   every graph by itself. The default graph is scanned without `FROM`, and a graph with no triple is
   not scanned at all, so an empty default graph raises no finding. Rejected: one scan over a union of every graph (it can't
   include the default graph portably, and it mixes unrelated graphs); `GRAPH` blocks (a pattern
@@ -64,7 +65,8 @@ and show them next to the profile.
   count and the examples, not every row. Rejected: storing every row (P35 alone is 1,100 rows on
   brainframe, and unbounded in general).
 - **DEC-5 Results are part of the raw profile.** `GraphProfile.pitfalls` holds the results, and a run
-  without the scan has none. The analytics only add the summary. The representations derive from the
+  without the scan has none. The analytics carry them unchanged; the report view builds the
+  summary. The representations derive from the
   saved profile, as for everything else (profile-representations), so `fingerprint-gen-doc` and
   `fingerprint-gen-pitfalls` work offline. Rejected: a separate `pitfalls.json` (two files to keep
   together).
@@ -152,8 +154,8 @@ and show them next to the profile.
 - **Code:**
   - `fingerprint/adapters/queries/pitfalls/` (29 `.rq` files) and a catalogue loader;
   - `fingerprint/domain/` (a `pitfalls.py` for the header contract and the level mapping);
-  - `fingerprint/service_layer/` (a scan stage in collection, the summary in the analytics, a
-    `PitfallsGenerator`, the report view);
+  - `fingerprint/service_layer/` (a scan stage in collection, a `PitfallsGenerator`, the report view
+    with the summary);
   - `fingerprint/entrypoints/cli/` (the options, `fingerprint-gen-pitfalls`, exit 5);
   - `model/*.yaml` and the generated models;
   - `fingerprint_report_templates/` (the report section, a `pitfalls_tsv` package).

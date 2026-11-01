@@ -42,7 +42,9 @@
       `description` (one line).
   - `IMPORTANCE_ORDER = (critical, important, minor)`.
   - `robot_level(importance)` → `ERROR` / `WARN` / `INFO`.
-  - `at_or_above(results, level) -> int`.
+  - `at_or_above(run, level) -> tuple[int, int]`: (rows, checks) over every graph of the run, where
+    rows is the sum of `count` of the results at or above the level, and checks the number of
+    distinct check ids among them.
   - `PitfallCheck` is a LinkML model (D-3) holding the metadata plus `query` (the text) and `origin`
     (`packaged` | the user file path).
 - **D-1a The catalogue** (normative for the packaged files; the ids, importance, scope and heuristic
@@ -108,7 +110,10 @@
   - `GraphProfile.pitfalls` (multivalued, optional);
   - the slot `check_id`, added to `Failure`;
   - the settings slots `pitfall_scan` (default false), `schema_graphs` (uriorcurie, multivalued) and
-    `pitfall_examples` (default 10, minimum 1), on `Settings` and `SettingsOverride`.
+    `pitfall_examples` (default 10, minimum 1), declared in `fingerprint_stats.yaml` and listed on
+    `Settings` there and on `SettingsOverride` in `fingerprint_analytics.yaml`;
+  - `_Collection.fail(...)` gains `check_id`, and the query-name → `QueryKind` table gains
+    `PITFALL` → `pitfall`.
 
   The class `PitfallCheck` is a view-free model in `fingerprint_stats.yaml` too. No `ProfileRun`
   field references it, so `profile.json` never holds it; `gen-json-schema` still lists every class
@@ -119,8 +124,13 @@
   `profile_graph`, which returns early below `classes` depth, so the scan runs at any depth), when
   `settings.pitfall_scan` is on, the collector calls `run.scan_pitfalls(graph, checks)`. It sets the
   graph profile's `pitfalls` with `model_copy`:
-  - **Empty graph:** first an `ASK { <dataset> ?s ?p ?o }` (the name line `# PITFALL ask`); a graph
-    without triples is not scanned.
+  - **Schema graphs are profiled too:** with the scan on, `collect` appends every schema graph that
+    is not among the selected graphs to the list it profiles (after them, in the given order). So
+    `--graph data --schema-graph schema` reports schema findings on `schema`.
+  - **Empty graph:** first `pitfall_ask_query(graph)`, which is `# PITFALL ask` then
+    `ASK FROM <graph> { ?s ?p ?o }`, over the graph alone (no `FROM` for the default graph). A
+    graph without triples is not scanned. A failed ASK is a `Failure(kind pitfall)` without a check
+    id, and the graph is not scanned. The call sits inside `collect`'s existing `IriRefError` try.
   - **Which checks:** without schema graphs, all of them. With schema graphs, `schema`-scope checks
     on a schema graph (over itself), and `data`-scope checks on the other graphs (with the
     `FROM <schema>` clauses).
@@ -130,7 +140,8 @@
   - **Example query:** `pitfall_example_query(…, limit)`.
   - Both builders live in `adapters/queries/__init__.py` (D-5).
   - **A count of 0:** no example query; the result has empty `examples`.
-  - **On a count failure:** record a `Failure(query_kind=pitfall, graph, check_id, message,
+  - **On a count failure:** no `PitfallResult` for that check (it appears among the failures, not
+    among the clean checks); `count` is required on a result. record a `Failure(query_kind=pitfall, graph, check_id, message,
     attempts)` and skip the examples.
   - **On an example failure:** record a failure; the result keeps its count and has no examples.
   - **Terms:** a term is read from rdflib (`URIRef` → `iri`, `BNode` → `blank_node`, `Literal` →
@@ -139,8 +150,11 @@
 
   `collect` receives the checks as a parameter, `collect(endpoint, settings, sparql, checks=())`, so
   the service layer never reads files.
-- **D-5 The query wrapping.** A check is split into its prologue (`PREFIX` and `BASE` lines) and its
-  body (the `SELECT …`). The builders emit:
+- **D-5 The query wrapping.** A check is split into its prologue (its `PREFIX` and `BASE` lines; the
+  contract keeps each on its own line) and its body (the `SELECT …`). There are three builders:
+  `pitfall_ask_query`, `pitfall_count_query` and `pitfall_example_query`. They are plain string
+  builders, not `QUERY_FILES` templates, and they are sent with `sparql.ask`/`sparql.select`
+  directly. The builders emit:
 
   ```sparql
   # PITFALL <id> count
@@ -235,8 +249,12 @@ WHERE { { SELECT ?entity ?property (COUNT(*) AS ?value) WHERE { … } GROUP BY ?
 
 It returns `1100`. The example query returns the first 10 rows by entity order. The profile then
 holds `PitfallResult(check_id=p35_untyped_property, importance=important, count=1100, examples=[…10])`.
-The page lists it under *important*. The TSV has 10 `WARN p35_untyped_property` lines. Because
-`p19_multiple_domains_or_ranges` (critical) found 4, the run exits 5.
+The page lists it under *important*. The TSV has 10 `WARN p35_untyped_property` lines.
+
+Because the scan is on, the ontology graph is appended to the profiled graphs. Its schema checks
+run on it alone, and `p19_multiple_domains_or_ranges` (critical) finds 4 there. On the workspace,
+`x_individual_as_predicate` (critical) counts 518. So the run exits 5 and logs
+`… findings in … checks at or above critical`.
 
 The scan is safe to rerun: it is read-only and deterministic, because the examples are ordered.
 
@@ -249,7 +267,7 @@ The scan is safe to rerun: it is read-only and deterministic, because the exampl
 | Unit, stage | wrapping (FROM, count, limit, ordering), the schema/data split, empty graphs, count 0 (no example query), blank-node entities, failures, scan off, depth `graphs`, through `FakeSparql` | `tests/unit/test_service_layer_pitfall_scan.py` |
 | Gherkin | `tests/features/pitfall_scans.feature` for the spec scenarios; report, exit and format scenarios in the existing features | `tests/unit/steps/` |
 | Golden | the page and the TSV for a fixed profile with scan results | `tests/test_data/golden/` |
-| e2e | Oxigraph: a schema graph plus data, `--pitfalls --format pitfalls`, and exit 5 with `--fail-on` | `tests/e2e/test_pitfall_scan.py` |
+| e2e | Oxigraph test store (unchanged: continents and treaties; the default graph holds continents). It scans the treaties graph with `--schema-graph <continents graph>` (exercising the `FROM` merge and the schema/data split), checks the structure (results, TSV files, the page section), and exit 5 with `--fail-on minor`. It asserts no counts beyond "at least one check ran" | `tests/e2e/test_pitfall_scan.py` |
 
 ### Anti-patterns
 | Don't | Do instead | Why |

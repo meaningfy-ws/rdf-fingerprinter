@@ -7,7 +7,8 @@ line that is not a comment) SHALL give `# id: <id>`, `# title: <text>`,
 `# importance: critical|important|minor`, `# scope: schema|data`, `# source: <text>`, and optionally
 `# heuristic: true` and `# description: <text>` (one line). A header comment line without a
 `key:` is ignored; an unknown key, or a key given twice, is refused. The id SHALL match `[a-z0-9_]+`
-and be unique in the catalogue. The query SHALL have no dataset clause (`FROM`, `FROM NAMED`). A file
+and be unique in the catalogue. The query SHALL have no dataset clause (`FROM`, `FROM NAMED`), and each `PREFIX` or `BASE`
+declaration SHALL be on its own line, before the `SELECT`. A file
 that breaks the contract SHALL be a usage error (exit 2) naming the file, before any query (EPIC
 DEC-1, DEC-7).
 
@@ -53,7 +54,10 @@ SHALL be those of design.md's catalogue table.
 
 ### Requirement: The pitfall scan stage
 With `pitfall_scan` on, the collector SHALL scan every profiled graph after profiling it, at any
-depth (also `graphs`). A graph that holds no triple (an `ASK`) SHALL NOT be scanned. Which checks
+depth (also `graphs`); each schema graph SHALL be added to the profiled graphs (after them, in the
+order given) when it is not already among them. A graph that holds no triple, by
+`ASK FROM <graph> { ?s ?p ?o }` over the graph alone (no `FROM` for the default graph), SHALL NOT be
+scanned. Which checks
 run, and over which dataset:
 - **No schema graph given:** every selected check runs over the graph alone: `FROM <graph>` for a
   named graph; the store's default graph, without `FROM`, for the default graph.
@@ -73,8 +77,8 @@ recorded (EPIC DEC-2, DEC-3, DEC-4, DEC-5).
 - **THEN** the profile of `ex:data` holds a `p35_untyped_property` result with count ≥ 1 and an example whose entity is `ex:undeclared`
 
 #### Scenario: Schema checks run once, on the schema graph
-- **WHEN** a run profiles `ex:data` and `ex:schema` with `--pitfalls --schema-graph ex:schema`
-- **THEN** `ex:schema` has results only for schema-scope checks, `ex:data` only for data-scope checks
+- **WHEN** a run profiles `--graph ex:data` with `--pitfalls --schema-graph ex:schema`
+- **THEN** `ex:schema` is profiled too, `ex:schema` has results only for schema-scope checks, and `ex:data` only for data-scope checks
 
 #### Scenario: Empty graph not scanned
 - **WHEN** the default graph holds no triple and a run uses `--pitfalls`
@@ -94,7 +98,7 @@ recorded (EPIC DEC-2, DEC-3, DEC-4, DEC-5).
 
 #### Scenario: Failed check
 - **WHEN** the count query of one check times out after its retries
-- **THEN** a failure of kind `pitfall` naming the check id is recorded, the other checks still run, and the command exits 1
+- **THEN** a failure of kind `pitfall` naming the check id is recorded, that check has no result, the other checks still run, and the command exits 1
 
 ### Requirement: Scan settings and options
 The scan settings SHALL be collection settings: `pitfall_scan` (boolean, default false),
@@ -108,7 +112,8 @@ in the profile. The `fingerprint` command SHALL also accept:
 
 An unknown id in `--skip-pitfall`, a missing directory, a schema graph that cannot be written as an
 IRI, or `--pitfall-checks`, `--skip-pitfall` or `--fail-on` given while the scan is off SHALL be
-usage errors (exit 2) before any query. In the environment, `RDF_FINGERPRINTER_SCHEMA_GRAPHS` is a
+usage errors (exit 2) before any query. `--schema-graph` without the scan is accepted and
+recorded, with no effect. In the environment, `RDF_FINGERPRINTER_SCHEMA_GRAPHS` is a
 comma-separated list (EPIC DEC-8).
 
 #### Scenario: A user check replaces a packaged one
@@ -122,7 +127,7 @@ comma-separated list (EPIC DEC-8).
 ### Requirement: Fail on findings
 A run SHALL exit 5 when `--fail-on LEVEL` is given, its outputs were written, it recorded no failure,
 and a check of importance LEVEL or higher (`critical` > `important` > `minor`) counted at least one
-row in any scanned graph. It SHALL log `<rows> findings in <checks> checks at or above <level>` at
+row in any scanned graph (rows: the sum of the counts, not of the examples). It SHALL log `<rows> findings in <checks> checks at or above <level>` at
 WARNING, counting rows and checks over all graphs. A recorded failure SHALL still exit 1 (EPIC
 DEC-10).
 
@@ -143,7 +148,8 @@ level maps critical → `ERROR`, important → `WARN` and minor → `INFO`; the 
 IRIs are written in full, a blank node as `_:<id>`, a literal as its lexical form (datatype and
 language dropped), and an unbound variable as an empty cell. A tab or line break inside a value
 SHALL be written as a space.
-`fingerprint-gen-pitfalls` SHALL write it from a saved profile. A profile without scan results SHALL
+`fingerprint-gen-pitfalls` SHALL write it from a saved profile. A graph whose checks all counted 0
+gets a file with the header only; a graph without scan results, and a profile without any, SHALL
 produce no file (EPIC DEC-9).
 
 #### Scenario: ROBOT-style lines

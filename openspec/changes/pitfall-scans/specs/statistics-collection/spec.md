@@ -2,7 +2,7 @@
 
 ### Requirement: Depth and switches select the queries
 The collector SHALL run only the queries that the configured depth and switches require, as tabled
-in `design.md`; graph totals, predicate partitions and untyped subjects (full scans) SHALL run only
+in `openspec/changes/archive/2026-10-31-harden-fingerprinter/design.md` ("Query templates"); graph totals, predicate partitions and untyped subjects (full scans) SHALL run only
 when `graph_statistics` is on, and pitfall check queries only when `pitfall_scan` is on
 (pitfall-scans "The pitfall scan stage").
 

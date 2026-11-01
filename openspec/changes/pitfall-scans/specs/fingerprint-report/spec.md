@@ -108,14 +108,14 @@ prefix file, a module size below 1, and an unwritable shapes namespace.
 
 #### Scenario: Pitfalls format in the run
 - **WHEN** the fingerprint command runs with `--pitfalls --format pitfalls`
-- **THEN** the output folder holds one `pitfalls-<graph>.tsv` per profiled graph
+- **THEN** the output folder holds one `pitfalls-<graph>.tsv` per profiled graph with a scan result
 
 ## ADDED Requirements
 
 ### Requirement: Pitfalls in the report
 When the profile holds scan results, the report SHALL have a *Pitfalls* section with:
 - a contents entry;
-- a summary of the number of checks with findings, per importance;
+- a summary of the number of distinct checks (by id, over all graphs) with findings, per importance;
 - per graph, one entry per check, ordered by importance, then by count descending, then by id,
   showing the title, the description (when given), importance, source, count, whether it is a
   heuristic, and the examples as short names (`prefix:local`, full IRI as title; literal values as escaped text);
