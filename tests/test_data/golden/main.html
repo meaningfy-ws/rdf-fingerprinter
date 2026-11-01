@@ -1425,7 +1425,7 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
 
   function apply() {
     var text = q.value.trim().toLowerCase();
-    var off = {};
+    var off = Object.create(null);
     switches.forEach(function (s) { if (!s.checked) off[s.value] = true; });
     var shown = 0;
     classes.forEach(function (cls) {

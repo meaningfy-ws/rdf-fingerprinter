@@ -360,7 +360,7 @@ def carries_in_report(ctx, prefix):
 
 @then("it carries no note of excluded namespaces")
 def carries_no_note(ctx):
-    assert not any("excluded namespaces" in t for ts in ctx["by_format"].values() for t in ts.values())
+    assert not any("excluded namespaces" in t.lower() for ts in ctx["by_format"].values() for t in ts.values())
 
 
 # --- a graph whose every class is excluded ---
