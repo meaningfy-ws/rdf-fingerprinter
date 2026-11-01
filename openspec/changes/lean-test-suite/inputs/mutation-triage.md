@@ -192,3 +192,303 @@ After the new tests: 51 left (50 survived + 1 timeout, caught by non-termination
 - Open spec question for the developer: at `acceptance_threshold = 0`, `cardinality_label` returns
   `exactly_one` with support 0.0 even when no instance has exactly one value; the schema allows 0.
   Either reject 0 or define the label.
+
+## service_layer.collection
+
+Survivors of `mutation-survivors-baseline.txt` re-checked on the current tree: 287. After the new tests: 75 left. Same classes as above.
+
+| module | before | after | gap | equivalent | cosmetic | dead |
+|---|---|---|---|---|---|---|
+| collection | 287 | 75 | 212 | 13 | 62 | 0 |
+
+Cosmetic = logger text/arguments and an unreachable assertion message; no scenario or CLI contract fixes them. Failure messages that land in the profile are gaps and are pinned exactly. All new tests are in `tests/unit/service_layer/test_collection.py` (FakeSparql rules and named-graph data no Gherkin scenario reaches). Per-mutant lines: `fingerprint.service_layer.collection.` and `xǁ_Collectionǁ` omitted.
+
+Dead code: none. The `done[-1] if done else "Q8"` fallback in `profile_class` is needed only by the `IriRefError` handler (exact mode raises before `Q8` is appended); in the `QueryTimeout`/`PermanentError` handlers it could be plain `done[-1]` (optional).
+
+- collection.x__term__mutmut_4 — cosmetic — text of an assertion that cannot fire
+- collection.x__term__mutmut_5 — cosmetic — text of an assertion that cannot fire
+- collection.x__int__mutmut_2 — gap — empty and unbound counts read as None — test_collection.py
+- collection.x__int__mutmut_4 — gap — empty and unbound counts read as None — test_collection.py
+- collection.x__int__mutmut_6 — gap — empty and unbound counts read as None — test_collection.py
+- collection.x__int__mutmut_8 — gap — empty and unbound counts read as None — test_collection.py
+- collection.fail__mutmut_5 — gap — a failure carries its graph (None for the default graph) and property — test_collection.py
+- collection.fail__mutmut_7 — gap — a failure carries its graph (None for the default graph) and property — test_collection.py
+- collection.fail__mutmut_11 — gap — a failure carries its graph (None for the default graph) and property — test_collection.py
+- collection.fail__mutmut_13 — gap — a failure carries its graph (None for the default graph) and property — test_collection.py
+- collection.fail__mutmut_15 — gap — a failure carries its graph (None for the default graph) and property — test_collection.py
+- collection.ask__mutmut_3 — gap — the presence check asks inside its graph — test_collection.py
+- collection._run__mutmut_12 — gap — a refusal past discovery is recorded as a rejection with its text — test_collection.py
+- collection._run__mutmut_13 — equivalent — status of the re-raised error is read only for 400/413 on a first-N list; `EndpointUnreachable` carries only 401/403/407
+- collection._run__mutmut_14 — gap — a refusal past discovery is recorded as a rejection with its text — test_collection.py
+- collection._run__mutmut_15 — equivalent — status of the re-raised error is read only for 400/413 on a first-N list; `EndpointUnreachable` carries only 401/403/407
+- collection._run__mutmut_16 — gap — a refusal past discovery is recorded as a rejection with its text — test_collection.py
+- collection.named_graphs__mutmut_3 — gap — graph names; listing failure text for timeout vs rejection — test_collection.py
+- collection.named_graphs__mutmut_12 — gap — graph names; listing failure text for timeout vs rejection — test_collection.py
+- collection.named_graphs__mutmut_13 — gap — graph names; listing failure text for timeout vs rejection — test_collection.py
+- collection.named_graphs__mutmut_14 — gap — graph names; listing failure text for timeout vs rejection — test_collection.py
+- collection.named_graphs__mutmut_15 — gap — graph names; listing failure text for timeout vs rejection — test_collection.py
+- collection.named_graphs__mutmut_16 — gap — graph names; listing failure text for timeout vs rejection — test_collection.py
+- collection.named_graphs__mutmut_17 — gap — graph names; listing failure text for timeout vs rejection — test_collection.py
+- collection.named_graphs__mutmut_18 — gap — graph names; listing failure text for timeout vs rejection — test_collection.py
+- collection.named_graphs__mutmut_19 — cosmetic — log call
+- collection.named_graphs__mutmut_21 — gap — graph names; listing failure text for timeout vs rejection — test_collection.py
+- collection.declared_edges__mutmut_21 — gap — only rows with both ends become edges — test_collection.py
+- collection.predicates__mutmut_3 — gap — Q2/Q2a stay in their graph; triples read; fallback failure text — test_collection.py
+- collection.predicates__mutmut_5 — gap — Q2/Q2a stay in their graph; triples read; fallback failure text — test_collection.py
+- collection.predicates__mutmut_9 — gap — Q2/Q2a stay in their graph; triples read; fallback failure text — test_collection.py
+- collection.predicates__mutmut_11 — gap — Q2/Q2a stay in their graph; triples read; fallback failure text — test_collection.py
+- collection.predicates__mutmut_15 — gap — Q2/Q2a stay in their graph; triples read; fallback failure text — test_collection.py
+- collection.predicates__mutmut_21 — cosmetic — log text
+- collection.predicates__mutmut_22 — cosmetic — log text
+- collection.predicates__mutmut_26 — cosmetic — log text
+- collection.predicates__mutmut_27 — cosmetic — log text
+- collection.predicates__mutmut_29 — cosmetic — log text
+- collection.predicates__mutmut_30 — cosmetic — log text
+- collection.predicates__mutmut_31 — cosmetic — log text
+- collection.predicates__mutmut_32 — cosmetic — log text
+- collection.predicates__mutmut_33 — cosmetic — log text
+- collection.predicates__mutmut_34 — cosmetic — log text
+- collection.predicates__mutmut_35 — cosmetic — log text
+- collection.predicates__mutmut_36 — cosmetic — log text
+- collection.predicates__mutmut_37 — cosmetic — log text
+- collection.predicates__mutmut_38 — cosmetic — log text
+- collection.predicates__mutmut_39 — cosmetic — log text
+- collection.predicates__mutmut_40 — cosmetic — log text
+- collection.predicates__mutmut_41 — cosmetic — log text
+- collection.predicates__mutmut_42 — cosmetic — log text
+- collection.predicates__mutmut_43 — cosmetic — log text
+- collection.predicates__mutmut_49 — gap — Q2/Q2a stay in their graph; triples read; fallback failure text — test_collection.py
+- collection.predicates__mutmut_51 — gap — Q2/Q2a stay in their graph; triples read; fallback failure text — test_collection.py
+- collection.predicates__mutmut_59 — gap — Q2/Q2a stay in their graph; triples read; fallback failure text — test_collection.py
+- collection.predicates__mutmut_62 — gap — Q2/Q2a stay in their graph; triples read; fallback failure text — test_collection.py
+- collection.predicates__mutmut_66 — gap — Q2/Q2a stay in their graph; triples read; fallback failure text — test_collection.py
+- collection.predicates__mutmut_67 — gap — Q2/Q2a stay in their graph; triples read; fallback failure text — test_collection.py
+- collection.predicates__mutmut_68 — gap — Q2/Q2a stay in their graph; triples read; fallback failure text — test_collection.py
+- collection.graph_totals__mutmut_16 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_18 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_25 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_28 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_29 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_30 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_31 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_34 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_37 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_38 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_39 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_40 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_41 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.graph_totals__mutmut_42 — gap — totals read per graph; failure text and graph — test_collection.py
+- collection.class_counts__mutmut_12 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_22 — cosmetic — log text
+- collection.class_counts__mutmut_23 — cosmetic — log text
+- collection.class_counts__mutmut_24 — cosmetic — log text
+- collection.class_counts__mutmut_25 — cosmetic — log text
+- collection.class_counts__mutmut_28 — cosmetic — log text
+- collection.class_counts__mutmut_29 — cosmetic — log text
+- collection.class_counts__mutmut_33 — cosmetic — log text
+- collection.class_counts__mutmut_40 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_42 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_50 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_53 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_62 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_65 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_73 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_74 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_75 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_76 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_77 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_78 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_79 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_80 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_81 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_82 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_83 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_84 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_86 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.class_counts__mutmut_87 — gap — per-graph class counts, empty count = 0, unusable class, failure text/graph — test_collection.py
+- collection.first_wave__mutmut_9 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_10 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_11 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_16 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_20 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_34 — cosmetic — log text
+- collection.first_wave__mutmut_35 — cosmetic — log text
+- collection.first_wave__mutmut_36 — cosmetic — log text
+- collection.first_wave__mutmut_37 — cosmetic — log text
+- collection.first_wave__mutmut_38 — cosmetic — log text
+- collection.first_wave__mutmut_39 — cosmetic — log text
+- collection.first_wave__mutmut_40 — cosmetic — log text
+- collection.first_wave__mutmut_42 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_53 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_55 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_59 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_63 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_67 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_85 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_88 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_115 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_116 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_117 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_119 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_122 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_129 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_135 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_137 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_141 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_142 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_143 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_146 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_157 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_158 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_159 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_182 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_187 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_199 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_208 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_212 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.first_wave__mutmut_215 — gap — one sample per class, graph scoped, kind of the failed query, distinct sum, typed reads — test_collection.py
+- collection.literal_partition__mutmut_5 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_8 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_9 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_10 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_15 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_18 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_19 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_20 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_25 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_26 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_27 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_28 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_36 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_45 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_48 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.literal_partition__mutmut_51 — gap — datatype from language, lengths and min/max text — test_collection.py
+- collection.second_wave__mutmut_11 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_16 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_18 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_24 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_26 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_30 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_37 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_38 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_40 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_41 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_42 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_43 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_45 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_46 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_47 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_48 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_52 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_53 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_58 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_62 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_66 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_78 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_79 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_80 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_81 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_83 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_84 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_85 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_86 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_91 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_92 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_93 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_94 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_95 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_96 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_97 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_100 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_103 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_107 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_110 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_117 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_118 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_119 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_121 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_122 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.second_wave__mutmut_123 — gap — Q9/Q10/Q11 values, graph scope, switches and failure arguments — test_collection.py
+- collection.profile_class__mutmut_2 — equivalent — `last` initial value and the `done[-1] if done else "Q8"` fallback are never read: `done` is non-empty where they run
+- collection.profile_class__mutmut_3 — equivalent — `last` initial value and the `done[-1] if done else "Q8"` fallback are never read: `done` is non-empty where they run
+- collection.profile_class__mutmut_4 — equivalent — `last` initial value and the `done[-1] if done else "Q8"` fallback are never read: `done` is non-empty where they run
+- collection.profile_class__mutmut_21 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_22 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_25 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_26 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_27 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_29 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_30 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_34 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_35 — equivalent — `last` initial value and the `done[-1] if done else "Q8"` fallback are never read: `done` is non-empty where they run
+- collection.profile_class__mutmut_38 — equivalent — `last` initial value and the `done[-1] if done else "Q8"` fallback are never read: `done` is non-empty where they run
+- collection.profile_class__mutmut_39 — equivalent — `last` initial value and the `done[-1] if done else "Q8"` fallback are never read: `done` is non-empty where they run
+- collection.profile_class__mutmut_40 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_41 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_43 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_46 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_48 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_49 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_51 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_52 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_53 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_54 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_60 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_64 — equivalent — `last` initial value and the `done[-1] if done else "Q8"` fallback are never read: `done` is non-empty where they run
+- collection.profile_class__mutmut_65 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_67 — equivalent — `last` initial value and the `done[-1] if done else "Q8"` fallback are never read: `done` is non-empty where they run
+- collection.profile_class__mutmut_68 — equivalent — `last` initial value and the `done[-1] if done else "Q8"` fallback are never read: `done` is non-empty where they run
+- collection.profile_class__mutmut_69 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_70 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_73 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_74 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_77 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_80 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_91 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_92 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_101 — gap — attempts, last failing query, too-large rule, graph of the failure — test_collection.py
+- collection.profile_class__mutmut_109 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_111 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_112 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_113 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_114 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_115 — cosmetic — log text and arguments
+- collection.profile_class__mutmut_122 — cosmetic — log text and arguments
+- collection.profile_graph__mutmut_1 — cosmetic — log text and label
+- collection.profile_graph__mutmut_2 — cosmetic — log text and label
+- collection.profile_graph__mutmut_3 — cosmetic — log text and label
+- collection.profile_graph__mutmut_4 — cosmetic — log text and label
+- collection.profile_graph__mutmut_6 — cosmetic — log text and label
+- collection.profile_graph__mutmut_7 — cosmetic — log text and label
+- collection.profile_graph__mutmut_8 — cosmetic — log text and label
+- collection.profile_graph__mutmut_9 — cosmetic — log text and label
+- collection.profile_graph__mutmut_14 — gap — class order (largest first, then IRI), graph scope, blank-node class failure — test_collection.py
+- collection.profile_graph__mutmut_17 — equivalent — `predicates = ""` differs from None only when the completeness check is off (guarded before it is read); `max_workers=None` is the library default sizing
+- collection.profile_graph__mutmut_22 — gap — class order (largest first, then IRI), graph scope, blank-node class failure — test_collection.py
+- collection.profile_graph__mutmut_35 — gap — class order (largest first, then IRI), graph scope, blank-node class failure — test_collection.py
+- collection.profile_graph__mutmut_36 — gap — class order (largest first, then IRI), graph scope, blank-node class failure — test_collection.py
+- collection.profile_graph__mutmut_39 — gap — class order (largest first, then IRI), graph scope, blank-node class failure — test_collection.py
+- collection.profile_graph__mutmut_40 — gap — class order (largest first, then IRI), graph scope, blank-node class failure — test_collection.py
+- collection.profile_graph__mutmut_46 — gap — class order (largest first, then IRI), graph scope, blank-node class failure — test_collection.py
+- collection.profile_graph__mutmut_48 — gap — class order (largest first, then IRI), graph scope, blank-node class failure — test_collection.py
+- collection.profile_graph__mutmut_50 — gap — class order (largest first, then IRI), graph scope, blank-node class failure — test_collection.py
+- collection.profile_graph__mutmut_52 — gap — class order (largest first, then IRI), graph scope, blank-node class failure — test_collection.py
+- collection.profile_graph__mutmut_53 — equivalent — `predicates = ""` differs from None only when the completeness check is off (guarded before it is read); `max_workers=None` is the library default sizing
+- collection.x_collect__mutmut_1 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_2 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_17 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_25 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_26 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_27 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_28 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_29 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_30 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_31 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_32 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_34 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_35 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_36 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_41 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_42 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_43 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
+- collection.x_collect__mutmut_47 — gap — run metadata, depth graphs reads no hierarchy, unusable graph IRI — test_collection.py
