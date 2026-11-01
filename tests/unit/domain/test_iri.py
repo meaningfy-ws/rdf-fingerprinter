@@ -48,7 +48,10 @@ def test_turtle_string_escapes(text, literal):
     assert turtle_string(text) == literal
 
 
-@pytest.mark.parametrize("value, literal", [(3, "3"), (0.5, "0.5"), (1.0, "1.0"), (0.123456, "0.1235"), (True, "true")])
+@pytest.mark.parametrize(
+    "value, literal",
+    [(3, "3"), (0.5, "0.5"), (1.0, "1.0"), (0.123456, "0.1235"), (0.028347, "0.0283"), (True, "true"), (False, "false")],
+)
 def test_turtle_number(value, literal):
     assert turtle_number(value) == literal
 

@@ -71,6 +71,11 @@ def test_median_mode_and_stddev_include_the_zero_bin():
     assert stats.total_triples == 4
 
 
+@pytest.mark.parametrize("observed, bins, median", [(3, {1: 1, 2: 1}, 1.0), (4, {1: 2}, 0.5)])  # 0 1 2 / 0 0 1 1
+def test_median_is_the_middle_value_or_the_mean_of_the_two_middle_ones(observed, bins, median):
+    assert cardinality_statistics(histogram(bins), observed).median == median
+
+
 def test_mode_tie_takes_the_smallest_n():
     assert cardinality_statistics(histogram({1: 2, 2: 2}), 4).mode == 1
 
@@ -105,6 +110,18 @@ def test_cardinality_label(observed, bins, label, support, alternatives, exact_c
     assert result.label_support == pytest.approx(support)
     assert result.alternative_labels == alternatives
     assert result.exact_count == exact_count
+
+
+@pytest.mark.parametrize(
+    "bins, label, support",
+    [
+        ({1: 95}, "exactly_one", 0.95),  # presence and the label's share are exactly at the threshold
+        ({2: 5}, "zero_or_one", 0.95),  # the share of at most one value is exactly at the threshold
+    ],
+)
+def test_a_share_equal_to_the_threshold_is_accepted(bins, label, support):
+    result = cardinality_label(histogram(bins), 100, 0.95)
+    assert (result.cardinality_label, result.label_support) == (label, pytest.approx(support))
 
 
 def test_exactly_n_picks_the_smallest_qualifying_k():
@@ -171,6 +188,64 @@ def test_untyped_object_ratio_uses_resource_triples():
     assert a.language_coverage is None and a.mean_length is None
 
 
+RDF_LANG = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+XSD_STRING = "http://www.w3.org/2001/XMLSchema#string"
+
+
+def indicators_of(histogram_bins, *partitions, **extra):
+    p = prop("p", histogram_bins, value_partitions=list(partitions), **extra)
+    return props_of(classes_of(run(cls("C", sum(histogram_bins.values()), [p])))["C"])["p"]
+
+
+def test_partitions_of_one_type_language_or_kind_add_up_and_rank_by_triples():
+    a = indicators_of(
+        {1: 20},
+        literal(RDF_LANG, 2, lang="fr", total_length=4),
+        literal(RDF_LANG, 1, lang="fr", total_length=2),
+        literal(None, 2, lang="en", total_length=2),  # a language-tagged literal without a datatype
+        literal(None, 1, total_length=4),  # no datatype, no language: counted in no type
+        literal(XSD_STRING, 6, total_length=12),
+        resource(2, "A", "iri"),
+        resource(2, "A", "blank_node"),
+        resource(2, "0B"),
+        resource(1),
+        resource(1, kind="blank_node"),
+    )
+    assert a.value_types == [XSD_STRING, RDF_LANG, EX + "A", EX + "0B"]
+    assert a.type_purity == pytest.approx(6 / 20)
+    assert a.languages == ["fr", "en"]
+    assert a.language_coverage == pytest.approx(5 / 12)
+    assert a.mean_length == pytest.approx(2.0)
+    assert a.untyped_object_ratio == pytest.approx(2 / 8)
+
+
+def test_a_partition_without_a_triple_count_counts_no_triples():
+    a = indicators_of(
+        {1: 4},
+        literal(XSD_STRING, None, lang="en", total_length=None),
+        literal(XSD_STRING, 1, total_length=3),
+        resource(None, "A"),
+        resource(None),
+        top_values=[ValueCount(value="x")],
+    )
+    assert a.value_types == [XSD_STRING, EX + "A"] and a.dominant_value_type == XSD_STRING
+    assert a.type_purity == pytest.approx(1 / 4)
+    assert a.languages == ["en"] and a.language_coverage == 0.0
+    assert a.untyped_object_ratio == 0.0 and a.mean_length == 3.0
+    assert a.top_k_share == 0.0
+
+
+def test_a_property_without_values_has_no_ratios_and_zero_entropy():
+    a = indicators_of({}, distinct_objects=0, top_values=[])
+    assert a.distinct_ratio is None and a.top_k_share is None and a.entropy_estimate == 0.0
+
+
+def test_as_many_distinct_objects_as_the_top_k_is_still_an_enumeration_candidate():
+    top_k = run(cls("C", 30)).settings.top_k
+    assert indicators_of({1: 30}, distinct_objects=top_k).is_enumeration_candidate is True
+    assert indicators_of({1: 30}, distinct_objects=top_k + 1).is_enumeration_candidate is False
+
+
 def test_identifier_like_and_enumeration_candidate():
     ident = prop("id", {1: 30}, distinct_objects=30, value_partitions=[literal("xsd:string", 30)])
     enum = prop("status", {1: 30}, distinct_objects=5, value_partitions=[literal("xsd:string", 30, distinct=5)])
@@ -234,9 +309,27 @@ def test_mutually_implied_classes_are_equivalent():
 def test_parent_without_profile_is_listed_not_compared():
     student = cls("Student", 10, [prop("name", {1: 10})])
     c = classes_of(run(student, edges=[("Student", "Agent")]))
-    assert [(p.parent, p.source) for p in c["Student"].parents] == [(EX + "Agent", "declared")]
+    assert [(p.parent, p.source, p.co_type_ratio) for p in c["Student"].parents] == [(EX + "Agent", "declared", 0.0)]
     assert props_of(c["Student"])["name"].inheritance == "own"
     assert c["Student"].hierarchy_depth == 1
+
+
+def test_depth_is_the_longest_path_to_a_class_without_parents():
+    c = classes_of(run(cls("A", 1), cls("B", 1), cls("C", 1), edges=[("A", "B"), ("B", "C")]))
+    assert [c[n].hierarchy_depth for n in "ABC"] == [2, 1, 0]
+
+
+def test_a_class_without_observed_instances_has_no_implied_parents_and_no_ratios():
+    unobserved = cls("Student", 10, [prop("p", {1: 1})], co_types={"Person": None, "Agent": 1}).model_copy(
+        update={"observed_instances": None}
+    )
+    c = classes_of(run(unobserved, cls("Person", 20)))["Student"]
+    assert c.parents == [] and c.mean_out_degree is None and c.sample_ratio == 0.0
+    assert props_of(c)["p"].mean is None
+
+
+def test_a_co_type_without_a_subject_count_does_not_imply_a_parent():
+    assert classes_of(run(cls("Solo", 1, co_types={"Person": None})))["Solo"].parents == []
 
 
 def test_declared_cycle_has_finite_depth():
@@ -259,6 +352,14 @@ def test_presence_only_property_has_no_statistics():
     a = props_of(c)["rare"]
     assert a.is_exact is False and a.inheritance == "own"
     assert a.min is None and a.max is None and a.mean is None and a.confidence is None and a.cardinality_label is None
+
+
+def test_an_exact_class_with_a_presence_only_property_is_not_exact_and_that_property_counts_no_triples():
+    label = builders.prop(RDFS_LABEL, presence_only=True)
+    c = classes_of(run(cls("C", 3, [label, prop("p", {1: 3})]), cls("Bare", 2, [prop("q", {1: 2})])))
+    assert c["C"].is_exact is False
+    assert c["C"].mean_out_degree == 1.0
+    assert c["C"].label_coverage == 0.0 and c["Bare"].label_coverage == 0.0
 
 
 def test_exact_class_is_exact():
@@ -296,6 +397,34 @@ def test_graph_indicators():
     assert g.typed_subject_ratio == 0.75
     assert g.vocabularies == [EX]
     assert g.cross_graph_object_types == [EX + "g2"]
+
+
+def test_vocabularies_are_weighted_by_instances_and_triples_and_a_property_without_triples_weighs_nothing():
+    def own(iri, instances, *properties):
+        return klass(iri, instances, *properties)
+
+    absent = builders.prop("http://0q.org/q", presence_only=True)
+    raw = run(
+        own("http://z.org/C1", 4),
+        own("http://z.org/C2", 4),
+        own("http://a.org/ont#D", 10, builders.prop("http://m.org/p1", {1: 3}), builders.prop("http://m.org/p2", {1: 3})),
+        own("http://w.org/W", 5),
+        own("urn:x:B", 1, absent),
+    )
+    g = analyse(raw).graphs[0]
+    assert g.vocabularies == [
+        "http://a.org/ont#",
+        "http://z.org/",
+        "http://m.org/",
+        "http://w.org/",
+        "urn:x:B",
+        "http://0q.org/",
+    ]
+    assert g.property_count == 3
+
+
+def test_typed_subjects_need_both_counts():
+    assert analyse(run(cls("C", 1), distinct_subjects=4)).graphs[0].typed_subject_ratio is None
 
 
 @pytest.mark.parametrize(

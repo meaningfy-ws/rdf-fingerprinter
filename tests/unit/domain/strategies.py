@@ -29,16 +29,23 @@ raw_iris = st.text(max_size=30)
 @st.composite
 def prefix_tables(draw):
     """Entries with distinct prefixes and distinct namespaces, some nested inside others."""
-    namespaces = draw(st.lists(_NAMESPACES, min_size=1, max_size=6, unique=True))
+    roots = draw(st.lists(_NAMESPACES, min_size=1, max_size=4, unique=True))
+    slashed = [ns for ns in roots if ns.endswith("/")]
+    nested = (
+        draw(st.lists(st.builds(lambda ns, label: f"{ns}{label}/", st.sampled_from(slashed), _LABEL), max_size=3))
+        if slashed
+        else []
+    )
+    namespaces = list(dict.fromkeys([*roots, *nested]))
     return [NamespacePrefix(prefix=f"p{i}", namespace=ns, source=PrefixSource.packaged) for i, ns in enumerate(namespaces)]
 
 
 @st.composite
 def table_and_iri(draw):
-    """A prefix table and an IRI built from one of its namespaces or from the IRI's own namespace."""
+    """A prefix table and an IRI under one of its namespaces, its local part holding any number of `/`."""
     table = draw(prefix_tables())
     base = draw(st.sampled_from([e.namespace for e in table]))
-    return table, base + draw(_LABEL)
+    return table, base + "/".join(draw(st.lists(_LABEL, min_size=1, max_size=3)))
 
 
 @st.composite

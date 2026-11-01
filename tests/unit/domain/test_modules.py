@@ -26,3 +26,17 @@ def test_big_namespaces_split_deterministically_with_every_class_once():
 
 def test_self_links_and_unknown_classes_are_ignored():
     assert cluster(["A", "B"], [("A", "A"), ("A", "Z")], 1) == [["A"], ["B"]]
+
+
+def test_no_classes_make_no_module():
+    assert cluster([], [], 3) == []
+
+
+def test_a_namespace_of_exactly_the_size_is_one_module_even_when_only_some_are_linked():
+    assert cluster(["A", "B", "C"], [("A", "B")], 3) == [["A", "B", "C"]]
+
+
+def test_the_seed_is_the_most_linked_class_and_ties_go_to_the_smaller_name():
+    links = [("B", "C")] * 3 + [("A", "B")]
+    assert cluster(list("ABCDE"), links, 2) == [["B", "C"], ["A", "D"], ["E"]]
+    assert cluster(list("ABCD"), [("C", "A"), ("C", "B")], 2) == [["A", "C"], ["B", "D"]]
