@@ -1,0 +1,100 @@
+// Seed input — carried over from llm-schema-tools PLAN, not gated (llm-schema-tools DEC-28, 2026-11-01).
+// It was docs/modules/ROOT/pages/use-cases/ucw3.adoc; it moves back there, with the two lines in docs-lines.md, when this change is planned.
+[#uc-w3]
+= UC-W3: Serve a fingerprint's schema to an agent
+
+*Use Case Level:* White (Summary) +
+*Primary Actor:* Agent (an LLM client that writes SPARQL) +
+*Scope:* rdf-fingerprinter +
+*Change:* `llm-schema-server` (decisions moved from `llm-schema-tools`: DEC-9 to DEC-11, DEC-23, DEC-24, DEC-26)
+
+== Stakeholders and Interests
+
+* The agent requires the classes, links, statistics and labels of a knowledge graph in a compact
+  form that reads like the triple patterns it must write, and a check of the query it wrote.
+* The requester who starts the server requires that it cannot load the endpoint or leak its
+  credentials.
+* The endpoint operator requires that serving the schema sends no query.
+
+== Brief Description
+
+The requester starts `fingerprint-mcp` with one saved `profile.json`. An agent connects over MCP
+(stdio). It lists the graphs and classes, describes the classes a question needs, searches names
+and labels, and has its SPARQL checked against the pattern view. It repairs the query itself. No
+SPARQL endpoint is involved.
+
+== Preconditions
+
+* A profile run is saved as `profile.json` (xref:use-cases/ucw1.adoc[UC-W1]).
+* `rdf-fingerprinter[mcp]` is installed.
+
+== Trigger
+
+An MCP client launches `fingerprint-mcp <profile.json>` and connects to it.
+
+== Success Guarantee (Postconditions)
+
+. Every answer is derived from the saved profile and the optional ontology file alone.
+. No network connection is opened and no query is run, updated or generated.
+. The schema texts equal the files `fingerprint-gen-pattern` and `fingerprint-gen-shex` write for
+  the same profile and options.
+. A validated query is parsed only; the report names each unknown class, unknown predicate and
+  predicate that does not belong to the class its variable is typed with, and lists what it did
+  not check.
+
+== Minimal Guarantees (On Failure)
+
+. If the profile or the ontology file cannot be used, the server does not start, and the file is
+  named.
+. An unknown graph, class or format, or empty search text, is a tool error with a message the
+  agent can act on, never a crash of the server.
+
+== Main Success Scenario
+
+. The agent lists the graphs (`list_graphs`).
+. The agent lists the classes of a graph, largest first (`list_classes`).
+. The agent finds the terms of its question (`search_schema`).
+. The agent reads the blocks of the classes it needs, with their incoming links and glossary
+  (`describe_class`).
+. The agent writes a SPARQL query and asks for it to be checked (`validate_query`).
+. The system reports the query valid; the agent runs it elsewhere.
+
+== Alternate Scenarios
+
+Whole schema::
+. In step 4 the agent reads the whole graph's schema at once (`get_schema` or the resource
+  `schema://{graph}`).
+
+ShExC::
+. In step 4 the agent asks for `format` `shex`, for a pipeline that expects shapes.
+
+== Extensions
+
+2a. Unknown graph — tool error listing the known graphs. +
+4a. Unknown class — tool error suggesting close names. +
+4b. A class hidden by the server's filters — tool error naming the option that shows it. +
+5a. The query does not parse — the report gives the parse error with line and column; the agent
+    repairs it and repeats step 5. +
+5b. The query uses a term the profile lacks — the report names it; the agent repairs it and
+    repeats step 5. +
+5c. The query uses `OPTIONAL`, `UNION`, subqueries or other property paths — those parts are listed
+    as not checked.
+
+== Out of Scope
+
+* Running, generating or repairing queries; collecting from an endpoint; several profiles per
+  server; embeddings; Cypher or Gremlin.
+
+== Special Requirements
+
+* No endpoint access (xref:decisions.adoc#ad-7[AD-7]: the saved profile is the input of every later
+  regeneration). A console script, not a deployed service (xref:decisions.adoc#ad-2[AD-2]).
+
+== Technology and Data Variations
+
+* MCP over stdio, from the official `mcp` Python SDK, as the optional extra `rdf-fingerprinter[mcp]`.
+* Formats: the pattern schema (default) and the enriched ShExC.
+
+== Frequency of Occurrence
+
+Once per question an agent answers over a profiled knowledge graph.

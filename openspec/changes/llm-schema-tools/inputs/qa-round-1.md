@@ -202,3 +202,11 @@ edited.
 The planner added one further decision for the amendment: DEC-27, how the ShEx output is checked.
 PyShExC, already in `poetry.lock`, parses it in the tests; the details are in
 `pattern-schema-option.md`, "Secondary form".
+
+## Round 6 answers (developer, 2026-11-01)
+
+| # | Question | Answer (verbatim) | Recorded as |
+|---|---|---|---|
+| R6-1 | (Unprompted, while the PLAN was being revised after the clarity gate) | "wait, only stage 1, the other stages are part of another epic change" | **Decided: re-shape.** `llm-schema-tools` keeps stage 1 only: the pattern-schema and enriched-ShExC generators, the glossary and term model, the label sources (`--ontology`, the data query and its model change), the golden files and the two `fingerprint-gen-*` commands. Stages 2–3 (the MCP server, cached only, and `validate_query`) become the new change `llm-schema-server`, a DRAFT that depends on this one. DEC-4 is superseded; DEC-9, DEC-10, DEC-11, DEC-23, DEC-24 and DEC-26 move there with their text; DEC-19 becomes MEDIUM. Logged as DEC-28. The stage-2/3 PLAN parts already written are kept as seed inputs of `llm-schema-server`, marked "carried over, not gated". |
+| R6-2 | Does DEC-12 (one release when the EPIC is complete) now mean that this change releases 3.2.0 when stage 1 is done? (asked through the coordinator) | "yes, release 3.2.0 when stage 1 is done" | **Decided.** This change releases 3.2.0 (MINOR; 3.1.0 was `pitfall-scans`) when its work is done; `llm-schema-server` gets its own release. Recorded in DEC-12 and DEC-28. |
+
