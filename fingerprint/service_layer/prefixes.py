@@ -13,7 +13,7 @@ from fingerprint.adapters.prefixes import PrefixListSource, PrefixLookupError, l
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref
 from fingerprint.domain.prefixes import STANDARD, generate_prefixes, is_reserved, namespace_of
-from fingerprint.domain.profile import NamespacePrefix, PrefixSource, ProfileRun
+from fingerprint.domain.profile import NamespacePrefix, NodeKind, PitfallTerm, PrefixSource, ProfileRun
 from fingerprint.domain.vocabulary import RDF
 
 logger = logging.getLogger(__name__)
@@ -36,6 +36,10 @@ IRI_FIELDS = frozenset(
 
 
 def _iris(value: object) -> Iterator[str]:
+    if isinstance(value, PitfallTerm):  # a pitfall example's term: only IRIs have a namespace (pitfall-scans DEC-11)
+        if value.kind == NodeKind.iri:
+            yield value.text
+        return
     if isinstance(value, BaseModel):
         for name in type(value).model_fields:
             if name == "settings" or name == "namespaces":

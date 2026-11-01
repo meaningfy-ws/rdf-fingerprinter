@@ -24,6 +24,7 @@ enums:
       shacl: { description: "SHACL shapes, one Turtle file per graph." }
       puml: { description: "PlantUML class diagrams: per graph an overview and one file per module." }
       doc: { description: "The report page main.html (HTML), from a saved profile." }
+      pitfalls: { description: "The pitfall findings as ROBOT-style TSV, one file per scanned graph (pitfall-scans)." }
   ShapeSeverity:
     description: The severity of a property shape; violation is SHACL's default and is not written.
     permissible_values:
@@ -168,6 +169,7 @@ classes:
       overview: { range: Overview, required: true, inlined: true }
       namespaces: { range: PrefixDeclaration, multivalued: true, inlined_as_list: true, description: "The profile's namespace table, with sources." }
       collection: { range: CollectionSection, required: true, inlined: true }
+      pitfalls: { range: DocumentPitfalls, inlined: true, description: "Present when the profile holds scan results." }
       graphs: { range: DocumentGraph, multivalued: true, inlined_as_list: true }
       caveats: { range: Caveats, required: true, inlined: true }
       skipped: { multivalued: true, description: "IRIs that cannot be written; the same list as caveats.skipped, kept for custom templates." }
@@ -215,6 +217,76 @@ classes:
       sampled: { range: boolean, required: true }
       parents: { range: ParentReference, multivalued: true, inlined_as_list: true }
       properties: { range: DocumentProperty, multivalued: true, inlined_as_list: true }
+      badges: { range: DocumentBadge, multivalued: true, inlined_as_list: true, description: "Pitfall checks whose examples name this class." }
+
+  DocumentBadge:
+    description: A link from a class section to a pitfall check entry.
+    attributes:
+      check_id: { required: true }
+      anchor: { required: true }
+      importance: { required: true }
+
+  DocumentPitfalls:
+    description: The Pitfalls section of the report.
+    attributes:
+      summary: { range: PitfallLevelCount, multivalued: true, inlined_as_list: true }
+      graphs: { range: DocumentPitfallGraph, multivalued: true, inlined_as_list: true }
+
+  PitfallLevelCount:
+    description: The number of distinct checks with findings at one importance.
+    attributes:
+      importance: { required: true }
+      checks: { range: integer, required: true }
+
+  DocumentPitfallGraph:
+    description: The pitfall results of one graph.
+    attributes:
+      label: { required: true }
+      slug: { required: true }
+      checks: { range: DocumentPitfallCheck, multivalued: true, inlined_as_list: true, description: "Checks with findings, ordered by importance, count (descending), id." }
+      clean: { multivalued: true, description: "Ids of the checks that found nothing." }
+
+  DocumentPitfallCheck:
+    description: One check's entry in the Pitfalls section.
+    attributes:
+      check_id: { required: true }
+      anchor: { required: true }
+      title: { required: true }
+      description: {}
+      importance: { required: true }
+      source: { required: true }
+      count: { range: integer, required: true }
+      heuristic: { range: boolean, required: true }
+      q: { required: true, description: "The search text: id and title, lower case." }
+      examples: { range: DocumentPitfallExample, multivalued: true, inlined_as_list: true }
+
+  DocumentPitfallExample:
+    description: One example row, each term as the page shows it.
+    attributes:
+      entity: { range: DocumentValue, inlined: true }
+      property: { range: DocumentValue, inlined: true }
+      value: { range: DocumentValue, inlined: true }
+
+  DocumentValue:
+    description: An RDF term as the page shows it - a short name with its IRI, or text.
+    attributes:
+      label: { required: true }
+      iri: { description: "The full IRI, for an IRI term." }
+
+  PitfallsTable:
+    description: The TSV of one graph's pitfall examples (ROBOT report columns).
+    mixins: [GraphView]
+    attributes:
+      lines: { range: PitfallLine, multivalued: true, inlined_as_list: true }
+
+  PitfallLine:
+    description: One TSV line - every value already written for TSV.
+    attributes:
+      level: { required: true }
+      rule: { required: true }
+      subject: { required: true }
+      property: { required: true }
+      value: { required: true }
 
   ParentReference:
     description: A parent class as the document names it.

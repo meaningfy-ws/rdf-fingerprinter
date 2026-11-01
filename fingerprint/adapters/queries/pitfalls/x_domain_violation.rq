@@ -1,0 +1,14 @@
+# id: x_domain_violation
+# title: Subjects outside a property's declared domain
+# importance: important
+# scope: data
+# source: rdf-fingerprinter (RDFUnit-style)
+# description: subjects of p not typed with p's rdfs:domain d (or a subclass of d); one row per (p, d).
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property (COUNT(DISTINCT ?s) AS ?value) WHERE {
+  ?entity rdfs:domain ?property . FILTER(isIRI(?property))
+  ?s ?entity ?o .
+  FILTER NOT EXISTS { ?s a ?t . ?t rdfs:subClassOf* ?property }
+} GROUP BY ?entity ?property

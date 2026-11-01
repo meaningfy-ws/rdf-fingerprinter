@@ -1,0 +1,15 @@
+# id: p10_no_disjointness
+# title: No disjointness axiom at all
+# importance: important
+# scope: schema
+# source: OOPS! P10
+# description: the ontology declares no disjointness at all (OOPS! only reports when there is none).
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property ?value WHERE {
+  ?entity a owl:Ontology .
+  FILTER NOT EXISTS { ?a owl:disjointWith ?b } FILTER NOT EXISTS { ?x a owl:AllDisjointClasses }
+  FILTER NOT EXISTS { ?c owl:disjointUnionOf ?l }
+  BIND(owl:disjointWith AS ?property) BIND("no disjointness axioms" AS ?value)
+}

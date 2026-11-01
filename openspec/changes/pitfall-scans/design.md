@@ -269,7 +269,7 @@ The scan is safe to rerun: it is read-only and deterministic, because the exampl
 |---|---|---|
 | Unit, domain | header parsing, level order and mapping, `at_or_above` | `tests/unit/test_domain_pitfalls.py` |
 | Unit, adapter | catalogue loading, validation (each invalid case, including `FROM`, an unknown key and a duplicate user id), replace, skip, and an empty catalogue after skips | `tests/unit/test_adapters_pitfall_catalogue.py` |
-| Unit, checks | each packaged check over `tests/test_data/pitfalls/<id>.trig`: a `positive` and a `negative` named graph, run with rdflib on each graph's content; the expected entity per id in a table in the test | `tests/unit/test_pitfall_checks.py` |
+| Unit, checks | each packaged check over a positive and a negative Turtle snippet, with the expected entity, in one table in the test (more readable than 29 `.trig` files), run with rdflib directly | `tests/unit/test_pitfall_checks.py` |
 | Unit, stage | wrapping (FROM, count, limit, ordering), an aggregate check over a clean graph counting 0 through the fake, the schema/data split, empty graphs, count 0 (no example query), blank-node entities, failures, scan off, depth `graphs`, through `FakeSparql` | `tests/unit/test_service_layer_pitfall_scan.py` |
 | Gherkin | `tests/features/pitfall_scans.feature` for the spec scenarios; report, exit and format scenarios in the existing features | `tests/unit/steps/` |
 | Golden | the page and the TSV for a fixed profile with scan results | `tests/test_data/golden/` |

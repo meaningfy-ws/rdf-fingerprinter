@@ -85,3 +85,53 @@ def render(
         limit=int(limit) if limit is not None else "",
         k=int(k) if k is not None else "",
     )
+
+
+# --- pitfall checks (pitfall-scans design D-5): plain builders around a check's SELECT ---
+
+
+def _split_check(query: str) -> tuple[str, str]:
+    """(prologue, body): the check's PREFIX/BASE lines, and the rest without its header comments."""
+    prologue, body = [], []
+    for line in query.splitlines():
+        stripped = line.strip()
+        if not body and (not stripped or stripped.startswith("#")):
+            continue
+        if not body and stripped.upper().startswith(("PREFIX", "BASE")):
+            prologue.append(stripped)
+        else:
+            body.append(line)
+    return "\n".join(prologue), "\n".join(body).strip()
+
+
+def _dataset(graph: str | None, schema_graphs: Iterable[str] = ()) -> str:
+    """FROM the graph and each schema graph; nothing for the default graph (its own dataset)."""
+    if not graph:
+        return ""
+    return " ".join(f"FROM {to_iriref(g)}" for g in [graph, *schema_graphs])
+
+
+def pitfall_ask_query(graph: str | None) -> str:
+    """Whether the graph alone holds any triple."""
+    return f"# PITFALL ask\nASK {_dataset(graph)} {{ ?s ?p ?o }}"
+
+
+def pitfall_count_query(check_id: str, query: str, graph: str | None, schema_graphs: Iterable[str] = ()) -> str:
+    prologue, body = _split_check(query)
+    return (
+        f"# PITFALL {check_id} count\n{prologue}\n"
+        f"SELECT (COUNT(*) AS ?n) {_dataset(graph, schema_graphs)} WHERE {{ {{ {body} }}"
+        # rdflib counts the one empty row of an aggregate over no match; conformant stores do not (no-op there)
+        " FILTER(BOUND(?entity) || BOUND(?property) || BOUND(?value)) }"
+    )
+
+
+def pitfall_example_query(
+    check_id: str, query: str, graph: str | None, schema_graphs: Iterable[str] = (), limit: int = 10
+) -> str:
+    prologue, body = _split_check(query)
+    return (
+        f"# PITFALL {check_id} examples\n{prologue}\n"
+        f"SELECT ?entity ?property ?value {_dataset(graph, schema_graphs)} WHERE {{ {{ {body} }} }}"
+        f" ORDER BY ?entity ?property ?value LIMIT {int(limit)}"
+    )

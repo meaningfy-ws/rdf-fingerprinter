@@ -91,6 +91,19 @@ enums:
       untyped_subjects: {}
       subject_stream:
         description: The instance listing (first N) used by the first_n mode.
+      pitfall:
+        description: A pitfall check query (its emptiness ASK, count or examples) (pitfall-scans).
+  PitfallImportance:
+    description: How serious a pitfall is; critical > important > minor (pitfall-scans DEC-1).
+    permissible_values:
+      critical: {}
+      important: {}
+      minor: {}
+  PitfallScope:
+    description: What a pitfall check needs - the ontology only (schema), or the data, optionally joined with the schema.
+    permissible_values:
+      schema: {}
+      data: {}
 
 slots:
   # --- identity of profiled things ---
@@ -216,6 +229,10 @@ slots:
   concurrency: { range: integer, minimum_value: 1, description: "Maximum concurrent queries." }
   acceptance_threshold: { range: float, minimum_value: 0, maximum_value: 1, description: "Share of instances a cardinality label must cover." }
   graph_statistics: { range: boolean, description: "Whether graph totals, predicate partitions and untyped subjects were collected (full scans)." }
+  pitfall_scan: { range: boolean, description: "Whether the pitfall checks ran (pitfall-scans; some are full scans)." }
+  schema_graphs: { range: uriorcurie, multivalued: true, description: "Graphs holding the ontology, joined with each data graph for the data checks." }
+  pitfall_examples: { range: integer, minimum_value: 1, description: "How many example rows are kept per pitfall check and graph." }
+  check_id: { description: "The id of a pitfall check." }
   selected_graphs: { range: uriorcurie, multivalued: true, description: "Graphs requested; empty means all." }
 
 classes:
@@ -254,7 +271,7 @@ classes:
 
   Settings:
     description: Collection parameters, recorded so a profile can be interpreted and reproduced.
-    slots: [depth, precision_policy, first_n, top_k, object_type_scope, completeness_check, timeout_seconds, concurrency, acceptance_threshold, graph_statistics, selected_graphs]
+    slots: [depth, precision_policy, first_n, top_k, object_type_scope, completeness_check, timeout_seconds, concurrency, acceptance_threshold, graph_statistics, selected_graphs, pitfall_scan, schema_graphs, pitfall_examples]
     slot_usage:
       depth: { required: true, ifabsent: "string(values)" }
       precision_policy: { required: true, ifabsent: "string(auto)" }
@@ -266,10 +283,12 @@ classes:
       concurrency: { required: true, ifabsent: "int(4)" }
       acceptance_threshold: { required: true, ifabsent: "float(0.95)" }
       graph_statistics: { required: true, ifabsent: "false" }
+      pitfall_scan: { required: true, ifabsent: "false" }
+      pitfall_examples: { required: true, ifabsent: "int(10)" }
 
   Failure:
     description: A query that could not be answered.
-    slots: [graph, class_iri, property]
+    slots: [graph, class_iri, property, check_id]
     attributes:
       query_kind: { range: QueryKind, required: true, description: "Which collection query failed." }
       message: { description: "The last error message." }
@@ -296,6 +315,55 @@ classes:
         inlined_as_list: true
         slot_uri: void:classPartition
         description: One profile per instantiated class.
+      pitfalls:
+        range: PitfallResult
+        multivalued: true
+        inlined_as_list: true
+        description: The pitfall checks run on this graph (pitfall-scans); absent when the scan was off or the graph empty.
+
+  PitfallResult:
+    description: What one pitfall check found in one graph - its metadata, the count and the first examples.
+    slots: [check_id]
+    slot_usage:
+      check_id: { required: true }
+    attributes:
+      title: { required: true }
+      description: {}
+      importance: { range: PitfallImportance, required: true }
+      scope: { range: PitfallScope, required: true }
+      source: { required: true }
+      heuristic: { range: boolean, required: true, ifabsent: "false" }
+      count: { range: integer, required: true, minimum_value: 0, description: "Rows the check found." }
+      examples: { range: PitfallExample, multivalued: true, inlined_as_list: true, description: "The first rows, ordered by entity, property, value." }
+      seconds: { range: float, description: "Time taken by the check's queries." }
+
+  PitfallExample:
+    description: One row a pitfall check found.
+    attributes:
+      entity: { range: PitfallTerm, inlined: true }
+      property: { range: PitfallTerm, inlined: true }
+      value: { range: PitfallTerm, inlined: true }
+
+  PitfallTerm:
+    description: An RDF term of a pitfall row - an IRI, a blank node label or a literal's lexical form.
+    attributes:
+      text: { required: true }
+      kind: { range: NodeKind, required: true }
+
+  PitfallCheck:
+    description: One check of the pitfall catalogue, as loaded from its SPARQL file (pitfall-scans DEC-1). Not part of profile.json.
+    slots: [check_id]
+    slot_usage:
+      check_id: { required: true }
+    attributes:
+      title: { required: true }
+      description: {}
+      importance: { range: PitfallImportance, required: true }
+      scope: { range: PitfallScope, required: true }
+      source: { required: true }
+      heuristic: { range: boolean, required: true, ifabsent: "false" }
+      query: { required: true, description: "The SPARQL text, header included." }
+      origin: { required: true, description: "packaged, or the path of the user's file." }
 
   PredicatePartition:
     description: Triples using one predicate across a graph.

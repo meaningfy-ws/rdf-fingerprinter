@@ -1,0 +1,14 @@
+# id: p22_class_naming
+# title: Class name not starting with an upper-case letter
+# importance: minor
+# scope: schema
+# source: OOPS! P22
+# description: naming conventions; here, a class whose local name does not start with an upper-case letter.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property ?value WHERE {
+  ?entity a owl:Class . FILTER(isIRI(?entity))
+  BIND(REPLACE(STR(?entity), "^.*[#/]", "") AS ?value)
+  FILTER(REGEX(?value, "^[^A-Z]")) BIND(rdf:type AS ?property)
+}

@@ -1,0 +1,14 @@
+# id: p05_wrong_inverse
+# title: Inverse properties whose domain and range do not mirror each other
+# importance: critical
+# scope: schema
+# source: OOPS! P05
+# description: p owl:inverseOf q, but p's domain is not q's range (or p's range is not q's domain).
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?entity ?property ?value WHERE {
+  ?entity owl:inverseOf ?value . BIND(owl:inverseOf AS ?property)
+  { ?entity rdfs:domain ?d . ?value rdfs:range ?r . FILTER(?d != ?r) FILTER NOT EXISTS { ?value rdfs:range ?d } }
+  UNION { ?entity rdfs:range ?r . ?value rdfs:domain ?d . FILTER(?d != ?r) FILTER NOT EXISTS { ?value rdfs:domain ?r } }
+}

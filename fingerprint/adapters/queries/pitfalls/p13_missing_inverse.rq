@@ -1,0 +1,15 @@
+# id: p13_missing_inverse
+# title: Object property without an inverse
+# importance: minor
+# scope: schema
+# source: OOPS! P13
+# description: an object property with no inverse, that is neither symmetric nor the inverse of another.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?entity ?property ?value WHERE {
+  ?entity a owl:ObjectProperty .
+  FILTER NOT EXISTS { ?entity owl:inverseOf ?x } FILTER NOT EXISTS { ?y owl:inverseOf ?entity }
+  FILTER NOT EXISTS { ?entity a owl:SymmetricProperty }
+  BIND(owl:inverseOf AS ?property) BIND("no inverse declared" AS ?value)
+}

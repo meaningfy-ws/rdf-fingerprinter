@@ -1,5 +1,6 @@
 """FakeSparql: the real client's classification and retries over an in-memory rdflib store (P-2, P-8)."""
 
+import rdflib.plugins.sparql
 import json
 import threading
 from collections.abc import Callable
@@ -36,6 +37,10 @@ def _binding(value: Any) -> dict[str, str]:
         typed = {"datatype": str(value.datatype)} if value.datatype else {}
         return {"type": "literal", "value": str(value)} | typed | ({"xml:lang": value.language} if value.language else {})
     return {"type": "uri" if isinstance(value, URIRef) else "literal", "value": str(value)}
+
+
+# A FROM graph the fake does not hold must not be fetched over HTTP (pitfall-scans design, Risks).
+rdflib.plugins.sparql.SPARQL_LOAD_GRAPHS = False
 
 
 class FakeSparql(SparqlHttpClient):

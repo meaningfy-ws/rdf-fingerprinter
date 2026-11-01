@@ -111,7 +111,7 @@ class FingerprintConfig:
 
 
 def _setting(name: str, raw: str) -> Any:
-    if name == "selected_graphs":
+    if name in ("selected_graphs", "schema_graphs"):
         return [graph.strip() for graph in raw.split(",")]
     if bool in get_args(SettingsOverride.model_fields[name].annotation):
         return _flag(f"{ENV_PREFIX}{name.upper()}", raw)

@@ -2,22 +2,22 @@
 
 ## 1. Model and contract
 
-- [ ] 1.1 Model per design D-3 (stats) and D-6/D-7 (views); `make generate-models`; round-trip a profile with `pitfalls`, and load one without them (pitfall-scans › The pitfall scan stage)
-- [ ] 1.2 `fingerprint/domain/pitfalls.py`: `parse_header`, importance order, `robot_level`, `at_or_above`, test-first (design D-1; pitfall-scans › Pitfall check contract)
+- [x] 1.1 Model per design D-3 (stats) and D-6/D-7 (views); `make generate-models`; round-trip a profile with `pitfalls`, and load one without them (pitfall-scans › The pitfall scan stage)
+- [x] 1.2 `fingerprint/domain/pitfalls.py`: `parse_header`, importance order, `robot_level`, `at_or_above`, test-first (design D-1; pitfall-scans › Pitfall check contract)
 - [ ] 1.3 Gherkin `tests/features/pitfall_scans.feature` for the new capability; scenarios added to `fingerprint_report.feature` (section, badge, escaping, exit 5, format, update refused); step stubs
 
 ## 2. Catalogue
 
-- [ ] 2.1 Verify and adjust the 29 packaged checks already written in `fingerprint/adapters/queries/pitfalls/` (from `inputs/seed-queries/`) against the header contract and the D-1a table (pitfall-scans › The packaged catalogue)
-- [ ] 2.2 `fingerprint/adapters/pitfall_catalogue.py:load_catalogue` with validation, replace and skip (design D-2)
-- [ ] 2.3 One `.trig` fixture per check (positive and negative graphs) and `tests/unit/test_pitfall_checks.py` (design Test strategy)
+- [x] 2.1 Verify and adjust the 29 packaged checks already written in `fingerprint/adapters/queries/pitfalls/` (from `inputs/seed-queries/`) against the header contract and the D-1a table (pitfall-scans › The packaged catalogue)
+- [x] 2.2 `fingerprint/adapters/pitfall_catalogue.py:load_catalogue` with validation, replace and skip (design D-2)
+- [x] 2.3 One `.trig` fixture per check (positive and negative graphs) and `tests/unit/test_pitfall_checks.py` (design Test strategy)
 
 ## 3. Scan stage
 
-- [ ] 3.1 The query builders in `adapters/queries/__init__.py` (design D-5)
-- [ ] 3.2 `_Collection.scan_pitfalls`, `collect(..., checks=())`, failures of kind `pitfall` with `check_id` (design D-4; pitfall-scans › The pitfall scan stage)
-- [ ] 3.3 The settings `pitfall_scan`, `schema_graphs` (comma-split in the environment; each IRI checked) and `pitfall_examples` through `resolve_settings` (pitfall-scans › Scan settings and options; statistics-collection › Depth and switches select the queries)
-- [ ] 3.4 The findings' IRIs in the namespace table (design D-8; namespace-prefixes › Every namespace has a prefix)
+- [x] 3.1 The query builders in `adapters/queries/__init__.py` (design D-5)
+- [x] 3.2 `_Collection.scan_pitfalls`, `collect(..., checks=())`, failures of kind `pitfall` with `check_id` (design D-4; pitfall-scans › The pitfall scan stage)
+- [x] 3.3 The settings `pitfall_scan`, `schema_graphs` (comma-split in the environment; each IRI checked) and `pitfall_examples` through `resolve_settings` (pitfall-scans › Scan settings and options; statistics-collection › Depth and switches select the queries)
+- [x] 3.4 The findings' IRIs in the namespace table (design D-8; namespace-prefixes › Every namespace has a prefix)
 
 ## 4. Outputs
 
@@ -39,7 +39,7 @@
 
 ## Roadmap
 
-- [ ] 1.1 · [ ] 1.2 · [ ] 1.3 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 3.4 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 6.4
+- [x] 1.1 · [ ] 1.2 · [ ] 1.3 · [ ] 2.1 · [ ] 2.2 · [ ] 2.3 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 3.4 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 6.4
 
 ## Verification
 

@@ -1,0 +1,13 @@
+# id: p24_recursive_definition
+# title: Class or property defined by itself
+# importance: important
+# scope: schema
+# source: OOPS! P24
+# description: OOPS! P24 (important), direct cases: a class or property used in its own subClassOf, equivalentClass or subPropertyOf.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT DISTINCT ?entity ?property ?value WHERE {
+  VALUES ?property { rdfs:subClassOf owl:equivalentClass rdfs:subPropertyOf owl:equivalentProperty }
+  ?entity ?property ?entity . FILTER(isIRI(?entity)) BIND("defined by itself" AS ?value)
+}
