@@ -506,7 +506,7 @@ def fixed_profile(ctx, sample_run):
 
 @when(parsers.parse("the {output} is generated from it"))
 def output_generated(ctx, output, sample_outputs):
-    ctx["texts"] = sample_outputs[FORMATS[output]]
+    ctx["texts"] = generated(ctx, "pattern") if output == "pattern schema" else sample_outputs[FORMATS[output]]
 
 
 @then("it equals its golden file")

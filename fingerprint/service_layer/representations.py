@@ -5,10 +5,12 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
-from fingerprint.adapters.exceptions import ProfileFileError, TemplatePackageError
+from fingerprint.adapters.exceptions import OntologyFileError, ProfileFileError, TemplatePackageError
+from fingerprint.adapters.ontology_file import load_ontology
 from fingerprint.adapters.profile_file import load_profile
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
+from fingerprint.domain.annotations import merge_annotations, select_annotations
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref
 from fingerprint.domain.prefixes import PrefixTable
@@ -29,6 +31,23 @@ def with_threshold(run: ProfileRun, threshold: float) -> ProfileRun:
     return run.model_copy(update={"settings": run.settings.model_copy(update={"acceptance_threshold": checked})})
 
 
+def with_ontology(run: ProfileRun, path: str | Path | None) -> ProfileRun:
+    """The run with the ontology file's labels and descriptions over each graph's own, term by term (DEC-20).
+
+    No path: the same run. An unreadable file is a usage error naming it."""
+    if path is None:
+        return run
+    try:
+        ontology = select_annotations(load_ontology(path))
+    except OntologyFileError as error:
+        raise UsageError(str(error)) from error
+    graphs = [
+        g.model_copy(update={"term_annotations": merge_annotations(ontology, g.term_annotations or [])})
+        for g in run.graphs or []
+    ]
+    return run.model_copy(update={"graphs": graphs})
+
+
 def validate_options(options: GeneratorOptions | None) -> None:
     """The generator options a caller gives, checked before any query or write (usage errors)."""
     if options is None:
@@ -40,6 +59,9 @@ def validate_options(options: GeneratorOptions | None) -> None:
             raise UsageError(f"--shapes-namespace {error.iri!r} cannot be written as an IRI") from error
     if options.module_size is not None and options.module_size < 1:
         raise UsageError("--module-size must be at least 1")
+    for name in ("min_instances", "max_classes"):
+        if getattr(options, name) is not None and getattr(options, name) < 1:
+            raise UsageError(f"--{name.replace('_', '-')} must be at least 1")
 
 
 def warn_unknown_filters(run: ProfileRun, options: GeneratorOptions | None) -> None:
@@ -93,7 +115,7 @@ def generate_representations(
         warn_unknown_filters(run, options)
     if threshold is not None:
         run = with_threshold(run, threshold)
-    analytics = analyse(run)
+    analytics = analyse(with_ontology(run, options.ontology if options else None))
     renderer = renderer or JinjaTemplateRenderer()
     paths: list[Path] = []
     for name in formats:

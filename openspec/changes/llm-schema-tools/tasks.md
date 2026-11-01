@@ -42,7 +42,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 - [x] 1.7 `fingerprint/domain/patterns.py`, part 2: chains and their assignment (P-5), `via` (N6), header, glossary (N9), prefixes (N8), `nested_blocks`, `reaching_edges` (design §B steps 6–10)
   - Layer: domain. Depends on: 1.2, 1.6.
   - Tests: TC-P3, TC-P6 (Hypothesis). The `› Pattern view` scenarios need the generator, so they are bound in 1.8.
-- [ ] 1.8 `PatternGenerator`, template package `fingerprint_report_templates/pattern_schema/`, `RepresentationFormat.pattern`, `GENERATORS`; `representations.with_ontology` and the size checks in `validate_options`; `gen_pattern` with `--ontology`, `--min-instances` and `--max-classes`; script `fingerprint-gen-pattern` in `pyproject.toml`
+- [x] 1.8 `PatternGenerator`, template package `fingerprint_report_templates/pattern_schema/`, `RepresentationFormat.pattern`, `GENERATORS`; `representations.with_ontology` and the size checks in `validate_options`; `gen_pattern` with `--ontology`, `--min-instances` and `--max-classes`; script `fingerprint-gen-pattern` in `pyproject.toml`
   - Layer: service_layer, entrypoints, templates. Depends on: 1.5, 1.7.
   - Tests: TC-G1, TC-E1; Gherkin `profile-representations › Pattern view` (4, steps on builder profiles), `› Pattern schema output` (6, `Unusual IRIs…` still red until 1.9), `› Term labels and descriptions in the outputs` (5) and `› Size filters` (2).
 - [ ] 1.9 `fingerprint/domain/shex.py`, `ShexGenerator`, template package `shex_schema/`, `RepresentationFormat.shex`, `gen_shex` (same options), script `fingerprint-gen-shex`; `pyshexc==0.10.3.post1` in the `test` group
@@ -78,7 +78,7 @@ their step definitions. Scenario titles are cited as `cap › Requirement › Sc
 
 ## Roadmap
 
-- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [ ] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
+- [x] 1.1 · [x] 1.2 · [x] 1.5 · [x] 1.6 · [x] 1.3 · [x] 1.4 · [x] 1.7 · [x] 1.8 · [ ] 1.9 · [ ] 1.10 · [ ] 1.11 · [ ] 1.12 · [ ] 1.13 · [ ] 1.14 · [ ] 1.15
 
 ## Verification
 

@@ -1,0 +1,27 @@
+{#- One pattern schema file: `view` is a PatternGraph (model/fingerprint_views.yaml). Header, edge text and glossary
+    lines come ready from fingerprint/domain/patterns.py; this template only lays them out. -#}
+{% macro lines(edges) -%}
+{% for edge in edges -%}
+{{ "  " * edge.depth }}{{ edge.text }}
+{{ lines(edge.edges) -}}
+{% endfor -%}
+{%- endmacro -%}
+{% for p in view.prefixes -%}
+PREFIX {{ p.prefix }}: <{{ p.namespace }}>
+{% endfor -%}
+# (:A&B) n: classes with the same n instances · ~m first_n: statistics over the first m read · co C k: k also typed C · via (:S)-p: incoming links · -p-> (:T|U) object classes · IRI, BNODE untyped · . not collected · deeper indent: a blank node's own edges, statistics over all its instances, up to 3 hops · ^ expanded under another edge · … deeper than 3 hops · k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured
+{% if view.hidden_classes -%}
+# hidden: {{ view.hidden_classes }} classes
+{% endif -%}
+{% for block in view.blocks -%}
+{{ block.header }}
+{{ lines(block.edges) -}}
+{% endfor -%}
+{% if view.glossary -%}
+# glossary
+{% for entry in view.glossary -%}
+{{ entry.line }}
+{% endfor -%}
+{% else -%}
+# glossary: none
+{% endif -%}
