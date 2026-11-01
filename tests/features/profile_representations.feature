@@ -176,7 +176,7 @@ Feature: Publishing a fingerprint as an application profile
       When the shapes are generated
       Then the node shapes are "http://ex.org/a/shape/Thing" and "http://ex.org/a/shape/Thing-2", in class IRI order
 
-  Rule: Namespace filters choose the classes shown
+  Rule: Namespace filters choose the classes and terms shown
 
     Scenario: Meta vocabularies hidden by default
       Given a profile holding the classes "http://example.org/Person" and "http://www.w3.org/2002/07/owl#Ontology"
@@ -191,14 +191,127 @@ Feature: Publishing a fingerprint as an application profile
 
     Scenario: Excluded by option
       Given a profile holding the classes "http://example.org/Person" and "http://www.w3.org/2002/07/owl#Ontology"
-      When the shapes and the diagram are generated with exclude "ex"
+      And "ex:Person" has the property "http://example.org/name"
+      When the shapes, the diagram and the report are generated with exclude "ex"
       Then "ex:Person" has neither
+      And the report has no "ex:Person" section
+      And no output writes an "ex:" property
 
     Scenario: Unknown name
       Given a profile holding the classes "http://example.org/Person" and "http://www.w3.org/2002/07/owl#Ontology"
       When the shapes and the diagram are generated with exclude "nope"
       Then a warning names "nope"
       And "ex:Person" has a node shape and a box
+
+    Scenario: Meta properties kept by default
+      Given the filter test profile
+      When every output is generated with no filter option
+      Then every output writes "rdfs:label" for "ex:Person"
+
+    Scenario: A meta namespace excluded by name
+      Given the filter test profile
+      When every output is generated with exclude "rdfs"
+      Then no output writes "rdfs:label"
+
+    Scenario Outline: Properties of an excluded namespace
+      Given the filter test profile
+      When the <output> is generated with exclude "rel"
+      Then it holds no "rel:" name
+      And it writes "ex:name" for "ex:Person"
+
+      Examples:
+        | output         |
+        | pattern schema |
+        | ShExC          |
+        | shapes         |
+        | diagram        |
+        | report         |
+
+    Scenario Outline: An edge to an excluded class
+      Given the filter test profile
+      When the <output> is generated with exclude "org"
+      Then "ex:memberOf" is written as <written>
+
+      Examples:
+        | output         | written                                                     |
+        | pattern schema | an edge "-ex:memberOf-> IRI"                                |
+        | ShExC          | the triple constraint "ex:memberOf IRI"                     |
+        | shapes         | a property shape with "sh:nodeKind sh:IRI" and no sh:class  |
+        | diagram        | the attribute "ex:memberOf : resource" with no link         |
+        | report         | a row whose value types do not name "org:Unit"              |
+
+    Scenario: A merged class loses its excluded member
+      Given a profile where all 5 "ex:Agent" instances are also the 5 "org:Member" instances
+      When the pattern schema is generated with no filter option
+      Then a block is headed "(:ex:Agent&org:Member) 5"
+      When the pattern schema is generated with exclude "org"
+      Then a block is headed "(:ex:Agent) 5"
+      And it holds no "org:" name
+
+    Scenario Outline: Matching a filter value
+      Given a profile with the namespaces "ex", "rel", "relx" under "http://example.org/" and "org" at "http://org.example/"
+      When the outputs are generated with exclude "<value>"
+      Then the excluded namespaces are <excluded>
+
+      Examples:
+        | value                   | excluded                                  |
+        | rel                     | rel                                       |
+        | rel*                    | rel, relx                                 |
+        | *x                      | relx                                      |
+        | http://example.org/rel/ | rel                                       |
+        | http://example.org/     | ex, rel, relx                             |
+        | Rel*                    | none, and a warning says Rel* is no namespace |
+
+    Scenario: Include wins over exclude
+      Given the filter test profile
+      When the outputs are generated with exclude "http://example.org/" and include "ex"
+      Then every output writes "ex:name" for "ex:Person"
+      And no output holds a "rel:" name
+
+    Scenario: A name that hides nothing
+      Given the filter test profile
+      When the outputs are generated with exclude "foaf"
+      Then one warning says "--exclude-namespace foaf: no term in this namespace; ignored"
+      And the outputs are as without the option
+
+    Scenario Outline: Excluded namespaces are noted
+      Given the filter test profile
+      When the <output> is generated with exclude "rel"
+      Then it carries <note>
+      When the <output> is generated with no filter option
+      Then it carries no note of excluded namespaces
+
+      Examples:
+        | output         | note                                                                                   |
+        | pattern schema | the line "# excluded namespaces: rel (classes 0, properties 2, values 0)"              |
+        | ShExC          | the line "# excluded namespaces: rel (classes 0, properties 2, values 0)"              |
+        | shapes         | the line "# excluded namespaces: rel (classes 0, properties 2, values 0)"              |
+        | diagram        | the line "' excluded namespaces: rel (classes 0, properties 2, values 0)" in every file |
+        | report         | the same text for the graph under its caveats and "rel" marked excluded in its table   |
+
+    Scenario: Datatypes are not filtered
+      Given the filter test profile
+      When every output is generated with exclude "xsd"
+      Then every output gives "ex:name" the type "xsd:string"
+      And a warning says "xsd" hides no term
+
+    Scenario: Pitfall findings are not filtered
+      Given a scanned profile whose finding names "rel:r1" as an example
+      When the pitfalls file and the report are generated with exclude "rel"
+      Then both still list "rel:r1" as an example
+
+    Scenario: Every class of a graph excluded
+      Given a profile whose only graph holds only "org:" classes
+      When the outputs are generated with exclude "org"
+      Then no shapes, diagram, pattern schema or ShExC file is written for that graph
+      And the report says the graph's classes are hidden, not that it is empty
+
+    Scenario: The saved profile keeps excluded terms
+      Given the filter test profile saved to a file
+      When the pattern schema is generated from the file with exclude "rel"
+      And the pattern schema is generated from the file again with no filter option
+      Then the profile file is unchanged
+      And the first pattern schema holds no "rel:" name and the second holds "rel:r1"
 
     Scenario: Empty default graph
       Given a profile whose default graph is empty

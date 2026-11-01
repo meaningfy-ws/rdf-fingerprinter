@@ -79,6 +79,12 @@ Feature: The fingerprint report and the command line
       When the report is rendered
       Then each class section carries its prefix and a search text with its short name and full IRI
 
+    Scenario: Property rows carry their prefix
+      Given the filter test profile
+      When the report is rendered
+      Then each property row carries its property's prefix
+      And there is one switch for each of "ex", "org", "rdfs" and "rel"
+
     @manual
     Scenario: Search narrows the classes
       Given the brainframe report open in a browser
@@ -90,6 +96,20 @@ Feature: The fingerprint report and the command line
       Given the brainframe report open in a browser
       When the reader switches off a namespace
       Then its class sections and contents entries are hidden, and the search still applies to the rest
+
+    @manual
+    Scenario: Property namespace switched off
+      Given the brainframe report generated with no filter option, open in a browser
+      When the reader switches off "relationid"
+      Then every "relationid:" property row is hidden, every class section stays, and the search still applies to the rows left
+
+    @manual
+    Scenario: Search and a property switch combine
+      Given the brainframe report generated with no filter option, open in a browser
+      When the reader types "2822a123" in the search box
+      Then only "brainframe:CloudInfrastructure" is shown, through its one matching "relationid:" row, and the count reads "1 shown" with every other class section hidden
+      When the reader switches off "relationid"
+      Then that class is hidden too, and the count reads "0 shown" with every class section hidden
 
   Rule: The exit status tells what happened
 
