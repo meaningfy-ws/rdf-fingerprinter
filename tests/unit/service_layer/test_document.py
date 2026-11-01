@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
+from fingerprint.domain.profile import Failure, QueryKind
 from fingerprint.service_layer.representations import make_generator
 from tests.builders import klass, literals, profile_run, prop
 from tests.fakes import EX, files
@@ -31,7 +32,7 @@ def test_sections_and_class_table():
 
 
 def test_samples_and_failures_are_flagged():
-    failure = {"query_kind": "co_types", "class_iri": EX + "Big", "message": "class Big: not profiled after 2 attempts"}
+    failure = Failure(query_kind=QueryKind.co_types, class_iri=EX + "Big", message="class Big: not profiled after 2 attempts")
     soup = document(people(failures=[failure]))
     assert "not profiled after 2 attempts" in soup.find(id="collection").get_text(" ")
     caveats = soup.find(id="caveats").get_text(" ")

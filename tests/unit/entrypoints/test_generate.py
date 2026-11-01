@@ -1,14 +1,13 @@
 """The generator commands (UC-B2.1): parse, call the representations service, exit 0/2/4 (P-3, P-4, P-13)."""
 
 import json
-from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
 
 from fingerprint.entrypoints.cli import generate
+from tests.sample_data import SAMPLE_PROFILE as SAMPLE
 
-SAMPLE = Path(__file__).parents[2] / "test_data" / "profiles" / "sample-profile.json"
 COMMANDS = {"shacl": generate.gen_shacl, "puml": generate.gen_puml, "doc": generate.gen_doc}
 FIRST_FILE = {"shacl": "shapes-default.ttl", "puml": "diagram-default.puml", "doc": "main.html"}
 
@@ -85,10 +84,11 @@ def test_an_unwritable_shapes_namespace_is_a_usage_error(tmp_path):
 
 def test_a_profile_with_failures_still_generates(tmp_path):
     from fingerprint.adapters.profile_file import save_profile
+    from fingerprint.domain.profile import Failure, QueryKind
     from tests.builders import klass, profile_run
     from tests.fakes import EX
 
-    failure = {"query_kind": "co_types", "class_iri": EX + "Big", "message": "not profiled"}
+    failure = Failure(query_kind=QueryKind.co_types, class_iri=EX + "Big", message="not profiled")
     path = save_profile(profile_run(klass(EX + "Person", 2), failures=[failure]), tmp_path)
     out = tmp_path / "out"
     out.mkdir()

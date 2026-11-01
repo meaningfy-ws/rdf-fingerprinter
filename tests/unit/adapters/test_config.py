@@ -6,18 +6,11 @@ import sys
 from pathlib import Path
 
 import pytest
-from click.testing import CliRunner
 
 from fingerprint import FingerprintConfig
 from fingerprint.adapters.config_resolver import DefaultConfigResolver, EnvConfigResolver, MappingConfigResolver
 from fingerprint.adapters.exceptions import ConfigError
 from fingerprint.domain.profile import Settings, SettingsOverride
-from fingerprint.entrypoints.cli.main import fingerprint_endpoint
-from fingerprint.service_layer import handlers
-from fingerprint.service_layer.exceptions import UsageError
-from fingerprint.service_layer.generators.generator import plain_label
-from fingerprint.service_layer.settings import load_user_prefixes, resolve_settings
-from tests.fakes import FakeSparql
 
 PACKAGE = Path(__file__).parents[3] / "fingerprint"
 
@@ -95,63 +88,9 @@ def test_the_override_has_the_settings_fields():
     assert set(SettingsOverride.model_fields) == set(Settings.model_fields)
 
 
-def test_a_variable_changes_a_default(tmp_path, monkeypatch):
-    """Scenario: A variable changes a default."""
-    fake = FakeSparql()
-    fake.add("ex:p", "a", "ex:Person")
-    monkeypatch.setattr(handlers, "SparqlHttpClient", lambda endpoint, timeout: fake)
-    monkeypatch.setenv("RDF_FINGERPRINTER_PROFILE_FILE", "run.json")
-    handlers.fingerprint_report("http://fake", tmp_path, resolve_settings(env={}))
-    assert (tmp_path / "run.json").is_file() and not (tmp_path / "profile.json").exists()
-
-
-def test_a_badly_typed_variable_exits_2_before_any_query(tmp_path, monkeypatch):
-    """Scenario: A badly typed variable."""
-    monkeypatch.setattr(handlers, "SparqlHttpClient", lambda endpoint, timeout: pytest.fail("a query was sent"))
-    result = CliRunner().invoke(
-        fingerprint_endpoint,
-        ["-e", "http://fake/sparql", "-o", str(tmp_path)],
-        env={"RDF_FINGERPRINTER_RETRY_BACKOFF_SECONDS": "x"},
-    )
-    assert result.exit_code == 2 and "RDF_FINGERPRINTER_RETRY_BACKOFF_SECONDS" in result.output
-    assert list(tmp_path.iterdir()) == []
-
-
 def test_an_unwritable_shapes_namespace_names_its_variable():
     with pytest.raises(ConfigError, match="RDF_FINGERPRINTER_SHAPES_NAMESPACE"):
         FingerprintConfig(MappingConfigResolver({"RDF_FINGERPRINTER_SHAPES_NAMESPACE": "urn:x y<"})).validate()
-
-
-@pytest.mark.parametrize(
-    "content",
-    [None, "[]", '{"x\\n!include /etc/passwd\\n\'": "http://ex.org/"}', '{"ex:": "http://ex.org/a b"}'],
-    ids=["missing", "not-an-object", "injected-name", "unwritable-namespace"],
-)
-def test_a_bad_prefixes_file_is_a_usage_error(tmp_path, monkeypatch, content):
-    path = tmp_path / "prefixes.json"
-    if content is not None:
-        path.write_text(content)
-    monkeypatch.setenv("RDF_FINGERPRINTER_PREFIXES_FILE", str(path))
-    with pytest.raises(UsageError, match="RDF_FINGERPRINTER_PREFIXES_FILE"):
-        load_user_prefixes()
-
-
-def test_the_default_graph_label_is_written_as_plain_text(monkeypatch):
-    monkeypatch.setenv("RDF_FINGERPRINTER_DEFAULT_GRAPH_LABEL", "x\n!include /etc/passwd")
-    assert "\n" not in plain_label(None)
-
-
-@pytest.mark.parametrize("arguments", [["--first-n", "0"], ["--concurrency", "0"]])
-def test_an_invalid_cli_setting_exits_2_before_any_query(tmp_path, monkeypatch, arguments):
-    monkeypatch.setattr(handlers, "SparqlHttpClient", lambda endpoint, timeout: pytest.fail("a query was sent"))
-    result = CliRunner().invoke(fingerprint_endpoint, ["-e", "http://fake/sparql", "-o", str(tmp_path), *arguments])
-    assert result.exit_code == 2 and "errors.pydantic.dev" not in result.output
-
-
-def test_only_http_endpoints_are_queried(tmp_path, monkeypatch):
-    monkeypatch.setattr(handlers, "SparqlHttpClient", lambda endpoint, timeout: pytest.fail("a query was sent"))
-    result = CliRunner().invoke(fingerprint_endpoint, ["-e", "file:///etc/hostname", "-o", str(tmp_path)])
-    assert result.exit_code == 2 and "http or https" in result.output
 
 
 def test_the_modules_the_root_imports_never_import_it_back():

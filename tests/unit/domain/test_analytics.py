@@ -1,7 +1,9 @@
 import pytest
 
 from fingerprint.domain.analytics import analyse, cardinality_label, cardinality_statistics
-from fingerprint.domain.profile import CardinalityBin, ProfileRun
+from fingerprint.domain.profile import CardinalityBin, ProfileRun, ValueCount
+from tests import builders
+from tests.builders import klass, profile_run
 
 EX = "http://example.org/"
 RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label"
@@ -9,11 +11,8 @@ SKOS_PREF = "http://www.w3.org/2004/02/skos/core#prefLabel"
 
 
 def prop(name, bins=None, **extra):
-    """A raw property profile; `bins` maps values-per-subject to subjects."""
-    profile = {"property": EX + name, **extra}
-    if bins is not None:
-        profile["cardinality_histogram"] = [{"values_per_subject": n, "subjects": s} for n, s in bins.items()]
-    return profile
+    """A property profile named under EX; `bins` maps values-per-subject to subjects, `extra` sets further fields."""
+    return builders.prop(EX + name, bins).model_copy(update=extra)
 
 
 def histogram(bins):
@@ -21,29 +20,20 @@ def histogram(bins):
     return [CardinalityBin(values_per_subject=n, subjects=s) for n, s in bins.items()]
 
 
-def cls(name, instances, properties=(), mode="exact", observed=None, co_types=None):
-    return {
-        "class_iri": EX + name,
-        "instances": instances,
-        "observed_instances": instances if observed is None else observed,
-        "precision_mode": mode,
-        "property_partitions": list(properties),
-        "co_types": [{"class_iri": EX + c, "subjects": s} for c, s in (co_types or {}).items()],
-    }
-
-
-def run(*classes, edges=(), settings=None, **graph):
-    return ProfileRun(
-        endpoint="http://localhost/sparql",
-        settings=settings or {},
-        graphs=[
-            {
-                "class_partitions": list(classes),
-                "declared_subclass_edges": [{"sub_class": EX + a, "super_class": EX + b} for a, b in edges],
-                **graph,
-            }
-        ],
+def cls(name, instances, properties=(), observed=None, co_types=None):
+    return klass(
+        EX + name,
+        instances,
+        *properties,
+        observed=observed,
+        co_types=[(EX + c, s) for c, s in (co_types or {}).items()],
     )
+
+
+def run(*classes, edges=(), **graph):
+    """A one-graph run; `graph` sets further fields of that graph."""
+    base = profile_run(*classes, edges=[(EX + a, EX + b) for a, b in edges])
+    return base.model_copy(update={"graphs": [base.graphs[0].model_copy(update=graph)]})
 
 
 def classes_of(raw_run):
@@ -124,21 +114,14 @@ def test_no_observed_instances_gives_no_label():
 
 
 def literal(dt, triples, distinct=None, lang=None, total_length=None):
-    part = {"node_kind": "literal", "datatype": dt, "triples": triples, "distinct_objects": distinct or triples}
-    if lang is not None:
-        part["language"] = lang
-    if total_length is not None:
-        part["total_length"] = total_length
-    return part
+    return builders.literals(triples, dt, lang).model_copy(
+        update={"distinct_objects": distinct or triples, "total_length": total_length}
+    )
 
 
 def resource(triples, object_class=None, kind="iri", graph=None):
-    part = {"node_kind": kind, "triples": triples, "distinct_objects": triples}
-    if object_class:
-        part["object_class"] = EX + object_class
-    if graph:
-        part["object_class_graph"] = graph
-    return part
+    partition = builders.resources(triples, EX + object_class if object_class else None, kind)
+    return partition.model_copy(update={"distinct_objects": triples, "object_class_graph": graph})
 
 
 @pytest.mark.parametrize(
@@ -192,8 +175,10 @@ def test_identifier_like_and_enumeration_candidate():
 
 
 def test_top_values_share_and_entropy():
-    same = prop("s", {1: 4}, distinct_objects=1, top_values=[{"value": "x", "triples": 4}])
-    split = prop("t", {1: 4}, distinct_objects=4, top_values=[{"value": "a", "triples": 1}, {"value": "b", "triples": 1}])
+    same = prop("s", {1: 4}, distinct_objects=1, top_values=[ValueCount(value="x", triples=4)])
+    split = prop(
+        "t", {1: 4}, distinct_objects=4, top_values=[ValueCount(value="a", triples=1), ValueCount(value="b", triples=1)]
+    )
     a = props_of(classes_of(run(cls("C", 4, [same, split])))["C"])
     assert a["s"].entropy_estimate == 0 and a["s"].top_k_share == 1.0
     # a, b and a remainder bucket of 2: −(¼ log ¼ · 2 + ½ log ½) = 1.5
@@ -258,14 +243,14 @@ def test_declared_cycle_has_finite_depth():
 
 
 def test_first_n_class_is_not_exact():
-    c = classes_of(run(cls("Big", 50000, [prop("p", {1: 10000})], mode="first_n", observed=10000)))["Big"]
+    c = classes_of(run(cls("Big", 50000, [prop("p", {1: 10000})], observed=10000)))["Big"]
     assert c.is_exact is False and props_of(c)["p"].is_exact is False
     assert c.sample_ratio == pytest.approx(0.2)
 
 
 def test_presence_only_property_has_no_statistics():
-    rare = prop("rare", presence_only=True)
-    c = classes_of(run(cls("Big", 50000, [rare], mode="first_n", observed=10000)))["Big"]
+    rare = builders.prop(EX + "rare", presence_only=True)
+    c = classes_of(run(cls("Big", 50000, [rare], observed=10000)))["Big"]
     a = props_of(c)["rare"]
     assert a.is_exact is False and a.inheritance == "own"
     assert a.min is None and a.max is None and a.mean is None and a.confidence is None and a.cardinality_label is None
@@ -286,11 +271,7 @@ def test_analytics_from_a_json_loaded_profile_are_equal():
 
 
 def test_class_indicators():
-    props = [
-        {"property": RDFS_LABEL, "cardinality_histogram": [{"values_per_subject": 1, "subjects": 80}]},
-        {"property": SKOS_PREF, "cardinality_histogram": [{"values_per_subject": 1, "subjects": 90}]},
-        prop("id", {1: 100}),
-    ]
+    props = [builders.prop(RDFS_LABEL, {1: 80}), builders.prop(SKOS_PREF, {1: 90}), prop("id", {1: 100})]
     c = classes_of(run(cls("C", 100, props)))["C"]
     assert c.label_coverage == pytest.approx(0.9)
     assert c.mandatory_property_count == 1

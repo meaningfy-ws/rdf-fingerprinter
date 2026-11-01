@@ -83,14 +83,6 @@ source_modules =
 forbidden_modules =
     fingerprint.service_layer
     fingerprint.entrypoints
-# test_config.py also covers how the CLI, handlers and settings read the configuration. Split it by
-# layer in task 4.5 (tests switched tier by tier), then delete these lines.
-ignore_imports =
-    tests.unit.adapters.test_config -> fingerprint.entrypoints.cli.main
-    tests.unit.adapters.test_config -> fingerprint.service_layer.exceptions
-    tests.unit.adapters.test_config -> fingerprint.service_layer.generators.generator
-    tests.unit.adapters.test_config -> fingerprint.service_layer.handlers
-    tests.unit.adapters.test_config -> fingerprint.service_layer.settings
 
 [importlinter:contract:tests-service-layer]
 name = service-layer tests import no entrypoint

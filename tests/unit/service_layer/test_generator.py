@@ -7,28 +7,21 @@ import pytest
 
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.profile import ProfileRun
 from fingerprint.domain.views import NodeShape, PropertyShape, ShapesGraph
 from fingerprint.service_layer.generators.generator import Generator, graph_slug
+from tests import builders
+from tests.builders import profile_run
 from tests.fakes import files
 
 EX = "http://ex.org/"
 
 
 def run(*classes, graph=None):
-    graph_profile = {"class_partitions": list(classes)} | ({"graph": graph} if graph else {})
-    return ProfileRun.model_validate({"endpoint": "http://e", "settings": {}, "graphs": [graph_profile]})
+    return profile_run(*classes, graph=graph)
 
 
 def klass(iri, *props):
-    partitions = [{"property": p, "cardinality_histogram": [{"values_per_subject": 1, "subjects": 2}]} for p in props]
-    return {
-        "class_iri": iri,
-        "instances": 2,
-        "observed_instances": 2,
-        "precision_mode": "exact",
-        "property_partitions": partitions,
-    }
+    return builders.klass(iri, 2, *(builders.prop(p, {1: 2}) for p in props))
 
 
 def package(tmp_path, body):

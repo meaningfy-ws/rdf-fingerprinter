@@ -6,6 +6,7 @@ After an intended change run `make refresh-golden`, then review the diff.
 import pyshacl
 import pytest
 from rdflib import Graph, Namespace
+from rdflib.compare import graph_diff, isomorphic, to_isomorphic
 
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.representations import with_threshold
@@ -17,13 +18,30 @@ SH = Namespace("http://www.w3.org/ns/shacl#")
 SOURCE = {"default": "continents", "continents": "continents", "treaties": "treaties"}
 
 
+def turtle_difference(golden: str, output: str) -> str | None:
+    """None when the two Turtle texts are the same graph, else the triples found in only one of them."""
+    expected, produced = Graph().parse(data=golden, format="turtle"), Graph().parse(data=output, format="turtle")
+    if isomorphic(expected, produced):
+        return None
+    _, only_golden, only_output = graph_diff(to_isomorphic(expected), to_isomorphic(produced))
+
+    def lines(graph):
+        return "\n".join(sorted(f"  {s.n3()} {p.n3()} {o.n3()}" for s, p, o in graph))
+
+    return f"only in the golden file:\n{lines(only_golden)}\nonly in the output:\n{lines(only_output)}"
+
+
 @pytest.mark.parametrize("name", sorted(GENERATORS))
 def test_golden_output(name, sample_outputs):
     produced = sample_outputs[name]
     stem = next(iter(produced)).split("-")[0].split(".")[0]
     assert set(produced) == {p.name for p in GOLDEN.iterdir() if p.name.startswith(stem)}
     for file_name, text in produced.items():
-        assert text == (GOLDEN / file_name).read_text(encoding="utf-8"), f"{file_name} differs from its golden file"
+        golden = (GOLDEN / file_name).read_text(encoding="utf-8")
+        if file_name.endswith(".ttl"):
+            assert (difference := turtle_difference(golden, text)) is None, f"{file_name} differs:\n{difference}"
+        else:
+            assert text == golden, f"{file_name} differs from its golden file"
 
 
 def shacl_files(run, threshold):
@@ -39,3 +57,36 @@ def test_shapes_report_no_violation_on_their_own_data(graph, threshold, sample_r
     _, results, _ = pyshacl.validate(data, shacl_graph=Graph().parse(data=text, format="turtle"), inference="none")
     violations = list(results.subjects(SH.resultSeverity, SH.Violation))
     assert not violations, results.serialize(format="turtle")[:2000]
+
+
+# --- the comparison itself (developer-tooling: Generated outputs compared by meaning) ---
+
+GOLDEN_TTL = """@prefix ex: <http://ex.org/> .
+ex:a ex:p "one" ; ex:q ex:b .
+ex:b ex:p "two" .
+"""
+
+
+def test_a_reordered_turtle_output():
+    """Scenario: A reordered Turtle output."""
+    reordered = """@prefix e: <http://ex.org/> .
+e:b e:p "two" .
+e:a e:q e:b ; e:p "one" .
+"""
+    assert turtle_difference(GOLDEN_TTL, reordered) is None
+
+
+def test_a_changed_triple():
+    """Scenario: A changed triple."""
+    changed = GOLDEN_TTL.replace('"two"', '"2"')
+    difference = turtle_difference(GOLDEN_TTL, changed)
+    golden_side, output_side = difference.split("only in the output:\n")
+    assert golden_side.splitlines()[1:] == ['  <http://ex.org/b> <http://ex.org/p> "two"']
+    assert output_side.splitlines() == ['  <http://ex.org/b> <http://ex.org/p> "2"']
+
+
+def test_blank_nodes_match_by_structure_not_by_label():
+    golden = '@prefix ex: <http://ex.org/> . ex:a ex:p [ ex:q "x" ] .'
+    relabelled = '@prefix ex: <http://ex.org/> . ex:a ex:p _:other . _:other ex:q "x" .'
+    assert turtle_difference(golden, relabelled) is None
+    assert turtle_difference(golden, relabelled.replace('"x"', '"y"')) is not None

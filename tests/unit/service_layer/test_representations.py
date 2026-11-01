@@ -6,7 +6,6 @@ import pytest
 
 from fingerprint.adapters.exceptions import GeneratedOutputError
 from fingerprint.adapters.profile_file import save_profile
-from fingerprint.domain.profile import ProfileRun
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer import representations
 from fingerprint.service_layer.exceptions import UsageError
@@ -16,12 +15,10 @@ from fingerprint.service_layer.representations import (
     with_threshold,
 )
 
-SAMPLE = Path(__file__).parents[2] / "test_data" / "profiles" / "sample-profile.json"
-
 
 @pytest.fixture
-def run():
-    return ProfileRun.model_validate_json(SAMPLE.read_text())
+def run(sample_run):
+    return sample_run
 
 
 class Recording:

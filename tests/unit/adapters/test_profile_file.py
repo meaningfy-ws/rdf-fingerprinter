@@ -8,13 +8,12 @@ import pytest
 from fingerprint import config
 from fingerprint.adapters.exceptions import ProfileFileError
 from fingerprint.adapters.profile_file import load_profile, save_profile
-from fingerprint.domain.profile import NamespacePrefix, PrefixSource, ProfileRun
+from fingerprint.domain.profile import NamespacePrefix, PrefixSource
+from tests.sample_data import SAMPLE_PROFILE as SAMPLE
 
-SAMPLE = Path(__file__).parents[2] / "test_data" / "profiles" / "sample-profile.json"
 
-
-def test_round_trip(tmp_path):
-    run = ProfileRun.model_validate_json(SAMPLE.read_text())
+def test_round_trip(tmp_path, sample_run):
+    run = sample_run
     path = save_profile(run, tmp_path)
     assert path == tmp_path / config.profile_file and load_profile(path) == run
 
@@ -40,16 +39,16 @@ def test_a_newer_file_names_its_tool_version(tmp_path):
         load_profile(path)
 
 
-def test_saved_profile_matches_the_published_schema(tmp_path):
+def test_saved_profile_matches_the_published_schema(tmp_path, sample_run):
     jsonschema = pytest.importorskip("jsonschema")
     schema = Path(__file__).parents[3] / "fingerprint" / "domain" / "profile_run.schema.json"
-    path = save_profile(ProfileRun.model_validate_json(SAMPLE.read_text()), tmp_path)
+    path = save_profile(sample_run, tmp_path)
     jsonschema.validate(json.loads(path.read_text()), json.loads(schema.read_text()))
 
 
-def test_namespace_table_round_trips(tmp_path):
+def test_namespace_table_round_trips(tmp_path, sample_run):
     """namespace-prefixes: the namespace table is saved with the profile."""
-    run = ProfileRun.model_validate_json(SAMPLE.read_text())
+    run = sample_run
     table = [NamespacePrefix(prefix="ex", namespace="http://ex.org/", source=PrefixSource.generated)]
     loaded = load_profile(save_profile(run.model_copy(update={"namespaces": table}), tmp_path))
     assert loaded.namespaces == table
