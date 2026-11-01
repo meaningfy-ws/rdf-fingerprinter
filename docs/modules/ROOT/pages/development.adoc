@@ -8,24 +8,200 @@ make install                    # Poetry env with the test and lint groups
 make check-all                  # lint, types, layers, OpenSpec, unit tests — the gate CI runs
 make oxigraph-load-test-data    # in-memory Oxigraph on :7878 with the test graphs
 make test-e2e                   # end-to-end tests against it (local only)
+make check-mutation             # mutation score ratchet (about 1 h)
 make build                      # sdist + wheel, checks the templates are in the wheel
 make preview-docs               # build this site and serve it on :8088
 ----
 
+[#tests]
 == Tests
+
+Every check has one home. The rules below say where a test goes, what it may import, which data it
+uses and what the gate demands. `make check-architecture` and the guards in `tests/guards/` enforce
+them.
+
+[#test-tiers]
+=== Tiers: where a new test goes
+
+[cols="2,2,3"]
+|===
+| The check is about… | Put it in | Example
+
+| what a user of a capability sees (a spec scenario)
+| a scenario in `tests/features/<capability>.feature`; steps in `tests/bdd/steps/`
+| "No queries during rendering"
+
+| a rule that holds for all inputs
+| `tests/unit/domain/`, as a Hypothesis property (strategies in `tests/unit/domain/strategies.py`)
+| prefix compaction round-trips
+
+| a branch or error path no scenario reaches
+| `tests/unit/<layer that decides>/` (`domain`, `adapters`, `service_layer`, `entrypoints`)
+| HTTPS→HTTP prefix-fetch fallback
+
+| the exact text or graph of a generated output
+| `tests/unit/service_layer/test_representations_golden.py`
+| `shapes-continents-*.ttl`
+
+| talking to a real SPARQL store
+| `tests/e2e/`
+| first-N reads at most N instances
+
+| the repository itself (packaging, dicts, traceability, fences, wiring)
+| `tests/guards/`
+| the wheel contains the templates
+|===
+
+A test that repeats an assertion another tier owns is deleted. Unit test files are named after the
+module they test: `tests/unit/<layer>/test_<module>.py`. Every test directory is a package (it has
+an `__init__.py`).
+
+Shared support lives at the top of `tests/`:
 
 [cols="1,3"]
 |===
-| Suite | Runs
+| File | Holds
 
-| `tests/unit` | Without a SPARQL store; in `make check-all` and in CI.
-| `tests/e2e` | Against the store at `RDF_FINGERPRINTER_TEST_ENDPOINT` (default
-`http://localhost:7878/query`, the Oxigraph from `make oxigraph-load-test-data`). Local only:
-run them before a release.
+| `conftest.py` | The sample-data fixtures, the Hypothesis profiles, the no-network and no-prefix-lookup fixtures.
+| `sample_data.py` | The facts about the canonical datasets; `same_profile()` and `differences()`.
+| `builders.py` | Builders of model objects for edge cases.
+| `fakes.py` | `FakeSparql` (an in-memory rdflib store) and other test doubles.
+| `bdd/conftest.py` | The shared step library: imports every `tests/bdd/steps/<area>.py`.
 |===
 
-Point `RDF_FINGERPRINTER_TEST_ENDPOINT` at any other store loaded with `tests/test_data` to
-check the templates there.
+[#test-traceability]
+=== Traceability: every spec scenario has one test
+
+`tests/guards/test_traceability.py` checks that every `#### Scenario: <title>` in
+`openspec/specs/<capability>/spec.md` has a Gherkin scenario with the *same title* in
+`tests/features/<capability>.feature` (`-` in the capability becomes `_`). Titles compare after
+stripping surrounding spaces. The guard fails on:
+
+* a spec scenario with no feature scenario and no allow-list entry;
+* a feature scenario whose title is in no spec scenario of that capability;
+* a title used twice in one spec or one feature file;
+* a malformed or stale allow-list entry.
+
+When titles differ, rename the feature scenario. The spec is the truth; change it only through a
+spec delta in an OpenSpec change.
+
+Add an allow-list entry only when a scenario is about the repository, not the product, and a
+pytest test proves it. Entries go in `tests/guards/untraced_scenarios.txt`, one per line, `#`
+starts a comment:
+
+----
+<capability> | <scenario title> | <path>::<function> | <reason>
+----
+
+The node id names a plain module-level test function: no class, no parametrisation suffix, no
+make target. The guard parses the file and checks the function exists. A check that is a make
+target gets a thin pytest wrapper that runs the tool in a subprocess.
+
+[#test-fences]
+=== Fences
+
+`.importlinter` lists `fingerprint` and `tests` as root packages and fences the test tiers.
+Indirect imports count.
+
+[cols="2,3"]
+|===
+| Source | May not import
+
+| `tests.unit.domain` | `fingerprint.adapters`, `fingerprint.service_layer`, `fingerprint.entrypoints`, `tests.fakes`
+| `tests.unit.adapters` | `fingerprint.service_layer`, `fingerprint.entrypoints`
+| `tests.unit.service_layer` | `fingerprint.entrypoints`
+| `tests.builders`, `tests.sample_data` | `fingerprint.adapters`, `fingerprint.service_layer`, `fingerprint.entrypoints`
+| `tests.conftest`, `tests.sample_data`, `tests.builders`, `tests.fakes` | any test tier
+| `tests.unit`, `tests.bdd`, `tests.e2e`, `tests.guards` | each other (independence contract)
+|===
+
+No network outside `tests/e2e/`: an autouse fixture makes `socket.socket.connect` raise
+`RuntimeError("network access is not allowed outside tests/e2e/")`. Use `FakeSparql` instead, or
+move the test to `tests/e2e/`. Another autouse fixture sets `RDF_FINGERPRINTER_PREFIX_LOOKUP=false`.
+
+[#test-data]
+=== Canonical data
+
+One sample dataset serves every tier: the continents and treaties RDF in `tests/test_data/`, and
+the profile collected from it, `tests/test_data/profiles/sample-profile.json`.
+
+* Assert the named facts in `tests/sample_data.py`, never a bare number. `CONTINENTS` and
+  `TREATIES` give the graphs, the classes with their instance counts, and each class's properties
+  with min and max cardinality. They are typed in by hand from the RDF;
+  `tests/guards/test_sample_data.py` checks they agree with the stored profile.
+* Use the session fixtures from `tests/conftest.py`: `sample_run` (the stored `ProfileRun`),
+  `sample_analytics` and `sample_outputs` (every generator's files).
+* Build an edge case locally, never in the canonical dataset: with the builders in
+  `tests/builders.py` (`klass`, `prop`, `literals`, `resources`, `failure`, `profile_run`) or with
+  `sample_run.model_copy(update=…)`.
+
+Never edit the sample profile or a golden file by hand. Regenerate them:
+
+[cols="1,3"]
+|===
+| Target | Run it when
+
+| `make refresh-sample-profile`
+| the RDF in `tests/test_data/` or the collector changed, or the drift test in `make test-e2e`
+fails. Needs `make oxigraph-load-test-data`. Leaves the file untouched when nothing changed and
+prints the classes and properties that differ. Update `tests/sample_data.py` if the data changed
+on purpose.
+
+| `make refresh-golden`
+| a generator or template changed its output on purpose. Writes only the files in
+`tests/test_data/golden/` that changed; review the diff.
+|===
+
+Turtle golden files compare as graphs (`rdflib.compare.isomorphic`); a failure prints the triples
+only in the golden and only in the output. PlantUML and HTML golden files compare as text.
+
+[#test-gate]
+=== The gate
+
+[cols="1,3"]
+|===
+| Command | Checks
+
+| `make test` (in `make check-all` and CI)
+| `tests/` without `tests/e2e/`, with branch coverage: at least 90% of `fingerprint/` and 100% of
+`fingerprint/domain/` (the generated `profile.py` and `views.py` excluded). Hypothesis runs with
+the `ci` profile (derandomized, no deadline).
+
+| `make test-e2e` (local, before a release)
+| `tests/e2e/` against the store at `RDF_FINGERPRINTER_TEST_ENDPOINT` (default
+`http://localhost:7878/query`, the Oxigraph from `make oxigraph-load-test-data`). Includes the drift
+test: a live collection must equal the sample profile.
+
+| `make check-mutation` (about 1 h; weekly CI and on demand, locally before a PR)
+| mutmut over `fingerprint/domain/` and `fingerprint/service_layer/`. The score,
+(killed + timeout) / all counted mutants, must not fall below `tests/guards/mutation_score.txt`. A
+drop exits 1 and lists the surviving mutants; a rise rewrites the file: commit it.
+|===
+
+Locally, Hypothesis uses the `dev` profile (random, no deadline); pass
+`--hypothesis-profile=ci` to reproduce CI. Point `RDF_FINGERPRINTER_TEST_ENDPOINT` at any other store
+loaded with `tests/test_data` to run the e2e tests there.
+
+A branch that only a contrived test could reach gets `# pragma: no cover — <reason>`, never inside
+`fingerprint/domain/`.
+
+[#test-anti-patterns]
+=== Anti-patterns
+
+[cols="1,1"]
+|===
+| Don't | Do instead
+
+| Assert a bare number from the sample data (`== 7`) | Assert the named fact from `tests/sample_data.py`
+| Add an edge case to the canonical dataset | Derive it with a builder or `model_copy`
+| Test one behaviour in Gherkin and in a unit test | Keep it in the tier the table above names
+| Write a contrived test for a defensive branch | `# pragma: no cover — <reason>` (outside `domain/`)
+| Edit a golden file or the sample profile by hand | `make refresh-golden` / `make refresh-sample-profile`
+| Rename a spec scenario to match a test | Rename the feature scenario to match the spec
+| Lower `mutation_score.txt` | Add the missing test or delete the dead code
+| Import `tests.fakes` from a domain test | Build domain inputs with `tests.builders`
+| Allow-list a scenario with a make target | Name a pytest test; add a thin wrapper if needed
+|===
 
 == Layout
 

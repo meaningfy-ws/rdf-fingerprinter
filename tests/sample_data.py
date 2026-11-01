@@ -1,7 +1,7 @@
 """Facts about the canonical sample datasets and the comparison of profiles (lean-test-suite P-5).
 
 The facts are typed in by hand from `tests/test_data/*-source-ap.rdf`, so they are an expectation
-independent of the stored sample profile; `tests/unit/test_sample_data.py` checks the two agree.
+independent of the stored sample profile; `tests/guards/test_sample_data.py` checks the two agree.
 """
 
 import json

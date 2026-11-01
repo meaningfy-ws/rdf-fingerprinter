@@ -59,13 +59,13 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## 8. Docs and conventions
 
-- [ ] 8.1 `docs/modules/ROOT/pages/development.adoc`: tiers, the P-2 ownership table, canonical data and refresh targets, the gate
-- [ ] 8.2 `AGENTS.md` *Working conventions*: the test-tier and sample-data rules (pointing at the docs page) and the moved path of `test_no_composed_dicts.py`
+- [x] 8.1 `docs/modules/ROOT/pages/development.adoc`: tiers, the P-2 ownership table, canonical data and refresh targets, the gate
+- [x] 8.2 `AGENTS.md` *Working conventions*: the test-tier and sample-data rules (pointing at the docs page) and the moved path of `test_no_composed_dicts.py`
 - [ ] 8.3 Outcome in `inputs/baseline.md`: before/after test count, run time, branch coverage, mutation score
 
 ## Roadmap
 
-- [x] 1.1 · [ ] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [x] 3.7 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 4.5 · [x] 4.6 · [x] 4.7 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [ ] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
+- [x] 1.1 · [ ] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [x] 3.7 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 4.4 · [x] 4.5 · [x] 4.6 · [x] 4.7 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 6.3 · [ ] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [x] 8.1 · [x] 8.2 · [ ] 8.3
 
 ## Verification
 
