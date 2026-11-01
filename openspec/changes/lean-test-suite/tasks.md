@@ -28,13 +28,13 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## 4. Canonical sample data
 
-- [ ] 4.1 `same_profile()` in `tests/sample_data.py`; `tests/refresh_sample_data.py`; `make refresh-sample-profile` and `make refresh-golden` (replacing `UPDATE_GOLDEN=1`); IT-1 (Requirement: Canonical sample data — Scenario: Regenerating without a data change; P-5)
-- [ ] 4.2 `CONTINENTS` and `TREATIES` facts; session fixtures `sample_run`, `sample_analytics`, `sample_outputs` (Requirement: Canonical sample data; P-5)
-- [ ] 4.3 `tests/builders.py` returning model objects; `tests/fakes.py` keeps only the doubles (P-5; DEC-5)
+- [x] 4.1 `same_profile()` in `tests/sample_data.py`; `tests/refresh_sample_data.py`; `make refresh-sample-profile` and `make refresh-golden` (replacing `UPDATE_GOLDEN=1`); IT-1 (Requirement: Canonical sample data — Scenario: Regenerating without a data change; P-5)
+- [x] 4.2 `CONTINENTS` and `TREATIES` facts; session fixtures `sample_run`, `sample_analytics`, `sample_outputs` (Requirement: Canonical sample data; P-5)
+- [x] 4.3 `tests/builders.py` returning model objects; `tests/fakes.py` keeps only the doubles (P-5; DEC-5)
 - [ ] 4.4 Domain-tier tests switched from inline raw profiles and bare numbers to builders, fixtures and named facts (DEC-4, DEC-5)
 - [ ] 4.5 Adapter-, service- and entrypoint-tier tests switched likewise (DEC-4, DEC-5)
 - [ ] 4.6 Gherkin steps switched likewise (DEC-4, DEC-5)
-- [ ] 4.7 The drift test names the differing class or property on failure; IT-2 (Scenario: The stored profile drifts)
+- [x] 4.7 The drift test names the differing class or property on failure; IT-2 (Scenario: The stored profile drifts)
 
 ## 5. Shared steps and outputs
 
@@ -65,7 +65,7 @@ Starts after `readable-representations` (the namespace-prefixes work) is merged 
 
 ## Roadmap
 
-- [x] 1.1 · [ ] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [ ] 3.7 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 4.4 · [ ] 4.5 · [ ] 4.6 · [ ] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
+- [x] 1.1 · [ ] 1.2 · [x] 2.1 · [x] 2.2 · [x] 2.3 · [x] 2.4 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 3.4 · [x] 3.5 · [x] 3.6 · [ ] 3.7 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [ ] 4.4 · [ ] 4.5 · [ ] 4.6 · [x] 4.7 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 6.3 · [ ] 6.4 · [ ] 7.1 · [ ] 7.2 · [ ] 7.3 · [ ] 7.4 · [ ] 7.5 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3
 
 ## Verification
 

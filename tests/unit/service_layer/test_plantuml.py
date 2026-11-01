@@ -7,7 +7,8 @@ from fingerprint.domain.analytics import analyse
 from fingerprint.domain.profile import NamespacePrefix
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer.generators.plantuml import PlantumlGenerator
-from tests.fakes import EX, files, klass, literals, profile_run, prop, resources
+from tests.builders import klass, literals, profile_run, prop, resources
+from tests.fakes import EX, files
 
 FOAF = "http://xmlns.com/foaf/0.1/"
 OWL = "http://www.w3.org/2002/07/owl#"

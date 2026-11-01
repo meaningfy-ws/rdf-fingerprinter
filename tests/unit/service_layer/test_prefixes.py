@@ -5,7 +5,7 @@ import logging
 from fingerprint.adapters.prefixes import PrefixLookupError
 from fingerprint.domain.profile import NamespacePrefix, PrefixSource
 from fingerprint.service_layer.prefixes import resolve_namespaces, used_namespaces
-from tests.fakes import klass, literals, profile_run, prop, resources
+from tests.builders import klass, literals, profile_run, prop, resources
 
 FOAF = "http://xmlns.com/foaf/0.1/"
 BF = "https://ontology.brainframe.com/2016/04/brainframe#"

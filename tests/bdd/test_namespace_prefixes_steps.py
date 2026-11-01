@@ -24,7 +24,8 @@ from fingerprint.entrypoints.cli import main as cli
 from fingerprint.service_layer import handlers
 from fingerprint.service_layer.generators.plantuml import PlantumlGenerator
 from fingerprint.service_layer.prefixes import resolve_namespaces
-from tests.fakes import FakeSparql, files, klass, profile_run, prop, resources
+from tests.builders import klass, profile_run, prop, resources
+from tests.fakes import FakeSparql, files
 
 scenarios("namespace_prefixes.feature")
 

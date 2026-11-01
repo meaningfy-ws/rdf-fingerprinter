@@ -5,7 +5,8 @@ from bs4 import BeautifulSoup
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.service_layer.representations import make_generator
-from tests.fakes import EX, files, klass, literals, profile_run, prop
+from tests.builders import klass, literals, profile_run, prop
+from tests.fakes import EX, files
 
 
 def document(run):

@@ -5,6 +5,12 @@ from pathlib import Path
 
 import pytest
 
+from fingerprint.adapters.profile_file import load_profile
+from fingerprint.domain.analytics import analyse
+from fingerprint.service_layer.generators import GENERATORS
+from tests.refresh_golden import render
+from tests.sample_data import SAMPLE_PROFILE
+
 E2E = Path(__file__).parent / "e2e"
 
 
@@ -23,6 +29,23 @@ def _no_network(request, monkeypatch):
         raise RuntimeError("network access is not allowed outside tests/e2e/")
 
     monkeypatch.setattr(socket.socket, "connect", refuse)
+
+
+@pytest.fixture(scope="session")
+def sample_run():
+    """The stored sample profile (a read-only model object; derive variants with `model_copy`)."""
+    return load_profile(SAMPLE_PROFILE)
+
+
+@pytest.fixture(scope="session")
+def sample_analytics(sample_run):
+    return analyse(sample_run)
+
+
+@pytest.fixture(scope="session")
+def sample_outputs(sample_run):
+    """Every generator's files for the sample profile: generator name → {file name → text}."""
+    return {name: render(sample_run, name) for name in sorted(GENERATORS)}
 
 
 def pytest_collection_modifyitems(items):

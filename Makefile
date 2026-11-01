@@ -1,7 +1,7 @@
 SHELL = /bin/bash -o pipefail
 
 .PHONY: help install install-poetry lock build check-wheel lint format lint-fix typecheck check-architecture \
-	check-spec check-models generate-models test test-e2e check-quality check-all start-oxigraph stop-oxigraph oxigraph-load-test-data \
+	check-spec check-models generate-models test test-e2e refresh-sample-profile refresh-golden check-quality check-all start-oxigraph stop-oxigraph oxigraph-load-test-data \
 	install-antora build-docs clean-docs serve-docs preview-docs
 
 include docker/.env
@@ -86,6 +86,14 @@ test: ## Unit, bdd and guard tests with coverage (no SPARQL store needed)
 test-e2e: ## End-to-end tests against the loaded test store (run oxigraph-load-test-data first); local only
 	@ echo -e "$(BUILD_PRINT)Running the e2e tests against $${RDF_FINGERPRINTER_TEST_ENDPOINT:-$(OXIGRAPH)/query}$(END_BUILD_PRINT)"
 	@ RDF_FINGERPRINTER_PREFIX_LOOKUP=false poetry run pytest $(TEST_PATH)/e2e
+
+refresh-sample-profile: ## Regenerate tests/test_data/profiles/sample-profile.json from the store (run oxigraph-load-test-data first)
+	@ echo -e "$(BUILD_PRINT)Refreshing the sample profile from $${RDF_FINGERPRINTER_TEST_ENDPOINT:-$(OXIGRAPH)/query}$(END_BUILD_PRINT)"
+	@ RDF_FINGERPRINTER_PREFIX_LOOKUP=false poetry run python -m tests.refresh_sample_data
+
+refresh-golden: ## Regenerate the golden outputs in tests/test_data/golden from the sample profile; writes only changed files
+	@ echo -e "$(BUILD_PRINT)Refreshing the golden outputs$(END_BUILD_PRINT)"
+	@ RDF_FINGERPRINTER_PREFIX_LOOKUP=false poetry run python -m tests.refresh_golden
 
 #-----------------------------------------------------------------------------
 # Profile model — LinkML sources in model/, generated read-only Pydantic (P-10)

@@ -22,7 +22,8 @@ from fingerprint.entrypoints.cli import generate
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.generators.generator import META_NAMESPACES
 from fingerprint.service_layer.representations import generate_from_profile_file, make_generator, with_threshold
-from tests.fakes import EX, XSD, files, klass, literals, profile_run, prop, resources
+from tests.builders import XSD, klass, literals, profile_run, prop, resources
+from tests.fakes import EX, files
 
 scenarios("profile_representations.feature")
 
