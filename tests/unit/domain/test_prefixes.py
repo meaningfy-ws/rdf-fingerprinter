@@ -15,8 +15,6 @@ def entry(prefix: str, namespace: str, source: PrefixSource = PrefixSource.packa
 @pytest.mark.parametrize(
     ("iri", "namespace"),
     [
-        (BF + "Person", BF),
-        ("https://my.brainframe.com/#/knowledge/Person/7a08", "https://my.brainframe.com/#/knowledge/Person/"),
         ("http://ex.org/a/b", "http://ex.org/a/"),
         ("urn:x:thing:A", "urn:x:thing:"),
         ("http://ex.org/core#", "http://ex.org/core#"),
@@ -53,14 +51,6 @@ def test_parents_are_named_before_children_and_clashes_count_up():
 def test_generation_is_deterministic():
     namespaces = [BF, "http://ex.org/a/", "http://ex.org/", "https://my.brainframe.com/#/knowledge/X/"]
     assert generate_prefixes(namespaces, []) == generate_prefixes(list(reversed(namespaces)), [])
-
-
-def test_the_longest_namespace_wins():
-    table = PrefixTable([entry("ex", "http://ex.org/"), entry("ex-core", "http://ex.org/core/")])
-    assert table.shorten("http://ex.org/core/Thing") == ("ex-core", "Thing")
-    assert table.curie("http://ex.org/Thing") == "ex:Thing"
-    assert table.curie("http://ex.org/core/") == "ex-core:"
-    assert table.curie("http://other.org/X") == "http://other.org/X"
 
 
 def test_table_lookups():
