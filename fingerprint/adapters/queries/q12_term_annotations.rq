@@ -1,4 +1,4 @@
-# Q12 term annotations (llm-schema-tools DEC-20, DEC-21)
+# Q12 term annotations (llm-schema-tools DEC-20, DEC-21; llm-schema-split DEC-5)
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>
@@ -6,11 +6,16 @@ PREFIX dcterms: <http://purl.org/dc/terms/>
 SELECT DISTINCT ?t ?p ?v {
   { VALUES ?t { $terms }
     VALUES ?p { skos:prefLabel rdfs:label dcterms:title skos:altLabel
-                skos:definition rdfs:comment dcterms:description skos:scopeNote }
+                skos:definition rdfs:comment dcterms:description
+                skos:scopeNote skos:note skos:example skos:editorialNote skos:historyNote skos:changeNote }
     { ?t ?p ?v } UNION { GRAPH ?g { ?t ?p ?v } } }
   UNION
   { VALUES ?t { $terms }
     { ?t skosxl:prefLabel/skosxl:literalForm ?v } UNION { GRAPH ?g { ?t skosxl:prefLabel/skosxl:literalForm ?v } }
     BIND(skosxl:prefLabel AS ?p) }
+  UNION
+  { VALUES ?t { $terms }
+    { ?t skosxl:altLabel/skosxl:literalForm ?v } UNION { GRAPH ?g { ?t skosxl:altLabel/skosxl:literalForm ?v } }
+    BIND(skosxl:altLabel AS ?p) }
   FILTER(isLiteral(?v))
 }

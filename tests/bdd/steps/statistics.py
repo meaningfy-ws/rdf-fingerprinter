@@ -828,13 +828,36 @@ def texts(values):
     return ", ".join(f'"{v.text}"' + (f"@{v.language}" if v.language else "") for v in values)
 
 
-def annotation(run, term, graph_iri=None):
-    return next(a for a in graph(run, graph_iri).term_annotations if a.term == expand(term))
+def annotation(run, term, graph_iri=None, required=True):
+    found = next((a for a in graph(run, graph_iri).term_annotations or [] if a.term == expand(term)), None)
+    assert found or not required, f"no annotation for {term}"
+    return found
 
 
-@then(parsers.parse("the term annotations give \"{term}\" the labels '{labels}'"))
+@then(parsers.re(r"the term annotations give \"(?P<term>[^\"]+)\" the labels '(?P<labels>[^']*)'$"))
 def has_labels(ctx, term, labels):
     assert texts(annotation(ctx["run"], term).labels) == labels
+
+
+@then(
+    parsers.re(
+        r"the term annotations give \"(?P<term>[^\"]+)\" the labels '(?P<labels>[^']*)' and the alt labels '(?P<alt>[^']*)'$"
+    )
+)
+def has_labels_and_alt_labels(ctx, term, labels, alt):
+    found = annotation(ctx["run"], term, required=False)
+    assert texts(found.labels if found else []) == ("" if labels == "none" else labels)
+    assert texts(found.alt_labels if found else []) == ("" if alt == "none" else alt)
+
+
+@then(parsers.parse("the term annotations give \"{term}\" the alt labels '{alt_labels}'"))
+def has_alt_labels(ctx, term, alt_labels):
+    assert texts(annotation(ctx["run"], term).alt_labels) == alt_labels
+
+
+@then(parsers.parse("the term annotations give \"{term}\" the notes '{notes}'"))
+def has_notes(ctx, term, notes):
+    assert texts(annotation(ctx["run"], term).notes) == notes
 
 
 @then(parsers.parse("the term annotations give \"{term}\" the descriptions '{descriptions}'"))

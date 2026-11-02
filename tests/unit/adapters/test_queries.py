@@ -11,6 +11,16 @@ from fingerprint.adapters.queries import (
     terms_values,
     type_lookup,
 )
+from fingerprint.domain.vocabulary import (
+    ALT_LABEL_PREDICATES,
+    DCTERMS,
+    NOTE_PREDICATES,
+    RDFS,
+    SKOS,
+    SKOSXL,
+    TERM_DESCRIPTION_PREDICATES,
+    TERM_LABEL_PREDICATES,
+)
 
 G = "http://example.org/g"
 C = "http://example.org/Person"
@@ -78,3 +88,19 @@ def test_term_annotation_query_lists_its_terms_and_an_unwritable_term_is_refused
     assert terms_values([]) == "" and "VALUES ?t { }" in compact(render("Q12", G))
     with pytest.raises(ValueError):
         terms_values(["http://e/a b"])
+
+
+def test_term_annotation_query_asks_for_every_predicate_of_the_vocabulary():
+    text = compact(render("Q12", G))
+    prefixes = {SKOS: "skos:", SKOSXL: "skosxl:", RDFS: "rdfs:", DCTERMS: "dcterms:"}
+
+    def curie(iri):
+        namespace = next(ns for ns in prefixes if iri.startswith(ns))
+        return prefixes[namespace] + iri.removeprefix(namespace)
+
+    everything = (*TERM_LABEL_PREDICATES, *ALT_LABEL_PREDICATES, *TERM_DESCRIPTION_PREDICATES, *NOTE_PREDICATES)
+    for predicate in (p for p in everything if not p.startswith(SKOSXL)):
+        assert curie(predicate) in text, predicate
+    for predicate in (p for p in everything if p.startswith(SKOSXL)):
+        assert f"{curie(predicate)}/skosxl:literalForm" in text, predicate
+        assert f"BIND({curie(predicate)} AS ?p)" in text, predicate

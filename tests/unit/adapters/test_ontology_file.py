@@ -17,12 +17,15 @@ def value(term, predicate, text, language=None):
     return AnnotationValue(term=term, predicate=predicate, text=text, language=language)
 
 
-def test_the_label_fixture_gives_the_values_of_its_nine_predicates_and_the_skosxl_path():
+def test_the_label_fixture_gives_the_values_of_its_predicates_and_the_skosxl_path():
     values = load_ontology(f"{ONTOLOGY}.ttl")
     assert value(SKOS + "Concept", SKOS + "prefLabel", "Concept", "en") in values
     assert value(SKOS + "Concept", SKOS + "definition", "An idea or notion; a unit of thought.", "en") in values
     assert value(EUVOC + "Treaty", RDFS + "label", "Vertrag", "de") in values
     assert value(SKOSXL + "altLabel", SKOS + "altLabel", "alternative label", "en") in values
+    assert value(SKOS + "Concept", SKOS + "altLabel", "Begriff", "de") in values
+    assert value(SKOS + "Concept", RDFS + "comment", "Also a SKOS class.", "en") in values
+    assert value(SKOS + "Concept", SKOS + "scopeNote", "Use for concepts of a scheme.", "en") in values
     assert value("http://example.org/Widget", SKOSXL + "prefLabel", "Widget", "en") in values
     assert max(len(v.text) for v in values if v.term == DCTERMS + "type") > 200
 
@@ -67,3 +70,18 @@ def test_triples_in_the_named_graphs_of_a_trig_file_count(tmp_path):
     path = tmp_path / "o.trig"
     path.write_text(f'<http://e/g> {{ <http://e/a> <{RDFS}label> "Person"@en . }}')
     assert load_ontology(path) == [value("http://e/a", RDFS + "label", "Person", "en")]
+
+
+@pytest.mark.parametrize("name", ["note", "example", "editorialNote", "historyNote", "changeNote", "scopeNote"])
+def test_every_note_predicate_is_read(tmp_path, name):
+    path = tmp_path / "o.ttl"
+    path.write_text(f'<http://e/a> <{SKOS}{name}> "N"@en .')
+    assert load_ontology(path) == [value("http://e/a", SKOS + name, "N", "en")]
+
+
+def test_a_skosxl_alt_label_counts_through_its_literal_form_only(tmp_path):
+    path = tmp_path / "o.ttl"
+    path.write_text(
+        f'<http://e/a> <{SKOSXL}altLabel> [ <{SKOSXL}literalForm> "Body"@en ] .<http://e/b> <{SKOSXL}altLabel> "Direct" .'
+    )
+    assert load_ontology(path) == [value("http://e/a", SKOSXL + "altLabel", "Body", "en")]

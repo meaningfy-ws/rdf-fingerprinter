@@ -15,7 +15,8 @@ RDF_TYPE = RDF + "type"
 XSD_STRING = XSD + "string"
 BLANK_NODE_PREFIX = "_:"  # how the profile writes a blank node: `_:<id>`
 
-# The predicates of a term's label and description, in priority order (llm-schema-tools DEC-17, DEC-20).
+# The predicates of a term's annotations (llm-schema-split DEC-5): labels and descriptions in priority order.
 TERM_LABEL_PREDICATES = (SKOS + "prefLabel", SKOSXL + "prefLabel", RDFS + "label", DCTERMS + "title")
-ALT_LABEL = SKOS + "altLabel"  # a label only when the term has no other
-TERM_DESCRIPTION_PREDICATES = (SKOS + "definition", RDFS + "comment", DCTERMS + "description", SKOS + "scopeNote")
+ALT_LABEL_PREDICATES = (SKOS + "altLabel", SKOSXL + "altLabel")
+TERM_DESCRIPTION_PREDICATES = (SKOS + "definition", RDFS + "comment", DCTERMS + "description")
+NOTE_PREDICATES = tuple(SKOS + name for name in ("scopeNote", "note", "example", "editorialNote", "historyNote", "changeNote"))

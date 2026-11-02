@@ -35,7 +35,7 @@ definitions and code exist. The red count `pytest tests/bdd` prints after 1.1 is
   - Layer: domain (model). Depends on: —.
   - Tests: `make check-models`; a unit test that `sample-profile.json` (no alt labels or notes)
     loads (DEC-9).
-- [ ] 1.3 Annotations (design §A): `vocabulary.py` predicate tuples; `select_annotations`,
+- [x] 1.3 Annotations (design §A): `vocabulary.py` predicate tuples; `select_annotations`,
   `merge_annotations`; Q12 predicates and the `skosxl:altLabel` branch; `load_ontology` reads alt
   labels and notes; the label fixture grows (§E); step definitions of the s-c scenarios
   - Layer: domain + adapters. Depends on: 1.2.
