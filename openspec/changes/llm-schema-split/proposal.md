@@ -38,7 +38,7 @@ computed twice, and every file names terms by the same prefixed names, so rows j
 | `patterns-<slug>.md` | the legend, the hidden/excluded notes, and the class blocks in the 3.2 arrow notation, one `##` heading per block |
 | `patterns-<slug>.csv` | one row per edge, nested blank-node edges included, with typed statistic columns |
 | `glossary-<slug>.md` | the 3.2 glossary lines (one language per term), plus the alt labels |
-| `glossary-<slug>.csv` | one row per term and language: term, kind, language, pref label, alt labels, definition, notes |
+| `glossary-<slug>.csv` | one row per term and language: term, IRI, kind, language, pref label, alt labels, definition, notes |
 
 The term-annotation data grows to match the glossary CSV: collection (Q12) and the `--ontology`
 reader also read alt labels and notes, and the profile stores them. The ShExC output keeps its one
@@ -60,7 +60,8 @@ file.
   `.md`, so a filter needs no token parsing. The exact columns are fixed in the PLAN. Rejected: one
   text column of statistic tokens.
 - **DEC-5** (R1-5, R2-1, R2-2): **The glossary CSV has one row per term and language**, with
-  columns `term, kind, language, pref_label, alt_labels, definition, notes`.
+  columns `term, iri, kind, language, pref_label, alt_labels, definition, notes`. A term with
+  notes only has rows here but no line in the glossary `.md`.
   - `pref_label`: the first of `skos:prefLabel`, `skosxl:prefLabel`/`skosxl:literalForm`,
     `rdfs:label`, `dcterms:title`; empty when none. `skos:altLabel` is no longer promoted to it
     (this revises llm-schema-tools DEC-20).
