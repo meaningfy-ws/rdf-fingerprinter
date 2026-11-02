@@ -13,7 +13,7 @@ profile alone, so the endpoint is queried once, whatever is generated afterwards
 | Report page | `main.html` | the profile as one static page with contents, search and namespace switches
 | SHACL shapes | `shapes-<graph>.ttl`, one per graph with a shown class | a node shape per class with a property shape per property
 | PlantUML diagrams | `diagram-<graph>.puml` (overview) and `diagram-<graph>--<module>.puml` | namespaces and their links; per module the classes, attributes, associations, generalisations — source only
-| Pattern schema | `pattern-<graph>.txt` | a compact, labelled schema for a language model (xref:llm-schema.adoc[Schemas for LLMs])
+| Pattern schema | `prefixes-<graph>.md`, `patterns-<graph>.md`, `patterns-<graph>.csv`, `glossary-<graph>.md`, `glossary-<graph>.csv` | a compact, labelled schema for a language model, in five files (xref:llm-schema.adoc[Schemas for LLMs])
 | Enriched ShExC | `shex-<graph>.shex` | the same schema as ShEx shapes with statistics in comments (xref:llm-schema.adoc[Schemas for LLMs])
 |===
 

@@ -1,22 +1,31 @@
 = Schemas for LLMs
-:description: The pattern schema and the enriched ShExC: compact, labelled schemas of a fingerprinted graph for a language model that writes SPARQL.
+:description: The pattern schema (five files per graph) and the enriched ShExC: compact, labelled schemas of a fingerprinted graph for a language model that writes SPARQL.
 
 A language model writes better SPARQL when it knows the shape of the data: which classes exist, which
-properties link them, and what the values look like. The SHACL shapes say this, but at about nine
-times the size. rdf-fingerprinter renders the same saved profile in two compact forms for a model's
-context window:
+properties link them, and what the values look like. The SHACL shapes say this, but at several times
+the size. rdf-fingerprinter renders the same saved profile in compact forms for a model's context
+window. For each graph with a class it writes six files: five for the pattern schema and one ShExC.
 
-[cols="1,2,3"]
+[cols="2,1,3"]
 |===
-| Format | Files | Content
+| File | Form | Content and use
 
-| Pattern schema (primary) | `pattern-<graph>.txt`, one per graph with a block | triple-pattern lines `(:Class)-property-> (:Target)` with statistics, nested blank nodes and a glossary
-| Enriched ShExC | `shex-<graph>.shex`, one per graph with a block | the same content as ShEx shapes, the statistics in comments; every file parses with PyShExC
+| `prefixes-<graph>.md` | Markdown table | each prefix, its namespace and how much of the schema uses it; read it to expand a prefixed name
+| `patterns-<graph>.md` | Markdown | the triple-pattern lines `(:Class)-property-> (:Target)` with statistics, one fenced block per class; the file to give a model that writes SPARQL
+| `patterns-<graph>.csv` | CSV | the same edges, one row per edge and one column per statistic; for a script, a filter or a spreadsheet
+| `glossary-<graph>.md` | Markdown list | the labels and short descriptions of the terms, one line each; for a model that maps the words of a question to terms
+| `glossary-<graph>.csv` | CSV | the full labels, alt labels, definitions and notes, one row per term and language
+| `shex-<graph>.shex` | ShExC | the same content as ShEx shapes, the statistics in comments; every file parses with PyShExC
 |===
 
-Both are rendered from one <<pattern-view,pattern view>> of the profile, so they never disagree. Like
-every xref:representations.adoc[representation], they are generated from `profile.json` alone and
-send no query.
+Choose the part you give an agent. A model that writes SPARQL needs `patterns-<graph>.md` and
+`prefixes-<graph>.md`. Add `glossary-<graph>.md` when users ask in words that differ from the term
+names. A script that filters the schema, or a model with a tool to query it, reads the CSV files.
+Nothing needs all six.
+
+All are rendered from one <<pattern-view,pattern view>> of the profile, so they never disagree. Like
+every xref:representations.adoc[representation], they are generated from `profile.json` alone and send
+no query. A graph with no class gets no file.
 
 == Generate
 
@@ -33,7 +42,7 @@ The two `fingerprint-gen-*` commands take the options every generator takes
 
 [cols="1,3"]
 |===
-| `--ontology FILE` | an RDF file (Turtle, RDF/XML, TriG, N-Quads, … by its extension) whose labels and descriptions win over the profile's (<<labels,Labels and descriptions>>)
+| `--ontology FILE` | an RDF file (Turtle, RDF/XML, TriG, N-Quads, … by its extension) whose labels, alt labels, descriptions and notes win over the profile's (<<labels,Labels and descriptions>>)
 | `--min-instances N` | hide classes with fewer than N instances; N ≥ 1 (<<size-filters,Size filters>>)
 | `--max-classes K` | show only the K largest classes; K ≥ 1
 |===
@@ -44,41 +53,60 @@ usage error (exit 2), and nothing is written.
 
 == Sizes
 
-Measured on the test profile (`tests/test_data/golden/`, Unicode code points). "Body" leaves out the
-`PREFIX` lines and the legend line.
+Measured on the test profile (`tests/test_data/golden/`; `wc -m`, Unicode code points). The test
+profile has no labels, so its glossaries are empty. With the label fixture
+`tests/test_data/ontology/labels.ttl`, the `continents` glossary is 563 characters (Markdown) and 927
+(CSV).
 
-[cols="2,1,1"]
+[cols="3,1,1"]
 |===
-| File | Full | Body
+| File | `continents` | `treaties`
 
-| `pattern-continents-214e8f67.txt` | 2,287 | 1,234
-| `shex-continents-214e8f67.shex` | 2,212 | 1,455
-| `shapes-continents-214e8f67.ttl` (SHACL) | 10,950 | —
-| `pattern-treaties-3b4301a8.txt` | 3,931 | 2,782
-| `shex-treaties-3b4301a8.shex` | 4,113 | 3,260
-| `shapes-treaties-3b4301a8.ttl` (SHACL) | 23,647 | —
+| `prefixes-<graph>.md` | 768 | 907
+| `patterns-<graph>.md` | 2,081 | 3,620
+| `patterns-<graph>.csv` | 5,872 | 10,593
+| `glossary-<graph>.md` (empty) | 128 | 126
+| `glossary-<graph>.csv` (empty) | 62 | 62
+| `shex-<graph>.shex` | 2,212 | 4,113
+| `shapes-<graph>.ttl` (SHACL, for comparison) | 10,950 | 23,647
 |===
 
-The pattern body of `continents` is about nine times smaller than its SHACL, the whole file about
-five times. The pattern legend is 596 code points, the ShExC legend 300.
+The patterns Markdown is about five times smaller than the SHACL shapes of the same graph; with the
+prefix file, about four times. The CSV is longer because it repeats the owner, the block and the
+target kind on every row. It is for scripts, not for a context window.
 
 == The pattern schema
 
-The whole file for the graph `continents` of the test data
-(`tests/test_data/golden/pattern-continents-214e8f67.txt`):
+=== The prefix file
+
+`prefixes-<graph>.md` has one row per prefix of the names the patterns write, sorted by prefix. The
+counts cover the patterns only: `classes` the distinct classes of the blocks and expanded nested
+groups, `properties` the distinct properties of the edges, `instances` the instances of those classes,
+`triples` the triples of those edges. A prefix used only for a datatype has four zeros. Three of the
+nine rows of `prefixes-continents-214e8f67.md`:
+
+[source,markdown]
+----
+# Prefixes of http://publications.europa.eu/resources/authority/continents
+
+| prefix | namespace | classes | properties | instances | triples |
+|---|---|---:|---:|---:|---:|
+| dcterms | <http://purl.org/dc/terms/> | 0 | 3 | 0 | 310 |
+| euvoc | <http://publications.europa.eu/ontology/euvoc#> | 2 | 3 | 12 | 322 |
+| xsd | <http://www.w3.org/2001/XMLSchema#> | 0 | 0 | 0 | 0 |
+----
+
+=== The patterns Markdown
+
+`patterns-<graph>.md` starts with a title, a line naming the two sibling files, the legend, and the
+notes `Hidden: <n> classes.` and `Excluded namespaces: <note>.` when filters left something out
+(<<size-filters,Size filters>>, <<excluding-namespaces,Excluding a namespace>>). Then comes one
+`##` heading and one fenced `text` block per class group, by instances, largest first, then by name.
+There are no prefix declarations and no glossary: they are in the sibling files. The first block of
+`tests/test_data/golden/patterns-continents-214e8f67.md`:
 
 [source,text]
 ----
-PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX euvoc: <http://publications.europa.eu/ontology/euvoc#>
-PREFIX lvont: <http://lexvo.org/ontology#>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-# (:A&B) n: classes with the same n instances · ~m first_n: statistics over the first m read · co C k: k also typed C · via (:S)-p: incoming links · -p-> (:T|U) object classes · IRI, BNODE untyped · . not collected · deeper indent: a blank node's own edges, statistics over all its instances, up to 3 hops · ^ expanded under another edge · … deeper than 3 hops · k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured
 (:euvoc:Continent&skos:Concept) 6
   -dcterms:created-> xsd:date =2014-10-10
   -euvoc:startDate-> xsd:date =1952-07-24
@@ -98,15 +126,6 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     -euvoc:status-> IRI d1
     -lvont:script-> IRI 12/145 d2
     -skosxl:literalForm-> rdf:langString @24
-(:owl:Ontology&skos:ConceptScheme) 1 via (:euvoc:Continent&skos:Concept)-skos:inScheme, (:euvoc:Continent&skos:Concept)-skos:topConceptOf
-  -dcterms:created-> xsd:date =2014-10-10
-  -dcterms:identifier-> xsd:string =http://publications.europa.eu/resource/authority/continent
-  -euvoc:startDate-> xsd:date =2014-10-10
-  -euvoc:status-> IRI
-  -owl:imports-> IRI
-  -rdfs:comment-> rdfs:Literal =Continent
-  -skosxl:prefLabel-> (:skosxl:Label) bn ^
-# glossary: none
 ----
 
 Read it as:
@@ -117,16 +136,10 @@ Read it as:
 * `-skosxl:prefLabel-> (:skosxl:Label) ×24 bn` — every continent has 24 labels, all blank nodes. The
   indented lines below it are the label nodes' own edges (a xref:glossary.adoc#nested-group[nested group]), with
   statistics over all 145 `skosxl:Label` instances: `12/145` of them have `lvont:script`.
-* `bn ^` on the scheme's `skosxl:prefLabel` — the same nested group, already expanded under another
-  edge.
 * `owl:Ontology` is a meta class, hidden by default, yet it stays in the group name, because its
   group has the shown member `skos:ConceptScheme`.
 
 === Blocks and headers
-
-The file holds, in order: the `PREFIX` lines it uses, sorted; the legend line; `# hidden: <n> classes`
-when filters hid any class; `# excluded namespaces: …` when `--exclude-namespace` left out a term
-(<<excluding-namespaces,Excluding a namespace>>); the blocks, by instances (largest first), then by name; the glossary.
 
 A block header is `(:<group>) <instances>`, then:
 
@@ -185,32 +198,114 @@ node → target.
 
 The statistics of a nested group are over all its instances, not per path.
 
-[#grammar]
-=== Grammar
+[#csv]
+== The CSV files
 
-[source,ebnf]
+Both follow RFC 4180: a header row, UTF-8, `\n` line ends. An absent value is an empty cell; a flag is
+`true` or `false`; a number is its digits. Several values in one cell are joined by ` | ` (space, bar,
+space), the same separator everywhere. A cell with `,`, `"`, a line break or a leading or trailing
+space is quoted with `"`, and a `"` inside it is doubled.
+
+=== patterns-<graph>.csv
+
+Per block, in the order of the Markdown: one block row, then one row per edge line, in line order.
+
+[cols="1,3"]
+|===
+| Column | Content
+
+| `graph` | the graph IRI; empty for the default graph
+| `block` | the group name of the block the row sits in
+| `owner` | the group whose profile gives the edge: the nested group for a nested edge
+| `path` | the properties of the edges above it, joined by `/`; empty at depth 1
+| `depth` | 0 for the block row, 1 to 3 for an edge
+| `property` | the prefixed name of the property
+| `targets` | the target alternatives, joined by ` \| `: a class group without `(:` and `)`, a datatype, `IRI` or `BNODE`
+| `target_kinds` | the kind of each target: `group`, `datatype`, `iri`, `blank_node` or `unknown`
+| `ending` | empty, `^` (expanded under another edge) or `…` (deeper than 3 hops)
+| `instances` | the owner's observed instances
+| `subjects` | the instances that have the property
+| `triples` | its triples
+| `per_min`, `per_max` | the fewest and most values per instance that has it
+| `blank_nodes` | whether some objects are blank nodes
+| `languages` | the language tags, sorted
+| `min_value`, `max_value` | the lowest and highest value, as in `lo..hi` or `=v`; not cut and not quoted
+| `single_value` | the value of `=v`, or the name of the IRI of `=<name>`
+| `distinct` | the distinct objects
+| `presence_only` | whether the completeness check found it and nothing else
+| `first_n` | on a block row: the instances read in first-N mode
+| `via` | on a block row: each incoming link as `<source>-<property>`
+|===
+
+A value the profile does not hold is an empty cell. The block row and one edge row of `continents`:
+
+[source,text]
 ----
-output    ::= prefix* legend [hidden] [excluded] block* glossary
-prefix    ::= "PREFIX " PNAME_NS " <" IRI ">" NL
-legend    ::= "# " LEGEND NL
-hidden    ::= "# hidden: " INT " classes" NL
-excluded  ::= "# excluded namespaces: " count ("; " count)* NL
-count     ::= PN_PREFIX " (classes " INT ", properties " INT ", values " INT ")"
-block     ::= header NL edge*
-header    ::= "(:" group ") " INT [" ~" INT " first_n"] [" co " pair (", " pair)*] [" via " link (", " link)*]
-link      ::= "(:" group ")-" name
-edge      ::= INDENT "-" name "-> " target (" " stat)* [" ^" | " …"] NL edge*   (* INDENT = 2 × level, level 1..3 *)
-target    ::= alt ("|" alt)* | "."
-alt       ::= "(:" gref ("|" gref)* ")" | name | "IRI" | "BNODE"   (* the class part comes first, once *)
-gref      ::= group [" @<" IRI ">"]                   (* typed in another graph *)
-group     ::= name ("&" name)*                        (* & binds tighter than | *)
-pair      ::= name " " INT
-stat      ::= INT "/" INT | "×" INT ["-" INT] | "bn" | "@" (INT | LANG) | "=" VALUE | "=" name | VALUE ".." VALUE | "d" INT | "presence"
-glossary  ::= "# glossary: none" NL | "# glossary" NL entry*
-entry     ::= name (" " STRING ["@" LANG] [": " TEXT] | ": " TEXT) NL
-name      ::= PNAME | "<" IRI ">"
-VALUE     ::= a lexical form, non-empty, ≤64 chars, without white space, '"' or ".." | a JSON string (cut at 64 + "…")
+graph,block,owner,path,depth,property,targets,target_kinds,ending,instances,subjects,triples,per_min,per_max,blank_nodes,languages,min_value,max_value,single_value,distinct,presence_only,first_n,via
+http://publications.europa.eu/resources/authority/continents,euvoc:Continent&skos:Concept,euvoc:Continent&skos:Concept,,0,,,,,6,,,,,,,,,,,,,
+http://publications.europa.eu/resources/authority/continents,euvoc:Continent&skos:Concept,euvoc:Continent&skos:Concept,,1,euvoc:startDate,xsd:date,datatype,,6,6,6,1,1,false,,1952-07-24,1952-07-24,1952-07-24,1,false,,
 ----
+
+=== glossary-<graph>.csv
+
+One row per term and language, for each term the output uses that has a label, an alt label, a
+description or a note. Sorted by prefixed name, then the untagged language first, then by tag.
+
+[cols="1,3"]
+|===
+| Column | Content
+
+| `term`, `iri` | the prefixed name and the full IRI
+| `kind` | the <<kinds,kind codes>>, several joined by ` \| `
+| `language` | the language tag; empty for untagged
+| `pref_label` | the label in that language
+| `alt_labels` | all alt labels in that language, in full, joined by ` \| `
+| `definition` | the description in that language, in full
+| `notes` | all notes in that language, in full, joined by ` \| `
+|===
+
+From the label fixture; `skos:Concept` has a German and an English row:
+
+[source,text]
+----
+term,iri,kind,language,pref_label,alt_labels,definition,notes
+skos:Concept,http://www.w3.org/2004/02/skos/core#Concept,C,de,,Begriff,,
+skos:Concept,http://www.w3.org/2004/02/skos/core#Concept,C,en,Concept,Notion,An idea or notion; a unit of thought.,Also a SKOS class. | Use for concepts of a scheme.
+skosxl:prefLabel,http://www.w3.org/2008/05/skos-xl#prefLabel,oP,en,preferred label,,,
+----
+
+[#kinds]
+=== Kind codes
+
+[cols="1,3"]
+|===
+| Code | The term is
+
+| `C` | a class
+| `dP` | a property whose objects are literals
+| `oP` | a property whose objects are IRIs, classes or blank nodes
+| `P` | a property with no collected objects
+| `D` | a datatype
+|===
+
+A term with several codes lists them in the order `C`, `dP`, `oP`, `P`, `D`: joined by ` | ` in the CSV,
+by `/` in the Markdown.
+
+=== Filtering a CSV
+
+Any tool that reads CSV works. Two one-liners on the continents file:
+
+[source,bash]
+----
+# every row that mentions skosxl:Label (a row is one line)
+grep -F 'skosxl:Label' patterns-continents-214e8f67.csv
+
+# the blank-node edges of depth 1, most triples first (DuckDB)
+duckdb -c "SELECT block, property, triples FROM 'patterns-continents-214e8f67.csv'
+           WHERE depth = 1 AND blank_nodes ORDER BY triples DESC"
+----
+
+`grep` also matches the `block` and `owner` columns; use DuckDB or csvkit when a column matters.
 
 == The enriched ShExC
 
@@ -280,50 +375,58 @@ the ShExC and listed on a `# skipped:` line; the pattern schema keeps it as `<IR
 == Labels and descriptions
 
 A model maps a question's words to terms through their labels. Each class and property can carry
-labels and one description, from two sources:
+labels, alt labels, descriptions and notes, from two sources:
 
 . **The store.** At every depth from `classes` on, the collector sends one query per graph (Q12,
-  xref:statistics.adoc[Statistics]) for the labels and descriptions of the graph's classes and, from
-  depth `properties`, of its properties. It looks in the default graph and in every named graph, so an
+  xref:statistics.adoc[Statistics]) for the annotations of the graph's classes and, from depth
+  `properties`, of its properties. It looks in the default graph and in every named graph, so an
   ontology loaded in its own graph counts. The selected values are saved in `profile.json`
   (`term_annotations`).
 . **An ontology file**, `--ontology FILE`, read when generating.
 
-The predicates, in priority order:
+The predicates:
 
 [cols="1,3"]
 |===
-| Label | `skos:prefLabel`, `skosxl:prefLabel`/`skosxl:literalForm`, `rdfs:label`, `dcterms:title`; `skos:altLabel` only when none of these is there
-| Description | `skos:definition`, `rdfs:comment`, `dcterms:description`, `skos:scopeNote`
+| Label, in priority order | `skos:prefLabel`, `skosxl:prefLabel`/`skosxl:literalForm`, `rdfs:label`, `dcterms:title`
+| Alt label | `skos:altLabel`, `skosxl:altLabel`/`skosxl:literalForm`; all are kept, and none becomes a label
+| Description, in priority order | `skos:definition`, `rdfs:comment`, `dcterms:description`
+| Note | `skos:scopeNote`, `skos:note`, `skos:example`, `skos:editorialNote`, `skos:historyNote`, `skos:changeNote`, and every description that was not selected
 |===
 
-Only literals count. For each language (untagged counts as one), the value comes from the first
-predicate that has one in that language; among several, the smallest text wins.
+The definition says what the term means. A note says how to use it or what to watch for: a
+`skos:scopeNote` is a note, not a definition. Only literals count. For each language (untagged counts
+as one), the label and the description come from the first predicate that has one in that language;
+among several, the smallest text wins.
 
-Per term and per field (labels, description), the ontology file's values win when it has any, else
-the store's; the two are never mixed. A term labelled `"Persoon"@nl` with the description `"Iemand"@nl`
-in the store, and `"Person"@en` with no description in the ontology, shows as
-`ex:Person "Person"@en: Iemand`.
+Per term and per field (labels, alt labels, descriptions, notes), the ontology file's values win when
+it has any, else the store's; the two are never mixed. A term labelled `"Persoon"@nl` with the
+description `"Iemand"@nl` in the store, and `"Person"@en` with no description in the ontology, shows
+as `ex:Person C "Person"@en: Iemand`.
 
-The *glossary* at the end of each file lists, by name, every term the file uses that has a label or a
-description. It shows one label and one description: the untagged one, else `en`, else the smallest
-language tag. A description is put on one line and cut at 200 characters with `…`. With the test
-fixture `tests/test_data/ontology/labels.ttl`, the treaties file ends with:
+The glossary Markdown lists, by name, every term the patterns use that has a label, an alt label or a
+description. One line each: the name, the kind code, the label, the alt labels in the language of the
+label, the description. It shows one language: the untagged value, else `en`, else the smallest tag.
+A term with no label shows an alt label in its place. A description is put on one line and cut at 200
+characters with `…`. Notes are not in the Markdown; they are in the CSV, in full. With the test
+fixture, `glossary-treaties-3b4301a8.md` is:
 
-[source,text]
+[source,markdown]
 ----
-# glossary
-dcterms:created "Date Created"@en: Date of creation of the resource.
-dcterms:type: A long description, longer than two hundred characters, so that the glossary has to shorten it: it goes on about the nature or genre of the resource, recommends a controlled vocabulary, and repeats it…
-euvoc:Treaty "Vertrag"@de
-skos:Concept "Concept"@en: An idea or notion; a unit of thought.
-skosxl:Label "Label"@en: A special class of lexical entities.
-skosxl:altLabel "alternative label"@en
-skosxl:prefLabel "preferred label"@en
+# Glossary of http://publications.europa.eu/resources/authority/treaties
+
+- dcterms:created dP "Date Created"@en: Date of creation of the resource.
+- dcterms:type oP: A long description, longer than two hundred characters, so that the glossary has to shorten it: it goes on about the nature or genre of the resource, recommends a controlled vocabulary, and repeats it…
+- euvoc:Treaty C "Vertrag"@de
+- skos:Concept C "Concept"@en alt: "Notion": An idea or notion; a unit of thought.
+- skosxl:Label C "Label"@en: A special class of lexical entities.
+- skosxl:altLabel oP "alternative label"@en
+- skosxl:prefLabel oP "preferred label"@en
 ----
 
-Without labels, the glossary is `# glossary: none`. A profile saved before 3.2 has no
-`term_annotations` and renders that way.
+Without annotations it says `No term of this graph has a label or a description.` and the CSV holds
+only its header. A profile saved before 3.2 has no `term_annotations` and renders that way. The ShExC
+ends with the same lines, each after `# `.
 
 [#size-filters]
 == Size filters
@@ -335,20 +438,16 @@ They apply after the xref:representations.adoc#filters[namespace filters], to na
 * `--max-classes K` then keeps the K groups with the most instances (ties by name).
 
 A hidden group gets no block and leaves `via` lists, but is still named as an edge target, so no link
-is lost. The file says how many classes it hides. On the test profile, `--min-instances 2` hides the
-scheme (`owl:Ontology` and `skos:ConceptScheme`):
+is lost. The patterns Markdown says how many classes it hides. On the test profile, `--min-instances 2` hides
+the scheme (`owl:Ontology` and `skos:ConceptScheme`) of `treaties`, and `patterns-treaties-3b4301a8.md` holds:
 
 [source,text]
 ----
-# hidden: 2 classes
-(:euvoc:Continent&skos:Concept) 6
-  -dcterms:created-> xsd:date =2014-10-10
-  -euvoc:startDate-> xsd:date =1952-07-24
-  -euvoc:status-> IRI d1
+Hidden: 2 classes.
 ----
 
-and further down the block, `-skos:inScheme-> (:owl:Ontology&skos:ConceptScheme) d1` still names the
-hidden scheme. There is no `(:owl:Ontology&skos:ConceptScheme)` block.
+The edge `-skos:inScheme-> (:owl:Ontology&skos:ConceptScheme) d1` still names the hidden scheme. There
+is no `(:owl:Ontology&skos:ConceptScheme)` block, and the CSV has no row for it.
 
 Nested groups are never hidden by size; they show wherever a shown block reaches them.
 
@@ -356,14 +455,11 @@ Nested groups are never hidden by size; they show wherever a shown block reaches
 == Excluding a namespace
 
 A size filter hides classes; `--exclude-namespace` leaves out every term of a namespace: its
-classes, its edges and `via` entries, and its glossary lines
+classes, its edges and `via` entries, its glossary lines and its prefix row
 (xref:representations.adoc#filters[Namespace filters]). It is the tool for a namespace of
-generated terms that crowds the file.
-
-The brainframe workspace graph models each relation as an RDF singleton property
-`relationid:<uuid>` (`https://my.brainframe.com/#/knowledge/RelationId/`): 619 distinct properties,
-one class each, on 17 of its 51 classes. They fill more than half of the pattern file. Measured on
-its saved profile (Unicode code points):
+generated terms that crowds the file. The brainframe workspace graph, for example, models each relation
+as an RDF singleton property `relationid:<uuid>`: 619 distinct properties, which fill more than half of
+its pattern file.
 
 [source,bash]
 ----
@@ -371,23 +467,16 @@ fingerprint-gen-pattern profile.json -o llm/ --exclude-namespace relationid
 fingerprint-gen-shex    profile.json -o llm/ --exclude-namespace relationid
 ----
 
-[cols="2,1,1"]
-|===
-| Workspace file | Full | `--exclude-namespace relationid`
-
-| pattern schema (`pattern-workspace-34f17ca3.txt`) | 221,523 | 98,323
-| ShExC (`shex-workspace-34f17ca3.shex`) | 249,854 | 110,555
-|===
-
-Neither filtered file holds `relationid:`; each says what it left out, in one comment line near the top:
+The patterns Markdown says what it left out, in one line near the top:
 
 [source,text]
 ----
-# excluded namespaces: relationid (classes 0, properties 619, values 0)
+Excluded namespaces: relationid (classes 0, properties 619, values 0).
 ----
 
-Filters combine: repeat the option, name several namespaces at once by an IRI stem or a prefix
-glob, and bring one back with `--include-namespace` (it wins over an exclude):
+(The ShExC has `# excluded namespaces: …`.) Filters combine: repeat the option, name several
+namespaces at once by an IRI stem or a prefix glob, and bring one back with `--include-namespace`
+(it wins over an exclude):
 
 [source,bash]
 ----
@@ -401,34 +490,19 @@ fingerprint-gen-pattern profile.json -o llm/ --exclude-namespace 'https://my.bra
   --include-namespace document
 ----
 
-[cols="3,1,1"]
-|===
-| Filters | Pattern schema | ShExC
-
-| none | 221,523 | 249,854
-| `relationid` | 98,323 | 110,555
-| `relationid`, `foaf`, `prv`, `dcterms` | 79,825 | 89,828
-| the `https://my.brainframe.com/#/knowledge/` stem | 68,308 | 78,339
-| the stem, `--include-namespace document` | 68,487 | 78,526
-|===
-
-The note then lists each namespace in prefix order:
-
-[source,text]
-----
-# excluded namespaces: dcterms (classes 0, properties 11, values 0); foaf (classes 0, properties 1, values 0); prv (classes 0, properties 2, values 0); relationid (classes 0, properties 619, values 0)
-----
-
 The statement nodes of those relations are typed `brainframe:RelationId`, in the same namespace as
 the real classes, so a namespace filter cannot hide them.
 
 [#pattern-view]
 == The pattern view
 
-Both files are layouts of one pattern view per graph (`PatternGraph` in
+All the files are layouts of one pattern view per graph (`PatternGraph` in
 `fingerprint/domain/views.py`, built by `fingerprint/domain/patterns.py`; the ShExC view `ShexSchema`
 by `fingerprint/domain/shex.py`). A custom template package (`--template`,
-xref:representations.adoc#your-own-templates[Your own templates]) receives that view as `view`. The
+xref:representations.adoc#your-own-templates[Your own templates]) receives that view as `view`, once
+for each of the five pattern files of a graph: it is a `PatternFile` (the kind of file, plus the
+graph's view). A package written for the single `pattern-<graph>.txt` of 3.3 must now render the
+five. The
 view is built from the profile's analytics and term annotations only, and is deterministic: the same
 profile gives the same files.
 

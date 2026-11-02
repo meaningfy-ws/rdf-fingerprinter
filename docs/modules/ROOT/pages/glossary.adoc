@@ -120,9 +120,10 @@ of the generated shapes is "no `sh:Violation` on their own data", not "conforms"
 The terms of xref:llm-schema.adoc[Schemas for LLMs].
 
 [#pattern-schema]
-Pattern schema:: A compact text rendering of one graph's profile for a language model:
-`(:Class)-property-> (:Target)` lines with statistics, nested blank nodes and a glossary
-(`pattern-<graph>.txt`). Its sibling, the enriched ShExC, renders the same content as ShEx shapes.
+Pattern schema:: A compact rendering of one graph's profile for a language model, in five files:
+a prefix table, the `(:Class)-property-> (:Target)` lines with statistics and nested blank nodes (Markdown
+and CSV), and a glossary of labels, alt labels, definitions and notes (Markdown and CSV), with kind
+codes `C`, `dP`, `oP`, `P`, `D`. Its sibling, the enriched ShExC, renders the same content as ShEx shapes.
 
 [#pattern-view]
 Pattern view:: The one view of a graph that the pattern schema and the enriched ShExC both lay out:
@@ -140,9 +141,9 @@ distinct objects as it has instances. It has no block of its own; its edges are 
 edge that reaches it, up to three hops deep.
 
 [#term-annotation]
-Term annotation:: The labels and the description selected for one class or property, each with its
+Term annotation:: The labels, alt labels, description and notes selected for one class or property, each with its
 language, from the store (query Q12, saved in `profile.json`) or from an `--ontology` file. Shown
-in the glossary of the pattern schema and the ShExC.
+in the glossary files of the pattern schema and in the ShExC.
 
 == Components
 

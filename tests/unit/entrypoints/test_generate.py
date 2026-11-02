@@ -111,10 +111,18 @@ def test_a_template_error_exits_4_and_names_the_template(tmp_path):
 LABELS = Path(__file__).parents[2] / "test_data" / "ontology" / "labels.ttl"
 
 
-def test_the_pattern_command_writes_one_file_per_graph(tmp_path):
+def test_the_pattern_command_writes_five_files_per_graph(tmp_path):
     result = invoke(generate.gen_pattern, SAMPLE, "-o", tmp_path)
     assert result.exit_code == 0, result.output
-    assert (tmp_path / "pattern-continents-214e8f67.txt").is_file()
+    written = sorted(p.name for p in tmp_path.glob("*-continents-214e8f67.*"))
+    assert written == [
+        "glossary-continents-214e8f67.csv",
+        "glossary-continents-214e8f67.md",
+        "patterns-continents-214e8f67.csv",
+        "patterns-continents-214e8f67.md",
+        "prefixes-continents-214e8f67.md",
+    ]
+    assert not list(tmp_path.glob("*.txt"))
 
 
 @pytest.mark.parametrize("option", ["--min-instances", "--max-classes"])
@@ -126,10 +134,10 @@ def test_a_size_filter_below_one_exits_2(tmp_path, option):
 def test_the_ontology_option_is_passed_through(tmp_path):
     result = invoke(generate.gen_pattern, SAMPLE, "-o", tmp_path, "--ontology", LABELS)
     assert result.exit_code == 0, result.output
-    assert 'skos:Concept "Concept"@en' in (tmp_path / "pattern-continents-214e8f67.txt").read_text()
+    assert 'skos:Concept C "Concept"@en' in (tmp_path / "glossary-continents-214e8f67.md").read_text()
 
 
 def test_the_size_options_are_passed_through(tmp_path):
     invoke(generate.gen_pattern, SAMPLE, "-o", tmp_path, "--max-classes", "1")
-    blocks = [ln for ln in (tmp_path / "pattern-continents-214e8f67.txt").read_text().splitlines() if ln.startswith("(:")]
+    blocks = [ln for ln in (tmp_path / "patterns-continents-214e8f67.md").read_text().splitlines() if ln.startswith("## ")]
     assert len(blocks) == 1

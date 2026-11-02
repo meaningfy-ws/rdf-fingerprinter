@@ -1,0 +1,18 @@
+{#- patterns-<slug>.csv: `view.graph` is a PatternGraph; per block one row at depth 0, then one row per edge line in
+    line order. Every cell goes through csv_cell, which quotes it (RFC 4180). -#}
+{% macro row(cells) -%}
+{{ cells | map("csv_cell") | join(",") }}
+{% endmacro -%}
+{% macro edge_rows(graph, block, edges) -%}
+{% for e in edges -%}
+{{ row([graph.graph, block.name, e.owner, e.path | join("/"), e.depth, e.name, e.target_texts, e.targets | map(attribute="kind") | list,
+        e.ending | trim, e.observed, e.subjects, e.triples, e.per_min, e.per_max, e.blank_nodes, e.languages,
+        e.min_value, e.max_value, e.single_value, e.distinct, e.presence_only, "", ""]) -}}
+{{ edge_rows(graph, block, e.edges) -}}
+{% endfor -%}
+{%- endmacro -%}
+graph,block,owner,path,depth,property,targets,target_kinds,ending,instances,subjects,triples,per_min,per_max,blank_nodes,languages,min_value,max_value,single_value,distinct,presence_only,first_n,via
+{% for block in view.graph.blocks -%}
+{{ row([view.graph.graph, block.name, block.name, "", 0, "", "", "", "", block.instances, "", "", "", "", "", "", "", "", "", "", "", block.observed, block.via_texts]) -}}
+{{ edge_rows(view.graph, block, block.edges) -}}
+{% endfor -%}

@@ -1,4 +1,4 @@
 {
-  "template": "schema.txt",
+  "template": "files.j2",
   "conf": {}
 }

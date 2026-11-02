@@ -14,6 +14,7 @@ from pydantic import BaseModel
 
 from fingerprint.adapters.exceptions import GeneratedOutputError, TemplatePackageError
 from fingerprint.domain.iri import curie, to_iriref, turtle_number, turtle_string, turtle_term
+from fingerprint.domain.patterns import csv_cell
 from fingerprint.domain.prefixes import PrefixTable
 from fingerprint.domain.views import OutputCheck, RenderedDocument
 
@@ -26,7 +27,7 @@ CHECKS: dict[OutputCheck, Callable[[str], None]] = {OutputCheck.turtle: _parse_t
 
 
 def filters(prefixes: PrefixTable) -> dict[str, Callable[..., Any]]:  # dict-ok: eds4jinja2 filters
-    """The IRI and literal filters every template gets, bound to the profile's prefix table, so custom templates
+    """The IRI, literal and CSV-cell filters every template gets, bound to the profile's prefix table, so custom templates
     escape and shorten like the packaged ones."""
     return {  # dict-ok: eds4jinja2 filters
         "turtle_iri": to_iriref,
@@ -34,6 +35,7 @@ def filters(prefixes: PrefixTable) -> dict[str, Callable[..., Any]]:  # dict-ok:
         "turtle_string": turtle_string,
         "turtle_number": turtle_number,
         "curie": lambda iri: curie(iri, prefixes),
+        "csv_cell": csv_cell,
     }
 
 

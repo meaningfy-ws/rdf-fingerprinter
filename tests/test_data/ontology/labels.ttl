@@ -1,4 +1,4 @@
-# Fixture for the term labels (llm-schema-tools design, "Glossary with the label fixture").
+# Fixture for the term labels (llm-schema-tools design, "Glossary with the label fixture"; llm-schema-split design E).
 # The texts are test data, not the wording of the published vocabularies.
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
@@ -10,7 +10,10 @@
 dcterms:created skos:prefLabel "Date Created"@en ;
     rdfs:comment "Date of creation of the resource."@en .
 skos:Concept skos:prefLabel "Concept"@en ;
-    skos:definition "An idea or notion; a unit of thought."@en .
+    skos:altLabel "Notion"@en, "Begriff"@de ;
+    skos:definition "An idea or notion; a unit of thought."@en ;
+    rdfs:comment "Also a SKOS class."@en ;
+    skos:scopeNote "Use for concepts of a scheme."@en .
 skosxl:Label skos:prefLabel "Label"@en ;
     skos:definition "A special class of lexical entities."@en .
 skosxl:prefLabel skos:prefLabel "preferred label"@en .

@@ -14,7 +14,13 @@ from fingerprint.domain.profile import (
     ValueCount,
     ValuePartition,
 )
-from fingerprint.domain.vocabulary import ALT_LABEL, RDFS, TERM_DESCRIPTION_PREDICATES, TERM_LABEL_PREDICATES
+from fingerprint.domain.vocabulary import (
+    ALT_LABEL_PREDICATES,
+    NOTE_PREDICATES,
+    RDFS,
+    TERM_DESCRIPTION_PREDICATES,
+    TERM_LABEL_PREDICATES,
+)
 from tests import builders
 
 _LABEL = st.text("abcdefghijklmnopqrstuvwxyz0123456789", min_size=1, max_size=6)
@@ -86,7 +92,9 @@ def class_with(observed: int, prop: PropertyProfile) -> ClassProfile:
 
 
 _TERMS = st.sampled_from(["http://ex.org/A", "http://ex.org/B", "http://ex.org/p"])
-_ANNOTATION_PREDICATES = st.sampled_from([*TERM_LABEL_PREDICATES, ALT_LABEL, *TERM_DESCRIPTION_PREDICATES, RDFS + "seeAlso"])
+_ANNOTATION_PREDICATES = st.sampled_from(
+    [*TERM_LABEL_PREDICATES, *ALT_LABEL_PREDICATES, *TERM_DESCRIPTION_PREDICATES, *NOTE_PREDICATES, RDFS + "seeAlso"]
+)
 
 
 def annotation_values():

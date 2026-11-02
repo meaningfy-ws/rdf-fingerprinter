@@ -591,6 +591,13 @@ def empty_default(ctx):
     ctx["run"] = profile_run()
 
 
-@then("no shapes, diagram, pattern schema or ShExC file is written for it")
+@then("no shapes, diagram or ShExC file is written for it")
 def no_files_for_empty(ctx):
-    assert ctx["texts"] == {}
+    assert {"shacl", "puml", "pattern", "shex"} <= set(ctx["formats"])  # the generators ran
+    assert not any(name.startswith(("shapes-", "diagram-", "shex-")) for name in ctx["texts"])
+
+
+@then(parsers.re(r"none of (?P<names>.+) is written$"))
+def none_of_the_files(ctx, names):
+    wanted = re.findall(r'"([^"]+)"', names)
+    assert len(wanted) == 5 and not set(wanted) & set(ctx["texts"])

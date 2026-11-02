@@ -162,7 +162,7 @@ class _Shex:
     def schema(self) -> ShexSchema:
         shapes = [self._shape(b, blank=None) for b in self.blocks if self._writable(b)]
         shapes += [self._shape(b, blank=True) for b in self.nested if self._writable(b) and (b.reaching_edges or 0) > 1]
-        entries = [entry.line for entry in self.view.glossary or []]
+        entries = [entry.line for entry in self.view.glossary or [] if entry.line]
         return ShexSchema(
             graph_label=self.view.graph_label,
             slug=self.view.slug,

@@ -1,11 +1,17 @@
 """Steps of the pattern schema scenarios of profile_representations.feature (UC-B2.1) over hand-built and sample profiles."""
 
+import csv
+import io
 import re
 
 from click.testing import CliRunner
 from pytest_bdd import given, parsers, then, when
+from rdflib import Graph, URIRef
+from rdflib.namespace import RDFS
 
 from fingerprint.adapters.profile_file import save_profile
+from fingerprint.adapters.template_renderer import filters
+from fingerprint.domain.prefixes import PrefixTable
 from fingerprint.domain.profile import (
     Depth,
     LangText,
@@ -21,7 +27,7 @@ from tests.bdd.steps.representations import generated, only
 from tests.builders import klass, literals, profile_run, prop, resources
 from tests.fakes import EX
 from tests.refresh_golden import render
-from tests.sample_data import TEST_DATA
+from tests.sample_data import DCT, GLOSSARY_COLUMNS, PATTERNS_COLUMNS, TEST_DATA
 
 LABELS = TEST_DATA / "ontology" / "labels.ttl"
 TEXT = re.compile(r'"([^"]*)"(?:@([A-Za-z-]+))?')  # a label as written in a step: "text" or "text"@lang
@@ -37,8 +43,8 @@ def name_of(header: str) -> str:
 
 
 def pattern_text(ctx) -> str:
-    """The one pattern file of a hand-built profile."""
-    return only(ctx["texts"])
+    """The patterns Markdown of a hand-built profile's one graph."""
+    return only(patterns_markdown(ctx["texts"]))
 
 
 def block_lines(text: str, name: str) -> list[str]:
@@ -59,8 +65,24 @@ def edge_line(text: str, property_name: str) -> str:
     return next(line for line in text.splitlines() if line.lstrip().startswith(f"-{property_name}->"))
 
 
+FILE_KINDS = ("prefixes-", "patterns-", "glossary-")  # the files of the pattern schema, by name prefix
+
+
 def pattern_files(texts: dict[str, str]) -> dict[str, str]:
-    return {name: text for name, text in texts.items() if name.startswith("pattern-")}
+    return {name: text for name, text in texts.items() if name.startswith(FILE_KINDS)}
+
+
+def patterns_markdown(texts: dict[str, str]) -> dict[str, str]:
+    """The `patterns-<slug>.md` files, the only ones with blocks and edge lines; never empty (a check over none is vacuous)."""
+    found = {name: text for name, text in texts.items() if name.startswith("patterns-") and name.endswith(".md")}
+    assert found, sorted(texts)
+    return found
+
+
+def glossary_markdown(texts: dict[str, str]) -> dict[str, str]:
+    found = {name: text for name, text in texts.items() if name.startswith("glossary-") and name.endswith(".md")}
+    assert found, sorted(texts)
+    return found
 
 
 # --- the pattern view: hand-built profiles ---
@@ -144,15 +166,15 @@ def edge_is(ctx, p, line):
     assert edge_line(pattern_text(ctx), p).strip() == line
 
 
-@then(parsers.parse('the prefix "{prefix}" is declared'))
-def prefix_declared(ctx, prefix):
-    assert f"PREFIX {prefix}: <" in pattern_text(ctx)
+@then(parsers.parse('the prefix file lists "{prefix}"'))
+def prefix_listed(ctx, prefix):
+    assert f"| {prefix} | <" in only({n: t for n, t in ctx["texts"].items() if n.startswith("prefixes-")})
 
 
 @then(parsers.parse('the same profile without top values gives the edge "{line}"'))
 def without_top_values(ctx, line):
     plain = status_profile(None).model_copy(update={"namespaces": ctx["run"].namespaces})
-    assert edge_line(only(generated(ctx, "pattern", plain)), "ex:status").strip() == line
+    assert edge_line(only(patterns_markdown(generated(ctx, "pattern", plain))), "ex:status").strip() == line
 
 
 @then(parsers.parse('the "{name}" block header is "{header}"'))
@@ -226,11 +248,11 @@ def holds_line_at_level(ctx, file, level, line):
     assert any(ln == INDENT * level * " " + line for ln in lines), line
 
 
-@then("in every file no group name begins two blocks and no property begins two edges at the same place")
+@then("in every patterns Markdown file no group name begins two blocks and no property begins two edges at the same place")
 def no_duplicates(ctx):
-    for text in pattern_files(ctx["texts"]).values():
+    for text in patterns_markdown(ctx["texts"]).values():
         headers = [name_of(ln) for ln in text.splitlines() if ln.startswith("(:")]
-        assert len(headers) == len(set(headers))
+        assert headers and len(headers) == len(set(headers))
         seen = []
         for line in text.splitlines():
             if line.startswith("(:"):
@@ -245,17 +267,16 @@ def no_duplicates(ctx):
 @then(parsers.parse("{names} begin no block"))
 def begin_no_block(ctx, names):
     for name in re.findall(r'"([^"]+)"', names):
-        assert all(not block_lines(t, name) for t in pattern_files(ctx["texts"]).values()), name
+        assert all(not block_lines(t, name) for t in patterns_markdown(ctx["texts"]).values()), name
 
 
-@then("every declared prefix is used")
+@then("every prefix of the matching prefix file is used in it")
 def prefixes_used(ctx):
-    for text in pattern_files(ctx["texts"]).values():
-        body = "\n".join(ln for ln in text.splitlines() if not ln.startswith(("PREFIX ", "# ")))
-        for prefix in re.findall(r"^PREFIX (\S*): ", text, re.M):
-            assert f"{prefix}:" in body or f"{prefix}:" in " ".join(
-                ln for ln in text.splitlines() if ln.startswith("# glossary")
-            ), prefix
+    for name, text in patterns_markdown(ctx["texts"]).items():
+        prefix_file = ctx["texts"][name.replace("patterns-", "prefixes-")]
+        body = "\n".join(ln for ln in text.splitlines() if not ln.startswith(("Legend:", "Prefixes:", "# ")))
+        for prefix in re.findall(r"^\| (\S*) \| <", prefix_file, re.M):
+            assert f"{prefix}:" in body, (name, prefix)
 
 
 # --- term labels and descriptions ---
@@ -324,36 +345,30 @@ def pattern_with_options(ctx, options):
 
 @then("it is written")
 def pattern_written(ctx):
-    assert pattern_files(ctx["texts"])
+    assert patterns_markdown(ctx["texts"])
 
 
-def glossary_lines(text: str) -> list[str]:
-    lines = text.splitlines()
-    return lines[lines.index("# glossary") + 1 :] if "# glossary" in lines else []
+def glossary_entries(text: str) -> list[str]:
+    """The lines of a glossary Markdown file, `- ` included."""
+    return [ln for ln in text.splitlines() if ln.startswith("- ")]
 
 
 @then(parsers.parse("the glossary holds the line '{line}'"))
 def glossary_holds(ctx, line):
-    assert any(line in glossary_lines(text) for text in pattern_files(ctx["texts"]).values())
+    assert any(line in glossary_entries(text) for text in glossary_markdown(ctx["texts"]).values())
 
 
 @then(parsers.parse('the glossary has no line for "{name}"'))
 def glossary_lacks(ctx, name):
-    assert all(
-        not ln.startswith((name + " ", name + ":")) for t in pattern_files(ctx["texts"]).values() for ln in glossary_lines(t)
-    )
+    assert all(not ln.startswith(f"- {name} ") for t in glossary_markdown(ctx["texts"]).values() for ln in glossary_entries(t))
 
 
 @then(parsers.parse('the glossary line of "{name}" shows {shown}'))
 def glossary_shows(ctx, name, shown):
-    (line,) = [ln for ln in glossary_lines(pattern_text(ctx)) if ln.startswith(name + " ")]
-    rest = line.removeprefix(f"{name} {shown}")
-    assert line.startswith(f"{name} {shown}") and (rest == "" or rest.startswith(":")), line
-
-
-@then(parsers.parse('its glossary is "{line}"'))
-def glossary_is(ctx, line):
-    assert all(t.splitlines()[-1] == line for t in pattern_files(ctx["texts"]).values())
+    (line,) = [ln for ln in glossary_entries(only(glossary_markdown(ctx["texts"]))) if ln.startswith(f"- {name} ")]
+    after_kind = line.removeprefix(f"- {name} ").split(" ", 1)[1]  # the kind codes come first
+    rest = after_kind.removeprefix(shown)
+    assert after_kind.startswith(shown) and (rest == "" or rest.startswith((":", " alt: "))), line
 
 
 @then("it exits 2 with a message naming the ontology file")
@@ -384,11 +399,219 @@ def still_holds_line(ctx, line):
     assert any(ln.strip() == line for ln in ctx["file"].splitlines())
 
 
-@then("each file has one block, the largest named group of its graph")
+@then("each patterns Markdown file has one block, the largest named group of its graph")
 def one_block_each(ctx, sample_run):
-    unfiltered = render(sample_run, "pattern")
-    assert pattern_files(ctx["texts"]).keys() == unfiltered.keys()
-    for file, text in pattern_files(ctx["texts"]).items():
-        headers = [ln for ln in text.splitlines() if ln.startswith("(:")]
-        largest = next(ln for ln in unfiltered[file].splitlines() if ln.startswith("(:"))
-        assert len(headers) == 1 and name_of(headers[0]) == name_of(largest)
+    unfiltered = patterns_markdown(render(sample_run, "pattern"))
+    assert patterns_markdown(ctx["texts"]).keys() == unfiltered.keys()
+    for file, text in patterns_markdown(ctx["texts"]).items():
+        headings = [ln for ln in text.splitlines() if ln.startswith("## ")]
+        largest = next(ln for ln in unfiltered[file].splitlines() if ln.startswith("## "))
+        assert headings == [largest], file
+
+
+@then("each patterns CSV file has one row of depth 0")
+def one_block_row_each(ctx):
+    found = {n: t for n, t in ctx["texts"].items() if n.startswith("patterns-") and n.endswith(".csv")}
+    assert found
+    for file, text in found.items():
+        assert sum(row["depth"] == "0" for row in csv_rows(text)) == 1, file
+
+
+# --- CSV cells ---
+
+
+def cell_value(text: str):
+    """The value a Cell quoting row names: a text, several texts, a flag or nothing."""
+    if text == "no value":
+        return None
+    if text.startswith("the flag "):
+        return text.removeprefix("the flag ") == "true"
+    if text.startswith("the texts "):
+        return text.removeprefix("the texts ").split(" and ")
+    return text.removeprefix("the text ")
+
+
+@when(parsers.parse("a cell's value is {value}"))
+def cell_is(ctx, value):
+    ctx["cell"] = filters(PrefixTable([]))["csv_cell"](cell_value(value))
+
+
+@then(parsers.parse("it is written {written}"))
+def cell_written(ctx, written):
+    assert ctx["cell"] == ("" if written == "the empty cell" else written)
+
+
+# --- the five files ---
+
+
+def csv_rows(text: str) -> list[dict[str, str]]:
+    return list(csv.DictReader(io.StringIO(text, newline="")))
+
+
+def csv_files(texts: dict[str, str]) -> dict[str, str]:
+    found = {name: text for name, text in texts.items() if name.endswith(".csv") and name.startswith(FILE_KINDS)}
+    assert found, sorted(texts)
+    return found
+
+
+def quoted(text: str) -> list[str]:
+    return re.findall(r'"([^"]*)"', text)
+
+
+@then(parsers.re(r"for each of (?P<slugs>.+) exactly (?P<markdown>.+) Markdown files, (?P<tables>.+) CSV files are written$"))
+def exactly_these_files(ctx, slugs, markdown, tables):
+    expected = {
+        f"{kind}-{slug}.{extension}"
+        for slug in quoted(slugs)
+        for extension, kinds in (("md", quoted(markdown)), ("csv", quoted(tables)))
+        for kind in kinds
+    }
+    assert set(ctx["texts"]) == expected
+
+
+@then(parsers.parse('no "{extension}" file is written'))
+def no_file_with_extension(ctx, extension):
+    assert ctx["texts"] and not any(name.endswith(extension) for name in ctx["texts"])
+
+
+@then(parsers.parse('"{file}" has a row for "{prefix}" whose "{column}" cell is "{value}"'))
+def prefix_row_cell(ctx, file, prefix, column, value):
+    lines = file_named(ctx, file).splitlines()
+    cells = lambda line: [cell.strip() for cell in line.strip("|").split("|")]  # noqa: E731
+    header = cells(next(ln for ln in lines if ln.startswith("| prefix |")))
+    assert cells(next(ln for ln in lines if ln.startswith(f"| {prefix} |")))[header.index(column)] == value
+
+
+@then(parsers.parse('it has the row "{row}"'))
+def has_row(ctx, row):
+    assert row in ctx["file"].splitlines()
+
+
+@then(
+    "every CSV file reads with csv.DictReader, its header is the column list of its requirement, "
+    "and every row has as many cells as the header"
+)
+def every_csv_parses(ctx):
+    for name, text in csv_files(ctx["texts"]).items():
+        columns = PATTERNS_COLUMNS if name.startswith("patterns-") else GLOSSARY_COLUMNS
+        reader = csv.DictReader(io.StringIO(text, newline=""))
+        assert reader.fieldnames == columns, name
+        for row in reader:  # a wider row puts its extra cells under the key None, a narrower one gives None values
+            assert None not in row and None not in row.values(), (name, row)
+
+
+def cells_of(text: str) -> list[str]:
+    return ["" if cell == "(empty)" else cell for cell in text.split(", ")]
+
+
+@then(parsers.parse('"{file}" has a row whose {columns} are {cells}'))
+def csv_has_row(ctx, file, columns, cells):
+    names, values = columns.split(", "), cells_of(cells)
+    assert any(all(row[n] == v for n, v in zip(names, values, strict=True)) for row in csv_rows(file_named(ctx, file))), cells
+
+
+def field_values(fields: str) -> list[tuple[str, str]]:
+    """`language "de", pref_label empty and alt_labels "Begriff"` as (column, value) pairs."""
+    return [
+        (name, "" if value == "empty" else value.strip('"')) for name, value in re.findall(r'(\w+) (empty|"[^"]*")', fields)
+    ]
+
+
+def has_glossary_row(text: str, term: str, fields: str) -> bool:
+    wanted = field_values(fields)
+    return any(row["term"] == term and all(row[name] == value for name, value in wanted) for row in csv_rows(text))
+
+
+@then(parsers.re(r'"(?P<file>[^"]+\.csv)" has for "(?P<term>[^"]+)" a row with (?P<fields>.+)$'))
+def glossary_row(ctx, file, term, fields):
+    assert has_glossary_row(file_named(ctx, file), term, fields), fields
+
+
+@then(parsers.re(r'it has for "(?P<term>[^"]+)" a row with (?P<fields>.+)$'))
+def glossary_row_again(ctx, term, fields):
+    assert has_glossary_row(ctx["file"], term, fields), fields
+
+
+@then(
+    parsers.parse(
+        'the definition of "{term}" in "{file}" is the whole comment of the fixture, longer than 200 characters, with no "…"'
+    )
+)
+def definition_not_cut(ctx, term, file):
+    comment = str(Graph().parse(LABELS).value(URIRef(DCT + term.removeprefix("dcterms:")), RDFS.comment))
+    (row,) = [r for r in csv_rows(file_named(ctx, file)) if r["term"] == term]
+    assert len(comment) > 200 and row["definition"] == comment and "…" not in row["definition"]
+
+
+@then(parsers.parse("\"{file}\" holds the line '{line}'"))
+def file_holds_line(ctx, file, line):
+    assert line in file_named(ctx, file).splitlines()
+
+
+@then(parsers.parse("it holds the line '{line}'"))
+def holds_quoted_line(ctx, line):
+    assert line in ctx["file"].splitlines()
+
+
+@then(parsers.parse('it has no line for "{name}"'))
+def has_no_line_for(ctx, name):
+    assert not any(ln.startswith(f"- {name} ") for ln in ctx["file"].splitlines())
+
+
+# --- notes and alt labels in hand-built profiles ---
+
+
+@given(parsers.parse("a profile whose data gives \"{term}\" only the note '{note}'"))
+def only_a_note(ctx, term, note):
+    ctx["run"] = with_annotations(profile_run(klass(iri(term), 2)), [TermAnnotation(term=iri(term), notes=langs(note))])
+
+
+@given(parsers.parse("a profile whose data gives \"{term}\" the label '{label}' and the alt labels '{alts}'"))
+def label_and_alt_labels(ctx, term, label, alts):
+    given = TermAnnotation(term=iri(term), labels=langs(label), alt_labels=langs(alts))
+    ctx["run"] = with_annotations(profile_run(klass(iri(term), 2)), [given])
+
+
+@then(parsers.parse('the glossary line of "{name}" holds \'{held}\' and not "{absent}"'))
+def glossary_line_holds(ctx, name, held, absent):
+    (line,) = [ln for ln in glossary_entries(only(glossary_markdown(ctx["texts"]))) if ln.startswith(f"- {name} ")]
+    assert held in line and absent not in line, line
+
+
+@then(parsers.parse('the glossary CSV has the row of "{term}" with notes "{notes}"'))
+def glossary_csv_notes(ctx, term, notes):
+    rows = csv_rows(only({n: t for n, t in ctx["texts"].items() if n.startswith("glossary-") and n.endswith(".csv")}))
+    assert [r["notes"] for r in rows if r["term"] == term] == [notes]
+
+
+@then("the glossary Markdown and the ShExC have no line for it")
+def no_glossary_line(ctx):
+    assert glossary_entries(only(glossary_markdown(ctx["texts"]))) == []
+    assert only(generated(ctx, "shex")).splitlines()[-1] == "# glossary: none"
+
+
+@then(parsers.parse('its glossary Markdown holds "{line}"'))
+def glossary_markdown_holds(ctx, line):
+    assert all(line in text.splitlines() for text in glossary_markdown(ctx["texts"]).values())
+
+
+@then("its glossary CSV holds its header row only")
+def glossary_csv_header_only(ctx):
+    found = {n: t for n, t in csv_files(ctx["texts"]).items() if n.startswith("glossary-")}
+    assert found and all(text == ",".join(GLOSSARY_COLUMNS) + "\n" for text in found.values())
+
+
+# --- unusual IRIs ---
+
+
+@when("the pattern schema and the ShExC are generated from it")
+def pattern_and_shex_generated(ctx):
+    ctx["texts"] = generated(ctx, "pattern")
+    ctx["shex"] = only(generated(ctx, "shex"))
+
+
+@then(parsers.parse('the patterns Markdown and CSV write the class as "{written}"'))
+def patterns_write_class(ctx, written):
+    assert any(line.startswith(f"(:{written}) ") for line in only(patterns_markdown(ctx["texts"])).splitlines())
+    patterns = {n: t for n, t in csv_files(ctx["texts"]).items() if n.startswith("patterns-")}
+    assert any(row["block"] == written for row in csv_rows(only(patterns)))

@@ -1,6 +1,6 @@
 # Carried over from the llm-schema-tools PLAN (tasks of stages 2–3) — 2026-11-01 (seed input, not gated)
 
-**Carried over from `../../llm-schema-tools/tasks.md`, not gated.** Moved unchanged when the developer
+**Carried over from `../../archive/2026-11-02-llm-schema-tools/tasks.md`, not gated.** Moved unchanged when the developer
 split the EPIC (`llm-schema-tools` DEC-28). Task ids keep their original numbers; dependencies on
 `1.x` tasks are tasks of `llm-schema-tools` (stage 1), which must be merged first. The docs task 3.4
 here covers only the server and validator parts; the stage-1 docs are done in `llm-schema-tools`.
