@@ -85,3 +85,9 @@ def test_a_skosxl_alt_label_counts_through_its_literal_form_only(tmp_path):
         f'<http://e/a> <{SKOSXL}altLabel> [ <{SKOSXL}literalForm> "Body"@en ] .<http://e/b> <{SKOSXL}altLabel> "Direct" .'
     )
     assert load_ontology(path) == [value("http://e/a", SKOSXL + "altLabel", "Body", "en")]
+
+
+def test_a_skosxl_label_of_a_blank_node_is_not_a_term(tmp_path):
+    path = tmp_path / "o.ttl"
+    path.write_text(f'[ <{SKOSXL}prefLabel> [ <{SKOSXL}literalForm> "Anonymous"@en ] ] .')
+    assert load_ontology(path) == []
