@@ -71,6 +71,9 @@ lint = [
 model = [
     "linkml==1.12.1",
 ]
+dev = [
+    "pytest-xdist (>=3.8.0,<4.0.0)"
+]
 
 [tool.poetry]
 # No-src layout: include the top-level packages directly; templates ship as package data.

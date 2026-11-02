@@ -24,10 +24,10 @@ under `fingerprint/` changes (No-gos); a test that reveals a bug is reported, no
 
 ## 2. One parallel feature gate (DEC-4, DEC-7; P-1, P-2)
 
-- [ ] 2.1 Add `pytest-xdist` to the dev group (`poetry add --group dev pytest-xdist`); register the
+- [x] 2.1 Add `pytest-xdist` to the dev group (`poetry add --group dev pytest-xdist`); register the
   `release` marker in `pytest.ini`; mark `test_shapes_report_no_violation_on_their_own_data` with it
   (P-2). **Acceptance:** `pytest --collect-only -m release -q` lists the 9 cases and nothing else.
-- [ ] 2.2 Run `pytest tests --ignore=tests/e2e -m "not release" -n auto --hypothesis-profile=ci`
+- [x] 2.2 Run `pytest tests --ignore=tests/e2e -m "not release" -n auto --hypothesis-profile=ci`
   twice; fix any test that fails only in parallel (tmp paths, global state — error matrix), never by
   serialising it. Check the domain coverage report still lists `fingerprint/domain/*` under xdist.
   **Acceptance:** two consecutive parallel runs green with equal pass counts.
