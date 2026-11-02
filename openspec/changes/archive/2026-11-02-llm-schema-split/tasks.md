@@ -85,7 +85,7 @@ definitions and code exist. The red count `pytest tests/bdd` prints after 1.1 is
   `make check-all-deep` (developer, R4-2)
   - Layer: all. Depends on: 1.1–1.8.
   - Tests: all of the above green.
-- [ ] 1.10 Release 3.4.0 (DEC-1, amended R4-1), per `AGENTS.md` "Branches" and "Release authority":
+- [x] 1.10 Release 3.4.0 (DEC-1, amended R4-1), per `AGENTS.md` "Branches" and "Release authority":
   - PR `feature/llm-schema-split` → `develop` (it also carries the archive of `llm-schema-tools`),
     CI green, merge;
   - `pyproject.toml` `3.3.0` → `3.4.0`; `CHANGELOG.md` `## [Unreleased]` → `## [3.4.0] - <date>`
