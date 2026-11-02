@@ -43,12 +43,12 @@ under `fingerprint/` changes (No-gos); a test that reveals a bug is reported, no
 
 ## 3. Cheaper scenarios and domain proof (P-4, P-5; DEC-9)
 
-- [ ] 3.1 Pitfall scenarios go/no-go (P-4): time the 18 pitfall scenarios under `-n auto`
+- [x] 3.1 Pitfall scenarios go/no-go (P-4): time the 18 pitfall scenarios under `-n auto`
   (`--durations`); if under 10% of 2.4's `make test`, record "skipped, below threshold" in the
   commit and tick the task. Otherwise narrow the catalogue in `tests/bdd/steps/pitfalls.py` per P-4,
   leaving the four whole-catalogue scenarios unnarrowed. **Acceptance:** `pytest tests/bdd/test_pitfall_scans.py`
   green; no `.feature` text changed.
-- [ ] 3.2 `patterns.py` example tests (P-5) in `tests/unit/domain/test_patterns.py`. **Acceptance:**
+- [x] 3.2 `patterns.py` example tests (P-5) in `tests/unit/domain/test_patterns.py`. **Acceptance:**
   `pytest tests/unit/domain -m "not hypothesis" --cov=fingerprint.domain.patterns --cov-branch --cov-report=term-missing`
   shows 100% for `fingerprint/domain/patterns.py`.
 
