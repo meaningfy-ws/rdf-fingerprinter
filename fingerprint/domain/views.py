@@ -619,6 +619,7 @@ class PatternEdge(ConfiguredBaseModel):
     max_value: Optional[str] = Field(default=None, description="""Highest value, as min_value.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PatternEdge']} })
     single_value: Optional[str] = Field(default=None, description="""The one value, or the name of the one IRI.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PatternEdge']} })
     distinct: Optional[int] = Field(default=None, description="""Distinct objects.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PatternEdge', 'DocumentProperty']} })
+    target_texts: Optional[list[str]] = Field(default=None, description="""The text of each target as the line writes it (`name`, or `name @<graph>`).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PatternEdge']} })
 
 
 class ViaLink(ConfiguredBaseModel):
@@ -688,6 +689,7 @@ class PatternBlock(ConfiguredBaseModel):
     reaching_edges: Optional[int] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternBlock']} })
     co_types: Optional[list[CoTypeNote]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternBlock']} })
     via: Optional[list[ViaLink]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternBlock']} })
+    via_texts: Optional[list[str]] = Field(default=None, description="""Each via link as `source-property`.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PatternBlock']} })
     header: Optional[str] = Field(default=None, description="""As written.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PatternBlock']} })
     edges: Optional[list[PatternEdge]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PatternEdge', 'PatternBlock']} })
 

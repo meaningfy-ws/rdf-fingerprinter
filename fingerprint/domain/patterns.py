@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from enum import Enum
 from itertools import groupby
 
+from fingerprint.domain.annotations import language_order
 from fingerprint.domain.annotations import shown as shown_text
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref, turtle_term
@@ -149,6 +150,7 @@ class _Spec:
     property: str
     name: str
     targets: tuple[EdgeTarget, ...]
+    target_texts: tuple[str, ...]  # what the line writes for each target
     head: str  # the line after the indent, without a nesting ending
     stats: str
     low: int | None
@@ -182,7 +184,10 @@ def _cell_text(value: object) -> str:
 
 def csv_cell(value: object) -> str:
     """One CSV cell (llm-schema-split P-2): several values joined by ` | `, quoted per RFC 4180 when needed."""
-    text = " | ".join(_cell_text(item) for item in value) if isinstance(value, list) else _cell_text(value)
+    if isinstance(value, (list, tuple)):
+        text = " | ".join(_cell_text(item) for item in value if item is not None)
+    else:
+        text = _cell_text(value)
     if any(char in text for char in ',"\r\n') or text != text.strip(" "):
         return '"' + text.replace('"', '""') + '"'
     return text
@@ -457,6 +462,7 @@ class _Builder:
             property=prop.property,
             name=name,
             targets=tuple(alt.target for alt in alternatives) or (EdgeTarget(kind=TargetKind.unknown, name=UNKNOWN),),
+            target_texts=tuple(alt.text for alt in alternatives) or (UNKNOWN,),
             head=f"-{name}-> {self._target_text(alternatives)}" + (f" {text}" if text else ""),
             stats=text,
             low=stats.low,
@@ -551,6 +557,7 @@ class _Builder:
             name=spec.name,
             depth=level,
             targets=list(spec.targets),
+            target_texts=list(spec.target_texts),
             text=spec.head + ending,
             stats=spec.stats,
             ending=ending,
@@ -640,6 +647,7 @@ class _Builder:
             reaching_edges=self.reaching[index] if nested else None,
             co_types=notes,
             via=via,
+            via_texts=[f"{link.source}-{link.property}" for link in via],
             header=self._header(group, notes, via),
             edges=self._edges(index, 1, []),
         )
@@ -655,6 +663,8 @@ class _Builder:
             rows = _rows(annotation) if annotation else []
             if annotation is not None and rows:
                 kinds = sorted({kind for term, kind in self.kinds if term == iri}, key=_KINDS.index)
+                if TermKind.P in kinds and {TermKind.dP, TermKind.oP} & set(kinds):
+                    kinds.remove(TermKind.P)  # P is for a property with no collected objects anywhere
                 entries.append(
                     GlossaryEntry(term=iri, name=name, line=_glossary_line(name, kinds, annotation), kinds=kinds, rows=rows)
                 )
@@ -702,14 +712,10 @@ def _one_line(text: str) -> str:
     return " ".join(text.split())
 
 
-def _language_key(language: str | None) -> tuple[bool, str]:
-    return (language is not None, language or "")
-
-
 def _rows(annotation: TermAnnotation) -> list[GlossaryRow]:
     """One row per language any field has, untagged first, then by tag."""
     fields = (annotation.labels, annotation.alt_labels, annotation.descriptions, annotation.notes)
-    languages = sorted({text.language for field in fields for text in field or []}, key=_language_key)
+    languages = sorted({text.language for field in fields for text in field or []}, key=language_order)
 
     def texts(field: list[LangText] | None, language: str | None) -> list[str]:
         return [text.text for text in field or [] if text.language == language]
@@ -733,7 +739,6 @@ def _quote(text: str) -> str:
 def _glossary_line(name: str, kinds: list[TermKind], annotation: TermAnnotation) -> str | None:
     """`name kinds "label"@lang alt: "a" | "b": description`, each part after the kinds optional, or None when none is."""
     label = shown_text(annotation.labels)
-    from_alt = label is None
     label = label or shown_text(annotation.alt_labels)
     description = shown_text(annotation.descriptions)
     if label is None and description is None:
@@ -741,11 +746,7 @@ def _glossary_line(name: str, kinds: list[TermKind], annotation: TermAnnotation)
     line = f"{name} {'/'.join(kind.value for kind in kinds)}"
     if label is not None:
         line += " " + _quote(label.text) + (f"@{label.language}" if label.language else "")
-        alts = [
-            t.text
-            for t in annotation.alt_labels or []
-            if t.language == label.language and not (from_alt and t.text == label.text)
-        ]
+        alts = [t.text for t in annotation.alt_labels or [] if t.language == label.language and t.text != label.text]
         if alts:
             line += " alt: " + " | ".join(_quote(text) for text in alts)
     if description is not None:

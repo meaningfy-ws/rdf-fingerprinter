@@ -254,6 +254,7 @@ classes:
       max_value: { description: "Highest value, as min_value." }
       single_value: { description: "The one value, or the name of the one IRI." }
       distinct: { range: integer, description: "Distinct objects." }
+      target_texts: { multivalued: true, description: "The text of each target as the line writes it (`name`, or `name @<graph>`)." }
 
   ViaLink:
     description: A group reached through another group's property.
@@ -279,6 +280,7 @@ classes:
       reaching_edges: { range: integer }
       co_types: { range: CoTypeNote, multivalued: true, inlined_as_list: true }
       via: { range: ViaLink, multivalued: true, inlined_as_list: true }
+      via_texts: { multivalued: true, description: "Each via link as `source-property`." }
       header: { description: "As written." }
       edges: { range: PatternEdge, multivalued: true, inlined_as_list: true }
 

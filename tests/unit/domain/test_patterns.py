@@ -507,6 +507,13 @@ def test_an_edge_to_a_class_of_another_graph_names_that_graph():
     assert one_edge(other).text == f"-ex:p-> (:ex:B @<{graph}>)"
 
 
+def test_an_edge_gives_the_text_of_each_of_its_targets_for_the_csv():
+    graph = "http://ex.org/people"
+    other = resources(2, B).model_copy(update={"object_class_graph": graph})
+    assert one_edge(other).target_texts == [f"ex:B @<{graph}>"]
+    assert one_edge(resources(2, B), literals(1)).target_texts == ["ex:B", "xsd:string"]
+
+
 def test_a_class_typed_in_this_graph_and_in_another_is_written_with_its_graph_only_for_the_other():
     here = "http://ex.org/here"
     same = resources(1, B).model_copy(update={"object_class_graph": here})
@@ -832,6 +839,7 @@ def test_via_names_the_edges_of_blocks_and_expanded_groups_that_reach_the_class(
         klass(D, 4, prop(EX + "self", {1: 4}, iri)),
     )
     assert block(shown, "ex:D").header == "(:ex:D) 4 via (:ex:A)-ex:r, (:ex:B)-ex:q, (:ex:C)-ex:q, (:ex:D)-ex:self"
+    assert block(shown, "ex:D").via_texts == ["ex:A-ex:r", "ex:B-ex:q", "ex:C-ex:q", "ex:D-ex:self"]
     assert block(shown, "ex:D").via == [
         ViaLink(source="ex:A", property="ex:r"),
         ViaLink(source="ex:B", property="ex:q"),
@@ -1037,7 +1045,9 @@ def test_the_view_is_deterministic(case):
         (["Body", "Human"], "Body | Human"),
         (["a | b", "c"], "a | b | c"),
         (["a, b", "c"], '"a, b | c"'),
-        ([1, True, None, "x"], "1 | true |  | x"),
+        ([1, True, None, "x"], "1 | true | x"),
+        (("Body", "Human"), "Body | Human"),
+        ([None], ""),
     ],
 )
 def test_a_csv_cell_is_written_as_rfc_4180_says(value, written):
@@ -1186,6 +1196,14 @@ def test_a_property_with_no_collected_objects_is_P():
     assert kinds_of(klass(A, 3, prop(P, {1: 3}))) == [("ex:A", ["C"]), ("ex:p", ["P"])]
 
 
+def test_a_property_with_objects_on_one_class_and_none_collected_on_another_is_not_P():
+    assert kinds_of(klass(A, 3, prop(P, {1: 3}, resources(3))), klass(B, 3, prop(P, {1: 3}))) == [
+        ("ex:A", ["C"]),
+        ("ex:B", ["C"]),
+        ("ex:p", ["oP"]),
+    ]
+
+
 def test_a_term_written_as_a_class_and_as_a_property_has_both_kinds_in_order():
     shown = view(klass(A, 3, prop(A, {1: 3}, resources(3))), annotations=[note(A, [("A", "en")])])
     (entry,) = shown.glossary
@@ -1206,6 +1224,11 @@ def entry_of(term_annotation: TermAnnotation):
 def test_alt_labels_follow_the_label_in_its_language_without_the_other_languages():
     line = entry_of(annotation(A, [("Concept", "en")], [("Begriff", "de"), ("Idea", "en"), ("Notion", "en")])).line
     assert line == 'ex:A C "Concept"@en alt: "Idea" | "Notion"'
+
+
+def test_an_alt_label_equal_to_the_label_is_not_repeated_whatever_its_source():
+    line = entry_of(annotation(A, [("Concept", "en")], [("Concept", "en"), ("Notion", "en")])).line
+    assert line == 'ex:A C "Concept"@en alt: "Notion"'
 
 
 def test_a_term_with_only_alt_labels_shows_the_shown_alt_label_as_its_label():

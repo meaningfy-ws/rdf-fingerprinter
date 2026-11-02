@@ -14,14 +14,14 @@ from fingerprint.domain.vocabulary import (
 PREFERRED_LANGUAGE = "en"
 
 
-def _language_order(language: str | None) -> tuple[bool, str]:
+def language_order(language: str | None) -> tuple[bool, str]:
     return (language is not None, language or "")
 
 
 def _per_language(values: list[AnnotationValue], predicates: tuple[str, ...]) -> list[LangText]:
     """For each language the smallest text of the first predicate that has a value in it; untagged first."""
     chosen = []
-    for language in sorted({v.language for v in values}, key=_language_order):
+    for language in sorted({v.language for v in values}, key=language_order):
         for predicate in predicates:
             texts = [v.text for v in values if v.language == language and v.predicate == predicate]
             if texts:
@@ -34,7 +34,7 @@ def _distinct(texts: Iterable[LangText]) -> list[LangText]:
     """The distinct (language, text) pairs, untagged first, then by language, then by text."""
     pairs = {(t.language, t.text) for t in texts}
     return [
-        LangText(text=text, language=language) for language, text in sorted(pairs, key=lambda p: (_language_order(p[0]), p[1]))
+        LangText(text=text, language=language) for language, text in sorted(pairs, key=lambda p: (language_order(p[0]), p[1]))
     ]
 
 
