@@ -86,9 +86,9 @@ check-spec: ## Validate the OpenSpec spine strictly (needs Node.js)
 	@ echo -e "$(BUILD_PRINT)openspec validate --strict$(END_BUILD_PRINT)"
 	@ $(OPENSPEC) validate --all --strict
 
-test-fast: ## Unit, bdd and guard tests without the Hypothesis property tests and without coverage
+test-fast: ## Unit, bdd and guard tests without the Hypothesis property tests; writes coverage.xml, no coverage floor
 	@ echo -e "$(BUILD_PRINT)Running the unit tests (no Hypothesis)$(END_BUILD_PRINT)"
-	@ poetry run pytest $(TEST_PATH) --ignore=$(TEST_PATH)/e2e -m "not hypothesis" -q
+	@ poetry run pytest $(TEST_PATH) --ignore=$(TEST_PATH)/e2e -m "not hypothesis" -q --cov=$(PACKAGE_NAME) --cov-branch --cov-report=term:skip-covered --cov-report=xml:coverage.xml
 
 test: ## Unit, bdd and guard tests with the Hypothesis property tests and coverage (no SPARQL store needed)
 	@ echo -e "$(BUILD_PRINT)Running the unit tests$(END_BUILD_PRINT)"
@@ -149,10 +149,10 @@ check-models: ## Fail when the generated model or schema is out of date with mod
 check-quality: lint typecheck check-architecture check-models check-spec ## Static checks
 	@ echo -e "$(BUILD_PRINT)All quality checks passed$(END_BUILD_PRINT)"
 
-check-all-fast: check-quality test-fast ## The everyday gate: static checks + tests, no Hypothesis, no coverage
+check-all-fast: check-quality test-fast ## The everyday gate: static checks + tests (no Hypothesis, coverage reported, no floor)
 	@ echo -e "$(BUILD_PRINT)Fast verification suite passed$(END_BUILD_PRINT)"
 
-check-all-deep: check-quality test ## The slow gate, run on exception: static checks + all tests incl. Hypothesis + coverage
+check-all-deep: check-quality test ## The slow gate (weekly in CI, deep.yml): static checks + all tests incl. Hypothesis + coverage floors
 	@ echo -e "$(BUILD_PRINT)Deep verification suite passed$(END_BUILD_PRINT)"
 
 check-all: check-all-fast ## The gate CI runs (= check-all-fast)

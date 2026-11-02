@@ -42,6 +42,7 @@ def test_the_fast_gate_skips_the_property_tests():
     _, fast = _recipe("test-fast")
     _, deep = _recipe("test")
     assert "poetry run pytest" in fast and '-m "not hypothesis"' in fast
+    assert "--cov-report=xml:coverage.xml" in fast and "--cov-fail-under" not in fast  # reported, no floor
     assert "hypothesis" not in deep.replace("--hypothesis-profile", "")  # the deep run selects every test
 
 
@@ -58,6 +59,15 @@ def test_ci_runs_check_all_on_push_and_pull_request_to_master_and_develop():
     assert triggers["push"]["branches"] == ["master", "develop"]
     assert triggers["pull_request"]["branches"] == ["master", "develop"]
     assert any(step.get("run") == "make check-all" for step in _steps(workflow))
+    upload = next(step for step in _steps(workflow) if "codecov-action" in step.get("uses", ""))
+    assert upload["with"]["files"] == "coverage.xml"
+
+
+def test_the_deep_gate_runs_weekly_and_on_demand():
+    workflow = _workflow("deep")
+    triggers = _triggers(workflow)
+    assert triggers["schedule"] and "workflow_dispatch" in triggers
+    assert any(step.get("run") == "make check-all-deep" for step in _steps(workflow))
 
 
 def test_the_release_workflow_publishes_through_oidc_without_a_token():

@@ -28,7 +28,8 @@ or a script reads only the part it needs.
   `PatternFile` (the file's template name and the graph's view), five times per graph, instead of
   the graph's view once.
 - **BREAKING: `make check-all` is now the fast gate** (static checks and tests without the Hypothesis
-  property tests or coverage). `make check-all-deep` adds them; run it on exception.
+  property tests; coverage is reported to Codecov without a floor). `make check-all-deep` adds the
+  Hypothesis tests and the coverage floors; CI runs it weekly and on demand (`deep.yml`).
 - Docs: the *Schemas for LLMs* page describes the five files, the CSV columns and a filtering
   example, with sizes re-measured on the new golden files.
 

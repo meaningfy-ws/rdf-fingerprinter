@@ -122,9 +122,9 @@ artifacts above; do not reintroduce parallel epic files under `.claude/`.
   (`make oxigraph-load-test-data`, config in `docker/`) for the local-only `tests/e2e`; the
   endpoint comes from `RDF_FINGERPRINTER_TEST_ENDPOINT`. `tests/unit` need no store.
 - **Deployable?** no — released as a Python package.
-- **Make targets:** `make install` (Poetry), `make check-all` (the gate CI runs; = `make check-all-fast`, no Hypothesis,
-  no coverage), `make check-all-deep` (adds the Hypothesis tests and the coverage gates; run on
-  exception), `make test`, `make build`,
+- **Make targets:** `make install` (Poetry), `make check-all` (the gate CI runs per PR; = `make check-all-fast`, no Hypothesis,
+  coverage reported without a floor), `make check-all-deep` (adds the Hypothesis tests and the
+  coverage floors; weekly and on demand in CI, `deep.yml`), `make test`, `make build`,
   `make test-e2e`, `make oxigraph-load-test-data`, `make build-docs`. Releases publish from a
   GitHub Release via Trusted Publishing (`publish.yml`); docs deploy to GitHub Pages (`docs.yml`).
 - **Release authority (developer, 2026-10-31):** an agent MAY merge a PR to `master` (or `develop`) and publish a
