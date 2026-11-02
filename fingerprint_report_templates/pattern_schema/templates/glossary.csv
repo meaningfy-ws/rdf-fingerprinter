@@ -1,0 +1,7 @@
+{#- glossary-<slug>.csv: `view.graph` is a PatternGraph; one row per term and language, every cell through csv_cell. -#}
+term,iri,kind,language,pref_label,alt_labels,definition,notes
+{% for entry in view.graph.glossary -%}
+{% for row in entry.rows -%}
+{{ [entry.name, entry.term, entry.kinds, row.language, row.pref_label, row.alt_labels, row.definition, row.notes] | map("csv_cell") | join(",") }}
+{% endfor -%}
+{% endfor -%}

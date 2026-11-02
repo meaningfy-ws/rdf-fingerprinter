@@ -149,7 +149,7 @@ def gen_pattern(
     max_classes: int | None,
     **shared,
 ):
-    """The pattern schema, one text file per graph with a block, from a saved profile.json."""
+    """The pattern schema, five files per graph (prefixes, patterns and glossary), from a saved profile.json."""
     generate_one(
         PATTERN, profile, output, threshold, template, shared,
         ontology=ontology, min_instances=min_instances, max_classes=max_classes,

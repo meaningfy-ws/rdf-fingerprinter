@@ -1,7 +1,7 @@
 # Carried over from the llm-schema-tools PLAN (stages 2–3) — 2026-11-01 (seed input, not gated)
 
-**Carried over from `../../llm-schema-tools/design.md`, not gated.** The developer split the EPIC
-(`../../llm-schema-tools/inputs/qa-round-1.md`, Round 6; `llm-schema-tools` DEC-28). These are the
+**Carried over from `../../archive/2026-11-02-llm-schema-tools/design.md`, not gated.** The developer split the EPIC
+(`../../archive/2026-11-02-llm-schema-tools/inputs/qa-round-1.md`, Round 6; `llm-schema-tools` DEC-28). These are the
 stage-2/3 parts of that PLAN, moved here unchanged so nothing is lost. The stage-1 parts they refer to
 (the pattern view, `§B`–`§D`, P-1 to P-10, TC-A*/TC-P*/TC-S1) stay in `llm-schema-tools/design.md`,
 which is their only source. Numbers (P-n, TC-n, §E–§G) keep their original ids. The clarity gate

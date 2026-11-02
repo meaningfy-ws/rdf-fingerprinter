@@ -138,7 +138,7 @@ Each warning SHALL be logged once per run (EPIC DEC-9).
 
   Examples:
     | output         | note                                                                                    |
-    | pattern schema | the line `# excluded namespaces: rel (classes 0, properties 2, values 0)`               |
+    | pattern schema | the line `Excluded namespaces: rel (classes 0, properties 2, values 0).` in every patterns Markdown file (llm-schema-split) |
     | ShExC          | the line `# excluded namespaces: rel (classes 0, properties 2, values 0)`               |
     | shapes         | the line `# excluded namespaces: rel (classes 0, properties 2, values 0)`               |
     | diagram        | the line `' excluded namespaces: rel (classes 0, properties 2, values 0)` in every file  |

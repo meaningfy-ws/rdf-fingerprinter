@@ -255,7 +255,7 @@
                     ]
                 },
                 "term_annotations": {
-                    "description": "Selected labels and descriptions of the graph's terms; absent in profiles saved before 3.2.",
+                    "description": "Selected labels, alt labels, descriptions and notes of the graph's terms; absent in profiles saved before 3.2.",
                     "items": {
                         "$ref": "#/$defs/TermAnnotation"
                     },
@@ -912,9 +912,20 @@
         },
         "TermAnnotation": {
             "additionalProperties": false,
-            "description": "The labels and descriptions selected for one class or property (llm-schema-tools DEC-17, DEC-20).",
+            "description": "The labels, alt labels, descriptions and notes selected for one class or property (llm-schema-split DEC-5, DEC-9).",
             "properties": {
+                "alt_labels": {
+                    "description": "Every alt label; absent in profiles saved before 3.4.",
+                    "items": {
+                        "$ref": "#/$defs/LangText"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "descriptions": {
+                    "description": "Definitions only.",
                     "items": {
                         "$ref": "#/$defs/LangText"
                     },
@@ -924,6 +935,17 @@
                     ]
                 },
                 "labels": {
+                    "description": "Pref labels only.",
+                    "items": {
+                        "$ref": "#/$defs/LangText"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "notes": {
+                    "description": "Every note, and the descriptions that were not selected; absent in profiles saved before 3.4.",
                     "items": {
                         "$ref": "#/$defs/LangText"
                     },

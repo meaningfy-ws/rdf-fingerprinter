@@ -39,7 +39,7 @@ def test_the_size_options_are_passed_through(tmp_path):
 def test_the_ontology_option_is_passed_through(tmp_path):
     result = invoke(SAMPLE, "-o", tmp_path, "--ontology", LABELS)
     assert result.exit_code == 0, result.output
-    assert '# skos:Concept "Concept"@en' in (tmp_path / CONTINENTS).read_text()
+    assert '# skos:Concept C "Concept"@en' in (tmp_path / CONTINENTS).read_text()
 
 
 def test_an_unreadable_ontology_exits_2_naming_it(tmp_path):

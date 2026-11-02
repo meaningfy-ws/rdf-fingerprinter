@@ -44,16 +44,18 @@ To use the fingerprinter programmatically, see the
 ## Schemas for LLMs
 
 To give a language model the shape of your data before it writes SPARQL, render the saved profile as
-a **pattern schema** (compact `(:Class)-property-> (:Target)` lines with statistics and a glossary of
-labels) or as **enriched ShExC** (the same content as ShEx shapes):
+a **pattern schema**: five files per graph (`prefixes-*.md`, `patterns-*.md`, `patterns-*.csv`,
+`glossary-*.md`, `glossary-*.csv`) with compact `(:Class)-property-> (:Target)` lines, statistics, and
+labels, alt labels, definitions and notes. Or as **enriched ShExC** (the same content as ShEx shapes):
 
 ```shell script
 fingerprint-gen-pattern my/output/folder/profile.json -o llm/ --ontology vocab.ttl --max-classes 30
 fingerprint-gen-shex    my/output/folder/profile.json -o llm/ --min-instances 10
 ```
 
-On the test data, the pattern schema of a graph is about nine times smaller than its SHACL shapes
-(1,234 against 10,950 characters, prefixes and legend left out).
+Give a model that writes SPARQL `patterns-*.md` and `prefixes-*.md`; filter the CSV files with grep or
+DuckDB. On the test data, the patterns Markdown of a graph is about five times smaller than its SHACL
+shapes (2,081 against 10,950 characters).
 
 Leave out whole namespaces, in every output (report, SHACL, ShExC, PlantUML, pattern schema),
 by prefix, prefix glob or IRI stem; repeat the option to combine them, and use
@@ -76,7 +78,8 @@ Requires Poetry, Docker and (for `make check-spec`) Node.js.
 
 ```shell script
 make install                    # Poetry env with the test and lint groups
-make check-all                  # lint, types, layers, OpenSpec, unit tests — the gate CI runs
+make check-all                  # lint, types, layers, OpenSpec, fast unit tests — the gate CI runs
+make check-all-deep             # adds the Hypothesis tests and coverage floors; weekly in CI (deep.yml)
 make oxigraph-load-test-data    # in-memory Oxigraph on :7878 with the test graphs
 make test-e2e                   # end-to-end tests against it (local only)
 ```

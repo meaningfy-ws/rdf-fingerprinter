@@ -10,7 +10,11 @@
   </rdf:Description>
   <rdf:Description rdf:about="http://www.w3.org/2004/02/skos/core#Concept">
     <skos:prefLabel xml:lang="en">Concept</skos:prefLabel>
+    <skos:altLabel xml:lang="en">Notion</skos:altLabel>
+    <skos:altLabel xml:lang="de">Begriff</skos:altLabel>
     <skos:definition xml:lang="en">An idea or notion; a unit of thought.</skos:definition>
+    <rdfs:comment xml:lang="en">Also a SKOS class.</rdfs:comment>
+    <skos:scopeNote xml:lang="en">Use for concepts of a scheme.</skos:scopeNote>
   </rdf:Description>
   <rdf:Description rdf:about="http://www.w3.org/2008/05/skos-xl#Label">
     <skos:prefLabel xml:lang="en">Label</skos:prefLabel>

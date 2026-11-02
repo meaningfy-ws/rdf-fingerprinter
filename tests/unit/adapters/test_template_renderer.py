@@ -71,6 +71,12 @@ def test_the_filters_escape_for_custom_templates(tmp_path):
     assert texts(rendered) == ['ex:a "say \\"x\\"" ex:a']
 
 
+def test_the_csv_cell_filter_is_registered_for_templates(tmp_path):
+    body = "{{ view.predicate | csv_cell }},{{ view.value | csv_cell }}"
+    view = Annotation(predicate="a, b", value="c")
+    assert texts(JinjaTemplateRenderer().render(package(tmp_path, body), [("a", view)])) == ['"a, b",c']
+
+
 def test_the_packaged_prefixes_are_loaded_without_colons():
     prefixes = {e.prefix: e.namespace for e in load_packaged_prefixes(config.packaged_prefixes_file)}
     assert prefixes["skos"] == "http://www.w3.org/2004/02/skos/core#" and not any(p.endswith(":") for p in prefixes)

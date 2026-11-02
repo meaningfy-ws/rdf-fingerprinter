@@ -6,6 +6,44 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-11-02
+
+The pattern schema is split into five files per graph (OpenSpec change `llm-schema-split`), so a model
+or a script reads only the part it needs.
+
+### Changed
+- **BREAKING: five files replace `pattern-<graph>.txt`.** `fingerprint-gen-pattern` and
+  `--format pattern` now write `prefixes-<graph>.md`, `patterns-<graph>.md`, `patterns-<graph>.csv`,
+  `glossary-<graph>.md` and `glossary-<graph>.csv`. The `PREFIX` lines and the glossary left the
+  pattern file; read them from the sibling files. Nothing writes `pattern-<graph>.txt` any more.
+- **BREAKING: `skos:altLabel` no longer becomes a label.** Alt labels are stored and shown as alt
+  labels; a term with only alt labels has no label in a profile collected with 3.4. A profile saved
+  earlier still holds the old labels.
+- **BREAKING: `skos:scopeNote` is a note, not a description.** The description is `skos:definition`,
+  `rdfs:comment` or `dcterms:description`; notes appear in the glossary CSV only.
+- **BREAKING: the notes of filters read `Hidden: <n> classes.` and `Excluded namespaces: <note>.`** in
+  the patterns Markdown (they were `# hidden:` and `# excluded namespaces:` comment lines). The ShExC
+  keeps its comment lines.
+- **BREAKING: a custom `--template` package for the pattern schema** now receives `view` as a
+  `PatternFile` (the file's template name and the graph's view), five times per graph, instead of
+  the graph's view once.
+- **BREAKING: `make check-all` is now the fast gate** (static checks and tests without the Hypothesis
+  property tests; coverage is reported to Codecov without a floor). `make check-all-deep` adds the
+  Hypothesis tests and the coverage floors; CI runs it weekly and on demand (`deep.yml`).
+- Docs: the *Schemas for LLMs* page describes the five files, the CSV columns and a filtering
+  example, with sizes re-measured on the new golden files.
+
+### Added
+- **Kind codes in the glossary**: `C` class, `dP` datatype property, `oP` object property, `P` property
+  with no collected objects, `D` datatype.
+- **Alt labels and notes** in the profile (`term_annotations`) and in the glossary CSV, one row per
+  term and language; the glossary Markdown shows the alt labels in the language of the label.
+- **CSV files**: `patterns-<graph>.csv` (one row per block and edge, 23 columns) and
+  `glossary-<graph>.csv` (full, uncut texts), both RFC 4180, with ` | ` between several values.
+- **Prefix counts**: `prefixes-<graph>.md` gives, per prefix, its classes, properties, instances and
+  triples in the patterns.
+- `make check-all-fast` and `make check-all-deep`.
+
 ## [3.3.0] - 2026-11-02
 
 Namespace filters that work (OpenSpec change `namespace-filter`). Excluding a namespace now leaves

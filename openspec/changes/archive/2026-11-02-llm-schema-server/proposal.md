@@ -1,7 +1,7 @@
 # EPIC: A schema server for agents over a saved fingerprint (MCP), with query validation
 
 **Status: DRAFT.** Not shaped against a readiness check; the PLAN is not gated. Split out of
-`llm-schema-tools` by the developer on 2026-11-01 (its DEC-28; `../llm-schema-tools/inputs/qa-round-1.md`,
+`llm-schema-tools` by the developer on 2026-11-01 (its DEC-28; `../archive/2026-11-02-llm-schema-tools/inputs/qa-round-1.md`,
 Round 6: "wait, only stage 1, the other stages are part of another epic change").
 
 ## Appetite
@@ -28,12 +28,12 @@ PLAN, not gated**:
 - `schema_server.feature`: its Gherkin projection;
 - `ucw3.adoc` and `docs-lines.md`: the use case UC-W3 and its index and nav lines.
 
-The parent's research and Q&A seeds stay in `../llm-schema-tools/inputs/`.
+The parent's research and Q&A seeds stay in `../archive/2026-11-02-llm-schema-tools/inputs/`.
 
 ## Why
 
 An agent writes better SPARQL when it can look up a graph's schema as tools and have its query
-checked against that schema (`../llm-schema-tools/inputs/llm-schema-research.md`). `llm-schema-tools`
+checked against that schema (`../archive/2026-11-02-llm-schema-tools/inputs/llm-schema-research.md`). `llm-schema-tools`
 produces the schema as files. This change serves it over MCP from one saved profile, without
 touching an endpoint, and adds the check-and-repair loop: the query is validated, never run.
 

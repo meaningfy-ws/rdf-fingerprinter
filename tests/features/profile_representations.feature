@@ -283,7 +283,7 @@ Feature: Publishing a fingerprint as an application profile
 
       Examples:
         | output         | note                                                                                   |
-        | pattern schema | the line "# excluded namespaces: rel (classes 0, properties 2, values 0)"              |
+        | pattern schema | the line "Excluded namespaces: rel (classes 0, properties 2, values 0)." in every patterns Markdown file |
         | ShExC          | the line "# excluded namespaces: rel (classes 0, properties 2, values 0)"              |
         | shapes         | the line "# excluded namespaces: rel (classes 0, properties 2, values 0)"              |
         | diagram        | the line "' excluded namespaces: rel (classes 0, properties 2, values 0)" in every file |
@@ -316,7 +316,8 @@ Feature: Publishing a fingerprint as an application profile
     Scenario: Empty default graph
       Given a profile whose default graph is empty
       When the shapes, the diagram, the pattern schema and the ShExC are generated with no filter option
-      Then no shapes, diagram, pattern schema or ShExC file is written for it
+      Then no shapes, diagram or ShExC file is written for it
+      And none of "prefixes-default.md", "patterns-default.md", "patterns-default.csv", "glossary-default.md" and "glossary-default.csv" is written
 
   Rule: Every format is checked into a golden file
 
@@ -370,7 +371,7 @@ Feature: Publishing a fingerprint as an application profile
     Scenario Outline: Lines of the continents pattern schema
       Given the fixed test profile
       When the pattern schema is generated from it
-      Then "pattern-continents-214e8f67.txt" holds, at level <level>, the line "<line>"
+      Then "patterns-continents-214e8f67.md" holds, at level <level>, the line "<line>"
 
       Examples:
         | level | line                                                                                                                                       |
@@ -383,15 +384,22 @@ Feature: Publishing a fingerprint as an application profile
         | 2     | -rdf:value-> xsd:string AFRICA..OCEANIA                                                                                                    |
         | 0     | (:owl:Ontology&skos:ConceptScheme) 1 via (:euvoc:Continent&skos:Concept)-skos:inScheme, (:euvoc:Continent&skos:Concept)-skos:topConceptOf |
         | 1     | -skosxl:prefLabel-> (:skosxl:Label) bn ^                                                                                                   |
-        | 0     | # glossary: none                                                                                                                           |
+        | 0     | ## euvoc:Continent&skos:Concept                                                                                                            |
+
+    @uc_b2_1
+    Scenario: Five files per graph
+      Given the fixed test profile
+      When the pattern schema is generated from it
+      Then for each of "continents-214e8f67", "treaties-3b4301a8" and "default" exactly "prefixes", "patterns" and "glossary" Markdown files, "patterns" and "glossary" CSV files are written
+      And no ".txt" file is written
 
     @uc_b2_1
     Scenario: One block per class group and one edge per property
       Given the fixed test profile
       When the pattern schema is generated from it
-      Then in every file no group name begins two blocks and no property begins two edges at the same place
+      Then in every patterns Markdown file no group name begins two blocks and no property begins two edges at the same place
       And "skosxl:Label", "euvoc:XlNotation" and "euvoc:XlNote" begin no block
-      And every declared prefix is used
+      And every prefix of the matching prefix file is used in it
 
     @uc_b2_1
     Scenario Outline: Values that need quotes
@@ -412,7 +420,7 @@ Feature: Publishing a fingerprint as an application profile
       And the prefix table maps "exs" to "http://ex.org/status/"
       When the pattern schema is generated from it
       Then the "ex:status" edge is "-ex:status-> IRI =exs:active"
-      And the prefix "exs" is declared
+      And the prefix file lists "exs"
       And the same profile without top values gives the edge "-ex:status-> IRI d1"
 
     @uc_b2_1
@@ -426,9 +434,73 @@ Feature: Publishing a fingerprint as an application profile
     Scenario: Unusual IRIs in the LLM outputs
       Given a profile whose class IRI is "http://ex.org/q?a=1&b='x'"
       When the pattern schema and the ShExC are generated from it
-      Then the pattern schema writes the class as "<http://ex.org/q?a=1&b='x'>"
+      Then the patterns Markdown and CSV write the class as "<http://ex.org/q?a=1&b='x'>"
       And the ShExC lists "http://ex.org/q?a=1&b='x'" after "# skipped:"
       And the ShExC parses
+
+  Rule: The prefix file counts what the view uses
+
+    @uc_b2_1
+    Scenario: Prefix counts of the continents graph
+      Given the fixed test profile
+      When the pattern schema is generated from it
+      Then "prefixes-continents-214e8f67.md" has a row for "euvoc" whose "classes" cell is "2"
+      And it has the row "| xsd | <http://www.w3.org/2001/XMLSchema#> | 0 | 0 | 0 | 0 |"
+
+  Rule: CSV cells follow RFC 4180
+
+    @uc_b2_1
+    Scenario Outline: Cell quoting
+      When a cell's value is <value>
+      Then it is written <written>
+
+      Examples:
+        | value                        | written          |
+        | the text a, b                | "a, b"           |
+        | the text say "hi"            | "say ""hi"""     |
+        | the texts Body and Human     | Body \| Human    |
+        | no value                     | the empty cell   |
+        | the flag true                | true             |
+
+    @uc_b2_1
+    Scenario: Every CSV parses
+      Given the fixed test profile
+      And the label fixture ontology
+      When the pattern schema is generated from it with that ontology
+      Then every CSV file reads with csv.DictReader, its header is the column list of its requirement, and every row has as many cells as the header
+
+  Rule: The patterns CSV has one typed row per block and edge
+
+    @uc_b2_1
+    Scenario Outline: Rows of the continents patterns CSV
+      Given the fixed test profile
+      When the pattern schema is generated from it
+      Then "patterns-continents-214e8f67.csv" has a row whose <columns> are <cells>
+
+      Examples:
+        | columns                                                       | cells                                                                                                                             |
+        | block, depth, property, instances                             | euvoc:Continent&skos:Concept, 0, (empty), 6                                                                                       |
+        | depth, property, targets, target_kinds, single_value          | 1, euvoc:startDate, xsd:date, datatype, 1952-07-24                                                                                |
+        | owner, path, depth, property, subjects, instances, distinct   | skosxl:Label, skosxl:prefLabel, 2, lvont:script, 12, 145, 2                                                                       |
+        | owner, depth, property, min_value, max_value                  | euvoc:XlNotation, 2, rdf:value, AFRICA, OCEANIA                                                                                   |
+        | block, depth, via                                             | owl:Ontology&skos:ConceptScheme, 0, euvoc:Continent&skos:Concept-skos:inScheme \| euvoc:Continent&skos:Concept-skos:topConceptOf |
+
+  Rule: The glossary CSV has one row per term and language
+
+    @uc_b2_1
+    Scenario: Rows per language
+      Given the fixed test profile
+      And the label fixture ontology
+      When the pattern schema is generated from it with that ontology
+      Then "glossary-continents-214e8f67.csv" has for "skos:Concept" a row with language "de", pref_label empty and alt_labels "Begriff"
+      And it has for "skos:Concept" a row with language "en", kind "C", pref_label "Concept", alt_labels "Notion", definition "An idea or notion; a unit of thought." and notes "Also a SKOS class. | Use for concepts of a scheme."
+
+    @uc_b2_1
+    Scenario: A description is not cut in the CSV
+      Given the fixed test profile
+      And the label fixture ontology
+      When the pattern schema is generated from it with that ontology
+      Then the definition of "dcterms:type" in "glossary-continents-214e8f67.csv" is the whole comment of the fixture, longer than 200 characters, with no "…"
 
   Rule: The enriched ShExC says the same, where ShExC can
 
@@ -454,23 +526,43 @@ Feature: Publishing a fingerprint as an application profile
         | 0     | skosxl:Label BNODE {                                                         |
         | 1     | lvont:script IRI ? ;  # 12/145 d2                                            |
 
-  Rule: Terms carry labels and one description, the ontology first
+  Rule: Terms carry labels, alt labels, one description and notes, the ontology first
 
     @uc_b2_1
     Scenario: Labels from an ontology file
       Given the fixed test profile
       And the label fixture ontology
       When the pattern schema is generated from it with that ontology
-      Then the glossary holds the line 'skos:Concept "Concept"@en: An idea or notion; a unit of thought.'
-      And the glossary holds the line 'skosxl:prefLabel "preferred label"@en'
-      And the glossary has no line for "euvoc:Continent"
+      Then "glossary-continents-214e8f67.md" holds the line '- skos:Concept C "Concept"@en alt: "Notion": An idea or notion; a unit of thought.'
+      And it holds the line '- skosxl:prefLabel oP "preferred label"@en'
+      And it has no line for "euvoc:Continent"
+
+    @uc_b2_1
+    Scenario: A term with only alt labels
+      Given the fixed test profile
+      And the label fixture ontology
+      When the pattern schema is generated from it with that ontology
+      Then "glossary-treaties-3b4301a8.md" holds the line '- skosxl:altLabel oP "alternative label"@en'
+
+    @uc_b2_1
+    Scenario: A term with notes only
+      Given a profile whose data gives "ex:Person" only the note '"Internal"@en'
+      When the pattern schema is generated from it
+      Then the glossary CSV has the row of "ex:Person" with notes "Internal"
+      And the glossary Markdown and the ShExC have no line for it
+
+    @uc_b2_1
+    Scenario: Alt labels in another language are not shown
+      Given a profile whose data gives "ex:Person" the label '"Concept"@en' and the alt labels '"Begriff"@de, "Notion"@en'
+      When the pattern schema is generated from it
+      Then the glossary line of "ex:Person" holds '"Concept"@en alt: "Notion"' and not "Begriff"
 
     @uc_b2_1
     Scenario: The ontology wins for the fields it gives
       Given a profile whose data labels "ex:Person" '"Persoon"@nl' with the description '"Iemand"@nl'
       And an ontology that labels "ex:Person" '"Person"@en' with no description
       When the pattern schema is generated from it with that ontology
-      Then the glossary holds the line 'ex:Person "Person"@en: Iemand'
+      Then the glossary holds the line '- ex:Person C "Person"@en: Iemand'
 
     @uc_b2_1
     Scenario Outline: The label shown
@@ -497,7 +589,8 @@ Feature: Publishing a fingerprint as an application profile
       Given a profile saved before 3.2, with no term annotations
       When the pattern schema is generated from it
       Then it is written
-      And its glossary is "# glossary: none"
+      And its glossary Markdown holds "No term of this graph has a label or a description."
+      And its glossary CSV holds its header row only
 
   Rule: Size filters prune the largest outputs
 
@@ -505,12 +598,13 @@ Feature: Publishing a fingerprint as an application profile
     Scenario: Small classes hidden
       Given the fixed test profile
       When the pattern schema is generated from it with "--min-instances 2"
-      Then "pattern-treaties-3b4301a8.txt" has no block "(:owl:Ontology&skos:ConceptScheme)"
-      And it holds the line "# hidden: 2 classes"
+      Then "patterns-treaties-3b4301a8.md" has no block "(:owl:Ontology&skos:ConceptScheme)"
+      And it holds the line "Hidden: 2 classes."
       And it still holds the line "-skos:inScheme-> (:owl:Ontology&skos:ConceptScheme) d1"
 
     @uc_b2_1
     Scenario: Only the largest classes
       Given the fixed test profile
       When the pattern schema is generated from it with "--max-classes 1"
-      Then each file has one block, the largest named group of its graph
+      Then each patterns Markdown file has one block, the largest named group of its graph
+      And each patterns CSV file has one row of depth 0

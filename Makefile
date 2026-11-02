@@ -1,7 +1,7 @@
 SHELL = /bin/bash -o pipefail
 
 .PHONY: help install install-poetry lock build check-wheel lint format lint-fix typecheck check-architecture \
-	check-spec check-models generate-models test check-mutation test-e2e refresh-sample-profile refresh-golden check-quality check-all start-oxigraph stop-oxigraph oxigraph-load-test-data scan-files \
+	check-spec check-models generate-models test test-fast check-mutation test-e2e refresh-sample-profile refresh-golden check-quality check-all check-all-fast check-all-deep start-oxigraph stop-oxigraph oxigraph-load-test-data scan-files \
 	install-antora build-docs clean-docs serve-docs preview-docs
 
 include docker/.env
@@ -47,7 +47,12 @@ build: ## Build the sdist and wheel into dist/ and check the wheel
 check-wheel: ## Fail when the wheel lacks the report templates, the schema templates or the SPARQL queries
 	@ files="$$(unzip -l dist/*.whl)"; \
 	for f in "$(TEMPLATES_PACKAGE)/fingerprint_report/templates/main.html" \
-		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/schema.txt" \
+		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/files.j2" \
+		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/prefixes.md" \
+		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/patterns.md" \
+		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/patterns.csv" \
+		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/glossary.md" \
+		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/glossary.csv" \
 		"$(TEMPLATES_PACKAGE)/shex_schema/templates/schema.shex" \
 		"fingerprint/adapters/queries/q0_named_graphs.rq" \
 		"fingerprint/adapters/queries/q12_term_annotations.rq"; do \
@@ -81,7 +86,11 @@ check-spec: ## Validate the OpenSpec spine strictly (needs Node.js)
 	@ echo -e "$(BUILD_PRINT)openspec validate --strict$(END_BUILD_PRINT)"
 	@ $(OPENSPEC) validate --all --strict
 
-test: ## Unit, bdd and guard tests with coverage (no SPARQL store needed)
+test-fast: ## Unit, bdd and guard tests without the Hypothesis property tests; writes coverage.xml, no coverage floor
+	@ echo -e "$(BUILD_PRINT)Running the unit tests (no Hypothesis)$(END_BUILD_PRINT)"
+	@ poetry run pytest $(TEST_PATH) --ignore=$(TEST_PATH)/e2e -m "not hypothesis" -q --cov=$(PACKAGE_NAME) --cov-branch --cov-report=term:skip-covered --cov-report=xml:coverage.xml
+
+test: ## Unit, bdd and guard tests with the Hypothesis property tests and coverage (no SPARQL store needed)
 	@ echo -e "$(BUILD_PRINT)Running the unit tests$(END_BUILD_PRINT)"
 	@ poetry run pytest $(TEST_PATH) --ignore=$(TEST_PATH)/e2e --hypothesis-profile=ci --cov=$(PACKAGE_NAME) --cov-branch --cov-report=term --cov-report=xml:coverage.xml --cov-fail-under=90 --junitxml=junit_report.xml
 	@ echo -e "$(BUILD_PRINT)Checking 100% branch coverage of the domain layer$(END_BUILD_PRINT)"
@@ -140,8 +149,13 @@ check-models: ## Fail when the generated model or schema is out of date with mod
 check-quality: lint typecheck check-architecture check-models check-spec ## Static checks
 	@ echo -e "$(BUILD_PRINT)All quality checks passed$(END_BUILD_PRINT)"
 
-check-all: check-quality test ## The full gate: static checks + tests
-	@ echo -e "$(BUILD_PRINT)Full verification suite passed$(END_BUILD_PRINT)"
+check-all-fast: check-quality test-fast ## The everyday gate: static checks + tests (no Hypothesis, coverage reported, no floor)
+	@ echo -e "$(BUILD_PRINT)Fast verification suite passed$(END_BUILD_PRINT)"
+
+check-all-deep: check-quality test ## The slow gate (weekly in CI, deep.yml): static checks + all tests incl. Hypothesis + coverage floors
+	@ echo -e "$(BUILD_PRINT)Deep verification suite passed$(END_BUILD_PRINT)"
+
+check-all: check-all-fast ## The gate CI runs (= check-all-fast)
 
 #-----------------------------------------------------------------------------
 # Test SPARQL store — Oxigraph only (DEC-10)

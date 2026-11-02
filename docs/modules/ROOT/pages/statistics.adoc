@@ -30,14 +30,18 @@ statements per predicate, untyped subjects) and `completeness_check` (below).
 and parents.
 
 [#term-annotations]
-=== Labels and descriptions (Q12)
+=== Labels, alt labels, descriptions and notes (Q12)
 
-Once a graph's classes are profiled, one more query (Q12) reads the labels and descriptions of its
+Once a graph's classes are profiled, one more query (Q12) reads the labels, alt labels, descriptions and notes of its
 classes and, from depth `properties`, of its properties. It matches them in the default graph and in
 every named graph, so an ontology kept in its own graph counts. Labels come from `skos:prefLabel`,
-`skosxl:prefLabel`/`skosxl:literalForm`, `rdfs:label` and `dcterms:title` (then `skos:altLabel`);
-descriptions from `skos:definition`, `rdfs:comment`, `dcterms:description` and `skos:scopeNote`.
-Per term and language, the first predicate in that order with a literal value wins. The selected
+`skosxl:prefLabel`/`skosxl:literalForm`, `rdfs:label` and `dcterms:title`; alt labels from
+`skos:altLabel` and `skosxl:altLabel`/`skosxl:literalForm` (all kept, never stored as a label);
+descriptions from `skos:definition`, `rdfs:comment` and `dcterms:description`; notes from
+`skos:scopeNote`, `skos:note`, `skos:example`, `skos:editorialNote`, `skos:historyNote` and
+`skos:changeNote`, plus every description that was not selected.
+Per term and language, the first predicate in that order with a literal value wins for the label and
+the description. The selected
 values are saved per graph in `profile.json` (`term_annotations`) and shown in the glossary of the
 xref:llm-schema.adoc#labels[schemas for LLMs]. If the query fails, a failure of kind
 `term_annotations` is recorded and the graph is kept without them.

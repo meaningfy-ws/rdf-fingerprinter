@@ -22,7 +22,9 @@ from tests.builders import EX, ORG, REL, filter_profile, klass, literals, prop, 
 OUTPUTS = {"pattern schema": "pattern", "ShExC": "shex", "shapes": "shacl", "diagram": "puml", "report": "doc"}
 EVERY_OUTPUT = tuple(OUTPUTS.values())
 PREFIX_OF_FILE = {
-    "pattern-": "pattern",
+    "prefixes-": "pattern",
+    "patterns-": "pattern",
+    "glossary-": "pattern",
     "shex-": "shex",
     "shapes-": "shacl",
     "diagram-": "puml",
@@ -50,8 +52,8 @@ def run_filtered(ctx, caplog, formats, how, *, from_file=False):
             generate_representations(ctx["run"], folder, formats, options=options)
     texts = {p.name: p.read_text(encoding="utf-8") for p in sorted(folder.iterdir())}
     ctx["by_format"] = {
-        fmt: {n: t for n, t in texts.items() if n.startswith(prefix)}
-        for prefix, fmt in PREFIX_OF_FILE.items()
+        fmt: {n: t for n, t in texts.items() if n.startswith(tuple(p for p, f in PREFIX_OF_FILE.items() if f == fmt))}
+        for fmt in dict.fromkeys(PREFIX_OF_FILE.values())
         if fmt in formats
     }
     ctx["texts"], ctx["formats"] = texts, list(formats)
@@ -77,7 +79,7 @@ def one_output(ctx, caplog, output, how):
 @when(parsers.parse("the pattern schema is generated from the file {how}"))
 def pattern_from_file(ctx, caplog, how):
     run_filtered(ctx, caplog, ("pattern",), how.removeprefix("again "), from_file=True)
-    ctx.setdefault("schemas", []).append(next(iter(ctx["texts"].values())))
+    ctx.setdefault("schemas", []).append("\n".join(ctx["texts"].values()))
 
 
 @when(parsers.parse("the pitfalls file and the report are generated with {how}"))
@@ -343,9 +345,15 @@ def both_list(ctx, name):
 # --- the note of the excluded namespaces ---
 
 
-@then(parsers.re(r'it carries the line "(?P<line>[^"]+)"(?: in every file)?'))
-def carries_line(ctx, line):
-    files = [t for ts in ctx["by_format"].values() for t in ts.values()]
+@then(parsers.re(r'it carries the line "(?P<line>[^"]+)"(?P<scope> in every file| in every patterns Markdown file)?$'))
+def carries_line(ctx, line, scope):
+    markdown_only = scope == " in every patterns Markdown file"  # the pattern schema's note is in `patterns-<slug>.md` only
+    files = [
+        text
+        for texts in ctx["by_format"].values()
+        for name, text in texts.items()
+        if not markdown_only or (name.startswith("patterns-") and name.endswith(".md"))
+    ]
     assert files
     for text in files:
         assert line in text.splitlines()
@@ -375,7 +383,7 @@ def only_one_namespace(ctx, prefix):
 
 @then("no shapes, diagram, pattern schema or ShExC file is written for that graph")
 def no_graph_files(ctx):
-    assert not any(n.startswith(("shapes-", "diagram-", "pattern-", "shex-")) for n in ctx["texts"])
+    assert not any(n.startswith(("shapes-", "diagram-", "prefixes-", "patterns-", "glossary-", "shex-")) for n in ctx["texts"])
 
 
 @then("the report says the graph's classes are hidden, not that it is empty")
