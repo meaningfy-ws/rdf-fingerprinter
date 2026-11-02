@@ -47,8 +47,9 @@ file.
 ## Key decisions
 
 - **DEC-1** (R1-1): **Five files replace `pattern-<slug>.txt`; the `.txt` is removed, not
-  deprecated.** Release **4.0.0** (SemVer MAJOR: an output file of a public command disappears).
-  Rejected: keeping the `.txt` for one minor release (3.4.0).
+  deprecated.** Release **3.4.0** (*amended in R4-1*: the developer keeps the 3.x line, so the
+  breaking output change ships as a MINOR release, marked **BREAKING** in the CHANGELOG; it was
+  4.0.0, SemVer MAJOR). Rejected: keeping the `.txt` for one more minor release; 4.0.0 (R4-1).
 - **DEC-2** (R1-1): **The indexes are CSV, and their rows carry the facts**, not pointers into the
   `.md`. A tool answers from the rows alone. CSV: flat, one record per line for `grep`, loads into
   DuckDB, pandas or a spreadsheet. RFC 4180 quoting, UTF-8, header row, `\n` line ends. Rejected:
@@ -121,7 +122,7 @@ file.
 - The term-annotation query (Q12) and the `--ontology` reader collect alt labels and notes; the
   profile's `TermAnnotation` gains `alt_labels` and `notes` (optional).
 - The ShExC glossary comments gain ` alt: …`.
-- Version 4.0.0 and its `CHANGELOG.md` entry.
+- Version 3.4.0 and its `CHANGELOG.md` entry (DEC-1 as amended in R4-1).
 
 ## Capabilities
 
@@ -148,4 +149,4 @@ None.
   with `csv.DictReader` and has its header.
 - **Docs:** the pattern-schema page under `docs/modules/ROOT/pages/` and `CHANGELOG.md`.
 - **Dependencies:** none.
-- **Release:** 4.0.0.
+- **Release:** 3.4.0.

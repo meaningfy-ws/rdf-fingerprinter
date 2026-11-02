@@ -55,3 +55,13 @@ description per language, `skos:altLabel` only as a fallback).
   glossary the term type (class data property or object propperty, but encoded minimally e.g. C,
   dP, oP)". Recorded as DEC-10. The agent added `D` (datatype) and `P` (no objects collected) for
   the two cases the three codes leave out, and `dP/oP` for a property with both kinds of object.
+
+## Round 4 (2026-11-02, during implementation)
+
+- **R4-1 Version** (developer, verbatim): "we do not 4.x.x, we stay on 3.x.x". DEC-1 amended: the
+  release is 3.4.0, its breaking output change marked **BREAKING** in the CHANGELOG.
+- **R4-2 Gate** (developer): "of course with checks and QA (not mutmut however, we want a
+  relatively quick implementation and release)", then "lets do check all quick only and a
+  mandatory requirement and only ocasionally mutmut and hypothesis". The gate of this change is
+  `make check-all` (now the fast gate, without Hypothesis and coverage), e2e, spec validation and
+  a code review; `make check-all-deep` and `make check-mutation` are occasional.

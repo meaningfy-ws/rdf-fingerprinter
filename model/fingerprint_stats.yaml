@@ -339,9 +339,9 @@ classes:
     attributes:
       term: { range: uriorcurie, required: true }
       labels: { range: LangText, multivalued: true, inlined_as_list: true, description: "Pref labels only." }
-      alt_labels: { range: LangText, multivalued: true, inlined_as_list: true, description: "Every alt label; absent in profiles saved before 4.0." }
+      alt_labels: { range: LangText, multivalued: true, inlined_as_list: true, description: "Every alt label; absent in profiles saved before 3.4." }
       descriptions: { range: LangText, multivalued: true, inlined_as_list: true, description: "Definitions only." }
-      notes: { range: LangText, multivalued: true, inlined_as_list: true, description: "Every note, and the descriptions that were not selected; absent in profiles saved before 4.0." }
+      notes: { range: LangText, multivalued: true, inlined_as_list: true, description: "Every note, and the descriptions that were not selected; absent in profiles saved before 3.4." }
 
   PitfallResult:
     description: What one pitfall check found in one graph - its metadata, the count and the first examples.

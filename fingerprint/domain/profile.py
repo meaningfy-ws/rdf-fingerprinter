@@ -462,9 +462,9 @@ class TermAnnotation(ConfiguredBaseModel):
 
     term: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation', 'AnnotationValue']} })
     labels: Optional[list[LangText]] = Field(default=None, description="""Pref labels only.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
-    alt_labels: Optional[list[LangText]] = Field(default=None, description="""Every alt label; absent in profiles saved before 4.0.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
+    alt_labels: Optional[list[LangText]] = Field(default=None, description="""Every alt label; absent in profiles saved before 3.4.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
     descriptions: Optional[list[LangText]] = Field(default=None, description="""Definitions only.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
-    notes: Optional[list[LangText]] = Field(default=None, description="""Every note, and the descriptions that were not selected; absent in profiles saved before 4.0.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
+    notes: Optional[list[LangText]] = Field(default=None, description="""Every note, and the descriptions that were not selected; absent in profiles saved before 3.4.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
 
 
 class PitfallResult(ConfiguredBaseModel):

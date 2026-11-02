@@ -24,7 +24,7 @@ so `{% include %}` of a sibling template works (the report's `main.html` already
 ## Goals / Non-Goals
 
 **Goals:** the five files of DEC-1 from the one view; typed CSV rows (DEC-2, DEC-4, DEC-5); the
-annotation model and selection of DEC-5; 3.x profiles load (DEC-9); release 4.0.0.
+annotation model and selection of DEC-5; 3.x profiles load (DEC-9); release 3.4.0 (DEC-1, R4-1).
 
 **Non-Goals:** everything in the EPIC's No-gos; a runtime CSV parse check (the tests parse every
 CSV; the cells are quoted by one tested function).
@@ -324,14 +324,14 @@ same files byte for byte; it is safe to repeat.
 
 ## Stage exit criteria
 
-`make check-all` green; `make oxigraph-load-test-data` + `make test-e2e` green; `make
-check-mutation` ≥ the score in `mutation_score.txt`; `openspec validate llm-schema-split --strict`
-green; every scenario of the feature map bound and green.
+`make check-all` (the fast gate) green; `make oxigraph-load-test-data` + `make test-e2e` green;
+`openspec validate llm-schema-split --strict` green; no mutation run and no `check-all-deep` for
+this change (developer, R4-2: a quick implementation and release); every scenario of the feature map bound and green.
 
 ## Risks / Trade-offs
 
-- [Alt-label behaviour changes for 3.2 users] → the CHANGELOG `### Changed` names it; MAJOR
-  release (DEC-1).
+- [Alt-label behaviour changes for 3.2 users] → the CHANGELOG `### Changed` names it
+  **BREAKING**, in a MINOR release (DEC-1, R4-1).
 - [Five files instead of one per graph] → `patterns.md` names the other two files in its second
   line, so an agent given one file finds the rest.
 - [Notes make Q12 results and profiles larger] → only class and property IRIs are annotated

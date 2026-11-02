@@ -915,7 +915,7 @@
             "description": "The labels, alt labels, descriptions and notes selected for one class or property (llm-schema-split DEC-5, DEC-9).",
             "properties": {
                 "alt_labels": {
-                    "description": "Every alt label; absent in profiles saved before 4.0.",
+                    "description": "Every alt label; absent in profiles saved before 3.4.",
                     "items": {
                         "$ref": "#/$defs/LangText"
                     },
@@ -945,7 +945,7 @@
                     ]
                 },
                 "notes": {
-                    "description": "Every note, and the descriptions that were not selected; absent in profiles saved before 4.0.",
+                    "description": "Every note, and the descriptions that were not selected; absent in profiles saved before 3.4.",
                     "items": {
                         "$ref": "#/$defs/LangText"
                     },

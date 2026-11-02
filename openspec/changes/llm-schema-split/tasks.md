@@ -80,18 +80,18 @@ definitions and code exist. The red count `pytest tests/bdd` prints after 1.1 is
   - Layer: docs. Depends on: 1.7.
   - Tests: `make build-docs` green.
 - [ ] 1.9 Gate (design "Stage exit criteria"): `make check-all`; `make oxigraph-load-test-data` +
-  `make test-e2e` (no e2e test reads `pattern-*.txt`; IT-3 is that run); `make check-mutation` at or above `tests/guards/mutation_score.txt` (survivors get a test in the
-  owning tier, or dead code is deleted and listed here); `openspec validate llm-schema-split
-  --strict`
+  `make test-e2e` (no e2e test reads `pattern-*.txt`; IT-3 is that run); `openspec validate llm-schema-split
+  --strict`; a code review by a reviewer agent; no `make check-mutation` and no
+  `make check-all-deep` (developer, R4-2)
   - Layer: all. Depends on: 1.1–1.8.
   - Tests: all of the above green.
-- [ ] 1.10 Release 4.0.0 (DEC-1), per `AGENTS.md` "Branches" and "Release authority":
+- [ ] 1.10 Release 3.4.0 (DEC-1, amended R4-1), per `AGENTS.md` "Branches" and "Release authority":
   - PR `feature/llm-schema-split` → `develop` (it also carries the archive of `llm-schema-tools`),
     CI green, merge;
-  - `pyproject.toml` `3.3.0` → `4.0.0`; `CHANGELOG.md` `## [Unreleased]` → `## [4.0.0] - <date>`
+  - `pyproject.toml` `3.3.0` → `3.4.0`; `CHANGELOG.md` `## [Unreleased]` → `## [3.4.0] - <date>`
     (an empty `## [Unreleased]` above it);
-  - release PR `develop` → `master`, CI green, merge; bare tag `4.0.0`; `gh release create 4.0.0`;
+  - release PR `develop` → `master`, CI green, merge; bare tag `3.4.0`; `gh release create 3.4.0`;
     bring `develop` level with `master`; report the release URL.
   - Layer: release. Depends on: 1.9.
-  - Tests: `publish.yml` succeeds; `pip install rdf-fingerprinter==4.0.0` in a clean venv runs
+  - Tests: `publish.yml` succeeds; `pip install rdf-fingerprinter==3.4.0` in a clean venv runs
     `fingerprint-gen-pattern --help`.

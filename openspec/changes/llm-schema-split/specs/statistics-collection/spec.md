@@ -25,7 +25,7 @@ was not selected. Alt labels and notes SHALL be distinct and sorted by language 
 then by text. An alt label SHALL never be stored as a label. The values SHALL be stored in the
 graph profile's `term_annotations`: one entry per term with at least one value, holding its
 labels, alt labels, descriptions and notes, each with its language. A graph whose terms have no
-annotation SHALL store an empty list. A profile saved before 4.0 SHALL load, with no alt labels
+annotation SHALL store an empty list. A profile saved before 3.4 SHALL load, with no alt labels
 and no notes. When the query fails, a failure of kind `term_annotations` SHALL be recorded, and
 the graph SHALL be kept, without annotations.
 
