@@ -283,7 +283,7 @@ Feature: Publishing a fingerprint as an application profile
 
       Examples:
         | output         | note                                                                                   |
-        | pattern schema | the line "# excluded namespaces: rel (classes 0, properties 2, values 0)"              |
+        | pattern schema | the line "Excluded namespaces: rel (classes 0, properties 2, values 0)." in every patterns Markdown file |
         | ShExC          | the line "# excluded namespaces: rel (classes 0, properties 2, values 0)"              |
         | shapes         | the line "# excluded namespaces: rel (classes 0, properties 2, values 0)"              |
         | diagram        | the line "' excluded namespaces: rel (classes 0, properties 2, values 0)" in every file |

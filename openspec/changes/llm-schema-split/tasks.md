@@ -64,7 +64,7 @@ definitions and code exist. The red count `pytest tests/bdd` prints after 1.1 is
     prefix in `tests/bdd/steps/filters.py` and `tests/bdd/steps/pattern.py` moved to the new
     names, so their checks still select files;
     `› Generators share one framework › Custom template package` still green; `make build`.
-- [ ] 1.7 Step definitions of the remaining p-r scenarios; `make refresh-golden` writes the 15
+- [x] 1.7 Step definitions of the remaining p-r scenarios; `make refresh-golden` writes the 15
   new golden files and removes the 3 `pattern-*.txt`; review them against design §B–§D; IT-2
   (every golden CSV parses, header equals the column list, rows as wide as the header)
   - Layer: tests. Depends on: 1.6.
