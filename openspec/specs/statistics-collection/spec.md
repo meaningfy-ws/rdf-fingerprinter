@@ -247,20 +247,27 @@ and descriptions of the graph's class IRIs, and, from depth `properties` on, of 
 IRIs. It SHALL match them in the default graph and in every named graph, as the declared-hierarchy
 query does. IRIs that cannot be put in a query SHALL be left out of it.
 
-The predicates SHALL be those of EPIC DEC-20 and DEC-17. They count whether or not they are
+The predicates SHALL be those of llm-schema-split DEC-5. They count whether or not they are
 declared `owl:AnnotationProperty`; no other annotation property is followed.
 - **Label**, in priority order: `skos:prefLabel`, `skosxl:prefLabel`/`skosxl:literalForm`,
-  `rdfs:label`, `dcterms:title`. `skos:altLabel` is used only when the term has none of these.
-- **Description**, in priority order: `skos:definition`, `rdfs:comment`, `dcterms:description`,
-  `skos:scopeNote`.
+  `rdfs:label`, `dcterms:title`.
+- **Alt label**: `skos:altLabel`, `skosxl:altLabel`/`skosxl:literalForm`.
+- **Description** (the definition), in priority order: `skos:definition`, `rdfs:comment`,
+  `dcterms:description`.
+- **Note**: `skos:scopeNote`, `skos:note`, `skos:example`, `skos:editorialNote`,
+  `skos:historyNote`, `skos:changeNote`.
 
-Only literal values count. Per term, per field and per language tag (untagged counts as one
-language), the value SHALL come from the highest-priority predicate that has a value in that
-language. Among several such values, the smallest lexical form wins. The selected values SHALL be
-stored in the graph profile's `term_annotations`: one entry per term with at least one value,
-holding its labels and its descriptions, each with its language. A graph whose terms have no
-annotation SHALL store an empty list. When the query fails, a failure of kind `term_annotations`
-SHALL be recorded, and the graph SHALL be kept, without annotations.
+Only literal values count. Per term, for labels and for descriptions, and per language tag
+(untagged counts as one language), the value SHALL come from the highest-priority predicate that
+has a value in that language. Among several such values, the smallest lexical form wins. Alt labels
+SHALL be every alt-label value. Notes SHALL be every note value and every description value that
+was not selected. Alt labels and notes SHALL be distinct and sorted by language (untagged first),
+then by text. An alt label SHALL never be stored as a label. The values SHALL be stored in the
+graph profile's `term_annotations`: one entry per term with at least one value, holding its
+labels, alt labels, descriptions and notes, each with its language. A graph whose terms have no
+annotation SHALL store an empty list. A profile saved before 3.4 SHALL load, with no alt labels
+and no notes. When the query fails, a failure of kind `term_annotations` SHALL be recorded, and
+the graph SHALL be kept, without annotations.
 
 #### Scenario: Labels and descriptions of a class are stored
 - **WHEN** `ex:Person` is profiled and the store holds `ex:Person rdfs:label "Person"@en`, `ex:Person skos:prefLabel "Personne"@fr` and `ex:Person rdfs:comment "A human being"@en`
@@ -268,15 +275,19 @@ SHALL be recorded, and the graph SHALL be kept, without annotations.
 
 #### Scenario Outline: Label predicate priority
 - **WHEN** the store holds, for the class `ex:Person`, only <values>
-- **THEN** its stored labels are <labels>
+- **THEN** its stored labels are <labels> and its stored alt labels are <alt labels>
 
   Examples:
-    | values                                                                  | labels                 |
-    | `skos:prefLabel "Human"@en`, `rdfs:label "Person"@en`                   | `"Human"@en`           |
-    | `skosxl:prefLabel [ skosxl:literalForm "Human"@en ]`, `rdfs:label "Person"@en` | `"Human"@en`    |
-    | `skos:altLabel "Body"@en`                                               | `"Body"@en`            |
-    | `skos:altLabel "Body"@en`, `dcterms:title "Person"@de`                  | `"Person"@de`          |
-    | `rdfs:label "B"`, `rdfs:label "A"`                                      | `"A"`                  |
+    | values                                                                          | labels        | alt labels    |
+    | `skos:prefLabel "Human"@en`, `rdfs:label "Person"@en`                           | `"Human"@en`  | none          |
+    | `skosxl:prefLabel [ skosxl:literalForm "Human"@en ]`, `rdfs:label "Person"@en`  | `"Human"@en`  | none          |
+    | `skos:altLabel "Body"@en`                                                       | none          | `"Body"@en`   |
+    | `skosxl:altLabel [ skosxl:literalForm "Body"@en ]`, `dcterms:title "Person"@de` | `"Person"@de` | `"Body"@en`   |
+    | `rdfs:label "B"`, `rdfs:label "A"`                                              | `"A"`         | none          |
+
+#### Scenario: Alt labels and notes are stored
+- **WHEN** the store holds, for the class `ex:Person`, `skos:prefLabel "Person"@en`, `skos:altLabel "Human"@en`, `skos:altLabel "Body"@en`, `skos:altLabel "Mensch"@de`, `rdfs:comment "A human being"@en`, `rdfs:comment "Also a legal person"@en` and `skos:scopeNote "Use for people"@en`
+- **THEN** its stored labels are `"Person"@en`, its alt labels `"Mensch"@de`, `"Body"@en`, `"Human"@en`, its descriptions `"A human being"@en`, and its notes `"Also a legal person"@en`, `"Use for people"@en`
 
 #### Scenario: Annotations from another graph
 - **WHEN** `ex:Person` is profiled in graph `http://ex.org/data` and its `rdfs:label` is asserted only in graph `http://ex.org/ontology`

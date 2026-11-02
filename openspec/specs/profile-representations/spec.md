@@ -247,12 +247,12 @@ Properties of the shown classes SHALL stay, whatever their value types. Collecti
 - **THEN** a warning names `nope`, and the outputs are as without the option
 
 ### Requirement: No files for empty graphs
-A profiled graph with no shown class SHALL produce no SHACL, PlantUML, pattern schema or ShExC
+A profiled graph with no shown class SHALL produce no SHACL, PlantUML, pattern-schema or ShExC
 file; the report SHALL still list it, as empty.
 
 #### Scenario: Empty default graph
 - **WHEN** the shapes, diagrams, pattern schema and ShExC are generated for a profile whose default graph is empty
-- **THEN** no `shapes-default.ttl`, no `diagram-default*.puml`, no `pattern-default.txt` and no `shex-default.shex` is written, and the report lists the default graph as empty
+- **THEN** no `shapes-default.ttl`, no `diagram-default*.puml`, none of `prefixes-default.md`, `patterns-default.md`, `patterns-default.csv`, `glossary-default.md`, `glossary-default.csv` and no `shex-default.shex` is written, and the report lists the default graph as empty
 
 ### Requirement: Pattern view
 The pattern schema and the enriched ShExC SHALL both render from one pattern view per graph. The
@@ -322,14 +322,24 @@ query (EPIC DEC-2, DEC-14, DEC-18). It SHALL follow rules N1–N9 of the EPIC's
 - **THEN** the edge target is written `(:ex:Person @<http://ex.org/people>)`
 
 ### Requirement: Pattern schema output
-The pattern generator SHALL write `pattern-<graph slug>.txt` for each graph with a block, through
-the `fingerprint-gen-pattern` command and `--format pattern`. The file SHALL hold, in this
-order (N8):
-1. one `PREFIX p: <ns>` line per prefix the file uses, sorted by prefix;
-2. the legend line `# (:A&B) n: classes with the same n instances · ~m first_n: statistics over the first m read · co C k: k also typed C · via (:S)-p: incoming links · -p-> (:T|U) object classes · IRI, BNODE untyped · . not collected · deeper indent: a blank node's own edges, statistics over all its instances, up to 3 hops · ^ expanded under another edge · … deeper than 3 hops · k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured`;
-3. `# hidden: <n> classes` when n > 0 classes are hidden ("Pattern view" rule 3);
-4. the blocks, by instances, largest first, then by name;
-5. the glossary ("Term labels and descriptions in the outputs").
+The pattern generator SHALL write five files for each graph with a block, through the
+`fingerprint-gen-pattern` command and `--format pattern` (llm-schema-split DEC-1, DEC-8):
+`prefixes-<graph slug>.md` ("Prefix file"), `patterns-<graph slug>.md` (below),
+`patterns-<graph slug>.csv` ("Patterns CSV"), `glossary-<graph slug>.md` and
+`glossary-<graph slug>.csv` ("Term labels and descriptions in the outputs", "Glossary CSV"). It
+SHALL NOT write `pattern-<graph slug>.txt`. All five SHALL render from the graph's one pattern
+view through one template package.
+
+`patterns-<graph slug>.md` SHALL hold, in this order:
+1. the line `# Patterns of <graph label>`;
+2. the line ``Prefixes: `prefixes-<graph slug>.md` · glossary: `glossary-<graph slug>.md` ``;
+3. the line `Legend: (:A&B) n: classes with the same n instances · ~m first_n: statistics over the first m read · co C k: k also typed C · via (:S)-p: incoming links · -p-> (:T|U) object classes · IRI, BNODE untyped · . not collected · deeper indent: a blank node's own edges, statistics over all its instances, up to 3 hops · ^ expanded under another edge · … deeper than 3 hops · k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured`;
+4. `Hidden: <n> classes.` when n > 0 classes are hidden ("Pattern view" rule 3), and
+   `Excluded namespaces: <note>.` when the namespace filter hid something;
+5. per block, by instances, largest first, then by name: the heading `## <group name>`, then a
+   fenced code block, with the info string `text` and a fence of three backticks, holding the
+   block header and its edge lines.
+It SHALL hold no prefix declarations and no glossary.
 
 A block header SHALL be `(:<group>) <instances>`, followed by ` ~<observed> first_n` for a group
 read in first-N mode, then ` co <class> <k>` for each co-type that is not merged, joined by `, `,
@@ -356,7 +366,7 @@ longer value SHALL be cut to 64 characters and end in `…` inside the quotes.
 
 #### Scenario Outline: Lines of the continents pattern schema
 - **WHEN** the pattern schema is generated from the sample profile
-- **THEN** `pattern-continents-214e8f67.txt` holds the line <line>
+- **THEN** `patterns-continents-214e8f67.md` holds the line <line>
 
   Examples:
     | line                                                                                                                                         |
@@ -369,11 +379,15 @@ longer value SHALL be cut to 64 characters and end in `…` inside the quotes.
     | `    -rdf:value-> xsd:string AFRICA..OCEANIA`                                                                                                |
     | `(:owl:Ontology&skos:ConceptScheme) 1 via (:euvoc:Continent&skos:Concept)-skos:inScheme, (:euvoc:Continent&skos:Concept)-skos:topConceptOf` |
     | `  -skosxl:prefLabel-> (:skosxl:Label) bn ^`                                                                                                 |
-    | `# glossary: none`                                                                                                                           |
+    | `## euvoc:Continent&skos:Concept`                                                                                                            |
+
+#### Scenario: Five files per graph
+- **WHEN** the pattern schema is generated from the sample profile
+- **THEN** for each of `continents-214e8f67`, `treaties-3b4301a8` and `default` exactly `prefixes-<slug>.md`, `patterns-<slug>.md`, `patterns-<slug>.csv`, `glossary-<slug>.md` and `glossary-<slug>.csv` are written, and no `.txt` file
 
 #### Scenario: One block per class group and one edge per property
 - **WHEN** the pattern schema is generated from the sample profile
-- **THEN** in every file no group name begins two blocks, no property begins two edges at the same place, `skosxl:Label`, `euvoc:XlNotation` and `euvoc:XlNote` begin no block, and every declared prefix is used
+- **THEN** in every `patterns-<slug>.md` no group name begins two blocks, no property begins two edges at the same place, `skosxl:Label`, `euvoc:XlNotation` and `euvoc:XlNote` begin no block, and every prefix of the matching `prefixes-<slug>.md` is used in it
 
 #### Scenario Outline: Values that need quotes
 - **WHEN** a literal property's lowest and highest values are both <value>
@@ -388,7 +402,7 @@ longer value SHALL be cut to 64 characters and end in `…` inside the quotes.
 
 #### Scenario: A single IRI value is written as a prefixed name
 - **WHEN** a profile collected at depth `rich_values` has `ex:status` whose objects are all the one IRI `http://ex.org/status/active`, recorded as its top value, and the prefix table maps `exs` to `http://ex.org/status/`
-- **THEN** the edge is `-ex:status-> IRI =exs:active`, `PREFIX exs:` is declared, and the same profile without top values gives `-ex:status-> IRI d1`
+- **THEN** the edge is `-ex:status-> IRI =exs:active`, the prefix file lists `exs`, and the same profile without top values gives `-ex:status-> IRI d1`
 
 #### Scenario: A class read in first-N mode
 - **WHEN** a profile has `ex:Big` with 50000 instances, 10000 of them read in first-N mode, and `ex:name` on 9000 of those
@@ -396,7 +410,7 @@ longer value SHALL be cut to 64 characters and end in `…` inside the quotes.
 
 #### Scenario: Unusual IRIs in the LLM outputs
 - **WHEN** the profile holds the class IRI `http://ex.org/q?a=1&b='x'`
-- **THEN** the pattern schema writes it as `<http://ex.org/q?a=1&b='x'>`, and the ShExC leaves it out, lists it after `# skipped:`, and parses
+- **THEN** the patterns Markdown and CSV write it as `<http://ex.org/q?a=1&b='x'>`, and the ShExC leaves it out, lists it after `# skipped:`, and parses
 
 ### Requirement: Enriched ShExC output
 The ShExC generator SHALL write `shex-<graph slug>.shex` for each graph with a block, through the
@@ -404,7 +418,7 @@ The ShExC generator SHALL write `shex-<graph slug>.shex` for each graph with a b
 DEC-18 amendment, DEC-27), with this mapping:
 - one `PREFIX` line per prefix used; then the legend line
   `# comments use the pattern schema's legend: k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured · … deeper than 3 hops`;
-  then `# hidden: <n> classes` as in the pattern schema; then the `# skipped:` line (below), if any;
+  then `# hidden: <n> classes` when n > 0 classes are hidden ("Pattern view" rule 3); then the `# skipped:` line (below), if any;
 - per block, the comment `# ` plus the pattern block header, then a shape labelled with the
   first member of the group, in name order, that the filters show and whose IRI holds no `=`. A group
   with no such member gets no shape, and a reference to it is `IRI`. A file is written for each
@@ -430,7 +444,9 @@ DEC-18 amendment, DEC-27), with this mapping:
   level 1;
 - cardinality: `?` for 0–1, nothing for exactly 1, `{a}` for exactly a > 1, `{a,b}` otherwise.
   The minimum is 0 when some instances lack the property. A property with no histogram is `*`;
-- the glossary at the end, each line commented with `# `;
+- the glossary at the end: the line `# glossary: none` when it has no entry, else the line
+  `# glossary` followed by each glossary line ("Term labels and descriptions in the outputs")
+  after `# `;
 - a term whose IRI holds `=` SHALL be left out and listed on one `# skipped: <IRI> …` line, after
   the legend and the hidden line, because PyShExC rejects `=` in an IRI.
 Every ShExC file SHALL parse with PyShExC, its `parse` returning a `Schema`.
@@ -454,33 +470,55 @@ Every ShExC file SHALL parse with PyShExC, its `parse` returning a `Schema`.
     | `  lvont:script IRI ? ;  # 12/145 d2`                                            |
 
 ### Requirement: Term labels and descriptions in the outputs
-Classes and properties SHALL get labels and one description from two sources (EPIC DEC-6, DEC-17,
-DEC-20):
+Classes and properties SHALL get labels, alt labels, descriptions and notes from two sources
+(llm-schema-tools DEC-6; llm-schema-split DEC-5):
 - the `--ontology FILE` option of `fingerprint-gen-pattern` and `fingerprint-gen-shex`, read at
   render time with the same predicates and selection as statistics-collection "Term labels and
   descriptions are collected";
 - the profile's stored term annotations.
 
-Per term and per field, labels or description, the ontology's values SHALL be used when it has
-any, else the data's; the two are never merged (DEC-7). A file that is missing, unreadable or not
-RDF in a format rdflib reads by its extension SHALL be a usage error (exit 2) that names the file,
-and nothing SHALL be written.
+Per term and per field (labels, alt labels, descriptions, notes), the ontology's values SHALL be
+used when it has any, else the data's; the two are never merged (llm-schema-tools DEC-7). A file
+that is missing, unreadable or not RDF in a format rdflib reads by its extension SHALL be a usage
+error (exit 2) that names the file, and nothing SHALL be written.
 
-The glossary SHALL list, sorted by prefixed name, each term the output uses that has a label or a
-description (N9): `<name> "<label>"[@<lang>][: <description>]`, or `<name>: <description>` with no
-label. When there are none, it SHALL be the line `# glossary: none`, else the line `# glossary`
-followed by the entries. The label and description shown SHALL each be the untagged value if
-there is one, else `en`, else the smallest language tag. A description SHALL have its white space
-collapsed to single spaces, and be cut to 200 characters ending in `…`. A profile saved before
-term annotations existed SHALL load, and SHALL render as a profile with no annotations.
+The glossary SHALL list, sorted by prefixed name, each term the output uses that has a label, an
+alt label or a description (N9), one line each:
+`<name> <kind>[ "<label>"[@<lang>]][ alt: "<a>" | "<b>" …][: <description>]` (llm-schema-split
+DEC-7, DEC-10):
+- the kind SHALL be the term's kind codes ("Glossary CSV"), several joined by `/`;
+- the label SHALL be the shown label; a term with no label SHALL show its shown alt label instead;
+- `alt:` SHALL list, JSON-quoted and joined by ` | `, the term's alt labels in the language of
+  the label shown, except the one shown as the label; it is left out when none remain;
+- the description SHALL be the shown description, its white space collapsed to single spaces,
+  cut to 200 characters ending in `…`.
+The text shown SHALL be the untagged value if there is one, else `en`, else the smallest language
+tag. Notes SHALL NOT appear in the glossary lines.
+
+`glossary-<graph slug>.md` SHALL hold the line `# Glossary of <graph label>`, then either each
+glossary line after `- `, or, with no entry, the line
+`No term of this graph has a label or a description.` A profile saved before term annotations
+existed SHALL load, and SHALL render as a profile with no annotations.
 
 #### Scenario: Labels from an ontology file
 - **WHEN** the pattern schema is generated from the sample profile with the label fixture ontology
-- **THEN** the glossary holds `skos:Concept "Concept"@en: An idea or notion; a unit of thought.` and `skosxl:prefLabel "preferred label"@en`, and has no line for `euvoc:Continent`
+- **THEN** `glossary-continents-214e8f67.md` holds `- skos:Concept C "Concept"@en alt: "Notion": An idea or notion; a unit of thought.` and `- skosxl:prefLabel oP "preferred label"@en`, and has no line for `euvoc:Continent`
+
+#### Scenario: A term with only alt labels
+- **WHEN** the pattern schema is generated from the sample profile with the label fixture ontology
+- **THEN** `glossary-treaties-3b4301a8.md` holds the line `- skosxl:altLabel oP "alternative label"@en`
+
+#### Scenario: A term with notes only
+- **WHEN** a term the output uses has the note `"Internal"@en` and no label, alt label or description
+- **THEN** `glossary-<slug>.csv` has its row with `notes` `Internal`, and the glossary Markdown and the ShExC have no line for it
+
+#### Scenario: Alt labels in another language are not shown
+- **WHEN** a term has the label `"Concept"@en` and the alt labels `"Begriff"@de` and `"Notion"@en`
+- **THEN** its glossary line holds `"Concept"@en alt: "Notion"` and not `Begriff`
 
 #### Scenario: The ontology wins for the fields it gives
 - **WHEN** the data labels `ex:Person` `"Persoon"@nl` with the description `"Iemand"@nl`, and the ontology labels it `"Person"@en` with no description
-- **THEN** the glossary line is `ex:Person "Person"@en: Iemand`
+- **THEN** the glossary line of the class `ex:Person` is `ex:Person C "Person"@en: Iemand`
 
 #### Scenario Outline: The label shown
 - **WHEN** a term's labels are <labels>
@@ -498,7 +536,7 @@ term annotations existed SHALL load, and SHALL render as a profile with no annot
 
 #### Scenario: A profile saved before term annotations
 - **WHEN** the pattern schema is generated from a profile saved before 3.2, with no term annotations
-- **THEN** it is written, and its glossary is `# glossary: none`
+- **THEN** it is written, `glossary-<slug>.md` holds `No term of this graph has a label or a description.`, and `glossary-<slug>.csv` holds its header row only
 
 ### Requirement: Size filters
 The pattern and ShExC generators SHALL take `--min-instances N` and
@@ -510,9 +548,110 @@ be a usage error (exit 2).
 
 #### Scenario: Small classes hidden
 - **WHEN** the pattern schema of the sample profile is generated with `--min-instances 2`
-- **THEN** `pattern-treaties-3b4301a8.txt` has no `(:owl:Ontology&skos:ConceptScheme)` block and holds `# hidden: 2 classes`, and the edge `-skos:inScheme-> (:owl:Ontology&skos:ConceptScheme) d1` is still there
+- **THEN** `patterns-treaties-3b4301a8.md` has no `(:owl:Ontology&skos:ConceptScheme)` block and holds `Hidden: 2 classes.`, and the edge `-skos:inScheme-> (:owl:Ontology&skos:ConceptScheme) d1` is still there
 
 #### Scenario: Only the largest classes
 - **WHEN** the pattern schema of the sample profile is generated with `--max-classes 1`
-- **THEN** each file has one block, the largest named group of its graph
+- **THEN** each `patterns-<slug>.md` has one block, the largest named group of its graph, and each `patterns-<slug>.csv` one row of depth 0
+
+### Requirement: Prefix file
+`prefixes-<graph slug>.md` SHALL hold the line `# Prefixes of <graph label>`, then a Markdown table
+with the header `| prefix | namespace | classes | properties | instances | triples |` and one row
+per prefix of the IRIs the graph's pattern view writes, sorted by prefix (llm-schema-split DEC-3).
+The namespace SHALL be written `<namespace IRI>`, with any `|` written `\|`. Counted over the
+view only, for the namespace of the prefix:
+- `classes`: the distinct class IRIs among the members of the groups with a block and of the
+  expanded nested groups;
+- `properties`: the distinct property IRIs of the edges written, at any depth;
+- `instances`: the sum of the instance counts of those classes, each class once;
+- `triples`: the sum of the triple counts of the edges written whose property is in it.
+A prefix used only for a datatype or a value SHALL have the count 0 in every column.
+
+#### Scenario: Prefix counts of the continents graph
+- **WHEN** the pattern schema is generated from the sample profile
+- **THEN** `prefixes-continents-214e8f67.md` has a row for `euvoc` whose `classes` cell is `2` (`euvoc:Continent`, `euvoc:XlNotation`) and a row `| xsd | <http://www.w3.org/2001/XMLSchema#> | 0 | 0 | 0 | 0 |`
+
+### Requirement: CSV cells
+Every CSV file of the pattern schema SHALL follow RFC 4180 with a header row, UTF-8 and `\n` line
+ends (llm-schema-split DEC-2). A cell SHALL be empty for an absent value, `true` or `false` for a
+flag, the digits for a number, and, for several values, their texts joined by ` | ` (DEC-6). A
+cell holding `,`, `"`, a carriage return, a line feed, or a leading or trailing space SHALL be
+quoted with `"`, each `"` inside doubled.
+
+#### Scenario Outline: Cell quoting
+- **WHEN** a cell's value is <value>
+- **THEN** it is written <written>
+
+  Examples:
+    | value                          | written                   |
+    | the text `a, b`                | `"a, b"`                  |
+    | the text `say "hi"`            | `"say ""hi"""`            |
+    | the texts `Body` and `Human`   | `Body \| Human`           |
+    | no value                       | the empty cell            |
+    | the flag true                  | `true`                    |
+
+#### Scenario: Every CSV parses
+- **WHEN** the pattern schema is generated from the sample profile with the label fixture ontology
+- **THEN** every `.csv` file reads with Python's `csv.DictReader`, its header is the column list of its requirement, and every row has as many cells as the header
+
+### Requirement: Patterns CSV
+`patterns-<graph slug>.csv` SHALL have the columns `graph, block, owner, path, depth, property,
+targets, target_kinds, ending, instances, subjects, triples, per_min, per_max, blank_nodes,
+languages, min_value, max_value, single_value, distinct, presence_only, first_n, via`
+(llm-schema-split DEC-4). It SHALL hold, per block in the order of `patterns-<graph slug>.md`, one
+block row and then one row per edge line of the block, in line order:
+- **block row:** `graph` the graph IRI (empty for the default graph), `block` and `owner` the
+  group name, `depth` `0`, `instances` the group's instances, `first_n` the instances read when
+  read in first-N mode, `via` each incoming link as `<source>-<property>`; every other cell
+  empty;
+- **edge row:** `block` the block it sits in; `owner` the group whose profile gives the edge (the
+  nested group for a nested edge); `path` the property names of the edges above it joined by `/`
+  (empty at depth 1); `depth` its level, 1 to 3; `property` its prefixed name; `targets` its
+  target alternatives in the order of "Pattern view" rule 4, each written as in the patterns
+  Markdown but a group without `(:` and `)`; `target_kinds` the kind of each, `group`,
+  `datatype`, `iri`, `blank_node` or `unknown`; `ending` empty, `^` or `…` (no space before it); `instances` the
+  owner's observed instances; `subjects` the instances having it; `triples` its triples;
+  `per_min` and `per_max` its fewest and most values per instance; `blank_nodes` whether some
+  objects are blank nodes; `languages` its language tags, sorted; `min_value` and `max_value`
+  its lowest and highest value when "Pattern schema output" writes `lo..hi` or `=v`, and
+  `single_value` the value when it writes `=v` and the name of the IRI when it writes
+  `=<name>`; all three not cut and not JSON-quoted; `distinct` its distinct objects; `presence_only` whether it was found only by the
+  completeness check; `first_n` and `via` empty.
+A value the profile does not hold SHALL be an empty cell.
+
+#### Scenario Outline: Rows of the continents patterns CSV
+- **WHEN** the pattern schema is generated from the sample profile
+- **THEN** `patterns-continents-214e8f67.csv` has a row whose <columns> are <cells>
+
+  Examples:
+    | columns                                                        | cells                                                                                         |
+    | `block, depth, property, instances`                            | `euvoc:Continent&skos:Concept, 0, (empty), 6`                                                 |
+    | `depth, property, targets, target_kinds, single_value`         | `1, euvoc:startDate, xsd:date, datatype, 1952-07-24`                                          |
+    | `owner, path, depth, property, subjects, instances, distinct`  | `skosxl:Label, skosxl:prefLabel, 2, lvont:script, 12, 145, 2`                                  |
+    | `owner, depth, property, min_value, max_value`                 | `euvoc:XlNotation, 2, rdf:value, AFRICA, OCEANIA`                                             |
+    | `block, depth, via`                                            | `owl:Ontology&skos:ConceptScheme, 0, euvoc:Continent&skos:Concept-skos:inScheme \| euvoc:Continent&skos:Concept-skos:topConceptOf` |
+
+### Requirement: Glossary CSV
+`glossary-<graph slug>.csv` SHALL have the columns `term, iri, kind, language, pref_label,
+alt_labels, definition, notes` (llm-schema-split DEC-5). It SHALL hold, for each term the
+output uses that has a label, an alt label, a description or a note, sorted by prefixed name, one
+row per language that
+any of its labels, alt labels, descriptions or notes has, the untagged language first (an empty
+`language` cell), then by tag:
+- `term` the prefixed name, `iri` the full IRI;
+- `kind` the term's kind codes: `C` a class; `dP` a property whose objects are literals;
+  `oP` a property whose objects are IRIs, classes or blank nodes; `P` a property with no
+  collected objects; `D` a datatype (llm-schema-split DEC-10); a term with several codes has them
+  joined by ` | `, in the order `C`, `dP`, `oP`, `P`, `D`;
+- `pref_label` and `definition` the term's label and description in that language, or empty;
+- `alt_labels` and `notes` all its alt labels and notes in that language, in full, joined by
+  ` | `.
+
+#### Scenario: Rows per language
+- **WHEN** the pattern schema is generated from the sample profile with the label fixture ontology
+- **THEN** `glossary-continents-214e8f67.csv` has for `skos:Concept` a row with `language` `de`, `pref_label` empty and `alt_labels` `Begriff`, and a row with `language` `en`, `kind` `C`, `pref_label` `Concept`, `alt_labels` `Notion`, `definition` `An idea or notion; a unit of thought.` and `notes` `Also a SKOS class. | Use for concepts of a scheme.`
+
+#### Scenario: A description is not cut in the CSV
+- **WHEN** the pattern schema is generated from the sample profile with the label fixture ontology
+- **THEN** the `definition` of `dcterms:type` in `glossary-continents-214e8f67.csv` is the whole comment of the fixture, longer than 200 characters, with no `…`
 
