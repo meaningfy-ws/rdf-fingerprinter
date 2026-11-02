@@ -21,7 +21,7 @@ definitions and code exist. The red count `pytest tests/bdd` prints after 1.1 is
 
 ## 1. Split the pattern schema
 
-- [ ] 1.1 Gherkin: bring `tests/features/profile_representations.feature` and
+- [x] 1.1 Gherkin: bring `tests/features/profile_representations.feature` and
   `tests/features/statistics_collection.feature` in line with the delta specs (new scenarios,
   reworded steps, the Label-priority table's new column); remove the steps that read
   `pattern-*.txt` only where the scenario text changed

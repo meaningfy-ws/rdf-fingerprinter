@@ -299,15 +299,30 @@ Feature: Collecting raw statistics from a knowledge graph
       Given class "ex:Person" has 2 instances
       And the store holds, for "ex:Person", only <values>
       When the knowledge graph is fingerprinted
-      Then the term annotations give "ex:Person" the labels '<labels>'
+      Then the term annotations give "ex:Person" the labels '<labels>' and the alt labels '<alt labels>'
 
       Examples:
-        | values                                                                        | labels      |
-        | skos:prefLabel "Human"@en and rdfs:label "Person"@en                          | "Human"@en  |
-        | skosxl:prefLabel [ skosxl:literalForm "Human"@en ] and rdfs:label "Person"@en | "Human"@en  |
-        | skos:altLabel "Body"@en                                                       | "Body"@en   |
-        | skos:altLabel "Body"@en and dcterms:title "Person"@de                         | "Person"@de |
-        | rdfs:label "B" and rdfs:label "A"                                             | "A"         |
+        | values                                                                        | labels      | alt labels |
+        | skos:prefLabel "Human"@en and rdfs:label "Person"@en                          | "Human"@en  | none       |
+        | skosxl:prefLabel [ skosxl:literalForm "Human"@en ] and rdfs:label "Person"@en | "Human"@en  | none       |
+        | skos:altLabel "Body"@en                                                       | none        | "Body"@en  |
+        | skosxl:altLabel [ skosxl:literalForm "Body"@en ] and dcterms:title "Person"@de | "Person"@de | "Body"@en  |
+        | rdfs:label "B" and rdfs:label "A"                                             | "A"         | none       |
+
+    Scenario: Alt labels and notes are stored
+      Given class "ex:Person" has 2 instances
+      And the store holds 'ex:Person skos:prefLabel "Person"@en'
+      And the store holds 'ex:Person skos:altLabel "Human"@en'
+      And the store holds 'ex:Person skos:altLabel "Body"@en'
+      And the store holds 'ex:Person skos:altLabel "Mensch"@de'
+      And the store holds 'ex:Person rdfs:comment "A human being"@en'
+      And the store holds 'ex:Person rdfs:comment "Also a legal person"@en'
+      And the store holds 'ex:Person skos:scopeNote "Use for people"@en'
+      When the knowledge graph is fingerprinted
+      Then the term annotations give "ex:Person" the labels '"Person"@en'
+      And the term annotations give "ex:Person" the alt labels '"Mensch"@de, "Body"@en, "Human"@en'
+      And the term annotations give "ex:Person" the descriptions '"A human being"@en'
+      And the term annotations give "ex:Person" the notes '"Also a legal person"@en, "Use for people"@en'
 
     Scenario: Annotations from another graph
       Given class "ex:Person" has 2 instances in graph "http://ex.org/data"
