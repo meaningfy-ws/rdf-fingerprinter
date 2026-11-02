@@ -162,7 +162,11 @@ only in the golden and only in the output. PlantUML and HTML golden files compar
 |===
 | Command | Checks
 
-| `make test` (in `make check-all` and CI)
+| `make test-fast` (in `make check-all` = `make check-all-fast`, and CI)
+| `tests/` without `tests/e2e/` and without the Hypothesis property tests; writes `coverage.xml`
+for Codecov, with no coverage floor.
+
+| `make test` (in `make check-all-deep`; weekly and on demand in CI, `deep.yml`)
 | `tests/` without `tests/e2e/`, with branch coverage: at least 90% of `fingerprint/` and 100% of
 `fingerprint/domain/` (the generated `profile.py` and `views.py` excluded). Hypothesis runs with
 the `ci` profile (derandomized, no deadline).
@@ -186,6 +190,149 @@ loaded with `tests/test_data` to run the e2e tests there.
 
 A branch that only a contrived test could reach gets `# pragma: no cover — <reason>`, never inside
 `fingerprint/domain/`.
+
+[#test-profile]
+=== Which tests to run when: the tier profile
+
+Each tier was run on its own with branch coverage (12-core laptop, 2026-11-02, Hypothesis `ci`
+profile). Times are pytest's own and include the coverage overhead, which roughly doubles a run.
+"Own layer" is the coverage of the layer the tier targets; "package" is all of `fingerprint/`.
+
+[cols="2,1,1,2,1"]
+|===
+| Tier | Tests | Time | Own layer | Package
+
+| `tests/unit/domain` (no Hypothesis) | 455 | 2 s | domain 89% | 61%
+| `tests/unit/adapters` | 160 | 11 s | adapters 93% | 45%
+| `tests/unit/service_layer` | 396 | 139 s | service_layer 99% | 90%
+| `tests/unit/entrypoints` | 35 | 6 s | entrypoints 87% | 80%
+| all of `tests/unit` (no Hypothesis) | 1,046 | 159 s | — | 93%
+| `tests/bdd` (+ 4 `manual`, skipped) | 314 | 159 s | — | 94%
+| `tests/guards` | 153 | 10 s | structure, not behaviour | 43%
+| Hypothesis properties (`-m hypothesis`) | 18 | 37 s | domain 58% | 55%
+| `make test-fast` (unit + bdd + guards) | 1,518 | 152 s, 318 s with coverage | domain 100% | 99%
+| `make test-e2e` (needs the store) | 91 | 16 s | — | 73%
+| `make check-mutation` | thousands of mutants | about 1 h | domain + service_layer | —
+|===
+
+What the numbers say:
+
+* *The fast suite already carries the coverage.* Without Hypothesis it reaches 100% branch
+  coverage of `fingerprint/domain/` and 99% of the package. The 18 property tests add no covered
+  line; they add inputs nobody wrote down. That is why they belong to the deep session, not the
+  quick one.
+* *Two tiers carry the time.* `tests/unit/service_layer` and `tests/bdd` take about 2.5 minutes
+  each; everything else together takes under 40 seconds. They also overlap: each covers 93–94% of
+  the package alone.
+* *One check costs a third of the fast suite.* "The shapes report no violation on their own data"
+  validates the treaties graph against its SHACL shapes: 56 s in
+  `tests/unit/service_layer/test_representations_golden.py` (three thresholds) and 18 s more as its
+  Gherkin scenario in `tests/bdd`. Moving the three-threshold parametrisation to the deep gate
+  would cut the fast suite by about a quarter.
+* *Coverage doubles the run.* `make test-fast` takes 2.5 minutes, the same tests under coverage
+  5.3 minutes. The quick gate still collects it, without a floor, because CI reports it to Codecov
+  on every PR; the floors (90% package, 100% domain) stay in `make check-all-deep`.
+* *Guards are cheap and catch structural mistakes* (layer fences, composed dicts, traceability,
+  packaging) that no behaviour test sees; run them in every session.
+
+So, by session:
+
+[cols="1,2,3"]
+|===
+| Session | Run | Why
+
+| While coding (seconds)
+| `poetry run pytest tests/unit/<layer>` or the one test file you are changing, plus
+`poetry run pytest tests/guards`
+| The domain, adapters and entrypoints tiers finish in seconds and cover their own layer at
+87–93%. In `tests/unit/service_layer`, add `-k "not shapes_report_no_violation"` to skip the
+74-second SHACL check until the end.
+
+| Before a commit or push (about 3–4 min)
+| `make check-all` (= `make check-all-fast`)
+| Static checks plus all 1,518 fast tests: 99% of the package is exercised. CI runs the same gate.
+
+| Deep QA, before a release or after a domain change (10+ min, does not block a PR)
+| `make check-all-deep`, then `make oxigraph-load-test-data` and `make test-e2e`
+| Adds the Hypothesis properties, the coverage gates (90% package, 100% domain) and the real
+store, including the sample-profile drift test.
+
+| Weekly or before a large refactor (about 1 h)
+| `make check-mutation`
+| Checks that the tests would catch a wrong line, not just run it.
+|===
+
+[#test-properties]
+=== Property tests with Hypothesis
+
+An ordinary test checks one example you chose. A property test states a rule that must hold for
+every input, and lets Hypothesis hunt for an input that breaks it. You write the rule. Hypothesis
+plays the opponent.
+
+Take the rule "the minimum is never above the mean, and the mean never above the maximum". An
+example test checks it for one histogram. The property test in `tests/unit/domain/test_properties.py`
+checks it for every histogram Hypothesis can build:
+
+[source,python]
+----
+@given(histograms())
+def test_cardinality_statistics_are_ordered_min_mean_max(case):
+    observed, histogram = case
+    stats = cardinality_statistics(histogram, observed)
+    assert stats.min <= stats.mean <= stats.max
+----
+
+Where do the inputs come from? From the _strategies_ in `tests/unit/domain/strategies.py`, recipes
+that build believable domain objects rather than random noise. `histograms()` makes bins whose
+subjects never add up to more than the observed instances. `prefix_tables()` nests some namespaces
+inside others, because that is where prefix matching goes wrong. `raw_iris` is the exception: it is
+any text at all, junk included, to attack `to_iriref`. The strategies build their objects with
+`tests/builders.py` and import only from `fingerprint.domain`, per the fences above.
+
+When a rule breaks, Hypothesis _shrinks_ the input: it simplifies the failing case step by step and
+reports the smallest one that still fails. You read "one bin, zero subjects", not forty random bins.
+
+The properties cover the domain only, because that is where the rules live. Today they state five:
+prefix compaction round-trips, the longest matching namespace wins, cardinality statistics are
+ordered, every analytics ratio lies in [0, 1], and `to_iriref` returns a valid IRIREF or raises.
+Add one when you find a rule that must hold for all inputs; a single tricky case is an ordinary unit
+test.
+
+The two profiles in `tests/conftest.py` trade discovery against repeatability. `dev`, the local
+default, draws fresh inputs on every run, so each run can find something new. `ci`, used by
+`make test` and mutmut, is derandomised: the same inputs every time, so a failure reproduces and a
+killed mutant stays killed. Neither has a deadline, so a slow machine does not fail a test.
+
+[#test-mutation]
+=== Why mutation testing, and why it takes an hour
+
+Coverage tells you a line ran during a test. It does not tell you a test would notice if that line
+were wrong. Mutation testing closes that gap: it checks the tests, not the code.
+
+Think of mutmut as a saboteur. It plants one small bug in a copy of the code, then runs the tests
+against it. Take `fingerprint/domain/analytics.py`, which marks a property functional when no
+instance has more than one value:
+
+[source,python]
+----
+is_functional=max(bins) <= 1
+----
+
+The saboteur turns `<=` into `<`. If some test feeds in a property with exactly one value per
+instance, that test now fails and the bug is caught: the mutant is _killed_. If every test only
+uses properties with zero or several values, all tests still pass and the mutant _survives_. A
+survivor points to a behaviour no test pins down, even though coverage marks the line as covered.
+
+So why does it take an hour? Because each mutant needs its own test run. mutmut makes one for
+every operator, comparison, number, boolean and string it can change in `fingerprint/domain/` and
+`fingerprint/service_layer/`, which comes to thousands. For each one it runs the `tests/unit` and
+`tests/bdd` tests that exercise the mutated function, Hypothesis properties included. A mutant that
+causes an endless loop costs a full timeout before it counts as killed. A second or two per mutant,
+times thousands of mutants, makes the hour.
+
+That cost is why the check stays out of `make check-all` and runs weekly instead. It does not
+guard each change. It guards the guards: the score in `tests/guards/mutation_score.txt` only
+rises, so the suite can never quietly lose its teeth.
 
 [#test-anti-patterns]
 === Anti-patterns
