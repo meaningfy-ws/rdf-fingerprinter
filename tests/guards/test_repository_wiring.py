@@ -6,6 +6,7 @@ These check the wiring only; that GitHub runs a workflow, or PyPI accepts an upl
 import re
 from pathlib import Path
 
+import pytest
 import yaml
 
 from tests.guards.makefile import MAKEFILE
@@ -27,23 +28,30 @@ def _steps(workflow: dict) -> list[dict]:  # dict-ok: parsed YAML
     return [step for job in workflow["jobs"].values() for step in job["steps"]]
 
 
+@pytest.mark.xfail(strict=True, reason="until task 2.3")
 def test_check_all_runs_every_static_check_and_the_tests():
     check_all, _ = _recipe("check-all")
-    fast, _ = _recipe("check-all-fast")
-    deep, _ = _recipe("check-all-deep")
     check_quality, _ = _recipe("check-quality")
-    assert check_all == ["check-all-fast"]
-    assert {"check-quality", "test-fast"} <= set(fast)  # whole prerequisites: `test-e2e` would not count
-    assert {"check-quality", "test"} <= set(deep)
+    assert check_all == ["check-quality", "test"]
     assert set(GATES) <= set(check_quality)
 
 
-def test_the_fast_gate_skips_the_property_tests():
-    _, fast = _recipe("test-fast")
-    _, deep = _recipe("test")
-    assert "poetry run pytest" in fast and '-m "not hypothesis"' in fast
-    assert "--cov-report=xml:coverage.xml" in fast and "--cov-fail-under" not in fast  # reported, no floor
-    assert "hypothesis" not in deep.replace("--hypothesis-profile", "")  # the deep run selects every test
+@pytest.mark.xfail(strict=True, reason="until task 2.3")
+def test_the_gate_runs_the_properties_in_parallel_with_the_floors():
+    _, test = _recipe("test")
+    for flag in ("-n auto", "--hypothesis-profile=ci", '-m "not release"', "--ignore=tests/e2e", "--cov-fail-under=90"):
+        assert flag in test, flag
+    assert re.search(r"coverage report .*--fail-under=100", test)
+
+
+@pytest.mark.xfail(strict=True, reason="until task 2.3")
+def test_check_release_runs_the_release_tests_the_random_properties_and_e2e():
+    check_release, _ = _recipe("check-release")
+    _, release = _recipe("test-release")
+    _, properties = _recipe("test-properties")
+    assert check_release == ["check-all", "test-release", "test-properties", "test-e2e"]
+    assert "-m release" in release
+    assert "-m hypothesis" in properties and "--hypothesis-profile=dev" in properties
 
 
 def test_the_test_target_runs_pytest_with_a_coverage_floor_and_no_recipe_line_ignores_failure():
@@ -63,11 +71,25 @@ def test_ci_runs_check_all_on_push_and_pull_request_to_master_and_develop():
     assert upload["with"]["files"] == "coverage.xml"
 
 
-def test_the_deep_gate_runs_weekly_and_on_demand():
-    workflow = _workflow("deep")
+@pytest.mark.xfail(strict=True, reason="until task 6.1")
+def test_the_release_check_runs_e2e_on_a_store_and_installs_the_wheel():
+    workflow = _workflow("release-check")
     triggers = _triggers(workflow)
-    assert triggers["schedule"] and "workflow_dispatch" in triggers
-    assert any(step.get("run") == "make check-all-deep" for step in _steps(workflow))
+    assert triggers["pull_request"]["branches"] == ["master"] and "workflow_dispatch" in triggers
+    assert any("oxigraph" in service for job in workflow["jobs"].values() for service in job.get("services", {}))
+    runs = [step.get("run", "") for step in _steps(workflow)]
+    commands = ("make load-test-data", "make test-release", "make test-e2e", "pip install dist/*.whl", "fingerprint --help")
+    for command in commands:
+        assert any(command in run for run in runs), command
+
+
+@pytest.mark.xfail(strict=True, reason="until task 6.1")
+def test_mutation_runs_after_a_release_and_on_demand():
+    workflow = _workflow("mutation")
+    triggers = _triggers(workflow)
+    assert triggers["release"]["types"] == ["published"] and "workflow_dispatch" in triggers
+    assert "schedule" not in triggers
+    assert any(step.get("run") == "make check-mutation" for step in _steps(workflow))
 
 
 def test_the_release_workflow_publishes_through_oidc_without_a_token():
