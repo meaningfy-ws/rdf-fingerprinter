@@ -89,6 +89,13 @@ Divergence). Commit only on explicit developer consent.
 - **Subagents** — before spawning one, follow *Subagent dispatch* in the `guardrails` skill: spawn
   only when it pays, brief it fresh, take the base report back, and have finished work checked by a
   second subagent.
+- **Subagents share this checkout and branch.** Implementers run one after another; the leader
+  commits after each task. Run writers in parallel only on tasks with disjoint files, and they
+  never stage or commit. Read-only agents (reviewers, Explore) may run in parallel freely. Use a
+  separate worktree (`isolation: "worktree"`) only for overlapping parallel work or when another
+  session holds this checkout.
+- **Run checks through make** (`make test`, `make check-all`); don't hand-roll pytest pipelines.
+- **Temporary files** go in `temp/` (git-ignored), not `/tmp` or the session scratchpad.
 - **Branches (developer, 2026-11-01):** `master` is the default and release branch; `develop` is
   the integration branch. Branch features off `develop` and open their PR into `develop`; a release
   is a PR into `master`, tagged from `master`, after which `develop` is brought level with `master`.
