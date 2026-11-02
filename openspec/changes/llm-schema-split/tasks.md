@@ -28,7 +28,7 @@ definitions and code exist. The red count `pytest tests/bdd` prints after 1.1 is
   - Layer: tests (features). Depends on: —.
   - Tests: `pytest tests/bdd --collect-only` collects every scenario of the design map; the red
     count is recorded in the commit body.
-- [ ] 1.2 Model (P-3, P-4): `model/fingerprint_stats.yaml` `TermAnnotation.alt_labels`, `.notes`;
+- [x] 1.2 Model (P-3, P-4): `model/fingerprint_stats.yaml` `TermAnnotation.alt_labels`, `.notes`;
   `model/fingerprint_views.yaml` `PatternFile(template, graph)`, the `PatternEdge` slots of design
   §B, the `PrefixDeclaration` counts of §C, `GlossaryEntry.kinds` and `.rows`, `GlossaryRow`, `GlossaryEntry.line` optional; the description
   of `RepresentationFormat.pattern` ("five files per graph"); `make generate-models`

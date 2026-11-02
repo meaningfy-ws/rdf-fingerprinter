@@ -25,7 +25,7 @@ enums:
       puml: { description: "PlantUML class diagrams: per graph an overview and one file per module." }
       doc: { description: "The report page main.html (HTML), from a saved profile." }
       pitfalls: { description: "The pitfall findings as ROBOT-style TSV, one file per scanned graph (pitfall-scans)." }
-      pattern: { description: "The pattern schema: one text file per graph." }
+      pattern: { description: "The pattern schema: five files per graph (prefixes, patterns and glossary Markdown; patterns and glossary CSV)." }
       shex: { description: "Enriched ShEx compact: one .shex file per graph." }
   FilterOption:
     description: The option a namespace filter value came from.
@@ -50,6 +50,14 @@ enums:
       iri: {}
       blank_node: {}
       unknown: {}
+  TermKind:
+    description: The kind code of a glossary term (llm-schema-split DEC-10); the code is the value.
+    permissible_values:
+      C: { description: "A class." }
+      dP: { description: "A property whose objects are literals." }
+      oP: { description: "A property whose objects are IRIs, classes or blank nodes." }
+      P: { description: "A property with no collected objects." }
+      D: { description: "A datatype." }
   DiagramMemberKind:
     description: How a property appears in a diagram class.
     permissible_values:
@@ -71,6 +79,10 @@ classes:
       source: { description: "Where the prefix came from (user, packaged, prefix_cc, generated); set in the report's table." }
       uses: { range: integer, description: "Instances of the namespace's classes plus subjects of its properties, over every class and graph; set in the report's table (pitfall-scans DEC-18)." }
       excluded: { range: boolean, description: "True when the namespace is excluded by the filters; set in the report's table (namespace-filter DEC-10)." }
+      classes: { range: integer, description: "Distinct classes of the namespace the pattern view writes; set in the prefix file (llm-schema-split design C)." }
+      properties: { range: integer, description: "Distinct properties of the namespace among the edges written." }
+      instances: { range: integer, description: "Sum of the instance counts of those classes, each once." }
+      triples: { range: integer, description: "Sum of the triple counts of the edges written whose property is in the namespace." }
 
   Annotation:
     description: A predicate and its value, both written as Turtle.
@@ -228,6 +240,20 @@ classes:
       max_count: { range: integer }
       presence_only: { range: boolean }
       edges: { range: PatternEdge, multivalued: true, inlined_as_list: true, description: "Nested edges." }
+      # typed facts for the patterns CSV (llm-schema-split P-3, design B); raw, neither quoted nor cut
+      owner: { description: "The name of the group whose profile gives the edge." }
+      path: { multivalued: true, description: "The property names of the edges above this one, from the block down; empty at depth 1." }
+      triples: { range: integer }
+      subjects: { range: integer, description: "Instances having the property." }
+      observed: { range: integer, description: "The owner's observed instances." }
+      per_min: { range: integer, description: "Fewest values per instance having the property." }
+      per_max: { range: integer, description: "Most values per instance having the property." }
+      blank_nodes: { range: boolean, description: "Some objects are blank nodes." }
+      languages: { multivalued: true, description: "The language tags, sorted." }
+      min_value: { description: "Lowest value, for a single literal datatype with a known range." }
+      max_value: { description: "Highest value, as min_value." }
+      single_value: { description: "The one value, or the name of the one IRI." }
+      distinct: { range: integer, description: "Distinct objects." }
 
   ViaLink:
     description: A group reached through another group's property.
@@ -261,7 +287,18 @@ classes:
     attributes:
       term: { range: uriorcurie, required: true }
       name: { required: true }
-      line: { required: true }
+      line: { description: "The glossary line; unset for a term with notes only." }
+      kinds: { range: TermKind, multivalued: true, description: "In the order C, dP, oP, P, D." }
+      rows: { range: GlossaryRow, multivalued: true, inlined_as_list: true, description: "One per language present in any field, untagged first, then by tag." }
+
+  GlossaryRow:
+    description: The annotations of one term in one language.
+    attributes:
+      language: {}
+      pref_label: {}
+      alt_labels: { multivalued: true }
+      definition: {}
+      notes: { multivalued: true }
 
   PatternGraph:
     description: The pattern schema of one graph.
@@ -273,6 +310,12 @@ classes:
       blocks: { range: PatternBlock, multivalued: true, inlined_as_list: true }
       nested_blocks: { range: PatternBlock, multivalued: true, inlined_as_list: true, description: "Every nested group's own block, edges from depth 1." }
       glossary: { range: GlossaryEntry, multivalued: true, inlined_as_list: true }
+
+  PatternFile:
+    description: What the pattern schema's one template receives for each of the five files of a graph (llm-schema-split P-1).
+    attributes:
+      template: { required: true, description: "The sub-template's file name." }
+      graph: { range: PatternGraph, required: true, inlined: true }
 
   # --- ShExC ---
   ShexConstraint:

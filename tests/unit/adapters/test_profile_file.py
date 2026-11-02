@@ -76,3 +76,14 @@ def test_term_annotations_round_trip(tmp_path, sample_run):
 def test_a_profile_saved_before_term_annotations_loads_without_them():
     run = load_profile(SCANNED_PROFILE)  # the sample profile is a 3.2 file since task 1.4
     assert all(graph.term_annotations is None for graph in run.graphs)
+
+
+def test_a_profile_saved_before_4_0_loads_with_no_alt_labels_or_notes(tmp_path):
+    stored = json.loads(SAMPLE.read_text())
+    stored["graphs"][0]["term_annotations"] = [
+        {"term": "http://ex.org/P", "labels": [{"text": "P", "language": "en"}], "descriptions": [{"text": "d"}]}
+    ]
+    path = tmp_path / "old.json"
+    path.write_text(json.dumps(stored))
+    (annotation,) = load_profile(path).graphs[0].term_annotations
+    assert annotation.labels[0].text == "P" and annotation.alt_labels is None and annotation.notes is None

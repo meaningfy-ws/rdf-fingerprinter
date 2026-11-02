@@ -326,7 +326,7 @@ classes:
         range: TermAnnotation
         multivalued: true
         inlined_as_list: true
-        description: Selected labels and descriptions of the graph's terms; absent in profiles saved before 3.2.
+        description: Selected labels, alt labels, descriptions and notes of the graph's terms; absent in profiles saved before 3.2.
 
   LangText:
     description: A literal's text and its language tag; no language for an untagged literal.
@@ -335,11 +335,13 @@ classes:
       language: {}
 
   TermAnnotation:
-    description: The labels and descriptions selected for one class or property (llm-schema-tools DEC-17, DEC-20).
+    description: The labels, alt labels, descriptions and notes selected for one class or property (llm-schema-split DEC-5, DEC-9).
     attributes:
       term: { range: uriorcurie, required: true }
-      labels: { range: LangText, multivalued: true, inlined_as_list: true }
-      descriptions: { range: LangText, multivalued: true, inlined_as_list: true }
+      labels: { range: LangText, multivalued: true, inlined_as_list: true, description: "Pref labels only." }
+      alt_labels: { range: LangText, multivalued: true, inlined_as_list: true, description: "Every alt label; absent in profiles saved before 4.0." }
+      descriptions: { range: LangText, multivalued: true, inlined_as_list: true, description: "Definitions only." }
+      notes: { range: LangText, multivalued: true, inlined_as_list: true, description: "Every note, and the descriptions that were not selected; absent in profiles saved before 4.0." }
 
   PitfallResult:
     description: What one pitfall check found in one graph - its metadata, the count and the first examples.

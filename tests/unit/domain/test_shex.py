@@ -8,7 +8,7 @@ from fingerprint.domain.patterns import pattern_view
 from fingerprint.domain.prefixes import PrefixTable
 from fingerprint.domain.profile import LangText, NamespacePrefix, PrefixSource, TermAnnotation
 from fingerprint.domain.shex import shex_view
-from fingerprint.domain.views import GeneratorOptions, PatternGraph, ShexConstraint, ShexSchema
+from fingerprint.domain.views import GeneratorOptions, GlossaryEntry, PatternGraph, ShexConstraint, ShexSchema
 from tests.builders import klass, literals, profile_run, prop, resources
 from tests.sample_data import CONTINENTS
 from tests.unit.domain.test_patterns import TABLE, sample_view
@@ -309,6 +309,12 @@ def test_the_glossary_is_none_or_the_pattern_s_lines():
     assert schema(klass(A, 2)).glossary == ["glossary: none"]
     note = TermAnnotation(term=A, labels=[LangText(text="Thing", language="en")])
     assert schema(klass(A, 2), annotations=[note]).glossary == ["glossary", 'ex:A "Thing"@en']
+
+
+def test_a_glossary_entry_without_a_line_is_not_written():
+    notes_only = GlossaryEntry(term=A, name="ex:A")
+    view = pattern(klass(A, 2)).model_copy(update={"glossary": [notes_only]})
+    assert shex_view(view).glossary == ["glossary: none"]
 
 
 def test_the_sample_continents_in_shex_skip_nothing_and_have_three_shapes(sample_analytics):

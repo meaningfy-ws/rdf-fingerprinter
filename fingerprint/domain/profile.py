@@ -441,7 +441,7 @@ class GraphProfile(ConfiguredBaseModel):
     declared_subclass_edges: Optional[list[SubclassEdge]] = Field(default=None, description="""rdfs:subClassOf edges declared in the dataset.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     class_partitions: Optional[list[ClassProfile]] = Field(default=None, description="""One profile per instantiated class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile'], 'slot_uri': 'void:classPartition'} })
     pitfalls: Optional[list[PitfallResult]] = Field(default=None, description="""The pitfall checks run on this graph (pitfall-scans); absent when the scan was off or the graph empty.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
-    term_annotations: Optional[list[TermAnnotation]] = Field(default=None, description="""Selected labels and descriptions of the graph's terms; absent in profiles saved before 3.2.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
+    term_annotations: Optional[list[TermAnnotation]] = Field(default=None, description="""Selected labels, alt labels, descriptions and notes of the graph's terms; absent in profiles saved before 3.2.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
 
 
 class LangText(ConfiguredBaseModel):
@@ -456,13 +456,15 @@ class LangText(ConfiguredBaseModel):
 
 class TermAnnotation(ConfiguredBaseModel):
     """
-    The labels and descriptions selected for one class or property (llm-schema-tools DEC-17, DEC-20).
+    The labels, alt labels, descriptions and notes selected for one class or property (llm-schema-split DEC-5, DEC-9).
     """
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
 
     term: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation', 'AnnotationValue']} })
-    labels: Optional[list[LangText]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
-    descriptions: Optional[list[LangText]] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
+    labels: Optional[list[LangText]] = Field(default=None, description="""Pref labels only.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
+    alt_labels: Optional[list[LangText]] = Field(default=None, description="""Every alt label; absent in profiles saved before 4.0.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
+    descriptions: Optional[list[LangText]] = Field(default=None, description="""Definitions only.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
+    notes: Optional[list[LangText]] = Field(default=None, description="""Every note, and the descriptions that were not selected; absent in profiles saved before 4.0.""", json_schema_extra = { "linkml_meta": {'domain_of': ['TermAnnotation']} })
 
 
 class PitfallResult(ConfiguredBaseModel):
@@ -957,7 +959,7 @@ class GraphAnalytics(GraphProfile):
     declared_subclass_edges: Optional[list[SubclassEdge]] = Field(default=None, description="""rdfs:subClassOf edges declared in the dataset.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     class_partitions: Optional[list[ClassAnalytics]] = Field(default=None, description="""One profile per instantiated class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile'], 'slot_uri': 'void:classPartition'} })
     pitfalls: Optional[list[PitfallResult]] = Field(default=None, description="""The pitfall checks run on this graph (pitfall-scans); absent when the scan was off or the graph empty.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
-    term_annotations: Optional[list[TermAnnotation]] = Field(default=None, description="""Selected labels and descriptions of the graph's terms; absent in profiles saved before 3.2.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
+    term_annotations: Optional[list[TermAnnotation]] = Field(default=None, description="""Selected labels, alt labels, descriptions and notes of the graph's terms; absent in profiles saved before 3.2.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
 
 
 # Model rebuild
