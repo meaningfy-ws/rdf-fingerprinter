@@ -29,9 +29,20 @@ def _steps(workflow: dict) -> list[dict]:  # dict-ok: parsed YAML
 
 def test_check_all_runs_every_static_check_and_the_tests():
     check_all, _ = _recipe("check-all")
+    fast, _ = _recipe("check-all-fast")
+    deep, _ = _recipe("check-all-deep")
     check_quality, _ = _recipe("check-quality")
-    assert {"check-quality", "test"} <= set(check_all)  # whole prerequisites: `test-e2e` would not count
+    assert check_all == ["check-all-fast"]
+    assert {"check-quality", "test-fast"} <= set(fast)  # whole prerequisites: `test-e2e` would not count
+    assert {"check-quality", "test"} <= set(deep)
     assert set(GATES) <= set(check_quality)
+
+
+def test_the_fast_gate_skips_the_property_tests():
+    _, fast = _recipe("test-fast")
+    _, deep = _recipe("test")
+    assert "poetry run pytest" in fast and '-m "not hypothesis"' in fast
+    assert "hypothesis" not in deep.replace("--hypothesis-profile", "")  # the deep run selects every test
 
 
 def test_the_test_target_runs_pytest_with_a_coverage_floor_and_no_recipe_line_ignores_failure():
