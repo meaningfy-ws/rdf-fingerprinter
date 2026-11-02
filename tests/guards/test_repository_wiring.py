@@ -28,7 +28,6 @@ def _steps(workflow: dict) -> list[dict]:  # dict-ok: parsed YAML
     return [step for job in workflow["jobs"].values() for step in job["steps"]]
 
 
-@pytest.mark.xfail(strict=True, reason="until task 2.3")
 def test_check_all_runs_every_static_check_and_the_tests():
     check_all, _ = _recipe("check-all")
     check_quality, _ = _recipe("check-quality")
@@ -36,7 +35,6 @@ def test_check_all_runs_every_static_check_and_the_tests():
     assert set(GATES) <= set(check_quality)
 
 
-@pytest.mark.xfail(strict=True, reason="until task 2.3")
 def test_the_gate_runs_the_properties_in_parallel_with_the_floors():
     _, test = _recipe("test")
     for flag in ("-n auto", "--hypothesis-profile=ci", '-m "not release"', "--ignore=tests/e2e", "--cov-fail-under=90"):
@@ -44,7 +42,6 @@ def test_the_gate_runs_the_properties_in_parallel_with_the_floors():
     assert re.search(r"coverage report .*--fail-under=100", test)
 
 
-@pytest.mark.xfail(strict=True, reason="until task 2.3")
 def test_check_release_runs_the_release_tests_the_random_properties_and_e2e():
     check_release, _ = _recipe("check-release")
     _, release = _recipe("test-release")

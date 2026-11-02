@@ -31,13 +31,13 @@ under `fingerprint/` changes (No-gos); a test that reveals a bug is reported, no
   twice; fix any test that fails only in parallel (tmp paths, global state — error matrix), never by
   serialising it. Check the domain coverage report still lists `fingerprint/domain/*` under xdist.
   **Acceptance:** two consecutive parallel runs green with equal pass counts.
-- [ ] 2.3 Makefile (P-1): `test` (parallel, Hypothesis `ci`, `-m "not release"`, floors),
+- [x] 2.3 Makefile (P-1): `test` (parallel, Hypothesis `ci`, `-m "not release"`, floors),
   `check-all: check-quality test`, `test-release`, `test-properties`, `check-release`; delete
   `test-fast`, `check-all-fast`, `check-all-deep`; split `load-test-data` out of
   `oxigraph-load-test-data` (P-6). **Acceptance:** wiring tests "The gate runs every
   self-contained test" and "The release gate runs what the feature gate leaves out" green;
   `make check-all` green.
-- [ ] 2.4 Measure (DEC-4 checkpoint): `make test` wall time ×2, test count, package and domain
+- [x] 2.4 Measure (DEC-4 checkpoint): `make test` wall time ×2, test count, package and domain
   branch coverage; write them into the commit body. **Acceptance:** numbers recorded; coverage
   equal to the seed (99% / 100%).
 

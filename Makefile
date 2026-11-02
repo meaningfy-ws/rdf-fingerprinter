@@ -1,7 +1,7 @@
 SHELL = /bin/bash -o pipefail
 
 .PHONY: help install install-poetry lock build check-wheel lint format lint-fix typecheck check-architecture \
-	check-spec check-models generate-models test test-fast check-mutation test-e2e refresh-sample-profile refresh-golden check-quality check-all check-all-fast check-all-deep start-oxigraph stop-oxigraph oxigraph-load-test-data scan-files \
+	check-spec check-models generate-models test test-release test-properties check-mutation test-e2e refresh-sample-profile refresh-golden check-quality check-all check-release start-oxigraph stop-oxigraph oxigraph-load-test-data load-test-data scan-files \
 	install-antora build-docs clean-docs serve-docs preview-docs
 
 include docker/.env
@@ -86,15 +86,19 @@ check-spec: ## Validate the OpenSpec spine strictly (needs Node.js)
 	@ echo -e "$(BUILD_PRINT)openspec validate --strict$(END_BUILD_PRINT)"
 	@ $(OPENSPEC) validate --all --strict
 
-test-fast: ## Unit, bdd and guard tests without the Hypothesis property tests; writes coverage.xml, no coverage floor
-	@ echo -e "$(BUILD_PRINT)Running the unit tests (no Hypothesis)$(END_BUILD_PRINT)"
-	@ poetry run pytest $(TEST_PATH) --ignore=$(TEST_PATH)/e2e -m "not hypothesis" -q --cov=$(PACKAGE_NAME) --cov-branch --cov-report=term:skip-covered --cov-report=xml:coverage.xml
-
-test: ## Unit, bdd and guard tests with the Hypothesis property tests and coverage (no SPARQL store needed)
-	@ echo -e "$(BUILD_PRINT)Running the unit tests$(END_BUILD_PRINT)"
-	@ poetry run pytest $(TEST_PATH) --ignore=$(TEST_PATH)/e2e --hypothesis-profile=ci --cov=$(PACKAGE_NAME) --cov-branch --cov-report=term --cov-report=xml:coverage.xml --cov-fail-under=90 --junitxml=junit_report.xml
+test: ## The feature gate: unit, bdd and guard tests in parallel, Hypothesis ci profile, coverage floors (no SPARQL store, no release tests)
+	@ echo -e "$(BUILD_PRINT)Running the unit tests (parallel)$(END_BUILD_PRINT)"
+	@ poetry run pytest $(TEST_PATH) --ignore=tests/e2e -m "not release" -n auto --hypothesis-profile=ci --cov=$(PACKAGE_NAME) --cov-branch --cov-report=term:skip-covered --cov-report=xml:coverage.xml --cov-fail-under=90 --junitxml=junit_report.xml
 	@ echo -e "$(BUILD_PRINT)Checking 100% branch coverage of the domain layer$(END_BUILD_PRINT)"
 	@ poetry run coverage report --include='fingerprint/domain/*' --omit='fingerprint/domain/profile.py,fingerprint/domain/views.py' --fail-under=100
+
+test-release: ## The release-only tests, in parallel, no coverage (extra depth the feature gate leaves out)
+	@ echo -e "$(BUILD_PRINT)Running the release tests$(END_BUILD_PRINT)"
+	@ poetry run pytest $(TEST_PATH) --ignore=$(TEST_PATH)/e2e -m release -n auto --hypothesis-profile=ci
+
+test-properties: ## The Hypothesis property tests with the dev profile (random examples, local only), no coverage
+	@ echo -e "$(BUILD_PRINT)Running the property tests (dev profile)$(END_BUILD_PRINT)"
+	@ poetry run pytest $(TEST_PATH) --ignore=$(TEST_PATH)/e2e -m hypothesis -n auto --hypothesis-profile=dev
 
 check-mutation: ## Mutation score ratchet over domain and service_layer (slow, ~1 h; not part of check-all)
 	@ echo -e "$(BUILD_PRINT)Running mutmut (about an hour)$(END_BUILD_PRINT)"
@@ -149,13 +153,11 @@ check-models: ## Fail when the generated model or schema is out of date with mod
 check-quality: lint typecheck check-architecture check-models check-spec ## Static checks
 	@ echo -e "$(BUILD_PRINT)All quality checks passed$(END_BUILD_PRINT)"
 
-check-all-fast: check-quality test-fast ## The everyday gate: static checks + tests (no Hypothesis, coverage reported, no floor)
-	@ echo -e "$(BUILD_PRINT)Fast verification suite passed$(END_BUILD_PRINT)"
+check-all: check-quality test ## The gate CI runs: static checks + the parallel tests with floors
+	@ echo -e "$(BUILD_PRINT)Verification suite passed$(END_BUILD_PRINT)"
 
-check-all-deep: check-quality test ## The slow gate (weekly in CI, deep.yml): static checks + all tests incl. Hypothesis + coverage floors
-	@ echo -e "$(BUILD_PRINT)Deep verification suite passed$(END_BUILD_PRINT)"
-
-check-all: check-all-fast ## The gate CI runs (= check-all-fast)
+check-release: check-all test-release test-properties test-e2e ## The release gate, local: check-all + release tests + random properties + e2e (run oxigraph-load-test-data first)
+	@ echo -e "$(BUILD_PRINT)Release verification suite passed$(END_BUILD_PRINT)"
 
 #-----------------------------------------------------------------------------
 # Test SPARQL store — Oxigraph only (DEC-10)
@@ -169,7 +171,9 @@ start-oxigraph: ## Start an in-memory Oxigraph on RDF_FINGERPRINTER_OXIGRAPH_POR
 stop-oxigraph: ## Stop Oxigraph
 	@ $(COMPOSE) rm -sf oxigraph
 
-oxigraph-load-test-data: start-oxigraph ## Load the test graphs into Oxigraph (endpoint $(OXIGRAPH)/query)
+oxigraph-load-test-data: start-oxigraph load-test-data ## Start Oxigraph and load the test graphs (endpoint $(OXIGRAPH)/query)
+
+load-test-data: ## Load the test graphs into the store at $(OXIGRAPH) (already running; CI uses it)
 	@ echo -e "$(BUILD_PRINT)Loading the test data into Oxigraph$(END_BUILD_PRINT)"
 	@ curl -sf -X DELETE "$(OXIGRAPH)/store?graph=$(GRAPH_BASE)/continents" -o /dev/null || true
 	@ curl -sf -X DELETE "$(OXIGRAPH)/store?graph=$(GRAPH_BASE)/treaties" -o /dev/null || true
