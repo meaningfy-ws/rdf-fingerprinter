@@ -70,7 +70,7 @@ definitions and code exist. The red count `pytest tests/bdd` prints after 1.1 is
   - Layer: tests. Depends on: 1.6.
   - Tests: every scenario of the "Still red" table green; `test_representations_golden.py` green;
     ShExC goldens unchanged (IT-4).
-- [ ] 1.8 Docs: `docs/modules/ROOT/pages/llm-schema.adoc` (the five files, their columns, the
+- [x] 1.8 Docs: `docs/modules/ROOT/pages/llm-schema.adoc` (the five files, their columns, the
   alt labels and notes, sizes re-measured with `wc -m` on the new goldens), `representations.adoc`
   table row, `glossary.adoc` "Pattern schema", `statistics.adoc` Q12 predicates, README section;
   `CHANGELOG.md` `## [Unreleased]` with `### Changed` (**BREAKING**: the five files replace
