@@ -345,9 +345,15 @@ def both_list(ctx, name):
 # --- the note of the excluded namespaces ---
 
 
-@then(parsers.re(r'it carries the line "(?P<line>[^"]+)"(?: in every file)?'))
-def carries_line(ctx, line):
-    files = [t for ts in ctx["by_format"].values() for t in ts.values()]
+@then(parsers.re(r'it carries the line "(?P<line>[^"]+)"(?P<scope> in every file| in every patterns Markdown file)?$'))
+def carries_line(ctx, line, scope):
+    markdown_only = scope == " in every patterns Markdown file"  # the pattern schema's note is in `patterns-<slug>.md` only
+    files = [
+        text
+        for texts in ctx["by_format"].values()
+        for name, text in texts.items()
+        if not markdown_only or (name.startswith("patterns-") and name.endswith(".md"))
+    ]
     assert files
     for text in files:
         assert line in text.splitlines()

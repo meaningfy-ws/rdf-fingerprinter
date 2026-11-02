@@ -15,13 +15,11 @@ from fingerprint.service_layer.generators.pattern import PatternGenerator
 from tests import builders
 from tests.builders import klass, literals, profile_run, prop
 from tests.fakes import EX, files
+from tests.sample_data import GLOSSARY_COLUMNS, PATTERNS_COLUMNS
 
 CONTINENTS_GRAPH = "http://publications.europa.eu/resources/authority/continents"
-PATTERNS_HEADER = (
-    "graph,block,owner,path,depth,property,targets,target_kinds,ending,instances,subjects,triples,per_min,per_max,"
-    "blank_nodes,languages,min_value,max_value,single_value,distinct,presence_only,first_n,via"
-)
-GLOSSARY_HEADER = "term,iri,kind,language,pref_label,alt_labels,definition,notes"
+PATTERNS_HEADER = ",".join(PATTERNS_COLUMNS)
+GLOSSARY_HEADER = ",".join(GLOSSARY_COLUMNS)
 
 
 def outputs(run, **options):

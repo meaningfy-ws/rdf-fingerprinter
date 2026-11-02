@@ -17,6 +17,12 @@ GOLDEN = TEST_DATA / "golden"
 SCANNED_PROFILE = TEST_DATA / "profiles" / "scanned-profile.json"
 SCANNED_GOLDEN = GOLDEN / "scanned"
 SCANNED_FORMATS = ("doc", "pitfalls")
+# The columns of the pattern schema's CSV files (llm-schema-split DEC-4, DEC-5): the spec's lists, typed in by hand.
+PATTERNS_COLUMNS = (
+    "graph block owner path depth property targets target_kinds ending instances subjects triples per_min per_max "
+    "blank_nodes languages min_value max_value single_value distinct presence_only first_n via"
+).split()
+GLOSSARY_COLUMNS = "term iri kind language pref_label alt_labels definition notes".split()
 GRAPH_BASE = "http://publications.europa.eu/resources/authority/"
 EUVOC = "http://publications.europa.eu/ontology/euvoc#"
 SKOS = "http://www.w3.org/2004/02/skos/core#"

@@ -3,6 +3,9 @@
 After an intended change run `make refresh-golden`, then review the diff.
 """
 
+import csv
+import io
+
 import pyshacl
 import pytest
 from rdflib import Graph, Namespace
@@ -12,7 +15,15 @@ from fingerprint.adapters.profile_file import load_profile
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.representations import with_threshold
 from tests.refresh_golden import render
-from tests.sample_data import GOLDEN, SCANNED_FORMATS, SCANNED_GOLDEN, SCANNED_PROFILE, TEST_DATA
+from tests.sample_data import (
+    GLOSSARY_COLUMNS,
+    GOLDEN,
+    PATTERNS_COLUMNS,
+    SCANNED_FORMATS,
+    SCANNED_GOLDEN,
+    SCANNED_PROFILE,
+    TEST_DATA,
+)
 
 SH = Namespace("http://www.w3.org/ns/shacl#")
 # make oxigraph-load-test-data puts continents in the default graph too; no union default graph.
@@ -48,6 +59,23 @@ def assert_golden(produced, folder):
 @pytest.mark.parametrize("name", sorted(set(GENERATORS) - {"pitfalls"}))  # the sample profile holds no scan results
 def test_golden_output(name, sample_outputs):
     assert_golden(sample_outputs[name], GOLDEN)
+
+
+GOLDEN_CSV = sorted(GOLDEN.glob("*.csv"))
+
+
+def test_the_pattern_schema_has_a_patterns_and_a_glossary_csv_for_each_of_the_three_graphs():
+    assert [p.name.split("-")[0] for p in GOLDEN_CSV] == ["glossary"] * 3 + ["patterns"] * 3
+
+
+@pytest.mark.parametrize("path", GOLDEN_CSV, ids=lambda p: p.name)
+def test_every_golden_csv_parses_with_its_columns_and_rows_as_wide_as_the_header(path):
+    """IT-2 (llm-schema-split)."""
+    columns = PATTERNS_COLUMNS if path.name.startswith("patterns-") else GLOSSARY_COLUMNS
+    reader = csv.DictReader(io.StringIO(path.read_text(encoding="utf-8"), newline=""))
+    assert reader.fieldnames == columns
+    for row in reader:
+        assert None not in row and None not in row.values(), row
 
 
 @pytest.mark.parametrize("name", SCANNED_FORMATS)
