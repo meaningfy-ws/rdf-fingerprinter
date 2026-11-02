@@ -77,7 +77,7 @@ under `fingerprint/` changes (No-gos); a test that reveals a bug is reported, no
 
 ## 6. CI (DEC-6; P-6)
 
-- [ ] 6.1 `release-check.yml` (PR into `master` + dispatch: Oxigraph service, `make load-test-data`,
+- [x] 6.1 `release-check.yml` (PR into `master` + dispatch: Oxigraph service, `make load-test-data`,
   `make test-release test-e2e`, wheel install + `fingerprint --help`); delete `deep.yml`;
   `mutation.yml` on `release: published` + dispatch, no schedule; `ci.yml` comment updated.
   **Acceptance:** wiring tests "A release PR runs the release checks" and "Mutation testing runs

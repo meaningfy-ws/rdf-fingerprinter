@@ -1,0 +1,62 @@
+name: release-check
+
+# The release gate on GitHub (lean-fast-suite DEC-6): runs on a pull request into master and on demand.
+# It adds what the per-PR gate (ci.yml) leaves out: the release-only tests, the e2e tests against a
+# real Oxigraph store, and an install of the built wheel. The randomised Hypothesis properties stay
+# local (`make test-properties`, DEC-8). Mutation testing runs after a release (mutation.yml).
+on:
+  pull_request:
+    branches: [ master ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  RDF_FINGERPRINTER_OXIGRAPH_PORT: 7878
+  RDF_FINGERPRINTER_TEST_ENDPOINT: http://localhost:7878/query
+
+jobs:
+  release-check:
+    runs-on: ubuntu-latest
+    services:
+      # same image as docker/docker-compose.yml; a service cannot pass a command, so the image's
+      # default CMD runs (`serve --location /data --bind 0.0.0.0:7878`): a fresh, empty store per job.
+      oxigraph:
+        image: ghcr.io/oxigraph/oxigraph:0.5.13
+        ports:
+          - 7878:7878
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install Poetry
+        run: pipx install "poetry>=2.0.0,<3.0.0"
+      - name: Install dependencies
+        run: |
+          poetry env use python
+          make install
+      - name: Wait for the Oxigraph endpoint
+        run: |
+          for _ in $(seq 60); do
+            curl -sf -o /dev/null "http://localhost:7878/query?query=ASK%20%7B%7D" && exit 0
+            sleep 1
+          done
+          echo "Oxigraph did not answer at http://localhost:7878/query within 60 s" >&2
+          exit 1
+      - name: Load the test data
+        run: make load-test-data
+      - name: Release-only tests
+        run: make test-release
+      - name: End-to-end tests
+        run: make test-e2e
+      - name: Build and check the distribution
+        run: make build
+      - name: Install the wheel in a fresh environment
+        run: |
+          python -m venv "$RUNNER_TEMP/wheel-venv"
+          . "$RUNNER_TEMP/wheel-venv/bin/activate"
+          pip install dist/*.whl
+          fingerprint --help

@@ -1,13 +1,13 @@
 name: mutation
 
-# The full mutmut run takes about an hour (lean-test-suite task 6.4), so it is weekly and on demand,
-# not per pull request; developers also run `make check-mutation` locally before a PR.
+# The full mutmut run takes about an hour, so it runs after a release is published (it never blocks
+# one) and on demand, not per pull request; developers also run `make check-mutation` locally.
 on:
-  schedule:
-    - cron: '0 3 * * 1'
+  release:
+    types: [published]
   workflow_dispatch:
 
-# One run at a time: a manual run waits for the scheduled one instead of competing for the runner.
+# One run at a time: a manual run waits for the post-release one instead of competing for the runner.
 concurrency:
   group: mutation
   cancel-in-progress: false

@@ -1,7 +1,7 @@
 name: ci
 
 # Gate per PR and on merge to master or develop; a PR branch is tested once (via pull_request), not twice.
-# No SPARQL store here: the e2e tests run locally (`make test-e2e`, DEC-10).
+# No SPARQL store here: the e2e and release-only tests run in release-check.yml (PRs into master) and locally.
 on:
   push:
     branches: [ master, develop ]

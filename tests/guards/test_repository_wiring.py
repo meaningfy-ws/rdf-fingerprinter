@@ -6,7 +6,6 @@ These check the wiring only; that GitHub runs a workflow, or PyPI accepts an upl
 import re
 from pathlib import Path
 
-import pytest
 import yaml
 
 from tests.guards.makefile import MAKEFILE
@@ -68,7 +67,6 @@ def test_ci_runs_check_all_on_push_and_pull_request_to_master_and_develop():
     assert upload["with"]["files"] == "coverage.xml"
 
 
-@pytest.mark.xfail(strict=True, reason="until task 6.1")
 def test_the_release_check_runs_e2e_on_a_store_and_installs_the_wheel():
     workflow = _workflow("release-check")
     triggers = _triggers(workflow)
@@ -80,7 +78,6 @@ def test_the_release_check_runs_e2e_on_a_store_and_installs_the_wheel():
         assert any(command in run for run in runs), command
 
 
-@pytest.mark.xfail(strict=True, reason="until task 6.1")
 def test_mutation_runs_after_a_release_and_on_demand():
     workflow = _workflow("mutation")
     triggers = _triggers(workflow)
