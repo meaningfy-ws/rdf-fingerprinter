@@ -81,6 +81,12 @@ file.
   the same line. Rejected: a full per-language section per term.
 - **DEC-8** (R1-6): **One command writes all five files**: `fingerprint-gen-pattern`, and
   `--format pattern`. Rejected: separate `-gen-glossary` and `-gen-prefixes` commands.
+- **DEC-10** (R3-1, added before implementation): **Each glossary term carries a minimal kind
+  code**: `C` class, `dP` data property (literal objects), `oP` object property (IRI, class or
+  blank-node objects); also `D` datatype and `P` property with no collected objects. Several
+  codes are joined (`dP/oP` in the `.md` line, ` | ` in the CSV `kind` column). The code follows
+  the name in the glossary line, so the ShExC glossary comments carry it too. Derived from the
+  pattern view's edge targets; no query. Rejected: the words `class`/`property`/`datatype`.
 - **DEC-9**: **Profiles saved by 3.x load.** Their stored labels become pref labels and their
   descriptions become definitions; they have no alt labels or notes. No profile version bump.
 

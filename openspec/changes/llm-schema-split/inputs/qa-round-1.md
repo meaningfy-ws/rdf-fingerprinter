@@ -48,3 +48,10 @@ description per language, `skos:altLabel` only as a fallback).
 - **R2-3 Glossary .md**: compact, one language per term as in 3.2, plus `alt: a | b`; notes only in
   the CSV.
 - **R2-4 Separator**: multi-valued cells are joined with ` | ` (developer chose it over `; `).
+
+## Round 3 (2026-11-02, after the PLAN gate, before implementation)
+
+- **R3-1 Term type in the glossary** (developer, verbatim): "oh we shall also indicate in teh
+  glossary the term type (class data property or object propperty, but encoded minimally e.g. C,
+  dP, oP)". Recorded as DEC-10. The agent added `D` (datatype) and `P` (no objects collected) for
+  the two cases the three codes leave out, and `dP/oP` for a property with both kinds of object.

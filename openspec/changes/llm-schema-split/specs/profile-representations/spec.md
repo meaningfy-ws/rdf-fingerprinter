@@ -85,14 +85,17 @@ row per language that
 any of its labels, alt labels, descriptions or notes has, the untagged language first (an empty
 `language` cell), then by tag:
 - `term` the prefixed name, `iri` the full IRI;
-- `kind` how the view writes the IRI: `class`, `property` or `datatype`, several joined by ` | `;
+- `kind` the term's kind codes: `C` a class; `dP` a property whose objects are literals;
+  `oP` a property whose objects are IRIs, classes or blank nodes; `P` a property with no
+  collected objects; `D` a datatype (llm-schema-split DEC-10); a term with several codes has them
+  joined by ` | `, in the order `C`, `dP`, `oP`, `P`, `D`;
 - `pref_label` and `definition` the term's label and description in that language, or empty;
 - `alt_labels` and `notes` all its alt labels and notes in that language, in full, joined by
   ` | `.
 
 #### Scenario: Rows per language
 - **WHEN** the pattern schema is generated from the sample profile with the label fixture ontology
-- **THEN** `glossary-continents-214e8f67.csv` has for `skos:Concept` a row with `language` `de`, `pref_label` empty and `alt_labels` `Begriff`, and a row with `language` `en`, `kind` `class`, `pref_label` `Concept`, `alt_labels` `Notion`, `definition` `An idea or notion; a unit of thought.` and `notes` `Also a SKOS class. | Use for concepts of a scheme.`
+- **THEN** `glossary-continents-214e8f67.csv` has for `skos:Concept` a row with `language` `de`, `pref_label` empty and `alt_labels` `Begriff`, and a row with `language` `en`, `kind` `C`, `pref_label` `Concept`, `alt_labels` `Notion`, `definition` `An idea or notion; a unit of thought.` and `notes` `Also a SKOS class. | Use for concepts of a scheme.`
 
 #### Scenario: A description is not cut in the CSV
 - **WHEN** the pattern schema is generated from the sample profile with the label fixture ontology
@@ -271,7 +274,9 @@ error (exit 2) that names the file, and nothing SHALL be written.
 
 The glossary SHALL list, sorted by prefixed name, each term the output uses that has a label, an
 alt label or a description (N9), one line each:
-`<name>[ "<label>"[@<lang>]][ alt: "<a>" | "<b>" …][: <description>]` (llm-schema-split DEC-7):
+`<name> <kind>[ "<label>"[@<lang>]][ alt: "<a>" | "<b>" …][: <description>]` (llm-schema-split
+DEC-7, DEC-10):
+- the kind SHALL be the term's kind codes ("Glossary CSV"), several joined by `/`;
 - the label SHALL be the shown label; a term with no label SHALL show its shown alt label instead;
 - `alt:` SHALL list, JSON-quoted and joined by ` | `, the term's alt labels in the language of
   the label shown, except the one shown as the label; it is left out when none remain;
@@ -287,11 +292,11 @@ existed SHALL load, and SHALL render as a profile with no annotations.
 
 #### Scenario: Labels from an ontology file
 - **WHEN** the pattern schema is generated from the sample profile with the label fixture ontology
-- **THEN** `glossary-continents-214e8f67.md` holds `- skos:Concept "Concept"@en alt: "Notion": An idea or notion; a unit of thought.` and `- skosxl:prefLabel "preferred label"@en`, and has no line for `euvoc:Continent`
+- **THEN** `glossary-continents-214e8f67.md` holds `- skos:Concept C "Concept"@en alt: "Notion": An idea or notion; a unit of thought.` and `- skosxl:prefLabel oP "preferred label"@en`, and has no line for `euvoc:Continent`
 
 #### Scenario: A term with only alt labels
 - **WHEN** the pattern schema is generated from the sample profile with the label fixture ontology
-- **THEN** `glossary-treaties-3b4301a8.md` holds the line `- skosxl:altLabel "alternative label"@en`
+- **THEN** `glossary-treaties-3b4301a8.md` holds the line `- skosxl:altLabel oP "alternative label"@en`
 
 #### Scenario: A term with notes only
 - **WHEN** a term the output uses has the note `"Internal"@en` and no label, alt label or description
@@ -303,7 +308,7 @@ existed SHALL load, and SHALL render as a profile with no annotations.
 
 #### Scenario: The ontology wins for the fields it gives
 - **WHEN** the data labels `ex:Person` `"Persoon"@nl` with the description `"Iemand"@nl`, and the ontology labels it `"Person"@en` with no description
-- **THEN** the glossary line is `ex:Person "Person"@en: Iemand`
+- **THEN** the glossary line of the class `ex:Person` is `ex:Person C "Person"@en: Iemand`
 
 #### Scenario Outline: The label shown
 - **WHEN** a term's labels are <labels>

@@ -203,14 +203,16 @@ A `|` in a namespace is written `\|`.
 
 ### D. Glossary: `glossary-<slug>.md` and `glossary-<slug>.csv`
 
-`GlossaryEntry` gains `kinds` (`class`, `property`, `datatype`: how the view writes the IRI; the
-builder records it where it adds to `used`) and `rows` (`GlossaryRow(language, pref_label,
+`GlossaryEntry` gains `kinds` (DEC-10: `C` for an IRI written as a class, `dP`/`oP`/`P` for one
+written as an edge property, by its target kinds — `datatype` → `dP`; `group`, `iri`,
+`blank_node` → `oP`; only `unknown` → `P`; both → `dP` and `oP` — and `D` for a datatype target;
+the builder records them where it adds to `used`, in the order `C`, `dP`, `oP`, `P`, `D`) and `rows` (`GlossaryRow(language, pref_label,
 alt_labels, definition, notes)`, one per language present in any of the four fields, untagged
 first, then by tag). Entries: the terms the view writes that have any annotation (notes only
 included), sorted by name (3.2 N9).
 
 The `.md` line (`GlossaryEntry.line`, also the ShExC comment) is
-`<name>[ "<label>"[@<lang>]][ alt: "<a>" | "<b>"][: <description>]`:
+`<name> <kinds joined by />[ "<label>"[@<lang>]][ alt: "<a>" | "<b>"][: <description>]`:
 - label = `shown(labels)`; when `labels` is empty, `shown(alt_labels)`;
 - alt = the `alt_labels` in the label's language, without the one used as the label, JSON-quoted;
 - description = `shown(descriptions)`, white space collapsed, cut at 200 characters with `…`;
@@ -221,8 +223,8 @@ The `.md` line (`GlossaryEntry.line`, also the ShExC comment) is
 ```text
 # Glossary of continents
 
-- skos:Concept "Concept"@en alt: "Notion": An idea or notion; a unit of thought.
-- skosxl:prefLabel "preferred label"@en
+- skos:Concept C "Concept"@en alt: "Notion": An idea or notion; a unit of thought.
+- skosxl:prefLabel oP "preferred label"@en
 ```
 
 With no entry the body is `No term of this graph has a label or a description.`
@@ -286,7 +288,9 @@ Feature file `tests/features/profile_representations.feature` and
 - `merge_annotations`: each of the four fields independently.
 - Prefix counts: a prefix used only by a datatype gives zeros; a class in two groups is counted
   once.
-- Glossary: a term written both as a class and a property has `kind` `class | property`; a
+- Glossary: a term written both as a class and an object property has `kind` `C | oP` and the
+  line token `C/oP`; a property with literal and IRI objects is `dP | oP`; one with no
+  collected objects is `P`; a
   notes-only term has CSV rows and no line, and alone gives `# glossary: none` in the ShExC.
 - Q12 text holds every predicate of §A (adapter unit test on the query file).
 
