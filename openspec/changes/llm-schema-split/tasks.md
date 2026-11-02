@@ -48,7 +48,7 @@ definitions and code exist. The red count `pytest tests/bdd` prints after 1.1 is
   quoting`
   - Layer: domain + adapters. Depends on: —.
   - Tests: the `csv_cell` unit tests of design "Unit tests"; `Cell quoting` green.
-- [ ] 1.5 Pattern view (design §B–§D): `_Builder` sets the typed `PatternEdge` slots, `owner` and
+- [x] 1.5 Pattern view (design §B–§D): `_Builder` sets the typed `PatternEdge` slots, `owner` and
   `path`; prefix counts on `PrefixDeclaration`; `GlossaryEntry.kinds`, `.rows` and the new
   `line` (alt labels; alt label as label); `fingerprint/domain/shex.py` glossary skips entries without a line
   - Layer: domain. Depends on: 1.2, 1.3.

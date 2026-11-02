@@ -12,11 +12,12 @@ from fingerprint.domain.prefixes import PrefixTable
 from fingerprint.domain.profile import LangText, NamespacePrefix, PrefixSource, TermAnnotation, ValueCount
 from fingerprint.domain.views import (
     GeneratorOptions,
+    GlossaryRow,
     PatternBlock,
     PatternEdge,
     PatternGraph,
-    PrefixDeclaration,
     TargetKind,
+    TermKind,
     ViaLink,
 )
 from tests.builders import klass, literals, profile_run, prop, resources
@@ -864,33 +865,33 @@ def glossary(*annotations):
 
 def test_the_glossary_has_the_label_and_the_description_of_each_term_the_view_writes_sorted_by_name():
     assert glossary(note(P, [("has p", "en")], [("The p.", "en")]), note(A, [("A thing", "en")], [("Something.", "fr")])) == [
-        'ex:A "A thing"@en: Something.',
-        'ex:p "has p"@en: The p.',
+        'ex:A C "A thing"@en: Something.',
+        'ex:p dP "has p"@en: The p.',
     ]
 
 
 def test_an_untagged_label_has_no_language_and_a_missing_part_is_left_out():
     assert glossary(note(A, [("Thing", None)]), note(P, descriptions=[("Only text", "en")])) == [
-        'ex:A "Thing"',
-        "ex:p: Only text",
+        'ex:A C "Thing"',
+        "ex:p dP: Only text",
     ]
 
 
 def test_the_glossary_shows_the_untagged_then_english_then_the_smallest_language():
-    assert glossary(note(A, [("Begriff", "de"), ("Concept", "fr"), ("Idea", "en")])) == ['ex:A "Idea"@en']
-    assert glossary(note(A, [("Begriff", "de"), ("Concept", "fr")])) == ['ex:A "Begriff"@de']
+    assert glossary(note(A, [("Begriff", "de"), ("Concept", "fr"), ("Idea", "en")])) == ['ex:A C "Idea"@en']
+    assert glossary(note(A, [("Begriff", "de"), ("Concept", "fr")])) == ['ex:A C "Begriff"@de']
 
 
 def test_a_description_is_one_line_cut_at_two_hundred_characters():
     long = "x" * 250
-    assert glossary(note(A, descriptions=[(long, None)])) == ["ex:A: " + "x" * 200 + "…"]
-    assert glossary(note(A, descriptions=[("two\n  lines", None)])) == ["ex:A: two lines"]
-    assert glossary(note(A, descriptions=[("x" * 200, None)])) == ["ex:A: " + "x" * 200]  # at the limit: not cut
+    assert glossary(note(A, descriptions=[(long, None)])) == ["ex:A C: " + "x" * 200 + "…"]
+    assert glossary(note(A, descriptions=[("two\n  lines", None)])) == ["ex:A C: two lines"]
+    assert glossary(note(A, descriptions=[("x" * 200, None)])) == ["ex:A C: " + "x" * 200]  # at the limit: not cut
 
 
 def test_a_label_is_quoted_as_a_json_string():
-    assert glossary(note(A, [('He said "hi"\n', None)])) == ['ex:A "He said \\"hi\\""']
-    assert glossary(note(A, [("Größe", "de")])) == ['ex:A "Größe"@de']  # not escaped to ASCII
+    assert glossary(note(A, [('He said "hi"\n', None)])) == ['ex:A C "He said \\"hi\\""']
+    assert glossary(note(A, [("Größe", "de")])) == ['ex:A C "Größe"@de']  # not escaped to ASCII
 
 
 def test_a_value_is_cut_at_sixty_four_characters_and_json_quoted_unless_it_is_one_bare_word():
@@ -909,7 +910,7 @@ def test_a_term_the_view_does_not_write_or_without_text_has_no_entry():
 
 def test_only_the_prefixes_of_the_names_written_are_declared_sorted():
     shown = view(klass(A, 3, prop(P, {1: 3}, literals(3))))
-    assert shown.prefixes == [PrefixDeclaration(prefix="ex", namespace=EX), PrefixDeclaration(prefix="xsd", namespace=XSD)]
+    assert [(p.prefix, p.namespace) for p in shown.prefixes] == [("ex", EX), ("xsd", XSD)]
 
 
 def test_a_name_written_in_full_declares_no_prefix():
@@ -945,7 +946,7 @@ def test_a_prefix_used_only_by_an_edge_target_without_a_block_is_declared_and_it
     reaches = klass(A, 2, prop(P, {1: 2}, resources(2, hidden, "iri")))
     shown = view(reaches, klass(hidden, 2), excluded=excluded_ex(), annotations=[note(hidden, [("Hidden", "en")])])
     assert [p.prefix for p in shown.prefixes] == ["ex", "meta"]
-    assert [g.line for g in shown.glossary] == ['meta:H "Hidden"@en']
+    assert [g.line for g in shown.glossary] == ['meta:H C "Hidden"@en']
 
 
 def test_a_prefix_used_only_by_a_hidden_member_of_a_group_name_is_declared():
@@ -1041,3 +1042,222 @@ def test_the_view_is_deterministic(case):
 )
 def test_a_csv_cell_is_written_as_rfc_4180_says(value, written):
     assert csv_cell(value) == written
+
+
+# --- typed edge facts for the patterns CSV (llm-schema-split P-3, design B) ---
+
+
+def flat(edges: list[PatternEdge]) -> list[PatternEdge]:
+    return [found for e in edges for found in (e, *flat(e.edges))]
+
+
+def test_a_nested_edge_knows_its_owner_its_path_and_its_counts(sample_analytics):
+    shown = sample_view(sample_analytics, CONTINENTS)
+    script = next(e for e in flat(block(shown, "euvoc:Continent&skos:Concept").edges) if e.name == "lvont:script")
+    assert (script.owner, script.path, script.depth) == ("skosxl:Label", ["skosxl:prefLabel"], 2)
+    assert (script.subjects, script.observed, script.distinct) == (12, 145, 2)
+    assert (script.per_min, script.per_max, script.blank_nodes) == (1, 1, False)
+
+
+def test_an_edge_of_the_block_has_the_block_as_owner_and_no_path(sample_analytics):
+    start = block(sample_view(sample_analytics, CONTINENTS), "euvoc:Continent&skos:Concept").edges[1]
+    assert (start.name, start.owner, start.path, start.depth) == ("euvoc:startDate", "euvoc:Continent&skos:Concept", [], 1)
+    assert (start.min_value, start.max_value, start.single_value) == ("1952-07-24",) * 3
+    assert (start.triples, start.subjects, start.observed) == (6, 6, 6)
+
+
+def test_a_path_lists_the_properties_from_the_block_down(sample_analytics):
+    notation = next(
+        e
+        for e in flat(block(sample_view(sample_analytics, CONTINENTS), "euvoc:Continent&skos:Concept").edges)
+        if (e.name, e.depth) == ("rdf:value", 2)
+    )
+    assert (notation.owner, notation.path) == ("euvoc:XlNotation", ["euvoc:xlNotation"])
+    assert (notation.min_value, notation.max_value, notation.single_value) == ("AFRICA", "OCEANIA", None)
+
+
+def test_the_values_of_an_edge_are_raw_not_quoted_or_cut():
+    long = "x y " * 30
+    both = literals(10).model_copy(update={"min_value": long, "max_value": long})
+    edge = one_edge(both)
+    assert (edge.min_value, edge.max_value, edge.single_value) == (long, long, long)
+    assert edge.text.endswith('…"')  # the Markdown line is cut and quoted
+
+
+def test_a_single_iri_value_is_the_single_value_and_has_no_range():
+    edge = status()
+    assert (edge.single_value, edge.min_value, edge.max_value) == ("exs:active", None, None)
+
+
+def test_languages_and_blank_nodes_are_typed_facts():
+    edge = one_edge(literals(5, LANG_STRING, "fr"), literals(5, LANG_STRING, "de"), resources(2, None, "blank_node"))
+    assert (edge.languages, edge.blank_nodes) == (["de", "fr"], True)
+    assert (one_edge(resources(10)).languages, one_edge(resources(10)).blank_nodes) == ([], False)
+
+
+def test_a_presence_only_edge_holds_no_statistics():
+    edge = edge_of(view(klass(A, 10, prop(P, presence_only=True))))
+    assert (edge.presence_only, edge.per_min, edge.per_max, edge.blank_nodes, edge.min_value, edge.single_value) == (
+        True,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
+
+
+# --- the prefix counts (design C) ---
+
+
+def counts(shown: PatternGraph) -> list[tuple]:
+    return [(p.prefix, p.classes, p.properties, p.instances, p.triples) for p in shown.prefixes]
+
+
+def test_the_prefix_counts_of_the_continents_graph(sample_analytics):
+    rows = {row[0]: row[1:] for row in counts(sample_view(sample_analytics, CONTINENTS))}
+    assert rows["euvoc"][0] == 2  # euvoc:Continent and euvoc:XlNotation
+    assert rows["xsd"] == (0, 0, 0, 0)
+
+
+def test_a_prefix_used_only_by_a_datatype_or_a_value_counts_zero_everywhere():
+    value = prop(P, {1: 10}, resources(10)).model_copy(
+        update={"distinct_objects": 1, "top_values": [ValueCount(value=EX + "status/active", triples=10)]}
+    )
+    shown = view(klass(A, 10, value))
+    assert dict((row[0], row[1:]) for row in counts(shown))["exs"] == (0, 0, 0, 0)
+
+
+def test_the_counts_of_a_prefix_are_its_classes_properties_instances_and_triples():
+    shown = view(
+        klass(A, 10, prop(P, {1: 10}, literals(10)), prop(Q, {2: 5}, literals(10))), klass(B, 4, prop(P, {1: 4}, literals(4)))
+    )
+    assert counts(shown) == [("ex", 2, 2, 14, 24), ("xsd", 0, 0, 0, 0)]
+
+
+def test_a_class_group_counts_each_of_its_classes_and_its_instances_once():
+    shown = view(klass(A, 4, co_types=[(B, 4)]), klass(B, 4, co_types=[(A, 4)]))
+    assert counts(shown) == [("ex", 2, 0, 8, 0)]
+
+
+def test_a_property_written_on_two_classes_is_one_property_and_its_triples_add_up():
+    twice = klass(A, 4, prop(P, {1: 4}, resources(4, B)))
+    shown = view(twice, klass(B, 4, prop(P, {1: 4}, literals(4))))
+    assert counts(shown)[0][:3] == ("ex", 2, 1)  # ex:p is written on both classes, but is one property
+    assert counts(shown)[0][4] == 8  # and its triples are summed over the lines
+
+
+def test_an_expanded_nested_group_and_its_edges_are_counted():
+    shown = view(klass(A, 4, blank(P, B)), klass(B, 4, prop(Q, {1: 4}, literals(4))))
+    assert counts(shown)[0] == ("ex", 2, 2, 8, 8)
+
+
+# --- the glossary kinds, rows and line (design D) ---
+
+
+def kinds_of(*classes, **options):
+    shown = view(
+        *classes, annotations=[note(iri, [("t", "en")]) for iri in (A, B, P, Q, XSD + "string", XSD + "date")], **options
+    )
+    return [(g.name, list(g.kinds)) for g in shown.glossary]
+
+
+def test_a_class_is_c_a_literal_property_dP_and_its_datatype_D():
+    assert kinds_of(klass(A, 3, prop(P, {1: 3}, literals(3)))) == [
+        ("ex:A", ["C"]),
+        ("ex:p", ["dP"]),
+        ("xsd:string", ["D"]),
+    ]
+
+
+def test_a_property_to_iris_classes_or_blank_nodes_is_oP_and_both_kinds_of_object_is_dP_and_oP():
+    assert kinds_of(
+        klass(A, 4, prop(P, {1: 4}, resources(4)), prop(Q, {1: 4}, literals(2), resources(2, B))), klass(B, 2)
+    ) == [
+        ("ex:A", ["C"]),
+        ("ex:B", ["C"]),
+        ("ex:p", ["oP"]),
+        ("ex:q", ["dP", "oP"]),
+        ("xsd:string", ["D"]),
+    ]
+
+
+def test_a_property_with_no_collected_objects_is_P():
+    assert kinds_of(klass(A, 3, prop(P, {1: 3}))) == [("ex:A", ["C"]), ("ex:p", ["P"])]
+
+
+def test_a_term_written_as_a_class_and_as_a_property_has_both_kinds_in_order():
+    shown = view(klass(A, 3, prop(A, {1: 3}, resources(3))), annotations=[note(A, [("A", "en")])])
+    (entry,) = shown.glossary
+    assert (entry.kinds, entry.line) == ([TermKind.C, TermKind.oP], 'ex:A C/oP "A"@en')
+
+
+def annotation(term, labels=(), alts=(), descriptions=(), notes=()):
+    texts = lambda pairs: [LangText(text=t, language=lang) for t, lang in pairs]  # noqa: E731
+    return TermAnnotation(
+        term=term, labels=texts(labels), alt_labels=texts(alts), descriptions=texts(descriptions), notes=texts(notes)
+    )
+
+
+def entry_of(term_annotation: TermAnnotation):
+    return view(klass(A, 3), annotations=[term_annotation]).glossary[0]
+
+
+def test_alt_labels_follow_the_label_in_its_language_without_the_other_languages():
+    line = entry_of(annotation(A, [("Concept", "en")], [("Begriff", "de"), ("Idea", "en"), ("Notion", "en")])).line
+    assert line == 'ex:A C "Concept"@en alt: "Idea" | "Notion"'
+
+
+def test_a_term_with_only_alt_labels_shows_the_shown_alt_label_as_its_label():
+    assert entry_of(annotation(A, alts=[("Body", "en"), ("Notion", "en")])).line == 'ex:A C "Body"@en alt: "Notion"'
+    assert entry_of(annotation(A, alts=[("Only", "en")])).line == 'ex:A C "Only"@en'
+
+
+def test_the_alt_label_shown_as_the_label_is_not_repeated_and_the_untagged_one_wins():
+    assert entry_of(annotation(A, alts=[("Plain", None), ("Notion", "en")])).line == 'ex:A C "Plain"'
+
+
+def test_the_alt_part_comes_before_the_description():
+    line = entry_of(annotation(A, [("Concept", "en")], [("Notion", "en")], [("An idea.", "en")])).line
+    assert line == 'ex:A C "Concept"@en alt: "Notion": An idea.'
+
+
+def test_a_term_with_notes_only_has_rows_and_no_line():
+    entry = entry_of(annotation(A, notes=[("Internal", "en")]))
+    assert entry.line is None
+    assert entry.rows == [GlossaryRow(language="en", notes=["Internal"], alt_labels=[])]
+
+
+def test_a_term_with_nothing_to_say_has_no_entry():
+    assert view(klass(A, 3), annotations=[annotation(A)]).glossary == []
+
+
+def test_a_profile_without_alt_labels_or_notes_still_gives_its_line_and_rows():
+    old = TermAnnotation(term=A, labels=[LangText(text="Thing", language="en")])
+    entry = entry_of(old)
+    assert entry.line == 'ex:A C "Thing"@en'
+    assert entry.rows == [GlossaryRow(language="en", pref_label="Thing", alt_labels=[], notes=[])]
+
+
+def test_the_rows_are_one_per_language_untagged_first_then_by_tag():
+    entry = entry_of(
+        annotation(
+            A,
+            [("Concept", "en"), ("Plain", None)],
+            [("Begriff", "de"), ("Notion", "en")],
+            [("An idea.", "en")],
+            [("Also a class.", "en"), ("Use it.", "en"), ("Intern", "fr")],
+        )
+    )
+    assert [(r.language, r.pref_label, r.alt_labels, r.definition, r.notes) for r in entry.rows] == [
+        (None, "Plain", [], None, []),
+        ("de", None, ["Begriff"], None, []),
+        ("en", "Concept", ["Notion"], "An idea.", ["Also a class.", "Use it."]),
+        ("fr", None, [], None, ["Intern"]),
+    ]
+
+
+def test_a_row_keeps_the_whole_description_the_line_cuts():
+    long = "x" * 250
+    entry = entry_of(annotation(A, descriptions=[(long, "en")]))
+    assert entry.rows[0].definition == long and entry.line.endswith("x" * 200 + "…")

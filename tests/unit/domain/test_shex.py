@@ -308,7 +308,7 @@ def test_the_prefixes_are_the_pattern_views():
 def test_the_glossary_is_none_or_the_pattern_s_lines():
     assert schema(klass(A, 2)).glossary == ["glossary: none"]
     note = TermAnnotation(term=A, labels=[LangText(text="Thing", language="en")])
-    assert schema(klass(A, 2), annotations=[note]).glossary == ["glossary", 'ex:A "Thing"@en']
+    assert schema(klass(A, 2), annotations=[note]).glossary == ["glossary", 'ex:A C "Thing"@en']
 
 
 def test_a_glossary_entry_without_a_line_is_not_written():

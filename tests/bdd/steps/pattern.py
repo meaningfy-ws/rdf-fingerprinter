@@ -349,8 +349,9 @@ def glossary_lacks(ctx, name):
 @then(parsers.parse('the glossary line of "{name}" shows {shown}'))
 def glossary_shows(ctx, name, shown):
     (line,) = [ln for ln in glossary_lines(pattern_text(ctx)) if ln.startswith(name + " ")]
-    rest = line.removeprefix(f"{name} {shown}")
-    assert line.startswith(f"{name} {shown}") and (rest == "" or rest.startswith(":")), line
+    after_kind = line.removeprefix(name + " ").split(" ", 1)[1]  # the kind codes come first
+    rest = after_kind.removeprefix(shown)
+    assert after_kind.startswith(shown) and (rest == "" or rest.startswith((":", " alt: "))), line
 
 
 @then(parsers.parse('its glossary is "{line}"'))

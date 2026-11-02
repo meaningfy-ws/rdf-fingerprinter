@@ -126,7 +126,7 @@ def test_a_size_filter_below_one_exits_2(tmp_path, option):
 def test_the_ontology_option_is_passed_through(tmp_path):
     result = invoke(generate.gen_pattern, SAMPLE, "-o", tmp_path, "--ontology", LABELS)
     assert result.exit_code == 0, result.output
-    assert 'skos:Concept "Concept"@en' in (tmp_path / "pattern-continents-214e8f67.txt").read_text()
+    assert 'skos:Concept C "Concept"@en' in (tmp_path / "pattern-continents-214e8f67.txt").read_text()
 
 
 def test_the_size_options_are_passed_through(tmp_path):

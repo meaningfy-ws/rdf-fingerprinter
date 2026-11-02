@@ -24,6 +24,7 @@ from fingerprint.domain.profile import (
     NodeKind,
     PrecisionMode,
     PropertyAnalytics,
+    TermAnnotation,
     ValuePartition,
 )
 from fingerprint.domain.views import (
@@ -31,11 +32,13 @@ from fingerprint.domain.views import (
     EdgeTarget,
     GeneratorOptions,
     GlossaryEntry,
+    GlossaryRow,
     PatternBlock,
     PatternEdge,
     PatternGraph,
     PrefixDeclaration,
     TargetKind,
+    TermKind,
     ViaLink,
 )
 from fingerprint.domain.vocabulary import RDF_LANG_STRING, XSD_STRING
@@ -123,6 +126,23 @@ class _Stats:
 
 
 @dataclass(frozen=True)
+class _Facts:
+    """The raw statistics of one edge (llm-schema-split design B)."""
+
+    triples: int | None
+    subjects: int | None
+    observed: int
+    per_min: int | None
+    per_max: int | None
+    blank_nodes: bool | None
+    languages: tuple[str, ...]
+    min_value: str | None
+    max_value: str | None
+    single_value: str | None
+    distinct: int | None
+
+
+@dataclass(frozen=True)
 class _Spec:
     """One property of a group, ready to be an edge at any level."""
 
@@ -137,6 +157,8 @@ class _Spec:
     groups: tuple[tuple[int, int], ...]  # (group reached, the largest triples of a partition reaching it)
     terms: tuple[str, ...]  # every IRI the line writes, but a value
     values: tuple[str, ...]  # the IRI a `=name` token writes: it feeds the prefixes, never the glossary (DEC-16)
+    kinds: tuple[tuple[str, TermKind], ...]  # (IRI, kind) of every term the line writes, but a value
+    facts: "_Facts"  # the typed values of the patterns CSV
 
 
 # --- step 5: stat tokens and value quoting ---
@@ -197,11 +219,19 @@ def _datatype(partition: ValuePartition) -> str:
     return partition.datatype or (RDF_LANG_STRING if partition.language else XSD_STRING)
 
 
-def _literal_range(partitions: list[ValuePartition]) -> tuple[list[str], bool]:
-    """(`=v` or `lo..hi`, whether it is one value): only for one plain literal datatype with a minimum."""
+def _one_literal(partitions: list[ValuePartition]) -> ValuePartition | None:
+    """The one plain literal datatype with a minimum and a maximum, if the partitions are that."""
     literals = [p for p in partitions if p.node_kind == NodeKind.literal]
     one = literals[0] if len(literals) == 1 else None
     if one is None or _datatype(one) == RDF_LANG_STRING or one.min_value is None or one.max_value is None:
+        return None
+    return one
+
+
+def _literal_range(partitions: list[ValuePartition]) -> tuple[list[str], bool]:
+    """(`=v` or `lo..hi`, whether it is one value): only for one plain literal datatype with a minimum."""
+    one = _one_literal(partitions)
+    if one is None or one.min_value is None or one.max_value is None:
         return [], False
     low, high = one.min_value, one.max_value
     if low == high:
@@ -236,7 +266,19 @@ def _tokens(prop: PropertyAnalytics, partitions: list[ValuePartition], bounds, v
     return tokens
 
 
-# --- the builder ---
+def _term_kinds(property_iri: str, alternatives: list[_Alternative]) -> tuple[tuple[str, TermKind], ...]:
+    """The kind code of every term an edge writes (DEC-10): the property by what its objects are, a class, a datatype."""
+    objects = {alt.kind for alt in alternatives}
+    if TargetKind.datatype in objects:
+        kind_of_property = [TermKind.dP, *([TermKind.oP] if objects - {TargetKind.datatype} else [])]
+    else:
+        kind_of_property = [TermKind.oP if objects else TermKind.P]
+    return (
+        *((property_iri, kind) for kind in kind_of_property),
+        *((iri, TermKind.C) for alt in alternatives if alt.kind == TargetKind.group for iri in alt.terms),
+        *((iri, TermKind.D) for alt in alternatives if alt.kind == TargetKind.datatype for iri in alt.terms),
+    )
+
 
 # --- the builder ---
 
@@ -250,6 +292,7 @@ class _Builder:
         self.namer = _Namer(table)
         self.used: set[str] = set()  # the IRIs the view writes: they decide the prefixes and the glossary
         self.valued: set[str] = set()  # the IRIs it writes as values: prefixes only, no labels (DEC-16)
+        self.kinds: set[tuple[str, TermKind]] = set()  # (IRI, kind code) of every term the view writes
         classes = [(name, c) for c in graph.class_partitions or [] if (name := self.namer.name(c.class_iri)) is not None]
         self.groups = self._groups(sorted(classes, key=lambda pair: pair[0]))
         self.group_of = _Lookup((member.class_iri, i) for i, g in enumerate(self.groups) for member in g.members)
@@ -422,6 +465,30 @@ class _Builder:
             groups=tuple((t, max(triples for _, triples in run)) for t, run in groupby(reached, key=lambda r: r[0])),
             terms=(prop.property, *(iri for alt in alternatives for iri in alt.terms)),
             values=stats.values,
+            kinds=_term_kinds(prop.property, alternatives),
+            facts=self._facts(prop, owner, partitions, stats),
+        )
+
+    def _facts(
+        self, prop: PropertyAnalytics, owner: ClassAnalytics, partitions: list[ValuePartition], stats: _Stats
+    ) -> _Facts:
+        measured = not prop.presence_only
+        bounds = _values_per_subject(prop.cardinality_histogram) if measured else None
+        one = _one_literal(partitions) if measured else None
+        name = self.namer.name(stats.values[0]) if stats.values else None
+        low, high = (one.min_value, one.max_value) if one else (None, None)
+        return _Facts(
+            triples=prop.total_triples,
+            subjects=prop.subjects_with_property,
+            observed=owner.observed_instances or owner.instances,
+            per_min=bounds[0] if bounds else None,
+            per_max=bounds[1] if bounds else None,
+            blank_nodes=any(p.node_kind == NodeKind.blank_node for p in partitions) if measured else None,
+            languages=tuple(sorted({p.language for p in partitions if p.language})),
+            min_value=low,
+            max_value=high,
+            single_value=name or (low if low == high else None),
+            distinct=prop.distinct_objects,
         )
 
     def _specs(self, group: _Group) -> list[_Spec]:
@@ -472,9 +539,10 @@ class _Builder:
             return " …"  # a target expanded nowhere: a level-3 edge, or a group this edge's first target left out
         return "" if expanded else " ^" if nested else ""  # else expanded under another edge
 
-    def _edge(self, source: int, spec: _Spec, level: int) -> PatternEdge:
+    def _edge(self, source: int, spec: _Spec, level: int, path: list[str]) -> PatternEdge:
         self.used.update(spec.terms)
         self.valued.update(spec.values)
+        self.kinds.update(spec.kinds)
         nested = [t for t, _ in spec.groups if self.nested[t]]
         expanded = [t for t in nested if self.owner[t] == (source, spec.property)]
         ending = self._ending(nested, expanded)
@@ -489,11 +557,24 @@ class _Builder:
             min_count=spec.low,
             max_count=spec.high,
             presence_only=spec.presence_only,
-            edges=[edge for t in expanded for edge in self._edges(t, level + 1)],
+            edges=[edge for t in expanded for edge in self._edges(t, level + 1, [*path, spec.name])],
+            owner=self.groups[source].name,
+            path=path,
+            triples=spec.facts.triples,
+            subjects=spec.facts.subjects,
+            observed=spec.facts.observed,
+            per_min=spec.facts.per_min,
+            per_max=spec.facts.per_max,
+            blank_nodes=spec.facts.blank_nodes,
+            languages=list(spec.facts.languages),
+            min_value=spec.facts.min_value,
+            max_value=spec.facts.max_value,
+            single_value=spec.facts.single_value,
+            distinct=spec.facts.distinct,
         )
 
-    def _edges(self, index: int, level: int) -> list[PatternEdge]:
-        return [self._edge(index, spec, level) for spec in self.specs_of[index]]
+    def _edges(self, index: int, level: int, path: list[str]) -> list[PatternEdge]:
+        return [self._edge(index, spec, level, path) for spec in self.specs_of[index]]
 
     # steps 7 and 8
     def _via(self, target: int) -> list[tuple[int, _Spec]]:
@@ -536,6 +617,7 @@ class _Builder:
         via = self._via(index)
         self.used.update(group.classes)
         self.used.update(iri for iri, _ in co_types)
+        self.kinds.update((iri, TermKind.C) for iri in (*group.classes, *(iri for iri, _ in co_types)))
         links = [ViaLink(source=self.groups[i].name, property=spec.name) for i, spec in via]
         notes = [note for _, note in co_types]
         return self._block(index, notes, links, nested=False)
@@ -559,45 +641,117 @@ class _Builder:
             co_types=notes,
             via=via,
             header=self._header(group, notes, via),
-            edges=self._edges(index, 1),
+            edges=self._edges(index, 1, []),
         )
 
     # steps 9 and 10
     def glossary(self) -> list[GlossaryEntry]:
-        """N9: the labels and descriptions of the terms the view writes, by name."""
-        notes = _Lookup((note.term, note) for note in self.graph.term_annotations or [])
+        """N9: the terms the view writes that have any annotation, by name; those with notes only have rows and no line."""
+        annotations = _Lookup((annotation.term, annotation) for annotation in self.graph.term_annotations or [])
         written = sorted((name, iri) for iri in self.used if (name := self.namer.name(iri)) is not None)
-        lines = [(name, iri, notes.get(iri)) for name, iri in written]
-        entries = [
-            GlossaryEntry(term=iri, name=name, line=line)
-            for name, iri, note in lines
-            if note is not None and (line := _glossary_line(name, shown_text(note.labels), shown_text(note.descriptions)))
-        ]
+        entries = []
+        for name, iri in written:
+            annotation = annotations.get(iri)
+            rows = _rows(annotation) if annotation else []
+            if annotation is not None and rows:
+                kinds = sorted({kind for term, kind in self.kinds if term == iri}, key=_KINDS.index)
+                entries.append(
+                    GlossaryEntry(term=iri, name=name, line=_glossary_line(name, kinds, annotation), kinds=kinds, rows=rows)
+                )
         return entries
 
-    def prefixes(self) -> list[PrefixDeclaration]:
-        """N8: the prefixes of the names written, sorted."""
+    def prefixes(self, blocks: list[PatternBlock]) -> list[PrefixDeclaration]:
+        """N8: the prefixes of the names written, sorted, with the counts of design C over the view."""
         declared = set()
         for iri in self.used | self.valued:
             prefix, entry = turtle_term(iri, self.table)[1], self.table.entry_for(iri)
             if prefix is not None and entry is not None:
                 declared.add((prefix, entry.namespace))
-        return [PrefixDeclaration(prefix=prefix, namespace=namespace) for prefix, namespace in sorted(declared)]
+        classes = sorted({(member.class_iri, member.instances) for i in self.in_view for member in self.groups[i].members})
+        edges = [edge for block in blocks for edge in _flatten(block.edges or [])]
+        return [
+            self._counted(PrefixDeclaration(prefix=prefix, namespace=namespace), classes, edges)
+            for prefix, namespace in sorted(declared)
+        ]
+
+    def _counted(
+        self, declaration: PrefixDeclaration, classes: list[tuple[str, int]], edges: list[PatternEdge]
+    ) -> PrefixDeclaration:
+        def inside(iri: str) -> bool:
+            return turtle_term(iri, self.table)[1] == declaration.prefix
+
+        mine = [edge for edge in edges if inside(edge.property)]
+        return declaration.model_copy(
+            update={
+                "classes": sum(1 for iri, _ in classes if inside(iri)),
+                "properties": len({edge.property for edge in mine}),
+                "instances": sum(instances for iri, instances in classes if inside(iri)),
+                "triples": sum(edge.triples or 0 for edge in mine),
+            }
+        )
+
+
+_KINDS = list(TermKind)  # C, dP, oP, P, D: the order of a term's kind codes (DEC-10)
+
+
+def _flatten(edges: list[PatternEdge]) -> list[PatternEdge]:
+    return [found for edge in edges for found in (edge, *_flatten(edge.edges or []))]
 
 
 def _one_line(text: str) -> str:
     return " ".join(text.split())
 
 
-def _glossary_line(name: str, label: LangText | None, description: LangText | None) -> str | None:
-    """`name "label"@lang: description`, either part optional; the description cut at 200 characters."""
-    line = name
+def _language_key(language: str | None) -> tuple[bool, str]:
+    return (language is not None, language or "")
+
+
+def _rows(annotation: TermAnnotation) -> list[GlossaryRow]:
+    """One row per language any field has, untagged first, then by tag."""
+    fields = (annotation.labels, annotation.alt_labels, annotation.descriptions, annotation.notes)
+    languages = sorted({text.language for field in fields for text in field or []}, key=_language_key)
+
+    def texts(field: list[LangText] | None, language: str | None) -> list[str]:
+        return [text.text for text in field or [] if text.language == language]
+
+    return [
+        GlossaryRow(
+            language=language,
+            pref_label=next(iter(texts(annotation.labels, language)), None),
+            alt_labels=texts(annotation.alt_labels, language),
+            definition=next(iter(texts(annotation.descriptions, language)), None),
+            notes=texts(annotation.notes, language),
+        )
+        for language in languages
+    ]
+
+
+def _quote(text: str) -> str:
+    return json.dumps(_one_line(text), ensure_ascii=False)
+
+
+def _glossary_line(name: str, kinds: list[TermKind], annotation: TermAnnotation) -> str | None:
+    """`name kinds "label"@lang alt: "a" | "b": description`, each part after the kinds optional, or None when none is."""
+    label = shown_text(annotation.labels)
+    from_alt = label is None
+    label = label or shown_text(annotation.alt_labels)
+    description = shown_text(annotation.descriptions)
+    if label is None and description is None:
+        return None
+    line = f"{name} {'/'.join(kind.value for kind in kinds)}"
     if label is not None:
-        line += " " + json.dumps(_one_line(label.text), ensure_ascii=False) + (f"@{label.language}" if label.language else "")
+        line += " " + _quote(label.text) + (f"@{label.language}" if label.language else "")
+        alts = [
+            t.text
+            for t in annotation.alt_labels or []
+            if t.language == label.language and not (from_alt and t.text == label.text)
+        ]
+        if alts:
+            line += " alt: " + " | ".join(_quote(text) for text in alts)
     if description is not None:
         text = _one_line(description.text)
         line += ": " + text[:DESCRIPTION_LIMIT] + ("…" if len(text) > DESCRIPTION_LIMIT else "")
-    return None if line == name else line
+    return line
 
 
 def _writable(iri: str) -> bool:
@@ -629,7 +783,7 @@ def pattern_view(
         hidden_classes=builder.hidden_classes(),
         blocks=blocks,
         nested_blocks=nested_blocks,
-        prefixes=builder.prefixes(),
+        prefixes=builder.prefixes(blocks),
         glossary=builder.glossary(),
         skipped=sorted(builder.namer.skipped),
     )
