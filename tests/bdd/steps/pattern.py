@@ -6,6 +6,8 @@ from click.testing import CliRunner
 from pytest_bdd import given, parsers, then, when
 
 from fingerprint.adapters.profile_file import save_profile
+from fingerprint.adapters.template_renderer import filters
+from fingerprint.domain.prefixes import PrefixTable
 from fingerprint.domain.profile import (
     Depth,
     LangText,
@@ -392,3 +394,27 @@ def one_block_each(ctx, sample_run):
         headers = [ln for ln in text.splitlines() if ln.startswith("(:")]
         largest = next(ln for ln in unfiltered[file].splitlines() if ln.startswith("(:"))
         assert len(headers) == 1 and name_of(headers[0]) == name_of(largest)
+
+
+# --- CSV cells ---
+
+
+def cell_value(text: str):
+    """The value a Cell quoting row names: a text, several texts, a flag or nothing."""
+    if text == "no value":
+        return None
+    if text.startswith("the flag "):
+        return text.removeprefix("the flag ") == "true"
+    if text.startswith("the texts "):
+        return text.removeprefix("the texts ").split(" and ")
+    return text.removeprefix("the text ")
+
+
+@when(parsers.parse("a cell's value is {value}"))
+def cell_is(ctx, value):
+    ctx["cell"] = filters(PrefixTable([]))["csv_cell"](cell_value(value))
+
+
+@then(parsers.parse("it is written {written}"))
+def cell_written(ctx, written):
+    assert ctx["cell"] == ("" if written == "the empty cell" else written)

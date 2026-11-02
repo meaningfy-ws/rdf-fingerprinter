@@ -9,6 +9,7 @@ import re
 from bisect import bisect_left
 from collections.abc import Iterable
 from dataclasses import dataclass
+from enum import Enum
 from itertools import groupby
 
 from fingerprint.domain.annotations import shown as shown_text
@@ -147,6 +148,22 @@ def quoted(value: str) -> str:
         return value
     cut = value[:VALUE_LIMIT] + ("…" if len(value) > VALUE_LIMIT else "")
     return json.dumps(cut, ensure_ascii=False)
+
+
+def _cell_text(value: object) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value.value if isinstance(value, Enum) else value)
+
+
+def csv_cell(value: object) -> str:
+    """One CSV cell (llm-schema-split P-2): several values joined by ` | `, quoted per RFC 4180 when needed."""
+    text = " | ".join(_cell_text(item) for item in value) if isinstance(value, list) else _cell_text(value)
+    if any(char in text for char in ',"\r\n') or text != text.strip(" "):
+        return '"' + text.replace('"', '""') + '"'
+    return text
 
 
 def _first_n(*classes: ClassAnalytics) -> bool:

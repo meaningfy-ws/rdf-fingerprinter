@@ -7,7 +7,7 @@ import pytest
 from hypothesis import given
 
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.patterns import pattern_view, quoted
+from fingerprint.domain.patterns import csv_cell, pattern_view, quoted
 from fingerprint.domain.prefixes import PrefixTable
 from fingerprint.domain.profile import LangText, NamespacePrefix, PrefixSource, TermAnnotation, ValueCount
 from fingerprint.domain.views import (
@@ -1008,3 +1008,36 @@ def test_chains_stop_at_three_levels_and_a_nested_group_is_expanded_once(case):
 @given(pattern_graphs())
 def test_the_view_is_deterministic(case):
     assert view(*case) == view(*case)
+
+
+# --- csv_cell (llm-schema-split P-2, DEC-6) ---
+
+
+@pytest.mark.parametrize(
+    "value, written",
+    [
+        (None, ""),
+        (True, "true"),
+        (False, "false"),
+        (0, "0"),
+        (24, "24"),
+        ("", ""),
+        ("plain", "plain"),
+        ("a, b", '"a, b"'),
+        ('say "hi"', '"say ""hi"""'),
+        ("two\nlines", '"two\nlines"'),
+        ("carriage\rreturn", '"carriage\rreturn"'),
+        (" leading", '" leading"'),
+        ("trailing ", '"trailing "'),
+        ("inner space", "inner space"),
+        (TargetKind.blank_node, "blank_node"),
+        ([], ""),
+        (["Body"], "Body"),
+        (["Body", "Human"], "Body | Human"),
+        (["a | b", "c"], "a | b | c"),
+        (["a, b", "c"], '"a, b | c"'),
+        ([1, True, None, "x"], "1 | true |  | x"),
+    ],
+)
+def test_a_csv_cell_is_written_as_rfc_4180_says(value, written):
+    assert csv_cell(value) == written

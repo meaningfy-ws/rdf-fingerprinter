@@ -43,7 +43,7 @@ definitions and code exist. The red count `pytest tests/bdd` prints after 1.1 is
     tests"; `tests/unit/adapters/test_ontology_file.py` updated for the new predicates;
     `tests/unit/domain/test_annotations.py` and `tests/unit/domain/strategies.py` moved off
     `ALT_LABEL` and the 4-element `TERM_DESCRIPTION_PREDICATES`; s-c scenarios green.
-- [ ] 1.4 `csv_cell` (P-2) in `fingerprint/domain/patterns.py`, registered as a filter in
+- [x] 1.4 `csv_cell` (P-2) in `fingerprint/domain/patterns.py`, registered as a filter in
   `fingerprint/adapters/template_renderer.py::filters`; step definitions of `› CSV cells › Cell
   quoting`
   - Layer: domain + adapters. Depends on: —.
