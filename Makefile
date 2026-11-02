@@ -47,7 +47,12 @@ build: ## Build the sdist and wheel into dist/ and check the wheel
 check-wheel: ## Fail when the wheel lacks the report templates, the schema templates or the SPARQL queries
 	@ files="$$(unzip -l dist/*.whl)"; \
 	for f in "$(TEMPLATES_PACKAGE)/fingerprint_report/templates/main.html" \
-		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/schema.txt" \
+		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/files.j2" \
+		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/prefixes.md" \
+		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/patterns.md" \
+		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/patterns.csv" \
+		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/glossary.md" \
+		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/glossary.csv" \
 		"$(TEMPLATES_PACKAGE)/shex_schema/templates/schema.shex" \
 		"fingerprint/adapters/queries/q0_named_graphs.rq" \
 		"fingerprint/adapters/queries/q12_term_annotations.rq"; do \

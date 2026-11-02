@@ -1,19 +1,27 @@
-"""The pattern schema: per graph one text file of class blocks and their edges with statistics (llm-schema-tools P-2).
+"""The pattern schema: per graph five files, all laid out from the one pattern view (llm-schema-split P-1).
 
-Every rule that decides what a line says is in `fingerprint.domain.patterns`; the template only lays the view out.
+Every rule that decides what a line says is in `fingerprint.domain.patterns`; the templates only lay the view out.
 """
 
 from pydantic import BaseModel
 
 from fingerprint.domain.patterns import pattern_view
-from fingerprint.domain.views import PatternGraph
+from fingerprint.domain.views import PatternFile, PatternGraph
 from fingerprint.service_layer.generators.generator import Generator, graph_slug, plain_label
 from fingerprint_report_templates import packaged
+
+# (file name, the sub-template of `files.j2` that writes it): the five files of a graph, in this order
+FILES = (
+    ("prefixes-{slug}.md", "prefixes.md"),
+    ("patterns-{slug}.md", "patterns.md"),
+    ("patterns-{slug}.csv", "patterns.csv"),
+    ("glossary-{slug}.md", "glossary.md"),
+    ("glossary-{slug}.csv", "glossary.csv"),
+)
 
 
 class PatternGenerator(Generator):
     template_package = packaged("pattern_schema")
-    file_name = "pattern-{slug}.txt"
 
     def views(self) -> list[PatternGraph]:
         """One view per graph that has a block (a graph with no shown class, or all hidden by a size filter, has none)."""
@@ -33,4 +41,8 @@ class PatternGenerator(Generator):
         return found
 
     def outputs(self) -> list[tuple[str, BaseModel]]:
-        return [(self.file_name.format(slug=view.slug), view) for view in self.views()]
+        return [
+            (name.format(slug=view.slug), PatternFile(template=template, graph=view))
+            for view in self.views()
+            for name, template in FILES
+        ]

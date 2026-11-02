@@ -39,8 +39,8 @@ def name_of(header: str) -> str:
 
 
 def pattern_text(ctx) -> str:
-    """The one pattern file of a hand-built profile."""
-    return only(ctx["texts"])
+    """The patterns Markdown of a hand-built profile's one graph."""
+    return only(patterns_markdown(ctx["texts"]))
 
 
 def block_lines(text: str, name: str) -> list[str]:
@@ -61,8 +61,24 @@ def edge_line(text: str, property_name: str) -> str:
     return next(line for line in text.splitlines() if line.lstrip().startswith(f"-{property_name}->"))
 
 
+FILE_KINDS = ("prefixes-", "patterns-", "glossary-")  # the files of the pattern schema, by name prefix
+
+
 def pattern_files(texts: dict[str, str]) -> dict[str, str]:
-    return {name: text for name, text in texts.items() if name.startswith("pattern-")}
+    return {name: text for name, text in texts.items() if name.startswith(FILE_KINDS)}
+
+
+def patterns_markdown(texts: dict[str, str]) -> dict[str, str]:
+    """The `patterns-<slug>.md` files, the only ones with blocks and edge lines; never empty (a check over none is vacuous)."""
+    found = {name: text for name, text in texts.items() if name.startswith("patterns-") and name.endswith(".md")}
+    assert found, sorted(texts)
+    return found
+
+
+def glossary_markdown(texts: dict[str, str]) -> dict[str, str]:
+    found = {name: text for name, text in texts.items() if name.startswith("glossary-") and name.endswith(".md")}
+    assert found, sorted(texts)
+    return found
 
 
 # --- the pattern view: hand-built profiles ---
@@ -146,9 +162,9 @@ def edge_is(ctx, p, line):
     assert edge_line(pattern_text(ctx), p).strip() == line
 
 
-@then(parsers.parse('the prefix "{prefix}" is declared'))
-def prefix_declared(ctx, prefix):
-    assert f"PREFIX {prefix}: <" in pattern_text(ctx)
+@then(parsers.parse('the prefix file lists "{prefix}"'))
+def prefix_listed(ctx, prefix):
+    assert f"| {prefix} | <" in only({n: t for n, t in ctx["texts"].items() if n.startswith("prefixes-")})
 
 
 @then(parsers.parse('the same profile without top values gives the edge "{line}"'))
@@ -228,11 +244,11 @@ def holds_line_at_level(ctx, file, level, line):
     assert any(ln == INDENT * level * " " + line for ln in lines), line
 
 
-@then("in every file no group name begins two blocks and no property begins two edges at the same place")
+@then("in every patterns Markdown file no group name begins two blocks and no property begins two edges at the same place")
 def no_duplicates(ctx):
-    for text in pattern_files(ctx["texts"]).values():
+    for text in patterns_markdown(ctx["texts"]).values():
         headers = [name_of(ln) for ln in text.splitlines() if ln.startswith("(:")]
-        assert len(headers) == len(set(headers))
+        assert headers and len(headers) == len(set(headers))
         seen = []
         for line in text.splitlines():
             if line.startswith("(:"):
@@ -247,17 +263,16 @@ def no_duplicates(ctx):
 @then(parsers.parse("{names} begin no block"))
 def begin_no_block(ctx, names):
     for name in re.findall(r'"([^"]+)"', names):
-        assert all(not block_lines(t, name) for t in pattern_files(ctx["texts"]).values()), name
+        assert all(not block_lines(t, name) for t in patterns_markdown(ctx["texts"]).values()), name
 
 
-@then("every declared prefix is used")
+@then("every prefix of the matching prefix file is used in it")
 def prefixes_used(ctx):
-    for text in pattern_files(ctx["texts"]).values():
-        body = "\n".join(ln for ln in text.splitlines() if not ln.startswith(("PREFIX ", "# ")))
-        for prefix in re.findall(r"^PREFIX (\S*): ", text, re.M):
-            assert f"{prefix}:" in body or f"{prefix}:" in " ".join(
-                ln for ln in text.splitlines() if ln.startswith("# glossary")
-            ), prefix
+    for name, text in patterns_markdown(ctx["texts"]).items():
+        prefix_file = ctx["texts"][name.replace("patterns-", "prefixes-")]
+        body = "\n".join(ln for ln in text.splitlines() if not ln.startswith(("Legend:", "Prefixes:", "# ")))
+        for prefix in re.findall(r"^\| (\S*) \| <", prefix_file, re.M):
+            assert f"{prefix}:" in body, (name, prefix)
 
 
 # --- term labels and descriptions ---
@@ -326,37 +341,30 @@ def pattern_with_options(ctx, options):
 
 @then("it is written")
 def pattern_written(ctx):
-    assert pattern_files(ctx["texts"])
+    assert patterns_markdown(ctx["texts"])
 
 
-def glossary_lines(text: str) -> list[str]:
-    lines = text.splitlines()
-    return lines[lines.index("# glossary") + 1 :] if "# glossary" in lines else []
+def glossary_entries(text: str) -> list[str]:
+    """The lines of a glossary Markdown file, `- ` included."""
+    return [ln for ln in text.splitlines() if ln.startswith("- ")]
 
 
 @then(parsers.parse("the glossary holds the line '{line}'"))
 def glossary_holds(ctx, line):
-    assert any(line in glossary_lines(text) for text in pattern_files(ctx["texts"]).values())
+    assert any(line in glossary_entries(text) for text in glossary_markdown(ctx["texts"]).values())
 
 
 @then(parsers.parse('the glossary has no line for "{name}"'))
 def glossary_lacks(ctx, name):
-    assert all(
-        not ln.startswith((name + " ", name + ":")) for t in pattern_files(ctx["texts"]).values() for ln in glossary_lines(t)
-    )
+    assert all(not ln.startswith(f"- {name} ") for t in glossary_markdown(ctx["texts"]).values() for ln in glossary_entries(t))
 
 
 @then(parsers.parse('the glossary line of "{name}" shows {shown}'))
 def glossary_shows(ctx, name, shown):
-    (line,) = [ln for ln in glossary_lines(pattern_text(ctx)) if ln.startswith(name + " ")]
-    after_kind = line.removeprefix(name + " ").split(" ", 1)[1]  # the kind codes come first
+    (line,) = [ln for ln in glossary_entries(only(glossary_markdown(ctx["texts"]))) if ln.startswith(f"- {name} ")]
+    after_kind = line.removeprefix(f"- {name} ").split(" ", 1)[1]  # the kind codes come first
     rest = after_kind.removeprefix(shown)
     assert after_kind.startswith(shown) and (rest == "" or rest.startswith((":", " alt: "))), line
-
-
-@then(parsers.parse('its glossary is "{line}"'))
-def glossary_is(ctx, line):
-    assert all(t.splitlines()[-1] == line for t in pattern_files(ctx["texts"]).values())
 
 
 @then("it exits 2 with a message naming the ontology file")

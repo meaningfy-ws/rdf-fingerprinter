@@ -1,15 +1,12 @@
-PREFIX dcterms: <http://purl.org/dc/terms/>
-PREFIX eli: <http://data.europa.eu/eli/ontology#>
-PREFIX euvoc: <http://publications.europa.eu/ontology/euvoc#>
-PREFIX lemon: <http://lemon-model.net/lemon#>
-PREFIX lvont: <http://lexvo.org/ontology#>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>
-PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-# (:A&B) n: classes with the same n instances · ~m first_n: statistics over the first m read · co C k: k also typed C · via (:S)-p: incoming links · -p-> (:T|U) object classes · IRI, BNODE untyped · . not collected · deeper indent: a blank node's own edges, statistics over all its instances, up to 3 hops · ^ expanded under another edge · … deeper than 3 hops · k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured
+# Patterns of http://publications.europa.eu/resources/authority/treaties
+
+Prefixes: `prefixes-treaties-3b4301a8.md` · glossary: `glossary-treaties-3b4301a8.md`
+
+Legend: (:A&B) n: classes with the same n instances · ~m first_n: statistics over the first m read · co C k: k also typed C · via (:S)-p: incoming links · -p-> (:T|U) object classes · IRI, BNODE untyped · . not collected · deeper indent: a blank node's own edges, statistics over all its instances, up to 3 hops · ^ expanded under another edge · … deeper than 3 hops · k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured
+
+## euvoc:Treaty&skos:Concept
+
+```text
 (:euvoc:Treaty&skos:Concept) 104 via (:euvoc:Treaty&skos:Concept)-dcterms:isReplacedBy, (:euvoc:Treaty&skos:Concept)-dcterms:replaces
   -dcterms:created-> xsd:date 2011-05-19..2018-05-17 d10
   -dcterms:dateAccepted-> xsd:date 2012-06-27..2018-06-06 d8
@@ -53,6 +50,11 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
     -euvoc:status-> IRI d3
     -lvont:script-> IRI 386/4530 d2
     -skosxl:literalForm-> rdf:langString @24 d4176
+```
+
+## owl:Ontology&skos:ConceptScheme
+
+```text
 (:owl:Ontology&skos:ConceptScheme) 1 via (:euvoc:Treaty&skos:Concept)-skos:inScheme, (:euvoc:Treaty&skos:Concept)-skos:topConceptOf
   -dcterms:created-> xsd:date =2011-09-23
   -dcterms:identifier-> xsd:string =http://publications.europa.eu/resource/authority/treaty
@@ -61,4 +63,4 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
   -owl:imports-> IRI ×2
   -rdfs:comment-> rdfs:Literal =Treaty
   -skosxl:prefLabel-> (:skosxl:Label) bn ^
-# glossary: none
+```

@@ -54,7 +54,7 @@ definitions and code exist. The red count `pytest tests/bdd` prints after 1.1 is
   - Layer: domain. Depends on: 1.2, 1.3.
   - Tests: `tests/unit/domain/test_patterns.py` for the prefix-count and glossary-line branches
     of design "Unit tests"; existing pattern-view unit tests stay green.
-- [ ] 1.6 Generator and templates (P-1): `PatternGenerator.outputs` emits five `PatternFile`s per
+- [x] 1.6 Generator and templates (P-1): `PatternGenerator.outputs` emits five `PatternFile`s per
   graph; `pattern_schema/config.json` → `files.j2`; templates `prefixes.md`, `patterns.md`,
   `patterns.csv`, `glossary.md`, `glossary.csv`; delete `schema.txt`; `Makefile` `check-wheel`
   lists the six new template files instead of `schema.txt`

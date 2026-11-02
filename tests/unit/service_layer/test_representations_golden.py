@@ -33,8 +33,10 @@ def turtle_difference(golden: str, output: str) -> str | None:
 
 
 def assert_golden(produced, folder):
-    stem = next(iter(produced)).split("-")[0].split(".")[0]
-    assert set(produced) == {p.name for p in folder.iterdir() if p.is_file() and p.name.startswith(stem)}
+    stems = {name.split("-")[0].split(".")[0] for name in produced}  # the pattern schema writes three kinds of file
+    assert produced and set(produced) == {
+        p.name for p in folder.iterdir() if p.is_file() and p.name.split("-")[0].split(".")[0] in stems
+    }
     for file_name, text in produced.items():
         golden = (folder / file_name).read_text(encoding="utf-8")
         if file_name.endswith(".ttl"):
