@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.4.0] - 2026-11-02
+
 The pattern schema is split into five files per graph (OpenSpec change `llm-schema-split`), so a model
 or a script reads only the part it needs.
 

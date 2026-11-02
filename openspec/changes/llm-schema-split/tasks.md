@@ -79,7 +79,7 @@ definitions and code exist. The red count `pytest tests/bdd` prints after 1.1 is
   `### Added` (alt labels and notes in the profile and the glossary CSV)
   - Layer: docs. Depends on: 1.7.
   - Tests: `make build-docs` green.
-- [ ] 1.9 Gate (design "Stage exit criteria"): `make check-all`; `make oxigraph-load-test-data` +
+- [x] 1.9 Gate (design "Stage exit criteria"): `make check-all`; `make oxigraph-load-test-data` +
   `make test-e2e` (no e2e test reads `pattern-*.txt`; IT-3 is that run); `openspec validate llm-schema-split
   --strict`; a code review by a reviewer agent; no `make check-mutation` and no
   `make check-all-deep` (developer, R4-2)
