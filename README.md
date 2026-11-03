@@ -78,8 +78,8 @@ Requires Poetry, Docker and (for `make check-spec`) Node.js.
 
 ```shell script
 make install                    # Poetry env with the test and lint groups
-make check-all                  # lint, types, layers, OpenSpec, fast unit tests — the gate CI runs
-make check-all-deep             # adds the Hypothesis tests and coverage floors; weekly in CI (deep.yml)
+make check-all                  # lint, types, layers, OpenSpec, parallel tests with coverage floors — the gate CI runs
+make check-release              # check-all + release tests + random properties + e2e; before a release
 make oxigraph-load-test-data    # in-memory Oxigraph on :7878 with the test graphs
 make test-e2e                   # end-to-end tests against it (local only)
 ```

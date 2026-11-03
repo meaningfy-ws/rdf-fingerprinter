@@ -92,7 +92,7 @@ of them and a greedy set cover chose 72 to restore; a rerun of those 314 mutants
 
 ## 7. Docs and rules
 
-- [ ] 7.1 `docs/modules/ROOT/pages/development.adoc`: the gate table (`#test-gate`) and the tier
+- [x] 7.1 `docs/modules/ROOT/pages/development.adoc`: the gate table (`#test-gate`) and the tier
   profile (`#test-profile`) rewritten for the feature gate / release gate, with 5.2's numbers and
   the session table (coding loop, feature, after a domain or adapter change, release, after release);
   `#test-mutation` says "after a release" instead of weekly. `AGENTS.md`: *Make targets* and
