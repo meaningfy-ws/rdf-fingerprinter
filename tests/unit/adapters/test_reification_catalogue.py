@@ -8,10 +8,10 @@ from fingerprint.adapters.queries import reification_query
 from fingerprint.adapters.reification_catalogue import ReificationTemplateError, packaged_templates, validate
 from fingerprint.domain.profile import ReificationKind
 
-PROBE = "ASK { $graph_open ?s ?sp ?o . ?sp rdf:singletonPropertyOf ?g . $graph_close }"
+PROBE = "ASK { $graph_open ?s ?sp ?o . ?sp rdf:subject ?g . $graph_close }"
 PREFIX = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"
-HEADER = "# id: singleton_property\n# title: T\n# family: statement_identity\n"
-HIDDEN = "SELECT DISTINCT ?term WHERE { $graph_open ?term rdf:singletonPropertyOf ?g . $graph_close }"
+HEADER = "# id: rdf_statement\n# title: T\n# family: statement_identity\n"
+HIDDEN = "SELECT DISTINCT ?term WHERE { $graph_open ?term rdf:subject ?g . $graph_close }"
 
 
 def section(kind, name, query):
@@ -20,7 +20,7 @@ def section(kind, name, query):
 
 def template(**sections):
     """A template file: the probe and any other section given as {name: query} (dashes as underscores)."""
-    body = "".join(section("singleton_property", name.replace("_", "-"), query) for name, query in sections.items())
+    body = "".join(section("rdf_statement", name.replace("_", "-"), query) for name, query in sections.items())
     return HEADER + body
 
 
@@ -28,21 +28,21 @@ def test_packaged_catalogue_holds_the_stage_one_kinds():
     templates = {t.id: t for t in packaged_templates()}
     assert set(templates) == set(ReificationKind)
     assert templates["triple_term"].relations is None
-    assert templates["singleton_property"].reifier_properties
+    assert templates["rdf_statement"].reifier_properties
 
 
 def test_a_valid_file_is_split_into_its_sections():
     found = validate(template(probe=PROBE, hidden=HIDDEN), "test")
-    assert (found.id, found.title, found.family) == ("singleton_property", "T", "statement_identity")
-    assert found.probe.startswith("# REIFY singleton_property probe\n")
-    assert found.hidden.startswith("# REIFY singleton_property hidden\n")
+    assert (found.id, found.title, found.family) == ("rdf_statement", "T", "statement_identity")
+    assert found.probe.startswith("# REIFY rdf_statement probe\n")
+    assert found.hidden.startswith("# REIFY rdf_statement hidden\n")
     assert found.relations is None
 
 
 @pytest.mark.parametrize(
     ("text", "message"),
     [
-        (HEADER + section("singleton_property", "hidden", HIDDEN), "no probe"),
+        (HEADER + section("rdf_statement", "hidden", HIDDEN), "no probe"),
         (template(probe="SELECT ?s WHERE { ?s ?p ?o }"), "must be an ASK"),
         (template(probe=PROBE, relations="SELECT ?a WHERE { ?a ?b ?c }"), "?subjectClass ?predicate ?objectClass ?statements"),
         (template(probe=PROBE, reifier_properties="SELECT ?a WHERE { ?a ?b ?c }"), "?reifierProperty"),
@@ -52,12 +52,12 @@ def test_a_valid_file_is_split_into_its_sections():
         (template(probe="ASK FROM <http://x/g> { ?s ?p ?o }"), "FROM"),
         (template(probe="ASK { ?s ?p"), "not a SPARQL query"),
         (template(probe="ASK { ?s ?p $other }"), "placeholder"),
-        (HEADER + "# REIFY singleton_property bogus\nASK { ?s ?p ?o }\n", "unknown section"),
-        (template(probe=PROBE).replace("# REIFY singleton_property probe", "# REIFY owl_axiom probe"), "must equal the id"),
-        (template(probe=PROBE) + section("singleton_property", "probe", PROBE), "twice"),
-        (template(probe=PROBE).replace("# id: singleton_property", "# id: made_up"), "not a reification kind"),
+        (HEADER + "# REIFY rdf_statement bogus\nASK { ?s ?p ?o }\n", "unknown section"),
+        (template(probe=PROBE).replace("# REIFY rdf_statement probe", "# REIFY owl_axiom probe"), "must equal the id"),
+        (template(probe=PROBE) + section("rdf_statement", "probe", PROBE), "twice"),
+        (template(probe=PROBE).replace("# id: rdf_statement", "# id: made_up"), "not a reification kind"),
         (template(probe=PROBE).replace("# title: T\n", ""), "missing header key"),
-        (template(probe=PROBE).replace("# id: singleton_property\n", ""), "missing header key"),
+        (template(probe=PROBE).replace("# id: rdf_statement\n", ""), "missing header key"),
     ],
 )
 def test_a_template_that_breaks_the_contract_is_rejected(text, message):
@@ -78,7 +78,7 @@ def test_reification_query_fills_the_graph_for_a_named_graph():
 
 
 def test_reification_query_fills_the_default_graph_and_distinct():
-    sub = "SELECT $distinct ?term WHERE { $graph_open ?term rdf:singletonPropertyOf ?g . $graph_close }"
+    sub = "SELECT $distinct ?term WHERE { $graph_open ?term rdf:subject ?g . $graph_close }"
     found = validate(template(probe=PROBE, hidden=sub), "test")
     assert "GRAPH" not in reification_query(found, "probe", None)
     assert re.search(r"SELECT DISTINCT\s+\?term", reification_query(found, "hidden", None))

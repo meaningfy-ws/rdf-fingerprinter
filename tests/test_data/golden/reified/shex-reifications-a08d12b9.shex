@@ -1,12 +1,13 @@
 PREFIX dcterms: <http://purl.org/dc/terms/>
 PREFIX ex: <http://example.org/>
 PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 # comments use the pattern schema's legend: k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured · … deeper than 3 hops
 # hidden: 1 classes
 # (:ex:Person) 3
 ex:Person {
-  # ~> ex:worksFor (:ex:Org) 2 statements via singleton_property [reifiers: prov:wasAttributedTo 1]
+  # ~> ex:Link (:ex:Org) 2 statements via resource_as_predicate [reifiers: rdf:singletonPropertyOf 2, prov:wasAttributedTo 1]
   # ~> ex:Procedure (:ex:Org) 1 statement via resource_as_predicate
   # ~> ex:knows (:ex:Person) 1 statement via owl_axiom [reifiers: dcterms:source 1]
   # ~> ex:knows (:ex:Person) 1 statement via rdf_statement [reifiers: dcterms:source 1]

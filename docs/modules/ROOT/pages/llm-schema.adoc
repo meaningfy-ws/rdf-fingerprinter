@@ -185,12 +185,12 @@ or when it is longer than 64 characters, it is a JSON string, cut at 64 characte
 
 === Reified relations
 
-A class with reified relations (links made through a reification, such as singleton properties or
-`rdf:Statement` nodes) ends its block with one line per relation, after its edges:
+A class with reified relations (links made through a reification, such as resources used as predicates
+(singleton properties) or `rdf:Statement` nodes) ends its block with one line per relation, after its edges:
 
 [source,text]
 ----
-~> ex:worksFor (:ex:Org) 2 statements via singleton_property [reifiers: prov:wasAttributedTo 1]
+~> ex:Link (:ex:Org) 2 statements via resource_as_predicate [reifiers: rdf:singletonPropertyOf 2, prov:wasAttributedTo 1]
 ----
 
 `-p->` is a triple in the data; `~>` is a link that exists only through a reifier node. The ShExC
@@ -508,8 +508,9 @@ fingerprint-gen-pattern profile.json -o llm/ --exclude-namespace 'https://my.bra
 The statement nodes of those relations are typed `brainframe:RelationId`, in the same namespace as
 the real classes, so a namespace filter cannot hide them.
 
-Excluding drops those links. A singleton predicate that carries `rdf:singletonPropertyOf` need not be
-excluded: by default the fingerprint folds it into a `~>` line of its subject's class
+Excluding drops those links. A predicate with a non-property type, such as the
+`brainframe:RelationId` singletons, need not be excluded: by default the fingerprint folds it into a
+`~>` line of its subject's class, named by that type
 (xref:reifications.adoc[Reified Relations]). Predicates typed only `rdf:Property` are not recognised;
 exclude their namespace as above.
 

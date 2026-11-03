@@ -591,28 +591,28 @@ def class_indicator(ctx, n, d, o):
 # --- reified relations ---
 
 
-@given("a profile with singleton properties and rdf:Statement reifications")
+@given("a profile with resources used as predicates and rdf:Statement reifications")
 def reified_profile(ctx):
     person = klass(
         EX + "Person",
         3,
         reified=[
-            relation(EX + "worksFor", EX + "Org", 2, kind=ReificationKind.singleton_property),
+            relation(EX + "Link", EX + "Org", 2, kind=ReificationKind.resource_as_predicate),
             relation(EX + "knows", EX + "Person", 1, kind=ReificationKind.rdf_statement),
         ],
     )
     run = profile_run(person)
-    kinds = [ReificationKind.rdf_statement, ReificationKind.singleton_property]
+    kinds = [ReificationKind.rdf_statement, ReificationKind.resource_as_predicate]
     ctx["run"] = run.model_copy(update={"graphs": [run.graphs[0].model_copy(update={"reification_kinds": kinds})]})
 
 
 @then("the graph summary names both kinds")
 def summary_names_kinds(ctx):
     summary = soup(ctx).select_one("section[id^=graph-] > p.note").get_text(" ")
-    assert "singleton property" in summary and "RDF statement" in summary
+    assert "resource as predicate" in summary and "RDF statement" in summary
 
 
 @then("each subject class shows its reified relations")
 def class_shows_relations(ctx):
     text = soup(ctx).select_one("details.cls").get_text(" ")
-    assert "Reified relations" in text and "ex:worksFor" in text and "ex:knows" in text
+    assert "Reified relations" in text and "ex:Link" in text and "ex:knows" in text

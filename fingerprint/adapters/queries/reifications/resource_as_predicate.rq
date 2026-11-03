@@ -12,7 +12,7 @@ ASK { $graph_open ?s ?p ?o . ?p a ?t .
     owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
     owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
     FILTER NOT EXISTS { ?t rdfs:subClassOf+ rdf:Property }
-    FILTER NOT EXISTS { ?p rdf:singletonPropertyOf ?g } $graph_close }
+    $graph_close }
 # REIFY resource_as_predicate relations
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -24,7 +24,7 @@ SELECT ?subjectClass ?predicate ?objectClass (COUNT(*) AS ?statements) WHERE {
     owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
     owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
     FILTER NOT EXISTS { ?predicate rdfs:subClassOf+ rdf:Property }
-    FILTER NOT EXISTS { ?p rdf:singletonPropertyOf ?g } $graph_close } }
+    $graph_close } }
   $graph_open ?s a ?subjectClass . OPTIONAL { ?o a ?objectClass } $graph_close }
 GROUP BY ?subjectClass ?predicate ?objectClass
 # REIFY resource_as_predicate reifier-properties
@@ -38,7 +38,6 @@ SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?p
     owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
     owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
   FILTER NOT EXISTS { ?predicate rdfs:subClassOf+ rdf:Property }
-  FILTER NOT EXISTS { ?p rdf:singletonPropertyOf ?g }
   FILTER(?reifierProperty != rdf:type) ?s a ?subjectClass .
   OPTIONAL { ?o a ?objectClass } $graph_close }
 GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
@@ -53,13 +52,13 @@ SELECT DISTINCT ?term WHERE { $graph_open
     owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
     owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
     FILTER NOT EXISTS { ?t rdfs:subClassOf+ rdf:Property }
-    FILTER NOT EXISTS { ?p rdf:singletonPropertyOf ?g } BIND(?p AS ?term) }
+    BIND(?p AS ?term) }
   UNION { ?s ?p ?o . ?p a ?t .
     FILTER(?t NOT IN (rdf:Property, rdfs:ContainerMembershipProperty, rdfs:Resource, owl:Thing, owl:NamedIndividual,
     owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty, owl:OntologyProperty, owl:DeprecatedProperty,
     owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
     owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
     FILTER NOT EXISTS { ?t rdfs:subClassOf+ rdf:Property }
-    FILTER NOT EXISTS { ?p rdf:singletonPropertyOf ?g } BIND(?t AS ?term)
+    BIND(?t AS ?term)
           FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?s2 ?x ?o2 } } }
   $graph_close }

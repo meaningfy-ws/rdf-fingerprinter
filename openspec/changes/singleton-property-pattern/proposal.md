@@ -67,7 +67,7 @@ The kinds come in four families (`inputs/shaping-qa.md` has the full catalogue):
 
 | Family | Kinds | Stage |
 |---|---|---|
-| A. The statement has its own identity | `rdf:Statement`; `rdf:singletonPropertyOf`; resource used as predicate without the marker; `owl:Axiom` / `owl:Annotation`; `owl:NegativePropertyAssertion`; RDF-star / RDF 1.2 `rdf:reifies` (counted only) | 1 |
+| A. The statement has its own identity | `rdf:Statement`; resource used as predicate (singleton properties included, DEC-12); `owl:Axiom` / `owl:Annotation`; `owl:NegativePropertyAssertion`; RDF-star / RDF 1.2 `rdf:reifies` (counted only) | 1 |
 | B. A named graph is the statement's id | one triple per graph with the graph described; nanopublications | 2 |
 | C. A relation qualified through a node, by vocabulary | PROV-O qualified forms; DCAT qualified relations; `schema:Role`; Wikibase statements; CIDOC-CRM properties of properties; SKOS-XL labels | 3 |
 | D. Through a blank node, no vocabulary | n-ary relation through a blank node; structured values through `rdf:value` | 4 |
@@ -99,7 +99,7 @@ by the developer in round 4.
   filter its machinery. Off gives today's fingerprint exactly. Rejected: separate switches for
   probing and filtering (a filter without detection has nothing to filter).
 - **DEC-7 Grouping never reads IRI strings.** The generic predicate comes from what the kind states
-  (`rdf:singletonPropertyOf`, `rdf:predicate`, `owl:annotatedProperty`, `prov:unqualifiedForm`, the
+  (`rdf:predicate`, `owl:annotatedProperty`, `prov:unqualifiedForm`, the
   incoming predicate of a qualifying node). When nothing states it, the predicate resource's own type
   (other than `rdf:Property` and the OWL property types) names the relation; otherwise it is an
   unnamed relation per (subject class, object class). Rejected: collection segments of IRIs (one
@@ -121,6 +121,17 @@ by the developer in round 4.
   profile document, pattern schema and view, diagram, `profile.json`) carry the full section.
   Rejected: shapes for reifiers (each kind would need its own shape idiom); silence (a reader of the
   shapes would not know the links exist).
+
+- **DEC-12 Re-shape (developer, 2026-11-03): no normalisation of non-standard constructs.**
+  `rdf:singletonPropertyOf` is not a W3C term (Nguyen et al. proposed it; RDF never adopted it), so
+  the fingerprint does not treat it as a marker that names a relation. Singleton properties are
+  captured as the generic antipattern they are, a resource used as a predicate (kind
+  `resource_as_predicate`, signal of Q5 answer A, named by the predicate resource's type), and
+  `rdf:singletonPropertyOf` appears among the reifier properties. The `singleton_property` kind is
+  removed. Only standard RDF and OWL vocabulary may name a relation (`rdf:predicate`,
+  `owl:annotatedProperty`, `owl:assertionProperty`). Logged as an EPIC re-shape in
+  `inputs/shaping-qa.md` (Q6); it amends DEC-1 and DEC-7. Rejected: keeping the `singleton_property`
+  kind (normalises a made-up construct into a relation the data never states in standard terms).
 
 ## Rabbit-holes
 

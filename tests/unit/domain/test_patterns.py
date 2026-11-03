@@ -1294,9 +1294,9 @@ def test_a_block_lists_the_reified_relations_of_its_classes_after_its_edges_most
     second = klass(B, 5, reified=[relation(None, A, 3)], co_types=[(A, 5)])
     texts = [r.text for r in block(view(first, second), "ex:A&ex:B").reified_relations]
     assert texts == [
-        "~> ex:q (:?) 3 statements via singleton_property [reifiers: ex:src 2]",
-        "~> unnamed (:ex:A) 3 statements via singleton_property",
-        "~> ex:p (:ex:B) 1 statement via singleton_property",
+        "~> ex:q (:?) 3 statements via resource_as_predicate [reifiers: ex:src 2]",
+        "~> unnamed (:ex:A) 3 statements via resource_as_predicate",
+        "~> ex:p (:ex:B) 1 statement via resource_as_predicate",
     ]
 
 

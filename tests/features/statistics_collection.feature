@@ -359,24 +359,25 @@ Feature: Collecting raw statistics from a knowledge graph
       Then no probe is issued
       And every singleton predicate IRI is an ordinary property
 
-    Scenario: Singleton properties of one generic property
-      Given 50 distinct predicate IRIs each linking a subject of class "ex:A" to an object of class "ex:B", each with rdf:singletonPropertyOf "ex:isRelatedTo" and "prov:wasAttributedTo"
+    Scenario: Singleton properties are resources used as predicates
+      Given 50 distinct predicate IRIs typed "ex:Link", each linking a subject of class "ex:A" to an object of class "ex:B", each with rdf:singletonPropertyOf "ex:isRelatedTo" and "prov:wasAttributedTo"
       When the graph is profiled
-      Then class "ex:A" has one reified relation of kind singleton property, "ex:isRelatedTo" to "ex:B", 50 statements
-      And its reifier property "prov:wasAttributedTo" is on 50
+      Then class "ex:A" has one reified relation of kind resource as predicate, "ex:Link" to "ex:B", 50 statements
+      And its reifier properties are "rdf:singletonPropertyOf" on 50 and "prov:wasAttributedTo" on 50
+      And no relation is named "ex:isRelatedTo"
 
     Scenario: RDF reification
       Given 30 rdf:Statement nodes whose rdf:subject is of class "ex:A", rdf:predicate is "ex:p" and rdf:object is of class "ex:B"
       When the graph is profiled
       Then class "ex:A" has one reified relation of kind RDF statement, "ex:p" to "ex:B", 30 statements
 
-    Scenario: Resource used as predicate with no marker
-      Given predicate IRIs typed "ex:Procedure", not a property type, and no rdf:singletonPropertyOf, linking class "ex:A" to class "ex:B", one of them used 25 times
+    Scenario: Resource used as predicate
+      Given predicate IRIs typed "ex:Procedure", not a property type, linking class "ex:A" to class "ex:B", one of them used 25 times
       When the graph is profiled
       Then class "ex:A" has one reified relation of kind resource as predicate, named "ex:Procedure", to "ex:B", counting every use
 
     Scenario: A predicate typed only as a property is ordinary
-      Given predicate IRIs typed only rdf:Property, used once each, with no rdf:singletonPropertyOf
+      Given predicate IRIs typed only rdf:Property, used once each, one of them with rdf:singletonPropertyOf "ex:isRelatedTo"
       When the graph is profiled
       Then each stays an ordinary property
       And no reified relation is reported for them
@@ -396,7 +397,7 @@ Feature: Collecting raw statistics from a knowledge graph
   Rule: Reification machinery is not an ordinary class or property
 
     Scenario: Singleton predicates leave the property rows
-      Given 50 distinct predicate IRIs each linking a subject of class "ex:A" to an object of class "ex:B", each with rdf:singletonPropertyOf "ex:isRelatedTo" and "prov:wasAttributedTo"
+      Given 50 distinct predicate IRIs typed "ex:Link", each linking a subject of class "ex:A" to an object of class "ex:B", each with rdf:singletonPropertyOf "ex:isRelatedTo" and "prov:wasAttributedTo"
       When the graph is profiled
       Then class "ex:A" has no ordinary property for any of the 50 predicate IRIs
 

@@ -44,6 +44,10 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 - [x] 7.1 New page `docs/modules/ROOT/pages/reifications.adoc` (the kinds, what is hidden, mixed classes (P-14), the per-class section in each output, the `~>` notation, `--no-reifications`, what is not detected: `rdf:Property`-only predicates, n-ary relations through IRIs, triple-term decomposition, untyped subjects (P-7), `patterns.csv` unchanged); the options table in `getting-started.adoc`; the nav entry; a pointer for the `~>` lines in `llm-schema.adoc`; the `CHANGELOG.md` entry (BREAKING: pitfall removed)
 
+## R. Re-shape DEC-12: no singleton normalisation
+
+- [x] R.1 Remove the `singleton_property` kind: delete `singleton_property.rq` and the enum value (`make generate-models`); `resource_as_predicate.rq` no longer excludes predicates with `rdf:singletonPropertyOf`, and `rdf:singletonPropertyOf` is an ordinary reifier property (not a hidden term, never a name); `reifications-source.ttl` §C singletons become resources typed `ex:Link`; feature titles and steps follow the spec delta ("Singleton properties are resources used as predicates", "Resource used as predicate"); unit tests, `REIFIED_*` facts, the reified profile and goldens refreshed; design.md §A, §C, the layering table and the exit criteria updated; docs `reifications.adoc`, `llm-schema.adoc` and CHANGELOG follow
+
 ## 8. Gate and release
 
 - [ ] 8.1 `make check-all`
@@ -54,7 +58,7 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## Roadmap
 
-- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 7.1 · [x] R.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

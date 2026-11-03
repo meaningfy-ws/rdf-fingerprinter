@@ -10,7 +10,7 @@ Hidden: 1 classes.
 
 ```text
 (:ex:Person) 3
-~> ex:worksFor (:ex:Org) 2 statements via singleton_property [reifiers: prov:wasAttributedTo 1]
+~> ex:Link (:ex:Org) 2 statements via resource_as_predicate [reifiers: rdf:singletonPropertyOf 2, prov:wasAttributedTo 1]
 ~> ex:Procedure (:ex:Org) 1 statement via resource_as_predicate
 ~> ex:knows (:ex:Person) 1 statement via owl_axiom [reifiers: dcterms:source 1]
 ~> ex:knows (:ex:Person) 1 statement via rdf_statement [reifiers: dcterms:source 1]

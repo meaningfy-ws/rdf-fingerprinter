@@ -11,7 +11,8 @@ for as reified relations of their class (OpenSpec change `singleton-property-pat
 
 ### Added
 - **Reification probes.** Every run asks one SPARQL `ASK` per kind: `rdf_statement`,
-  `singleton_property`, `resource_as_predicate`, `owl_axiom`, `negative_property_assertion` and
+  `resource_as_predicate` (which also captures singleton properties: `rdf:singletonPropertyOf` is not
+  standard, so it is a reifier property and never names a relation), `owl_axiom`, `negative_property_assertion` and
   `triple_term` (RDF 1.2 `rdf:reifies`, counted only). Only the kinds found are captured.
 - **Reified relations per class**: kind, property, object class, statements and reifier properties,
   in the report, the pattern schema (`~>` lines), the PlantUML diagram and `profile.json`

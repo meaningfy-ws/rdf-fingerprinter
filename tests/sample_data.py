@@ -46,8 +46,9 @@ REIFIED_PERSON = "http://example.org/Person"
 # ex:Person's reified relations in profile order: (kind, predicate, object class, statements, reifier properties).
 SOURCE_REIFIER = (("http://purl.org/dc/terms/source", 1),)
 REIFIED_PERSON_RELATIONS = (
-    ("singleton_property", "http://example.org/worksFor", "http://example.org/Org", 2,
-     (("http://www.w3.org/ns/prov#wasAttributedTo", 1),)),
+    ("resource_as_predicate", "http://example.org/Link", "http://example.org/Org", 2,
+     (("http://www.w3.org/1999/02/22-rdf-syntax-ns#singletonPropertyOf", 2),
+      ("http://www.w3.org/ns/prov#wasAttributedTo", 1))),
     ("resource_as_predicate", "http://example.org/Procedure", "http://example.org/Org", 1, ()),
     ("owl_axiom", "http://example.org/knows", "http://example.org/Person", 1, SOURCE_REIFIER),
     ("rdf_statement", "http://example.org/knows", "http://example.org/Person", 1, SOURCE_REIFIER),
@@ -62,7 +63,7 @@ REIFIED_HIDDEN_CLASSES = (
     "http://www.w3.org/2002/07/owl#NegativePropertyAssertion",
 )
 REIFIED_KINDS = (
-    "negative_property_assertion", "owl_axiom", "rdf_statement", "resource_as_predicate", "singleton_property",
+    "negative_property_assertion", "owl_axiom", "rdf_statement", "resource_as_predicate",
     "triple_term",
 )  # fmt: skip
 REIFIED_TRIPLE_TERMS = 1

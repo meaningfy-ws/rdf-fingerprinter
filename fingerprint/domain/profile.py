@@ -241,13 +241,9 @@ class ReificationKind(str, Enum):
     """
     An rdf:Statement resource with rdf:subject, rdf:predicate and rdf:object.
     """
-    singleton_property = "singleton_property"
-    """
-    A unique property that is rdf:singletonPropertyOf a generic property.
-    """
     resource_as_predicate = "resource_as_predicate"
     """
-    A predicate with an rdf:type other than a property type and no rdf:singletonPropertyOf; its type names the relation.
+    A predicate with an rdf:type other than a property type (this covers singleton properties, DEC-12); its type names the relation.
     """
     owl_axiom = "owl_axiom"
     """

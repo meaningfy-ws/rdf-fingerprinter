@@ -1,4 +1,4 @@
-> Derives from: EPIC singleton-property-pattern (`proposal.md`, DEC-1 to DEC-11). Covers **stage 1**
+> Derives from: EPIC singleton-property-pattern (`proposal.md`, DEC-1 to DEC-12). Covers **stage 1**
 > in full; stages 2–4 are outlined in "Later stages" and planned in detail when stage 1 closes.
 
 ## Context
@@ -37,8 +37,9 @@ Current state the plan builds on (paths relative to the repo root):
 **Goals (stage 1):**
 - The mechanism: the probe catalogue, the collection stage, the hidden-term filter, the model type,
   the per-class section in every descriptive output and the note in SHACL/ShExC (DEC-2..DEC-6, DEC-11).
-- The family-A kinds: `rdf_statement`, `singleton_property`, `resource_as_predicate`, `owl_axiom`,
-  `negative_property_assertion`, and the `triple_term` count (DEC-1).
+- The family-A kinds: `rdf_statement`, `resource_as_predicate`, `owl_axiom`, `negative_property_assertion`, and the
+  `triple_term` count (DEC-1). Amended by DEC-12: there is no `singleton_property` kind; singleton
+  predicates are resources used as predicates.
 - The removal of pitfall `x_individual_as_predicate` (DEC-10).
 - Canonical sample data with one instance of each stage-1 kind, its profile and goldens.
 
@@ -76,7 +77,7 @@ New planning decisions; EPIC decisions are cited, not restated.
   the machinery, contradicting DEC-4).
 - **P-5 A hidden class is a class all of whose instances are reifiers.** Fixed reifier classes
   (`rdf:Statement`, `owl:Axiom`, `owl:NegativePropertyAssertion`) are listed in the `hidden` query by
-  `VALUES`; the classes of singleton or resource predicates are hidden only when no instance of the
+  `VALUES`; the classes of resource predicates (singletons included) are hidden only when no instance of the
   class is outside the kind (`FILTER NOT EXISTS`). The same dynamic rule applies to the reifier nodes
   of every kind (an `rdf:Statement` node also typed `ex:Claim` hides `ex:Claim` only if every
   `ex:Claim` is a statement). Rejected: hiding every class of a reifier (would hide `rdf:Property`).
@@ -137,7 +138,7 @@ New planning decisions; EPIC decisions are cited, not restated.
 
 | Layer | File | Change |
 |---|---|---|
-| model | `model/fingerprint_stats.yaml` | enum `ReificationKind` (stage-1 values: `rdf_statement`, `singleton_property`, `resource_as_predicate`, `owl_axiom`, `negative_property_assertion`, `triple_term`); classes `ReifiedRelation` (`kind`, `property` optional (the generic predicate; this slot name is in `IRI_FIELDS` of `fingerprint/service_layer/prefixes.py`, so its namespace gets a prefix), `object_class` optional, `statements`, `reifier_properties`) and `ReifierProperty` (`property`, `reifiers`); `ClassProfile.reified_relations`; `GraphProfile.reification_kinds` (optional; left unset, so absent from `profile.json`, when no kind is found, so the existing profiles do not change), `GraphProfile.triple_term_reifications`; slot `reifications` (boolean, `ifabsent: "true"`) in `Settings`; `QueryKind.reification` |
+| model | `model/fingerprint_stats.yaml` | enum `ReificationKind` (stage-1 values: `rdf_statement`, `resource_as_predicate`, `owl_axiom`, `negative_property_assertion`, `triple_term`); classes `ReifiedRelation` (`kind`, `property` optional (the generic predicate; this slot name is in `IRI_FIELDS` of `fingerprint/service_layer/prefixes.py`, so its namespace gets a prefix), `object_class` optional, `statements`, `reifier_properties`) and `ReifierProperty` (`property`, `reifiers`); `ClassProfile.reified_relations`; `GraphProfile.reification_kinds` (optional; left unset, so absent from `profile.json`, when no kind is found, so the existing profiles do not change), `GraphProfile.triple_term_reifications`; slot `reifications` (boolean, `ifabsent: "true"`) in `Settings`; `QueryKind.reification` |
 | model | `model/fingerprint_analytics.yaml` | `reifications` in `SettingsOverride` |
 | model | `model/fingerprint_views.yaml` | `reified_relations` on `DocumentClass`, `PatternBlock`, `ShexShape`, `NodeShape`, `DiagramClass` (a view class `ReifiedRelationView` with the rendered predicate, object class, count and reifier text) |
 | adapters | `fingerprint/adapters/reification_catalogue.py` (new) | `packaged_templates() -> list[ReificationTemplate]`: reads `queries/reifications/*.rq`, splits sections, validates P-2 |
@@ -160,41 +161,46 @@ texts), never a dict (domain-object-model DEC-1).
 
 ### A. The stage-1 templates (abridged; prefixes omitted)
 
-`singleton_property.rq`:
+`resource_as_predicate.rq` (amended by DEC-12: it also captures singleton predicates, and
+`rdf:singletonPropertyOf` is only a reifier property; `NOT_REIFIER_TYPES` is listed below):
 
 ```sparql
-# id: singleton_property
-# title: Singleton property (rdf:singletonPropertyOf)
+# id: resource_as_predicate
+# title: Resource used as a predicate
 # family: statement_identity
-# REIFY singleton_property probe
-ASK { $graph_open ?s ?sp ?o . ?sp rdf:singletonPropertyOf ?g . $graph_close }
-# REIFY singleton_property relations
+# REIFY resource_as_predicate probe
+ASK { $graph_open ?s ?p ?o . ?p a ?t .
+  FILTER(?t NOT IN (NOT_REIFIER_TYPES))
+  FILTER NOT EXISTS { ?t rdfs:subClassOf+ rdf:Property } $graph_close }
+# REIFY resource_as_predicate relations
 SELECT ?subjectClass ?predicate ?objectClass (COUNT(*) AS ?statements) WHERE {
-  { SELECT $distinct ?s ?sp ?o WHERE { $graph_open ?s ?sp ?o . ?sp rdf:singletonPropertyOf ?g . $graph_close } }
-  $graph_open ?sp rdf:singletonPropertyOf ?predicate . ?s a ?subjectClass .
-  OPTIONAL { ?o a ?objectClass } $graph_close } GROUP BY ?subjectClass ?predicate ?objectClass
-# REIFY singleton_property reifier-properties
-SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?sp) AS ?reifiers)
-WHERE { $graph_open ?s ?sp ?o . ?sp rdf:singletonPropertyOf ?predicate ; ?reifierProperty ?v .
-  FILTER(?reifierProperty NOT IN (rdf:singletonPropertyOf, rdf:type)) ?s a ?subjectClass .
+  { SELECT $distinct ?s ?p ?o ?predicate WHERE { $graph_open ?s ?p ?o . ?p a ?predicate .
+    FILTER(?predicate NOT IN (NOT_REIFIER_TYPES))
+    FILTER NOT EXISTS { ?predicate rdfs:subClassOf+ rdf:Property } $graph_close } }
+  $graph_open ?s a ?subjectClass . OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY resource_as_predicate reifier-properties
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?p) AS ?reifiers) WHERE {
+  $graph_open ?s ?p ?o . ?p a ?predicate ; ?reifierProperty ?v .
+  FILTER(?predicate NOT IN (NOT_REIFIER_TYPES))
+  FILTER NOT EXISTS { ?predicate rdfs:subClassOf+ rdf:Property }
+  FILTER(?reifierProperty != rdf:type) ?s a ?subjectClass .
   OPTIONAL { ?o a ?objectClass } $graph_close }
 GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
-# REIFY singleton_property hidden
+# REIFY resource_as_predicate hidden
 SELECT DISTINCT ?term WHERE { $graph_open
-  { ?sp rdf:singletonPropertyOf ?g . BIND(?sp AS ?term) }
-  UNION { VALUES ?term { rdf:singletonPropertyOf } }
-  UNION { ?sp rdf:singletonPropertyOf ?g ; a ?term .
-          FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?x rdf:singletonPropertyOf ?any } } }
+  { ?s ?p ?o . ?p a ?t . <the ?t filters above> BIND(?p AS ?term) }
+  UNION { ?s ?p ?o . ?p a ?t . <the ?t filters above> BIND(?t AS ?term)
+          FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?s2 ?x ?o2 } } }
   $graph_close }
 ```
 
-The other five follow the same sections:
+The other four follow the same sections:
 
 | Kind | Probe matches | `?predicate` from | Statement counted | Fixed hidden terms | Dynamic hidden terms |
 |---|---|---|---|---|---|
 | `rdf_statement` | `?st rdf:subject ?s ; rdf:predicate ?p ; rdf:object ?o` | `rdf:predicate` | distinct `?st` | `rdf:Statement`, `rdf:subject`, `rdf:predicate`, `rdf:object` | classes of `?st` per P-5 |
-| `singleton_property` | above | `rdf:singletonPropertyOf` | each `?s ?sp ?o` triple | `rdf:singletonPropertyOf` | each `?sp`; classes of `?sp` per P-5 |
-| `resource_as_predicate` | `?s ?p ?o . ?p a ?t`, with `?t` not in `NOT_REIFIER_TYPES` (below), `FILTER NOT EXISTS { ?t rdfs:subClassOf+ rdf:Property }` (user subclasses of `rdf:Property` in the same graph), and no `rdf:singletonPropertyOf` | `?t` (the predicate's type, DEC-7) | each triple | — | each such `?p`; `?t` per P-5 |
+| `resource_as_predicate` | `?s ?p ?o . ?p a ?t`, with `?t` not in `NOT_REIFIER_TYPES` (below), `FILTER NOT EXISTS { ?t rdfs:subClassOf+ rdf:Property }` (user subclasses of `rdf:Property` in the same graph)) | `?t` (the predicate's type, DEC-7; never `rdf:singletonPropertyOf`, DEC-12) | each triple | — (`rdf:singletonPropertyOf` is not hidden: it is a reifier property) | each such `?p`; `?t` per P-5 |
 | `owl_axiom` | `?ax owl:annotatedSource ?s ; owl:annotatedProperty ?p ; owl:annotatedTarget ?o` | `owl:annotatedProperty` | distinct `?ax` | `owl:Axiom`, `owl:annotatedSource`, `owl:annotatedProperty`, `owl:annotatedTarget` | classes of `?ax` per P-5 |
 | `negative_property_assertion` | `?n owl:sourceIndividual ?s ; owl:assertionProperty ?p` | `owl:assertionProperty` | distinct `?n` | `owl:NegativePropertyAssertion`, `owl:sourceIndividual`, `owl:assertionProperty`, `owl:targetIndividual`, `owl:targetValue` | classes of `?n` per P-5 |
 | `triple_term` | `?r rdf:reifies ?t` | — (count only, P-12) | `count`: `COUNT(*)` of `rdf:reifies` triples | `rdf:reifies` | — |
@@ -206,11 +212,11 @@ The other five follow the same sections:
 `owl:AsymmetricProperty`, `owl:ReflexiveProperty`, `owl:IrreflexiveProperty`. `rdfs:Resource` and
 `owl:Thing` are there because a store with inference types every predicate with them.
 
-Counting triples (the singleton and resource kinds) follows the existing rule for union-default
+Counting triples (the resource kind) follows the existing rule for union-default
 stores: the relations query counts over a subquery `SELECT $distinct ?s ?sp ?o`, so a triple seen
 through two graphs counts once.
 
-Reifier properties exclude the kind's own structural predicates and `rdf:type`. A `resource_as_predicate`
+Reifier properties exclude the kind's own structural predicates and `rdf:type` (for `resource_as_predicate`, only `rdf:type`: `rdf:singletonPropertyOf` is reported like any other). A `resource_as_predicate`
 predicate with several non-property types yields one relation per type (as P-7 for subjects).
 
 ### B. The collection stage (`_Reifications`)
@@ -243,18 +249,21 @@ ex:alice a ex:Person .  ex:bob a ex:Person .  ex:acme a ex:Org .
 ex:alice ex:rel1 ex:acme .  ex:bob ex:rel2 ex:acme .
 ex:rel1 rdf:singletonPropertyOf ex:worksFor ; a ex:Link ; prov:wasAttributedTo ex:hr .
 ex:rel2 rdf:singletonPropertyOf ex:worksFor ; a ex:Link .
+ex:performs1 a ex:Procedure .  ex:carol a ex:Person ; ex:performs1 ex:acme .
 ex:st1 a rdf:Statement ; rdf:subject ex:alice ; rdf:predicate ex:knows ; rdf:object ex:bob ;
        dct:source ex:survey .
 ```
 
 Profile of class `ex:Person`: no property `ex:rel1`, `ex:rel2` or anything from `rdf:`; reified
 relations, in this order:
-1. `singleton_property`, `ex:worksFor` → `ex:Org`, 2 statements, reifiers `prov:wasAttributedTo` 1.
-2. `rdf_statement`, `ex:knows` → `ex:Person`, 1 statement, reifiers `dct:source` 1.
+1. `resource_as_predicate`, `ex:Link` → `ex:Org`, 2 statements, reifiers `rdf:singletonPropertyOf` 2,
+   `prov:wasAttributedTo` 1 (DEC-12: never named `ex:worksFor`).
+2. `resource_as_predicate`, `ex:Procedure` → `ex:Org`, 1 statement, no reifiers.
+3. `rdf_statement`, `ex:knows` → `ex:Person`, 1 statement, reifiers `dct:source` 1.
 
-No class `ex:Link` (every instance is a singleton predicate, P-5), no class `rdf:Statement`.
-`reification_kinds` = `[rdf_statement, singleton_property]`. Pattern line:
-`~> ex:worksFor (:Org) 2 statements via singleton_property [reifiers: prov:wasAttributedTo 1]`.
+No class `ex:Link` (every instance is a resource used as a predicate, P-5), no class `rdf:Statement`.
+`reification_kinds` = `[rdf_statement, resource_as_predicate]`. Pattern line:
+`~> ex:Link (:ex:Org) 2 statements via resource_as_predicate [reifiers: rdf:singletonPropertyOf 2, prov:wasAttributedTo 1]`.
 
 ### D. Canonical data
 
@@ -293,7 +302,7 @@ binds them (tasks.md names it); `@stage4` is skipped by the conftest hook.
 
 | Spec delta → scenario | Feature file |
 |---|---|
-| statistics-collection: Kind absent; Switch off; A class with reifiers and ordinary instances stays whole; Singleton properties of one generic property; RDF reification; Resource used as predicate with no marker; A predicate typed only as a property is ordinary; Relation through a blank node (stage 4, `@stage4` skipped until then); RDF-star is counted only; Singleton predicates leave the property rows; rdf:Statement leaves the classes | `tests/features/statistics_collection.feature` |
+| statistics-collection: Kind absent; Switch off; A class with reifiers and ordinary instances stays whole; Singleton properties are resources used as predicates; RDF reification; Resource used as predicate; A predicate typed only as a property is ordinary; Relation through a blank node (stage 4, `@stage4` skipped until then); RDF-star is counted only; Singleton predicates leave the property rows; rdf:Statement leaves the classes | `tests/features/statistics_collection.feature` |
 | profile-analytics: Relations follow their class | `tests/features/profile_analytics.feature` |
 | profile-representations: Section present; No section when none; Shapes note reifications without constraining them | `tests/features/profile_representations.feature` |
 | fingerprint-report: Kinds found are named | `tests/features/fingerprint_report.feature` |
@@ -319,15 +328,16 @@ sends every rendered section of every packaged template to Oxigraph and asserts 
 | `relations` / `reifier-properties` fails | port raises | failure recorded; the kind's relations omitted; hidden terms still applied (the machinery is known) |
 | Endpoint rejects `rdf:reifies` objects (1.1 store with triple terms) | probe raises | as a failed probe; the docs name `--no-reifications` as the way round |
 | Capture slow on a large graph | duration in the run log | no escalation (P-9); measured at the gate |
-| Reifier with a non-IRI generic predicate (literal in `rdf:singletonPropertyOf`) | `?predicate` not an IRI | the relation is unnamed (`property` absent) |
+| Reifier with a non-IRI generic predicate (a literal in `rdf:type`; not valid RDF, kept for stores that allow it) | `?predicate` not an IRI | the relation is unnamed (`property` absent) |
 | Retry of a timed-out query | existing retry policy | safe: read-only, no state written before all queries of a graph return |
 
 ## Exit criteria (stage 1)
 
 `make check-all` green; `make oxigraph-load-test-data` + `make test-e2e` green; `make check-mutation`
 at or above the stored score; `openspec validate --all --strict`; the brainframe acceptance (task
-8.4): with defaults, the 517 marked singleton predicates appear as one relation `isRelatedTo` per
-(subject class, object class) and as no ordinary property, the 465 `rdf:Property`-only predicates are
+8.4): with defaults, the 517 marked predicates typed `RelationId` fold into relations named
+`RelationId` (not `isRelatedTo`) per (subject class, object class) and appear as no ordinary
+property (amended by DEC-12), the 465 `rdf:Property`-only predicates are
 unchanged, and the reification stage costs under 10 % of collection time, measured as the
 difference in `ProfileRun` duration (finished − started) between a default run and a
 `--no-reifications` run of the same settings, each run twice, the faster of each pair compared.

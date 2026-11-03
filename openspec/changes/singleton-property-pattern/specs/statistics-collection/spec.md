@@ -20,16 +20,19 @@ once per graph, and SHALL run a kind's capture query only when its probe answers
 ### Requirement: Reified relations are grouped by what they stand for
 Each kind found SHALL be captured as reified relations, one per (subject class, generic predicate,
 object class), each with its kind, statement count and the reifier properties with their counts. The
-generic predicate SHALL come from what the data states, never from IRI strings: the kind's own
-marker, else the predicate resource's type other than `rdf:Property` and the OWL property types, else
-none (an unnamed relation).
+generic predicate SHALL come from what the data states, never from IRI strings: the kind's standard
+marker (`rdf:predicate`, `owl:annotatedProperty`, `owl:assertionProperty`), else the predicate
+resource's type other than `rdf:Property` and the OWL property types, else none (an unnamed
+relation). Non-standard vocabulary, such as `rdf:singletonPropertyOf`, SHALL NOT name a relation:
+it is reported as a reifier property only (DEC-12).
 
-#### Scenario: Singleton properties of one generic property
-- **GIVEN** 50 distinct predicate IRIs each linking a subject of class A to an object of class B, each
-  with `rdf:singletonPropertyOf ex:isRelatedTo` and `prov:wasAttributedTo`
+#### Scenario: Singleton properties are resources used as predicates
+- **GIVEN** 50 distinct predicate IRIs typed `ex:Link`, each linking a subject of class A to an object
+  of class B, each with `rdf:singletonPropertyOf ex:isRelatedTo` and `prov:wasAttributedTo`
 - **WHEN** the graph is profiled
-- **THEN** class A has one reified relation of kind singleton property, `ex:isRelatedTo` to B, 50
-  statements, reifier property `prov:wasAttributedTo` on 50
+- **THEN** class A has one reified relation of kind resource as predicate, named `ex:Link`, to B, 50
+  statements, reifier properties `rdf:singletonPropertyOf` on 50 and `prov:wasAttributedTo` on 50,
+  and no relation named `ex:isRelatedTo`
 
 #### Scenario: RDF reification
 - **GIVEN** 30 `rdf:Statement` nodes whose `rdf:subject` is of class A, `rdf:predicate` is `ex:p`
@@ -37,16 +40,16 @@ none (an unnamed relation).
 - **WHEN** the graph is profiled
 - **THEN** class A has one reified relation of kind RDF statement, `ex:p` to B, 30 statements
 
-#### Scenario: Resource used as predicate with no marker
-- **GIVEN** predicate IRIs typed `ex:Procedure` (not a property type) and no
-  `rdf:singletonPropertyOf`, linking class A to class B, one of them used 25 times
+#### Scenario: Resource used as predicate
+- **GIVEN** predicate IRIs typed `ex:Procedure` (not a property type), linking class A to class B,
+  one of them used 25 times
 - **WHEN** the graph is profiled
 - **THEN** class A has one reified relation of kind resource as predicate, named `ex:Procedure`, to
   B, counting every use
 
 #### Scenario: A predicate typed only as a property is ordinary
-- **GIVEN** predicate IRIs typed only `rdf:Property`, used once each, with no
-  `rdf:singletonPropertyOf`
+- **GIVEN** predicate IRIs typed only `rdf:Property`, used once each, one of them with
+  `rdf:singletonPropertyOf ex:isRelatedTo`
 - **WHEN** the graph is profiled
 - **THEN** each stays an ordinary property and no reified relation is reported for them
 
@@ -68,7 +71,7 @@ When a kind is found, the predicates and reifier classes that implement it SHALL
 profile's ordinary classes and properties.
 
 #### Scenario: Singleton predicates leave the property rows
-- **GIVEN** the singleton graph of "Singleton properties of one generic property"
+- **GIVEN** the singleton graph of "Singleton properties are resources used as predicates"
 - **WHEN** the graph is profiled
 - **THEN** class A has no ordinary property for any of the 50 predicate IRIs
 

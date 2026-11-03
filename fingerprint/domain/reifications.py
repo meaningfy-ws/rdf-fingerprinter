@@ -10,7 +10,6 @@ from fingerprint.domain.views import ReifiedRelationView
 
 KIND_LABELS = {
     ReificationKind.rdf_statement: "RDF statement",
-    ReificationKind.singleton_property: "singleton property",
     ReificationKind.resource_as_predicate: "resource as predicate",
     ReificationKind.owl_axiom: "OWL axiom",
     ReificationKind.negative_property_assertion: "negative property assertion",

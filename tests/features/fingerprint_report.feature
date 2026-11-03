@@ -314,7 +314,7 @@ Feature: The fingerprint report and the command line
   Rule: Reified relations are reported
 
     Scenario: Kinds found are named
-      Given a profile with singleton properties and rdf:Statement reifications
+      Given a profile with resources used as predicates and rdf:Statement reifications
       When the report is rendered
       Then the graph summary names both kinds
       And each subject class shows its reified relations

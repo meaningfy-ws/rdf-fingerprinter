@@ -54,7 +54,7 @@ def relation(
     object_class: str | None,
     statements: int,
     *reifiers: tuple[str, int],
-    kind=ReificationKind.singleton_property,
+    kind=ReificationKind.resource_as_predicate,
 ) -> ReifiedRelation:
     """A reified relation with its reifier properties as (property, reifiers) pairs."""
     return ReifiedRelation(

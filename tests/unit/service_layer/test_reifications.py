@@ -49,7 +49,7 @@ def test_only_probes_hidden_terms_and_the_count_run_at_depth_graphs():
     graph = profile(fake, depth="graphs", graph_statistics=False)
     assert {s.split()[1] for s in sections(fake)} == {"probe", "hidden", "count"}
     assert list(graph.reification_kinds) == [
-        "negative_property_assertion", "owl_axiom", "rdf_statement", "resource_as_predicate", "singleton_property",
+        "negative_property_assertion", "owl_axiom", "rdf_statement", "resource_as_predicate",
         "triple_term",
     ]  # fmt: skip
     assert graph.triple_term_reifications == 1
@@ -68,7 +68,7 @@ def test_machinery_leaves_classes_properties_and_links_and_the_relations_follow_
     person = found["Person"]
     assert not {p.property for p in person.property_partitions} & {EX + "rel1", EX + "rel2"}
     assert [(r.kind, r.property, r.object_class, r.statements) for r in person.reified_relations] == [
-        ("singleton_property", EX + "worksFor", EX + "Org", 2),
+        ("resource_as_predicate", EX + "Link", EX + "Org", 2),
         ("resource_as_predicate", EX + "Procedure", EX + "Org", 1),
         ("owl_axiom", EX + "knows", EX + "Person", 1),
         ("rdf_statement", EX + "knows", EX + "Person", 1),
@@ -80,41 +80,43 @@ def test_machinery_leaves_classes_properties_and_links_and_the_relations_follow_
 
 
 def test_reifier_properties_are_merged_into_their_relation():
-    singleton = classes(profile(sample(), depth="classes"))["Person"].reified_relations[0]
-    assert [(p.property, p.reifiers) for p in singleton.reifier_properties] == [
-        ("http://www.w3.org/ns/prov#wasAttributedTo", 1)
-    ]
+    link = classes(profile(sample(), depth="classes"))["Person"].reified_relations[0]
+    assert link.property == EX + "Link"
+    assert {(p.property, p.reifiers) for p in link.reifier_properties} == {
+        ("http://www.w3.org/ns/prov#wasAttributedTo", 1),
+        (RDF + "singletonPropertyOf", 2),
+    }
 
 
 def test_a_failed_probe_is_recorded_and_the_machinery_stays_ordinary():
     fake = sample()
-    fake.on("REIFY", PermanentError("no"), when=fails_on("singleton_property", "probe"))
+    fake.on("REIFY", PermanentError("no"), when=fails_on("resource_as_predicate", "probe"))
     result = run(fake, depth="classes")
     (failure,) = result.failures
-    assert (failure.query_kind, failure.check_id, failure.graph) == (QueryKind.reification, "singleton_property", GRAPH)
+    assert (failure.query_kind, failure.check_id, failure.graph) == (QueryKind.reification, "resource_as_predicate", GRAPH)
     graph = result.graphs[0]
-    assert ReificationKind.singleton_property not in graph.reification_kinds and "Link" in classes(graph)
-    assert not [s for s in sections(fake) if s.startswith("singleton_property r")]
+    assert ReificationKind.resource_as_predicate not in graph.reification_kinds and "Link" in classes(graph)
+    assert not [s for s in sections(fake) if s.startswith("resource_as_predicate r")]
 
 
 def test_a_failed_hidden_query_keeps_the_machinery_but_still_captures_the_relations():
     fake = sample()
-    fake.on("REIFY", PermanentError("no"), when=fails_on("singleton_property", "hidden"))
+    fake.on("REIFY", PermanentError("no"), when=fails_on("resource_as_predicate", "hidden"))
     result = run(fake, depth="classes")
-    assert [f.check_id for f in result.failures] == ["singleton_property"]
+    assert [f.check_id for f in result.failures] == ["resource_as_predicate"]
     found = classes(result.graphs[0])
     assert "Link" in found
-    assert ReificationKind.singleton_property in {r.kind for r in found["Person"].reified_relations}
+    assert ReificationKind.resource_as_predicate in {r.kind for r in found["Person"].reified_relations}
 
 
 def test_a_failed_relations_query_omits_the_relations_but_keeps_the_hiding():
     fake = sample()
-    fake.on("REIFY", PermanentError("no"), when=fails_on("singleton_property", "relations"))
+    fake.on("REIFY", PermanentError("no"), when=fails_on("resource_as_predicate", "relations"))
     result = run(fake, depth="classes")
-    assert [f.check_id for f in result.failures] == ["singleton_property"]
+    assert [f.check_id for f in result.failures] == ["resource_as_predicate"]
     found = classes(result.graphs[0])
     assert "Link" not in found
-    assert ReificationKind.singleton_property not in {r.kind for r in found["Person"].reified_relations}
+    assert ReificationKind.resource_as_predicate not in {r.kind for r in found["Person"].reified_relations}
 
 
 def test_a_failed_count_leaves_the_triple_term_count_unset():

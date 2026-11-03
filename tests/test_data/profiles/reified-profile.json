@@ -1,7 +1,7 @@
 {
   "endpoint": "http://fake/sparql",
-  "started_at": "2026-11-03T14:35:36.639878Z",
-  "finished_at": "2026-11-03T14:35:38.078696Z",
+  "started_at": "2026-11-03T14:43:45.702515Z",
+  "finished_at": "2026-11-03T14:43:46.314929Z",
   "tool_version": "0.3.1",
   "settings": {
     "depth": "values",
@@ -29,7 +29,6 @@
         "owl_axiom",
         "rdf_statement",
         "resource_as_predicate",
-        "singleton_property",
         "triple_term"
       ],
       "triple_term_reifications": 1,
@@ -44,11 +43,15 @@
           "property_partitions": [],
           "reified_relations": [
             {
-              "property": "http://example.org/worksFor",
+              "property": "http://example.org/Link",
               "object_class": "http://example.org/Org",
-              "kind": "singleton_property",
+              "kind": "resource_as_predicate",
               "statements": 2,
               "reifier_properties": [
+                {
+                  "property": "http://www.w3.org/1999/02/22-rdf-syntax-ns#singletonPropertyOf",
+                  "reifiers": 2
+                },
                 {
                   "property": "http://www.w3.org/ns/prov#wasAttributedTo",
                   "reifiers": 1

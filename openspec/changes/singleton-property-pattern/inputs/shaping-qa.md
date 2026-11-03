@@ -69,3 +69,15 @@ triples outside rdf/rdfs/owl/skos/sh; (C) B or a rarely-used statistical signal.
 **Answer: A.** No false positives on vocabularies. Consequence: brainframe's 465 predicates typed
 only `rdf:Property` (the unmarked `RelationId`, `Procedure`, `Policy`, `mitigationImplementationStatus`
 families) stay ordinary properties; only the 517 marked singletons fold into `isRelatedTo`.
+
+## Q6 — Re-shape: singleton properties are not standard (developer, 2026-11-03, during apply)
+
+Developer: "note that those singleton templates are made up, they are not standard constructs, they
+are made up. so do not normalise them, just capture the generic antipattern".
+
+Options offered: (1) one generic kind — drop `singleton_property`; any predicate with a non-property
+type is `resource_as_predicate`, named by that type, `rdf:singletonPropertyOf` only a reifier
+property; (2) the same but never named; (3) the same with a wider signal (reverses Q5).
+**Answer: (1).** Recorded as DEC-12 (EPIC re-shape, amends DEC-1 and DEC-7). Consequence for
+brainframe: the 517 marked predicates (typed `RelationId` and `rdf:Property`) form relations named
+`RelationId`, not `isRelatedTo`.

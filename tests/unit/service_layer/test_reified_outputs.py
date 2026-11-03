@@ -9,7 +9,7 @@ from fingerprint.service_layer.representations import make_generator
 from tests.builders import EX, klass, literals, profile_run, prop, relation
 from tests.fakes import files
 
-TEXT = "~> ex:worksFor (:ex:Org) 2 statements via singleton_property [reifiers: ex:source 1]"
+TEXT = "~> ex:worksFor (:ex:Org) 2 statements via resource_as_predicate [reifiers: ex:source 1]"
 
 
 def run(*reified):

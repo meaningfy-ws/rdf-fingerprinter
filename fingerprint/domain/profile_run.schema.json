@@ -826,7 +826,6 @@
             "description": "The way a reification is expressed in the data (singleton-property-pattern, stage 1).",
             "enum": [
                 "rdf_statement",
-                "singleton_property",
                 "resource_as_predicate",
                 "owl_axiom",
                 "negative_property_assertion",

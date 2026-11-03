@@ -7,7 +7,6 @@ from tests.bdd.steps.statistics import EX, RDF, expand, fingerprint, graph, klas
 PROV = "http://www.w3.org/ns/prov#"
 SINGLETON = RDF + "singletonPropertyOf"
 KINDS = {
-    "singleton property": "singleton_property",
     "RDF statement": "rdf_statement",
     "resource as predicate": "resource_as_predicate",
 }  # dict-ok: module-level lookup table
@@ -60,13 +59,14 @@ def reifications_off(ctx):
 
 @given(
     parsers.parse(
-        '{n:d} distinct predicate IRIs each linking a subject of class "{a}" to an object of class "{b}", '
+        '{n:d} distinct predicate IRIs typed "{t}", each linking a subject of class "{a}" to an object of class "{b}", '
         'each with rdf:singletonPropertyOf "{generic}" and "{reifier}"'
     )
 )
-def singletons(ctx, n, a, b, generic, reifier):
+def singletons(ctx, n, t, a, b, generic, reifier):
     for i in range(n):
         link(ctx["fake"], i, f"ex:sp{i}", a, b)
+        ctx["fake"].add(f"ex:sp{i}", "a", t)
         ctx["fake"].add(f"ex:sp{i}", SINGLETON, generic)
         ctx["fake"].add(f"ex:sp{i}", iri(reifier), "ex:someone")
     ctx["n"] = n
@@ -84,7 +84,7 @@ def rdf_statements(ctx, n, a, p, b):
 
 @given(
     parsers.parse(
-        'predicate IRIs typed "{t}", not a property type, and no rdf:singletonPropertyOf, '
+        'predicate IRIs typed "{t}", not a property type, '
         'linking class "{a}" to class "{b}", one of them used {n:d} times'
     )
 )
@@ -98,11 +98,16 @@ def resources_as_predicates(ctx, t, a, b, n):
     ctx["n"] = n + 2
 
 
-@given("predicate IRIs typed only rdf:Property, used once each, with no rdf:singletonPropertyOf")
-def only_property(ctx):
+@given(
+    parsers.parse(
+        'predicate IRIs typed only rdf:Property, used once each, one of them with rdf:singletonPropertyOf "{generic}"'
+    )
+)
+def only_property(ctx, generic):
     for i in range(3):
         link(ctx["fake"], i, f"ex:old{i}")
         ctx["fake"].add(f"ex:old{i}", "a", RDF + "Property")
+    ctx["fake"].add("ex:old0", SINGLETON, generic)
     ctx["n"] = 3
 
 
@@ -188,6 +193,16 @@ def one_relation_every_use(ctx, curie, kind, p, target):
 @then(parsers.parse('its reifier property "{p}" is on {count:d}'))
 def reifier_property(ctx, p, count):
     assert [(q.property, q.reifiers) for q in ctx["relation"].reifier_properties] == [(iri(p), count)]
+
+
+@then(parsers.parse('its reifier properties are "{p}" on {a:d} and "{q}" on {b:d}'))
+def reifier_properties(ctx, p, a, q, b):
+    assert {(r.property, r.reifiers) for r in ctx["relation"].reifier_properties} == {(iri(p), a), (iri(q), b)}
+
+
+@then(parsers.parse('no relation is named "{p}"'))
+def no_relation_named(ctx, p):
+    assert iri(p) not in {r.property for c in graph(ctx["run"]).class_partitions for r in c.reified_relations or []}
 
 
 @then("each stays an ordinary property")

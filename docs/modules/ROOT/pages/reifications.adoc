@@ -9,8 +9,10 @@ the subject's class.
 
 == An example
 
-In the singleton property pattern, each link uses its own predicate IRI, and that IRI names the
-generic property and carries the link's metadata:
+In the singleton property pattern, each link uses its own predicate IRI, and that IRI carries the
+link's metadata. `rdf:singletonPropertyOf` is not a standard W3C term, so the fingerprint does not
+read it as the link's generic property. The predicate is a resource used as a predicate, and its type
+names the relation:
 
 [source,turtle]
 ----
@@ -22,17 +24,17 @@ ex:rel2 rdf:singletonPropertyOf ex:worksFor ; a ex:Link .
 ----
 
 Profiled as ordinary data, `ex:Person` has two one-off properties, `ex:rel1` and `ex:rel2`, and there
-is a class `ex:Link`. Nothing says that people work for organisations. With reifications on, the
-profile of `ex:Person` has neither property, there is no class `ex:Link`, and the class gets one
-reified relation:
+is a class `ex:Link`. With reifications on, the profile of `ex:Person` has neither property, there is
+no class `ex:Link`, and the class gets one reified relation:
 
 [source,text]
 ----
-~> ex:worksFor (:ex:Org) 2 statements via singleton_property [reifiers: prov:wasAttributedTo 1]
+~> ex:Link (:ex:Org) 2 statements via resource_as_predicate [reifiers: rdf:singletonPropertyOf 2, prov:wasAttributedTo 1]
 ----
 
-Read it as: two statements link a person to an organisation by `ex:worksFor`, made through singleton
-properties; one of the two reifiers carries `prov:wasAttributedTo`.
+Read it as: two statements link a person to an organisation through predicates typed `ex:Link`; both
+reifiers carry `rdf:singletonPropertyOf` (an ordinary reifier property) and one carries
+`prov:wasAttributedTo`.
 
 == The kinds
 
@@ -45,13 +47,8 @@ properties; one of the two reifiers carries `prov:wasAttributedTo`.
 | `rdf:predicate`
 | `rdf:Statement`, `rdf:subject`, `rdf:predicate`, `rdf:object`; the other classes of the statement nodes (see below)
 
-| `singleton_property`
-| a predicate with `rdf:singletonPropertyOf`
-| `rdf:singletonPropertyOf`
-| `rdf:singletonPropertyOf`, every singleton predicate, and their classes (see below)
-
 | `resource_as_predicate`
-| a predicate typed with a class that is not a property type (not `rdf:Property`, an OWL property type, `rdfs:Resource`, `owl:Thing`, `owl:NamedIndividual`, or a subclass of `rdf:Property`), and with no `rdf:singletonPropertyOf`
+| a predicate typed with a class that is not a property type (not `rdf:Property`, an OWL property type, `rdfs:Resource`, `owl:Thing`, `owl:NamedIndividual`, or a subclass of `rdf:Property`)
 | the predicate's type
 | every such predicate, and its type (see below)
 
@@ -148,8 +145,8 @@ recognise.
 == Limits
 
 * **Predicates typed only `rdf:Property` are not detected.** A singleton-style predicate with no
-  `rdf:singletonPropertyOf` and no other type is an ordinary property, since nothing in the data tells
-  it from a declared one.
+  other type is an ordinary property, with or without `rdf:singletonPropertyOf`, since nothing in the
+  data tells it from a declared one.
 * **A mixed class stays whole.** A class with reifiers and ordinary instances, such as an
   `rdf:Property` class holding singleton predicates and declared ones, keeps its instance count and
   property rows, reifiers included.

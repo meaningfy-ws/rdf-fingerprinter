@@ -102,10 +102,8 @@ enums:
     permissible_values:
       rdf_statement:
         description: An rdf:Statement resource with rdf:subject, rdf:predicate and rdf:object.
-      singleton_property:
-        description: A unique property that is rdf:singletonPropertyOf a generic property.
       resource_as_predicate:
-        description: A predicate with an rdf:type other than a property type and no rdf:singletonPropertyOf; its type names the relation.
+        description: A predicate with an rdf:type other than a property type (this covers singleton properties, DEC-12); its type names the relation.
       owl_axiom:
         description: An owl:Axiom or owl:Annotation that annotates a triple through owl:annotatedSource, owl:annotatedProperty and owl:annotatedTarget.
       negative_property_assertion:

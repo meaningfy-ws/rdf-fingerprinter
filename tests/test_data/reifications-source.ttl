@@ -12,7 +12,8 @@ ex:bob   a ex:Person .
 ex:carol a ex:Person .
 ex:acme  a ex:Org .
 
-# singleton_property: ex:rel1 and ex:rel2 are singleton predicates of ex:worksFor, typed ex:Link only.
+# resource_as_predicate: ex:rel1 and ex:rel2 are singleton predicates typed ex:Link; the non-standard
+# rdf:singletonPropertyOf is no normalisation, only a reifier property (DEC-12).
 ex:alice ex:rel1 ex:acme .
 ex:bob   ex:rel2 ex:acme .
 ex:rel1 rdf:singletonPropertyOf ex:worksFor ; a ex:Link ; prov:wasAttributedTo ex:hr .
