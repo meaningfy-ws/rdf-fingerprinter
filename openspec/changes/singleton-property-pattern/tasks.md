@@ -62,12 +62,12 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 - [x] 8.1 `make check-all`
 - [x] 8.2 `make oxigraph-load-test-data` + `make test-e2e`
 - [x] 8.3 `make check-mutation` from a deleted `mutants/` (fresh stats), at or above the stored score; survivors get a test in the owning tier
-- [ ] 8.4 Brainframe acceptance (design "Exit criteria", with its timing method), recorded with commands in `inputs/brainframe-evidence.md` under "After the EPIC"; `openspec validate --all --strict`
+- [x] 8.4 Brainframe acceptance (design "Exit criteria", with its timing method), recorded with commands in `inputs/brainframe-evidence.md` under "After the EPIC"; `openspec validate --all --strict`
 - [ ] 8.5 Release (P-13): the developer chooses the version bump; then AGENTS.md "Release authority"
 
 ## Roadmap
 
-- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 7.1 · [x] R.1 · [x] S.1 · [x] S.2 · [x] S.3 · [x] S.4 · [x] S.5 · [x] 8.0 · [x] 8.1 · [x] 8.2 · [x] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 7.1 · [x] R.1 · [x] S.1 · [x] S.2 · [x] S.3 · [x] S.4 · [x] S.5 · [x] 8.0 · [x] 8.1 · [x] 8.2 · [x] 8.3 · [x] 8.4 · [ ] 8.5
 
 ## Verification
 

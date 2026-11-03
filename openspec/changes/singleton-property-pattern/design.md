@@ -343,6 +343,11 @@ unchanged, and the reification stage costs under 10 % of collection time, measur
 difference in `ProfileRun` duration (finished − started) between a default run and a
 `--no-reifications` run of the same settings, each run twice, the faster of each pair compared.
 
+**Cost criterion waived (developer, 2026-11-03).** On brainframe the stage costs about +20 %
+(+0.18 s on a 0.8 s run; `inputs/brainframe-evidence.md` "After the EPIC"). The cost is the fixed
+set of probes and captures, which dominates on a graph this small; `--no-reifications` removes it.
+The outcome criterion is met, and the release goes ahead without optimising the queries.
+
 ## Risks / Trade-offs
 
 - [Brainframe gains less than hoped: only the marked quarter folds (Q5 answer A)] → stated in the
