@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.5.0] - 2026-11-03
+
 The fingerprint recognises reifications (statements about statements) and shows the links they stand
 for as reified relations of their class (OpenSpec change `singleton-property-pattern`).
 
