@@ -10,7 +10,7 @@ from rdflib import URIRef
 from fingerprint.adapters.exceptions import PermanentError
 from fingerprint.adapters.reification_catalogue import packaged_templates
 from fingerprint.domain.profile import QueryKind, ReificationKind
-from fingerprint.service_layer.collection import _Reifications, collect
+from fingerprint.service_layer.collection import _Collection, _Reifications, collect
 from fingerprint.service_layer.settings import resolve_settings
 from tests import builders
 from tests.fakes import EX, FakeSparql
@@ -226,3 +226,63 @@ def test_attach_files_every_relation_under_its_profiled_class_sorted(rows, profi
         assert keys == sorted(keys)
     unprofiled = [rel for subject, rel in rows if subject not in profiled]
     assert sum(len(own) for own in attached.values()) == len(rows) - len(unprofiled)
+
+
+class Answers:
+    """A port that answers each section with fixed rows and records the sections asked; `None` rows fail."""
+
+    def __init__(self, rows):
+        self.rows, self.asked = rows, []
+
+    def _answer(self, query):
+        section = query.splitlines()[0].split()[-1]
+        self.asked.append(section)
+        if self.rows.get(section) is None:
+            raise PermanentError("no")
+        return self.rows[section]
+
+    ask = select = _answer
+
+
+def stage(rows, kind):
+    run = _Collection("http://fake/sparql", resolve_settings(cli={}, env={}), Answers(rows))
+    (template,) = [t for t in packaged_templates() if t.id == kind]
+    return _Reifications(run, [template]), template
+
+
+@pytest.mark.parametrize("graph, label", [("", "default"), (GRAPH, GRAPH)])
+def test_a_failed_query_names_the_graph_kind_and_section(graph, label):
+    reifications, template = stage({}, "rdf_statement")
+    assert reifications.found(graph) == []
+    (failure,) = reifications.collection.failures
+    assert failure.message == f"graph {label}: reification rdf_statement probe failed: no"
+
+
+def test_a_count_without_a_number_counts_zero():
+    reifications, template = stage({"count": [{"count": None}]}, "graph_statement")  # dict-ok: a SPARQL result row
+    assert [(c.kind, c.count) for c in reifications.counts(GRAPH, [template])] == [("graph_statement", 0)]
+
+
+def test_capture_skips_untyped_subjects_and_sorts_reifier_properties_by_use():
+    a, p, b = (URIRef(EX + n) for n in ("A", "p", "B"))
+    row = {"subjectClass": a, "predicate": p, "objectClass": b, "statements": None}  # dict-ok: a SPARQL result row
+    reifier = {"subjectClass": a, "predicate": p, "objectClass": b}  # dict-ok: a SPARQL result row
+    reifications, template = stage(
+        {
+            "relations": [{**row, "subjectClass": None}, row],  # dict-ok: SPARQL result rows
+            "reifier-properties": [
+                {**reifier, "reifierProperty": URIRef(EX + "rare"), "reifiers": 1},  # dict-ok: a SPARQL result row
+                {**reifier, "reifierProperty": URIRef(EX + "common"), "reifiers": 2},  # dict-ok: a SPARQL result row
+            ],
+        },
+        "rdf_statement",
+    )
+    ((subject, relation),) = reifications._capture(GRAPH, template)
+    assert (subject, relation.property, relation.object_class, relation.statements) == (EX + "A", EX + "p", EX + "B", 0)
+    assert [(q.property, q.reifiers) for q in relation.reifier_properties] == [(EX + "common", 2), (EX + "rare", 1)]
+
+
+def test_a_kind_without_reifier_properties_sends_only_its_relations_query():
+    reifications, template = stage({"relations": []}, "rdf_statement")
+    assert reifications._capture(GRAPH, template.model_copy(update={"reifier_properties": None})) == []
+    assert reifications.collection.sparql.asked == ["relations"]
