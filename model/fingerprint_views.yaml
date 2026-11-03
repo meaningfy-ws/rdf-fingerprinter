@@ -151,6 +151,7 @@ classes:
       target: { required: true, description: "The target class, as Turtle." }
       annotations: { range: Annotation, multivalued: true, inlined_as_list: true }
       property_shapes: { range: PropertyShape, multivalued: true, inlined_as_list: true }
+      reified_relations: { range: ReifiedRelationView, multivalued: true, inlined_as_list: true }
 
   PropertyShape:
     description: The shape of one property of one class.
@@ -202,6 +203,16 @@ classes:
       label: { required: true }
       members: { range: DiagramMember, multivalued: true, inlined_as_list: true }
       generalisations: { multivalued: true, description: "Generalisation lines, as PlantUML." }
+      reified_relations: { range: ReifiedRelationView, multivalued: true, inlined_as_list: true }
+
+  ReifiedRelationView:
+    description: One reified relation of a class, as rendered text.
+    attributes:
+      kind: { required: true, description: "The reification kind." }
+      property: { required: true, description: "The generic predicate, or unnamed." }
+      object_class: { description: "The object class; empty when untyped." }
+      statements: { range: integer, required: true }
+      reifier_text: { description: "The reifier properties, as text." }
 
   DiagramMember:
     description: An attribute line, or the target of an association (multiplicity, class alias and label).
@@ -283,6 +294,7 @@ classes:
       via_texts: { multivalued: true, description: "Each via link as `source-property`." }
       header: { description: "As written." }
       edges: { range: PatternEdge, multivalued: true, inlined_as_list: true }
+      reified_relations: { range: ReifiedRelationView, multivalued: true, inlined_as_list: true }
 
   GlossaryEntry:
     description: A term with its label or description line.
@@ -337,6 +349,7 @@ classes:
       label: { required: true }
       blank: { range: boolean }
       constraints: { range: ShexConstraint, multivalued: true, inlined_as_list: true }
+      reified_relations: { range: ReifiedRelationView, multivalued: true, inlined_as_list: true }
 
   ShexSchema:
     description: The enriched ShExC of one graph.
@@ -419,6 +432,7 @@ classes:
       parents: { range: ParentReference, multivalued: true, inlined_as_list: true }
       properties: { range: DocumentProperty, multivalued: true, inlined_as_list: true, description: "Own, refined, inherited; each by subjects, confidence, short name." }
       property_groups: { range: DocumentPropertyGroup, multivalued: true, inlined_as_list: true }
+      reified_relations: { range: ReifiedRelationView, multivalued: true, inlined_as_list: true }
       badges: { range: DocumentBadge, multivalued: true, inlined_as_list: true, description: "Pitfall checks whose examples name this class." }
 
   DocumentPropertyGroup:

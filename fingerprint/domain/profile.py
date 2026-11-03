@@ -227,6 +227,40 @@ class QueryKind(str, Enum):
     """
     The labels and descriptions of a graph's classes and properties (Q12).
     """
+    reification = "reification"
+    """
+    A reification template query (singleton-property-pattern).
+    """
+
+
+class ReificationKind(str, Enum):
+    """
+    The way a reification is expressed in the data (singleton-property-pattern, stage 1).
+    """
+    rdf_statement = "rdf_statement"
+    """
+    An rdf:Statement resource with rdf:subject, rdf:predicate and rdf:object.
+    """
+    singleton_property = "singleton_property"
+    """
+    A unique property that is rdf:singletonPropertyOf a generic property.
+    """
+    resource_as_predicate = "resource_as_predicate"
+    """
+    A predicate with an rdf:type other than a property type and no rdf:singletonPropertyOf; its type names the relation.
+    """
+    owl_axiom = "owl_axiom"
+    """
+    An owl:Axiom or owl:Annotation that annotates a triple through owl:annotatedSource, owl:annotatedProperty and owl:annotatedTarget.
+    """
+    negative_property_assertion = "negative_property_assertion"
+    """
+    An owl:NegativePropertyAssertion that denies a triple through owl:sourceIndividual, owl:assertionProperty and owl:targetIndividual.
+    """
+    triple_term = "triple_term"
+    """
+    An RDF 1.2 reifier (rdf:reifies a triple term); counted per graph only, since SPARQL 1.1 cannot decompose triple terms.
+    """
 
 
 class PitfallImportance(str, Enum):
@@ -374,6 +408,9 @@ class Settings(ConfiguredBaseModel):
                         'precision_policy': {'ifabsent': 'string(auto)',
                                              'name': 'precision_policy',
                                              'required': True},
+                        'reifications': {'ifabsent': 'true',
+                                         'name': 'reifications',
+                                         'required': True},
                         'timeout_seconds': {'ifabsent': 'int(60)',
                                             'name': 'timeout_seconds',
                                             'required': True},
@@ -396,6 +433,7 @@ class Settings(ConfiguredBaseModel):
     pitfall_scan: bool = Field(default=False, description="""Whether the pitfall checks ran (pitfall-scans; some are full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'false'} })
     schema_graphs: Optional[list[str]] = Field(default=None, description="""Graphs holding the ontology, joined with each data graph for the data checks.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
     pitfall_examples: int = Field(default=10, description="""How many example rows are kept per pitfall check and graph.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'int(10)'} })
+    reifications: bool = Field(default=True, description="""Whether the reification templates ran (singleton-property-pattern).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride'], 'ifabsent': 'true'} })
 
 
 class Failure(ConfiguredBaseModel):
@@ -410,6 +448,8 @@ class Failure(ConfiguredBaseModel):
     property: Optional[str] = Field(default=None, description="""IRI of a predicate.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
                        'PitfallExample',
                        'PredicatePartition',
+                       'ReifierProperty',
+                       'ReifiedRelation',
                        'PropertyProfile',
                        'IncomingLink'],
          'slot_uri': 'void:property'} })
@@ -437,6 +477,8 @@ class GraphProfile(ConfiguredBaseModel):
     distinct_objects: Optional[int] = Field(default=None, description="""Number of distinct objects.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile', 'PropertyProfile', 'ValuePartition'],
          'slot_uri': 'void:distinctObjects'} })
     untyped_subjects: Optional[int] = Field(default=None, description="""Distinct subjects in the graph that have no rdf:type.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
+    reification_kinds: Optional[list[ReificationKind]] = Field(default=None, description="""The reification kinds found in the graph; left unset when none is found.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
+    triple_term_reifications: Optional[int] = Field(default=None, description="""The rdf:reifies triples of the graph (singleton-property-pattern P-12).""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     predicate_partitions: Optional[list[PredicatePartition]] = Field(default=None, description="""Triples per predicate across the graph.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     declared_subclass_edges: Optional[list[SubclassEdge]] = Field(default=None, description="""rdfs:subClassOf edges declared in the dataset.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     class_partitions: Optional[list[ClassProfile]] = Field(default=None, description="""One profile per instantiated class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile'], 'slot_uri': 'void:classPartition'} })
@@ -475,7 +517,7 @@ class PitfallResult(ConfiguredBaseModel):
          'slot_usage': {'check_id': {'name': 'check_id', 'required': True}}})
 
     check_id: str = Field(default=..., description="""The id of a pitfall check.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure', 'PitfallResult', 'PitfallCheck']} })
-    title: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
+    title: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck', 'ReificationTemplate']} })
     description: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
     importance: PitfallImportance = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
     scope: PitfallScope = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
@@ -484,7 +526,7 @@ class PitfallResult(ConfiguredBaseModel):
                        'PitfallCheck',
                        'ParentClass']} })
     heuristic: bool = Field(default=False, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck'], 'ifabsent': 'false'} })
-    count: int = Field(default=..., description="""Rows the check found.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult']} })
+    count: int = Field(default=..., description="""Rows the check found.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'ReificationTemplate']} })
     examples: Optional[list[PitfallExample]] = Field(default=None, description="""The first rows, ordered by entity, property, value.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult']} })
     seconds: Optional[float] = Field(default=None, description="""Time taken by the check's queries.""", json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult']} })
 
@@ -499,6 +541,8 @@ class PitfallExample(ConfiguredBaseModel):
     property: Optional[PitfallTerm] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
                        'PitfallExample',
                        'PredicatePartition',
+                       'ReifierProperty',
+                       'ReifiedRelation',
                        'PropertyProfile',
                        'IncomingLink']} })
     value: Optional[PitfallTerm] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallExample', 'ValueCount']} })
@@ -511,7 +555,7 @@ class PitfallTerm(ConfiguredBaseModel):
     linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
 
     text: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['LangText', 'PitfallTerm', 'AnnotationValue']} })
-    kind: NodeKind = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallTerm']} })
+    kind: NodeKind = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallTerm', 'ReifiedRelation']} })
 
 
 class PitfallCheck(ConfiguredBaseModel):
@@ -522,7 +566,7 @@ class PitfallCheck(ConfiguredBaseModel):
          'slot_usage': {'check_id': {'name': 'check_id', 'required': True}}})
 
     check_id: str = Field(default=..., description="""The id of a pitfall check.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure', 'PitfallResult', 'PitfallCheck']} })
-    title: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
+    title: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck', 'ReificationTemplate']} })
     description: Optional[str] = Field(default=None, json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
     importance: PitfallImportance = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
     scope: PitfallScope = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck']} })
@@ -545,6 +589,8 @@ class PredicatePartition(ConfiguredBaseModel):
     property: str = Field(default=..., description="""IRI of a predicate.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
                        'PitfallExample',
                        'PredicatePartition',
+                       'ReifierProperty',
+                       'ReifiedRelation',
                        'PropertyProfile',
                        'IncomingLink'],
          'slot_uri': 'void:property'} })
@@ -586,6 +632,65 @@ class ClassProfile(ConfiguredBaseModel):
     co_types: Optional[list[CoTypeCount]] = Field(default=None, description="""Other classes the observed instances also have.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ClassProfile']} })
     property_partitions: Optional[list[PropertyProfile]] = Field(default=None, description="""One profile per property used by the instances.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ClassProfile'], 'slot_uri': 'void:propertyPartition'} })
     incoming_links: Optional[list[IncomingLink]] = Field(default=None, description="""Classes and properties pointing at the observed instances.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ClassProfile']} })
+    reified_relations: Optional[list[ReifiedRelation]] = Field(default=None, description="""The reified relations whose subjects are instances of the class; absent when none (singleton-property-pattern).""", json_schema_extra = { "linkml_meta": {'domain_of': ['ClassProfile']} })
+
+
+class ReifierProperty(ConfiguredBaseModel):
+    """
+    A property on the reifiers of a reified relation, and how many reifiers carry it.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema',
+         'slot_usage': {'property': {'name': 'property', 'required': True}}})
+
+    property: str = Field(default=..., description="""IRI of a predicate.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
+                       'PitfallExample',
+                       'PredicatePartition',
+                       'ReifierProperty',
+                       'ReifiedRelation',
+                       'PropertyProfile',
+                       'IncomingLink'],
+         'slot_uri': 'void:property'} })
+    reifiers: int = Field(default=..., ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['ReifierProperty']} })
+
+
+class ReifiedRelation(ConfiguredBaseModel):
+    """
+    A relation expressed through a reification, with the generic predicate it stands for.
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema',
+         'slot_usage': {'property': {'description': 'The generic predicate; absent '
+                                                    'when the reifier does not name '
+                                                    'one.',
+                                     'name': 'property'}}})
+
+    property: Optional[str] = Field(default=None, description="""The generic predicate; absent when the reifier does not name one.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
+                       'PitfallExample',
+                       'PredicatePartition',
+                       'ReifierProperty',
+                       'ReifiedRelation',
+                       'PropertyProfile',
+                       'IncomingLink'],
+         'slot_uri': 'void:property'} })
+    object_class: Optional[str] = Field(default=None, description="""A class of the objects; absent when the objects are untyped.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ReifiedRelation', 'ValuePartition']} })
+    kind: ReificationKind = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallTerm', 'ReifiedRelation']} })
+    statements: int = Field(default=..., description="""Reified statements.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['ReifiedRelation']} })
+    reifier_properties: Optional[list[ReifierProperty]] = Field(default=None, description="""The properties on the reifiers, with their reifier counts.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ReifiedRelation', 'ReificationTemplate']} })
+
+
+class ReificationTemplate(ConfiguredBaseModel):
+    """
+    A packaged reification template, split into its sections (singleton-property-pattern P-2).
+    """
+    linkml_meta: ClassVar[LinkMLMeta] = LinkMLMeta({'from_schema': 'https://data.meaningfy.ws/fingerprint/stats/schema'})
+
+    id: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ReificationTemplate']} })
+    title: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'PitfallCheck', 'ReificationTemplate']} })
+    family: str = Field(default=..., json_schema_extra = { "linkml_meta": {'domain_of': ['ReificationTemplate']} })
+    probe: str = Field(default=..., description="""The ASK that tells whether the kind occurs.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ReificationTemplate']} })
+    relations: Optional[str] = Field(default=None, description="""The SELECT of the reified relations per subject class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ReificationTemplate']} })
+    reifier_properties: Optional[str] = Field(default=None, description="""The SELECT of the properties on the reifiers.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ReifiedRelation', 'ReificationTemplate']} })
+    hidden: Optional[str] = Field(default=None, description="""The SELECT of the terms that implement the kind, hidden from the ordinary profile (P-4).""", json_schema_extra = { "linkml_meta": {'domain_of': ['ReificationTemplate']} })
+    count: Optional[str] = Field(default=None, description="""The SELECT counting rdf:reifies triples (triple_term only, P-12).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PitfallResult', 'ReificationTemplate']} })
 
 
 class CoTypeCount(ConfiguredBaseModel):
@@ -613,6 +718,8 @@ class PropertyProfile(ConfiguredBaseModel):
     property: str = Field(default=..., description="""IRI of a predicate.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
                        'PitfallExample',
                        'PredicatePartition',
+                       'ReifierProperty',
+                       'ReifiedRelation',
                        'PropertyProfile',
                        'IncomingLink'],
          'slot_uri': 'void:property'} })
@@ -656,7 +763,7 @@ class ValuePartition(ConfiguredBaseModel):
     distinct_objects_exact: Optional[bool] = Field(default=None, description="""False when the distinct count is a lower bound (reserved for the batched-collection EPIC).""", json_schema_extra = { "linkml_meta": {'domain_of': ['PropertyProfile', 'ValuePartition']} })
     datatype: Optional[str] = Field(default=None, description="""Datatype IRI of literal objects.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValuePartition']} })
     language: Optional[str] = Field(default=None, description="""Language tag of literal objects; empty for untagged literals.""", json_schema_extra = { "linkml_meta": {'domain_of': ['LangText', 'ValuePartition', 'AnnotationValue']} })
-    object_class: Optional[str] = Field(default=None, description="""A class of the objects; absent when the objects are untyped.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValuePartition']} })
+    object_class: Optional[str] = Field(default=None, description="""A class of the objects; absent when the objects are untyped.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ReifiedRelation', 'ValuePartition']} })
     object_class_graph: Optional[str] = Field(default=None, description="""Graph in which the object class was asserted, when looked up across graphs.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ValuePartition']} })
     min_length: Optional[int] = Field(default=None, description="""Shortest lexical form (STRLEN) among the literals.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['ValuePartition']} })
     max_length: Optional[int] = Field(default=None, description="""Longest lexical form (STRLEN) among the literals.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['ValuePartition']} })
@@ -691,6 +798,8 @@ class IncomingLink(ConfiguredBaseModel):
     property: Optional[str] = Field(default=None, description="""IRI of a predicate.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
                        'PitfallExample',
                        'PredicatePartition',
+                       'ReifierProperty',
+                       'ReifiedRelation',
                        'PropertyProfile',
                        'IncomingLink'],
          'slot_uri': 'void:property'} })
@@ -734,6 +843,7 @@ class SettingsOverride(ConfiguredBaseModel):
     pitfall_scan: Optional[bool] = Field(default=None, description="""Whether the pitfall checks ran (pitfall-scans; some are full scans).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
     schema_graphs: Optional[list[str]] = Field(default=None, description="""Graphs holding the ontology, joined with each data graph for the data checks.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
     pitfall_examples: Optional[int] = Field(default=None, description="""How many example rows are kept per pitfall check and graph.""", ge=1, json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
+    reifications: Optional[bool] = Field(default=None, description="""Whether the reification templates ran (singleton-property-pattern).""", json_schema_extra = { "linkml_meta": {'domain_of': ['Settings', 'SettingsOverride']} })
 
 
 class ExcludedTerms(ConfiguredBaseModel):
@@ -876,6 +986,8 @@ class PropertyAnalytics(ValueIndicators, CardinalityChoice, CardinalityStatistic
     property: str = Field(default=..., description="""IRI of a predicate.""", json_schema_extra = { "linkml_meta": {'domain_of': ['Failure',
                        'PitfallExample',
                        'PredicatePartition',
+                       'ReifierProperty',
+                       'ReifiedRelation',
                        'PropertyProfile',
                        'IncomingLink'],
          'slot_uri': 'void:property'} })
@@ -928,6 +1040,7 @@ class ClassAnalytics(ClassProfile):
     co_types: Optional[list[CoTypeCount]] = Field(default=None, description="""Other classes the observed instances also have.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ClassProfile']} })
     property_partitions: Optional[list[PropertyAnalytics]] = Field(default=None, description="""One profile per property used by the instances.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ClassProfile'], 'slot_uri': 'void:propertyPartition'} })
     incoming_links: Optional[list[IncomingLink]] = Field(default=None, description="""Classes and properties pointing at the observed instances.""", json_schema_extra = { "linkml_meta": {'domain_of': ['ClassProfile']} })
+    reified_relations: Optional[list[ReifiedRelation]] = Field(default=None, description="""The reified relations whose subjects are instances of the class; absent when none (singleton-property-pattern).""", json_schema_extra = { "linkml_meta": {'domain_of': ['ClassProfile']} })
 
 
 class GraphAnalytics(GraphProfile):
@@ -955,6 +1068,8 @@ class GraphAnalytics(GraphProfile):
     distinct_objects: Optional[int] = Field(default=None, description="""Number of distinct objects.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile', 'PropertyProfile', 'ValuePartition'],
          'slot_uri': 'void:distinctObjects'} })
     untyped_subjects: Optional[int] = Field(default=None, description="""Distinct subjects in the graph that have no rdf:type.""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
+    reification_kinds: Optional[list[ReificationKind]] = Field(default=None, description="""The reification kinds found in the graph; left unset when none is found.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
+    triple_term_reifications: Optional[int] = Field(default=None, description="""The rdf:reifies triples of the graph (singleton-property-pattern P-12).""", ge=0, json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     predicate_partitions: Optional[list[PredicatePartition]] = Field(default=None, description="""Triples per predicate across the graph.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     declared_subclass_edges: Optional[list[SubclassEdge]] = Field(default=None, description="""rdfs:subClassOf edges declared in the dataset.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile']} })
     class_partitions: Optional[list[ClassAnalytics]] = Field(default=None, description="""One profile per instantiated class.""", json_schema_extra = { "linkml_meta": {'domain_of': ['GraphProfile'], 'slot_uri': 'void:classPartition'} })
@@ -978,6 +1093,9 @@ PitfallCheck.model_rebuild()
 PredicatePartition.model_rebuild()
 SubclassEdge.model_rebuild()
 ClassProfile.model_rebuild()
+ReifierProperty.model_rebuild()
+ReifiedRelation.model_rebuild()
+ReificationTemplate.model_rebuild()
 CoTypeCount.model_rebuild()
 PropertyProfile.model_rebuild()
 CardinalityBin.model_rebuild()

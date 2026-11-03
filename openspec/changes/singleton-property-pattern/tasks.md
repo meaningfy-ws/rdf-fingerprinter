@@ -15,7 +15,7 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## 2. Model (design "Layering and modules")
 
-- [ ] 2.1 The model rows of the layering table in `model/fingerprint_stats.yaml`, `model/fingerprint_analytics.yaml` and `model/fingerprint_views.yaml`; `make generate-models`; `make check-models` green; add `"reifications": true` to `scanned-profile.json` by hand; `make refresh-golden` shows no diff
+- [x] 2.1 The model rows of the layering table in `model/fingerprint_stats.yaml`, `model/fingerprint_analytics.yaml` and `model/fingerprint_views.yaml`; `make generate-models`; `make check-models` green; add `"reifications": true` to `scanned-profile.json` by hand; `make refresh-golden` shows no diff
 
 ## 3. The probe catalogue (P-1, P-2, P-16, design §A)
 
@@ -54,7 +54,7 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## Roadmap
 
-- [x] 0.1 · [x] 1.1 · [ ] 2.1 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 0.1 · [x] 1.1 · [x] 2.1 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

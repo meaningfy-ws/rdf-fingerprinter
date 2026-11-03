@@ -77,6 +77,16 @@
                         "null"
                     ]
                 },
+                "reified_relations": {
+                    "description": "The reified relations whose subjects are instances of the class; absent when none (singleton-property-pattern).",
+                    "items": {
+                        "$ref": "#/$defs/ReifiedRelation"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "sample_shared": {
                     "description": "In first_n mode, true when every query used the same listed instances; false after the blank-node fallback.",
                     "type": [
@@ -254,6 +264,16 @@
                         "null"
                     ]
                 },
+                "reification_kinds": {
+                    "description": "The reification kinds found in the graph; left unset when none is found.",
+                    "items": {
+                        "$ref": "#/$defs/ReificationKind"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
                 "term_annotations": {
                     "description": "Selected labels, alt labels, descriptions and notes of the graph's terms; absent in profiles saved before 3.2.",
                     "items": {
@@ -261,6 +281,14 @@
                     },
                     "type": [
                         "array",
+                        "null"
+                    ]
+                },
+                "triple_term_reifications": {
+                    "description": "The rdf:reifies triples of the graph (singleton-property-pattern P-12).",
+                    "minimum": 0,
+                    "type": [
+                        "integer",
                         "null"
                     ]
                 },
@@ -788,10 +816,143 @@
                 "untyped_subjects",
                 "subject_stream",
                 "pitfall",
-                "term_annotations"
+                "term_annotations",
+                "reification"
             ],
             "title": "QueryKind",
             "type": "string"
+        },
+        "ReificationKind": {
+            "description": "The way a reification is expressed in the data (singleton-property-pattern, stage 1).",
+            "enum": [
+                "rdf_statement",
+                "singleton_property",
+                "resource_as_predicate",
+                "owl_axiom",
+                "negative_property_assertion",
+                "triple_term"
+            ],
+            "title": "ReificationKind",
+            "type": "string"
+        },
+        "ReificationTemplate": {
+            "additionalProperties": false,
+            "description": "A packaged reification template, split into its sections (singleton-property-pattern P-2).",
+            "properties": {
+                "count": {
+                    "description": "The SELECT counting rdf:reifies triples (triple_term only, P-12).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "family": {
+                    "type": "string"
+                },
+                "hidden": {
+                    "description": "The SELECT of the terms that implement the kind, hidden from the ordinary profile (P-4).",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "id": {
+                    "type": "string"
+                },
+                "probe": {
+                    "description": "The ASK that tells whether the kind occurs.",
+                    "type": "string"
+                },
+                "reifier_properties": {
+                    "description": "The SELECT of the properties on the reifiers.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "relations": {
+                    "description": "The SELECT of the reified relations per subject class.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "title": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "id",
+                "title",
+                "family",
+                "probe"
+            ],
+            "title": "ReificationTemplate",
+            "type": "object"
+        },
+        "ReifiedRelation": {
+            "additionalProperties": false,
+            "description": "A relation expressed through a reification, with the generic predicate it stands for.",
+            "properties": {
+                "kind": {
+                    "$ref": "#/$defs/ReificationKind"
+                },
+                "object_class": {
+                    "description": "A class of the objects; absent when the objects are untyped.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "property": {
+                    "description": "The generic predicate; absent when the reifier does not name one.",
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "reifier_properties": {
+                    "description": "The properties on the reifiers, with their reifier counts.",
+                    "items": {
+                        "$ref": "#/$defs/ReifierProperty"
+                    },
+                    "type": [
+                        "array",
+                        "null"
+                    ]
+                },
+                "statements": {
+                    "description": "Reified statements.",
+                    "minimum": 0,
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "kind",
+                "statements"
+            ],
+            "title": "ReifiedRelation",
+            "type": "object"
+        },
+        "ReifierProperty": {
+            "additionalProperties": false,
+            "description": "A property on the reifiers of a reified relation, and how many reifiers carry it.",
+            "properties": {
+                "property": {
+                    "description": "IRI of a predicate.",
+                    "type": "string"
+                },
+                "reifiers": {
+                    "minimum": 0,
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "property",
+                "reifiers"
+            ],
+            "title": "ReifierProperty",
+            "type": "object"
         },
         "Settings": {
             "additionalProperties": false,
@@ -842,6 +1003,10 @@
                     "$ref": "#/$defs/PrecisionPolicy",
                     "description": "Allowed precision modes."
                 },
+                "reifications": {
+                    "description": "Whether the reification templates ran (singleton-property-pattern).",
+                    "type": "boolean"
+                },
                 "schema_graphs": {
                     "description": "Graphs holding the ontology, joined with each data graph for the data checks.",
                     "items": {
@@ -885,7 +1050,8 @@
                 "acceptance_threshold",
                 "graph_statistics",
                 "pitfall_scan",
-                "pitfall_examples"
+                "pitfall_examples",
+                "reifications"
             ],
             "title": "Settings",
             "type": "object"

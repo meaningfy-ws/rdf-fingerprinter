@@ -21,7 +21,8 @@
     "schema_graphs": [
       "http://publications.europa.eu/resources/authority/continents"
     ],
-    "pitfall_examples": 10
+    "pitfall_examples": 10,
+    "reifications": true
   },
   "graphs": [
     {
