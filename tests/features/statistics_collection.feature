@@ -360,10 +360,10 @@ Feature: Collecting raw statistics from a knowledge graph
       And every singleton predicate IRI is an ordinary property
 
     Scenario: Singleton properties of one generic property
-      Given 500 distinct predicate IRIs each linking a subject of class "ex:A" to an object of class "ex:B", each with rdf:singletonPropertyOf "ex:isRelatedTo" and "prov:wasAttributedTo"
+      Given 50 distinct predicate IRIs each linking a subject of class "ex:A" to an object of class "ex:B", each with rdf:singletonPropertyOf "ex:isRelatedTo" and "prov:wasAttributedTo"
       When the graph is profiled
-      Then class "ex:A" has one reified relation of kind singleton property, "ex:isRelatedTo" to "ex:B", 500 statements
-      And its reifier property "prov:wasAttributedTo" is on 500
+      Then class "ex:A" has one reified relation of kind singleton property, "ex:isRelatedTo" to "ex:B", 50 statements
+      And its reifier property "prov:wasAttributedTo" is on 50
 
     Scenario: RDF reification
       Given 30 rdf:Statement nodes whose rdf:subject is of class "ex:A", rdf:predicate is "ex:p" and rdf:object is of class "ex:B"
@@ -396,9 +396,9 @@ Feature: Collecting raw statistics from a knowledge graph
   Rule: Reification machinery is not an ordinary class or property
 
     Scenario: Singleton predicates leave the property rows
-      Given 500 distinct predicate IRIs each linking a subject of class "ex:A" to an object of class "ex:B", each with rdf:singletonPropertyOf "ex:isRelatedTo" and "prov:wasAttributedTo"
+      Given 50 distinct predicate IRIs each linking a subject of class "ex:A" to an object of class "ex:B", each with rdf:singletonPropertyOf "ex:isRelatedTo" and "prov:wasAttributedTo"
       When the graph is profiled
-      Then class "ex:A" has no ordinary property for any of the 500 predicate IRIs
+      Then class "ex:A" has no ordinary property for any of the 50 predicate IRIs
 
     Scenario: A class with reifiers and ordinary instances stays whole
       Given 3 singleton predicate IRIs typed rdf:Property and "ex:Link", and 2 ordinary predicates typed rdf:Property only

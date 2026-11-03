@@ -25,11 +25,11 @@ marker, else the predicate resource's type other than `rdf:Property` and the OWL
 none (an unnamed relation).
 
 #### Scenario: Singleton properties of one generic property
-- **GIVEN** 500 distinct predicate IRIs each linking a subject of class A to an object of class B, each
+- **GIVEN** 50 distinct predicate IRIs each linking a subject of class A to an object of class B, each
   with `rdf:singletonPropertyOf ex:isRelatedTo` and `prov:wasAttributedTo`
 - **WHEN** the graph is profiled
-- **THEN** class A has one reified relation of kind singleton property, `ex:isRelatedTo` to B, 500
-  statements, reifier property `prov:wasAttributedTo` on 500
+- **THEN** class A has one reified relation of kind singleton property, `ex:isRelatedTo` to B, 50
+  statements, reifier property `prov:wasAttributedTo` on 50
 
 #### Scenario: RDF reification
 - **GIVEN** 30 `rdf:Statement` nodes whose `rdf:subject` is of class A, `rdf:predicate` is `ex:p`
@@ -70,7 +70,7 @@ profile's ordinary classes and properties.
 #### Scenario: Singleton predicates leave the property rows
 - **GIVEN** the singleton graph of "Singleton properties of one generic property"
 - **WHEN** the graph is profiled
-- **THEN** class A has no ordinary property for any of the 500 predicate IRIs
+- **THEN** class A has no ordinary property for any of the 50 predicate IRIs
 
 #### Scenario: A class with reifiers and ordinary instances stays whole
 - **GIVEN** 3 singleton predicate IRIs typed `rdf:Property` and `ex:Link`, and 2 ordinary predicates

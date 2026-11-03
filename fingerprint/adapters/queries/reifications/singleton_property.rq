@@ -8,9 +8,9 @@ ASK { $graph_open ?s ?sp ?o . ?sp rdf:singletonPropertyOf ?g . $graph_close }
 # REIFY singleton_property relations
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 SELECT ?subjectClass ?predicate ?objectClass (COUNT(*) AS ?statements) WHERE {
-  { SELECT $distinct ?s ?sp ?o WHERE { $graph_open ?s ?sp ?o . ?sp rdf:singletonPropertyOf ?g . $graph_close } }
-  $graph_open ?sp rdf:singletonPropertyOf ?predicate . ?s a ?subjectClass .
-  OPTIONAL { ?o a ?objectClass } $graph_close }
+  { SELECT $distinct ?s ?sp ?o ?predicate ?subjectClass WHERE {
+      $graph_open ?s ?sp ?o . ?sp rdf:singletonPropertyOf ?predicate . ?s a ?subjectClass . $graph_close } }
+  OPTIONAL { $graph_open ?o a ?objectClass $graph_close } }
 GROUP BY ?subjectClass ?predicate ?objectClass
 # REIFY singleton_property reifier-properties
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>

@@ -17,6 +17,7 @@ from pathlib import Path
 from fingerprint.adapters.pitfall_catalogue import load_catalogue
 from fingerprint.adapters.prefixes import PrefixListSource
 from fingerprint.adapters.profile_file import save_profile
+from fingerprint.adapters.reification_catalogue import packaged_templates
 from fingerprint.adapters.sparql import SparqlHttpClient, SparqlPort
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.profile import NamespacePrefix, PitfallCheck, ProfileRun, Settings
@@ -60,7 +61,7 @@ def fingerprint_report(
     sparql = sparql or SparqlHttpClient(sparql_endpoint_url, settings.timeout_seconds)
     if settings.pitfall_scan and checks is None:
         checks = load_catalogue()  # the packaged catalogue; the adapter does the reading (design D-9)
-    run = collect(sparql_endpoint_url, settings, sparql, checks or ())
+    run = collect(sparql_endpoint_url, settings, sparql, checks or (), packaged_templates() if settings.reifications else ())
     run = resolve_namespaces(run, user_prefixes or (), prefix_list=prefix_list)
     save_profile(run, location)
     renderer = renderer or JinjaTemplateRenderer()

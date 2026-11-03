@@ -25,9 +25,9 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## 4. The collection stage (P-3 to P-9, P-14, design §B)
 
-- [ ] 4.1 `_Reifications` in `fingerprint/service_layer/collection.py`: probes first at every depth, hidden terms at every depth, capture from depth `classes`, `QUERY_KIND["REIFY"]`, failures with `check_id=<kind>` (P-8), `reification_kinds` and `triple_term_reifications`; `tests/unit/service_layer/test_reifications.py` (probe and hidden only at depth `graphs`; the failure branches, with `FakeSparql.on(..., when=…)`)
-- [ ] 4.2 The hidden-term filter (P-4, P-5, P-14): graph predicate partitions, classes next to the blank-node drop, `seen()`, Q10 predicates, co-types, Q11; relations attached and sorted (P-6, P-7); unit tests for the P-7 branches and the sort order
-- [ ] 4.3 `--reifications/--no-reifications` in `fingerprint/entrypoints/cli/main.py`; step definitions in `tests/bdd/steps/` — binds every statistics-collection scenario except `@stage4`
+- [x] 4.1 `_Reifications` in `fingerprint/service_layer/collection.py`: probes first at every depth, hidden terms at every depth, capture from depth `classes`, `QUERY_KIND["REIFY"]`, failures with `check_id=<kind>` (P-8), `reification_kinds` and `triple_term_reifications`; `tests/unit/service_layer/test_reifications.py` (probe and hidden only at depth `graphs`; the failure branches, with `FakeSparql.on(..., when=…)`)
+- [x] 4.2 The hidden-term filter (P-4, P-5, P-14): graph predicate partitions, classes next to the blank-node drop, `seen()`, Q10 predicates, co-types, Q11; relations attached and sorted (P-6, P-7); unit tests for the P-7 branches and the sort order
+- [x] 4.3 `--reifications/--no-reifications` in `fingerprint/entrypoints/cli/main.py`; step definitions in `tests/bdd/steps/` — binds every statistics-collection scenario except `@stage4`
 
 ## 5. Outputs (P-10, P-11, DEC-5, DEC-11)
 
@@ -54,7 +54,7 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## Roadmap
 
-- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 
