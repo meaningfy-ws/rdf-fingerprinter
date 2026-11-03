@@ -2,16 +2,14 @@
 
 import logging
 import re
-import urllib.error
 
 import pytest
-from pydantic import ValidationError
 from rdflib import Literal
 
 from fingerprint import __version__
 from fingerprint.adapters.sparql import EndpointUnreachable, PermanentError, QueryTimeout, query_name, redact
 from fingerprint.service_layer.collection import collect
-from fingerprint.service_layer.settings import UsageError, resolve_settings
+from fingerprint.service_layer.settings import resolve_settings
 from tests.fakes import EX, FakeSparql
 
 TIMEOUT, REJECTED = QueryTimeout("timed out"), PermanentError("400 unsupported", 400)
@@ -85,13 +83,6 @@ def test_blank_node_class_is_skipped(fake):
     assert "not usable in a SPARQL query" in result.failures[0].message
 
 
-def test_unreachable_endpoint_is_named_without_credentials(fake):
-    fake.on("Q0", urllib.error.URLError(ConnectionRefusedError("refused")))
-    with pytest.raises(EndpointUnreachable) as raised:
-        run(fake)
-    assert "cannot reach endpoint http://fake/sparql" in str(raised.value) and "secret" not in str(raised.value)
-
-
 def test_default_depth_sends_only_its_queries(fake):
     run(fake)
     sent = {q.lstrip("# ").split()[0] for q in fake.queries}
@@ -103,25 +94,6 @@ def test_failures_are_logged(fake, caplog):
     with caplog.at_level(logging.WARNING):
         run(fake)
     assert "declared hierarchy not read" in caplog.text
-
-
-@pytest.mark.parametrize(
-    "kwargs",
-    [
-        {"env": {"RDF_FINGERPRINTER_ACCEPTANCE_THRESHOLD": "0"}},
-        {"env": {"RDF_FINGERPRINTER_ACCEPTANCE_THRESHOLD": "0.0"}},
-        {"env": {}, "config": {"acceptance_threshold": 0}},
-    ],
-)
-def test_zero_threshold_is_refused_from_every_source(kwargs):
-    with pytest.raises(UsageError):
-        resolve_settings(**kwargs)
-
-
-def test_profile_objects_are_read_only(fake):
-    result = run(fake)
-    with pytest.raises(ValidationError):
-        result.endpoint = "http://other"
 
 
 @pytest.mark.parametrize(
@@ -357,7 +329,6 @@ def failure_of(result):
 
 PERSON, NAME = EX + "Person", EX + "name"
 OF_PERSON = f"class {PERSON}: not profiled after "
-REJECTED_BY = "{} rejected by endpoint: {}"
 
 
 @pytest.mark.parametrize("graph", [None, G])
@@ -431,32 +402,6 @@ def annotated_terms(query):
     return sorted(re.findall(r"<([^>]+)>", query.split("VALUES ?t {")[1].split("}")[0]))
 
 
-def test_term_annotations_are_asked_once_per_graph_after_the_classes_for_the_classes_and_their_properties():
-    fake = people()
-    fake.add("ex:p0", "http://www.w3.org/2004/02/skos/core#prefLabel", Literal("Pip", lang="en"))
-    result = collected(fake, depth="properties")
-    (query,) = fake.sent("Q12")
-    assert annotated_terms(query) == [EX + "Person", EX + "name", "http://www.w3.org/2004/02/skos/core#prefLabel"]
-    assert fake.queries.index(query) > max(i for i, q in enumerate(fake.queries) if q.startswith("# Q8"))
-    assert result.graphs[0].term_annotations == []
-
-
-def test_the_classes_alone_are_annotated_at_depth_classes_and_no_term_is_asked_at_depth_graphs():
-    fake = people()
-    collected(fake, depth="classes")
-    assert [annotated_terms(q) for q in fake.sent("Q12")] == [[EX + "Person"]]
-    none = people()
-    collected(none, depth="graphs")
-    assert not none.sent("Q12")
-
-
-def test_a_graph_with_no_class_stores_an_empty_list_and_sends_no_annotation_query():
-    fake = FakeSparql()
-    fake.add("ex:s", "ex:p", "ex:o")
-    result = collected(fake)
-    assert not fake.sent("Q12") and result.graphs[0].term_annotations == []
-
-
 def test_a_property_that_cannot_be_written_is_left_out_of_the_annotation_query_without_a_failure():
     fake = people()
     fake.on("Q5", [{"p": BAD, "n": "1", "subjects": "2"}, {"p": EX + "name", "n": "1", "subjects": "2"}])
@@ -477,43 +422,11 @@ def test_rows_are_selected_per_term_and_a_failure_leaves_none():
     assert failure_of(result)[:2] == ("term_annotations", "graph default: term annotations not read: 400 unsupported")
 
 
-def test_language_tags_of_annotations_are_lower_cased():
-    fake = people()
-    fake.add("ex:Person", "http://www.w3.org/2000/01/rdf-schema#label", Literal("Person", lang="EN"))
-    (annotation,) = collected(fake).graphs[0].term_annotations
-    assert [t.language for t in annotation.labels] == ["en"]
-
-
-def test_two_graphs_send_one_annotation_query_each():
-    fake = people()
-    for i in range(2):
-        fake.add(f"ex:q{i}", "a", "ex:Person", G)
-    result = collected(fake)
-    assert [g.graph for g in result.graphs] == [None, G]
-    assert len(fake.sent("Q12")) == 2
-
-
-@pytest.mark.parametrize("code", [429, 502])
-def test_a_transient_failure_of_the_annotation_query_is_retried(code):
-    fake = people()
-    fake.on("Q12", urllib.error.HTTPError("http://fake", code, "status", {}, None), times=1)  # type: ignore[arg-type]
-    result = collected(fake)
-    assert len(fake.sent("Q12")) == 2
-    assert result.graphs[0].term_annotations == [] and not result.failures
-
-
 def test_a_failure_of_the_annotation_query_names_its_graph():
     failing = people(G)
     failing.on("Q12", DENIED)
     kind, message, graph, *_ = failure_of(collected(failing, G))
     assert (kind, message, graph) == ("term_annotations", f"graph {G}: term annotations not read: 400 unsupported", G)
-
-
-def test_an_annotation_whose_value_is_an_iri_has_no_language():
-    fake = people()
-    fake.on("Q12", [{"t": PERSON, "p": "http://www.w3.org/2000/01/rdf-schema#label", "v": EX + "Thing"}])
-    (annotation,) = collected(fake).graphs[0].term_annotations
-    assert [(t.text, t.language) for t in annotation.labels] == [(EX + "Thing", None)]
 
 
 # --- what the collection logs (lean-test-suite: the operator's messages are pinned) ---

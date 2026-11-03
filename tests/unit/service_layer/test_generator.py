@@ -6,13 +6,11 @@ import re
 
 import pytest
 
-from fingerprint import config
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.namespace_filter import META_NAMESPACES
 from fingerprint.domain.views import GeneratorOptions, NodeShape, OutputCheck, PropertyShape, ShapesGraph
-from fingerprint.domain.vocabulary import RDFS
-from fingerprint.service_layer.generators.generator import Generator, graph_slug, plain_label
+from fingerprint.service_layer.generators.generator import Generator, graph_slug
 from tests import builders
 from tests.builders import profile_run
 from tests.fakes import files
@@ -64,11 +62,6 @@ def listing(tmp_path, profile, body=BODY, **kwargs):
     return Listing(analyse(profile), JinjaTemplateRenderer(), template_location=package(tmp_path, body), **kwargs)
 
 
-def test_view_is_sorted_by_iri(tmp_path):
-    texts = files(listing(tmp_path, run(klass(EX + "B", EX + "q", EX + "p"), klass(EX + "A"))).serialize())
-    assert texts == {"list-default.txt": f"{EX}A:;{EX}B:{EX}p,{EX}q,;"}
-
-
 def test_a_hook_returning_none_drops_the_element_and_records_it(tmp_path, caplog):
     bad = "http://ex.org/<script> x"
     with caplog.at_level(logging.WARNING):
@@ -80,32 +73,6 @@ def test_a_hook_returning_none_drops_the_element_and_records_it(tmp_path, caplog
         f"skipping {bad!r}: it cannot be written as an IRI",
         "skipping 'http://ex.org/a b': it cannot be written as an IRI",
     ]
-
-
-def test_custom_template_reads_its_configuration(tmp_path):
-    texts = files(listing(tmp_path, run(klass(EX + "A")), body="{{ conf.title }}").serialize())
-    assert texts == {"list-default.txt": "T"}
-
-
-def test_write_puts_the_files_in_the_folder(tmp_path):
-    out = tmp_path / "out"
-    paths = listing(tmp_path, run(klass(EX + "A"))).write(out)
-    assert [p.name for p in paths] == ["list-default.txt"]
-
-
-@pytest.mark.parametrize(
-    "graph, slug",
-    [
-        (None, "default"),
-        ("http://publications.europa.eu/resources/authority/continents", "continents-"),
-        ("http://ex.org/data/", "data-"),
-        ("urn:x:Ünïcode Graph!", "n-code-graph-"),
-        ("http://ex.org/#", "ex-org-"),
-    ],
-)
-def test_graph_slug(graph, slug):
-    result = graph_slug(graph)
-    assert result.startswith(slug) and (graph is None or len(result) == len(slug) + 8)
 
 
 # --- what the framework hands the renderer and how it walks (lean-test-suite 7.5) ---
@@ -227,11 +194,6 @@ def test_graph_slug_is_readable_and_file_safe(graph, pattern):
     assert re.fullmatch(pattern, graph_slug(graph))
 
 
-def test_a_graph_label_keeps_only_plain_characters():
-    assert plain_label('http://g/%getenv("HOME")\n!x') == "http://g/_getenv__HOME____x"
-    assert plain_label(None) == config.default_graph_label
-
-
 def test_a_hook_left_alone_keeps_every_class():
     class Bare(Generator):
         file_name = "bare-{slug}.txt"
@@ -257,21 +219,3 @@ def test_a_generator_built_directly_hides_the_meta_and_the_excluded_namespaces()
     assert plain.excluded == set(META_NAMESPACES)
     assert excluded.excluded == set(META_NAMESPACES) | {builders.ORG}
     assert [(c.target) for c in excluded.view()[0].node_shapes] == [builders.EX + "Person"]
-
-
-def test_a_meta_namespace_included_is_no_longer_hidden():
-    generator = Listing(
-        analyse(builders.filter_profile()), JinjaTemplateRenderer(), options=GeneratorOptions(include_namespaces=["rdfs"])
-    )
-    assert generator.excluded == set(META_NAMESPACES) - {RDFS}
-
-
-def test_the_excluded_note_of_a_graph_is_the_note_text_of_its_excluded_terms():
-    generator = Listing(builders.filtered_analytics("rel"), JinjaTemplateRenderer())
-    assert generator.excluded_note(generator.analytics.graphs[0]) == builders.REL_NOTE
-
-
-def test_a_graph_without_excluded_terms_has_no_note():
-    generator = Listing(analyse(builders.filter_profile()), JinjaTemplateRenderer())
-    assert generator.analytics.graphs[0].excluded_terms is None
-    assert generator.excluded_note(generator.analytics.graphs[0]) is None

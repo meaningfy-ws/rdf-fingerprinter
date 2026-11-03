@@ -13,25 +13,6 @@ from fingerprint.service_layer.settings import (
 )
 
 
-def test_defaults():
-    s = resolve_settings(env={})
-    assert (s.depth, s.precision_policy, s.first_n, s.top_k) == ("values", "auto", 10000, 20)
-    assert (s.timeout_seconds, s.concurrency, s.acceptance_threshold) == (60, 4, 0.95)
-    assert (s.object_type_scope, s.completeness_check, s.graph_statistics) == ("same_graph", False, False)
-    assert not s.selected_graphs
-
-
-def test_selected_graphs_parameter_sits_between_env_and_config():
-    assert resolve_settings(env={}, selected_graphs=["g1"], config={"selected_graphs": ["g2"]}).selected_graphs == ["g1"]
-    env = {"RDF_FINGERPRINTER_SELECTED_GRAPHS": "a, b"}
-    assert resolve_settings(env=env, selected_graphs=["g1"]).selected_graphs == ["a", "b"]
-
-
-@pytest.mark.parametrize("value, expected", [("1", True), ("YES", True), ("on", True), ("0", False), ("Off", False)])
-def test_boolean_env_values(value, expected):
-    assert resolve_settings(env={"RDF_FINGERPRINTER_COMPLETENESS_CHECK": value}).completeness_check is expected
-
-
 @pytest.mark.parametrize(
     "kwargs",
     [
@@ -46,10 +27,6 @@ def test_boolean_env_values(value, expected):
 def test_bad_values_are_usage_errors(kwargs):
     with pytest.raises(UsageError):
         resolve_settings(**kwargs)
-
-
-def test_other_prefixed_variables_are_ignored():
-    assert resolve_settings(env={"RDF_FINGERPRINTER_TEST_ENDPOINT": "x"}).depth == "values"
 
 
 def test_config_file(tmp_path):

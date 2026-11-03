@@ -7,7 +7,6 @@ from fingerprint.domain.analytics import analyse
 from fingerprint.domain.profile import NamespacePrefix
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer.generators.plantuml import PlantumlGenerator
-from tests import builders
 from tests.builders import klass, literals, profile_run, prop, resources
 from tests.fakes import EX, files
 
@@ -30,67 +29,6 @@ def aliases(text):
     return dict(re.findall(r'class "([^"]+)" as (\w+)', text))
 
 
-def test_an_overview_and_a_module_per_namespace_each_between_start_and_end():
-    texts, _ = outputs(profile_run(klass(EX + "Person", 4), klass(FOAF + "Agent", 1)))
-    assert sorted(texts) == ["diagram-default--ex.puml", "diagram-default--foaf.puml", "diagram-default.puml"]
-    for text in texts.values():
-        assert text.count("@startuml") == 1 and text.count("@enduml") == 1 and text.strip().endswith("@enduml")
-
-
-def test_the_overview_counts_links_between_namespaces():
-    targets = [klass(EX + f"C{n}", 2, prop(EX + "knows", {1: 2}, resources(2, FOAF + "Person"))) for n in range(3)]
-    texts, _ = outputs(profile_run(*targets))
-    overview = texts["diagram-default.puml"]
-    assert 'package "ex (3 classes)" as N1' in overview and 'package "foaf (referenced)" as N2' in overview
-    assert "N1 --> N2 : 3" in overview
-
-
-def test_a_big_namespace_is_split_into_clusters():
-    run = profile_run(*(klass(EX + f"C{n:02}", 1) for n in range(7)))
-    texts, _ = outputs(run, module_size=3)
-    assert sorted(n for n in texts if "--" in n) == [f"diagram-default--ex~{n}.puml" for n in (1, 2, 3)]
-    assert outputs(run, module_size=3)[0] == texts
-
-
-def test_a_class_outside_the_module_is_a_reference_box():
-    run = profile_run(klass(EX + "Person", 4, prop(EX + "knows", {1: 4}, resources(4, FOAF + "Person"))))
-    text, _ = diagram(run)
-    assert 'class "foaf:Person" as P1 #lightgray' in text and '--> "1" P1 : ex:knows' in text
-
-
-def test_meta_classes_are_hidden_unless_included_and_empty_graphs_write_nothing():
-    run = profile_run(klass(OWL + "Ontology", 1))
-    assert outputs(run)[0] == {}
-    assert "diagram-default--owl.puml" in outputs(run, include_namespaces=["owl"])[0]
-
-
-def test_class_with_an_attribute_and_an_implied_parent():
-    run = profile_run(klass(EX + "Person", 4, prop(EX + "name", {1: 4}, literals(4)), co_types=[(EX + "Agent", 4)]))
-    text, _ = diagram(run)
-    names = aliases(text)
-    assert list(names).count("ex:Person") == 1
-    assert "ex:name : xsd:string [1]" in text
-    assert f"{names['ex:Person']} ..|> {names['ex:Agent']}" in text
-
-
-def test_declared_parent_is_a_solid_generalisation():
-    run = profile_run(klass(EX + "Person", 4), klass(EX + "Agent", 4), edges=[(EX + "Person", EX + "Agent")])
-    text, _ = diagram(run)
-    names = aliases(text)
-    assert f"{names['ex:Person']} --|> {names['ex:Agent']}" in text
-
-
-def test_object_property_to_one_profiled_class_is_an_association():
-    run = profile_run(
-        klass(EX + "Person", 4, prop(EX + "livesIn", {1: 2}, resources(2, EX + "City"))),
-        klass(EX + "City", 2),
-    )
-    text, _ = diagram(run)
-    names = aliases(text)
-    assert f'{names["ex:Person"]} --> "0..1" {names["ex:City"]} : ex:livesIn' in text
-    assert "ex:livesIn :" not in text
-
-
 def test_object_property_to_untyped_objects_stays_an_attribute():
     text, _ = diagram(profile_run(klass(EX + "Person", 4, prop(EX + "knows", {2: 4}, resources(8)))))
     assert "ex:knows : resource [2]" in text
@@ -106,37 +44,12 @@ def test_inherited_properties_are_not_repeated():
     assert text.count("ex:name : xsd:string [1]") == 1
 
 
-def test_unusual_and_unwritable_iris():
-    bad = "http://ex.org/<script> x"
-    run = profile_run(klass("http://ex.org/q?a=1&b='x'", 4, prop("http://ex.org/ș/ü", {1: 4}, literals(4))), klass(bad, 1))
-    text, generator = diagram(run)
-    assert len(aliases(text)) == 1 and "script" not in text and generator.skipped == [bad]
-
-
 def test_an_unwritable_value_type_never_reaches_the_diagram():
     evil = "http://x/a\n}\n!include /etc/hostname\nclass X {"
     run = profile_run(klass(EX + "Person", 4, prop(EX + "p", {1: 4}, literals(4, datatype=evil))))
     text, generator = diagram(run)
     assert "!include" not in text and evil in generator.skipped
     assert "ex:p : value [1]" in text
-
-
-def test_a_graph_label_is_plain_text_in_the_title():
-    run = profile_run(klass(EX + "Person", 4), graph='http://g/%getenv("HOME")\n!include x')
-    text, _ = diagram(run)
-    (title,) = [line for line in text.splitlines() if line.startswith("title ")]
-    assert "%" not in title and '"' not in title and "!include" not in text
-
-
-def test_a_prefix_that_looks_like_a_cluster_name_keeps_its_own_module():
-    namespaces = [
-        NamespacePrefix(prefix="ex", namespace="http://ex.org/", source="user"),
-        NamespacePrefix(prefix="ex-1", namespace="http://ex.org/1/", source="user"),
-    ]
-    big = profile_run(*(klass(f"http://ex.org/C{n}", 1) for n in range(4)), klass("http://ex.org/1/D", 1))
-    texts, _ = outputs(big.model_copy(update={"namespaces": namespaces}), module_size=2)
-    modules = sorted(n for n in texts if "--" in n)
-    assert modules == ["diagram-default--ex-1.puml", "diagram-default--ex~1.puml", "diagram-default--ex~2.puml"]
 
 
 # --- decisions the first tests left open (lean-test-suite 7.5) ---
@@ -148,26 +61,12 @@ def with_prefixes(run, **namespace_of_prefix):
     return run.model_copy(update={"namespaces": table})
 
 
-def test_classes_get_aliases_from_c1_in_iri_order():
-    text, _ = diagram(profile_run(klass(EX + "B", 1), klass(EX + "A", 1)))
-    assert aliases(text) == {"ex:A": "C1", "ex:B": "C2"}
-
-
 def test_a_custom_template_location_replaces_the_packaged_template(tmp_path):
     (tmp_path / "templates").mkdir()
     (tmp_path / "templates" / "out.txt").write_text("custom")
     (tmp_path / "config.json").write_text('{"template": "out.txt", "conf": {}}')
     generator = PlantumlGenerator(analyse(profile_run(klass(EX + "A", 1))), JinjaTemplateRenderer(), tmp_path)
     assert set(files(generator.serialize()).values()) == {"custom"}
-
-
-def test_a_namespace_is_one_module_up_to_fifteen_classes_by_default():
-    def modules(n):
-        texts, _ = outputs(profile_run(*(klass(EX + f"C{i:02}", 1) for i in range(n))))
-        return [name for name in texts if "--" in name]
-
-    assert modules(15) == ["diagram-default--ex.puml"]
-    assert modules(16) == ["diagram-default--ex~1.puml", "diagram-default--ex~2.puml"]
 
 
 def test_no_module_size_means_fifteen():
@@ -275,12 +174,6 @@ def test_overview_packages_list_their_modules_and_links_are_ordered_by_prefix():
     assert [(named[a], named[b]) for a, b in arrows] == [("m", "a"), ("m", "b"), ("n", "a"), ("n", "b")]
 
 
-def test_a_big_namespace_lists_its_clusters_in_the_overview():
-    run = profile_run(*(klass(EX + f"C{n:02}", 1) for n in range(7)))
-    overview = outputs(run, module_size=3)[0]["diagram-default.puml"]
-    assert all(f"  [ex~{n}]" in overview for n in (1, 2, 3))
-
-
 def test_value_types_are_joined_and_an_untyped_part_adds_resource():
     typed = prop(EX + "a", {1: 4}, literals(2), literals(2, datatype="http://www.w3.org/2001/XMLSchema#integer"))
     mixed = prop(EX + "b", {1: 4}, resources(2, EX + "City"), resources(2))
@@ -289,9 +182,3 @@ def test_value_types_are_joined_and_an_untyped_part_adds_resource():
     assert "ex:a : xsd:integer | xsd:string [1]" in text
     assert "ex:b : ex:City | resource [1]" in text
     assert "ex:c : resource [1]" in text
-
-
-def test_every_diagram_file_notes_the_excluded_namespaces_after_the_start():
-    noted = files(PlantumlGenerator(builders.filtered_analytics("rel"), JinjaTemplateRenderer()).serialize())
-    assert len(noted) > 1
-    assert all(t.splitlines()[1] == f"' excluded namespaces: {builders.REL_NOTE}" for t in noted.values())

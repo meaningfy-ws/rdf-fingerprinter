@@ -100,16 +100,6 @@ def test_the_options_reach_every_format_and_unknown_filters_are_warned_once(stor
     assert [m for m in caplog.messages if "nope" in m] == ["--exclude-namespace nope: no such namespace; ignored"]
 
 
-def test_a_saved_profile_survives_a_failing_render(store, tmp_path):
-    class Broken(Recorder):
-        def make(self, *args, **kwargs):
-            raise RuntimeError("render failed")
-
-    with pytest.raises(RuntimeError):
-        fingerprint_report("http://e/sparql", tmp_path, Settings(), sparql=store, renderer=Broken())
-    assert (tmp_path / "profile.json").is_file()
-
-
 @pytest.mark.parametrize("formats, noted", [(["doc"], True), ([], False)])
 def test_asking_for_the_document_format_is_noted_not_written_twice(store, tmp_path, caplog, formats, noted):
     renderer = Recorder()

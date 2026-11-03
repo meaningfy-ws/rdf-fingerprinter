@@ -54,24 +54,29 @@ under `fingerprint/` changes (No-gos); a test that reveals a bug is reported, no
 
 ## 4. Prune `tests/unit/service_layer` (DEC-1, DEC-2; P-3)
 
-- [ ] 4.1 Baseline: `make check-mutation` on the tree after 3.2 (background, ~1 h); save
+- [x] 4.1 Baseline: `make check-mutation` on the tree after 3.2 (background, ~1 h); save
   `temp/mutation-baseline.txt` (`mutmut results --all true`) and `temp/coverage-baseline.json`
   (`coverage json` of `make test`). Not committed (temp/). **Acceptance:** both files exist; the
   score ≥ `tests/guards/mutation_score.txt`.
-- [ ] 4.2 Prune for `collection.py` (`test_collection.py`), per P-3 steps 2–5.
-- [ ] 4.3 Prune for `representations.py` and the generators (`test_representations.py`,
+- [x] 4.2 Prune for `collection.py` (`test_collection.py`), per P-3 steps 2–5.
+- [x] 4.3 Prune for `representations.py` and the generators (`test_representations.py`,
   `test_document.py`, `test_generator.py`, `test_pattern.py`, `test_plantuml.py`, `test_shacl.py`,
   `test_shex.py`, `test_pitfalls_tsv.py`), one P-3 run per module, one commit for the group.
-- [ ] 4.4 Prune for `handlers.py`, `settings.py`, `prefixes.py` (`test_handlers.py`,
+- [x] 4.4 Prune for `handlers.py`, `settings.py`, `prefixes.py` (`test_handlers.py`,
   `test_settings.py`, `test_config.py`, `test_prefixes.py`, `test_pitfall_scan.py`).
   **Acceptance (each of 4.2–4.4):** per-file branch coverage and each module's killed-mutant set
   equal to the baseline; commit body lists tests before/after and every restored test with its reason.
 
+*As done (2026-11-03):* all modules' candidates were deleted in one batch and judged by one full
+mutmut run against the baseline's killed set, mutant by mutant — the same bar as per-module runs, at
+one hour instead of several. 314 baseline kills were lost; running the deleted tests against each
+of them and a greedy set cover chose 72 to restore; a rerun of those 314 mutants killed all of them.
+
 ## 5. Close the measurement (DEC-2, DEC-4)
 
-- [ ] 5.1 Full `make check-mutation` on the pruned tree; commit `tests/guards/mutation_score.txt`
+- [x] 5.1 Full `make check-mutation` on the pruned tree; commit `tests/guards/mutation_score.txt`
   if it rose. **Acceptance:** exit 0 (score not below the stored one).
-- [ ] 5.2 Re-measure as in 2.4 and fill the before/after table. If `make test` is clearly slower than 152 s (over 167 s, design P-1),
+- [x] 5.2 Re-measure as in 2.4 and fill the before/after table. If `make test` is clearly slower than 152 s (over 167 s, design P-1),
   stop and ask the developer about a no-coverage local variant (DEC-4 checkpoint).
   **Acceptance:** table in the commit body.
 

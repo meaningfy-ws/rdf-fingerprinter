@@ -32,12 +32,3 @@ def test_cells_blank_nodes_unbound_and_breaks():
     example = PitfallExample(entity=term("b1", "blank_node"), value=term("a\tb\nc", "literal"))
     (text,) = tsv([GraphProfile(graph="http://ex.org/g", pitfalls=[result("x", "minor", [example])])]).values()
     assert text.strip().split("\n")[1] == "INFO\tx\t_:b1\t\ta b c"
-
-
-def test_files_per_scanned_graph_only():
-    names = tsv([GraphProfile(pitfalls=[result("x", "minor", [], count=0)]), GraphProfile(graph="http://ex.org/g")])
-    assert (
-        list(names) == ["pitfalls-default.tsv"]
-        and names["pitfalls-default.tsv"].strip() == "Level\tRule Name\tSubject\tProperty\tValue"
-    )
-    assert tsv([GraphProfile()]) == {}
