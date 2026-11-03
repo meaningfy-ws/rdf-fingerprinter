@@ -1,17 +1,71 @@
 # statistics-collection — delta for singleton-property-pattern
 
-> Outcome only; the detection and grouping rules are decided when the EPIC is shaped.
-
 ## ADDED Requirements
 
-### Requirement: Resources used as predicates are recognised
-The profile SHALL recognise predicates that are themselves resources of the graph (the singleton
-property pattern and its variants) and report them as relations grouped by what they stand for,
-instead of as one ordinary property per predicate IRI.
+### Requirement: Reification probes
+When `reifications` is on (the default), the collector SHALL ask each packaged reification probe
+once per graph, and SHALL run a kind's capture query only when its probe answers true. With
+`reifications` off it SHALL issue no probe or capture query and the profile SHALL equal today's.
+
+#### Scenario: Kind absent
+- **GIVEN** a graph with no `rdf:Statement` node
+- **WHEN** the graph is profiled
+- **THEN** the collector issues the `rdf:Statement` probe and not its capture query
+
+#### Scenario: Switch off
+- **GIVEN** `reifications` is off
+- **WHEN** a graph with singleton properties is profiled
+- **THEN** no probe is issued and every singleton predicate IRI is an ordinary property, as before
+
+### Requirement: Reified relations are grouped by what they stand for
+Each kind found SHALL be captured as reified relations, one per (subject class, generic predicate,
+object class), each with its kind, statement count and the reifier properties with their counts. The
+generic predicate SHALL come from what the data states, never from IRI strings: the kind's own
+marker, else the predicate resource's type other than `rdf:Property` and the OWL property types, else
+none (an unnamed relation).
 
 #### Scenario: Singleton properties of one generic property
-- **GIVEN** a graph where 500 distinct predicate IRIs each link a subject of class A to an object of
-  class B, and each predicate IRI has `rdf:singletonPropertyOf ex:isRelatedTo`
+- **GIVEN** 500 distinct predicate IRIs each linking a subject of class A to an object of class B, each
+  with `rdf:singletonPropertyOf ex:isRelatedTo` and `prov:wasAttributedTo`
 - **WHEN** the graph is profiled
-- **THEN** the profile reports one relation `ex:isRelatedTo` from A to B, built from 500 singleton
-  predicates, and no ordinary property for any of those 500 predicate IRIs
+- **THEN** class A has one reified relation of kind singleton property, `ex:isRelatedTo` to B, 500
+  statements, reifier property `prov:wasAttributedTo` on 500
+
+#### Scenario: RDF reification
+- **GIVEN** 30 `rdf:Statement` nodes whose `rdf:subject` is of class A, `rdf:predicate` is `ex:p`
+  and `rdf:object` is of class B
+- **WHEN** the graph is profiled
+- **THEN** class A has one reified relation of kind RDF statement, `ex:p` to B, 30 statements
+
+#### Scenario: Resource used as predicate with no marker
+- **GIVEN** predicate IRIs typed only `rdf:Property`, with triples of their own, linking class A to
+  class B, one of them used 25 times
+- **WHEN** the graph is profiled
+- **THEN** class A has one unnamed reified relation to B counting every use
+
+#### Scenario: Relation through a blank node
+- **GIVEN** subjects of class A each pointing with `ex:role` to a blank node that carries
+  `ex:agent` and `ex:since`, the blank node not being a list or an OWL construct
+- **WHEN** the graph is profiled
+- **THEN** class A has one reified relation of kind blank n-ary, `ex:role`, with reifier properties
+  `ex:agent` and `ex:since`
+
+#### Scenario: RDF-star is counted only
+- **GIVEN** a graph with 12 `rdf:reifies` triples
+- **WHEN** the graph is profiled
+- **THEN** the graph profile records 12 triple-term reifiers and no class has a relation for them
+
+### Requirement: Reification machinery is not an ordinary class or property
+When a kind is found, the predicates and reifier classes that implement it SHALL be absent from the
+profile's ordinary classes and properties.
+
+#### Scenario: Singleton predicates leave the property rows
+- **GIVEN** the singleton graph of "Singleton properties of one generic property"
+- **WHEN** the graph is profiled
+- **THEN** class A has no ordinary property for any of the 500 predicate IRIs
+
+#### Scenario: rdf:Statement leaves the classes
+- **GIVEN** the graph of "RDF reification"
+- **WHEN** the graph is profiled
+- **THEN** the profile has no class `rdf:Statement` and no property `rdf:subject`, `rdf:predicate` or
+  `rdf:object`
