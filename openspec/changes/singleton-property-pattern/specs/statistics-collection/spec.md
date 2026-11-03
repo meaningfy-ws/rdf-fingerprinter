@@ -54,11 +54,47 @@ it is reported as a reifier property only (DEC-12).
 - **THEN** each stays an ordinary property and no reified relation is reported for them
 
 #### Scenario: Relation through a blank node
-- **GIVEN** subjects of class A each pointing with `ex:role` to a blank node that carries
+- **GIVEN** subjects of class A each pointing with `ex:role` to an untyped blank node that carries
   `ex:agent` and `ex:since`, the blank node not being a list or an OWL construct
 - **WHEN** the graph is profiled
 - **THEN** class A has one reified relation of kind blank n-ary, `ex:role`, with reifier properties
   `ex:agent` and `ex:since`
+
+#### Scenario: A typed blank node stays ordinary
+- **GIVEN** subjects of class A each pointing with `ex:address` to a blank node typed `ex:Address`
+  that carries `ex:street`
+- **WHEN** the graph is profiled
+- **THEN** class `ex:Address` is profiled with property `ex:street` as before, and class A has no
+  reified relation for `ex:address`
+
+#### Scenario: Structured value
+- **GIVEN** subjects of class A each with `ex:height` pointing to a node with `rdf:value` and
+  `ex:unit`
+- **WHEN** the graph is profiled
+- **THEN** class A has one reified relation of kind structured value, `ex:height`, with reifier
+  property `ex:unit`
+
+#### Scenario: PROV qualified association
+- **GIVEN** 4 subjects of class `ex:Run`, each with a `prov:qualifiedAssociation` node whose
+  `prov:agent` is of class `ex:Team` and which carries `prov:hadRole`
+- **WHEN** the graph is profiled
+- **THEN** class `ex:Run` has one reified relation of kind PROV qualified, `prov:wasAssociatedWith`
+  to `ex:Team`, 4 statements, reifier property `prov:hadRole` on 4, and no ordinary property
+  `prov:qualifiedAssociation`
+
+#### Scenario: SKOS-XL labels
+- **GIVEN** concepts of class `skos:Concept` with `skosxl:prefLabel` nodes typed `skosxl:Label`
+  carrying `skosxl:literalForm`
+- **WHEN** the graph is profiled
+- **THEN** class `skos:Concept` has one reified relation of kind SKOS-XL label, `skos:prefLabel`,
+  and the profile has no class `skosxl:Label`
+
+#### Scenario: Nanopublications are counted
+- **GIVEN** a graph holding 3 nanopublication heads with `np:hasAssertion`, `np:hasProvenance` and
+  `np:hasPublicationInfo`
+- **WHEN** the graph is profiled
+- **THEN** the graph profile counts 3 nanopublications, no class has a relation for them, and the
+  profile has no class `np:Nanopublication`
 
 #### Scenario: RDF-star is counted only
 - **GIVEN** a graph with 12 `rdf:reifies` triples

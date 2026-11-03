@@ -356,16 +356,55 @@ difference in `ProfileRun` duration (finished − started) between a default run
   count is a possible later addition.
 - [Golden churn] → the existing goldens must not change (§D); any diff is a defect.
 
-## Later stages (outline; planned in detail when stage 1 closes)
+## Stages 2–4 (PLAN extension; derives from DEC-1, DEC-3, DEC-7, DEC-12)
 
-| Stage | Kinds (new `ReificationKind` values) | New beyond templates |
-|---|---|---|
-| 2 | `graph_statement` (one triple per named graph, graph described), `nanopublication` | none expected; the probe must run over all graphs, so the template uses `GRAPH ?g` instead of `$graph_open` |
-| 3 | `prov_qualified`, `dcat_qualified`, `schema_role`, `wikibase_statement`, `cidoc_property_of_property`, `skosxl_label` | none |
-| 4 | `blank_nary`, `structured_value` (`rdf:value`) | none; the `@stage4` scenario of statistics-collection is bound |
+Developer, 2026-11-03: implement stages 2–4 after stage 1; the deep tests (Hypothesis properties,
+mutmut, the release gate) and the brainframe acceptance run once, at the end of the whole EPIC.
 
-Each stage: templates, sample data in `reifications-source.ttl`, scenarios, refreshed reified
-profile and goldens, docs rows, release.
+### Decisions
+
+- **P-17 Family B is counted, not related.** A statement per named graph, and a nanopublication, put
+  each statement in its own graph; the collector profiles graph by graph, so no class of the
+  profiled graph owns the relation. Both kinds have `probe`, `count` and `hidden` sections only, like
+  `triple_term`. Rejected: cross-graph relations (a new collection mode, more than templates —
+  EPIC appetite says cut).
+- **P-18 One count list for count-only kinds.** `GraphProfile.triple_term_reifications` becomes
+  `GraphProfile.reification_counts: list[ReificationCount{kind, count}]`, filled from every template
+  with a `count` section; the report note lists each. Unreleased field, so no migration. Rejected:
+  one integer field per kind.
+- **P-19 Standard mappings may live in a template.** A W3C or community vocabulary that itself states
+  how a qualified form maps to a plain property (PROV-O `prov:unqualifiedForm`, SKOS-XL to SKOS
+  labels, DCAT `qualifiedAttribution` to `prov:wasAttributedTo`) is written as a `VALUES` table in
+  the template; that is the vocabulary's own statement, not IRI-string inference (DEC-7, DEC-12).
+- **P-20 `blank_nary` covers untyped blank nodes only.** A typed blank node (`[ a ex:Address ; … ]`)
+  is an ordinary instance, already profiled under its class; hiding it would remove real classes.
+  An untyped blank node that is the object of exactly one triple, has outgoing triples, and is not
+  an RDF list, an OWL construct, an `rdf:Statement`/`owl:Axiom` reifier or an `rdf:value` node is a
+  relation through a blank node: named by the incoming predicate, its outgoing predicates as reifier
+  properties. No hidden terms: untyped nodes are not in the ordinary profile today, so nothing
+  ordinary disappears.
+- **P-21 `structured_value` covers `rdf:value` nodes** (blank or IRI): named by the incoming
+  predicate, object class absent, the node's other properties (e.g. a unit) as reifier properties;
+  no hidden terms for untyped nodes; typed value nodes' classes per P-5.
+
+### Stage kinds (new `ReificationKind` values)
+
+| Stage | Kind | Probe | Named by | Statements | Hidden |
+|---|---|---|---|---|---|
+| 2 | `graph_statement` | a named graph IRI is the subject of triples in the profiled graph | — (count: distinct described graphs) | — | — |
+| 2 | `nanopublication` | `?np np:hasAssertion ?a` | — (count: distinct `?np`) | — | `np:Nanopublication`, `np:hasAssertion`, `np:hasProvenance`, `np:hasPublicationInfo` |
+| 3 | `prov_qualified` | `?s ?qp ?q` with `?qp` in the 14 `prov:qualifiedX` | the unqualified form (P-19 table) | distinct `?q` | the `prov:qualifiedX` predicates; classes of `?q` per P-5 |
+| 3 | `dcat_qualified` | `dcat:qualifiedRelation` or `dcat:qualifiedAttribution` | `dct:relation` / `prov:wasAttributedTo` | distinct node | `dcat:qualifiedRelation`, `dcat:qualifiedAttribution`; `dcat:Relationship`, `prov:Attribution` per P-5 |
+| 3 | `schema_role` | `?s ?p ?r . ?r a ?rt ; ?p ?o`, `?rt` a `schema:Role` type (http and https) | `?p` | distinct `?r` | role classes per P-5 |
+| 3 | `wikibase_statement` | `?st a wikibase:Statement` linked from a subject | the property entity of `wikibase:claim`, else the claim predicate | distinct `?st` | `wikibase:Statement` per P-5 |
+| 3 | `cidoc_property_of_property` | `?pc crm:P01_has_domain ?s ; crm:P02_has_range ?o` | the PC class (`?pc`'s type) | distinct `?pc` | `crm:P01_has_domain`, `crm:P02_has_range`; PC classes per P-5 |
+| 3 | `skosxl_label` | `?s skosxl:prefLabel|altLabel|hiddenLabel ?l` | `skos:prefLabel` / `altLabel` / `hiddenLabel` | distinct `?l` | the three `skosxl:` label predicates, `skosxl:literalForm`; `skosxl:Label` per P-5 |
+| 4 | `blank_nary` | P-20 | the incoming predicate | distinct blank node | — |
+| 4 | `structured_value` | `?s ?p ?n . ?n rdf:value ?v` | the incoming predicate | distinct `?n` | classes of `?n` per P-5 |
+
+Sample data: each kind gets one instance in `reifications-source.ttl` (family B in their own named
+graphs of the in-memory store; the reified profile then covers them through `selected_graphs`).
+
 
 ## Open Questions
 

@@ -1,4 +1,4 @@
-> Derives from: EPIC singleton-property-pattern (`proposal.md`, DEC-1 to DEC-11); design in `design.md` (P-1 to P-16). Stage 1 only.
+> Derives from: EPIC singleton-property-pattern (`proposal.md`, DEC-1 to DEC-12); design in `design.md` (P-1 to P-21). Stages 1 to 4.
 
 Each task is test-first (`superpowers:test-driven-development`): write the named tests red, then the
 code, then the task's named tests green. From task 0.1 on, the new Gherkin scenarios exist and stay
@@ -48,17 +48,26 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 - [x] R.1 Remove the `singleton_property` kind: delete `singleton_property.rq` and the enum value (`make generate-models`); `resource_as_predicate.rq` no longer excludes predicates with `rdf:singletonPropertyOf`, and `rdf:singletonPropertyOf` is an ordinary reifier property (not a hidden term, never a name); `reifications-source.ttl` §C singletons become resources typed `ex:Link`; feature titles and steps follow the spec delta ("Singleton properties are resources used as predicates", "Resource used as predicate"); unit tests, `REIFIED_*` facts, the reified profile and goldens refreshed; design.md §A, §C, the layering table and the exit criteria updated; docs `reifications.adoc`, `llm-schema.adoc` and CHANGELOG follow
 
+## S. Stages 2–4 (design "Stages 2–4", P-17 to P-21)
+
+- [ ] S.1 Gherkin first for the new statistics-collection scenarios (and the reworded "Relation through a blank node"); P-18: `GraphProfile.reification_counts` (`ReificationCount{kind, count}`) replaces `triple_term_reifications` in the model, collection, report note, `REIFIED_*` facts, docs; the triple-term scenario and steps migrated
+- [ ] S.2 Stage 2 templates `graph_statement`, `nanopublication` (count-only, P-17) + sample graphs in `reifications-source.ttl` (the reified profile's `selected_graphs` widened to them) + bindings
+- [ ] S.3 Stage 3 templates `prov_qualified`, `dcat_qualified`, `schema_role`, `wikibase_statement`, `cidoc_property_of_property`, `skosxl_label` (P-19 tables) + sample + bindings
+- [ ] S.4 Stage 4 templates `blank_nary` (P-20), `structured_value` (P-21) + sample + bindings; the `@stage4` tag and its conftest hook removed
+- [ ] S.5 `make refresh-sample-profile` + `make refresh-golden` (only reified files change); docs kinds table and limits; CHANGELOG; `openspec validate --strict`
+
 ## 8. Gate and release
 
+- [ ] 8.0 Hypothesis property tests for the new logic: relation attach and sort (P-6, P-7), the namespace filter on relations (P-10: none left in an excluded namespace; idempotent), `relation_view` (singular/plural, kind present)
 - [ ] 8.1 `make check-all`
 - [ ] 8.2 `make oxigraph-load-test-data` + `make test-e2e`
-- [ ] 8.3 `make check-mutation` at or above the stored score; survivors get a test in the owning tier
-- [ ] 8.4 Brainframe acceptance (design "Exit criteria", with its timing method), recorded with commands in `inputs/brainframe-evidence.md` under "After stage 1"; `openspec validate --all --strict`
+- [ ] 8.3 `make check-mutation` from a deleted `mutants/` (fresh stats), at or above the stored score; survivors get a test in the owning tier
+- [ ] 8.4 Brainframe acceptance (design "Exit criteria", with its timing method), recorded with commands in `inputs/brainframe-evidence.md` under "After the EPIC"; `openspec validate --all --strict`
 - [ ] 8.5 Release (P-13): the developer chooses the version bump; then AGENTS.md "Release authority"
 
 ## Roadmap
 
-- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 7.1 · [x] R.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 7.1 · [x] R.1 · [ ] S.1 · [ ] S.2 · [ ] S.3 · [ ] S.4 · [ ] S.5 · [ ] 8.0 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 
