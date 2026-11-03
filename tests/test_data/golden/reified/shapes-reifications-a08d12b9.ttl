@@ -1,0 +1,39 @@
+# SHACL shapes inferred by rdf-fingerprinter — http://example.org/reifications
+
+@prefix ex: <http://example.org/> .
+@prefix ex-shape: <http://example.org/shape/> .
+@prefix fp: <https://data.meaningfy.ws/fingerprint/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex-shape:Org a sh:NodeShape ;
+    sh:targetClass ex:Org ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property ex-shape:Org-ex-legacy ;
+.
+
+ex-shape:Org-ex-legacy a sh:PropertyShape ;
+    sh:path ex:legacy ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+ex-shape:Person a sh:NodeShape ;
+    sh:targetClass ex:Person ;
+    fp:instances 3 ;
+    fp:observedInstances 3 ;
+    fp:precisionMode "exact" ;
+    rdfs:comment "Reified relation: ~> ex:worksFor (:ex:Org) 2 statements via singleton_property [reifiers: prov:wasAttributedTo 1]" ;
+    rdfs:comment "Reified relation: ~> ex:Procedure (:ex:Org) 1 statement via resource_as_predicate" ;
+    rdfs:comment "Reified relation: ~> ex:knows (:ex:Person) 1 statement via owl_axiom [reifiers: dcterms:source 1]" ;
+    rdfs:comment "Reified relation: ~> ex:knows (:ex:Person) 1 statement via rdf_statement [reifiers: dcterms:source 1]" ;
+    rdfs:comment "Reified relation: ~> ex:worksFor (:ex:Org) 1 statement via negative_property_assertion" ;
+.

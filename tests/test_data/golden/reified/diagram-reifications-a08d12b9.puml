@@ -1,0 +1,8 @@
+@startuml
+title Class diagram inferred by rdf-fingerprinter — ex:reifications — overview
+
+package "ex (2 classes)" as N1 {
+  [ex]
+}
+
+@enduml

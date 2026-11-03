@@ -37,12 +37,12 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## 6. Canonical data (design §D, P-15)
 
-- [ ] 6.1 `tests/refresh_sample_data.py` writes `reified-profile.json` in memory (P-15); `tests/refresh_golden.py` renders `golden/reified/`; `REIFIED_*` facts in `tests/sample_data.py`, checked by `tests/guards/test_sample_data.py`; `make oxigraph-load-test-data`, `make refresh-sample-profile`, `make refresh-golden`; review: the sample profile changes only by `"reifications": true`, and the only other changes are the new reified files
-- [ ] 6.2 e2e test in `tests/e2e/`: every rendered section of every packaged template is accepted by Oxigraph (P-15)
+- [x] 6.1 `tests/refresh_sample_data.py` writes `reified-profile.json` in memory (P-15); `tests/refresh_golden.py` renders `golden/reified/`; `REIFIED_*` facts in `tests/sample_data.py`, checked by `tests/guards/test_sample_data.py`; `make oxigraph-load-test-data`, `make refresh-sample-profile`, `make refresh-golden`; review: the sample profile changes only by `"reifications": true`, and the only other changes are the new reified files
+- [x] 6.2 e2e test in `tests/e2e/`: every rendered section of every packaged template is accepted by Oxigraph (P-15)
 
 ## 7. Docs
 
-- [ ] 7.1 New page `docs/modules/ROOT/pages/reifications.adoc` (the kinds, what is hidden, mixed classes (P-14), the per-class section in each output, the `~>` notation, `--no-reifications`, what is not detected: `rdf:Property`-only predicates, n-ary relations through IRIs, triple-term decomposition, untyped subjects (P-7), `patterns.csv` unchanged); the options table in `getting-started.adoc`; the nav entry; a pointer for the `~>` lines in `llm-schema.adoc`; the `CHANGELOG.md` entry (BREAKING: pitfall removed)
+- [x] 7.1 New page `docs/modules/ROOT/pages/reifications.adoc` (the kinds, what is hidden, mixed classes (P-14), the per-class section in each output, the `~>` notation, `--no-reifications`, what is not detected: `rdf:Property`-only predicates, n-ary relations through IRIs, triple-term decomposition, untyped subjects (P-7), `patterns.csv` unchanged); the options table in `getting-started.adoc`; the nav entry; a pointer for the `~>` lines in `llm-schema.adoc`; the `CHANGELOG.md` entry (BREAKING: pitfall removed)
 
 ## 8. Gate and release
 
@@ -54,7 +54,7 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## Roadmap
 
-- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

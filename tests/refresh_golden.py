@@ -9,7 +9,16 @@ from fingerprint.domain.analytics import analyse
 from fingerprint.domain.profile import ProfileRun
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.representations import make_generator
-from tests.sample_data import GOLDEN, SAMPLE_PROFILE, SCANNED_FORMATS, SCANNED_GOLDEN, SCANNED_PROFILE
+from tests.sample_data import (
+    GOLDEN,
+    REIFIED_FORMATS,
+    REIFIED_GOLDEN,
+    REIFIED_PROFILE,
+    SAMPLE_PROFILE,
+    SCANNED_FORMATS,
+    SCANNED_GOLDEN,
+    SCANNED_PROFILE,
+)
 
 
 def render(run: ProfileRun, name: str) -> dict[str, str]:
@@ -23,6 +32,7 @@ def main() -> None:
     jobs = [
         (load_profile(SAMPLE_PROFILE), GOLDEN, sorted(GENERATORS)),
         (load_profile(SCANNED_PROFILE), SCANNED_GOLDEN, SCANNED_FORMATS),
+        (load_profile(REIFIED_PROFILE), REIFIED_GOLDEN, REIFIED_FORMATS),
     ]
     for run, folder, names in jobs:
         folder.mkdir(exist_ok=True)

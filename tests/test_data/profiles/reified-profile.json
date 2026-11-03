@@ -1,0 +1,141 @@
+{
+  "endpoint": "http://fake/sparql",
+  "started_at": "2026-11-03T14:35:36.639878Z",
+  "finished_at": "2026-11-03T14:35:38.078696Z",
+  "tool_version": "0.3.1",
+  "settings": {
+    "depth": "values",
+    "precision_policy": "auto",
+    "first_n": 10000,
+    "top_k": 20,
+    "object_type_scope": "same_graph",
+    "completeness_check": false,
+    "timeout_seconds": 60,
+    "concurrency": 4,
+    "acceptance_threshold": 0.95,
+    "graph_statistics": false,
+    "selected_graphs": [
+      "http://example.org/reifications"
+    ],
+    "pitfall_scan": false,
+    "pitfall_examples": 10,
+    "reifications": true
+  },
+  "graphs": [
+    {
+      "graph": "http://example.org/reifications",
+      "reification_kinds": [
+        "negative_property_assertion",
+        "owl_axiom",
+        "rdf_statement",
+        "resource_as_predicate",
+        "singleton_property",
+        "triple_term"
+      ],
+      "triple_term_reifications": 1,
+      "declared_subclass_edges": [],
+      "class_partitions": [
+        {
+          "class_iri": "http://example.org/Person",
+          "instances": 3,
+          "observed_instances": 3,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [],
+          "reified_relations": [
+            {
+              "property": "http://example.org/worksFor",
+              "object_class": "http://example.org/Org",
+              "kind": "singleton_property",
+              "statements": 2,
+              "reifier_properties": [
+                {
+                  "property": "http://www.w3.org/ns/prov#wasAttributedTo",
+                  "reifiers": 1
+                }
+              ]
+            },
+            {
+              "property": "http://example.org/Procedure",
+              "object_class": "http://example.org/Org",
+              "kind": "resource_as_predicate",
+              "statements": 1
+            },
+            {
+              "property": "http://example.org/knows",
+              "object_class": "http://example.org/Person",
+              "kind": "owl_axiom",
+              "statements": 1,
+              "reifier_properties": [
+                {
+                  "property": "http://purl.org/dc/terms/source",
+                  "reifiers": 1
+                }
+              ]
+            },
+            {
+              "property": "http://example.org/knows",
+              "object_class": "http://example.org/Person",
+              "kind": "rdf_statement",
+              "statements": 1,
+              "reifier_properties": [
+                {
+                  "property": "http://purl.org/dc/terms/source",
+                  "reifiers": 1
+                }
+              ]
+            },
+            {
+              "property": "http://example.org/worksFor",
+              "object_class": "http://example.org/Org",
+              "kind": "negative_property_assertion",
+              "statements": 1
+            }
+          ]
+        },
+        {
+          "class_iri": "http://example.org/Org",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://example.org/legacy",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 3,
+                  "max_length": 3,
+                  "total_length": 3,
+                  "min_value": "old",
+                  "max_value": "old",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": []
+        }
+      ],
+      "term_annotations": []
+    }
+  ],
+  "failures": []
+}

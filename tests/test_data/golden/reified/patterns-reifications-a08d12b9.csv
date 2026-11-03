@@ -1,0 +1,4 @@
+graph,block,owner,path,depth,property,targets,target_kinds,ending,instances,subjects,triples,per_min,per_max,blank_nodes,languages,min_value,max_value,single_value,distinct,presence_only,first_n,via
+http://example.org/reifications,ex:Person,ex:Person,,0,,,,,3,,,,,,,,,,,,,
+http://example.org/reifications,ex:Org,ex:Org,,0,,,,,1,,,,,,,,,,,,,
+http://example.org/reifications,ex:Org,ex:Org,,1,ex:legacy,xsd:string,datatype,,1,1,1,1,1,false,,old,old,old,1,false,,
