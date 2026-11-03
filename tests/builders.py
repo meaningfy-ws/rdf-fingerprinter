@@ -16,6 +16,9 @@ from fingerprint.domain.profile import (
     ProfileRun,
     PropertyProfile,
     QueryKind,
+    ReificationKind,
+    ReifiedRelation,
+    ReifierProperty,
     Settings,
     SubclassEdge,
     ValuePartition,
@@ -46,7 +49,24 @@ def prop(iri: str, bins: dict[int, int] | None = None, *partitions: ValuePartiti
     return PropertyProfile(property=iri, cardinality_histogram=histogram, value_partitions=list(partitions))
 
 
-def klass(iri: str, instances: int, *props: PropertyProfile, observed: int | None = None, co_types=()):
+def relation(
+    property: str | None,
+    object_class: str | None,
+    statements: int,
+    *reifiers: tuple[str, int],
+    kind=ReificationKind.singleton_property,
+) -> ReifiedRelation:
+    """A reified relation with its reifier properties as (property, reifiers) pairs."""
+    return ReifiedRelation(
+        property=property,
+        object_class=object_class,
+        kind=kind,
+        statements=statements,
+        reifier_properties=[ReifierProperty(property=p, reifiers=n) for p, n in reifiers] or None,
+    )
+
+
+def klass(iri: str, instances: int, *props: PropertyProfile, observed: int | None = None, co_types=(), reified=()):
     exact = observed is None or observed == instances
     return ClassProfile(
         class_iri=iri,
@@ -55,6 +75,7 @@ def klass(iri: str, instances: int, *props: PropertyProfile, observed: int | Non
         precision_mode=PrecisionMode.exact if exact else PrecisionMode.first_n,
         property_partitions=list(props),
         co_types=[CoTypeCount(class_iri=c, subjects=s) for c, s in co_types] or None,
+        reified_relations=list(reified) or None,
     )
 
 

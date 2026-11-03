@@ -31,9 +31,9 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## 5. Outputs (P-10, P-11, DEC-5, DEC-11)
 
-- [ ] 5.1 P-10 in `fingerprint/domain/namespace_filter.py` with its cases in `tests/unit/domain/test_namespace_filter.py`
-- [ ] 5.2 Report and profile document: `DocumentGenerator.end_class` builds the views; `main.html` renders the section after the properties and the kinds found (and the triple-term count when not zero) in the graph summary — binds fingerprint-report "Kinds found are named" and profile-analytics "Relations follow their class"
-- [ ] 5.3 Pattern `~>` lines (`fingerprint/domain/patterns.py`), ShExC comment (`fingerprint/domain/shex.py`), SHACL `rdfs:comment` (`shacl.py`), PlantUML compartment (`plantuml.py`), and their templates (P-11) — binds profile-representations "Section present", "No section when none", "Shapes note reifications without constraining them"
+- [x] 5.1 P-10 in `fingerprint/domain/namespace_filter.py` with its cases in `tests/unit/domain/test_namespace_filter.py`
+- [x] 5.2 Report and profile document: `DocumentGenerator.end_class` builds the views; `main.html` renders the section after the properties and the kinds found (and the triple-term count when not zero) in the graph summary — binds fingerprint-report "Kinds found are named" and profile-analytics "Relations follow their class"
+- [x] 5.3 Pattern `~>` lines (`fingerprint/domain/patterns.py`), ShExC comment (`fingerprint/domain/shex.py`), SHACL `rdfs:comment` (`shacl.py`), PlantUML compartment (`plantuml.py`), and their templates (P-11) — binds profile-representations "Section present", "No section when none", "Shapes note reifications without constraining them"
 
 ## 6. Canonical data (design §D, P-15)
 
@@ -54,7 +54,7 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## Roadmap
 
-- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

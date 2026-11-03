@@ -25,6 +25,12 @@ class "{{ cls.label }}" as {{ cls.alias }} {
 {%- for m in cls.members if m.kind == "attribute" %}
   {{ m.text }}
 {%- endfor %}
+{%- if cls.reified_relations %}
+  -- reified --
+{%- for r in cls.reified_relations %}
+  {{ r.text[3:] }}
+{%- endfor %}
+{%- endif %}
 }
 {%- endfor %}
 {% for box in view.reference_boxes %}

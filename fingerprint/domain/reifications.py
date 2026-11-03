@@ -1,0 +1,48 @@
+"""How a reified relation reads in every output (singleton-property-pattern P-11). Pure: no I/O.
+
+One formatter, so the report, the pattern schema, ShExC, SHACL and PlantUML print the same text.
+"""
+
+from collections.abc import Callable
+
+from fingerprint.domain.profile import ReificationKind, ReifiedRelation
+from fingerprint.domain.views import ReifiedRelationView
+
+KIND_LABELS = {
+    ReificationKind.rdf_statement: "RDF statement",
+    ReificationKind.singleton_property: "singleton property",
+    ReificationKind.resource_as_predicate: "resource as predicate",
+    ReificationKind.owl_axiom: "OWL axiom",
+    ReificationKind.negative_property_assertion: "negative property assertion",
+    ReificationKind.triple_term: "triple term",
+}  # dict-ok: module-level lookup table
+UNNAMED = "unnamed"
+
+
+def relation_view(relation: ReifiedRelation, name: Callable[[str], str | None]) -> ReifiedRelationView | None:
+    """The view of `relation`, its IRIs written by `name`; None when its property or object class cannot be written
+    (an unwritable reifier property is left out of the list)."""
+    prop = name(relation.property) if relation.property else UNNAMED
+    object_class = name(relation.object_class) if relation.object_class else None
+    if prop is None or (relation.object_class and object_class is None):
+        return None
+    reifiers = [(n, r.reifiers) for r in relation.reifier_properties or [] if (n := name(r.property)) is not None]
+    reifier_text = ", ".join(f"{n} {count}" for n, count in reifiers) or None
+    noun = "statement" if relation.statements == 1 else "statements"
+    text = f"~> {prop} (:{object_class or '?'}) {relation.statements} {noun} via {ReificationKind(relation.kind).value}"
+    return ReifiedRelationView(
+        kind=KIND_LABELS[ReificationKind(relation.kind)],
+        property=prop,
+        object_class=object_class,
+        statements=relation.statements,
+        reifier_text=reifier_text,
+        text=f"{text} [reifiers: {reifier_text}]" if reifier_text else text,
+    )
+
+
+def reification_note(kinds: list[ReificationKind] | None, triple_terms: int | None) -> str | None:
+    """The graph summary line: the kinds found and, when not zero, the triple-term count; None when none was found."""
+    if not kinds:
+        return None
+    names = ", ".join(sorted(KIND_LABELS[ReificationKind(k)] for k in kinds))
+    return f"Reifications found: {names}" + (f"; {triple_terms} triple terms." if triple_terms else ".")

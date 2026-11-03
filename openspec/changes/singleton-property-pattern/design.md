@@ -120,11 +120,11 @@ New planning decisions; EPIC decisions are cited, not restated.
   an excluded namespace, inside `exclude_terms`' class removal (same rule as properties). Reifier
   properties in excluded namespaces are dropped from a relation's list.
 - **P-11 The pattern notation is `~>`.** In the pattern schema a reified relation is a line
-  `~> <property|unnamed> (:<ObjectClass>|(:?)) <n> statements [reifiers: <p1> <n1>, …]` after the
+  `~> <property|unnamed> (:<ObjectClass>|(:?)) <n> statement(s) via <kind> [reifiers: <p1> <n1>, …]` after the
   class's properties, built in `fingerprint/domain/patterns.py` (`block()`); brainframe-mcp already
   uses `~>` for these links. ShExC carries the same text as a `#` comment line inside the shape
   (`fingerprint/domain/shex.py`, `shex_view`); SHACL an `rdfs:comment "Reified relation: …"` on the
-  node shape; PlantUML a `-- reified --` compartment in the class box with one line per relation (no
+  node shape; PlantUML a `-- reified --` compartment in the class box with one line per relation, without the leading `~>` (PlantUML reads `~` as visibility) (no
   association arrows, so absent or unprofiled object classes need no rule). `patterns.csv` and the
   glossary are unchanged in stage 1 (one row per property; documented).
 - **P-12 Triple terms are a graph-level count.** `triple_term` has `probe`, `count` and `hidden`
@@ -254,7 +254,7 @@ relations, in this order:
 
 No class `ex:Link` (every instance is a singleton predicate, P-5), no class `rdf:Statement`.
 `reification_kinds` = `[rdf_statement, singleton_property]`. Pattern line:
-`~> ex:worksFor (:Org) 2 statements [reifiers: prov:wasAttributedTo 1]`.
+`~> ex:worksFor (:Org) 2 statements via singleton_property [reifiers: prov:wasAttributedTo 1]`.
 
 ### D. Canonical data
 

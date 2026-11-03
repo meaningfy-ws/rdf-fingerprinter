@@ -20,7 +20,7 @@ from fingerprint.domain.views import (
     TermKind,
     ViaLink,
 )
-from tests.builders import klass, literals, profile_run, prop, resources
+from tests.builders import klass, literals, profile_run, prop, relation, resources
 from tests.sample_data import CONTINENTS, TREATIES, DatasetFacts
 from tests.unit.domain.strategies import pattern_graphs
 
@@ -1284,3 +1284,31 @@ def test_a_row_keeps_the_whole_description_the_line_cuts():
     long = "x" * 250
     entry = entry_of(annotation(A, descriptions=[(long, "en")]))
     assert entry.rows[0].definition == long and entry.line.endswith("x" * 200 + "…")
+
+
+# --- reified relations (singleton-property-pattern P-11) ---
+
+
+def test_a_block_lists_the_reified_relations_of_its_classes_after_its_edges_most_statements_first():
+    first = klass(A, 5, reified=[relation(P, B, 1), relation(Q, None, 3, (EX + "src", 2))], co_types=[(B, 5)])
+    second = klass(B, 5, reified=[relation(None, A, 3)], co_types=[(A, 5)])
+    texts = [r.text for r in block(view(first, second), "ex:A&ex:B").reified_relations]
+    assert texts == [
+        "~> ex:q (:?) 3 statements via singleton_property [reifiers: ex:src 2]",
+        "~> unnamed (:ex:A) 3 statements via singleton_property",
+        "~> ex:p (:ex:B) 1 statement via singleton_property",
+    ]
+
+
+def test_a_relation_whose_property_cannot_be_written_is_left_out_and_noted_as_skipped():
+    single = view(klass(A, 5, reified=[relation(EX + "bad iri", B, 1)]))
+    assert single.blocks[0].reified_relations == [] and EX + "bad iri" in single.skipped
+
+
+def test_the_prefixes_of_a_relation_are_declared():
+    single = view(klass(A, 5, reified=[relation(EX + "status/s", B, 1)]))
+    assert "exs" in [p.prefix for p in single.prefixes]
+
+
+def test_a_class_without_relations_has_an_empty_list():
+    assert view(klass(A, 5)).blocks[0].reified_relations in (None, [])

@@ -156,7 +156,11 @@ class _Shex:
 
     def _shape(self, block: PatternBlock, *, blank: bool | None) -> ShexShape:
         return ShexShape(
-            label=block.shape or block.name, comment=block.header, blank=blank, constraints=self._constraints(block.edges)
+            label=block.shape or block.name,
+            comment=block.header,
+            blank=blank,
+            constraints=self._constraints(block.edges),
+            reified_relations=block.reified_relations,
         )
 
     def schema(self) -> ShexSchema:

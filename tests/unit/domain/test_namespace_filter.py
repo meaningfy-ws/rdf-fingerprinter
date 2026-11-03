@@ -194,6 +194,47 @@ def test_an_excluded_property_is_dropped_from_every_class():
     assert REL + "r1" not in person and REL + "r2" not in person and EX + "name" in person
 
 
+PROV = "http://www.w3.org/ns/prov#"
+
+
+def reified_world() -> ProfileAnalytics:
+    """`ex:Person` with three reified relations: ordinary, one in `rel`, one to an `org` class, with a `rel` reifier."""
+    person = builders.klass(
+        EX + "Person",
+        10,
+        reified=[
+            builders.relation(EX + "worksFor", EX + "Thing", 2, (EX + "source", 1), (REL + "note", 1)),
+            builders.relation(REL + "r1", EX + "Thing", 1),
+            builders.relation(EX + "memberOf", ORG + "Unit", 3),
+            builders.relation(None, None, 4),
+        ],
+    )
+    return analyse(builders.profile_run(person))
+
+
+def reified(analytics):
+    return classes(analytics)[EX + "Person"].reified_relations
+
+
+def test_a_reified_relation_of_an_excluded_property_or_object_class_is_dropped():
+    kept = reified(exclude_terms(reified_world(), {REL, ORG}, TABLE))
+    assert [r.property for r in kept] == [EX + "worksFor", None]
+
+
+def test_an_excluded_reifier_property_is_dropped_from_its_relation():
+    (works_for, _) = reified(exclude_terms(reified_world(), {REL}, TABLE))[0:2]
+    assert [p.property for p in works_for.reifier_properties] == [EX + "source"]
+
+
+def test_excluding_nothing_keeps_the_reified_relations():
+    assert reified(exclude_terms(reified_world(), set(), TABLE)) == reified(reified_world())
+
+
+def test_the_dropped_reified_terms_are_noted():
+    notes = {t.namespace: t for t in terms(exclude_terms(reified_world(), {REL, ORG}, TABLE))}
+    assert (notes[REL].properties, notes[ORG].classes) == (2, 1)
+
+
 def test_an_excluded_class_is_dropped_with_its_properties():
     after = exclude_terms(filter_world(), {ORG}, TABLE)
     assert ORG + "Unit" not in classes(after) and EX + "Person" in classes(after)
