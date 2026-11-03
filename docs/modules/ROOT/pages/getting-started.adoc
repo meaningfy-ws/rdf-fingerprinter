@@ -29,6 +29,7 @@ fingerprint -e https://my.endpoint/sparql -o report
 | `--config` | — | A JSON file with collection settings.
 | `--format` | — | Also write `shacl`, `puml`, `doc` or `pitfalls` (repeatable); see xref:representations.adoc[].
 | `--pitfalls` | off | Also scan for modelling pitfalls; see xref:pitfalls.adoc[].
+| `--no-reifications` | on | Profile reifications as ordinary classes and properties instead of reified relations; see xref:reifications.adoc[].
 |===
 
 The other options (`--depth`, `--precision`, `--first-n`, `--timeout`, …) are listed in

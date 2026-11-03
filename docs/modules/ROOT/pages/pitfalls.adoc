@@ -130,6 +130,9 @@ infer a type rather than report an error.
 | `x_range_violation` | important | data |  | rdf-fingerprinter (RDFUnit-style) | IRI objects outside an object property's declared range
 |===
 
+An individual used as a predicate is no longer a pitfall (the check `x_individual_as_predicate` is
+removed): the fingerprint reports it as a xref:reifications.adoc[reified relation].
+
 == Scan files
 
 To scan RDF files rather than an endpoint, `make scan-files ONTOLOGY=o.owl [DATA=d.rdf] OUT=dir` loads
