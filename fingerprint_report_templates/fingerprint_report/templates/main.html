@@ -116,6 +116,9 @@
   {%- for g in view.graphs or [] %}
   <section id="graph-{{ g.slug }}">
     <h2>{% if g.iri %}{{ term(g.label, g.iri) }}{% else %}{{ g.label|capitalize }}{% endif %}</h2>
+    {%- if g.reification_note %}
+    <p class="note">{{ g.reification_note }}</p>
+    {%- endif %}
     {%- if g.empty %}
     <p class="note">This graph has no typed instances.</p>
     {%- elif not g.classes %}
@@ -157,6 +160,19 @@
         </tbody>
       </table>
       </div>
+      {%- if c.reified_relations %}
+      <h4>Reified relations</h4>
+      <div class="scroll">
+      <table class="reified">
+        <thead><tr><th>Kind</th><th>Property</th><th>Object class</th><th>Statements</th><th>Reifier properties</th></tr></thead>
+        <tbody>
+        {%- for r in c.reified_relations %}
+          <tr><td>{{ r.kind }}</td><td>{{ r.property }}</td><td>{{ r.object_class or '—' }}</td><td class="n">{{ r.statements }}</td><td>{{ r.reifier_text or '—' }}</td></tr>
+        {%- endfor %}
+        </tbody>
+      </table>
+      </div>
+      {%- endif %}
     </details>
     {%- endfor %}
   </section>

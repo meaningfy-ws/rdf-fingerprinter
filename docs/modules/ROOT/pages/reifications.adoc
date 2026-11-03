@@ -1,0 +1,223 @@
+= Reified Relations
+:description: How the fingerprint finds reifications (statements about statements), folds them into the relations they stand for, and shows them per class.
+
+Many graphs say something about a link: who asserted it, when, with what confidence. RDF has no single
+way to do that, so graphs *reify*: they give the statement, or the relation, a node of its own. Left
+alone, a profile shows that node as one more class or property and loses the link it stands for.
+rdf-fingerprinter recognises the reification and shows the link instead, as a *reified relation* of
+the subject's class.
+
+== An example
+
+In the singleton property pattern, each link uses its own predicate IRI, and that IRI carries the
+link's metadata. `rdf:singletonPropertyOf` is not a standard W3C term, so the fingerprint does not
+read it as the link's generic property. The predicate is a resource used as a predicate, and its type
+names the relation:
+
+[source,turtle]
+----
+ex:alice a ex:Person .  ex:bob a ex:Person .  ex:acme a ex:Org .
+ex:alice ex:rel1 ex:acme .
+ex:bob   ex:rel2 ex:acme .
+ex:rel1 rdf:singletonPropertyOf ex:worksFor ; a ex:Link ; prov:wasAttributedTo ex:hr .
+ex:rel2 rdf:singletonPropertyOf ex:worksFor ; a ex:Link .
+----
+
+Profiled as ordinary data, `ex:Person` has two one-off properties, `ex:rel1` and `ex:rel2`, and there
+is a class `ex:Link`. With reifications on, the profile of `ex:Person` has neither property, there is
+no class `ex:Link`, and the class gets one reified relation:
+
+[source,text]
+----
+~> ex:Link (:ex:Org) 2 statements via resource_as_predicate [reifiers: rdf:singletonPropertyOf 2, prov:wasAttributedTo 1]
+----
+
+Read it as: two statements link a person to an organisation through predicates typed `ex:Link`; both
+reifiers carry `rdf:singletonPropertyOf` (an ordinary reifier property) and one carries
+`prov:wasAttributedTo`.
+
+== The kinds
+
+[cols="2,3,2,3"]
+|===
+| Kind | Recognised by | The relation is named by | Hidden from the ordinary profile
+
+| `rdf_statement`
+| a node with `rdf:subject`, `rdf:predicate` and `rdf:object`
+| `rdf:predicate`
+| `rdf:Statement`, `rdf:subject`, `rdf:predicate`, `rdf:object`; the other classes of the statement nodes (see below)
+
+| `resource_as_predicate`
+| a predicate typed with a class that is not a property type (not `rdf:Property`, an OWL property type, `rdfs:Resource`, `owl:Thing`, `owl:NamedIndividual`, or a subclass of `rdf:Property`)
+| the predicate's type
+| every such predicate, and its type (see below)
+
+| `owl_axiom`
+| a node with `owl:annotatedSource`, `owl:annotatedProperty` and `owl:annotatedTarget`
+| `owl:annotatedProperty`
+| `owl:Axiom` and the three `owl:annotated…` properties; the other classes of the axiom nodes
+
+| `negative_property_assertion`
+| a node with `owl:sourceIndividual` and `owl:assertionProperty`
+| `owl:assertionProperty`
+| `owl:NegativePropertyAssertion`, `owl:sourceIndividual`, `owl:assertionProperty`, `owl:targetIndividual`, `owl:targetValue`; the other classes of the assertion nodes
+
+| `triple_term`
+| an `rdf:reifies` triple (RDF 1.2, RDF-star)
+| — (counted only)
+| `rdf:reifies`
+
+| `graph_statement`
+| a named graph IRI that is the subject of triples in the profiled graph
+| — (counted only)
+| —
+
+| `nanopublication`
+| a node with `np:hasAssertion`
+| — (counted only)
+| `np:Nanopublication`, `np:hasAssertion`, `np:hasProvenance`, `np:hasPublicationInfo`
+
+| `prov_qualified`
+| a subject linked by one of the 14 `prov:qualifiedX` properties to a node
+| the `prov:qualifiedX` property itself (for example `prov:qualifiedAssociation`)
+| the `prov:qualifiedX` properties; classes whose every instance is such a node
+
+| `dcat_qualified`
+| `dcat:qualifiedRelation` or `dcat:qualifiedAttribution` to a node
+| that property
+| the two properties; classes whose every instance is such a node
+
+| `schema_role`
+| a node typed `schema:Role` or a subclass (http or https) that repeats the linking property to the real object
+| the linking property
+| the role classes, when every instance is a role node
+
+| `wikibase_statement`
+| a node typed `wikibase:Statement` linked from a subject
+| the claim predicate the data uses
+| `wikibase:Statement`, when every instance is a statement node
+
+| `cidoc_property_of_property`
+| a node with `crm:P01_has_domain` and `crm:P02_has_range`
+| the node's type (a `crm:PC…` class)
+| the two properties and the `crm:PC…` classes whose every instance is such a node
+
+| `blank_nary`
+| an untyped blank node, the object of exactly one triple, with outgoing triples, that is not a list, an OWL or SHACL construct, an `rdf:Statement` or an `rdf:value` node
+| the linking property
+| — (untyped nodes are not in the ordinary profile)
+
+| `structured_value`
+| an untyped node with `rdf:value` linked by a property (a quantity with its unit)
+| the linking property
+| —
+|===
+
+The relation is named by the predicate the data uses: no mapping table translates `prov:qualifiedX`
+to `prov:wasX`, or a Wikibase claim to its property. SKOS-XL labels are ordinary classes and
+properties, not a reification. `graph_statement` and `nanopublication` are counted only, not related
+to a class. `blank_nary` and `structured_value` cover untyped nodes only: a typed node, such as a
+`[ a ex:Address ]` blank node or an `euvoc:XlNotation` value node, is an ordinary instance and
+class.
+
+A class other than the fixed ones above (`ex:Link` in the example) is hidden only when *every* one of
+its instances is part of the reification. A class with reifiers and ordinary instances stays whole:
+see <<limits,Limits>>.
+
+The relation is never guessed from IRI strings. When the reification does not name the generic
+property, the relation is `unnamed`. A relation is filed under each class of its subject; its object
+class is the class of the object, or `?` when the object is untyped, a literal or a blank node.
+
+== How it works
+
+With reifications on (the default), each graph is profiled like this:
+
+. **Probe.** Before anything else, at every `--depth`, the collector asks one SPARQL `ASK` per kind.
+  A kind not in the graph costs that one query.
+. **Hide.** For each kind found, a query lists the terms that implement it. They leave the ordinary
+  classes, properties, co-types and incoming links, and the graph-level predicate counts.
+. **Capture.** From depth `classes` on, for each kind found, two queries return the relations
+  (subject class, generic property, object class, statements) and the properties their reifiers carry
+  (name and how many reifiers carry it; no values). Each relation is filed under its subject's class,
+  most statements first.
+
+The queries are packaged `.rq` templates (`fingerprint/adapters/queries/reifications/`), one file per
+kind. A probe or capture that fails is a recorded failure (exit 1), and that kind's machinery stays in
+the ordinary profile: nothing disappears without a trace. If an endpoint rejects the `rdf:reifies`
+probe, run with `--no-reifications`.
+
+== Where the relations show
+
+[cols="1,3"]
+|===
+| Output | What it shows
+
+| Report page (`main.html`, `--format doc`) | Per graph, the note `Reifications found: <kinds>.`, with the triple-term count when not zero. Per class, a *Reified relations* table: kind, property, object class, statements, reifier properties.
+| Pattern schema (`patterns-<graph>.md`) | One `~>` line per relation at the end of the class block, after its edges (<<notation,below>>).
+| Enriched ShExC (`shex-<graph>.shex`) | The same line as a `#` comment inside the class's shape; no triple constraint.
+| SHACL shapes (`shapes-<graph>.ttl`) | An `rdfs:comment "Reified relation: ~> …"` on the class's node shape; no property shape, no constraint.
+| PlantUML (`diagram-<graph>--<module>.puml`) | A `-- reified --` compartment in the class box, one line per relation without the leading `~>`; no association arrow.
+| `profile.json` | Per class, `reified_relations` (`kind`, `property`, `object_class`, `statements`, `reifier_properties` with `property` and `reifiers`). Per graph, `reification_kinds` (absent when none is found) and `reification_counts` (per count-only kind: `kind` and `count`).
+|===
+
+The validation shapes note the relations and never constrain them. A graph with no reification gets
+no section, no note and no new field.
+
+[#notation]
+=== The `~>` notation
+
+[source,text]
+----
+~> <property|unnamed> (:<ObjectClass>|(:?)) <n> statement(s) via <kind> [reifiers: <p1> <n1>, …]
+----
+
+`(:?)` is a relation with no object class. The `[reifiers: …]` part is left out when the reifiers
+carry no other property. `-p->` is a triple in the data; `~>` is a link that exists only through a
+reification, so a SPARQL query must go through the reifier to follow it.
+
+== Options
+
+[cols="1,1,3"]
+|===
+| Option | Default | Meaning
+
+| `--reifications` / `--no-reifications` | on | Probe for reifications, hide their machinery and show the relations (setting `reifications`, `RDF_FINGERPRINTER_REIFICATIONS`).
+|===
+
+With `--no-reifications` no probe is sent, and the profile equals that of a version without this
+stage, except that its settings record `"reifications": false`.
+
+`--exclude-namespace` (xref:representations.adoc#filters[Namespace filters]) also applies to reified
+relations: a relation whose property or object class is in an excluded namespace is left out, and a
+reifier property in an excluded namespace leaves the relation's list. Excluding a namespace drops the
+links; reifications on keeps them, folded. Use the namespace filter for what the probes do not
+recognise.
+
+[#limits]
+== Limits
+
+* **Predicates typed only `rdf:Property` are not detected.** A singleton-style predicate with no
+  other type is an ordinary property, with or without `rdf:singletonPropertyOf`, since nothing in the
+  data tells it from a declared one.
+* **A mixed class stays whole.** A class with reifiers and ordinary instances, such as an
+  `rdf:Property` class holding singleton predicates and declared ones, keeps its instance count and
+  property rows, reifiers included.
+* **A mixed Wikibase claim predicate stays whole.** A claim predicate used both for statements and for
+  plain values stays an ordinary property and also yields its reified relation.
+* **Untyped subjects are dropped.** A reified statement whose subject has no class, or only a
+  blank-node class, has no class to be filed under and is counted nowhere.
+* **Triple terms, graph statements and nanopublications are counted only.** SPARQL 1.1 cannot take a
+  triple term apart, and the other two put each statement in its own graph, which the per-graph
+  collection cannot relate to a class. Each gives a per-graph count (`reification_counts`) and no
+  relation.
+* **A `negative_property_assertion` relation is a denial.** It says the subject is *not* linked to the
+  object by the property. The suffix `via negative_property_assertion` is the only sign of that in the
+  `~>` line, the ShExC and SHACL comments and the diagram; read it before reading the relation as a
+  fact.
+* **`patterns-<graph>.csv` and the glossary are unchanged.** They have one row per property and no
+  reified relation.
+* **Typed nodes stay ordinary.** `blank_nary` and `structured_value` skip any node with an
+  `rdf:type`, since a typed node is a real class of the data.
+* **Not covered:** n-ary relations through typed IRI nodes (nothing tells them from ordinary
+  classes), and qualified-relation vocabularies other than PROV-O, DCAT, `schema:Role`, Wikibase and
+  CIDOC CRM.

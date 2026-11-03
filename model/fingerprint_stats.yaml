@@ -95,6 +95,40 @@ enums:
         description: A pitfall check query (its emptiness ASK, count or examples) (pitfall-scans).
       term_annotations:
         description: The labels and descriptions of a graph's classes and properties (Q12).
+      reification:
+        description: A reification template query (singleton-property-pattern).
+  ReificationKind:
+    description: The way a reification is expressed in the data (singleton-property-pattern).
+    permissible_values:
+      rdf_statement:
+        description: An rdf:Statement resource with rdf:subject, rdf:predicate and rdf:object.
+      resource_as_predicate:
+        description: A predicate with an rdf:type other than a property type (this covers singleton properties, DEC-12); its type names the relation.
+      owl_axiom:
+        description: An owl:Axiom or owl:Annotation that annotates a triple through owl:annotatedSource, owl:annotatedProperty and owl:annotatedTarget.
+      negative_property_assertion:
+        description: An owl:NegativePropertyAssertion that denies a triple through owl:sourceIndividual, owl:assertionProperty and owl:targetIndividual.
+      triple_term:
+        description: An RDF 1.2 reifier (rdf:reifies a triple term); counted per graph only, since SPARQL 1.1 cannot decompose triple terms.
+      graph_statement:
+        description: A named graph IRI described by triples of the profiled graph, so a statement is made about a whole graph; counted per graph only (P-17).
+      nanopublication:
+        description: A nanopublication head (np:hasAssertion) whose assertion, provenance and publication info live in their own graphs; counted per graph only (P-17).
+      prov_qualified:
+        description: A PROV-O qualified influence (prov:qualifiedX to a node with prov:entity, prov:agent, prov:activity or prov:influencer); the qualified property names the relation (DEC-13).
+      dcat_qualified:
+        description: A DCAT qualified relation or attribution (dcat:qualifiedRelation, dcat:qualifiedAttribution) to a node naming its target; the qualified property names the relation (DEC-13).
+      schema_role:
+        description: A schema.org Role node typed schema:Role or a subclass that repeats the linking property to the real object; the linking property names the relation.
+      wikibase_statement:
+        description: A Wikibase statement node (wikibase:Statement) linked by a claim predicate; the claim predicate names the relation.
+      cidoc_property_of_property:
+        description: A CIDOC CRM property class instance (P01_has_domain, P02_has_range) standing for a relation; its type names the relation.
+      blank_nary:
+        description: An untyped blank node, referenced once and not a list or an OWL or SHACL construct, that carries the qualifications of a relation; the linking property names the relation (P-20).
+      structured_value:
+        description: A node with an rdf:value (a quantity with its unit) linked by a property; the linking property names the relation (P-21).
+
   PitfallImportance:
     description: How serious a pitfall is; critical > important > minor (pitfall-scans DEC-1).
     permissible_values:
@@ -234,6 +268,7 @@ slots:
   pitfall_scan: { range: boolean, description: "Whether the pitfall checks ran (pitfall-scans; some are full scans)." }
   schema_graphs: { range: uriorcurie, multivalued: true, description: "Graphs holding the ontology, joined with each data graph for the data checks." }
   pitfall_examples: { range: integer, minimum_value: 1, description: "How many example rows are kept per pitfall check and graph." }
+  reifications: { range: boolean, description: "Whether the reification templates ran (singleton-property-pattern)." }
   check_id: { description: "The id of a pitfall check." }
   selected_graphs: { range: uriorcurie, multivalued: true, description: "Graphs requested; empty means all." }
 
@@ -273,7 +308,7 @@ classes:
 
   Settings:
     description: Collection parameters, recorded so a profile can be interpreted and reproduced.
-    slots: [depth, precision_policy, first_n, top_k, object_type_scope, completeness_check, timeout_seconds, concurrency, acceptance_threshold, graph_statistics, selected_graphs, pitfall_scan, schema_graphs, pitfall_examples]
+    slots: [depth, precision_policy, first_n, top_k, object_type_scope, completeness_check, timeout_seconds, concurrency, acceptance_threshold, graph_statistics, selected_graphs, pitfall_scan, schema_graphs, pitfall_examples, reifications]
     slot_usage:
       depth: { required: true, ifabsent: "string(values)" }
       precision_policy: { required: true, ifabsent: "string(auto)" }
@@ -287,6 +322,7 @@ classes:
       graph_statistics: { required: true, ifabsent: "false" }
       pitfall_scan: { required: true, ifabsent: "false" }
       pitfall_examples: { required: true, ifabsent: "int(10)" }
+      reifications: { required: true, ifabsent: "true" }
 
   Failure:
     description: A query that could not be answered.
@@ -301,6 +337,15 @@ classes:
     class_uri: void:Dataset
     slots: [graph, triples, distinct_subjects, distinct_objects, untyped_subjects]
     attributes:
+      reification_kinds:
+        range: ReificationKind
+        multivalued: true
+        description: The reification kinds found in the graph; left unset when none is found.
+      reification_counts:
+        range: ReificationCount
+        multivalued: true
+        inlined_as_list: true
+        description: The occurrences of each count-only reification kind found in the graph (singleton-property-pattern P-18).
       predicate_partitions:
         range: PredicatePartition
         multivalued: true
@@ -427,6 +472,51 @@ classes:
         multivalued: true
         inlined_as_list: true
         description: Classes and properties pointing at the observed instances.
+      reified_relations:
+        range: ReifiedRelation
+        multivalued: true
+        inlined_as_list: true
+        description: The reified relations whose subjects are instances of the class; absent when none (singleton-property-pattern).
+
+  ReifierProperty:
+    description: A property on the reifiers of a reified relation, and how many reifiers carry it.
+    slots: [property]
+    slot_usage:
+      property: { required: true }
+    attributes:
+      reifiers: { range: integer, required: true, minimum_value: 0 }
+
+  ReifiedRelation:
+    description: A relation expressed through a reification, with the generic predicate it stands for.
+    slots: [property, object_class]
+    slot_usage:
+      property: { description: "The generic predicate; absent when the reifier does not name one." }
+    attributes:
+      kind: { range: ReificationKind, required: true }
+      statements: { range: integer, required: true, minimum_value: 0, description: "Reified statements." }
+      reifier_properties:
+        range: ReifierProperty
+        multivalued: true
+        inlined_as_list: true
+        description: The properties on the reifiers, with their reifier counts.
+
+  ReificationCount:
+    description: How often a count-only reification kind occurs in a graph (singleton-property-pattern P-18).
+    attributes:
+      kind: { range: ReificationKind, required: true }
+      count: { range: integer, required: true, minimum_value: 0 }
+
+  ReificationTemplate:
+    description: A packaged reification template, split into its sections (singleton-property-pattern P-2).
+    attributes:
+      id: { required: true, identifier: true }
+      title: { required: true }
+      family: { required: true }
+      probe: { required: true, description: "The ASK that tells whether the kind occurs." }
+      relations: { description: "The SELECT of the reified relations per subject class." }
+      reifier_properties: { description: "The SELECT of the properties on the reifiers." }
+      hidden: { description: "The SELECT of the terms that implement the kind, hidden from the ordinary profile (P-4)." }
+      count: { description: "The SELECT counting the occurrences of a count-only kind (P-12, P-17)." }
 
   CoTypeCount:
     description: Observed instances that also have another class.

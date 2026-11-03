@@ -7,7 +7,7 @@ import re
 from bs4 import BeautifulSoup
 from click.testing import CliRunner
 from pytest_bdd import given, parsers, then, when
-from rdflib import RDF, Graph, Literal, Namespace, URIRef
+from rdflib import RDF, RDFS, Graph, Literal, Namespace, URIRef
 
 from fingerprint.adapters.profile_file import load_profile, save_profile
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
@@ -23,7 +23,7 @@ from fingerprint.service_layer.representations import (
 )
 from tests.bdd.steps.common import big_failure
 from tests.bdd.steps.filters import run_filtered
-from tests.builders import klass, literals, profile_run, prop, resources
+from tests.builders import klass, literals, profile_run, prop, relation, resources
 from tests.fakes import EX, files
 from tests.sample_data import GOLDEN, SAMPLE_PROFILE, TEST_DATA
 
@@ -601,3 +601,63 @@ def no_files_for_empty(ctx):
 def none_of_the_files(ctx, names):
     wanted = re.findall(r'"([^"]+)"', names)
     assert len(wanted) == 5 and not set(wanted) & set(ctx["texts"])
+
+
+# --- reified relations ---
+
+
+@given(parsers.parse('a profile where class "{cls}" has a reified relation "{p}" to "{o}"'))
+def one_relation(ctx, cls, p, o):
+    reified = relation(EX + p.removeprefix("ex:"), EX + o.removeprefix("ex:"), 5, (EX + "source", 5))
+    ctx["run"] = profile_run(klass(EX + cls.removeprefix("ex:"), 5, prop(EX + "name", {1: 5}, literals(5)), reified=[reified]))
+
+
+@when("the profile document is generated")
+def profile_document_generated(ctx):
+    ctx["soup"] = BeautifulSoup(only(generated(ctx, "doc")), "html.parser")
+
+
+@then(parsers.parse('the entry of "{cls}" has a reified-relations section naming "{p}", "{o}" and the count'))
+def entry_has_relations(ctx, cls, p, o):
+    entry = ctx["soup"].select_one("details.cls")
+    assert cls in entry.find("h3").get_text()
+    row = entry.select_one("table.reified tbody tr").get_text(" ")
+    assert entry.find("h4").get_text() == "Reified relations"
+    assert p in row and o in row and "5" in row
+
+
+@given("a profile with no reified relations")
+def no_relations(ctx, sample_run):
+    ctx["run"] = sample_run
+
+
+@when("any output is generated")
+def any_output_generated(ctx, sample_outputs):
+    ctx["texts"] = {name: text for texts in sample_outputs.values() for name, text in texts.items()}
+
+
+@then("it equals the output for the same profile before this change")
+def equals_the_stored_output(ctx):
+    equals_golden(ctx)
+
+
+@when("SHACL shapes and ShExC are generated")
+def shapes_and_shex_generated(ctx):
+    ctx["shacl"] = Graph().parse(data=only(generated(ctx, "shacl")), format="turtle")
+    ctx["shex"] = only(generated(ctx, "shex"))
+
+
+@then(parsers.parse('the shape of "{cls}" notes "{p}" to "{o}"'))
+def shapes_note_relation(ctx, cls, p, o):
+    note = f"Reified relation: ~> {p} (:{o})"
+    (shape,) = ctx["shacl"].subjects(SH.targetClass, URIRef(EX + cls.removeprefix("ex:")))
+    assert any(str(c).startswith(note) for c in ctx["shacl"].objects(shape, RDFS.comment))
+    assert f"# ~> {p} (:{o})" in ctx["shex"]
+
+
+@then("it has no property shape or triple constraint for the relation or its reifier properties")
+def shapes_do_not_constrain(ctx):
+    paths = {str(o) for o in ctx["shacl"].objects(None, SH.path)}
+    assert not paths & {EX + "isRelatedTo", EX + "source"}
+    constraints = [line for line in ctx["shex"].splitlines() if not line.lstrip().startswith("#")]
+    assert not any("isRelatedTo" in line or "source" in line for line in constraints)

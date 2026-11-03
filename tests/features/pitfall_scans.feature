@@ -33,7 +33,7 @@ Feature: Scanning a fingerprinted store for modelling pitfalls
 
     Scenario: Catalogue size
       When the packaged catalogue is loaded
-      Then it holds 29 checks with unique ids, each OOPS!-derived one naming its pitfall code
+      Then it holds 28 checks, each with a unique id, none of them x_individual_as_predicate, and every OOPS!-derived check's source names its pitfall code
 
   Rule: The scan stage
 

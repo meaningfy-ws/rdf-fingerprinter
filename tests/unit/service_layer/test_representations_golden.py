@@ -19,6 +19,9 @@ from tests.sample_data import (
     GLOSSARY_COLUMNS,
     GOLDEN,
     PATTERNS_COLUMNS,
+    REIFIED_FORMATS,
+    REIFIED_GOLDEN,
+    REIFIED_PROFILE,
     SCANNED_FORMATS,
     SCANNED_GOLDEN,
     SCANNED_PROFILE,
@@ -82,6 +85,12 @@ def test_every_golden_csv_parses_with_its_columns_and_rows_as_wide_as_the_header
 def test_golden_output_of_the_scanned_profile(name):
     """The page's Pitfalls section and the TSV, from the test data scanned for pitfalls (pitfall-scans)."""
     assert_golden(render(load_profile(SCANNED_PROFILE), name), SCANNED_GOLDEN)
+
+
+@pytest.mark.parametrize("name", REIFIED_FORMATS)
+def test_golden_output_of_the_reified_profile(name):
+    """Reified relations in every descriptive output, from the in-memory reification sample (singleton-property-pattern)."""
+    assert_golden(render(load_profile(REIFIED_PROFILE), name), REIFIED_GOLDEN)
 
 
 def shacl_files(run, threshold):

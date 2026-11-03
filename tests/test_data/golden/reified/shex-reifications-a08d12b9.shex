@@ -1,0 +1,95 @@
+PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX ex: <http://example.org/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX schema: <http://schema.org/>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX skosxl: <http://www.w3.org/2008/05/skos-xl#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+# comments use the pattern schema's legend: k/n instances having p (omitted: all) · ×a-b values per instance (omitted: 1) · bn blank nodes · @n languages, @tag one language · =v one value · lo..hi range · dN distinct values (omitted: all differ) · presence found, not measured · … deeper than 3 hops
+# hidden: 1 classes
+# (:ex:Person) 3
+ex:Person {
+  # ~> ex:Link (:ex:Org) 2 statements via resource_as_predicate [reifiers: rdf:singletonPropertyOf 2, prov:wasAttributedTo 1]
+  # ~> ex:Procedure (:?) 2 statements via resource_as_predicate
+  # ~> ex:Procedure (:ex:Org) 1 statement via resource_as_predicate
+  # ~> ex:knows (:ex:Person) 1 statement via owl_axiom [reifiers: dcterms:source 1]
+  # ~> ex:knows (:ex:Person) 1 statement via rdf_statement [reifiers: dcterms:source 1]
+  # ~> ex:worksFor (:ex:Org) 1 statement via negative_property_assertion
+}
+# (:ex:Actor) 1
+ex:Actor {
+}
+# (:ex:Archive) 1
+ex:Archive {
+}
+# (:ex:Building) 1
+ex:Building {
+  ex:height BNODE ;  # bn
+  # ~> ex:height (:?) 1 statement via structured_value [reifiers: ex:unit 1]
+}
+# (:ex:Dataset) 1
+ex:Dataset {
+  # ~> dcat:qualifiedRelation (:ex:Archive) 1 statement via dcat_qualified [reifiers: dcat:hadRole 1]
+}
+# (:ex:Entry) 1
+ex:Entry {
+  ex:code @ex:Notation ;  # (:ex:Notation)
+}
+# (:ex:Event) 1
+ex:Event {
+  # ~> crm:PC14_carried_out_by (:ex:Actor) 1 statement via cidoc_property_of_property [reifiers: ex:note 1]
+}
+# (:ex:Firm) 1
+ex:Firm {
+}
+# (:ex:Item) 1
+ex:Item {
+  # ~> ex:claimP1 (:ex:Place) 1 statement via wikibase_statement [reifiers: ex:rank 1]
+}
+# (:ex:Notation) 1 via (:ex:Entry)-ex:code
+ex:Notation {
+  rdf:value xsd:string ;  # =A1
+}
+# (:ex:Office) 1
+ex:Office {
+  ex:address BNODE {  # (:ex:Address) bn
+    ex:street xsd:string ;  # ="Main St"
+  } ;
+}
+# (:ex:Org) 1
+ex:Org {
+  ex:legacy xsd:string ;  # =old
+}
+# (:ex:Place) 1
+ex:Place {
+}
+# (:ex:Project) 1
+ex:Project {
+  ex:role BNODE ;  # bn
+  # ~> ex:role (:?) 1 statement via blank_nary [reifiers: ex:agent 1, ex:since 1]
+}
+# (:ex:Run) 1
+ex:Run {
+  # ~> prov:qualifiedAssociation (:ex:Team) 1 statement via prov_qualified [reifiers: prov:hadRole 1]
+}
+# (:ex:Team) 1
+ex:Team {
+}
+# (:ex:Worker) 1
+ex:Worker {
+  schema:affiliation IRI ;  # (:schema:OrganizationRole)
+  # ~> schema:affiliation (:ex:Firm) 1 statement via schema_role [reifiers: schema:startDate 1]
+}
+# (:skos:Concept) 1
+skos:Concept {
+  skosxl:prefLabel @skosxl:Label ;  # (:skosxl:Label)
+}
+# (:skosxl:Label) 1 via (:skos:Concept)-skosxl:prefLabel
+skosxl:Label {
+  dcterms:source IRI ;
+  skosxl:literalForm rdf:langString ;  # @en
+}
+# glossary: none

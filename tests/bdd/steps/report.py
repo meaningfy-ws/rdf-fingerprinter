@@ -14,12 +14,12 @@ from fingerprint.adapters.profile_file import load_profile
 from fingerprint.adapters.sparql import QueryTimeout, SparqlHttpClient
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.analytics import analyse
-from fingerprint.domain.profile import ProfileRun, Settings
+from fingerprint.domain.profile import ProfileRun, ReificationKind, Settings
 from fingerprint.entrypoints.cli import generate
 from fingerprint.service_layer import handlers, representations
 from fingerprint.service_layer.generators import DocumentGenerator
 from tests.bdd.steps.common import ENDPOINT, READABILITY, big_failure, person_run, run_fingerprint
-from tests.builders import klass, literals, profile_run, prop, resources
+from tests.builders import klass, literals, profile_run, prop, relation, resources
 from tests.fakes import EX
 from tests.sample_data import TEST_DATA
 
@@ -586,3 +586,33 @@ def class_indicator(ctx, n, d, o):
     assert entry.get_text(strip=True) == f"{n} · {d} d, {o} o"
     assert entry["title"] == f"{n} instances, {d} data properties, {o} object properties"
     assert f"{n} instances" in heading and f"{d} data and {o} object properties" in heading
+
+
+# --- reified relations ---
+
+
+@given("a profile with resources used as predicates and rdf:Statement reifications")
+def reified_profile(ctx):
+    person = klass(
+        EX + "Person",
+        3,
+        reified=[
+            relation(EX + "Link", EX + "Org", 2, kind=ReificationKind.resource_as_predicate),
+            relation(EX + "knows", EX + "Person", 1, kind=ReificationKind.rdf_statement),
+        ],
+    )
+    run = profile_run(person)
+    kinds = [ReificationKind.rdf_statement, ReificationKind.resource_as_predicate]
+    ctx["run"] = run.model_copy(update={"graphs": [run.graphs[0].model_copy(update={"reification_kinds": kinds})]})
+
+
+@then("the graph summary names both kinds")
+def summary_names_kinds(ctx):
+    summary = soup(ctx).select_one("section[id^=graph-] > p.note").get_text(" ")
+    assert "resource as predicate" in summary and "RDF statement" in summary
+
+
+@then("each subject class shows its reified relations")
+def class_shows_relations(ctx):
+    text = soup(ctx).select_one("details.cls").get_text(" ")
+    assert "Reified relations" in text and "ex:Link" in text and "ex:knows" in text

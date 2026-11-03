@@ -17,6 +17,12 @@ GOLDEN = TEST_DATA / "golden"
 SCANNED_PROFILE = TEST_DATA / "profiles" / "scanned-profile.json"
 SCANNED_GOLDEN = GOLDEN / "scanned"
 SCANNED_FORMATS = ("doc", "pitfalls")
+# The reification sample (singleton-property-pattern P-15): collected in memory, never loaded in Oxigraph.
+REIFIED_SOURCE = TEST_DATA / "reifications-source.ttl"
+REIFIED_PROFILE = TEST_DATA / "profiles" / "reified-profile.json"
+REIFIED_GOLDEN = GOLDEN / "reified"
+REIFIED_FORMATS = ("doc", "pattern", "puml", "shex", "shacl")
+REIFIED_GRAPH = "http://example.org/reifications"
 # The columns of the pattern schema's CSV files (llm-schema-split DEC-4, DEC-5): the spec's lists, typed in by hand.
 PATTERNS_COLUMNS = (
     "graph block owner path depth property targets target_kinds ending instances subjects triples per_min per_max "
@@ -33,6 +39,57 @@ RDFS = "http://www.w3.org/2000/01/rdf-schema#"
 DCT = "http://purl.org/dc/terms/"
 LEXVO = "http://lexvo.org/ontology#"
 VBAP = "http://publications.europa.eu/ontology/vbap#"
+
+
+# Named facts of the reification sample (design §C, §D), typed in by hand from `reifications-source.ttl`.
+REIFIED_PERSON = "http://example.org/Person"
+# ex:Person's reified relations in profile order: (kind, predicate, object class, statements, reifier properties).
+SOURCE_REIFIER = (("http://purl.org/dc/terms/source", 1),)
+REIFIED_PERSON_RELATIONS = (
+    ("resource_as_predicate", "http://example.org/Link", "http://example.org/Org", 2,
+     (("http://www.w3.org/1999/02/22-rdf-syntax-ns#singletonPropertyOf", 2),
+      ("http://www.w3.org/ns/prov#wasAttributedTo", 1))),
+    ("resource_as_predicate", "http://example.org/Procedure", None, 2, ()),
+    ("resource_as_predicate", "http://example.org/Procedure", "http://example.org/Org", 1, ()),
+    ("owl_axiom", "http://example.org/knows", "http://example.org/Person", 1, SOURCE_REIFIER),
+    ("rdf_statement", "http://example.org/knows", "http://example.org/Person", 1, SOURCE_REIFIER),
+    ("negative_property_assertion", "http://example.org/worksFor", "http://example.org/Org", 1, ()),
+)  # fmt: skip
+# The classes the machinery would add (every instance a reifier or a statement): none is profiled.
+REIFIED_HIDDEN_CLASSES = (
+    "http://example.org/Link",
+    "http://example.org/Procedure",
+    "http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement",
+    "http://www.w3.org/2002/07/owl#Axiom",
+    "http://www.w3.org/2002/07/owl#NegativePropertyAssertion",
+    "http://www.nanopub.org/nschema#Nanopublication",
+    "http://www.w3.org/ns/prov#Association",
+    "http://www.w3.org/ns/dcat#Relationship",
+    "http://schema.org/OrganizationRole",
+    "http://wikiba.se/ontology#Statement",
+    "http://www.cidoc-crm.org/cidoc-crm/PC14_carried_out_by",
+)
+REIFIED_KINDS = (
+    "blank_nary", "cidoc_property_of_property", "dcat_qualified", "graph_statement", "nanopublication",
+    "negative_property_assertion", "owl_axiom", "prov_qualified", "rdf_statement", "resource_as_predicate",
+    "schema_role", "structured_value", "triple_term", "wikibase_statement",
+)  # fmt: skip
+# The stage 3 relations, one per kind: (subject class, kind, predicate, object class, reifier property).
+_EX, _PROV = "http://example.org/", "http://www.w3.org/ns/prov#"
+REIFIED_STAGE3_RELATIONS = (
+    (_EX + "Run", "prov_qualified", _PROV + "qualifiedAssociation", _EX + "Team", _PROV + "hadRole"),
+    (_EX + "Dataset", "dcat_qualified", "http://www.w3.org/ns/dcat#qualifiedRelation", _EX + "Archive",
+     "http://www.w3.org/ns/dcat#hadRole"),
+    (_EX + "Worker", "schema_role", "http://schema.org/affiliation", _EX + "Firm", "http://schema.org/startDate"),
+    (_EX + "Item", "wikibase_statement", _EX + "claimP1", _EX + "Place", _EX + "rank"),
+    (_EX + "Event", "cidoc_property_of_property", "http://www.cidoc-crm.org/cidoc-crm/PC14_carried_out_by",
+     _EX + "Actor", _EX + "note"),
+)  # fmt: skip
+# The count-only kinds: kind -> occurrences (one ex:r1 reifier, the graph describing itself, two nanopublication heads).
+REIFIED_COUNTS = (("graph_statement", 1), ("nanopublication", 2), ("triple_term", 1))
+# Typed only rdf:Property and used once: stays an ordinary property of ex:Org.
+REIFIED_ORDINARY_PREDICATE = "http://example.org/legacy"
+REIFIED_ORDINARY_OWNER = "http://example.org/Org"
 
 
 @dataclass(frozen=True)

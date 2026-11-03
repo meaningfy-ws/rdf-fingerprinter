@@ -1,0 +1,31 @@
+# id: owl_axiom
+# title: OWL axiom annotation (owl:Axiom)
+# family: statement_identity
+# A resource of owl:annotatedSource, owl:annotatedProperty and owl:annotatedTarget triples.
+# REIFY owl_axiom probe
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+ASK { $graph_open ?r owl:annotatedSource ?s ; owl:annotatedProperty ?p ; owl:annotatedTarget ?o . $graph_close }
+# REIFY owl_axiom relations
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT ?subjectClass ?predicate ?objectClass (COUNT(DISTINCT ?r) AS ?statements) WHERE {
+  $graph_open ?r owl:annotatedSource ?s ; owl:annotatedProperty ?predicate ; owl:annotatedTarget ?o . ?s a ?subjectClass .
+  OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY owl_axiom reifier-properties
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?r) AS ?reifiers) WHERE {
+  $graph_open ?r owl:annotatedSource ?s ; owl:annotatedProperty ?predicate ; owl:annotatedTarget ?o . ?r ?reifierProperty ?v .
+  FILTER(?reifierProperty NOT IN (owl:annotatedSource, owl:annotatedProperty, owl:annotatedTarget, rdf:type)) ?s a ?subjectClass .
+  OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
+# REIFY owl_axiom hidden
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT DISTINCT ?term WHERE { $graph_open
+  { VALUES ?term { owl:Axiom owl:annotatedSource owl:annotatedProperty owl:annotatedTarget } }
+  UNION { ?r owl:annotatedSource ?s ; owl:annotatedProperty ?p ; owl:annotatedTarget ?o . ?r a ?term .
+          FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?x owl:annotatedSource ?s2 ; owl:annotatedProperty ?p2 ; owl:annotatedTarget ?o2 . } } }
+  $graph_close }

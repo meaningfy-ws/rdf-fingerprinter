@@ -8,6 +8,7 @@ import urllib.error
 from pytest_bdd import given, parsers, then, when
 from rdflib import Graph, Literal, URIRef
 
+from fingerprint.adapters.reification_catalogue import packaged_templates
 from fingerprint.adapters.sparql import PermanentError, QueryTimeout, query_name
 from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.settings import UsageError, load_config_file, resolve_settings
@@ -41,7 +42,7 @@ def fingerprint(ctx, **cli):
     settings = resolve_settings(
         cli={**ctx["cli"], **cli}, env=ctx["env"], selected_graphs=ctx["selected"], config=ctx["config"]
     )
-    return collect("http://fake/sparql", settings, ctx["fake"])
+    return collect("http://fake/sparql", settings, ctx["fake"], templates=packaged_templates())
 
 
 def graph(run, iri=None):

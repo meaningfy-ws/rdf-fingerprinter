@@ -15,6 +15,7 @@ from tests.bdd.steps.filters import *  # noqa: F403
 from tests.bdd.steps.pattern import *  # noqa: F403
 from tests.bdd.steps.pitfalls import *  # noqa: F403
 from tests.bdd.steps.prefixes import *  # noqa: F403
+from tests.bdd.steps.reifications import *  # noqa: F403
 from tests.bdd.steps.report import *  # noqa: F403
 from tests.bdd.steps.representations import *  # noqa: F403
 from tests.bdd.steps.shex import *  # noqa: F403

@@ -4,10 +4,25 @@ from datetime import datetime
 
 import pytest
 
+from fingerprint.adapters.profile_file import load_profile
 from fingerprint.domain.profile import ProfileRun
 from tests.builders import klass, literals, profile_run, prop
 from tests.refresh_sample_data import refreshed
-from tests.sample_data import CONTINENTS, TREATIES, differences, same_profile
+from tests.sample_data import (
+    CONTINENTS,
+    REIFIED_COUNTS,
+    REIFIED_HIDDEN_CLASSES,
+    REIFIED_KINDS,
+    REIFIED_ORDINARY_OWNER,
+    REIFIED_ORDINARY_PREDICATE,
+    REIFIED_PERSON,
+    REIFIED_PERSON_RELATIONS,
+    REIFIED_PROFILE,
+    REIFIED_STAGE3_RELATIONS,
+    TREATIES,
+    differences,
+    same_profile,
+)
 
 NAME = "http://example.org/name"
 AGE = "http://example.org/age"
@@ -86,3 +101,25 @@ def test_the_stored_sample_profile_agrees_with_the_named_facts(facts, sample_ana
         for fact in facts.classes:
             seen = {p.property: (p.min, p.max) for p in classes[fact.iri].property_partitions}
             assert seen == {p.iri: (p.min, p.max) for p in fact.properties}, (graph.graph, fact.iri)
+
+
+def test_the_stored_reified_profile_agrees_with_the_named_facts():
+    (graph,) = load_profile(REIFIED_PROFILE).graphs
+    classes = {c.class_iri: c for c in graph.class_partitions}
+    assert list(graph.reification_kinds) == list(REIFIED_KINDS)
+    assert {c.kind: c.count for c in graph.reification_counts} == dict(REIFIED_COUNTS)
+    assert not set(REIFIED_HIDDEN_CLASSES) & set(classes)
+    relations = classes[REIFIED_PERSON].reified_relations
+    assert [
+        (r.kind, r.property, r.object_class, r.statements, tuple((p.property, p.reifiers) for p in r.reifier_properties or ()))
+        for r in relations
+    ] == list(REIFIED_PERSON_RELATIONS)
+    assert not classes[REIFIED_PERSON].property_partitions
+    found = {
+        (c.class_iri, r.kind, r.property, r.object_class, p.property)
+        for c in classes.values()
+        for r in c.reified_relations or ()
+        for p in r.reifier_properties or ()
+    }
+    assert set(REIFIED_STAGE3_RELATIONS) <= found
+    assert REIFIED_ORDINARY_PREDICATE in {p.property for p in classes[REIFIED_ORDINARY_OWNER].property_partitions}

@@ -1,0 +1,14 @@
+# id: nanopublication
+# title: Nanopublication
+# family: statement_identity
+# Counted only: assertion, provenance and publication info live in their own graphs (P-17).
+# REIFY nanopublication probe
+PREFIX np: <http://www.nanopub.org/nschema#>
+ASK { $graph_open ?np np:hasAssertion ?a . $graph_close }
+# REIFY nanopublication count
+PREFIX np: <http://www.nanopub.org/nschema#>
+SELECT (COUNT(*) AS ?count) WHERE {
+  { SELECT DISTINCT ?np WHERE { $graph_open ?np np:hasAssertion ?a . $graph_close } } }
+# REIFY nanopublication hidden
+PREFIX np: <http://www.nanopub.org/nschema#>
+SELECT DISTINCT ?term WHERE { VALUES ?term { np:Nanopublication np:hasAssertion np:hasProvenance np:hasPublicationInfo } }

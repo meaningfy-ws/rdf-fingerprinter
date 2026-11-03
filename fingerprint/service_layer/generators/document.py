@@ -17,6 +17,7 @@ from fingerprint.domain.profile import (
     PropertyAnalytics,
     PropertyKind,
 )
+from fingerprint.domain.reifications import reification_note, relation_view
 from fingerprint.domain.views import (
     Caveats,
     CollectionSection,
@@ -193,6 +194,7 @@ class DocumentGenerator(Generator):
             parents=[ParentReference(iri=p.parent, label=self.label(p.parent), source=p.source) for p in parents],
             properties=[p for g in groups for p in g.properties or []],
             property_groups=groups,
+            reified_relations=[v for r in cls.reified_relations or [] if (v := relation_view(r, self.label)) is not None],
             badges=self.badges(graph, cls.class_iri),
         )
 
@@ -221,6 +223,7 @@ class DocumentGenerator(Generator):
             empty=not graph.class_partitions and not any(t.classes for t in graph.excluded_terms or []),
             classes=ordered,
             taxonomy=self.taxonomy(ordered),
+            reification_note=reification_note(graph.reification_kinds, graph.reification_counts),
         )
 
     def taxonomy(self, classes: list[DocumentClass]) -> list[TaxonomyNode]:

@@ -1,0 +1,9 @@
+# id: graph_statement
+# title: Statement about a named graph
+# family: statement_identity
+# Counted only: a named graph IRI is the subject of triples in the profiled graph (P-17).
+# REIFY graph_statement probe
+ASK { $graph_open ?g ?p ?o . $graph_close GRAPH ?g { ?a ?b ?c } }
+# REIFY graph_statement count
+SELECT (COUNT(*) AS ?count) WHERE {
+  { SELECT DISTINCT ?g WHERE { $graph_open ?g ?p ?o . $graph_close GRAPH ?g { ?a ?b ?c } } } }

@@ -1,0 +1,31 @@
+# id: negative_property_assertion
+# title: OWL negative property assertion
+# family: statement_identity
+# A resource of owl:sourceIndividual and owl:assertionProperty triples (the target is optional).
+# REIFY negative_property_assertion probe
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+ASK { $graph_open ?r owl:sourceIndividual ?s ; owl:assertionProperty ?p . $graph_close }
+# REIFY negative_property_assertion relations
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT ?subjectClass ?predicate ?objectClass (COUNT(DISTINCT ?r) AS ?statements) WHERE {
+  $graph_open ?r owl:sourceIndividual ?s ; owl:assertionProperty ?predicate . ?s a ?subjectClass .
+  OPTIONAL { ?r owl:targetIndividual ?o . ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY negative_property_assertion reifier-properties
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?r) AS ?reifiers) WHERE {
+  $graph_open ?r owl:sourceIndividual ?s ; owl:assertionProperty ?predicate . ?r ?reifierProperty ?v .
+  FILTER(?reifierProperty NOT IN (owl:sourceIndividual, owl:assertionProperty, owl:targetIndividual, owl:targetValue, rdf:type)) ?s a ?subjectClass .
+  OPTIONAL { ?r owl:targetIndividual ?o . ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
+# REIFY negative_property_assertion hidden
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT DISTINCT ?term WHERE { $graph_open
+  { VALUES ?term { owl:NegativePropertyAssertion owl:sourceIndividual owl:assertionProperty owl:targetIndividual owl:targetValue } }
+  UNION { ?r owl:sourceIndividual ?s ; owl:assertionProperty ?p . ?r a ?term .
+          FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?x owl:sourceIndividual ?s2 ; owl:assertionProperty ?p2 . } } }
+  $graph_close }

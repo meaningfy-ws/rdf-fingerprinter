@@ -55,7 +55,7 @@ def test_aggregate_checks_count_zero_on_a_clean_graph_and_send_no_example_query(
     fake.add("ex:a", "ex:knows", "ex:b", graph=DATA)
     fake.add("ex:knows", "a", OWL + "ObjectProperty", graph=DATA)
     found = results(run(fake, selected_graphs=[DATA]), DATA)
-    for check_id in ("p19_multiple_domains_or_ranges", "p35_untyped_property", "x_individual_as_predicate"):
+    for check_id in ("p19_multiple_domains_or_ranges", "p35_untyped_property"):
         assert found[check_id].count == 0 and found[check_id].examples == []
         assert not [q for q in fake.sent("PITFALL") if q.startswith(f"# PITFALL {check_id} examples")]
 

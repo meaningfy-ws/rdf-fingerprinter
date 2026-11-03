@@ -1,0 +1,107 @@
+# One instance of each reification kind of stages 1 to 3 (singleton-property-pattern design §C, §D).
+# Collected in memory into the named graph http://example.org/reifications, never loaded in Oxigraph.
+@prefix ex:   <http://example.org/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dct:  <http://purl.org/dc/terms/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix schema: <http://schema.org/> .
+@prefix wikibase: <http://wikiba.se/ontology#> .
+@prefix crm:  <http://www.cidoc-crm.org/cidoc-crm/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix skosxl: <http://www.w3.org/2008/05/skos-xl#> .
+
+# Ordinary instances.
+ex:alice a ex:Person .
+ex:bob   a ex:Person .
+ex:carol a ex:Person .
+ex:acme  a ex:Org .
+
+# resource_as_predicate: ex:rel1 and ex:rel2 are singleton predicates typed ex:Link; the non-standard
+# rdf:singletonPropertyOf is no normalisation, only a reifier property (DEC-12).
+ex:alice ex:rel1 ex:acme .
+ex:bob   ex:rel2 ex:acme .
+ex:rel1 rdf:singletonPropertyOf ex:worksFor ; a ex:Link ; prov:wasAttributedTo ex:hr .
+ex:rel2 rdf:singletonPropertyOf ex:worksFor ; a ex:Link .
+
+# rdf_statement: ex:st1 reifies "alice knows bob".
+ex:st1 a rdf:Statement ; rdf:subject ex:alice ; rdf:predicate ex:knows ; rdf:object ex:bob ;
+       dct:source ex:survey .
+
+# owl_axiom: an annotated axiom about "bob knows alice".
+ex:ax1 a owl:Axiom ; owl:annotatedSource ex:bob ; owl:annotatedProperty ex:knows ;
+       owl:annotatedTarget ex:alice ; dct:source ex:survey .
+
+# negative_property_assertion: "bob does not work for acme".
+ex:npa1 a owl:NegativePropertyAssertion ; owl:sourceIndividual ex:bob ;
+        owl:assertionProperty ex:worksFor ; owl:targetIndividual ex:acme .
+
+# resource_as_predicate: ex:performs1 is an ex:Procedure (a non-property type) used as a predicate.
+ex:carol ex:performs1 ex:acme .
+ex:performs1 a ex:Procedure .
+# ... also with a literal object and with an object that has no type: the statements still count (no class for them).
+ex:carol ex:performs2 "pending" .
+ex:performs2 a ex:Procedure .
+ex:carol ex:performs3 ex:untyped-thing .
+ex:performs3 a ex:Procedure .
+
+# An ordinary predicate typed only rdf:Property, used once: it must stay an ordinary property.
+ex:acme ex:legacy "old" .
+ex:legacy a rdf:Property .
+
+# triple_term: the object is an IRI standing in for a triple term (rdflib cannot parse RDF 1.2).
+ex:r1 rdf:reifies ex:tripleTermStandIn .
+
+# graph_statement: the graph describes itself, so a named graph is the subject of triples.
+<http://example.org/reifications> dct:source ex:survey .
+
+# nanopublication: two heads whose assertion, provenance and publication info would live in their own graphs.
+@prefix np: <http://www.nanopub.org/nschema#> .
+ex:np1 a np:Nanopublication ; np:hasAssertion ex:np1-assertion ;
+       np:hasProvenance ex:np1-provenance ; np:hasPublicationInfo ex:np1-info .
+ex:np2 a np:Nanopublication ; np:hasAssertion ex:np2-assertion ;
+       np:hasProvenance ex:np2-provenance ; np:hasPublicationInfo ex:np2-info .
+
+# prov_qualified: a run qualified by an association with a team, which has a role.
+ex:run1 a ex:Run ; prov:qualifiedAssociation ex:assoc1 .
+ex:assoc1 a prov:Association ; prov:agent ex:team1 ; prov:hadRole ex:leader .
+ex:team1 a ex:Team .
+
+# dcat_qualified: a dataset qualified by a relation to another dataset, with a role.
+ex:ds1 a ex:Dataset ; dcat:qualifiedRelation ex:rel-q1 .
+ex:rel-q1 a dcat:Relationship ; dct:relation ex:ds2 ; dcat:hadRole ex:derivedFrom .
+ex:ds2 a ex:Archive .
+
+# schema_role: a worker whose affiliation goes through a role node that repeats the affiliation.
+ex:worker1 a ex:Worker ; schema:affiliation ex:role1 .
+ex:role1 a schema:OrganizationRole ; schema:affiliation ex:firm1 ; schema:startDate "2020-01-01" .
+ex:firm1 a ex:Firm .
+
+# wikibase_statement: an item with a claim statement; the property entity declares claim and value predicates.
+ex:item1 a ex:Item ; ex:claimP1 ex:wst1 .
+ex:wst1 a wikibase:Statement ; ex:valueP1 ex:place1 ; ex:rank "normal" .
+ex:place1 a ex:Place .
+ex:P1 wikibase:claim ex:claimP1 ; wikibase:statementProperty ex:valueP1 .
+
+# cidoc_property_of_property: a property class instance with a domain and a range.
+ex:pc1 a crm:PC14_carried_out_by ; crm:P01_has_domain ex:event1 ; crm:P02_has_range ex:actor1 ; ex:note "n" .
+ex:event1 a ex:Event .
+ex:actor1 a ex:Actor .
+
+# Ordinary data (DEC-13): a concept with a SKOS-XL preferred label is no reification.
+ex:concept1 a skos:Concept ; skosxl:prefLabel ex:label1 .
+ex:label1 a skosxl:Label ; skosxl:literalForm "thing"@en ; dct:source ex:survey .
+
+# blank_nary: a project with a role through an untyped blank node that is referenced once.
+ex:project1 a ex:Project ; ex:role [ ex:agent ex:person9 ; ex:since "2021" ] .
+
+# structured_value: a building with a height, a node with an rdf:value and a unit.
+ex:building1 a ex:Building ; ex:height [ rdf:value 12 ; ex:unit ex:metre ] .
+
+# Ordinary data: a typed rdf:value node is an instance of its class (P-22).
+ex:item2 a ex:Entry ; ex:code ex:notation1 .
+ex:notation1 a ex:Notation ; rdf:value "A1" .
+
+# Ordinary data: a typed blank node is an instance of its class, no reification.
+ex:office1 a ex:Office ; ex:address [ a ex:Address ; ex:street "Main St" ] .

@@ -96,11 +96,6 @@ FIXTURES = {
     "p38_no_ontology_declaration": ("ex:A a owl:Class .", "ex:o a owl:Ontology .", OWL + "Ontology"),
     "p41_no_license": ("ex:o a owl:Ontology .", "ex:o a owl:Ontology ; dcterms:license <http://x.org/l> .", EX + "o"),
     "x_punning_class_and_property": ("ex:C a owl:Class . ex:i a ex:C . ex:s ex:C ex:o .", "ex:i a ex:C .", EX + "C"),
-    "x_individual_as_predicate": (
-        "ex:r a ex:Rel . ex:s ex:r ex:o .",
-        "ex:r a owl:ObjectProperty . ex:s ex:r ex:o .",
-        EX + "r",
-    ),
     "x_domain_violation": (
         "ex:p rdfs:domain ex:A . ex:s ex:p ex:o .",
         "ex:p rdfs:domain ex:A . ex:s ex:p ex:o ; a ex:A .",

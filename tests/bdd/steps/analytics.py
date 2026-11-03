@@ -6,7 +6,7 @@ from pytest_bdd import given, parsers, then, when
 from fingerprint.adapters.profile_file import load_profile, save_profile
 from fingerprint.domain.analytics import analyse
 from fingerprint.domain.profile import ClassProfile, CoTypeCount, ValueCount
-from tests.builders import klass, literals, profile_run, prop, resources
+from tests.builders import klass, literals, profile_run, prop, relation, resources
 from tests.fakes import EX
 
 PREFIXES = {
@@ -313,3 +313,23 @@ def property_not_exact(ctx):
 def no_statistics(ctx):
     p = analysed_property(ctx)
     assert (p.min, p.max, p.mean, p.confidence, p.cardinality_label) == (None,) * 5
+
+
+# --- reified relations ---
+
+
+@given(parsers.parse('a profile where class "{cls}" has two reified relations'))
+def two_relations(ctx, cls):
+    ctx["relations"] = [relation(EX + "r1", EX + "B", 3, (EX + "source", 3)), relation(EX + "r2", None, 1)]
+    change_class(ctx, cls, reified_relations=ctx["relations"])
+
+
+@then(parsers.parse('the class analytics of "{cls}" list both relations'))
+def lists_both_relations(ctx, cls):
+    assert analysed_class(ctx, cls).reified_relations == ctx["relations"]
+
+
+@then("its property analytics include neither")
+def no_property_for_relations(ctx):
+    properties = {p.property for p in analysed_class(ctx, "ex:A").property_partitions or []}
+    assert not properties & {EX + "r1", EX + "r2"}

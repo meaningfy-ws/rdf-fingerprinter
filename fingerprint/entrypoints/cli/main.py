@@ -56,6 +56,9 @@ def _choice(enum: type[Enum]) -> click.Choice:
 @click.option("--object-types", "object_type_scope", type=_choice(ObjectTypeScope))
 @click.option("--completeness/--no-completeness", "completeness_check", default=None, help="property presence check")
 @click.option("--graph-stats/--no-graph-stats", "graph_statistics", default=None, help="graph totals (full scans)")
+@click.option(
+    "--reifications/--no-reifications", "reifications", default=None, help="find reified relations and hide their machinery"
+)
 @click.option("--timeout", "timeout_seconds", type=int, help="per-query timeout in seconds")
 @click.option("--concurrency", type=int, help="classes profiled at once")
 @click.option("--graph", "graphs", multiple=True, help="graph to profile (repeatable; empty string = default graph)")

@@ -608,3 +608,21 @@ Feature: Publishing a fingerprint as an application profile
       When the pattern schema is generated from it with "--max-classes 1"
       Then each patterns Markdown file has one block, the largest named group of its graph
       And each patterns CSV file has one row of depth 0
+
+  Rule: Reified relations are shown per class
+
+    Scenario: Section present
+      Given a profile where class "ex:A" has a reified relation "ex:isRelatedTo" to "ex:B"
+      When the profile document is generated
+      Then the entry of "ex:A" has a reified-relations section naming "ex:isRelatedTo", "ex:B" and the count
+
+    Scenario: No section when none
+      Given a profile with no reified relations
+      When any output is generated
+      Then it equals the output for the same profile before this change
+
+    Scenario: Shapes note reifications without constraining them
+      Given a profile where class "ex:A" has a reified relation "ex:isRelatedTo" to "ex:B"
+      When SHACL shapes and ShExC are generated
+      Then the shape of "ex:A" notes "ex:isRelatedTo" to "ex:B"
+      And it has no property shape or triple constraint for the relation or its reifier properties

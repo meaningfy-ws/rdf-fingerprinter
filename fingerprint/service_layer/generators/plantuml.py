@@ -20,6 +20,7 @@ from fingerprint.domain.profile import (
     PropertyAnalytics,
     PropertyKind,
 )
+from fingerprint.domain.reifications import relation_view
 from fingerprint.domain.views import (
     DiagramBox,
     DiagramClass,
@@ -100,7 +101,14 @@ class PlantumlGenerator(Generator):
                 arrow = "--|>" if parent.source == ParentSource.declared else "..|>"
                 generalisations.append(f"{alias} {arrow} {self.alias(parent.parent)}")
                 self._links.append((cls.class_iri, parent.parent))
-        return DiagramClass(alias=alias, label=self.label(cls.class_iri), members=properties, generalisations=generalisations)
+        relations = [v for r in cls.reified_relations or [] if (v := relation_view(r, self.written)) is not None]
+        return DiagramClass(
+            alias=alias,
+            label=self.label(cls.class_iri),
+            members=properties,
+            generalisations=generalisations,
+            reified_relations=relations,
+        )
 
     def end_graph(self, graph: GraphAnalytics, classes: list[DiagramClass]) -> None:
         """Queue the graph's overview and module files (see `outputs`)."""

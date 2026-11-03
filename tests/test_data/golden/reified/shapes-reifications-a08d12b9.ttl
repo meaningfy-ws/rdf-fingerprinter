@@ -1,0 +1,286 @@
+# SHACL shapes inferred by rdf-fingerprinter — http://example.org/reifications
+
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ex: <http://example.org/> .
+@prefix ex-shape: <http://example.org/shape/> .
+@prefix fp: <https://data.meaningfy.ws/fingerprint/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix skos-shape: <http://www.w3.org/2004/02/skos/core/shape/> .
+@prefix skosxl: <http://www.w3.org/2008/05/skos-xl#> .
+@prefix skosxl-shape: <http://www.w3.org/2008/05/skos-xl/shape/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex-shape:Actor a sh:NodeShape ;
+    sh:targetClass ex:Actor ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+.
+
+ex-shape:Address a sh:NodeShape ;
+    sh:targetClass ex:Address ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property ex-shape:Address-ex-street ;
+.
+
+ex-shape:Address-ex-street a sh:PropertyShape ;
+    sh:path ex:street ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+ex-shape:Archive a sh:NodeShape ;
+    sh:targetClass ex:Archive ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+.
+
+ex-shape:Building a sh:NodeShape ;
+    sh:targetClass ex:Building ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    rdfs:comment "Reified relation: ~> ex:height (:?) 1 statement via structured_value [reifiers: ex:unit 1]" ;
+    sh:property ex-shape:Building-ex-height ;
+.
+
+ex-shape:Building-ex-height a sh:PropertyShape ;
+    sh:path ex:height ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:BlankNode ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+ex-shape:Dataset a sh:NodeShape ;
+    sh:targetClass ex:Dataset ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    rdfs:comment "Reified relation: ~> dcat:qualifiedRelation (:ex:Archive) 1 statement via dcat_qualified [reifiers: dcat:hadRole 1]" ;
+.
+
+ex-shape:Entry a sh:NodeShape ;
+    sh:targetClass ex:Entry ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property ex-shape:Entry-ex-code ;
+.
+
+ex-shape:Entry-ex-code a sh:PropertyShape ;
+    sh:path ex:code ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class ex:Notation ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+ex-shape:Event a sh:NodeShape ;
+    sh:targetClass ex:Event ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    rdfs:comment "Reified relation: ~> crm:PC14_carried_out_by (:ex:Actor) 1 statement via cidoc_property_of_property [reifiers: ex:note 1]" ;
+.
+
+ex-shape:Firm a sh:NodeShape ;
+    sh:targetClass ex:Firm ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+.
+
+ex-shape:Item a sh:NodeShape ;
+    sh:targetClass ex:Item ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    rdfs:comment "Reified relation: ~> ex:claimP1 (:ex:Place) 1 statement via wikibase_statement [reifiers: ex:rank 1]" ;
+.
+
+ex-shape:Notation a sh:NodeShape ;
+    sh:targetClass ex:Notation ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property ex-shape:Notation-rdf-value ;
+.
+
+ex-shape:Notation-rdf-value a sh:PropertyShape ;
+    sh:path rdf:value ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+ex-shape:Office a sh:NodeShape ;
+    sh:targetClass ex:Office ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property ex-shape:Office-ex-address ;
+.
+
+ex-shape:Office-ex-address a sh:PropertyShape ;
+    sh:path ex:address ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class ex:Address ;
+    sh:nodeKind sh:BlankNode ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+ex-shape:Org a sh:NodeShape ;
+    sh:targetClass ex:Org ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property ex-shape:Org-ex-legacy ;
+.
+
+ex-shape:Org-ex-legacy a sh:PropertyShape ;
+    sh:path ex:legacy ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+ex-shape:Person a sh:NodeShape ;
+    sh:targetClass ex:Person ;
+    fp:instances 3 ;
+    fp:observedInstances 3 ;
+    fp:precisionMode "exact" ;
+    rdfs:comment "Reified relation: ~> ex:Link (:ex:Org) 2 statements via resource_as_predicate [reifiers: rdf:singletonPropertyOf 2, prov:wasAttributedTo 1]" ;
+    rdfs:comment "Reified relation: ~> ex:Procedure (:?) 2 statements via resource_as_predicate" ;
+    rdfs:comment "Reified relation: ~> ex:Procedure (:ex:Org) 1 statement via resource_as_predicate" ;
+    rdfs:comment "Reified relation: ~> ex:knows (:ex:Person) 1 statement via owl_axiom [reifiers: dcterms:source 1]" ;
+    rdfs:comment "Reified relation: ~> ex:knows (:ex:Person) 1 statement via rdf_statement [reifiers: dcterms:source 1]" ;
+    rdfs:comment "Reified relation: ~> ex:worksFor (:ex:Org) 1 statement via negative_property_assertion" ;
+.
+
+ex-shape:Place a sh:NodeShape ;
+    sh:targetClass ex:Place ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+.
+
+ex-shape:Project a sh:NodeShape ;
+    sh:targetClass ex:Project ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    rdfs:comment "Reified relation: ~> ex:role (:?) 1 statement via blank_nary [reifiers: ex:agent 1, ex:since 1]" ;
+    sh:property ex-shape:Project-ex-role ;
+.
+
+ex-shape:Project-ex-role a sh:PropertyShape ;
+    sh:path ex:role ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:BlankNode ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+ex-shape:Run a sh:NodeShape ;
+    sh:targetClass ex:Run ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    rdfs:comment "Reified relation: ~> prov:qualifiedAssociation (:ex:Team) 1 statement via prov_qualified [reifiers: prov:hadRole 1]" ;
+.
+
+ex-shape:Team a sh:NodeShape ;
+    sh:targetClass ex:Team ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+.
+
+ex-shape:Worker a sh:NodeShape ;
+    sh:targetClass ex:Worker ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    rdfs:comment "Reified relation: ~> schema:affiliation (:ex:Firm) 1 statement via schema_role [reifiers: schema:startDate 1]" ;
+    sh:property ex-shape:Worker-schema-affiliation ;
+.
+
+ex-shape:Worker-schema-affiliation a sh:PropertyShape ;
+    sh:path schema:affiliation ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class schema:OrganizationRole ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skos-shape:Concept a sh:NodeShape ;
+    sh:targetClass skos:Concept ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property skos-shape:Concept-skosxl-prefLabel ;
+.
+
+skos-shape:Concept-skosxl-prefLabel a sh:PropertyShape ;
+    sh:path skosxl:prefLabel ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class skosxl:Label ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skosxl-shape:Label a sh:NodeShape ;
+    sh:targetClass skosxl:Label ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property skosxl-shape:Label-dcterms-source ;
+    sh:property skosxl-shape:Label-skosxl-literalForm ;
+.
+
+skosxl-shape:Label-dcterms-source a sh:PropertyShape ;
+    sh:path dcterms:source ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+skosxl-shape:Label-skosxl-literalForm a sh:PropertyShape ;
+    sh:path skosxl:literalForm ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype rdf:langString ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.

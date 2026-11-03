@@ -202,6 +202,17 @@ classes:
       label: { required: true }
       members: { range: DiagramMember, multivalued: true, inlined_as_list: true }
       generalisations: { multivalued: true, description: "Generalisation lines, as PlantUML." }
+      reified_relations: { range: ReifiedRelationView, multivalued: true, inlined_as_list: true }
+
+  ReifiedRelationView:
+    description: One reified relation of a class, as rendered text.
+    attributes:
+      kind: { required: true, description: "The reification kind." }
+      property: { required: true, description: "The generic predicate, or unnamed." }
+      object_class: { description: "The object class; empty when untyped." }
+      statements: { range: integer, required: true }
+      reifier_text: { description: "The reifier properties, as text." }
+      text: { required: true, description: "The relation in the pattern notation (singleton-property-pattern P-11), as every output prints it." }
 
   DiagramMember:
     description: An attribute line, or the target of an association (multiplicity, class alias and label).
@@ -283,6 +294,7 @@ classes:
       via_texts: { multivalued: true, description: "Each via link as `source-property`." }
       header: { description: "As written." }
       edges: { range: PatternEdge, multivalued: true, inlined_as_list: true }
+      reified_relations: { range: ReifiedRelationView, multivalued: true, inlined_as_list: true }
 
   GlossaryEntry:
     description: A term with its label or description line.
@@ -337,6 +349,7 @@ classes:
       label: { required: true }
       blank: { range: boolean }
       constraints: { range: ShexConstraint, multivalued: true, inlined_as_list: true }
+      reified_relations: { range: ReifiedRelationView, multivalued: true, inlined_as_list: true }
 
   ShexSchema:
     description: The enriched ShExC of one graph.
@@ -390,6 +403,7 @@ classes:
       empty: { range: boolean, required: true, description: "True when the graph has no class partitions." }
       classes: { range: DocumentClass, multivalued: true, inlined_as_list: true, description: "Grouped by namespace prefix, then by instances descending, then short name." }
       taxonomy: { range: TaxonomyNode, multivalued: true, inlined_as_list: true, description: "The root nodes of the class tree." }
+      reification_note: { description: "The reification kinds found in the graph and its triple-term count; absent when none." }
 
   TaxonomyNode:
     description: A class in the taxonomy view, with its popularity (pitfall-scans DEC-15).
@@ -419,6 +433,7 @@ classes:
       parents: { range: ParentReference, multivalued: true, inlined_as_list: true }
       properties: { range: DocumentProperty, multivalued: true, inlined_as_list: true, description: "Own, refined, inherited; each by subjects, confidence, short name." }
       property_groups: { range: DocumentPropertyGroup, multivalued: true, inlined_as_list: true }
+      reified_relations: { range: ReifiedRelationView, multivalued: true, inlined_as_list: true }
       badges: { range: DocumentBadge, multivalued: true, inlined_as_list: true, description: "Pitfall checks whose examples name this class." }
 
   DocumentPropertyGroup:

@@ -1,0 +1,11 @@
+@startuml
+title Class diagram inferred by rdf-fingerprinter — ex:reifications — skosxl
+hide empty members
+
+class "skosxl:Label" as C20 {
+  dcterms:source : resource [1]
+  skosxl:literalForm : rdf:langString [1]
+}
+
+
+@enduml

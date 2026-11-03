@@ -10,6 +10,9 @@ from fingerprint.domain.profile import (
     PrefixSource,
     ProfileRun,
     PropertyProfile,
+    ReificationKind,
+    ReifiedRelation,
+    ReifierProperty,
     TermAnnotation,
     ValueCount,
     ValuePartition,
@@ -190,3 +193,26 @@ def filter_runs(draw):
         graphs.append(base.model_copy(update={"term_annotations": notes}))
     run = builders.profile_run()
     return ProfileRun(settings=run.settings, graphs=graphs, namespaces=FILTER_TABLE)
+
+
+reifier_properties = st.builds(ReifierProperty, property=_FILTER_TERMS, reifiers=st.integers(0, 5))
+# A relation over the filter namespaces; its property and object class are sometimes absent (unnamed, untyped).
+reified_relations = st.builds(
+    ReifiedRelation,
+    property=st.one_of(st.none(), _FILTER_TERMS),
+    object_class=st.one_of(st.none(), _FILTER_TERMS),
+    kind=st.sampled_from(list(ReificationKind)),
+    statements=st.integers(0, 9),
+    reifier_properties=st.one_of(st.none(), st.lists(reifier_properties, max_size=3)),
+)
+# (subject class, relation) rows as the collection captures them, over the classes C0-C3.
+relation_rows = st.lists(st.tuples(st.sampled_from(_CLASSES), reified_relations), max_size=12)
+
+
+@st.composite
+def relation_runs(draw):
+    """A one-graph run whose classes carry reified relations, over the filter namespaces."""
+    iris = draw(st.lists(_FILTER_TERMS, unique=True, min_size=1, max_size=4))
+    classes = [builders.klass(iri, 1, reified=draw(st.lists(reified_relations, max_size=4))) for iri in iris]
+    run = builders.profile_run(*classes)
+    return run.model_copy(update={"namespaces": FILTER_TABLE})
