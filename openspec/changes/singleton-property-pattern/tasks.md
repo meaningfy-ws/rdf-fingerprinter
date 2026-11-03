@@ -58,7 +58,7 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## 8. Gate and release
 
-- [ ] 8.0 Hypothesis property tests for the new logic: relation attach and sort (P-6, P-7), the namespace filter on relations (P-10: none left in an excluded namespace; idempotent), `relation_view` (singular/plural, kind present)
+- [x] 8.0 Hypothesis property tests for the new logic: relation attach and sort (P-6, P-7), the namespace filter on relations (P-10: none left in an excluded namespace; idempotent), `relation_view` (singular/plural, kind present)
 - [ ] 8.1 `make check-all`
 - [ ] 8.2 `make oxigraph-load-test-data` + `make test-e2e`
 - [ ] 8.3 `make check-mutation` from a deleted `mutants/` (fresh stats), at or above the stored score; survivors get a test in the owning tier
@@ -67,7 +67,7 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## Roadmap
 
-- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 7.1 · [x] R.1 · [x] S.1 · [x] S.2 · [x] S.3 · [x] S.4 · [x] S.5 · [ ] 8.0 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 7.1 · [x] R.1 · [x] S.1 · [x] S.2 · [x] S.3 · [x] S.4 · [x] S.5 · [x] 8.0 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

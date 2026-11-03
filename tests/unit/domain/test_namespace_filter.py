@@ -31,7 +31,7 @@ from fingerprint.domain.profile import (
 from fingerprint.domain.views import FilterMatch, FilterOption, GeneratorOptions
 from fingerprint.domain.vocabulary import OWL, RDF, RDFS, SH
 from tests import builders
-from tests.unit.domain.strategies import FILTER_NAMESPACES, filter_runs
+from tests.unit.domain.strategies import FILTER_NAMESPACES, filter_runs, relation_runs
 
 EX = "http://example.org/"
 REL = EX + "rel/"
@@ -533,3 +533,29 @@ def test_a_property_keeps_its_value_types_unless_it_lost_an_object_class(run, ex
             assert [p.triples for p in prop_after.value_partitions or []] == [
                 p.triples for p in prop_before.value_partitions or []
             ]
+
+
+def relations_by_class(analytics):
+    return {c.class_iri: c.reified_relations or [] for g in analytics.graphs for c in g.class_partitions}
+
+
+@given(relation_runs(), excluded_sets)
+def test_no_relation_is_left_with_an_excluded_term_and_the_others_are_untouched(run, excluded):
+    before, table = analysed(run)
+    after = relations_by_class(exclude_terms(before, excluded, table))
+    for relations in after.values():
+        for relation in relations:
+            terms = [relation.property, relation.object_class, *(r.property for r in relation.reifier_properties or [])]
+            assert not any(t and is_excluded(t, excluded, table) for t in terms)
+    for iri, relations in relations_by_class(before).items():
+        for relation in (r for r in relations if iri in after):  # a class in an excluded namespace leaves with them
+            terms = [relation.property, relation.object_class, *(r.property for r in relation.reifier_properties or [])]
+            if not any(t and is_excluded(t, excluded, table) for t in terms):
+                assert relation in after[iri]
+
+
+@given(relation_runs(), excluded_sets)
+def test_filtering_relations_twice_is_filtering_once(run, excluded):
+    once = exclude_terms(*analysed(run)[:1], excluded, PrefixTable(run.namespaces))
+    twice = exclude_terms(once, excluded, PrefixTable(run.namespaces))
+    assert relations_by_class(twice) == relations_by_class(once)

@@ -121,7 +121,10 @@ def check_metadata(ctx, check_id, importance, scope, source):
     assert (check.importance, check.scope, check.source) == (importance, scope, source)
 
 
-@then("it holds 28 checks, each with a unique id, none of them x_individual_as_predicate, and every OOPS!-derived check's source names its pitfall code")
+@then(
+    "it holds 28 checks, each with a unique id, none of them x_individual_as_predicate, "
+    "and every OOPS!-derived check's source names its pitfall code"
+)
 def catalogue_size(ctx):
     ids = [c.check_id for c in ctx["checks"]]
     assert len(ids) == 28 == len(set(ids))

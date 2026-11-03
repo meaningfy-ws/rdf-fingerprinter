@@ -1,8 +1,11 @@
 """The shared text of a reified relation (singleton-property-pattern P-11)."""
 
+from hypothesis import given
+
 from fingerprint.domain.profile import ReificationCount, ReificationKind
 from fingerprint.domain.reifications import reification_note, relation_view
 from tests.builders import EX, relation
+from tests.unit.domain.strategies import reified_relations
 
 PROV = "http://www.w3.org/ns/prov#"
 
@@ -50,3 +53,18 @@ def test_the_note_names_the_kinds_and_each_count_when_any():
         "Reifications found: RDF statement, resource as predicate."
     )
     assert reification_note(None, None) is None
+
+
+@given(reified_relations)
+def test_the_notation_follows_the_relation_for_any_relation(rel):
+    view = relation_view(rel, lambda iri: "n:" + iri.rsplit("/", 1)[-1])
+    noun = "1 statement via" if rel.statements == 1 else f"{rel.statements} statements via"
+    assert view.text.startswith("~> ")
+    assert f" {noun} {ReificationKind(rel.kind).value}" in view.text
+    assert (" unnamed " in view.text) == (rel.property is None)
+    assert ("(:?)" in view.text) == (rel.object_class is None)
+    expected = ", ".join(f"n:{r.property.rsplit('/', 1)[-1]} {r.reifiers}" for r in rel.reifier_properties or [])
+    assert view.reifier_text == (expected or None)
+    assert (" [reifiers: " in view.text) == bool(expected)
+    if expected:
+        assert view.text.endswith(f"[reifiers: {expected}]")

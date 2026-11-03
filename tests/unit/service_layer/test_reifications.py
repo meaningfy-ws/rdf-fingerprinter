@@ -2,15 +2,19 @@
 
 from pathlib import Path
 
+from hypothesis import given
+from hypothesis import strategies as st
 from rdflib import URIRef
 
 from fingerprint.adapters.exceptions import PermanentError
 from fingerprint.adapters.reification_catalogue import packaged_templates
 from fingerprint.domain.profile import QueryKind, ReificationKind
-from fingerprint.service_layer.collection import collect
+from fingerprint.service_layer.collection import _Reifications, collect
 from fingerprint.service_layer.settings import resolve_settings
+from tests import builders
 from tests.fakes import EX, FakeSparql
 from tests.sample_data import REIFIED_KINDS
+from tests.unit.domain.strategies import _CLASSES, relation_rows
 
 GRAPH = EX + "reifications"
 SOURCE = Path(__file__).parents[2] / "test_data" / "reifications-source.ttl"
@@ -203,3 +207,18 @@ def test_relations_are_sorted_by_statements_then_predicate_then_object_class():
         fake.add("ex:small", p, o, GRAPH)
     order = [(r.property.removeprefix(EX), r.statements) for r in classes(profile(fake))["A"].reified_relations]
     assert order == [("z", 3), ("a", 1), ("b", 1)]
+
+
+@given(relation_rows, st.lists(st.sampled_from(_CLASSES), unique=True, max_size=4))
+def test_attach_files_every_relation_under_its_profiled_class_sorted(rows, profiled):
+    profiles = [builders.klass(iri, 1) for iri in profiled]
+    attached = {p.class_iri: p.reified_relations or [] for p in _Reifications.attach(profiles, rows)}
+    assert list(attached) == profiled
+    for iri, own in attached.items():
+        expected = [rel for subject, rel in rows if subject == iri]
+        assert sorted(own, key=repr) == sorted(expected, key=repr)  # nothing lost or gained, reifiers intact
+        assert sum(r.statements for r in own) == sum(r.statements for r in expected)
+        keys = [(-r.statements, r.property or "", r.object_class or "", r.kind) for r in own]
+        assert keys == sorted(keys)
+    unprofiled = [rel for subject, rel in rows if subject not in profiled]
+    assert sum(len(own) for own in attached.values()) == len(rows) - len(unprofiled)
