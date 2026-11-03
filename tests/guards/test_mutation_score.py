@@ -5,7 +5,6 @@ import re
 from pathlib import Path
 
 import pytest
-import yaml
 
 from tests.guards.mutation_score import EXIT_DROPPED, EXIT_ERROR, EXIT_OK, Stats, main, score
 
@@ -82,13 +81,3 @@ def test_check_mutation_runs_mutmut_then_the_ratchet_and_is_not_part_of_check_al
     check_all = re.search(r"^check-all:([^\n#]*)", makefile, re.MULTILINE)
     assert check_all
     assert "check-mutation" not in check_all.group(1)
-
-
-def test_the_mutation_workflow_runs_weekly_and_on_demand():
-    workflow = yaml.safe_load((ROOT / ".github" / "workflows" / "mutation.yml").read_text())
-    triggers = workflow.get("on") or workflow[True]  # YAML reads a bare `on` as True
-    assert "workflow_dispatch" in triggers
-    assert triggers["schedule"][0]["cron"]
-    job = next(iter(workflow["jobs"].values()))
-    assert job["timeout-minutes"] >= 120
-    assert any(step.get("run") == "make check-mutation" for step in job["steps"])

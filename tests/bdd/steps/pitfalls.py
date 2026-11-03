@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 from click.testing import CliRunner
 from pytest_bdd import given, parsers, then, when
 
+from fingerprint.adapters import pitfall_catalogue
 from fingerprint.adapters.exceptions import QueryTimeout
 from fingerprint.adapters.pitfall_catalogue import packaged_checks
 from fingerprint.adapters.sparql import SparqlHttpClient
@@ -39,10 +40,27 @@ BAD = {
     "has a FROM clause": HEADER.format(id="a")
     + "SELECT ?entity ?property ?value FROM <urn:g> WHERE { ?entity ?property ?value }\n",
 }
+# Scenarios that need only a few checks run a narrowed catalogue (one data, one schema, plus the checks they name);
+# the others, whose assertion is about the whole catalogue, are absent and run all 29 (lean-fast-suite P-4).
+NARROWED = {
+    "test_scan_with_a_schema_graph": ("p35_untyped_property", "p19_multiple_domains_or_ranges"),
+    "test_the_default_graph_runs_without_the_schema": ("p35_untyped_property", "p19_multiple_domains_or_ranges"),
+    "test_empty_graph_not_scanned": ("p35_untyped_property", "p19_multiple_domains_or_ranges"),
+    "test_bounded_examples": ("p35_untyped_property", "p19_multiple_domains_or_ranges"),
+    "test_failed_check": ("p35_untyped_property", "p19_multiple_domains_or_ranges"),
+    "test_a_check_that_finds_nothing": ("p35_untyped_property", "p25_inverse_of_itself"),
+    "test_a_user_check_replaces_a_packaged_one": ("p35_untyped_property", "p22_class_naming"),
+    "test_skipped_check": ("p35_untyped_property", "p13_missing_inverse"),
+    "test_exit_status_from_findings": (
+        "p35_untyped_property",
+        "p19_multiple_domains_or_ranges",
+        "x_individual_as_predicate",
+    ),
+}
 
 
 @given('a store whose graph "data" uses an undeclared relation and whose graph "schema" holds the ontology')
-def pitfall_store(ctx, monkeypatch):
+def pitfall_store(ctx, monkeypatch, request):
     """`ex:undeclared` is used in data and declared nowhere; `ex:knows` is declared, with two domains (a P19 finding)."""
     fake = FakeSparql()
     data, schema = GRAPHS["data"], GRAPHS["schema"]
@@ -55,6 +73,9 @@ def pitfall_store(ctx, monkeypatch):
     fake.add("ex:knows", RDFS + "domain", "ex:Agent", graph=schema)
     monkeypatch.setattr(handlers, "SparqlHttpClient", lambda endpoint, timeout: fake)
     ctx["fake"] = fake
+    if keep := NARROWED.get(request.node.originalname):
+        narrowed = [c for c in packaged_checks() if c.check_id in keep]
+        monkeypatch.setattr(pitfall_catalogue, "packaged_checks", lambda: list(narrowed))
 
 
 def options(text: str) -> list[str]:

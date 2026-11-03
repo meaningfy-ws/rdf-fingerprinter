@@ -6,6 +6,20 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Changed
+- **One feature gate: `make check-all`** runs in parallel (pytest-xdist) and includes the Hypothesis
+  tests (`ci` profile) and the coverage floors. CI runs it on every PR.
+- **Release gate:** `make check-release` (local) runs `check-all`, `make test-release`,
+  `make test-properties` (random Hypothesis inputs) and `make test-e2e`. The new `release-check`
+  workflow runs the release tests, the e2e tests and a wheel install on PRs into `master`.
+- **Mutation testing runs after a release** (and on demand), not weekly.
+- The service-layer unit tests are pruned where the BDD scenarios already prove the behaviour;
+  coverage and mutation score are unchanged.
+
+### Removed
+- **BREAKING for contributors:** `make check-all-fast`, `make check-all-deep`, `make test-fast` and
+  the weekly deep workflow (`deep.yml`). Use `make check-all` and `make check-release`.
+
 ## [3.4.0] - 2026-11-02
 
 The pattern schema is split into five files per graph (OpenSpec change `llm-schema-split`), so a model

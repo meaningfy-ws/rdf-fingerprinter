@@ -1,0 +1,11 @@
+domain rc=0 wall=7.0s ================ 455 passed, 18 deselected, 1 warning in 2.46s =================
+hypothesis rc=0 wall=42.7s =============== 18 passed, 1517 deselected, 1 warning in 36.95s ================
+adapters rc=0 wall=15.6s ======================= 160 passed, 1 warning in 10.74s ========================
+service rc=0 wall=145.4s ================== 396 passed, 1 warning in 139.43s (0:02:19) ==================
+entrypoints rc=0 wall=11.7s ======================== 35 passed, 1 warning in 6.30s =========================
+unit rc=0 wall=164.5s ========== 1046 passed, 18 deselected, 1 warning in 159.10s (0:02:39) ==========
+bdd rc=0 wall=165.5s ============ 314 passed, 4 skipped, 1 warning in 158.88s (0:02:38) =============
+guards rc=0 wall=14.8s ======================== 153 passed, 1 warning in 9.89s ========================
+fast rc=0 wall=323.8s ==== 1518 passed, 4 skipped, 18 deselected, 1 warning in 317.99s (0:05:17) =====
+e2e rc=0 wall=21.6s ======================== 91 passed, 1 warning in 16.44s ========================
+fast-nocov wall=156.2s ========== 1518 passed, 4 skipped, 18 deselected in 151.96s (0:02:31) ==========

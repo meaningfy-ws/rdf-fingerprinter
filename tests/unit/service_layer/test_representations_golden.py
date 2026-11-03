@@ -88,6 +88,7 @@ def shacl_files(run, threshold):
     return render(with_threshold(run, threshold) if threshold is not None else run, "shacl")
 
 
+@pytest.mark.release
 @pytest.mark.parametrize("threshold", [None, 0.5, 0.1])  # None: the profile's own (0.95)
 @pytest.mark.parametrize("graph", sorted(SOURCE))
 def test_shapes_report_no_violation_on_their_own_data(graph, threshold, sample_run):

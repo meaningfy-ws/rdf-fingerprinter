@@ -50,13 +50,6 @@ def test_the_count_and_example_queries_wrap_the_check():
     assert "FROM" not in examples and examples.endswith("ORDER BY ?entity ?property ?value LIMIT 3")
 
 
-def test_without_schema_graphs_every_check_runs_alone():
-    profile = run(store(), selected_graphs=[DATA])
-    found = results(profile, DATA)
-    assert len(found) == len(CHECKS)
-    assert found["p35_untyped_property"].count == 2  # ex:knows is undeclared without the schema
-
-
 def test_aggregate_checks_count_zero_on_a_clean_graph_and_send_no_example_query():
     fake = FakeSparql()
     fake.add("ex:a", "ex:knows", "ex:b", graph=DATA)
@@ -65,11 +58,6 @@ def test_aggregate_checks_count_zero_on_a_clean_graph_and_send_no_example_query(
     for check_id in ("p19_multiple_domains_or_ranges", "p35_untyped_property", "x_individual_as_predicate"):
         assert found[check_id].count == 0 and found[check_id].examples == []
         assert not [q for q in fake.sent("PITFALL") if q.startswith(f"# PITFALL {check_id} examples")]
-
-
-def test_the_scan_runs_at_depth_graphs():
-    found = results(run(store(), selected_graphs=[DATA], depth="graphs"), DATA)
-    assert found["p35_untyped_property"].count == 2
 
 
 def test_blank_node_entities():
@@ -90,20 +78,6 @@ def test_an_unwritable_schema_graph_is_a_usage_error(value):
 
     with pytest.raises(UsageError, match="schema graph"):
         resolve_settings(cli={"schema_graphs": [value]}, env={})
-
-
-def test_schema_graphs_from_the_environment_are_comma_separated():
-    settings = resolve_settings(env={"RDF_FINGERPRINTER_SCHEMA_GRAPHS": f"{SCHEMA}, {EX}other"})
-    assert settings.schema_graphs == [SCHEMA, EX + "other"]
-
-
-def test_an_unbound_count_is_a_recorded_failure_not_a_crash():
-    """Review: some stores answer an aggregate over nothing with one unbound row."""
-    fake = store()
-    fake.on("PITFALL", [{"n": None}], when=lambda q: " count\n" in q)
-    profile = run(fake, checks=[CHECKS["p35_untyped_property"]], selected_graphs=[DATA])
-    assert results(profile, DATA) == {}
-    assert [f.check_id for f in profile.failures] == ["p35_untyped_property"]
 
 
 def test_a_failed_emptiness_check_skips_the_graph_and_failed_examples_keep_the_count():

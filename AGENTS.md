@@ -122,14 +122,17 @@ artifacts above; do not reintroduce parallel epic files under `.claude/`.
   (`make oxigraph-load-test-data`, config in `docker/`) for the local-only `tests/e2e`; the
   endpoint comes from `RDF_FINGERPRINTER_TEST_ENDPOINT`. `tests/unit` need no store.
 - **Deployable?** no — released as a Python package.
-- **Make targets:** `make install` (Poetry), `make check-all` (the gate CI runs per PR; = `make check-all-fast`, no Hypothesis,
-  coverage reported without a floor), `make check-all-deep` (adds the Hypothesis tests and the
-  coverage floors; weekly and on demand in CI, `deep.yml`), `make test`, `make build`,
+- **Make targets:** `make install` (Poetry), `make check-all` (the feature gate CI runs on every PR:
+  parallel, Hypothesis `ci` profile, coverage floors), `make check-release` (the local release gate:
+  `check-all` + release tests + `make test-properties` + e2e; `release-check.yml` runs the release
+  tests, e2e and a wheel install on PRs into `master`), `make check-mutation` (after a release),
+  `make test`, `make build`,
   `make test-e2e`, `make oxigraph-load-test-data`, `make build-docs`. Releases publish from a
   GitHub Release via Trusted Publishing (`publish.yml`); docs deploy to GitHub Pages (`docs.yml`).
 - **Release authority (developer, 2026-10-31):** an agent MAY merge a PR to `master` (or `develop`) and publish a
   release without asking again, when all of these hold: the PR's CI checks are green; `make
-  check-all` and `make test-e2e` (against `make oxigraph-load-test-data`) pass locally; the version
+  check-release` (after `make oxigraph-load-test-data`) passes locally and the release PR's
+  release-check is green; the version
   in `pyproject.toml` is bumped per SemVer and `CHANGELOG.md` has its entry. A release is a
   bare `X.Y.Z` tag (no `v`; the `release` environment accepts only `[0-9]*.[0-9]*.[0-9]*`) plus a
   published GitHub Release (`gh release create`); `publish.yml` uploads to PyPI
