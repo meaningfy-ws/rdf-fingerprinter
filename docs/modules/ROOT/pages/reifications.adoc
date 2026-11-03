@@ -202,6 +202,8 @@ recognise.
 * **A mixed class stays whole.** A class with reifiers and ordinary instances, such as an
   `rdf:Property` class holding singleton predicates and declared ones, keeps its instance count and
   property rows, reifiers included.
+* **A mixed Wikibase claim predicate stays whole.** A claim predicate used both for statements and for
+  plain values stays an ordinary property and also yields its reified relation.
 * **Untyped subjects are dropped.** A reified statement whose subject has no class, or only a
   blank-node class, has no class to be filed under and is counted nowhere.
 * **Triple terms, graph statements and nanopublications are counted only.** SPARQL 1.1 cannot take a

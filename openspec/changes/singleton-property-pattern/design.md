@@ -398,6 +398,11 @@ mutmut, the release gate) and the brainframe acceptance run once, at the end of 
   predicate type that is, or is `rdfs:subClassOf*` (as the graph states), `rdf:Property`, an `owl:*Property`,
   `rdfs:ContainerMembershipProperty` or a Data Cube property type (`qb:DimensionProperty`, `qb:MeasureProperty`,
   `qb:AttributeProperty`, `qb:CodedProperty`, `qb:ComponentProperty`); such predicates stay ordinary properties.
+- **P-23 refined.** `rdfs:Resource`, `owl:Thing` and `owl:NamedIndividual` are compared exactly, never through
+  `rdfs:subClassOf*`: data stating `ex:Link rdfs:subClassOf owl:Thing` still makes predicates typed `ex:Link`
+  singletons. Only the property types keep the `subClassOf*` exclusion.
+- **Wikibase mixed claim predicates (P-14 analogue).** A claim predicate used both for statements and for plain
+  values stays an ordinary property and also yields its reified relation; mixed uses stay whole.
 - **P-8 clarified.** A kind's hidden terms apply only when its probe, `hidden`, `relations` and
   `reifier-properties` queries all succeeded; otherwise nothing of that kind is hidden.
 - **`blank_nary` excludes nodes owned by other kinds**: nodes reached through `prov:qualified*`,

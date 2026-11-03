@@ -442,3 +442,10 @@ CLAIMS = (
 
 def test_a_claim_predicate_is_hidden_only_when_every_use_points_to_a_statement():
     assert run_both(CLAIMS, "wikibase_statement", "hidden") == {(EX.claimP1,), (WIKIBASE.Statement,)}
+
+
+def test_a_subclass_of_a_generic_type_still_makes_a_resource_as_predicate_next_to_property_subclasses():
+    turtle = QB + " ex:Link rdfs:subClassOf owl:Thing . ex:a a ex:A ; ex:rel1 ex:BE . ex:rel1 a ex:Link ."
+    assert run_both(turtle, "resource_as_predicate", "probe") is True
+    assert run_both(turtle, "resource_as_predicate", "relations") == {(EX.A, EX.Link, EX.Area, Literal(1))}
+    assert run_both(turtle, "resource_as_predicate", "hidden") == {(EX.rel1,), (EX.Link,)}
