@@ -14,7 +14,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  RDF_FINGERPRINTER_OXIGRAPH_PORT: 7878
   RDF_FINGERPRINTER_TEST_ENDPOINT: http://localhost:7878/query
 
 jobs:

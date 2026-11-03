@@ -16,9 +16,6 @@ CONTINENTS_GRAPH = "http://publications.europa.eu/resources/authority/continents
 PATTERNS_HEADER = ",".join(PATTERNS_COLUMNS)
 
 
-SLUGS = ("continents-214e8f67", "default", "treaties-3b4301a8")
-
-
 @pytest.fixture(scope="module")
 def sample_files(sample_analytics):
     return files(PatternGenerator(sample_analytics, JinjaTemplateRenderer()).serialize())
