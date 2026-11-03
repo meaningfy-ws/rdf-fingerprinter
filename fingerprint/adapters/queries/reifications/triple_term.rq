@@ -1,0 +1,14 @@
+# id: triple_term
+# title: RDF-star triple term (rdf:reifies)
+# family: statement_identity
+# Counted only: the triple term itself is not decomposed (P-12).
+# REIFY triple_term probe
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+ASK { $graph_open ?r rdf:reifies ?t . $graph_close }
+# REIFY triple_term count
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT (COUNT(*) AS ?count) WHERE {
+  { SELECT $distinct ?r ?t WHERE { $graph_open ?r rdf:reifies ?t . $graph_close } } }
+# REIFY triple_term hidden
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT DISTINCT ?term WHERE { VALUES ?term { rdf:reifies } }

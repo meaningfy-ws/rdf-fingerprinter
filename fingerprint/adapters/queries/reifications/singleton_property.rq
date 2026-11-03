@@ -1,0 +1,29 @@
+# id: singleton_property
+# title: Singleton property (rdf:singletonPropertyOf)
+# family: statement_identity
+# A unique property of one triple, linked to its generic property by rdf:singletonPropertyOf.
+# REIFY singleton_property probe
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+ASK { $graph_open ?s ?sp ?o . ?sp rdf:singletonPropertyOf ?g . $graph_close }
+# REIFY singleton_property relations
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?subjectClass ?predicate ?objectClass (COUNT(*) AS ?statements) WHERE {
+  { SELECT $distinct ?s ?sp ?o WHERE { $graph_open ?s ?sp ?o . ?sp rdf:singletonPropertyOf ?g . $graph_close } }
+  $graph_open ?sp rdf:singletonPropertyOf ?predicate . ?s a ?subjectClass .
+  OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY singleton_property reifier-properties
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?sp) AS ?reifiers) WHERE {
+  $graph_open ?s ?sp ?o . ?sp rdf:singletonPropertyOf ?predicate ; ?reifierProperty ?v .
+  FILTER(?reifierProperty NOT IN (rdf:singletonPropertyOf, rdf:type)) ?s a ?subjectClass .
+  OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
+# REIFY singleton_property hidden
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT DISTINCT ?term WHERE { $graph_open
+  { ?sp rdf:singletonPropertyOf ?g . BIND(?sp AS ?term) }
+  UNION { VALUES ?term { rdf:singletonPropertyOf } }
+  UNION { ?sp rdf:singletonPropertyOf ?g ; a ?term .
+          FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?x rdf:singletonPropertyOf ?any } } }
+  $graph_close }

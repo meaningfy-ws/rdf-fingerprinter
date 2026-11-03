@@ -19,9 +19,9 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## 3. The probe catalogue (P-1, P-2, P-16, design §A)
 
-- [ ] 3.1 `reification_query` in `fingerprint/adapters/queries/__init__.py`; `fingerprint/adapters/reification_catalogue.py` (`packaged_templates()`, section split, fill-then-parse validation); `tests/unit/adapters/test_reification_catalogue.py` (each rejection of design "Test case specifications")
-- [ ] 3.2 `tests/test_data/reifications-source.ttl` (design §C and §D)
-- [ ] 3.3 The six stage-1 templates in `fingerprint/adapters/queries/reifications/` per design §A (`NOT_REIFIER_TYPES`, the `$distinct` subquery, P-5 dynamic hiding for every kind); a unit test runs each section, rendered for `graph=None`, over `reifications-source.ttl` in rdflib and asserts the §C rows
+- [x] 3.1 `reification_query` in `fingerprint/adapters/queries/__init__.py`; `fingerprint/adapters/reification_catalogue.py` (`packaged_templates()`, section split, fill-then-parse validation); `tests/unit/adapters/test_reification_catalogue.py` (each rejection of design "Test case specifications")
+- [x] 3.2 `tests/test_data/reifications-source.ttl` (design §C and §D)
+- [x] 3.3 The six stage-1 templates in `fingerprint/adapters/queries/reifications/` per design §A (`NOT_REIFIER_TYPES`, the `$distinct` subquery, P-5 dynamic hiding for every kind); a unit test runs each section, rendered for `graph=None`, over `reifications-source.ttl` in rdflib and asserts the §C rows
 
 ## 4. The collection stage (P-3 to P-9, P-14, design §B)
 
@@ -54,7 +54,7 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## Roadmap
 
-- [x] 0.1 · [x] 1.1 · [x] 2.1 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

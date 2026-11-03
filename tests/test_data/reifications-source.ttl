@@ -1,0 +1,42 @@
+# One instance of each stage-1 reification kind (singleton-property-pattern design §C, §D).
+# Collected in memory into the named graph http://example.org/reifications, never loaded in Oxigraph.
+@prefix ex:   <http://example.org/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dct:  <http://purl.org/dc/terms/> .
+
+# Ordinary instances.
+ex:alice a ex:Person .
+ex:bob   a ex:Person .
+ex:carol a ex:Person .
+ex:acme  a ex:Org .
+
+# singleton_property: ex:rel1 and ex:rel2 are singleton predicates of ex:worksFor, typed ex:Link only.
+ex:alice ex:rel1 ex:acme .
+ex:bob   ex:rel2 ex:acme .
+ex:rel1 rdf:singletonPropertyOf ex:worksFor ; a ex:Link ; prov:wasAttributedTo ex:hr .
+ex:rel2 rdf:singletonPropertyOf ex:worksFor ; a ex:Link .
+
+# rdf_statement: ex:st1 reifies "alice knows bob".
+ex:st1 a rdf:Statement ; rdf:subject ex:alice ; rdf:predicate ex:knows ; rdf:object ex:bob ;
+       dct:source ex:survey .
+
+# owl_axiom: an annotated axiom about "bob knows alice".
+ex:ax1 a owl:Axiom ; owl:annotatedSource ex:bob ; owl:annotatedProperty ex:knows ;
+       owl:annotatedTarget ex:alice ; dct:source ex:survey .
+
+# negative_property_assertion: "bob does not work for acme".
+ex:npa1 a owl:NegativePropertyAssertion ; owl:sourceIndividual ex:bob ;
+        owl:assertionProperty ex:worksFor ; owl:targetIndividual ex:acme .
+
+# resource_as_predicate: ex:performs1 is an ex:Procedure (a non-property type) used as a predicate.
+ex:carol ex:performs1 ex:acme .
+ex:performs1 a ex:Procedure .
+
+# An ordinary predicate typed only rdf:Property, used once: it must stay an ordinary property.
+ex:acme ex:legacy "old" .
+ex:legacy a rdf:Property .
+
+# triple_term: the object is an IRI standing in for a triple term (rdflib cannot parse RDF 1.2).
+ex:r1 rdf:reifies ex:tripleTermStandIn .

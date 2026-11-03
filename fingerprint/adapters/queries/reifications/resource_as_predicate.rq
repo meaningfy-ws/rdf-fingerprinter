@@ -1,0 +1,65 @@
+# id: resource_as_predicate
+# title: Resource used as a predicate
+# family: statement_identity
+# A predicate with a type that is not a property type: the type is the relation (DEC-7).
+# REIFY resource_as_predicate probe
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+ASK { $graph_open ?s ?p ?o . ?p a ?t .
+    FILTER(?t NOT IN (rdf:Property, rdfs:ContainerMembershipProperty, rdfs:Resource, owl:Thing, owl:NamedIndividual,
+    owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty, owl:OntologyProperty, owl:DeprecatedProperty,
+    owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
+    owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
+    FILTER NOT EXISTS { ?t rdfs:subClassOf+ rdf:Property }
+    FILTER NOT EXISTS { ?p rdf:singletonPropertyOf ?g } $graph_close }
+# REIFY resource_as_predicate relations
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT ?subjectClass ?predicate ?objectClass (COUNT(*) AS ?statements) WHERE {
+  { SELECT $distinct ?s ?p ?o ?predicate WHERE { $graph_open ?s ?p ?o . ?p a ?predicate .
+    FILTER(?predicate NOT IN (rdf:Property, rdfs:ContainerMembershipProperty, rdfs:Resource, owl:Thing, owl:NamedIndividual,
+    owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty, owl:OntologyProperty, owl:DeprecatedProperty,
+    owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
+    owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
+    FILTER NOT EXISTS { ?predicate rdfs:subClassOf+ rdf:Property }
+    FILTER NOT EXISTS { ?p rdf:singletonPropertyOf ?g } $graph_close } }
+  $graph_open ?s a ?subjectClass . OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY resource_as_predicate reifier-properties
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?p) AS ?reifiers) WHERE {
+  $graph_open ?s ?p ?o . ?p a ?predicate ; ?reifierProperty ?v .
+  FILTER(?predicate NOT IN (rdf:Property, rdfs:ContainerMembershipProperty, rdfs:Resource, owl:Thing, owl:NamedIndividual,
+    owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty, owl:OntologyProperty, owl:DeprecatedProperty,
+    owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
+    owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
+  FILTER NOT EXISTS { ?predicate rdfs:subClassOf+ rdf:Property }
+  FILTER NOT EXISTS { ?p rdf:singletonPropertyOf ?g }
+  FILTER(?reifierProperty != rdf:type) ?s a ?subjectClass .
+  OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
+# REIFY resource_as_predicate hidden
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+SELECT DISTINCT ?term WHERE { $graph_open
+  { ?s ?p ?o . ?p a ?t .
+    FILTER(?t NOT IN (rdf:Property, rdfs:ContainerMembershipProperty, rdfs:Resource, owl:Thing, owl:NamedIndividual,
+    owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty, owl:OntologyProperty, owl:DeprecatedProperty,
+    owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
+    owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
+    FILTER NOT EXISTS { ?t rdfs:subClassOf+ rdf:Property }
+    FILTER NOT EXISTS { ?p rdf:singletonPropertyOf ?g } BIND(?p AS ?term) }
+  UNION { ?s ?p ?o . ?p a ?t .
+    FILTER(?t NOT IN (rdf:Property, rdfs:ContainerMembershipProperty, rdfs:Resource, owl:Thing, owl:NamedIndividual,
+    owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty, owl:OntologyProperty, owl:DeprecatedProperty,
+    owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
+    owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
+    FILTER NOT EXISTS { ?t rdfs:subClassOf+ rdf:Property }
+    FILTER NOT EXISTS { ?p rdf:singletonPropertyOf ?g } BIND(?t AS ?term)
+          FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?s2 ?x ?o2 } } }
+  $graph_close }

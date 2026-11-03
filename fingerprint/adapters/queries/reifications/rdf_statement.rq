@@ -1,0 +1,27 @@
+# id: rdf_statement
+# title: RDF reification (rdf:Statement)
+# family: statement_identity
+# A resource of rdf:subject, rdf:predicate and rdf:object triples that stands for a statement.
+# REIFY rdf_statement probe
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+ASK { $graph_open ?r rdf:subject ?s ; rdf:predicate ?p ; rdf:object ?o . $graph_close }
+# REIFY rdf_statement relations
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?subjectClass ?predicate ?objectClass (COUNT(DISTINCT ?r) AS ?statements) WHERE {
+  $graph_open ?r rdf:subject ?s ; rdf:predicate ?predicate ; rdf:object ?o . ?s a ?subjectClass .
+  OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY rdf_statement reifier-properties
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?r) AS ?reifiers) WHERE {
+  $graph_open ?r rdf:subject ?s ; rdf:predicate ?predicate ; rdf:object ?o . ?r ?reifierProperty ?v .
+  FILTER(?reifierProperty NOT IN (rdf:subject, rdf:predicate, rdf:object, rdf:type)) ?s a ?subjectClass .
+  OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
+# REIFY rdf_statement hidden
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT DISTINCT ?term WHERE { $graph_open
+  { VALUES ?term { rdf:Statement rdf:subject rdf:predicate rdf:object } }
+  UNION { ?r rdf:subject ?s ; rdf:predicate ?p ; rdf:object ?o . ?r a ?term .
+          FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?x rdf:subject ?s2 ; rdf:predicate ?p2 ; rdf:object ?o2 . } } }
+  $graph_close }
