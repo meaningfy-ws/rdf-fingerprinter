@@ -4,7 +4,7 @@
 
 [project]
 name = "rdf-fingerprinter"
-version = "3.4.0"
+version = "3.4.1"
 description = "Find out kind of data shapes your RDF dataset instantiates."
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
@@ -70,6 +70,9 @@ lint = [
 # Development only: generates the fingerprint/domain/ models from model/*.yaml (P-10).
 model = [
     "linkml==1.12.1",
+]
+dev = [
+    "pytest-xdist (>=3.8.0,<4.0.0)"
 ]
 
 [tool.poetry]

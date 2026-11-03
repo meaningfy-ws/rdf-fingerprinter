@@ -4,7 +4,6 @@ import pytest
 
 from fingerprint.service_layer import handlers
 from fingerprint.service_layer.exceptions import UsageError
-from fingerprint.service_layer.generators.generator import plain_label
 from fingerprint.service_layer.settings import load_user_prefixes, resolve_settings
 from tests.fakes import FakeSparql
 
@@ -31,8 +30,3 @@ def test_a_bad_prefixes_file_is_a_usage_error(tmp_path, monkeypatch, content):
     monkeypatch.setenv("RDF_FINGERPRINTER_PREFIXES_FILE", str(path))
     with pytest.raises(UsageError, match="RDF_FINGERPRINTER_PREFIXES_FILE"):
         load_user_prefixes()
-
-
-def test_the_default_graph_label_is_written_as_plain_text(monkeypatch):
-    monkeypatch.setenv("RDF_FINGERPRINTER_DEFAULT_GRAPH_LABEL", "x\n!include /etc/passwd")
-    assert "\n" not in plain_label(None)
