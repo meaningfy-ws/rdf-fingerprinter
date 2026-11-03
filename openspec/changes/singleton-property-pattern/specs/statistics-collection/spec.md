@@ -38,10 +38,17 @@ none (an unnamed relation).
 - **THEN** class A has one reified relation of kind RDF statement, `ex:p` to B, 30 statements
 
 #### Scenario: Resource used as predicate with no marker
-- **GIVEN** predicate IRIs typed only `rdf:Property`, with triples of their own, linking class A to
-  class B, one of them used 25 times
+- **GIVEN** predicate IRIs typed `ex:Procedure` (not a property type) and no
+  `rdf:singletonPropertyOf`, linking class A to class B, one of them used 25 times
 - **WHEN** the graph is profiled
-- **THEN** class A has one unnamed reified relation to B counting every use
+- **THEN** class A has one reified relation of kind resource as predicate, named `ex:Procedure`, to
+  B, counting every use
+
+#### Scenario: A predicate typed only as a property is ordinary
+- **GIVEN** predicate IRIs typed only `rdf:Property`, used once each, with no
+  `rdf:singletonPropertyOf`
+- **WHEN** the graph is profiled
+- **THEN** each stays an ordinary property and no reified relation is reported for them
 
 #### Scenario: Relation through a blank node
 - **GIVEN** subjects of class A each pointing with `ex:role` to a blank node that carries
@@ -53,7 +60,8 @@ none (an unnamed relation).
 #### Scenario: RDF-star is counted only
 - **GIVEN** a graph with 12 `rdf:reifies` triples
 - **WHEN** the graph is profiled
-- **THEN** the graph profile records 12 triple-term reifiers and no class has a relation for them
+- **THEN** the graph profile records 12 triple-term reifications (`rdf:reifies` triples) and no class has a
+  relation for them
 
 ### Requirement: Reification machinery is not an ordinary class or property
 When a kind is found, the predicates and reifier classes that implement it SHALL be absent from the
@@ -63,6 +71,12 @@ profile's ordinary classes and properties.
 - **GIVEN** the singleton graph of "Singleton properties of one generic property"
 - **WHEN** the graph is profiled
 - **THEN** class A has no ordinary property for any of the 500 predicate IRIs
+
+#### Scenario: A class with reifiers and ordinary instances stays whole
+- **GIVEN** 3 singleton predicate IRIs typed `rdf:Property` and `ex:Link`, and 2 ordinary predicates
+  typed `rdf:Property` only
+- **WHEN** the graph is profiled
+- **THEN** class `ex:Link` is absent, and class `rdf:Property` is present with 5 instances
 
 #### Scenario: rdf:Statement leaves the classes
 - **GIVEN** the graph of "RDF reification"

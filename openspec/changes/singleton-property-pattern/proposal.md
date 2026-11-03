@@ -93,7 +93,8 @@ by the developer in round 4.
   class; for a relation through a blank node, under the class of the node that points to the blank
   node. Rejected: one graph-level list of reifications.
 - **DEC-6 One switch, on by default: probe every run, capture only what is present.** With the
-  `reifications` setting on (the default, like `pitfall_scan`), every run asks every probe, at every
+  `reifications` setting on (the default; a boolean setting like `pitfall_scan`, which is off by
+  default), every run asks every probe, at every
   depth; only for a kind whose probe answers true does it go on to capture that kind's relations and
   filter its machinery. Off gives today's fingerprint exactly. Rejected: separate switches for
   probing and filtering (a filter without detection has nothing to filter).

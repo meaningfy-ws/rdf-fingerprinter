@@ -61,3 +61,11 @@ metadata by name and count, packaged templates only, pitfall kept, no SHACL/ShEx
   pattern. Recorded as DEC-10 (removal).
 - SHACL/ShEx could add a note on reified relations (DEC-11 amended: note, never constrain).
 - Yes to the other decisions. "go ahead, continue shaping".
+
+## Q5 — Signal for "resource used as predicate" (developer, 2026-11-03)
+
+Options: (A) the predicate has an `rdf:type` other than the property types; (B) A or it carries
+triples outside rdf/rdfs/owl/skos/sh; (C) B or a rarely-used statistical signal.
+**Answer: A.** No false positives on vocabularies. Consequence: brainframe's 465 predicates typed
+only `rdf:Property` (the unmarked `RelationId`, `Procedure`, `Policy`, `mitigationImplementationStatus`
+families) stay ordinary properties; only the 517 marked singletons fold into `isRelatedTo`.
