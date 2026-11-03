@@ -345,3 +345,102 @@ Feature: Collecting raw statistics from a knowledge graph
       Then "ex:Person" is in the profile
       And the graph has no term annotations
       And one failure of kind "term_annotations" is recorded
+
+  Rule: Reifications are probed, then captured by kind
+
+    Scenario: Kind absent
+      Given a graph with no rdf:Statement node
+      When the graph is profiled
+      Then the collector issues the rdf:Statement probe and not its capture query
+
+    Scenario: Switch off
+      Given reifications is off
+      When a graph with singleton properties is profiled
+      Then no probe is issued
+      And every singleton predicate IRI is an ordinary property
+
+    Scenario: Singleton properties are resources used as predicates
+      Given 50 distinct predicate IRIs typed "ex:Link", each linking a subject of class "ex:A" to an object of class "ex:B", each with rdf:singletonPropertyOf "ex:isRelatedTo" and "prov:wasAttributedTo"
+      When the graph is profiled
+      Then class "ex:A" has one reified relation of kind resource as predicate, "ex:Link" to "ex:B", 50 statements
+      And its reifier properties are "rdf:singletonPropertyOf" on 50 and "prov:wasAttributedTo" on 50
+      And no relation is named "ex:isRelatedTo"
+
+    Scenario: RDF reification
+      Given 30 rdf:Statement nodes whose rdf:subject is of class "ex:A", rdf:predicate is "ex:p" and rdf:object is of class "ex:B"
+      When the graph is profiled
+      Then class "ex:A" has one reified relation of kind RDF statement, "ex:p" to "ex:B", 30 statements
+
+    Scenario: Resource used as predicate
+      Given predicate IRIs typed "ex:Procedure", not a property type, linking class "ex:A" to class "ex:B", one of them used 25 times
+      When the graph is profiled
+      Then class "ex:A" has one reified relation of kind resource as predicate, named "ex:Procedure", to "ex:B", counting every use
+
+    Scenario: A predicate typed only as a property is ordinary
+      Given predicate IRIs typed only rdf:Property, used once each, one of them with rdf:singletonPropertyOf "ex:isRelatedTo"
+      When the graph is profiled
+      Then each stays an ordinary property
+      And no reified relation is reported for them
+
+    Scenario: Relation through a blank node
+      Given subjects of class "ex:A" each pointing with "ex:role" to an untyped blank node that carries "ex:agent" and "ex:since", the blank node not being a list or an OWL construct
+      When the graph is profiled
+      Then class "ex:A" has one reified relation of kind blank n-ary, "ex:role", with reifier properties "ex:agent" and "ex:since"
+
+    Scenario: A typed blank node stays ordinary
+      Given subjects of class "ex:A" each pointing with "ex:address" to a blank node typed "ex:Address" that carries "ex:street"
+      When the graph is profiled
+      Then class "ex:Address" is profiled with property "ex:street" as before
+      And class "ex:A" has no reified relation for "ex:address"
+
+    Scenario: Structured value
+      Given subjects of class "ex:A" each with "ex:height" pointing to an untyped node with "rdf:value" and "ex:unit", and subjects of class "ex:A" each with "ex:code" pointing to a node typed "ex:Notation" with "rdf:value"
+      When the graph is profiled
+      Then class "ex:A" has one reified relation of kind structured value, "ex:height", with reifier property "ex:unit", no relation for "ex:code", and class "ex:Notation" is profiled as before
+
+    Scenario: PROV qualified association
+      Given 4 subjects of class "ex:Run", each with a "prov:qualifiedAssociation" node whose "prov:agent" is of class "ex:Team" and which carries "prov:hadRole"
+      When the graph is profiled
+      Then class "ex:Run" has one reified relation of kind PROV qualified, "prov:qualifiedAssociation" to "ex:Team", 4 statements
+      And its reifier property "prov:hadRole" is on 4
+      And no relation is named "prov:wasAssociatedWith"
+      And class "ex:Run" has no ordinary property "prov:qualifiedAssociation"
+
+    Scenario: SKOS-XL labels stay ordinary
+      Given concepts of class "skos:Concept" with "skos:prefLabel" literals and "skosxl:prefLabel" nodes typed "skosxl:Label" carrying "skosxl:literalForm"
+      When the graph is profiled
+      Then class "skos:Concept" has the ordinary properties "skos:prefLabel" and "skosxl:prefLabel"
+      And class "skosxl:Label" is profiled with property "skosxl:literalForm"
+      And no reified relation is reported for them
+
+    Scenario: Nanopublications are counted
+      Given a graph holding 3 nanopublication heads with "np:hasAssertion", "np:hasProvenance" and "np:hasPublicationInfo"
+      When the graph is profiled
+      Then the graph profile counts 3 nanopublications
+      And no class has a relation for them
+      And the profile has no class "np:Nanopublication"
+
+    Scenario: RDF-star is counted only
+      Given a graph with 12 rdf:reifies triples
+      When the graph is profiled
+      Then the graph profile counts 12 triple terms
+      And no class has a relation for them
+
+  Rule: Reification machinery is not an ordinary class or property
+
+    Scenario: Singleton predicates leave the property rows
+      Given 50 distinct predicate IRIs typed "ex:Link", each linking a subject of class "ex:A" to an object of class "ex:B", each with rdf:singletonPropertyOf "ex:isRelatedTo" and "prov:wasAttributedTo"
+      When the graph is profiled
+      Then class "ex:A" has no ordinary property for any of the 50 predicate IRIs
+
+    Scenario: A class with reifiers and ordinary instances stays whole
+      Given 3 singleton predicate IRIs typed rdf:Property and "ex:Link", and 2 ordinary predicates typed rdf:Property only
+      When the graph is profiled
+      Then class "ex:Link" is absent
+      And class rdf:Property is present with 5 instances
+
+    Scenario: rdf:Statement leaves the classes
+      Given 30 rdf:Statement nodes whose rdf:subject is of class "ex:A", rdf:predicate is "ex:p" and rdf:object is of class "ex:B"
+      When the graph is profiled
+      Then the profile has no class rdf:Statement
+      And it has no property rdf:subject, rdf:predicate or rdf:object

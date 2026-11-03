@@ -5,7 +5,7 @@ from importlib.resources import files
 from string import Template
 
 from fingerprint.domain.iri import to_iriref
-from fingerprint.domain.profile import ObjectTypeScope
+from fingerprint.domain.profile import ObjectTypeScope, ReificationTemplate
 
 QUERY_FILES = {
     "Q0": "q0_named_graphs.rq",
@@ -93,6 +93,15 @@ def render(
         limit=int(limit) if limit is not None else "",
         k=int(k) if k is not None else "",
     )
+
+
+def reification_query(template: ReificationTemplate, section: str, graph: str | None) -> str:
+    """One section of a reification template, with the graph placeholders filled as `render()` does (P-16)."""
+    text = getattr(template, section.replace("-", "_"))
+    if text is None:
+        raise ValueError(f"reification template {template.id!r} has no {section} section")
+    graph_open, graph_close = _graph(graph)
+    return Template(text).substitute(graph_open=graph_open, graph_close=graph_close, distinct=_distinct(graph))
 
 
 # --- pitfall checks (pitfall-scans design D-5): plain builders around a check's SELECT ---

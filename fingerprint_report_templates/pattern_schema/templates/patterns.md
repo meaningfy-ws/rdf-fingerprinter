@@ -24,5 +24,8 @@ Excluded namespaces: {{ g.excluded_note }}.
 ```text
 {{ block.header }}
 {{ lines(block.edges) -}}
+{% for r in block.reified_relations or [] -%}
+{{ r.text }}
+{% endfor -%}
 ```
 {% endfor -%}

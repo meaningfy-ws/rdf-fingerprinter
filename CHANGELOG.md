@@ -6,6 +6,37 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.5.0] - 2026-11-03
+
+The fingerprint recognises reifications (statements about statements) and shows the links they stand
+for as reified relations of their class (OpenSpec change `singleton-property-pattern`).
+
+### Added
+- **Reification probes.** Every run asks one SPARQL `ASK` per kind: `rdf_statement`,
+  `resource_as_predicate` (which also captures singleton properties: `rdf:singletonPropertyOf` is not
+  standard, so it is a reifier property and never names a relation), `owl_axiom`, `negative_property_assertion` and
+  `triple_term` (RDF 1.2 `rdf:reifies`, counted only). Only the kinds found are captured.
+- **More kinds.** `graph_statement` and `nanopublication` (counted only); `prov_qualified`,
+  `dcat_qualified`, `schema_role`, `wikibase_statement` and `cidoc_property_of_property`, each named by
+  the predicate or type the data uses; `blank_nary` (an untyped blank node carrying the qualifications)
+  and `structured_value` (an untyped `rdf:value` node). Typed blank nodes and value nodes stay ordinary.
+  SKOS-XL labels are not a reification.
+- **Reified relations per class**: kind, property, object class, statements and reifier properties,
+  in the report, the pattern schema (`~>` lines), the PlantUML diagram and `profile.json`
+  (`reified_relations`, `reification_kinds`, `reification_counts`); ShExC and SHACL note them
+  in comments, without constraints. See the new *Reified Relations* docs page.
+- **`--reifications/--no-reifications`** (setting `reifications`, on by default).
+
+### Changed
+- **The default fingerprint hides reification machinery.** In a graph with reifications, singleton
+  predicates, `rdf:Statement` nodes, `owl:Axiom` and the like leave the ordinary classes and
+  properties. `--no-reifications` gives the previous fingerprint.
+
+### Removed
+- **BREAKING: the packaged pitfall check `x_individual_as_predicate`** (28 checks remain); the
+  pattern it flagged is now a reified relation. `--skip-pitfall x_individual_as_predicate` now fails
+  as an unknown check. Supply the query with `--pitfall-checks` to keep it as a defect.
+
 ## [3.4.1] - 2026-11-03
 
 No change to the published package: the test suite, the make targets and CI are reorganised

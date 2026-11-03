@@ -17,6 +17,7 @@ from fingerprint.domain.profile import (
     NodeKind,
     ProfileAnalytics,
     PropertyAnalytics,
+    ReifiedRelation,
 )
 from fingerprint.domain.views import FilterMatch, FilterOption, GeneratorOptions, NamespaceFilter
 from fingerprint.domain.vocabulary import OWL, RDF, RDFS, SH
@@ -138,6 +139,14 @@ class _Removal:
             prop = prop.model_copy(update={"top_values": []})  # the one value is excluded: no other is written
         return prop
 
+    def relation(self, relation: ReifiedRelation) -> ReifiedRelation | None:
+        """A kept reified relation, less its excluded reifier properties; None when its property or object class is
+        excluded (singleton-property-pattern P-10)."""
+        if self.gone(relation.property, self.properties) or self.gone(relation.object_class, self.classes):
+            return None
+        reifiers = self.keep(relation.reifier_properties, lambda r: r.property, self.properties)
+        return relation.model_copy(update={"reifier_properties": reifiers})
+
     def cls(self, cls: ClassAnalytics) -> ClassAnalytics:
         """A kept class: excluded properties, co-types and parents dropped."""
         props = self.keep(cls.property_partitions, lambda p: p.property, self.properties)
@@ -146,6 +155,9 @@ class _Removal:
                 "property_partitions": None if props is None else [self.prop(p) for p in props],
                 "co_types": self.keep(cls.co_types, lambda c: c.class_iri, self.classes),
                 "parents": self.keep(cls.parents, lambda p: p.parent, self.classes),
+                "reified_relations": None
+                if cls.reified_relations is None
+                else [r for relation in cls.reified_relations if (r := self.relation(relation))],
             }
         )
 

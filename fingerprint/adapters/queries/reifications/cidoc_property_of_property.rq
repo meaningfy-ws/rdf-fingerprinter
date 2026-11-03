@@ -1,0 +1,29 @@
+# id: cidoc_property_of_property
+# title: CIDOC CRM property of property (PC class)
+# family: n_ary
+# An instance of a CIDOC CRM property class (PC...), a resource with crm:P01_has_domain and crm:P02_has_range that
+# stands for a relation; its type names the relation.
+# REIFY cidoc_property_of_property probe
+PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
+ASK { $graph_open ?pc crm:P01_has_domain ?s ; crm:P02_has_range ?o . $graph_close }
+# REIFY cidoc_property_of_property relations
+PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
+SELECT ?subjectClass ?predicate ?objectClass (COUNT(DISTINCT ?pc) AS ?statements) WHERE {
+  $graph_open ?pc crm:P01_has_domain ?s ; crm:P02_has_range ?o ; a ?predicate . ?s a ?subjectClass .
+  OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY cidoc_property_of_property reifier-properties
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?pc) AS ?reifiers) WHERE {
+  $graph_open ?pc crm:P01_has_domain ?s ; crm:P02_has_range ?o ; a ?predicate . ?pc ?reifierProperty ?v .
+  FILTER(?reifierProperty NOT IN (crm:P01_has_domain, crm:P02_has_range, rdf:type)) ?s a ?subjectClass .
+  OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
+# REIFY cidoc_property_of_property hidden
+PREFIX crm: <http://www.cidoc-crm.org/cidoc-crm/>
+SELECT DISTINCT ?term WHERE { $graph_open
+  { VALUES ?term { crm:P01_has_domain crm:P02_has_range } }
+  UNION { ?pc crm:P01_has_domain ?s ; crm:P02_has_range ?o ; a ?term .
+          FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?x crm:P01_has_domain ?s2 ; crm:P02_has_range ?o2 . } } }
+  $graph_close }

@@ -31,6 +31,9 @@ PREFIX {{ p.prefix }}: <{{ p.namespace }}>
 # {{ shape.comment }}
 {{ shape.label }}{% if shape.blank %} BNODE{% endif %} {
 {{ constraints(shape.constraints) -}}
+{% for r in shape.reified_relations or [] -%}
+{{ "  # " ~ r.text }}
+{% endfor -%}
 }
 {% endfor -%}
 {% for line in view.glossary -%}

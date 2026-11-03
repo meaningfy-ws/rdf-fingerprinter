@@ -17,6 +17,7 @@ from fingerprint.domain.profile import (
     ProfileAnalytics,
     PropertyAnalytics,
 )
+from fingerprint.domain.reifications import relation_view
 from fingerprint.domain.shapes import shape_iri
 from fingerprint.domain.views import (
     Annotation,
@@ -141,6 +142,9 @@ class ShaclGenerator(Generator):
             comments.append("sh:class constraints assume the object types' graphs are part of the data graph.")
         if comments:
             annotations.append(Annotation(predicate="rdfs:comment", value=turtle_string(" ".join(comments))))
+        for relation in cls.reified_relations or []:
+            if view := relation_view(relation, self.written):
+                annotations.append(Annotation(predicate="rdfs:comment", value=turtle_string(f"Reified relation: {view.text}")))
         return NodeShape(
             shape=self.shape(cls),
             target=self.term(cls.class_iri),

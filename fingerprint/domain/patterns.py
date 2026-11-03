@@ -28,6 +28,7 @@ from fingerprint.domain.profile import (
     TermAnnotation,
     ValuePartition,
 )
+from fingerprint.domain.reifications import relation_view
 from fingerprint.domain.views import (
     CoTypeNote,
     EdgeTarget,
@@ -38,6 +39,7 @@ from fingerprint.domain.views import (
     PatternEdge,
     PatternGraph,
     PrefixDeclaration,
+    ReifiedRelationView,
     TargetKind,
     TermKind,
     ViaLink,
@@ -629,6 +631,18 @@ class _Builder:
         notes = [note for _, note in co_types]
         return self._block(index, notes, links, nested=False)
 
+    def _relations(self, group: _Group) -> list[ReifiedRelationView]:
+        """The reified relations of a group's classes, the most statements first (singleton-property-pattern P-11).
+        A relation whose property or object class cannot be written is skipped; the IRIs of the rest count as written."""
+        views = []
+        for member in group.members:
+            for relation in member.reified_relations or []:
+                if (shown := relation_view(relation, self.namer.name)) is not None and shown not in views:
+                    views.append(shown)
+                    reifiers = [r.property for r in relation.reifier_properties or []]
+                    self.valued.update(iri for iri in (relation.property, relation.object_class, *reifiers) if iri)
+        return sorted(views, key=lambda view: -view.statements)
+
     def nested_block(self, index: int) -> PatternBlock:
         """The own block of an expanded nested group, its edges from level 1 (for the ShExC)."""
         return self._block(index, [note for _, note in self._co_types(self.groups[index])], [], nested=True)
@@ -650,6 +664,7 @@ class _Builder:
             via_texts=[f"{link.source}-{link.property}" for link in via],
             header=self._header(group, notes, via),
             edges=self._edges(index, 1, []),
+            reified_relations=None if nested else self._relations(group),
         )
 
     # steps 9 and 10

@@ -1,0 +1,13 @@
+@startuml
+title Class diagram inferred by rdf-fingerprinter — ex:reifications — ex~2
+hide empty members
+
+class "ex:Entry" as C6 {
+}
+class "ex:Notation" as C10 {
+  rdf:value : xsd:string [1]
+}
+
+
+C6 --> "1" C10 : ex:code
+@enduml

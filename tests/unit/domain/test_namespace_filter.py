@@ -31,7 +31,7 @@ from fingerprint.domain.profile import (
 from fingerprint.domain.views import FilterMatch, FilterOption, GeneratorOptions
 from fingerprint.domain.vocabulary import OWL, RDF, RDFS, SH
 from tests import builders
-from tests.unit.domain.strategies import FILTER_NAMESPACES, filter_runs
+from tests.unit.domain.strategies import FILTER_NAMESPACES, filter_runs, relation_runs
 
 EX = "http://example.org/"
 REL = EX + "rel/"
@@ -192,6 +192,47 @@ def test_excluding_nothing_changes_only_the_notes_and_the_uses():
 def test_an_excluded_property_is_dropped_from_every_class():
     person = properties(classes(exclude_terms(filter_world(), {REL}, TABLE))[EX + "Person"])
     assert REL + "r1" not in person and REL + "r2" not in person and EX + "name" in person
+
+
+PROV = "http://www.w3.org/ns/prov#"
+
+
+def reified_world() -> ProfileAnalytics:
+    """`ex:Person` with three reified relations: ordinary, one in `rel`, one to an `org` class, with a `rel` reifier."""
+    person = builders.klass(
+        EX + "Person",
+        10,
+        reified=[
+            builders.relation(EX + "worksFor", EX + "Thing", 2, (EX + "source", 1), (REL + "note", 1)),
+            builders.relation(REL + "r1", EX + "Thing", 1),
+            builders.relation(EX + "memberOf", ORG + "Unit", 3),
+            builders.relation(None, None, 4),
+        ],
+    )
+    return analyse(builders.profile_run(person))
+
+
+def reified(analytics):
+    return classes(analytics)[EX + "Person"].reified_relations
+
+
+def test_a_reified_relation_of_an_excluded_property_or_object_class_is_dropped():
+    kept = reified(exclude_terms(reified_world(), {REL, ORG}, TABLE))
+    assert [r.property for r in kept] == [EX + "worksFor", None]
+
+
+def test_an_excluded_reifier_property_is_dropped_from_its_relation():
+    (works_for, _) = reified(exclude_terms(reified_world(), {REL}, TABLE))[0:2]
+    assert [p.property for p in works_for.reifier_properties] == [EX + "source"]
+
+
+def test_excluding_nothing_keeps_the_reified_relations():
+    assert reified(exclude_terms(reified_world(), set(), TABLE)) == reified(reified_world())
+
+
+def test_the_dropped_reified_terms_are_noted():
+    notes = {t.namespace: t for t in terms(exclude_terms(reified_world(), {REL, ORG}, TABLE))}
+    assert (notes[REL].properties, notes[ORG].classes) == (2, 1)
 
 
 def test_an_excluded_class_is_dropped_with_its_properties():
@@ -492,3 +533,29 @@ def test_a_property_keeps_its_value_types_unless_it_lost_an_object_class(run, ex
             assert [p.triples for p in prop_after.value_partitions or []] == [
                 p.triples for p in prop_before.value_partitions or []
             ]
+
+
+def relations_by_class(analytics):
+    return {c.class_iri: c.reified_relations or [] for g in analytics.graphs for c in g.class_partitions}
+
+
+@given(relation_runs(), excluded_sets)
+def test_no_relation_is_left_with_an_excluded_term_and_the_others_are_untouched(run, excluded):
+    before, table = analysed(run)
+    after = relations_by_class(exclude_terms(before, excluded, table))
+    for relations in after.values():
+        for relation in relations:
+            terms = [relation.property, relation.object_class, *(r.property for r in relation.reifier_properties or [])]
+            assert not any(t and is_excluded(t, excluded, table) for t in terms)
+    for iri, relations in relations_by_class(before).items():
+        for relation in (r for r in relations if iri in after):  # a class in an excluded namespace leaves with them
+            terms = [relation.property, relation.object_class, *(r.property for r in relation.reifier_properties or [])]
+            if not any(t and is_excluded(t, excluded, table) for t in terms):
+                assert relation in after[iri]
+
+
+@given(relation_runs(), excluded_sets)
+def test_filtering_relations_twice_is_filtering_once(run, excluded):
+    once = exclude_terms(*analysed(run)[:1], excluded, PrefixTable(run.namespaces))
+    twice = exclude_terms(once, excluded, PrefixTable(run.namespaces))
+    assert relations_by_class(twice) == relations_by_class(once)

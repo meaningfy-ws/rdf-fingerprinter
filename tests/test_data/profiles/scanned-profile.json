@@ -21,7 +21,8 @@
     "schema_graphs": [
       "http://publications.europa.eu/resources/authority/continents"
     ],
-    "pitfall_examples": 10
+    "pitfall_examples": 10,
+    "reifications": true
   },
   "graphs": [
     {
@@ -377,18 +378,6 @@
           "importance": "important",
           "scope": "data",
           "source": "rdf-fingerprinter (RDFUnit-style)",
-          "heuristic": false,
-          "count": 0,
-          "examples": [],
-          "seconds": 0.0
-        },
-        {
-          "check_id": "x_individual_as_predicate",
-          "title": "Typed individual used as a predicate",
-          "description": "a typed individual (or a subject with data) used as a predicate (singleton properties, versions as predicates).",
-          "importance": "critical",
-          "scope": "data",
-          "source": "rdf-fingerprinter",
           "heuristic": false,
           "count": 0,
           "examples": [],

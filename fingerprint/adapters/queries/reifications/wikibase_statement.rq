@@ -1,0 +1,31 @@
+# id: wikibase_statement
+# title: Wikibase statement node
+# family: n_ary
+# A subject linked by a claim predicate to a wikibase:Statement node; the relation is named by the claim
+# predicate (DEC-13) and, when the property entity declares it, wikibase:statementProperty gives the value.
+# REIFY wikibase_statement probe
+PREFIX wikibase: <http://wikiba.se/ontology#>
+ASK { $graph_open ?s ?predicate ?st . ?st a wikibase:Statement . $graph_close }
+# REIFY wikibase_statement relations
+PREFIX wikibase: <http://wikiba.se/ontology#>
+SELECT ?subjectClass ?predicate ?objectClass (COUNT(DISTINCT ?st) AS ?statements) WHERE {
+  $graph_open ?s ?predicate ?st . ?st a wikibase:Statement . ?s a ?subjectClass .
+  OPTIONAL { ?prop wikibase:claim ?predicate ; wikibase:statementProperty ?ps . ?st ?ps ?o . OPTIONAL { ?o a ?objectClass } }
+  $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY wikibase_statement reifier-properties
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX wikibase: <http://wikiba.se/ontology#>
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?st) AS ?reifiers) WHERE {
+  $graph_open ?s ?predicate ?st . ?st a wikibase:Statement . ?st ?reifierProperty ?v . ?s a ?subjectClass .
+  OPTIONAL { ?prop wikibase:claim ?predicate ; wikibase:statementProperty ?ps . ?st ?ps ?o . OPTIONAL { ?o a ?objectClass } }
+  FILTER(?reifierProperty != rdf:type && (!BOUND(?ps) || ?reifierProperty != ?ps)) $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
+# REIFY wikibase_statement hidden
+PREFIX wikibase: <http://wikiba.se/ontology#>
+SELECT DISTINCT ?term WHERE { $graph_open
+  { ?s ?predicate ?st . ?st a wikibase:Statement .
+    FILTER NOT EXISTS { ?s3 ?predicate ?o3 FILTER NOT EXISTS { ?o3 a wikibase:Statement } } BIND(?predicate AS ?term) }
+  UNION { ?s ?predicate ?st . ?st a wikibase:Statement ; a ?term .
+          FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?s2 ?claim2 ?x . ?x a wikibase:Statement . } } }
+  $graph_close }

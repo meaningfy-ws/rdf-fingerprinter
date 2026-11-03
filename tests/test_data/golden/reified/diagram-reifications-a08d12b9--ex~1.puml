@@ -1,0 +1,13 @@
+@startuml
+title Class diagram inferred by rdf-fingerprinter — ex:reifications — ex~1
+hide empty members
+
+class "ex:Address" as C2 {
+  ex:street : xsd:string [1]
+}
+class "ex:Office" as C11 {
+}
+
+
+C11 --> "1" C2 : ex:address
+@enduml

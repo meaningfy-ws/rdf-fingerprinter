@@ -168,6 +168,10 @@ class Generator:
             return iri
         return f"{entry.prefix}:{iri[len(entry.namespace) :]}"
 
+    def written(self, iri: str) -> str | None:
+        """The CURIE of an IRI that can be written, else None (the term is then left out and recorded as skipped)."""
+        return self.label(iri) if self.accepts(iri) else None
+
     # --- the walk ---
 
     def view(self) -> list[Any]:

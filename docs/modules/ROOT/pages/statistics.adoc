@@ -131,6 +131,7 @@ its own: a malformed value fails even when a source with higher precedence sets 
 | `timeout_seconds` | `--timeout` | 60 | Per-query timeout.
 | `concurrency` | `--concurrency` | 4 | Classes profiled at once.
 | `selected_graphs` | `--graph` (repeatable) | all | Graphs to profile; `""` is the default graph. Comma-separated in the environment variable.
+| `reifications` | `--reifications/--no-reifications` | on | Find reified relations and hide their machinery (xref:reifications.adoc[]).
 | `pitfall_scan` | `--pitfalls` | off | Scan each graph for modelling pitfalls (xref:pitfalls.adoc[]).
 | `schema_graphs` | `--schema-graph` (repeatable) | none | Graphs holding the ontology. Comma-separated in the environment variable.
 | `pitfall_examples` | `--pitfall-examples` | 10 | Example rows kept per pitfall check and graph.

@@ -24,6 +24,7 @@ from fingerprint.adapters.queries import (
     pitfall_ask_query,
     pitfall_count_query,
     pitfall_example_query,
+    reification_query,
     render,
     subjects_exact,
     subjects_limit,
@@ -55,6 +56,11 @@ from fingerprint.domain.profile import (
     ProfileRun,
     PropertyProfile,
     QueryKind,
+    ReificationCount,
+    ReificationKind,
+    ReificationTemplate,
+    ReifiedRelation,
+    ReifierProperty,
     Settings,
     SubclassEdge,
     TermAnnotation,
@@ -89,6 +95,7 @@ QUERY_KIND = {
     "Q11": QueryKind.incoming_links,
     "Q12": QueryKind.term_annotations,
     "PITFALL": QueryKind.pitfall,
+    "REIFY": QueryKind.reification,
 }
 
 
@@ -248,10 +255,10 @@ class _Collection:
     # --- per class ---
 
     def first_wave(
-        self, graph: str, cls: str, instances: int, mode: PrecisionMode, done: list[str]
+        self, graph: str, cls: str, instances: int, mode: PrecisionMode, done: list[str], hidden: frozenset[str] = frozenset()
     ) -> tuple[ClassProfile, Any]:
         """Q8 [+Q5] [+Q6, Q7] over one subject source, and that source for the second wave; `done` records the
-        queries run, for failure kinds."""
+        queries run, for failure kinds. Terms in `hidden` (reification machinery, P-4) are left out."""
         sample_shared = None
         if mode == EXACT:
             subjects = subjects_exact(graph, cls)
@@ -271,7 +278,7 @@ class _Collection:
         co_types = [
             CoTypeCount(class_iri=_term(r["d"]), subjects=_int(r["subjects"]))
             for r in self.select("Q8", graph, cls=cls, subjects=subjects)
-            if r["d"]
+            if r["d"] and _term(r["d"]) not in hidden
         ]
         # Rows of Q5–Q7 grouped by property IRI, in first-seen order; each property is built once below.
         order: list[str] = []
@@ -284,16 +291,19 @@ class _Collection:
                 order.append(iri)
             return iri
 
+        def wanted(r: ResultRow) -> bool:
+            return bool(r["p"]) and str(r["p"]) not in hidden  # an empty group may come back as one unbound row
+
         if self.depth_at_least(Depth.properties):
             done.append("Q5")
             for r in self.select("Q5", graph, subjects=subjects):
-                if r["p"]:  # an empty group may come back as one unbound row
+                if wanted(r):
                     histogram = bins.setdefault(seen(str(r["p"])), [])
                     histogram.append(CardinalityBin(values_per_subject=int(r["n"]), subjects=int(r["subjects"])))
         if self.depth_at_least(Depth.values):
             done.append("Q6")
             for r in self.select("Q6", graph, subjects=subjects):
-                if not r["p"]:
+                if not wanted(r):
                     continue
                 iri = seen(str(r["p"]))
                 distinct[iri] = distinct.get(iri, 0) + (_int(r["distinct"]) or 0)
@@ -301,7 +311,7 @@ class _Collection:
                     partitions.setdefault(iri, []).append(self.literal_partition(r))
             done.append("Q7")
             for r in self.select("Q7", graph, subjects=subjects):
-                if r["p"]:
+                if wanted(r):
                     partitions.setdefault(seen(str(r["p"])), []).append(
                         ValuePartition(
                             node_kind=NodeKind(str(r["kind"])),
@@ -347,7 +357,12 @@ class _Collection:
         )
 
     def second_wave(
-        self, graph: str, profile: ClassProfile, subjects: Any, predicates: list[PredicatePartition] | None
+        self,
+        graph: str,
+        profile: ClassProfile,
+        subjects: Any,
+        predicates: list[PredicatePartition] | None,
+        hidden: frozenset[str] = frozenset(),
     ) -> ClassProfile:
         cls, exact = profile.class_iri, profile.precision_mode == EXACT
         properties = list(profile.property_partitions or [])
@@ -373,20 +388,25 @@ class _Collection:
                 incoming = [
                     IncomingLink(subject_class=_text(r["sc"]), property=_text(r["p"]), triples=_int(r["triples"]))
                     for r in self.select("Q11", graph, subjects=subjects)
-                    if r["p"]
+                    if r["p"] and _text(r["p"]) not in hidden and _text(r["sc"]) not in hidden
                 ]
             except (SparqlError, IriRefError) as error:
                 self.fail("Q11", f"class {cls}: Q11 failed: {error}", graph, cls)
         return profile.model_copy(update={"property_partitions": properties, "incoming_links": incoming})
 
     def profile_class(
-        self, graph: str, cls: str, instances: int, predicates: list[PredicatePartition] | None
+        self,
+        graph: str,
+        cls: str,
+        instances: int,
+        predicates: list[PredicatePartition] | None,
+        hidden: frozenset[str] = frozenset(),
     ) -> ClassProfile | None:
         modes = MODES[self.settings.precision_policy]
         for index, mode in enumerate(modes):
             done: list[str] = []
             try:
-                profile, subjects = self.first_wave(graph, cls, instances, mode, done)
+                profile, subjects = self.first_wave(graph, cls, instances, mode, done, hidden)
                 break
             except IriRefError as error:
                 self.fail(done[-1] if done else "Q8", f"skipping {error.iri!r}: not usable in a SPARQL query", graph, cls)
@@ -408,7 +428,7 @@ class _Collection:
         else:
             self.fail(last, f"class {cls}: not profiled after {len(modes)} attempts", graph, cls, attempts=len(modes))
             return None
-        profile = self.second_wave(graph, profile, subjects, predicates)
+        profile = self.second_wave(graph, profile, subjects, predicates, hidden)
         queries = len(done)
         logger.info(
             "class %s: %s, %s of %s instances, %s queries", cls, mode.value, profile.observed_instances, instances, queries
@@ -438,13 +458,25 @@ class _Collection:
             for r in rows
         )
 
-    def profile_graph(self, graph: str, edges: list[SubclassEdge]) -> GraphProfile:
+    def profile_graph(self, graph: str, edges: list[SubclassEdge], stage: "_Reifications | None" = None) -> GraphProfile:
         label = graph or "default"
         logger.info("graph %s: profiling", label)
+        found = stage.found(graph) if stage else []  # first, at every depth (P-3)
+        captured, uncaptured = stage.relations(graph, found) if stage and self.depth_at_least(Depth.classes) else ([], set())
+        hidden = stage.hidden(graph, found, uncaptured) if stage else frozenset()  # P-8: only for kinds fully read
         result = self.graph_totals(graph) if self.settings.graph_statistics else GraphProfile(graph=graph or None)
+        if found and stage:
+            result = result.model_copy(
+                update={
+                    "reification_kinds": [ReificationKind(t.id) for t in found],
+                    "reification_counts": stage.counts(graph, found) or None,
+                }
+            )
         predicates = None
         if self.settings.graph_statistics or (self.settings.completeness_check and self.depth_at_least(Depth.properties)):
             predicates = self.predicates(graph)
+            if predicates is not None:
+                predicates = [p for p in predicates if p.property not in hidden]
             result = result.model_copy(update={"predicate_partitions": predicates or []})
         if not self.depth_at_least(Depth.classes):
             return result
@@ -452,12 +484,14 @@ class _Collection:
         for cls, instances in self.class_counts(graph):
             if cls.startswith(BLANK_NODE_PREFIX):
                 self.fail("Q3", f"skipping {cls!r}: not usable in a SPARQL query", graph, cls)
-            else:
+            elif cls not in hidden:
                 usable.append((cls, instances))
         ordered = sorted(usable, key=lambda pair: (-pair[1], pair[0]))
         with ThreadPoolExecutor(max_workers=self.settings.concurrency) as pool:
-            profiles = list(pool.map(lambda pair: self.profile_class(graph, pair[0], pair[1], predicates), ordered))
+            profiles = list(pool.map(lambda pair: self.profile_class(graph, pair[0], pair[1], predicates, hidden), ordered))
         profiled = [p for p in profiles if p]
+        if stage:
+            profiled = stage.attach(profiled, captured)
         return result.model_copy(
             update={
                 "declared_subclass_edges": edges,
@@ -476,6 +510,110 @@ def _pitfall_term(term: Any) -> PitfallTerm | None:
     if isinstance(term, BNode):
         return PitfallTerm(text=str(term), kind=NodeKind.blank_node)
     return PitfallTerm(text=str(term), kind=NodeKind.literal)
+
+
+def _iri(term: Any) -> str | None:
+    """A term as text when it is an IRI; a literal or blank node names nothing (P-7)."""
+    return str(term) if isinstance(term, URIRef) else None
+
+
+class _Reifications:
+    """The reification stage of one run (singleton-property-pattern design §B): per graph, probe each template, hide
+    the machinery of the kinds found and capture their relations. A failed query is recorded and degrades as P-8 says."""
+
+    def __init__(self, collection: "_Collection", templates: Sequence[ReificationTemplate]):
+        self.collection = collection
+        self.templates = list(templates)
+
+    def _send(self, graph: str, template: ReificationTemplate, section: str) -> Any:
+        """The answer of one section, or None after recording the failure."""
+        run = self.collection
+        query = reification_query(template, section, graph)
+        try:
+            return (run.sparql.ask if section == "probe" else run.sparql.select)(query)
+        except SparqlError as error:
+            run.fail(
+                "REIFY",
+                f"graph {graph or 'default'}: reification {template.id} {section} failed: {error}",
+                graph,
+                check_id=template.id,
+            )
+            return None
+
+    def _each(self, kinds: Sequence[ReificationTemplate], work: Any) -> list[Any]:
+        with ThreadPoolExecutor(max_workers=self.collection.settings.concurrency) as pool:  # map keeps the order
+            return list(pool.map(work, kinds))
+
+    def found(self, graph: str) -> list[ReificationTemplate]:
+        """The templates whose probe answers true; a failed probe counts as absent."""
+        answers = self._each(self.templates, lambda t: self._send(graph, t, "probe"))
+        return [t for t, answer in zip(self.templates, answers, strict=True) if answer]
+
+    def hidden(
+        self, graph: str, kinds: Sequence[ReificationTemplate], uncaptured: frozenset[str] | set[str] = frozenset()
+    ) -> frozenset[str]:
+        """The classes and predicates that implement the kinds found (P-4), except those of `uncaptured` kinds, whose
+        machinery stays ordinary (P-8); a failed `hidden` hides nothing."""
+        wanted = [t for t in kinds if t.hidden and t.id not in uncaptured]
+        rows = self._each(wanted, lambda t: self._send(graph, t, "hidden") or [])
+        return frozenset(_term(r["term"]) for answer in rows for r in answer if r["term"])
+
+    def counts(self, graph: str, kinds: Sequence[ReificationTemplate]) -> list[ReificationCount]:
+        """One count per kind found that has a `count` section; a kind whose count fails or comes back empty is left out."""
+        counted = []
+        for template in kinds:
+            rows = self._send(graph, template, "count") if template.count else None
+            if rows:
+                counted.append(ReificationCount(kind=ReificationKind(template.id), count=_int(rows[0]["count"]) or 0))
+        return counted
+
+    def relations(
+        self, graph: str, kinds: Sequence[ReificationTemplate]
+    ) -> tuple[list[tuple[str, ReifiedRelation]], set[str]]:
+        """((subject class, relation) of every kind found, reifier properties merged in; the ids of the kinds whose
+        relations or reifier-properties query failed, which give no relation)."""
+        wanted = [t for t in kinds if t.relations]
+        captured = self._each(wanted, lambda t: self._capture(graph, t))
+        failed = {t.id for t, pairs in zip(wanted, captured, strict=True) if pairs is None}
+        return [pair for pairs in captured if pairs for pair in pairs], failed
+
+    def _capture(self, graph: str, template: ReificationTemplate) -> list[tuple[str, ReifiedRelation]] | None:
+        """The kind's relations, or None when one of its queries failed."""
+        rows = self._send(graph, template, "relations")
+        reifiers = self._send(graph, template, "reifier-properties") if template.reifier_properties else []
+        if rows is None or reifiers is None:
+            return None
+        found: list[tuple[str, ReifiedRelation]] = []
+        for r in rows:
+            subject = _text(r["subjectClass"])
+            if subject is None or subject.startswith(BLANK_NODE_PREFIX):
+                continue  # an untyped subject has no class, a blank-node class cannot be profiled (P-7)
+            key = (subject, _iri(r["predicate"]), _iri(r["objectClass"]))
+            properties = [
+                ReifierProperty(property=_term(q["reifierProperty"]), reifiers=int(q["reifiers"]))
+                for q in reifiers
+                if q["reifierProperty"] and (_term(q["subjectClass"]), _iri(q["predicate"]), _iri(q["objectClass"])) == key
+            ]
+            properties.sort(key=lambda p: (-p.reifiers, p.property))
+            relation = ReifiedRelation(
+                kind=ReificationKind(template.id),
+                property=key[1],
+                object_class=key[2],
+                statements=_int(r["statements"]) or 0,
+                reifier_properties=properties or None,
+            )
+            found.append((subject, relation))
+        return found
+
+    @staticmethod
+    def attach(profiles: list[ClassProfile], relations: list[tuple[str, ReifiedRelation]]) -> list[ClassProfile]:
+        """Each class gets the relations of its subjects, sorted (P-6); those of classes not profiled are dropped (P-7)."""
+        attached = []
+        for profile in profiles:
+            own = [rel for subject, rel in relations if subject == profile.class_iri]
+            own.sort(key=lambda r: (-r.statements, r.property or "", r.object_class or "", r.kind))
+            attached.append(profile.model_copy(update={"reified_relations": own}) if own else profile)
+        return attached
 
 
 UNJOINED_DEFAULT = "the default graph's data checks ran without the schema graphs"
@@ -559,21 +697,29 @@ class _PitfallScan:
         )
 
 
-def collect(endpoint: str, settings: Settings, sparql: SparqlPort, checks: Sequence[PitfallCheck] = ()) -> ProfileRun:
+def collect(
+    endpoint: str,
+    settings: Settings,
+    sparql: SparqlPort,
+    checks: Sequence[PitfallCheck] = (),
+    templates: Sequence[ReificationTemplate] = (),
+) -> ProfileRun:
     """Collect the raw profile of every graph; raises EndpointUnreachable, records every other failure.
-    With `pitfall_scan` on, the `checks` run on every graph after it is profiled (pitfall-scans)."""
+    With `pitfall_scan` on, the `checks` run on every graph after it is profiled (pitfall-scans); with
+    `reifications` on, the `templates` are probed on every graph first (singleton-property-pattern)."""
     started = datetime.now(UTC)
     run = _Collection(endpoint, settings, sparql)
     named = run.named_graphs()
     graphs = list(settings.selected_graphs or ["", *named])
     scan = _PitfallScan(run, checks) if settings.pitfall_scan else None
+    stage = _Reifications(run, templates) if settings.reifications else None
     if scan:  # schema graphs are always profiled, so their schema findings have a place (design D-4)
         graphs += [g for g in scan.schema_graphs if g not in graphs]
     edges = run.declared_edges() if run.depth_at_least(Depth.classes) else []
     profiles = []
     for graph in graphs:
         try:
-            profile = run.profile_graph(graph, edges)
+            profile = run.profile_graph(graph, edges, stage)
             if scan:
                 profile = profile.model_copy(update={"pitfalls": scan.scan(graph)})
             profiles.append(profile)

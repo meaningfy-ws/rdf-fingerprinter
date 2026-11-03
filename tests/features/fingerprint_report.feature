@@ -310,3 +310,11 @@ Feature: The fingerprint report and the command line
       Given "ex:Person" declares the parents "ex:Agent", not profiled, and "ex:Thing", profiled
       When the report is rendered
       Then "ex:Agent" is a root node without count holding "ex:Person", and "ex:Thing" holds a see reference to "ex:Person"
+
+  Rule: Reified relations are reported
+
+    Scenario: Kinds found are named
+      Given a profile with resources used as predicates and rdf:Statement reifications
+      When the report is rendered
+      Then the graph summary names both kinds
+      And each subject class shows its reified relations

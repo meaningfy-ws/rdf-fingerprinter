@@ -15,7 +15,8 @@
     "acceptance_threshold": 0.95,
     "graph_statistics": false,
     "pitfall_scan": false,
-    "pitfall_examples": 10
+    "pitfall_examples": 10,
+    "reifications": true
   },
   "graphs": [
     {
