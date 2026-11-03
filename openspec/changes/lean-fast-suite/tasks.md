@@ -87,7 +87,7 @@ of them and a greedy set cover chose 72 to restore; a rerun of those 314 mutants
   `mutation.yml` on `release: published` + dispatch, no schedule; `ci.yml` comment updated.
   **Acceptance:** wiring tests "A release PR runs the release checks" and "Mutation testing runs
   after a release" green; `make check-all` green.
-- [ ] 6.2 Local release gate: `make oxigraph-load-test-data` then `make check-release`.
+- [x] 6.2 Local release gate: `make oxigraph-load-test-data` then `make check-release`.
   **Acceptance:** exit 0. (Exercising `release-check.yml` on GitHub needs a push — the developer decides.)
 
 ## 7. Docs and rules
