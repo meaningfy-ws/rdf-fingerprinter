@@ -10,6 +10,7 @@ from tests.builders import klass, literals, profile_run, prop
 from tests.refresh_sample_data import refreshed
 from tests.sample_data import (
     CONTINENTS,
+    REIFIED_COUNTS,
     REIFIED_HIDDEN_CLASSES,
     REIFIED_KINDS,
     REIFIED_ORDINARY_OWNER,
@@ -17,7 +18,6 @@ from tests.sample_data import (
     REIFIED_PERSON,
     REIFIED_PERSON_RELATIONS,
     REIFIED_PROFILE,
-    REIFIED_TRIPLE_TERMS,
     TREATIES,
     differences,
     same_profile,
@@ -106,7 +106,7 @@ def test_the_stored_reified_profile_agrees_with_the_named_facts():
     (graph,) = load_profile(REIFIED_PROFILE).graphs
     classes = {c.class_iri: c for c in graph.class_partitions}
     assert list(graph.reification_kinds) == list(REIFIED_KINDS)
-    assert graph.triple_term_reifications == REIFIED_TRIPLE_TERMS
+    assert {c.kind: c.count for c in graph.reification_counts} == dict(REIFIED_COUNTS)
     assert not set(REIFIED_HIDDEN_CLASSES) & set(classes)
     relations = classes[REIFIED_PERSON].reified_relations
     assert [

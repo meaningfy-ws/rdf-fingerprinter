@@ -98,7 +98,7 @@ enums:
       reification:
         description: A reification template query (singleton-property-pattern).
   ReificationKind:
-    description: The way a reification is expressed in the data (singleton-property-pattern, stage 1).
+    description: The way a reification is expressed in the data (singleton-property-pattern).
     permissible_values:
       rdf_statement:
         description: An rdf:Statement resource with rdf:subject, rdf:predicate and rdf:object.
@@ -110,6 +110,10 @@ enums:
         description: An owl:NegativePropertyAssertion that denies a triple through owl:sourceIndividual, owl:assertionProperty and owl:targetIndividual.
       triple_term:
         description: An RDF 1.2 reifier (rdf:reifies a triple term); counted per graph only, since SPARQL 1.1 cannot decompose triple terms.
+      graph_statement:
+        description: A named graph IRI described by triples of the profiled graph, so a statement is made about a whole graph; counted per graph only (P-17).
+      nanopublication:
+        description: A nanopublication head (np:hasAssertion) whose assertion, provenance and publication info live in their own graphs; counted per graph only (P-17).
 
   PitfallImportance:
     description: How serious a pitfall is; critical > important > minor (pitfall-scans DEC-1).
@@ -323,10 +327,11 @@ classes:
         range: ReificationKind
         multivalued: true
         description: The reification kinds found in the graph; left unset when none is found.
-      triple_term_reifications:
-        range: integer
-        minimum_value: 0
-        description: The rdf:reifies triples of the graph (singleton-property-pattern P-12).
+      reification_counts:
+        range: ReificationCount
+        multivalued: true
+        inlined_as_list: true
+        description: The occurrences of each count-only reification kind found in the graph (singleton-property-pattern P-18).
       predicate_partitions:
         range: PredicatePartition
         multivalued: true
@@ -481,6 +486,12 @@ classes:
         inlined_as_list: true
         description: The properties on the reifiers, with their reifier counts.
 
+  ReificationCount:
+    description: How often a count-only reification kind occurs in a graph (singleton-property-pattern P-18).
+    attributes:
+      kind: { range: ReificationKind, required: true }
+      count: { range: integer, required: true, minimum_value: 0 }
+
   ReificationTemplate:
     description: A packaged reification template, split into its sections (singleton-property-pattern P-2).
     attributes:
@@ -491,7 +502,7 @@ classes:
       relations: { description: "The SELECT of the reified relations per subject class." }
       reifier_properties: { description: "The SELECT of the properties on the reifiers." }
       hidden: { description: "The SELECT of the terms that implement the kind, hidden from the ordinary profile (P-4)." }
-      count: { description: "The SELECT counting rdf:reifies triples (triple_term only, P-12)." }
+      count: { description: "The SELECT counting the occurrences of a count-only kind (P-12, P-17)." }
 
   CoTypeCount:
     description: Observed instances that also have another class.

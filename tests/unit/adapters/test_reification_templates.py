@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import pytest
-from rdflib import RDF, Graph, Literal, Namespace, URIRef
+from rdflib import RDF, Dataset, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import DCTERMS, OWL, PROV
 
 from fingerprint.adapters.queries import reification_query
@@ -17,7 +17,11 @@ TEMPLATES = {t.id: t for t in packaged_templates()}
 
 @pytest.fixture(scope="module")
 def sample():
-    return Graph().parse(SAMPLE)
+    """A dataset (graph_statement needs named graphs): the sample is its default graph and the named graph it describes."""
+    dataset = Dataset()
+    dataset.parse(SAMPLE)
+    dataset.graph(EX.reifications).parse(SAMPLE)
+    return dataset
 
 
 def run(graph, kind, section):
@@ -36,7 +40,7 @@ def test_every_kind_is_found_in_the_sample(sample, kind):
 
 @pytest.mark.parametrize("kind", list(TEMPLATES))
 def test_no_kind_is_found_in_an_empty_graph(kind):
-    assert run(Graph(), kind, "probe") is False
+    assert run(Dataset(), kind, "probe") is False
 
 
 def test_a_property_typed_predicate_with_the_singleton_marker_is_still_ordinary():
@@ -107,7 +111,20 @@ def test_hidden_terms_of_the_sample(sample, kind):
 
 
 def test_a_property_only_predicate_is_hidden_by_no_kind(sample):
-    assert not any(RDF.Property in terms(sample, kind) or EX.legacy in terms(sample, kind) for kind in TEMPLATES)
+    assert not any(
+        RDF.Property in terms(sample, kind) or EX.legacy in terms(sample, kind) for kind in TEMPLATES if TEMPLATES[kind].hidden
+    )
+
+
+def test_graph_statement_counts_the_named_graphs_the_graph_describes(sample):
+    assert run(sample, "graph_statement", "count") == {(Literal(1),)}
+    assert TEMPLATES["graph_statement"].relations is None and TEMPLATES["graph_statement"].hidden is None
+
+
+def test_nanopublication_counts_the_heads_and_hides_its_vocabulary(sample):
+    NP = Namespace("http://www.nanopub.org/nschema#")
+    assert run(sample, "nanopublication", "count") == {(Literal(2),)}
+    assert terms(sample, "nanopublication") == {NP.Nanopublication, NP.hasAssertion, NP.hasProvenance, NP.hasPublicationInfo}
 
 
 def test_triple_term_counts_the_reifies_triples(sample):

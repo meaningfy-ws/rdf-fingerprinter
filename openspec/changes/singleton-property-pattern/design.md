@@ -129,7 +129,7 @@ New planning decisions; EPIC decisions are cited, not restated.
   association arrows, so absent or unprofiled object classes need no rule). `patterns.csv` and the
   glossary are unchanged in stage 1 (one row per property; documented).
 - **P-12 Triple terms are a graph-level count.** `triple_term` has `probe`, `count` and `hidden`
-  (`rdf:reifies`) sections and no relations; the count of `rdf:reifies` triples lands on `GraphProfile.triple_term_reifications`.
+  (`rdf:reifies`) sections and no relations; the count of `rdf:reifies` triples lands in `GraphProfile.reification_counts` (P-18).
 - **P-13 Release.** Stage 1 removes a packaged pitfall id (BREAKING for `--skip-pitfall
   x_individual_as_predicate`); the version bump is the developer's call at release (EPIC Impact).
   Stages 2–4 are MINOR.
@@ -138,7 +138,7 @@ New planning decisions; EPIC decisions are cited, not restated.
 
 | Layer | File | Change |
 |---|---|---|
-| model | `model/fingerprint_stats.yaml` | enum `ReificationKind` (stage-1 values: `rdf_statement`, `resource_as_predicate`, `owl_axiom`, `negative_property_assertion`, `triple_term`); classes `ReifiedRelation` (`kind`, `property` optional (the generic predicate; this slot name is in `IRI_FIELDS` of `fingerprint/service_layer/prefixes.py`, so its namespace gets a prefix), `object_class` optional, `statements`, `reifier_properties`) and `ReifierProperty` (`property`, `reifiers`); `ClassProfile.reified_relations`; `GraphProfile.reification_kinds` (optional; left unset, so absent from `profile.json`, when no kind is found, so the existing profiles do not change), `GraphProfile.triple_term_reifications`; slot `reifications` (boolean, `ifabsent: "true"`) in `Settings`; `QueryKind.reification` |
+| model | `model/fingerprint_stats.yaml` | enum `ReificationKind` (stage-1 values: `rdf_statement`, `resource_as_predicate`, `owl_axiom`, `negative_property_assertion`, `triple_term`); classes `ReifiedRelation` (`kind`, `property` optional (the generic predicate; this slot name is in `IRI_FIELDS` of `fingerprint/service_layer/prefixes.py`, so its namespace gets a prefix), `object_class` optional, `statements`, `reifier_properties`) and `ReifierProperty` (`property`, `reifiers`); `ClassProfile.reified_relations`; `GraphProfile.reification_kinds` (optional; left unset, so absent from `profile.json`, when no kind is found, so the existing profiles do not change), `GraphProfile.reification_counts` (`ReificationCount{kind, count}`, P-18); slot `reifications` (boolean, `ifabsent: "true"`) in `Settings`; `QueryKind.reification` |
 | model | `model/fingerprint_analytics.yaml` | `reifications` in `SettingsOverride` |
 | model | `model/fingerprint_views.yaml` | `reified_relations` on `DocumentClass`, `PatternBlock`, `ShexShape`, `NodeShape`, `DiagramClass` (a view class `ReifiedRelationView` with the rendered predicate, object class, count and reifier text) |
 | adapters | `fingerprint/adapters/reification_catalogue.py` (new) | `packaged_templates() -> list[ReificationTemplate]`: reads `queries/reifications/*.rq`, splits sections, validates P-2 |

@@ -32,6 +32,10 @@ def profile(fake, **cli):
     return run(fake, **cli).graphs[0]
 
 
+def counts(graph):
+    return {c.kind: c.count for c in graph.reification_counts or []}
+
+
 def classes(graph):
     return {c.class_iri.removeprefix(EX): c for c in graph.class_partitions or []}
 
@@ -49,10 +53,10 @@ def test_only_probes_hidden_terms_and_the_count_run_at_depth_graphs():
     graph = profile(fake, depth="graphs", graph_statistics=False)
     assert {s.split()[1] for s in sections(fake)} == {"probe", "hidden", "count"}
     assert list(graph.reification_kinds) == [
-        "negative_property_assertion", "owl_axiom", "rdf_statement", "resource_as_predicate",
-        "triple_term",
+        "graph_statement", "nanopublication", "negative_property_assertion", "owl_axiom", "rdf_statement",
+        "resource_as_predicate", "triple_term",
     ]  # fmt: skip
-    assert graph.triple_term_reifications == 1
+    assert counts(graph) == {"triple_term": 1, "graph_statement": 1, "nanopublication": 2}
 
 
 def test_graph_level_predicate_partitions_leave_out_the_machinery():
@@ -119,11 +123,11 @@ def test_a_failed_relations_query_omits_the_relations_but_keeps_the_hiding():
     assert ReificationKind.resource_as_predicate not in {r.kind for r in found["Person"].reified_relations}
 
 
-def test_a_failed_count_leaves_the_triple_term_count_unset():
+def test_a_failed_count_leaves_that_kind_uncounted():
     fake = sample()
     fake.on("REIFY", PermanentError("no"), when=fails_on("triple_term", "count"))
     result = run(fake, depth="graphs")
-    assert result.graphs[0].triple_term_reifications is None and [f.check_id for f in result.failures] == ["triple_term"]
+    assert "triple_term" not in counts(result.graphs[0]) and [f.check_id for f in result.failures] == ["triple_term"]
 
 
 def test_no_kind_found_leaves_the_kinds_unset_and_nothing_is_captured():
@@ -132,7 +136,7 @@ def test_no_kind_found_leaves_the_kinds_unset_and_nothing_is_captured():
     fake.add("ex:a", "ex:name", "n", GRAPH)
     fake.add("ex:legacy", "a", RDF + "Property", GRAPH)
     graph = profile(fake)
-    assert graph.reification_kinds is None and graph.triple_term_reifications is None
+    assert graph.reification_kinds is None and graph.reification_counts is None
     assert all(s.endswith("probe") for s in sections(fake))
 
 

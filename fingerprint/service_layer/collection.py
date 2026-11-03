@@ -56,6 +56,7 @@ from fingerprint.domain.profile import (
     ProfileRun,
     PropertyProfile,
     QueryKind,
+    ReificationCount,
     ReificationKind,
     ReificationTemplate,
     ReifiedRelation,
@@ -467,7 +468,7 @@ class _Collection:
             result = result.model_copy(
                 update={
                     "reification_kinds": [ReificationKind(t.id) for t in found],
-                    "triple_term_reifications": stage.count(graph, found),
+                    "reification_counts": stage.counts(graph, found) or None,
                 }
             )
         predicates = None
@@ -553,14 +554,14 @@ class _Reifications:
         rows = self._each(wanted, lambda t: self._send(graph, t, "hidden") or [])
         return frozenset(_term(r["term"]) for answer in rows for r in answer if r["term"])
 
-    def count(self, graph: str, kinds: Sequence[ReificationTemplate]) -> int | None:
-        """The `count` section of the kinds that have one (the triple terms, P-12)."""
+    def counts(self, graph: str, kinds: Sequence[ReificationTemplate]) -> list[ReificationCount]:
+        """One count per kind found that has a `count` section; a kind whose count fails or comes back empty is left out."""
+        counted = []
         for template in kinds:
-            if template.count:
-                rows = self._send(graph, template, "count")
-                if rows:
-                    return _int(rows[0]["count"])
-        return None
+            rows = self._send(graph, template, "count") if template.count else None
+            if rows:
+                counted.append(ReificationCount(kind=ReificationKind(template.id), count=_int(rows[0]["count"]) or 0))
+        return counted
 
     def relations(self, graph: str, kinds: Sequence[ReificationTemplate]) -> list[tuple[str, ReifiedRelation]]:
         """(subject class, relation) of every kind found, reifier properties merged in; failed kinds give none."""

@@ -16,7 +16,7 @@ for as reified relations of their class (OpenSpec change `singleton-property-pat
   `triple_term` (RDF 1.2 `rdf:reifies`, counted only). Only the kinds found are captured.
 - **Reified relations per class**: kind, property, object class, statements and reifier properties,
   in the report, the pattern schema (`~>` lines), the PlantUML diagram and `profile.json`
-  (`reified_relations`, `reification_kinds`, `triple_term_reifications`); ShExC and SHACL note them
+  (`reified_relations`, `reification_kinds`, `reification_counts`); ShExC and SHACL note them
   in comments, without constraints. See the new *Reified Relations* docs page.
 - **`--reifications/--no-reifications`** (setting `reifications`, on by default).
 

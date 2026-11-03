@@ -223,7 +223,7 @@ class DocumentGenerator(Generator):
             empty=not graph.class_partitions and not any(t.classes for t in graph.excluded_terms or []),
             classes=ordered,
             taxonomy=self.taxonomy(ordered),
-            reification_note=reification_note(graph.reification_kinds, graph.triple_term_reifications),
+            reification_note=reification_note(graph.reification_kinds, graph.reification_counts),
         )
 
     def taxonomy(self, classes: list[DocumentClass]) -> list[TaxonomyNode]:

@@ -24,10 +24,12 @@ def template(**sections):
     return HEADER + body
 
 
-def test_packaged_catalogue_holds_the_stage_one_kinds():
+def test_packaged_catalogue_holds_a_template_for_every_kind():
     templates = {t.id: t for t in packaged_templates()}
     assert set(templates) == set(ReificationKind)
-    assert templates["triple_term"].relations is None
+    assert all(
+        templates[k].relations is None and templates[k].count for k in ("triple_term", "graph_statement", "nanopublication")
+    )
     assert templates["rdf_statement"].reifier_properties
 
 

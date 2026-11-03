@@ -66,6 +66,16 @@ reifiers carry `rdf:singletonPropertyOf` (an ordinary reifier property) and one 
 | an `rdf:reifies` triple (RDF 1.2, RDF-star)
 | — (counted only)
 | `rdf:reifies`
+
+| `graph_statement`
+| a named graph IRI that is the subject of triples in the profiled graph
+| — (counted only)
+| —
+
+| `nanopublication`
+| a node with `np:hasAssertion`
+| — (counted only)
+| `np:Nanopublication`, `np:hasAssertion`, `np:hasProvenance`, `np:hasPublicationInfo`
 |===
 
 A class other than the fixed ones above (`ex:Link` in the example) is hidden only when *every* one of
@@ -105,7 +115,7 @@ probe, run with `--no-reifications`.
 | Enriched ShExC (`shex-<graph>.shex`) | The same line as a `#` comment inside the class's shape; no triple constraint.
 | SHACL shapes (`shapes-<graph>.ttl`) | An `rdfs:comment "Reified relation: ~> …"` on the class's node shape; no property shape, no constraint.
 | PlantUML (`diagram-<graph>--<module>.puml`) | A `-- reified --` compartment in the class box, one line per relation without the leading `~>`; no association arrow.
-| `profile.json` | Per class, `reified_relations` (`kind`, `property`, `object_class`, `statements`, `reifier_properties` with `property` and `reifiers`). Per graph, `reification_kinds` (absent when none is found) and `triple_term_reifications`.
+| `profile.json` | Per class, `reified_relations` (`kind`, `property`, `object_class`, `statements`, `reifier_properties` with `property` and `reifiers`). Per graph, `reification_kinds` (absent when none is found) and `reification_counts` (per count-only kind: `kind` and `count`).
 |===
 
 The validation shapes note the relations and never constrain them. A graph with no reification gets
@@ -152,8 +162,10 @@ recognise.
   property rows, reifiers included.
 * **Untyped subjects are dropped.** A reified statement whose subject has no class, or only a
   blank-node class, has no class to be filed under and is counted nowhere.
-* **Triple terms are counted only.** SPARQL 1.1 cannot take a triple term apart, so `triple_term`
-  gives a per-graph count and no relation.
+* **Triple terms, graph statements and nanopublications are counted only.** SPARQL 1.1 cannot take a
+  triple term apart, and the other two put each statement in its own graph, which the per-graph
+  collection cannot relate to a class. Each gives a per-graph count (`reification_counts`) and no
+  relation.
 * **A `negative_property_assertion` relation is a denial.** It says the subject is *not* linked to the
   object by the property. The suffix `via negative_property_assertion` is the only sign of that in the
   `~>` line, the ShExC and SHACL comments and the diagram; read it before reading the relation as a

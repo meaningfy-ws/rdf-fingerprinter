@@ -1,4 +1,4 @@
-# One instance of each stage-1 reification kind (singleton-property-pattern design §C, §D).
+# One instance of each reification kind of stages 1 and 2 (singleton-property-pattern design §C, §D).
 # Collected in memory into the named graph http://example.org/reifications, never loaded in Oxigraph.
 @prefix ex:   <http://example.org/> .
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
@@ -41,3 +41,13 @@ ex:legacy a rdf:Property .
 
 # triple_term: the object is an IRI standing in for a triple term (rdflib cannot parse RDF 1.2).
 ex:r1 rdf:reifies ex:tripleTermStandIn .
+
+# graph_statement: the graph describes itself, so a named graph is the subject of triples.
+<http://example.org/reifications> dct:source ex:survey .
+
+# nanopublication: two heads whose assertion, provenance and publication info would live in their own graphs.
+@prefix np: <http://www.nanopub.org/nschema#> .
+ex:np1 a np:Nanopublication ; np:hasAssertion ex:np1-assertion ;
+       np:hasProvenance ex:np1-provenance ; np:hasPublicationInfo ex:np1-info .
+ex:np2 a np:Nanopublication ; np:hasAssertion ex:np2-assertion ;
+       np:hasProvenance ex:np2-provenance ; np:hasPublicationInfo ex:np2-info .

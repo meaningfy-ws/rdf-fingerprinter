@@ -5,7 +5,7 @@ One formatter, so the report, the pattern schema, ShExC, SHACL and PlantUML prin
 
 from collections.abc import Callable
 
-from fingerprint.domain.profile import ReificationKind, ReifiedRelation
+from fingerprint.domain.profile import ReificationCount, ReificationKind, ReifiedRelation
 from fingerprint.domain.views import ReifiedRelationView
 
 KIND_LABELS = {
@@ -14,6 +14,8 @@ KIND_LABELS = {
     ReificationKind.owl_axiom: "OWL axiom",
     ReificationKind.negative_property_assertion: "negative property assertion",
     ReificationKind.triple_term: "triple term",
+    ReificationKind.graph_statement: "graph statement",
+    ReificationKind.nanopublication: "nanopublication",
 }  # dict-ok: module-level lookup table
 UNNAMED = "unnamed"
 
@@ -39,9 +41,12 @@ def relation_view(relation: ReifiedRelation, name: Callable[[str], str | None]) 
     )
 
 
-def reification_note(kinds: list[ReificationKind] | None, triple_terms: int | None) -> str | None:
-    """The graph summary line: the kinds found and, when not zero, the triple-term count; None when none was found."""
+def reification_note(kinds: list[ReificationKind] | None, counts: list[ReificationCount] | None) -> str | None:
+    """The graph summary line: the kinds found and each non-zero count ("1 triple term"); None when no kind was found."""
     if not kinds:
         return None
     names = ", ".join(sorted(KIND_LABELS[ReificationKind(k)] for k in kinds))
-    return f"Reifications found: {names}" + (f"; {triple_terms} triple terms." if triple_terms else ".")
+    counted = [
+        f"{c.count} {KIND_LABELS[ReificationKind(c.kind)]}{'' if c.count == 1 else 's'}" for c in counts or [] if c.count
+    ]
+    return f"Reifications found: {names}" + (f"; {', '.join(counted)}." if counted else ".")

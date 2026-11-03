@@ -25,13 +25,28 @@
     {
       "graph": "http://example.org/reifications",
       "reification_kinds": [
+        "graph_statement",
+        "nanopublication",
         "negative_property_assertion",
         "owl_axiom",
         "rdf_statement",
         "resource_as_predicate",
         "triple_term"
       ],
-      "triple_term_reifications": 1,
+      "reification_counts": [
+        {
+          "kind": "graph_statement",
+          "count": 1
+        },
+        {
+          "kind": "nanopublication",
+          "count": 2
+        },
+        {
+          "kind": "triple_term",
+          "count": 1
+        }
+      ],
       "declared_subclass_edges": [],
       "class_partitions": [
         {

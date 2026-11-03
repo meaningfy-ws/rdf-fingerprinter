@@ -384,14 +384,49 @@ Feature: Collecting raw statistics from a knowledge graph
 
     @stage4
     Scenario: Relation through a blank node
-      Given subjects of class "ex:A" each pointing with "ex:role" to a blank node that carries "ex:agent" and "ex:since", the blank node not being a list or an OWL construct
+      Given subjects of class "ex:A" each pointing with "ex:role" to an untyped blank node that carries "ex:agent" and "ex:since", the blank node not being a list or an OWL construct
       When the graph is profiled
       Then class "ex:A" has one reified relation of kind blank n-ary, "ex:role", with reifier properties "ex:agent" and "ex:since"
+
+    @stage4
+    Scenario: A typed blank node stays ordinary
+      Given subjects of class "ex:A" each pointing with "ex:address" to a blank node typed "ex:Address" that carries "ex:street"
+      When the graph is profiled
+      Then class "ex:Address" is profiled with property "ex:street" as before
+      And class "ex:A" has no reified relation for "ex:address"
+
+    @stage4
+    Scenario: Structured value
+      Given subjects of class "ex:A" each with "ex:height" pointing to a node with "rdf:value" and "ex:unit"
+      When the graph is profiled
+      Then class "ex:A" has one reified relation of kind structured value, "ex:height", with reifier property "ex:unit"
+
+    @stage3
+    Scenario: PROV qualified association
+      Given 4 subjects of class "ex:Run", each with a "prov:qualifiedAssociation" node whose "prov:agent" is of class "ex:Team" and which carries "prov:hadRole"
+      When the graph is profiled
+      Then class "ex:Run" has one reified relation of kind PROV qualified, "prov:wasAssociatedWith" to "ex:Team", 4 statements
+      And its reifier property "prov:hadRole" is on 4
+      And class "ex:Run" has no ordinary property "prov:qualifiedAssociation"
+
+    @stage3
+    Scenario: SKOS-XL labels
+      Given concepts of class "skos:Concept" with "skosxl:prefLabel" nodes typed "skosxl:Label" carrying "skosxl:literalForm"
+      When the graph is profiled
+      Then class "skos:Concept" has one reified relation of kind SKOS-XL label, "skos:prefLabel"
+      And the profile has no class "skosxl:Label"
+
+    Scenario: Nanopublications are counted
+      Given a graph holding 3 nanopublication heads with "np:hasAssertion", "np:hasProvenance" and "np:hasPublicationInfo"
+      When the graph is profiled
+      Then the graph profile counts 3 nanopublications
+      And no class has a relation for them
+      And the profile has no class "np:Nanopublication"
 
     Scenario: RDF-star is counted only
       Given a graph with 12 rdf:reifies triples
       When the graph is profiled
-      Then the graph profile records 12 triple-term reifications
+      Then the graph profile counts 12 triple terms
       And no class has a relation for them
 
   Rule: Reification machinery is not an ordinary class or property

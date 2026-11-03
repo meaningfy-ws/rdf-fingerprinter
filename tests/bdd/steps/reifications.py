@@ -2,9 +2,11 @@
 
 from pytest_bdd import given, parsers, then, when
 
+from fingerprint.domain.profile import ReificationKind
 from tests.bdd.steps.statistics import EX, RDF, expand, fingerprint, graph, klass, people
 
 PROV = "http://www.w3.org/ns/prov#"
+NP = "http://www.nanopub.org/nschema#"
 SINGLETON = RDF + "singletonPropertyOf"
 KINDS = {
     "RDF statement": "rdf_statement",
@@ -13,7 +15,10 @@ KINDS = {
 
 
 def iri(curie: str) -> str:
-    return PROV + curie.removeprefix("prov:") if curie.startswith("prov:") else expand(curie)
+    for prefix, ns in (("prov:", PROV), ("np:", NP)):
+        if curie.startswith(prefix):
+            return ns + curie.removeprefix(prefix)
+    return expand(curie)
 
 
 def link(fake, i, predicate, subject_class="ex:A", object_class="ex:B"):
@@ -84,8 +89,7 @@ def rdf_statements(ctx, n, a, p, b):
 
 @given(
     parsers.parse(
-        'predicate IRIs typed "{t}", not a property type, '
-        'linking class "{a}" to class "{b}", one of them used {n:d} times'
+        'predicate IRIs typed "{t}", not a property type, linking class "{a}" to class "{b}", one of them used {n:d} times'
     )
 )
 def resources_as_predicates(ctx, t, a, b, n):
@@ -116,6 +120,15 @@ def reifies(ctx):
     people(ctx["fake"], 1)
     for i in range(12):
         ctx["fake"].add(f"ex:r{i}", RDF + "reifies", f"ex:t{i}")
+
+
+@given(parsers.parse('a graph holding {n:d} nanopublication heads with "{assertion}", "{provenance}" and "{info}"'))
+def nanopublications(ctx, n, assertion, provenance, info):
+    people(ctx["fake"], 1)
+    for i in range(n):
+        ctx["fake"].add(f"ex:np{i}", "a", NP + "Nanopublication")
+        for predicate, part in ((assertion, "assertion"), (provenance, "provenance"), (info, "info")):
+            ctx["fake"].add(f"ex:np{i}", iri(predicate), f"ex:np{i}-{part}")
 
 
 @given(
@@ -216,9 +229,18 @@ def none_reported(ctx):
     assert all(c.reified_relations is None for c in graph(ctx["run"]).class_partitions)
 
 
-@then("the graph profile records 12 triple-term reifications")
+def counted(ctx, kind, n):
+    assert {(c.kind, c.count) for c in graph(ctx["run"]).reification_counts} >= {(kind, n)}
+
+
+@then("the graph profile counts 12 triple terms")
 def triple_terms(ctx):
-    assert graph(ctx["run"]).triple_term_reifications == 12
+    counted(ctx, ReificationKind.triple_term, 12)
+
+
+@then(parsers.parse("the graph profile counts {n:d} nanopublications"))
+def nanopublications_counted(ctx, n):
+    counted(ctx, ReificationKind.nanopublication, n)
 
 
 @then("no class has a relation for them")
@@ -230,6 +252,11 @@ def no_relations(ctx):
 def no_singleton_rows(ctx, curie):
     found = {p.property for p in klass(ctx["run"], curie).property_partitions}
     assert not {EX + f"sp{i}" for i in range(ctx["n"])} & found
+
+
+@then(parsers.parse('the profile has no class "{curie}"'))
+def profile_lacks_class(ctx, curie):
+    assert iri(curie) not in {c.class_iri for c in graph(ctx["run"]).class_partitions}
 
 
 @then(parsers.parse('class "{curie}" is absent'))

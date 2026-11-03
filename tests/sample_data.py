@@ -61,12 +61,14 @@ REIFIED_HIDDEN_CLASSES = (
     "http://www.w3.org/1999/02/22-rdf-syntax-ns#Statement",
     "http://www.w3.org/2002/07/owl#Axiom",
     "http://www.w3.org/2002/07/owl#NegativePropertyAssertion",
+    "http://www.nanopub.org/nschema#Nanopublication",
 )
 REIFIED_KINDS = (
-    "negative_property_assertion", "owl_axiom", "rdf_statement", "resource_as_predicate",
-    "triple_term",
+    "graph_statement", "nanopublication", "negative_property_assertion", "owl_axiom", "rdf_statement",
+    "resource_as_predicate", "triple_term",
 )  # fmt: skip
-REIFIED_TRIPLE_TERMS = 1
+# The count-only kinds: kind -> occurrences (one ex:r1 reifier, the graph describing itself, two nanopublication heads).
+REIFIED_COUNTS = (("graph_statement", 1), ("nanopublication", 2), ("triple_term", 1))
 # Typed only rdf:Property and used once: stays an ordinary property of ex:Org.
 REIFIED_ORDINARY_PREDICATE = "http://example.org/legacy"
 REIFIED_ORDINARY_OWNER = "http://example.org/Org"
