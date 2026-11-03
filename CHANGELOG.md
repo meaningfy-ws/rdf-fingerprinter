@@ -6,6 +6,11 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.4.1] - 2026-11-03
+
+No change to the published package: the test suite, the make targets and CI are reorganised
+(OpenSpec change `lean-fast-suite`).
+
 ### Changed
 - **One feature gate: `make check-all`** runs in parallel (pytest-xdist) and includes the Hypothesis
   tests (`ci` profile) and the coverage floors. CI runs it on every PR.
