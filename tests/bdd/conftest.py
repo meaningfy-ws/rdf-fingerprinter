@@ -72,3 +72,10 @@ def lookups(monkeypatch):
 
     monkeypatch.setattr(cli, "PrefixCcList", Recording)
     return built
+
+
+def pytest_bdd_apply_tag(tag, function):
+    """`@stage4` scenarios wait for a later stage of their change and are skipped."""
+    if tag == "stage4":
+        return pytest.mark.skip(reason="stage 4")(function)
+    return None

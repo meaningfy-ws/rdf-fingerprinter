@@ -345,3 +345,69 @@ Feature: Collecting raw statistics from a knowledge graph
       Then "ex:Person" is in the profile
       And the graph has no term annotations
       And one failure of kind "term_annotations" is recorded
+
+  Rule: Reifications are probed, then captured by kind
+
+    Scenario: Kind absent
+      Given a graph with no rdf:Statement node
+      When the graph is profiled
+      Then the collector issues the rdf:Statement probe and not its capture query
+
+    Scenario: Switch off
+      Given reifications is off
+      When a graph with singleton properties is profiled
+      Then no probe is issued
+      And every singleton predicate IRI is an ordinary property
+
+    Scenario: Singleton properties of one generic property
+      Given 500 distinct predicate IRIs each linking a subject of class "ex:A" to an object of class "ex:B", each with rdf:singletonPropertyOf "ex:isRelatedTo" and "prov:wasAttributedTo"
+      When the graph is profiled
+      Then class "ex:A" has one reified relation of kind singleton property, "ex:isRelatedTo" to "ex:B", 500 statements
+      And its reifier property "prov:wasAttributedTo" is on 500
+
+    Scenario: RDF reification
+      Given 30 rdf:Statement nodes whose rdf:subject is of class "ex:A", rdf:predicate is "ex:p" and rdf:object is of class "ex:B"
+      When the graph is profiled
+      Then class "ex:A" has one reified relation of kind RDF statement, "ex:p" to "ex:B", 30 statements
+
+    Scenario: Resource used as predicate with no marker
+      Given predicate IRIs typed "ex:Procedure", not a property type, and no rdf:singletonPropertyOf, linking class "ex:A" to class "ex:B", one of them used 25 times
+      When the graph is profiled
+      Then class "ex:A" has one reified relation of kind resource as predicate, named "ex:Procedure", to "ex:B", counting every use
+
+    Scenario: A predicate typed only as a property is ordinary
+      Given predicate IRIs typed only rdf:Property, used once each, with no rdf:singletonPropertyOf
+      When the graph is profiled
+      Then each stays an ordinary property
+      And no reified relation is reported for them
+
+    @stage4
+    Scenario: Relation through a blank node
+      Given subjects of class "ex:A" each pointing with "ex:role" to a blank node that carries "ex:agent" and "ex:since", the blank node not being a list or an OWL construct
+      When the graph is profiled
+      Then class "ex:A" has one reified relation of kind blank n-ary, "ex:role", with reifier properties "ex:agent" and "ex:since"
+
+    Scenario: RDF-star is counted only
+      Given a graph with 12 rdf:reifies triples
+      When the graph is profiled
+      Then the graph profile records 12 triple-term reifications
+      And no class has a relation for them
+
+  Rule: Reification machinery is not an ordinary class or property
+
+    Scenario: Singleton predicates leave the property rows
+      Given 500 distinct predicate IRIs each linking a subject of class "ex:A" to an object of class "ex:B", each with rdf:singletonPropertyOf "ex:isRelatedTo" and "prov:wasAttributedTo"
+      When the graph is profiled
+      Then class "ex:A" has no ordinary property for any of the 500 predicate IRIs
+
+    Scenario: A class with reifiers and ordinary instances stays whole
+      Given 3 singleton predicate IRIs typed rdf:Property and "ex:Link", and 2 ordinary predicates typed rdf:Property only
+      When the graph is profiled
+      Then class "ex:Link" is absent
+      And class rdf:Property is present with 5 instances
+
+    Scenario: rdf:Statement leaves the classes
+      Given 30 rdf:Statement nodes whose rdf:subject is of class "ex:A", rdf:predicate is "ex:p" and rdf:object is of class "ex:B"
+      When the graph is profiled
+      Then the profile has no class rdf:Statement
+      And it has no property rdf:subject, rdf:predicate or rdf:object

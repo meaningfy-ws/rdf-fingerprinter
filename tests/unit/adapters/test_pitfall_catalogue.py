@@ -22,7 +22,7 @@ def test_heuristic_checks_are_minor():
 
 def test_a_user_check_with_a_new_id_is_added(tmp_path):
     folder = write(tmp_path / "u", "mine.rq", HEADER.format(id="mine") + SELECT)
-    assert len(load_catalogue(folder)) == 30
+    assert len(load_catalogue(folder)) == 29
 
 
 def test_skip_and_an_empty_catalogue(tmp_path):

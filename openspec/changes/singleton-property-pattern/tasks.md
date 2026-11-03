@@ -7,11 +7,11 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## 0. Scenarios first
 
-- [ ] 0.1 Write every scenario of the five spec deltas (design "Test case specifications" table) into its feature file with the spec's title, via `bdd-gherkin`; tag "Relation through a blank node" `@stage4`; add the `pytest_bdd_apply_tag` hook to `tests/bdd/conftest.py` (P-15 row of the layering table); `tests/guards/test_traceability.py` green
+- [x] 0.1 Write every scenario of the five spec deltas (design "Test case specifications" table) into its feature file with the spec's title, via `bdd-gherkin`; tag "Relation through a blank node" `@stage4`; add the `pytest_bdd_apply_tag` hook to `tests/bdd/conftest.py` (P-15 row of the layering table); `tests/guards/test_traceability.py` green
 
 ## 1. Remove the pitfall `x_individual_as_predicate` (DEC-10)
 
-- [ ] 1.1 Delete `fingerprint/adapters/queries/pitfalls/x_individual_as_predicate.rq`; remove it from `tests/unit/adapters/test_pitfall_checks.py`, `tests/unit/service_layer/test_pitfall_scan.py` (the clean-graph test keeps `p19_multiple_domains_or_ranges` and `p35_untyped_property`), `tests/bdd/steps/pitfalls.py`; the row in `docs/modules/ROOT/pages/pitfalls.adoc`; drop its result from `tests/test_data/profiles/scanned-profile.json` by hand (design §D: no target refreshes it); `make refresh-golden`; only `golden/scanned/main.html` changes, by that check's name — binds pitfall-scans "Catalogue size" (28) and "Each check finds its pitfall and only it"
+- [x] 1.1 Delete `fingerprint/adapters/queries/pitfalls/x_individual_as_predicate.rq`; remove it from `tests/unit/adapters/test_pitfall_checks.py`, `tests/unit/service_layer/test_pitfall_scan.py` (the clean-graph test keeps `p19_multiple_domains_or_ranges` and `p35_untyped_property`), `tests/bdd/steps/pitfalls.py`; the row in `docs/modules/ROOT/pages/pitfalls.adoc`; drop its result from `tests/test_data/profiles/scanned-profile.json` by hand (design §D: no target refreshes it); `make refresh-golden`; only `golden/scanned/main.html` changes, by that check's name — binds pitfall-scans "Catalogue size" (28) and "Each check finds its pitfall and only it"
 
 ## 2. Model (design "Layering and modules")
 
@@ -54,7 +54,7 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## Roadmap
 
-- [ ] 0.1 · [ ] 1.1 · [ ] 2.1 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 0.1 · [x] 1.1 · [ ] 2.1 · [ ] 3.1 · [ ] 3.2 · [ ] 3.3 · [ ] 4.1 · [ ] 4.2 · [ ] 4.3 · [ ] 5.1 · [ ] 5.2 · [ ] 5.3 · [ ] 6.1 · [ ] 6.2 · [ ] 7.1 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

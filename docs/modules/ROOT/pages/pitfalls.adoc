@@ -3,7 +3,7 @@
 
 The fingerprint says what a dataset holds. The pitfall scan says what is wrong with how it is
 modelled: relations used but never defined, classes declared twice under one label, properties with
-two domains, individuals used as predicates. It runs in the same pass, against the same endpoint,
+two domains. It runs in the same pass, against the same endpoint,
 and the findings land next to the profile.
 
 [source,bash]
@@ -126,7 +126,6 @@ infer a type rather than report an error.
 | `p38_no_ontology_declaration` | important | schema |  | OOPS! P38 | No owl:Ontology declaration
 | `p41_no_license` | important | schema |  | OOPS! P41 | Ontology without a licence
 | `x_domain_violation` | important | data |  | rdf-fingerprinter (RDFUnit-style) | Subjects outside a property's declared domain
-| `x_individual_as_predicate` | critical | data |  | rdf-fingerprinter | Typed individual used as a predicate
 | `x_punning_class_and_property` | important | data |  | rdf-fingerprinter | IRI used as a class and as a property
 | `x_range_violation` | important | data |  | rdf-fingerprinter (RDFUnit-style) | IRI objects outside an object property's declared range
 |===

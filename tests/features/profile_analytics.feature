@@ -111,3 +111,11 @@ Feature: Deriving analytics from the raw statistics
       When the analytics are computed
       Then it is marked not exact
       And it has no min, max, mean, confidence or label
+
+  Rule: Class analytics carry reified relations
+
+    Scenario: Relations follow their class
+      Given a profile where class "ex:A" has two reified relations
+      When the analytics are computed
+      Then the class analytics of "ex:A" list both relations
+      And its property analytics include neither

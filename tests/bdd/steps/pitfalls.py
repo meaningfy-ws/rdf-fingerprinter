@@ -41,7 +41,7 @@ BAD = {
     + "SELECT ?entity ?property ?value FROM <urn:g> WHERE { ?entity ?property ?value }\n",
 }
 # Scenarios that need only a few checks run a narrowed catalogue (one data, one schema, plus the checks they name);
-# the others, whose assertion is about the whole catalogue, are absent and run all 29 (lean-fast-suite P-4).
+# the others, whose assertion is about the whole catalogue, are absent and run all 28 (lean-fast-suite P-4).
 NARROWED = {
     "test_scan_with_a_schema_graph": ("p35_untyped_property", "p19_multiple_domains_or_ranges"),
     "test_the_default_graph_runs_without_the_schema": ("p35_untyped_property", "p19_multiple_domains_or_ranges"),
@@ -51,11 +51,7 @@ NARROWED = {
     "test_a_check_that_finds_nothing": ("p35_untyped_property", "p25_inverse_of_itself"),
     "test_a_user_check_replaces_a_packaged_one": ("p35_untyped_property", "p22_class_naming"),
     "test_skipped_check": ("p35_untyped_property", "p13_missing_inverse"),
-    "test_exit_status_from_findings": (
-        "p35_untyped_property",
-        "p19_multiple_domains_or_ranges",
-        "x_individual_as_predicate",
-    ),
+    "test_exit_status_from_findings": ("p35_untyped_property", "p19_multiple_domains_or_ranges"),
 }
 
 
@@ -125,10 +121,11 @@ def check_metadata(ctx, check_id, importance, scope, source):
     assert (check.importance, check.scope, check.source) == (importance, scope, source)
 
 
-@then("it holds 29 checks with unique ids, each OOPS!-derived one naming its pitfall code")
+@then("it holds 28 checks, each with a unique id, none of them x_individual_as_predicate, and every OOPS!-derived check's source names its pitfall code")
 def catalogue_size(ctx):
     ids = [c.check_id for c in ctx["checks"]]
-    assert len(ids) == 29 == len(set(ids))
+    assert len(ids) == 28 == len(set(ids))
+    assert "x_individual_as_predicate" not in ids
     assert all(c.source.startswith("OOPS! P") for c in ctx["checks"] if not c.check_id.startswith("x_"))
 
 
