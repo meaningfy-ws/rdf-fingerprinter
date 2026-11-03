@@ -7,15 +7,18 @@ from tests.bdd.steps.statistics import EX, RDF, expand, fingerprint, graph, klas
 
 PROV = "http://www.w3.org/ns/prov#"
 NP = "http://www.nanopub.org/nschema#"
+SKOS = "http://www.w3.org/2004/02/skos/core#"
+SKOSXL = "http://www.w3.org/2008/05/skos-xl#"
 SINGLETON = RDF + "singletonPropertyOf"
 KINDS = {
     "RDF statement": "rdf_statement",
     "resource as predicate": "resource_as_predicate",
+    "PROV qualified": "prov_qualified",
 }  # dict-ok: module-level lookup table
 
 
 def iri(curie: str) -> str:
-    for prefix, ns in (("prov:", PROV), ("np:", NP)):
+    for prefix, ns in (("prov:", PROV), ("np:", NP), ("skos:", SKOS), ("skosxl:", SKOSXL)):
         if curie.startswith(prefix):
             return ns + curie.removeprefix(prefix)
     return expand(curie)
@@ -133,6 +136,36 @@ def nanopublications(ctx, n, assertion, provenance, info):
 
 @given(
     parsers.parse(
+        '{n:d} subjects of class "{cls}", each with a "{qualified}" node whose "{link}" is of class "{target}" '
+        'and which carries "{reifier}"'
+    )
+)
+def qualified_nodes(ctx, n, cls, qualified, link, target, reifier):
+    for i in range(n):
+        fake = ctx["fake"]
+        fake.add(f"ex:s{i}", "a", cls)
+        fake.add(f"ex:s{i}", iri(qualified), f"ex:q{i}")
+        fake.add(f"ex:q{i}", iri(link), f"ex:o{i}")
+        fake.add(f"ex:o{i}", "a", target)
+        fake.add(f"ex:q{i}", iri(reifier), "ex:role")
+
+
+@given(
+    parsers.parse(
+        'concepts of class "{cls}" with "{plain}" literals and "{label}" nodes typed "{label_class}" carrying "{literal}"'
+    )
+)
+def skosxl_labels(ctx, cls, plain, label, label_class, literal):
+    for i in range(2):
+        ctx["fake"].add(f"ex:c{i}", "a", iri(cls))
+        ctx["fake"].add(f"ex:c{i}", iri(plain), f"label {i}")
+        ctx["fake"].add(f"ex:c{i}", iri(label), f"ex:l{i}")
+        ctx["fake"].add(f"ex:l{i}", "a", iri(label_class))
+        ctx["fake"].add(f"ex:l{i}", iri(literal), f"label {i}")
+
+
+@given(
+    parsers.parse(
         '3 singleton predicate IRIs typed rdf:Property and "{cls}", and 2 ordinary predicates typed rdf:Property only'
     )
 )
@@ -198,6 +231,17 @@ def one_relation(ctx, curie, kind, p, target, count):
     only_relation(ctx, curie, kind, p, target, count)
 
 
+@then(parsers.parse('class "{curie}" has the ordinary properties "{p}" and "{q}"'))
+def ordinary_properties(ctx, curie, p, q):
+    found = {x.property for x in klass(ctx["run"], iri(curie)).property_partitions}
+    assert {iri(p), iri(q)} <= found
+
+
+@then(parsers.parse('class "{curie}" is profiled with property "{p}"'))
+def profiled_with_property(ctx, curie, p):
+    assert iri(p) in {x.property for x in klass(ctx["run"], iri(curie)).property_partitions}
+
+
 @then(parsers.parse('class "{curie}" has one reified relation of kind {kind}, named "{p}", to "{target}", counting every use'))
 def one_relation_every_use(ctx, curie, kind, p, target):
     only_relation(ctx, curie, kind, p, target, ctx["n"])
@@ -216,6 +260,11 @@ def reifier_properties(ctx, p, a, q, b):
 @then(parsers.parse('no relation is named "{p}"'))
 def no_relation_named(ctx, p):
     assert iri(p) not in {r.property for c in graph(ctx["run"]).class_partitions for r in c.reified_relations or []}
+
+
+@then(parsers.parse('class "{curie}" has no ordinary property "{p}"'))
+def no_ordinary_property(ctx, curie, p):
+    assert iri(p) not in {q.property for q in klass(ctx["run"], curie).property_partitions}
 
 
 @then("each stays an ordinary property")

@@ -1,0 +1,31 @@
+# id: prov_qualified
+# title: PROV-O qualified influence (prov:qualifiedX)
+# family: n_ary
+# A subject linked by a prov:qualifiedX property to a node that holds the target and the qualification (DEC-13: the
+# relation keeps the qualified property's name).
+# REIFY prov_qualified probe
+PREFIX prov: <http://www.w3.org/ns/prov#>
+ASK { $graph_open VALUES ?predicate { prov:qualifiedAssociation prov:qualifiedAttribution prov:qualifiedCommunication prov:qualifiedDelegation prov:qualifiedDerivation prov:qualifiedEnd prov:qualifiedGeneration prov:qualifiedInfluence prov:qualifiedInvalidation prov:qualifiedPrimarySource prov:qualifiedQuotation prov:qualifiedRevision prov:qualifiedStart prov:qualifiedUsage } ?s ?predicate ?q . $graph_close }
+# REIFY prov_qualified relations
+PREFIX prov: <http://www.w3.org/ns/prov#>
+SELECT ?subjectClass ?predicate ?objectClass (COUNT(DISTINCT ?q) AS ?statements) WHERE {
+  VALUES ?predicate { prov:qualifiedAssociation prov:qualifiedAttribution prov:qualifiedCommunication prov:qualifiedDelegation prov:qualifiedDerivation prov:qualifiedEnd prov:qualifiedGeneration prov:qualifiedInfluence prov:qualifiedInvalidation prov:qualifiedPrimarySource prov:qualifiedQuotation prov:qualifiedRevision prov:qualifiedStart prov:qualifiedUsage }
+  $graph_open ?s ?predicate ?q . ?s a ?subjectClass .
+  OPTIONAL { ?q prov:entity|prov:agent|prov:activity|prov:influencer ?o . OPTIONAL { ?o a ?objectClass } } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY prov_qualified reifier-properties
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?q) AS ?reifiers) WHERE {
+  VALUES ?predicate { prov:qualifiedAssociation prov:qualifiedAttribution prov:qualifiedCommunication prov:qualifiedDelegation prov:qualifiedDerivation prov:qualifiedEnd prov:qualifiedGeneration prov:qualifiedInfluence prov:qualifiedInvalidation prov:qualifiedPrimarySource prov:qualifiedQuotation prov:qualifiedRevision prov:qualifiedStart prov:qualifiedUsage }
+  $graph_open ?s ?predicate ?q . ?q ?reifierProperty ?v .
+  FILTER(?reifierProperty NOT IN (rdf:type, prov:entity, prov:agent, prov:activity, prov:influencer)) ?s a ?subjectClass .
+  OPTIONAL { ?q prov:entity|prov:agent|prov:activity|prov:influencer ?o . OPTIONAL { ?o a ?objectClass } } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
+# REIFY prov_qualified hidden
+PREFIX prov: <http://www.w3.org/ns/prov#>
+SELECT DISTINCT ?term WHERE { $graph_open
+  { VALUES ?term { prov:qualifiedAssociation prov:qualifiedAttribution prov:qualifiedCommunication prov:qualifiedDelegation prov:qualifiedDerivation prov:qualifiedEnd prov:qualifiedGeneration prov:qualifiedInfluence prov:qualifiedInvalidation prov:qualifiedPrimarySource prov:qualifiedQuotation prov:qualifiedRevision prov:qualifiedStart prov:qualifiedUsage } }
+  UNION { VALUES ?predicate { prov:qualifiedAssociation prov:qualifiedAttribution prov:qualifiedCommunication prov:qualifiedDelegation prov:qualifiedDerivation prov:qualifiedEnd prov:qualifiedGeneration prov:qualifiedInfluence prov:qualifiedInvalidation prov:qualifiedPrimarySource prov:qualifiedQuotation prov:qualifiedRevision prov:qualifiedStart prov:qualifiedUsage } ?s ?predicate ?q . ?q a ?term .
+          FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { VALUES ?qp2 { prov:qualifiedAssociation prov:qualifiedAttribution prov:qualifiedCommunication prov:qualifiedDelegation prov:qualifiedDerivation prov:qualifiedEnd prov:qualifiedGeneration prov:qualifiedInfluence prov:qualifiedInvalidation prov:qualifiedPrimarySource prov:qualifiedQuotation prov:qualifiedRevision prov:qualifiedStart prov:qualifiedUsage } ?s2 ?qp2 ?x . } } }
+  $graph_close }

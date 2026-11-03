@@ -62,10 +62,27 @@ REIFIED_HIDDEN_CLASSES = (
     "http://www.w3.org/2002/07/owl#Axiom",
     "http://www.w3.org/2002/07/owl#NegativePropertyAssertion",
     "http://www.nanopub.org/nschema#Nanopublication",
+    "http://www.w3.org/ns/prov#Association",
+    "http://www.w3.org/ns/dcat#Relationship",
+    "http://schema.org/OrganizationRole",
+    "http://wikiba.se/ontology#Statement",
+    "http://www.cidoc-crm.org/cidoc-crm/PC14_carried_out_by",
 )
 REIFIED_KINDS = (
-    "graph_statement", "nanopublication", "negative_property_assertion", "owl_axiom", "rdf_statement",
-    "resource_as_predicate", "triple_term",
+    "cidoc_property_of_property", "dcat_qualified", "graph_statement", "nanopublication",
+    "negative_property_assertion", "owl_axiom", "prov_qualified", "rdf_statement", "resource_as_predicate",
+    "schema_role", "triple_term", "wikibase_statement",
+)  # fmt: skip
+# The stage 3 relations, one per kind: (subject class, kind, predicate, object class, reifier property).
+_EX, _PROV = "http://example.org/", "http://www.w3.org/ns/prov#"
+REIFIED_STAGE3_RELATIONS = (
+    (_EX + "Run", "prov_qualified", _PROV + "qualifiedAssociation", _EX + "Team", _PROV + "hadRole"),
+    (_EX + "Dataset", "dcat_qualified", "http://www.w3.org/ns/dcat#qualifiedRelation", _EX + "Archive",
+     "http://www.w3.org/ns/dcat#hadRole"),
+    (_EX + "Worker", "schema_role", "http://schema.org/affiliation", _EX + "Firm", "http://schema.org/startDate"),
+    (_EX + "Item", "wikibase_statement", _EX + "claimP1", _EX + "Place", _EX + "rank"),
+    (_EX + "Event", "cidoc_property_of_property", "http://www.cidoc-crm.org/cidoc-crm/PC14_carried_out_by",
+     _EX + "Actor", _EX + "note"),
 )  # fmt: skip
 # The count-only kinds: kind -> occurrences (one ex:r1 reifier, the graph describing itself, two nanopublication heads).
 REIFIED_COUNTS = (("graph_statement", 1), ("nanopublication", 2), ("triple_term", 1))

@@ -80,10 +80,15 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
 @keyframes open { from { opacity: 0; } to { opacity: 1; } }
 
 [data-ns="ex"] { --h: 190; }
-[data-ns="rdf"] { --h: 327; }
+[data-ns="skosxl"] { --h: 327; }
 [data-ns="dcterms"] { --h: 104; }
-[data-ns="prov"] { --h: 241; }
-[data-ns="xsd"] { --h: 18; }
+[data-ns="rdf"] { --h: 241; }
+[data-ns="schema"] { --h: 18; }
+[data-ns="skos"] { --h: 155; }
+[data-ns="crm"] { --h: 292; }
+[data-ns="dcat"] { --h: 69; }
+[data-ns="prov"] { --h: 206; }
+[data-ns="xsd"] { --h: 343; }
 
 </style>
 </head>
@@ -92,22 +97,44 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
 <header class="bar">
   <h1>RDF fingerprint <small>http://fake/sparql</small></h1>
   <input id="q" type="search" placeholder="Search classes and properties" aria-label="Search classes and properties" hidden data-js>
-  <span class="count" id="count" aria-live="polite">2 classes</span>
+  <span class="count" id="count" aria-live="polite">14 classes</span>
 </header>
 <div class="frame">
 <nav aria-label="Contents">
   <a href="#overview">Overview</a> · <a href="#namespaces">Namespaces</a> · <a href="#taxonomy">Taxonomy</a> · <a href="#collection">Collection</a> · <a href="#caveats">Caveats</a>
   <details open>
-    <summary>ex:reifications <span class="note">(2)</span></summary>
-    <div class="group"><span class="pfx" data-ns="ex">ex</span> 2</div>
+    <summary>ex:reifications <span class="note">(14)</span></summary>
+    <div class="group"><span class="pfx" data-ns="ex">ex</span> 12</div>
     <ul>
       <li data-anchor="reifications-a08d12b9-person-beb81092"><a href="#reifications-a08d12b9-person-beb81092">Person</a> <span class="ind" title="3 instances, 0 data properties, 0 object properties">3 · 0 d, 0 o</span></li>
+      <li data-anchor="reifications-a08d12b9-actor-af3280b8"><a href="#reifications-a08d12b9-actor-af3280b8">Actor</a> <span class="ind" title="1 instances, 0 data properties, 0 object properties">1 · 0 d, 0 o</span></li>
+      <li data-anchor="reifications-a08d12b9-archive-d3952a04"><a href="#reifications-a08d12b9-archive-d3952a04">Archive</a> <span class="ind" title="1 instances, 0 data properties, 0 object properties">1 · 0 d, 0 o</span></li>
+      <li data-anchor="reifications-a08d12b9-dataset-fcf22773"><a href="#reifications-a08d12b9-dataset-fcf22773">Dataset</a> <span class="ind" title="1 instances, 0 data properties, 0 object properties">1 · 0 d, 0 o</span></li>
+      <li data-anchor="reifications-a08d12b9-event-c5a57f20"><a href="#reifications-a08d12b9-event-c5a57f20">Event</a> <span class="ind" title="1 instances, 0 data properties, 0 object properties">1 · 0 d, 0 o</span></li>
+      <li data-anchor="reifications-a08d12b9-firm-680c30c8"><a href="#reifications-a08d12b9-firm-680c30c8">Firm</a> <span class="ind" title="1 instances, 0 data properties, 0 object properties">1 · 0 d, 0 o</span></li>
+      <li data-anchor="reifications-a08d12b9-item-89a74faf"><a href="#reifications-a08d12b9-item-89a74faf">Item</a> <span class="ind" title="1 instances, 0 data properties, 0 object properties">1 · 0 d, 0 o</span></li>
       <li data-anchor="reifications-a08d12b9-org-e25f73c7"><a href="#reifications-a08d12b9-org-e25f73c7">Org</a> <span class="ind" title="1 instances, 1 data properties, 0 object properties">1 · 1 d, 0 o</span></li>
+      <li data-anchor="reifications-a08d12b9-place-ceb909d4"><a href="#reifications-a08d12b9-place-ceb909d4">Place</a> <span class="ind" title="1 instances, 0 data properties, 0 object properties">1 · 0 d, 0 o</span></li>
+      <li data-anchor="reifications-a08d12b9-run-378ea287"><a href="#reifications-a08d12b9-run-378ea287">Run</a> <span class="ind" title="1 instances, 0 data properties, 0 object properties">1 · 0 d, 0 o</span></li>
+      <li data-anchor="reifications-a08d12b9-team-9a064d9a"><a href="#reifications-a08d12b9-team-9a064d9a">Team</a> <span class="ind" title="1 instances, 0 data properties, 0 object properties">1 · 0 d, 0 o</span></li>
+      <li data-anchor="reifications-a08d12b9-worker-3111ba88"><a href="#reifications-a08d12b9-worker-3111ba88">Worker</a> <span class="ind" title="1 instances, 0 data properties, 1 object properties">1 · 0 d, 1 o</span></li>
+    </ul>
+    <div class="group"><span class="pfx" data-ns="skos">skos</span> 1</div>
+    <ul>
+      <li data-anchor="reifications-a08d12b9-concept-07819658"><a href="#reifications-a08d12b9-concept-07819658">Concept</a> <span class="ind" title="1 instances, 0 data properties, 1 object properties">1 · 0 d, 1 o</span></li>
+    </ul>
+    <div class="group"><span class="pfx" data-ns="skosxl">skosxl</span> 1</div>
+    <ul>
+      <li data-anchor="reifications-a08d12b9-label-1f1eba51"><a href="#reifications-a08d12b9-label-1f1eba51">Label</a> <span class="ind" title="1 instances, 1 data properties, 1 object properties">1 · 1 d, 1 o</span></li>
     </ul>
   </details>
   <fieldset hidden data-js>
     <legend>Show namespaces</legend>
+    <label><input type="checkbox" checked data-switch value="dcterms"> <span class="pfx" data-ns="dcterms">dcterms</span></label>
     <label><input type="checkbox" checked data-switch value="ex"> <span class="pfx" data-ns="ex">ex</span></label>
+    <label><input type="checkbox" checked data-switch value="schema"> <span class="pfx" data-ns="schema">schema</span></label>
+    <label><input type="checkbox" checked data-switch value="skos"> <span class="pfx" data-ns="skos">skos</span></label>
+    <label><input type="checkbox" checked data-switch value="skosxl"> <span class="pfx" data-ns="skosxl">skosxl</span></label>
   </fieldset>
 </nav>
 <main>
@@ -116,10 +143,10 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
     <dl class="facts">
       <div><dt>Endpoint</dt><dd>http://fake/sparql</dd></div>
       <div><dt>Graphs</dt><dd>1</dd></div>
-      <div><dt>Classes shown</dt><dd>2</dd></div>
-      <div><dt>Namespaces</dt><dd>5</dd></div>
-      <div><dt>Started</dt><dd>2026-11-03 14:43:45.702515+00:00</dd></div>
-      <div><dt>Finished</dt><dd>2026-11-03 14:43:46.314929+00:00</dd></div>
+      <div><dt>Classes shown</dt><dd>14</dd></div>
+      <div><dt>Namespaces</dt><dd>10</dd></div>
+      <div><dt>Started</dt><dd>2026-11-03 17:43:19.293574+00:00</dd></div>
+      <div><dt>Finished</dt><dd>2026-11-03 17:43:21.072952+00:00</dd></div>
       <div><dt>rdf-fingerprinter</dt><dd>0.3.1</dd></div>
     </dl>
     <p class="note">Each class states its precision: exact when every instance was read, or first N of M when only the
@@ -132,9 +159,14 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
     <table>
       <thead><tr><th>Prefix</th><th>Namespace</th><th>Source</th><th>Uses</th></tr></thead>
       <tbody>
-        <tr data-prefix="ex"><td><span class="pfx" data-ns="ex">ex</span></td><td class="curie">http://example.org/</td><td>packaged</td><td class="n">5</td></tr>
+        <tr data-prefix="ex"><td><span class="pfx" data-ns="ex">ex</span></td><td class="curie">http://example.org/</td><td>packaged</td><td class="n">15</td></tr>
+        <tr data-prefix="skosxl"><td><span class="pfx" data-ns="skosxl">skosxl</span></td><td class="curie">http://www.w3.org/2008/05/skos-xl#</td><td>packaged</td><td class="n">3</td></tr>
+        <tr data-prefix="dcterms"><td><span class="pfx" data-ns="dcterms">dcterms</span></td><td class="curie">http://purl.org/dc/terms/</td><td>packaged</td><td class="n">1</td></tr>
         <tr data-prefix="rdf"><td><span class="pfx" data-ns="rdf">rdf</span></td><td class="curie">http://www.w3.org/1999/02/22-rdf-syntax-ns#</td><td>packaged</td><td class="n">1</td></tr>
-        <tr data-prefix="dcterms"><td><span class="pfx" data-ns="dcterms">dcterms</span></td><td class="curie">http://purl.org/dc/terms/</td><td>packaged</td><td class="n">0</td></tr>
+        <tr data-prefix="schema"><td><span class="pfx" data-ns="schema">schema</span></td><td class="curie">http://schema.org/</td><td>packaged</td><td class="n">1</td></tr>
+        <tr data-prefix="skos"><td><span class="pfx" data-ns="skos">skos</span></td><td class="curie">http://www.w3.org/2004/02/skos/core#</td><td>packaged</td><td class="n">1</td></tr>
+        <tr data-prefix="crm"><td><span class="pfx" data-ns="crm">crm</span></td><td class="curie">http://www.cidoc-crm.org/cidoc-crm/</td><td>packaged</td><td class="n">0</td></tr>
+        <tr data-prefix="dcat"><td><span class="pfx" data-ns="dcat">dcat</span></td><td class="curie">http://www.w3.org/ns/dcat#</td><td>packaged</td><td class="n">0</td></tr>
         <tr data-prefix="prov"><td><span class="pfx" data-ns="prov">prov</span></td><td class="curie">http://www.w3.org/ns/prov#</td><td>packaged</td><td class="n">0</td></tr>
         <tr data-prefix="xsd"><td><span class="pfx" data-ns="xsd">xsd</span></td><td class="curie">http://www.w3.org/2001/XMLSchema#</td><td>packaged</td><td class="n">0</td></tr>
       </tbody>
@@ -150,13 +182,37 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
     <ul class="tree">
   <li><a href="#reifications-a08d12b9-person-beb81092" title="http://example.org/Person">ex:Person</a> <span class="pop"><span class="bar" style="width: 100%"></span></span> <span class="meta">3</span>
   </li>
+  <li><a href="#reifications-a08d12b9-actor-af3280b8" title="http://example.org/Actor">ex:Actor</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><a href="#reifications-a08d12b9-archive-d3952a04" title="http://example.org/Archive">ex:Archive</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><a href="#reifications-a08d12b9-dataset-fcf22773" title="http://example.org/Dataset">ex:Dataset</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><a href="#reifications-a08d12b9-event-c5a57f20" title="http://example.org/Event">ex:Event</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><a href="#reifications-a08d12b9-firm-680c30c8" title="http://example.org/Firm">ex:Firm</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><a href="#reifications-a08d12b9-item-89a74faf" title="http://example.org/Item">ex:Item</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
+  </li>
   <li><a href="#reifications-a08d12b9-org-e25f73c7" title="http://example.org/Org">ex:Org</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><a href="#reifications-a08d12b9-place-ceb909d4" title="http://example.org/Place">ex:Place</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><a href="#reifications-a08d12b9-run-378ea287" title="http://example.org/Run">ex:Run</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><a href="#reifications-a08d12b9-team-9a064d9a" title="http://example.org/Team">ex:Team</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><a href="#reifications-a08d12b9-worker-3111ba88" title="http://example.org/Worker">ex:Worker</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><a href="#reifications-a08d12b9-concept-07819658" title="http://www.w3.org/2004/02/skos/core#Concept">skos:Concept</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
+  </li>
+  <li><a href="#reifications-a08d12b9-label-1f1eba51" title="http://www.w3.org/2008/05/skos-xl#Label">skosxl:Label</a> <span class="pop"><span class="bar" style="width: 33%"></span></span> <span class="meta">1</span>
   </li>
 </ul>
   </section>
   <section id="graph-reifications-a08d12b9">
     <h2><a class="curie" href="http://example.org/reifications" title="http://example.org/reifications"><span class="pfx" data-ns="ex">ex:</span>reifications</a></h2>
-    <p class="note">Reifications found: OWL axiom, RDF statement, graph statement, nanopublication, negative property assertion, resource as predicate, triple term; 1 graph statement, 2 nanopublications, 1 triple term.</p>
+    <p class="note">Reifications found: CIDOC property of property, DCAT qualified, OWL axiom, PROV qualified, RDF statement, Wikibase statement, graph statement, nanopublication, negative property assertion, resource as predicate, schema.org role, triple term; 1 graph statement, 2 nanopublications, 1 triple term.</p>
     <details class="cls" id="reifications-a08d12b9-person-beb81092" open data-ns="ex" data-q="ex:person http://example.org/person">
       <summary>
         <h3><a class="curie" href="http://example.org/Person" title="http://example.org/Person"><span class="pfx" data-ns="ex">ex:</span>Person</a></h3>
@@ -187,6 +243,135 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
       </table>
       </div>
     </details>
+    <details class="cls" id="reifications-a08d12b9-actor-af3280b8" open data-ns="ex" data-q="ex:actor http://example.org/actor">
+      <summary>
+        <h3><a class="curie" href="http://example.org/Actor" title="http://example.org/Actor"><span class="pfx" data-ns="ex">ex:</span>Actor</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">0 data and 0 object properties</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="reifications-a08d12b9-archive-d3952a04" open data-ns="ex" data-q="ex:archive http://example.org/archive">
+      <summary>
+        <h3><a class="curie" href="http://example.org/Archive" title="http://example.org/Archive"><span class="pfx" data-ns="ex">ex:</span>Archive</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">0 data and 0 object properties</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="reifications-a08d12b9-dataset-fcf22773" open data-ns="ex" data-q="ex:dataset http://example.org/dataset">
+      <summary>
+        <h3><a class="curie" href="http://example.org/Dataset" title="http://example.org/Dataset"><span class="pfx" data-ns="ex">ex:</span>Dataset</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">0 data and 0 object properties</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+      <h4>Reified relations</h4>
+      <div class="scroll">
+      <table class="reified">
+        <thead><tr><th>Kind</th><th>Property</th><th>Object class</th><th>Statements</th><th>Reifier properties</th></tr></thead>
+        <tbody>
+          <tr><td>DCAT qualified</td><td>dcat:qualifiedRelation</td><td>ex:Archive</td><td class="n">1</td><td>dcat:hadRole 1</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="reifications-a08d12b9-event-c5a57f20" open data-ns="ex" data-q="ex:event http://example.org/event">
+      <summary>
+        <h3><a class="curie" href="http://example.org/Event" title="http://example.org/Event"><span class="pfx" data-ns="ex">ex:</span>Event</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">0 data and 0 object properties</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+      <h4>Reified relations</h4>
+      <div class="scroll">
+      <table class="reified">
+        <thead><tr><th>Kind</th><th>Property</th><th>Object class</th><th>Statements</th><th>Reifier properties</th></tr></thead>
+        <tbody>
+          <tr><td>CIDOC property of property</td><td>crm:PC14_carried_out_by</td><td>ex:Actor</td><td class="n">1</td><td>ex:note 1</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="reifications-a08d12b9-firm-680c30c8" open data-ns="ex" data-q="ex:firm http://example.org/firm">
+      <summary>
+        <h3><a class="curie" href="http://example.org/Firm" title="http://example.org/Firm"><span class="pfx" data-ns="ex">ex:</span>Firm</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">0 data and 0 object properties</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="reifications-a08d12b9-item-89a74faf" open data-ns="ex" data-q="ex:item http://example.org/item">
+      <summary>
+        <h3><a class="curie" href="http://example.org/Item" title="http://example.org/Item"><span class="pfx" data-ns="ex">ex:</span>Item</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">0 data and 0 object properties</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+      <h4>Reified relations</h4>
+      <div class="scroll">
+      <table class="reified">
+        <thead><tr><th>Kind</th><th>Property</th><th>Object class</th><th>Statements</th><th>Reifier properties</th></tr></thead>
+        <tbody>
+          <tr><td>Wikibase statement</td><td>ex:claimP1</td><td>ex:Place</td><td class="n">1</td><td>ex:rank 1</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
     <details class="cls" id="reifications-a08d12b9-org-e25f73c7" open data-ns="ex" data-q="ex:org http://example.org/org">
       <summary>
         <h3><a class="curie" href="http://example.org/Org" title="http://example.org/Org"><span class="pfx" data-ns="ex">ex:</span>Org</a></h3>
@@ -205,6 +390,150 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
             <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
             <td><a class="curie" href="http://www.w3.org/2001/XMLSchema#string" title="http://www.w3.org/2001/XMLSchema#string"><span class="pfx" data-ns="xsd">xsd:</span>string</a></td>
             <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">0</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="reifications-a08d12b9-place-ceb909d4" open data-ns="ex" data-q="ex:place http://example.org/place">
+      <summary>
+        <h3><a class="curie" href="http://example.org/Place" title="http://example.org/Place"><span class="pfx" data-ns="ex">ex:</span>Place</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">0 data and 0 object properties</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="reifications-a08d12b9-run-378ea287" open data-ns="ex" data-q="ex:run http://example.org/run">
+      <summary>
+        <h3><a class="curie" href="http://example.org/Run" title="http://example.org/Run"><span class="pfx" data-ns="ex">ex:</span>Run</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">0 data and 0 object properties</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+      <h4>Reified relations</h4>
+      <div class="scroll">
+      <table class="reified">
+        <thead><tr><th>Kind</th><th>Property</th><th>Object class</th><th>Statements</th><th>Reifier properties</th></tr></thead>
+        <tbody>
+          <tr><td>PROV qualified</td><td>prov:qualifiedAssociation</td><td>ex:Team</td><td class="n">1</td><td>prov:hadRole 1</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="reifications-a08d12b9-team-9a064d9a" open data-ns="ex" data-q="ex:team http://example.org/team">
+      <summary>
+        <h3><a class="curie" href="http://example.org/Team" title="http://example.org/Team"><span class="pfx" data-ns="ex">ex:</span>Team</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">0 data and 0 object properties</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="reifications-a08d12b9-worker-3111ba88" open data-ns="ex" data-q="ex:worker http://example.org/worker">
+      <summary>
+        <h3><a class="curie" href="http://example.org/Worker" title="http://example.org/Worker"><span class="pfx" data-ns="ex">ex:</span>Worker</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">0 data and 1 object properties</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr data-ns="schema">
+            <td><a class="curie" href="http://schema.org/affiliation" title="http://schema.org/affiliation"><span class="pfx" data-ns="schema">schema:</span>affiliation</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://schema.org/OrganizationRole" title="http://schema.org/OrganizationRole"><span class="pfx" data-ns="schema">schema:</span>OrganizationRole</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <h4>Reified relations</h4>
+      <div class="scroll">
+      <table class="reified">
+        <thead><tr><th>Kind</th><th>Property</th><th>Object class</th><th>Statements</th><th>Reifier properties</th></tr></thead>
+        <tbody>
+          <tr><td>schema.org role</td><td>schema:affiliation</td><td>ex:Firm</td><td class="n">1</td><td>schema:startDate 1</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="reifications-a08d12b9-concept-07819658" open data-ns="skos" data-q="skos:concept http://www.w3.org/2004/02/skos/core#concept">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2004/02/skos/core#Concept" title="http://www.w3.org/2004/02/skos/core#Concept"><span class="pfx" data-ns="skos">skos:</span>Concept</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">0 data and 1 object properties</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr data-ns="skosxl">
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#prefLabel" title="http://www.w3.org/2008/05/skos-xl#prefLabel"><span class="pfx" data-ns="skosxl">skosxl:</span>prefLabel</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </details>
+    <details class="cls" id="reifications-a08d12b9-label-1f1eba51" open data-ns="skosxl" data-q="skosxl:label http://www.w3.org/2008/05/skos-xl#label">
+      <summary>
+        <h3><a class="curie" href="http://www.w3.org/2008/05/skos-xl#Label" title="http://www.w3.org/2008/05/skos-xl#Label"><span class="pfx" data-ns="skosxl">skosxl:</span>Label</a></h3>
+        <span class="meta">1 instances, exact</span>
+        <span class="meta">1 data and 1 object properties</span>
+      </summary>
+      <div class="scroll">
+      <table class="props">
+        <thead><tr>
+          <th>Property</th><th>Subjects</th><th>Min</th><th>Max</th><th>Avg</th><th>Kind</th><th>Distinct values</th>
+          <th>Value types</th><th>Confidence</th><th>Cardinality</th><th>Inheritance</th><th>Language coverage</th>
+        </tr></thead>
+        <tbody>
+          <tr data-ns="dcterms">
+            <td><a class="curie" href="http://purl.org/dc/terms/source" title="http://purl.org/dc/terms/source"><span class="pfx" data-ns="dcterms">dcterms:</span>source</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>object_property</td><td class="n">1</td>
+            <td>—</td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">—</td>
+          </tr>
+          <tr data-ns="skosxl">
+            <td><a class="curie" href="http://www.w3.org/2008/05/skos-xl#literalForm" title="http://www.w3.org/2008/05/skos-xl#literalForm"><span class="pfx" data-ns="skosxl">skosxl:</span>literalForm</a></td><td class="n">1</td><td class="n">1</td><td class="n">1</td>
+            <td class="n">1</td><td>datatype_property</td><td class="n">1</td>
+            <td><a class="curie" href="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" title="http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"><span class="pfx" data-ns="rdf">rdf:</span>langString</a></td>
+            <td class="n">1</td><td>exactly_one</td><td>own</td><td class="n">1</td>
           </tr>
         </tbody>
       </table>

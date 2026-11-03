@@ -18,6 +18,7 @@ from tests.sample_data import (
     REIFIED_PERSON,
     REIFIED_PERSON_RELATIONS,
     REIFIED_PROFILE,
+    REIFIED_STAGE3_RELATIONS,
     TREATIES,
     differences,
     same_profile,
@@ -114,4 +115,11 @@ def test_the_stored_reified_profile_agrees_with_the_named_facts():
         for r in relations
     ] == list(REIFIED_PERSON_RELATIONS)
     assert not classes[REIFIED_PERSON].property_partitions
+    found = {
+        (c.class_iri, r.kind, r.property, r.object_class, p.property)
+        for c in classes.values()
+        for r in c.reified_relations or ()
+        for p in r.reifier_properties or ()
+    }
+    assert set(REIFIED_STAGE3_RELATIONS) <= found
     assert REIFIED_ORDINARY_PREDICATE in {p.property for p in classes[REIFIED_ORDINARY_OWNER].property_partitions}

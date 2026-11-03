@@ -114,6 +114,16 @@ enums:
         description: A named graph IRI described by triples of the profiled graph, so a statement is made about a whole graph; counted per graph only (P-17).
       nanopublication:
         description: A nanopublication head (np:hasAssertion) whose assertion, provenance and publication info live in their own graphs; counted per graph only (P-17).
+      prov_qualified:
+        description: A PROV-O qualified influence (prov:qualifiedX to a node with prov:entity, prov:agent, prov:activity or prov:influencer); the qualified property names the relation (DEC-13).
+      dcat_qualified:
+        description: A DCAT qualified relation or attribution (dcat:qualifiedRelation, dcat:qualifiedAttribution) to a node naming its target; the qualified property names the relation (DEC-13).
+      schema_role:
+        description: A schema.org Role node typed schema:Role or a subclass that repeats the linking property to the real object; the linking property names the relation.
+      wikibase_statement:
+        description: A Wikibase statement node (wikibase:Statement) linked by a claim predicate; the claim predicate names the relation.
+      cidoc_property_of_property:
+        description: A CIDOC CRM property class instance (P01_has_domain, P02_has_range) standing for a relation; its type names the relation.
 
   PitfallImportance:
     description: How serious a pitfall is; critical > important > minor (pitfall-scans DEC-1).

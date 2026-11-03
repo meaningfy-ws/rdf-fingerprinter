@@ -852,7 +852,12 @@
                 "negative_property_assertion",
                 "triple_term",
                 "graph_statement",
-                "nanopublication"
+                "nanopublication",
+                "prov_qualified",
+                "dcat_qualified",
+                "schema_role",
+                "wikibase_statement",
+                "cidoc_property_of_property"
             ],
             "title": "ReificationKind",
             "type": "string"

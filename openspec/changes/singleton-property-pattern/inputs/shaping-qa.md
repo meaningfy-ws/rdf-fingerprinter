@@ -81,3 +81,12 @@ property; (2) the same but never named; (3) the same with a wider signal (revers
 **Answer: (1).** Recorded as DEC-12 (EPIC re-shape, amends DEC-1 and DEC-7). Consequence for
 brainframe: the 517 marked predicates (typed `RelationId` and `rdf:Property`) form relations named
 `RelationId`, not `isRelatedTo`.
+
+## Q7 — SKOS-XL and name mappings (developer, 2026-11-03, during apply)
+
+Stage 3 hid `skosxl:Label` by default and named the relations `skos:prefLabel`; the canonical EU
+sample's class counts dropped (16 → 13). Developer: "no that folding is wrong skos: is skos: and
+skosxl: is skosxl: stay precise no compressions please; we shall fingerprint correctly and if the
+class had a skos: and a skosxl: property then we shall show both".
+Recorded as DEC-13: drop `skosxl_label`; name every relation by the predicate in the data (PROV,
+DCAT, Wikibase included); P-19 superseded.

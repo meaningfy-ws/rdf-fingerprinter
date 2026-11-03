@@ -1,10 +1,16 @@
-# One instance of each reification kind of stages 1 and 2 (singleton-property-pattern design §C, §D).
+# One instance of each reification kind of stages 1 to 3 (singleton-property-pattern design §C, §D).
 # Collected in memory into the named graph http://example.org/reifications, never loaded in Oxigraph.
 @prefix ex:   <http://example.org/> .
 @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl:  <http://www.w3.org/2002/07/owl#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix dct:  <http://purl.org/dc/terms/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix schema: <http://schema.org/> .
+@prefix wikibase: <http://wikiba.se/ontology#> .
+@prefix crm:  <http://www.cidoc-crm.org/cidoc-crm/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix skosxl: <http://www.w3.org/2008/05/skos-xl#> .
 
 # Ordinary instances.
 ex:alice a ex:Person .
@@ -51,3 +57,33 @@ ex:np1 a np:Nanopublication ; np:hasAssertion ex:np1-assertion ;
        np:hasProvenance ex:np1-provenance ; np:hasPublicationInfo ex:np1-info .
 ex:np2 a np:Nanopublication ; np:hasAssertion ex:np2-assertion ;
        np:hasProvenance ex:np2-provenance ; np:hasPublicationInfo ex:np2-info .
+
+# prov_qualified: a run qualified by an association with a team, which has a role.
+ex:run1 a ex:Run ; prov:qualifiedAssociation ex:assoc1 .
+ex:assoc1 a prov:Association ; prov:agent ex:team1 ; prov:hadRole ex:leader .
+ex:team1 a ex:Team .
+
+# dcat_qualified: a dataset qualified by a relation to another dataset, with a role.
+ex:ds1 a ex:Dataset ; dcat:qualifiedRelation ex:rel-q1 .
+ex:rel-q1 a dcat:Relationship ; dct:relation ex:ds2 ; dcat:hadRole ex:derivedFrom .
+ex:ds2 a ex:Archive .
+
+# schema_role: a worker whose affiliation goes through a role node that repeats the affiliation.
+ex:worker1 a ex:Worker ; schema:affiliation ex:role1 .
+ex:role1 a schema:OrganizationRole ; schema:affiliation ex:firm1 ; schema:startDate "2020-01-01" .
+ex:firm1 a ex:Firm .
+
+# wikibase_statement: an item with a claim statement; the property entity declares claim and value predicates.
+ex:item1 a ex:Item ; ex:claimP1 ex:wst1 .
+ex:wst1 a wikibase:Statement ; ex:valueP1 ex:place1 ; ex:rank "normal" .
+ex:place1 a ex:Place .
+ex:P1 wikibase:claim ex:claimP1 ; wikibase:statementProperty ex:valueP1 .
+
+# cidoc_property_of_property: a property class instance with a domain and a range.
+ex:pc1 a crm:PC14_carried_out_by ; crm:P01_has_domain ex:event1 ; crm:P02_has_range ex:actor1 ; ex:note "n" .
+ex:event1 a ex:Event .
+ex:actor1 a ex:Actor .
+
+# Ordinary data (DEC-13): a concept with a SKOS-XL preferred label is no reification.
+ex:concept1 a skos:Concept ; skosxl:prefLabel ex:label1 .
+ex:label1 a skosxl:Label ; skosxl:literalForm "thing"@en ; dct:source ex:survey .

@@ -372,7 +372,7 @@ mutmut, the release gate) and the brainframe acceptance run once, at the end of 
   `GraphProfile.reification_counts: list[ReificationCount{kind, count}]`, filled from every template
   with a `count` section; the report note lists each. Unreleased field, so no migration. Rejected:
   one integer field per kind.
-- **P-19 Standard mappings may live in a template.** A W3C or community vocabulary that itself states
+- **P-19 (superseded by DEC-13: relations are named by the predicate in the data; no mapping tables)** Standard mappings may live in a template. A W3C or community vocabulary that itself states
   how a qualified form maps to a plain property (PROV-O `prov:unqualifiedForm`, SKOS-XL to SKOS
   labels, DCAT `qualifiedAttribution` to `prov:wasAttributedTo`) is written as a `VALUES` table in
   the template; that is the vocabulary's own statement, not IRI-string inference (DEC-7, DEC-12).

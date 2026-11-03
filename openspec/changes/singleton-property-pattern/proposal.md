@@ -133,6 +133,15 @@ by the developer in round 4.
   `inputs/shaping-qa.md` (Q6); it amends DEC-1 and DEC-7. Rejected: keeping the `singleton_property`
   kind (normalises a made-up construct into a relation the data never states in standard terms).
 
+- **DEC-13 (developer, 2026-11-03): precise names, no compression.** A relation is named by the
+  predicate the data actually uses; the fingerprint never translates one vocabulary's term into
+  another's (`skosxl:` stays `skosxl:`, `prov:qualifiedAssociation` is not renamed
+  `prov:wasAssociatedWith`, a Wikibase claim predicate is not renamed after its property entity).
+  SKOS-XL labels are first-class label resources, not reified statements: the `skosxl_label` kind is
+  dropped and `skosxl:Label` is profiled as an ordinary class, so a class with both `skos:` and
+  `skosxl:` label properties shows both. Amends DEC-1 and supersedes design P-19. Rejected: folding
+  SKOS-XL into SKOS labels (loses the distinction and hid `skosxl:Label` in the EU authority data).
+
 ## Rabbit-holes
 
 - **Structural probes on large graphs.** "Resource used as predicate" and "one triple per named

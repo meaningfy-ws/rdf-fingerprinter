@@ -401,20 +401,20 @@ Feature: Collecting raw statistics from a knowledge graph
       When the graph is profiled
       Then class "ex:A" has one reified relation of kind structured value, "ex:height", with reifier property "ex:unit"
 
-    @stage3
     Scenario: PROV qualified association
       Given 4 subjects of class "ex:Run", each with a "prov:qualifiedAssociation" node whose "prov:agent" is of class "ex:Team" and which carries "prov:hadRole"
       When the graph is profiled
-      Then class "ex:Run" has one reified relation of kind PROV qualified, "prov:wasAssociatedWith" to "ex:Team", 4 statements
+      Then class "ex:Run" has one reified relation of kind PROV qualified, "prov:qualifiedAssociation" to "ex:Team", 4 statements
       And its reifier property "prov:hadRole" is on 4
+      And no relation is named "prov:wasAssociatedWith"
       And class "ex:Run" has no ordinary property "prov:qualifiedAssociation"
 
-    @stage3
-    Scenario: SKOS-XL labels
-      Given concepts of class "skos:Concept" with "skosxl:prefLabel" nodes typed "skosxl:Label" carrying "skosxl:literalForm"
+    Scenario: SKOS-XL labels stay ordinary
+      Given concepts of class "skos:Concept" with "skos:prefLabel" literals and "skosxl:prefLabel" nodes typed "skosxl:Label" carrying "skosxl:literalForm"
       When the graph is profiled
-      Then class "skos:Concept" has one reified relation of kind SKOS-XL label, "skos:prefLabel"
-      And the profile has no class "skosxl:Label"
+      Then class "skos:Concept" has the ordinary properties "skos:prefLabel" and "skosxl:prefLabel"
+      And class "skosxl:Label" is profiled with property "skosxl:literalForm"
+      And no reified relation is reported for them
 
     Scenario: Nanopublications are counted
       Given a graph holding 3 nanopublication heads with "np:hasAssertion", "np:hasProvenance" and "np:hasPublicationInfo"

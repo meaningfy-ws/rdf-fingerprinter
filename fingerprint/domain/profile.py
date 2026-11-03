@@ -265,6 +265,26 @@ class ReificationKind(str, Enum):
     """
     A nanopublication head (np:hasAssertion) whose assertion, provenance and publication info live in their own graphs; counted per graph only (P-17).
     """
+    prov_qualified = "prov_qualified"
+    """
+    A PROV-O qualified influence (prov:qualifiedX to a node with prov:entity, prov:agent, prov:activity or prov:influencer); the qualified property names the relation (DEC-13).
+    """
+    dcat_qualified = "dcat_qualified"
+    """
+    A DCAT qualified relation or attribution (dcat:qualifiedRelation, dcat:qualifiedAttribution) to a node naming its target; the qualified property names the relation (DEC-13).
+    """
+    schema_role = "schema_role"
+    """
+    A schema.org Role node typed schema:Role or a subclass that repeats the linking property to the real object; the linking property names the relation.
+    """
+    wikibase_statement = "wikibase_statement"
+    """
+    A Wikibase statement node (wikibase:Statement) linked by a claim predicate; the claim predicate names the relation.
+    """
+    cidoc_property_of_property = "cidoc_property_of_property"
+    """
+    A CIDOC CRM property class instance (P01_has_domain, P02_has_range) standing for a relation; its type names the relation.
+    """
 
 
 class PitfallImportance(str, Enum):

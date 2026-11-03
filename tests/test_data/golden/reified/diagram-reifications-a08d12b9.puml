@@ -1,8 +1,18 @@
 @startuml
 title Class diagram inferred by rdf-fingerprinter — ex:reifications — overview
 
-package "ex (2 classes)" as N1 {
+package "ex (12 classes)" as N1 {
   [ex]
 }
+package "schema (referenced)" as N2 {
+}
+package "skos (1 classes)" as N3 {
+  [skos]
+}
+package "skosxl (1 classes)" as N4 {
+  [skosxl]
+}
 
+N1 --> N2 : 1
+N3 --> N4 : 1
 @enduml

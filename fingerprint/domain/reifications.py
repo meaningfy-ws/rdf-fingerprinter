@@ -16,6 +16,11 @@ KIND_LABELS = {
     ReificationKind.triple_term: "triple term",
     ReificationKind.graph_statement: "graph statement",
     ReificationKind.nanopublication: "nanopublication",
+    ReificationKind.prov_qualified: "PROV qualified",
+    ReificationKind.dcat_qualified: "DCAT qualified",
+    ReificationKind.schema_role: "schema.org role",
+    ReificationKind.wikibase_statement: "Wikibase statement",
+    ReificationKind.cidoc_property_of_property: "CIDOC property of property",
 }  # dict-ok: module-level lookup table
 UNNAMED = "unnamed"
 

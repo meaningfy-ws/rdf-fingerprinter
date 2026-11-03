@@ -1,0 +1,36 @@
+# id: dcat_qualified
+# title: DCAT qualified relation and attribution
+# family: n_ary
+# A subject linked by dcat:qualifiedRelation or dcat:qualifiedAttribution to a node holding the target and the
+# qualification (DEC-13: the relation keeps the qualified property's name).
+# REIFY dcat_qualified probe
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+ASK { $graph_open VALUES ?predicate { dcat:qualifiedRelation dcat:qualifiedAttribution } ?s ?predicate ?q . $graph_close }
+# REIFY dcat_qualified relations
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+SELECT ?subjectClass ?predicate ?objectClass (COUNT(DISTINCT ?q) AS ?statements) WHERE {
+  VALUES (?predicate ?link) { (dcat:qualifiedRelation dct:relation)
+                                  (dcat:qualifiedAttribution prov:agent) }
+  $graph_open ?s ?predicate ?q . ?s a ?subjectClass .
+  OPTIONAL { ?q ?link ?o . OPTIONAL { ?o a ?objectClass } } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY dcat_qualified reifier-properties
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?q) AS ?reifiers) WHERE {
+  VALUES (?predicate ?link) { (dcat:qualifiedRelation dct:relation)
+                                  (dcat:qualifiedAttribution prov:agent) }
+  $graph_open ?s ?predicate ?q . ?q ?reifierProperty ?v . FILTER(?reifierProperty NOT IN (rdf:type, ?link)) ?s a ?subjectClass .
+  OPTIONAL { ?q ?link ?o . OPTIONAL { ?o a ?objectClass } } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
+# REIFY dcat_qualified hidden
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+SELECT DISTINCT ?term WHERE { $graph_open
+  { VALUES ?term { dcat:qualifiedRelation dcat:qualifiedAttribution } }
+  UNION { ?s ?predicate ?q . ?q a ?term . VALUES ?predicate { dcat:qualifiedRelation dcat:qualifiedAttribution }
+          FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { VALUES ?qp2 { dcat:qualifiedRelation dcat:qualifiedAttribution } ?s2 ?qp2 ?x . } } }
+  $graph_close }

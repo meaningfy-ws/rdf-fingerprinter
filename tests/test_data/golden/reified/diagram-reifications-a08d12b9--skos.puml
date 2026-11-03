@@ -1,0 +1,11 @@
+@startuml
+title Class diagram inferred by rdf-fingerprinter — ex:reifications — skos
+hide empty members
+
+class "skos:Concept" as C13 {
+}
+
+class "skosxl:Label" as C14 #lightgray
+
+C13 --> "1" C14 : skosxl:prefLabel
+@enduml

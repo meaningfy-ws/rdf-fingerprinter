@@ -1,0 +1,27 @@
+# id: schema_role
+# title: schema.org Role
+# family: n_ary
+# A subject linked by a property to a schema:Role node that repeats the property to the real object and holds the
+# qualifications (start date, role name).
+# REIFY schema_role probe
+ASK { $graph_open VALUES ?rt { <http://schema.org/Role> <http://schema.org/OrganizationRole> <http://schema.org/EmployeeRole> <http://schema.org/PerformanceRole> <http://schema.org/LinkRole> <https://schema.org/Role> <https://schema.org/OrganizationRole> <https://schema.org/EmployeeRole> <https://schema.org/PerformanceRole> <https://schema.org/LinkRole> } ?s ?p ?r . ?r a ?rt ; ?p ?o . $graph_close }
+# REIFY schema_role relations
+SELECT ?subjectClass ?predicate ?objectClass (COUNT(DISTINCT ?r) AS ?statements) WHERE {
+  VALUES ?rt { <http://schema.org/Role> <http://schema.org/OrganizationRole> <http://schema.org/EmployeeRole> <http://schema.org/PerformanceRole> <http://schema.org/LinkRole> <https://schema.org/Role> <https://schema.org/OrganizationRole> <https://schema.org/EmployeeRole> <https://schema.org/PerformanceRole> <https://schema.org/LinkRole> }
+  $graph_open ?s ?predicate ?r . ?r a ?rt ; ?predicate ?o . ?s a ?subjectClass .
+  OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY schema_role reifier-properties
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?r) AS ?reifiers) WHERE {
+  VALUES ?rt { <http://schema.org/Role> <http://schema.org/OrganizationRole> <http://schema.org/EmployeeRole> <http://schema.org/PerformanceRole> <http://schema.org/LinkRole> <https://schema.org/Role> <https://schema.org/OrganizationRole> <https://schema.org/EmployeeRole> <https://schema.org/PerformanceRole> <https://schema.org/LinkRole> }
+  $graph_open ?s ?predicate ?r . ?r a ?rt ; ?predicate ?o . ?r ?reifierProperty ?v .
+  FILTER(?reifierProperty NOT IN (rdf:type, ?predicate)) ?s a ?subjectClass .
+  OPTIONAL { ?o a ?objectClass } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
+# REIFY schema_role hidden
+SELECT DISTINCT ?term WHERE { $graph_open
+  VALUES ?rt { <http://schema.org/Role> <http://schema.org/OrganizationRole> <http://schema.org/EmployeeRole> <http://schema.org/PerformanceRole> <http://schema.org/LinkRole> <https://schema.org/Role> <https://schema.org/OrganizationRole> <https://schema.org/EmployeeRole> <https://schema.org/PerformanceRole> <https://schema.org/LinkRole> }
+  ?s ?p ?r . ?r a ?rt ; ?p ?o ; a ?term .
+  FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?s2 ?p2 ?x . ?x ?p2 ?o2 . } }
+  $graph_close }

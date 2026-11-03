@@ -17,9 +17,90 @@ Hidden: 1 classes.
 ~> ex:worksFor (:ex:Org) 1 statement via negative_property_assertion
 ```
 
+## ex:Actor
+
+```text
+(:ex:Actor) 1
+```
+
+## ex:Archive
+
+```text
+(:ex:Archive) 1
+```
+
+## ex:Dataset
+
+```text
+(:ex:Dataset) 1
+~> dcat:qualifiedRelation (:ex:Archive) 1 statement via dcat_qualified [reifiers: dcat:hadRole 1]
+```
+
+## ex:Event
+
+```text
+(:ex:Event) 1
+~> crm:PC14_carried_out_by (:ex:Actor) 1 statement via cidoc_property_of_property [reifiers: ex:note 1]
+```
+
+## ex:Firm
+
+```text
+(:ex:Firm) 1
+```
+
+## ex:Item
+
+```text
+(:ex:Item) 1
+~> ex:claimP1 (:ex:Place) 1 statement via wikibase_statement [reifiers: ex:rank 1]
+```
+
 ## ex:Org
 
 ```text
 (:ex:Org) 1
   -ex:legacy-> xsd:string =old
+```
+
+## ex:Place
+
+```text
+(:ex:Place) 1
+```
+
+## ex:Run
+
+```text
+(:ex:Run) 1
+~> prov:qualifiedAssociation (:ex:Team) 1 statement via prov_qualified [reifiers: prov:hadRole 1]
+```
+
+## ex:Team
+
+```text
+(:ex:Team) 1
+```
+
+## ex:Worker
+
+```text
+(:ex:Worker) 1
+  -schema:affiliation-> (:schema:OrganizationRole)
+~> schema:affiliation (:ex:Firm) 1 statement via schema_role [reifiers: schema:startDate 1]
+```
+
+## skos:Concept
+
+```text
+(:skos:Concept) 1
+  -skosxl:prefLabel-> (:skosxl:Label)
+```
+
+## skosxl:Label
+
+```text
+(:skosxl:Label) 1 via (:skos:Concept)-skosxl:prefLabel
+  -dcterms:source-> IRI
+  -skosxl:literalForm-> rdf:langString @en
 ```

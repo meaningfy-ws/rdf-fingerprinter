@@ -1,7 +1,7 @@
 {
   "endpoint": "http://fake/sparql",
-  "started_at": "2026-11-03T14:43:45.702515Z",
-  "finished_at": "2026-11-03T14:43:46.314929Z",
+  "started_at": "2026-11-03T17:43:19.293574Z",
+  "finished_at": "2026-11-03T17:43:21.072952Z",
   "tool_version": "0.3.1",
   "settings": {
     "depth": "values",
@@ -25,13 +25,18 @@
     {
       "graph": "http://example.org/reifications",
       "reification_kinds": [
+        "cidoc_property_of_property",
+        "dcat_qualified",
         "graph_statement",
         "nanopublication",
         "negative_property_assertion",
         "owl_axiom",
+        "prov_qualified",
         "rdf_statement",
         "resource_as_predicate",
-        "triple_term"
+        "schema_role",
+        "triple_term",
+        "wikibase_statement"
       ],
       "reification_counts": [
         {
@@ -112,6 +117,96 @@
           ]
         },
         {
+          "class_iri": "http://example.org/Actor",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://example.org/Archive",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://example.org/Dataset",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [],
+          "reified_relations": [
+            {
+              "property": "http://www.w3.org/ns/dcat#qualifiedRelation",
+              "object_class": "http://example.org/Archive",
+              "kind": "dcat_qualified",
+              "statements": 1,
+              "reifier_properties": [
+                {
+                  "property": "http://www.w3.org/ns/dcat#hadRole",
+                  "reifiers": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://example.org/Event",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [],
+          "reified_relations": [
+            {
+              "property": "http://www.cidoc-crm.org/cidoc-crm/PC14_carried_out_by",
+              "object_class": "http://example.org/Actor",
+              "kind": "cidoc_property_of_property",
+              "statements": 1,
+              "reifier_properties": [
+                {
+                  "property": "http://example.org/note",
+                  "reifiers": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://example.org/Firm",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://example.org/Item",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [],
+          "reified_relations": [
+            {
+              "property": "http://example.org/claimP1",
+              "object_class": "http://example.org/Place",
+              "kind": "wikibase_statement",
+              "statements": 1,
+              "reifier_properties": [
+                {
+                  "property": "http://example.org/rank",
+                  "reifiers": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
           "class_iri": "http://example.org/Org",
           "instances": 1,
           "observed_instances": 1,
@@ -144,12 +239,168 @@
           ]
         },
         {
+          "class_iri": "http://example.org/Place",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://example.org/Run",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [],
+          "reified_relations": [
+            {
+              "property": "http://www.w3.org/ns/prov#qualifiedAssociation",
+              "object_class": "http://example.org/Team",
+              "kind": "prov_qualified",
+              "statements": 1,
+              "reifier_properties": [
+                {
+                  "property": "http://www.w3.org/ns/prov#hadRole",
+                  "reifiers": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://example.org/Team",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": []
+        },
+        {
+          "class_iri": "http://example.org/Worker",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://schema.org/affiliation",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://schema.org/OrganizationRole",
+                  "node_kind": "iri"
+                }
+              ]
+            }
+          ],
+          "reified_relations": [
+            {
+              "property": "http://schema.org/affiliation",
+              "object_class": "http://example.org/Firm",
+              "kind": "schema_role",
+              "statements": 1,
+              "reifier_properties": [
+                {
+                  "property": "http://schema.org/startDate",
+                  "reifiers": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
           "class_iri": "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
           "instances": 1,
           "observed_instances": 1,
           "precision_mode": "exact",
           "co_types": [],
           "property_partitions": []
+        },
+        {
+          "class_iri": "http://www.w3.org/2004/02/skos/core#Concept",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#prefLabel",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://www.w3.org/2008/05/skos-xl#Label",
+                  "node_kind": "iri"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://www.w3.org/2008/05/skos-xl#Label",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://www.w3.org/2008/05/skos-xl#literalForm",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+                  "language": "en",
+                  "min_length": 5,
+                  "max_length": 5,
+                  "total_length": 5,
+                  "min_value": "thing",
+                  "max_value": "thing",
+                  "node_kind": "literal"
+                }
+              ]
+            },
+            {
+              "property": "http://purl.org/dc/terms/source",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "iri"
+                }
+              ]
+            }
+          ]
         }
       ],
       "term_annotations": []

@@ -10,6 +10,7 @@ from fingerprint.domain.profile import QueryKind, ReificationKind
 from fingerprint.service_layer.collection import collect
 from fingerprint.service_layer.settings import resolve_settings
 from tests.fakes import EX, FakeSparql
+from tests.sample_data import REIFIED_KINDS
 
 GRAPH = EX + "reifications"
 SOURCE = Path(__file__).parents[2] / "test_data" / "reifications-source.ttl"
@@ -52,10 +53,7 @@ def test_only_probes_hidden_terms_and_the_count_run_at_depth_graphs():
     fake = sample()
     graph = profile(fake, depth="graphs", graph_statistics=False)
     assert {s.split()[1] for s in sections(fake)} == {"probe", "hidden", "count"}
-    assert list(graph.reification_kinds) == [
-        "graph_statement", "nanopublication", "negative_property_assertion", "owl_axiom", "rdf_statement",
-        "resource_as_predicate", "triple_term",
-    ]  # fmt: skip
+    assert list(graph.reification_kinds) == list(REIFIED_KINDS)
     assert counts(graph) == {"triple_term": 1, "graph_statement": 1, "nanopublication": 2}
 
 

@@ -24,7 +24,9 @@ generic predicate SHALL come from what the data states, never from IRI strings: 
 marker (`rdf:predicate`, `owl:annotatedProperty`, `owl:assertionProperty`), else the predicate
 resource's type other than `rdf:Property` and the OWL property types, else none (an unnamed
 relation). Non-standard vocabulary, such as `rdf:singletonPropertyOf`, SHALL NOT name a relation:
-it is reported as a reifier property only (DEC-12).
+it is reported as a reifier property only (DEC-12). A relation through a qualifying node SHALL be
+named by the predicate the data uses to reach that node, never translated into another
+vocabulary's term (DEC-13).
 
 #### Scenario: Singleton properties are resources used as predicates
 - **GIVEN** 50 distinct predicate IRIs typed `ex:Link`, each linking a subject of class A to an object
@@ -78,16 +80,16 @@ it is reported as a reifier property only (DEC-12).
 - **GIVEN** 4 subjects of class `ex:Run`, each with a `prov:qualifiedAssociation` node whose
   `prov:agent` is of class `ex:Team` and which carries `prov:hadRole`
 - **WHEN** the graph is profiled
-- **THEN** class `ex:Run` has one reified relation of kind PROV qualified, `prov:wasAssociatedWith`
-  to `ex:Team`, 4 statements, reifier property `prov:hadRole` on 4, and no ordinary property
-  `prov:qualifiedAssociation`
+- **THEN** class `ex:Run` has one reified relation of kind PROV qualified, `prov:qualifiedAssociation`
+  to `ex:Team`, 4 statements, reifier property `prov:hadRole` on 4, no relation named
+  `prov:wasAssociatedWith`, and no ordinary property `prov:qualifiedAssociation`
 
-#### Scenario: SKOS-XL labels
-- **GIVEN** concepts of class `skos:Concept` with `skosxl:prefLabel` nodes typed `skosxl:Label`
-  carrying `skosxl:literalForm`
+#### Scenario: SKOS-XL labels stay ordinary
+- **GIVEN** concepts of class `skos:Concept` with `skos:prefLabel` literals and `skosxl:prefLabel`
+  nodes typed `skosxl:Label` carrying `skosxl:literalForm`
 - **WHEN** the graph is profiled
-- **THEN** class `skos:Concept` has one reified relation of kind SKOS-XL label, `skos:prefLabel`,
-  and the profile has no class `skosxl:Label`
+- **THEN** class `skos:Concept` has the ordinary properties `skos:prefLabel` and `skosxl:prefLabel`,
+  class `skosxl:Label` is profiled with `skosxl:literalForm`, and no reified relation is reported
 
 #### Scenario: Nanopublications are counted
 - **GIVEN** a graph holding 3 nanopublication heads with `np:hasAssertion`, `np:hasProvenance` and
