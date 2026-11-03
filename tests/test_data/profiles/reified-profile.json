@@ -82,6 +82,11 @@
             },
             {
               "property": "http://example.org/Procedure",
+              "kind": "resource_as_predicate",
+              "statements": 2
+            },
+            {
+              "property": "http://example.org/Procedure",
               "object_class": "http://example.org/Org",
               "kind": "resource_as_predicate",
               "statements": 1

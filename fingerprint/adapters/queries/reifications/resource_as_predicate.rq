@@ -1,43 +1,48 @@
 # id: resource_as_predicate
 # title: Resource used as a predicate
 # family: statement_identity
-# A predicate with a type that is not a property type: the type is the relation (DEC-7).
+# A predicate with a type that is not a property type: the type is the relation (DEC-7). Property types of standard
+# vocabularies (qb:, owl:*Property and their subclasses) never count as reifier types (P-23).
 # REIFY resource_as_predicate probe
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX qb: <http://purl.org/linked-data/cube#>
 ASK { $graph_open ?s ?p ?o . ?p a ?t .
-    FILTER(?t NOT IN (rdf:Property, rdfs:ContainerMembershipProperty, rdfs:Resource, owl:Thing, owl:NamedIndividual,
-    owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty, owl:OntologyProperty, owl:DeprecatedProperty,
-    owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
-    owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
-    FILTER NOT EXISTS { ?t rdfs:subClassOf+ rdf:Property }
+    FILTER NOT EXISTS { VALUES ?np { rdf:Property rdfs:ContainerMembershipProperty rdfs:Resource owl:Thing owl:NamedIndividual
+      owl:ObjectProperty owl:DatatypeProperty owl:AnnotationProperty owl:OntologyProperty owl:DeprecatedProperty
+      owl:FunctionalProperty owl:InverseFunctionalProperty owl:TransitiveProperty owl:SymmetricProperty
+      owl:AsymmetricProperty owl:ReflexiveProperty owl:IrreflexiveProperty
+      qb:DimensionProperty qb:MeasureProperty qb:AttributeProperty qb:CodedProperty qb:ComponentProperty } ?t rdfs:subClassOf* ?np }
     $graph_close }
 # REIFY resource_as_predicate relations
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX qb: <http://purl.org/linked-data/cube#>
 SELECT ?subjectClass ?predicate ?objectClass (COUNT(*) AS ?statements) WHERE {
   { SELECT $distinct ?s ?p ?o ?predicate WHERE { $graph_open ?s ?p ?o . ?p a ?predicate .
-    FILTER(?predicate NOT IN (rdf:Property, rdfs:ContainerMembershipProperty, rdfs:Resource, owl:Thing, owl:NamedIndividual,
-    owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty, owl:OntologyProperty, owl:DeprecatedProperty,
-    owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
-    owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
-    FILTER NOT EXISTS { ?predicate rdfs:subClassOf+ rdf:Property }
+    FILTER NOT EXISTS { VALUES ?np { rdf:Property rdfs:ContainerMembershipProperty rdfs:Resource owl:Thing owl:NamedIndividual
+      owl:ObjectProperty owl:DatatypeProperty owl:AnnotationProperty owl:OntologyProperty owl:DeprecatedProperty
+      owl:FunctionalProperty owl:InverseFunctionalProperty owl:TransitiveProperty owl:SymmetricProperty
+      owl:AsymmetricProperty owl:ReflexiveProperty owl:IrreflexiveProperty
+      qb:DimensionProperty qb:MeasureProperty qb:AttributeProperty qb:CodedProperty qb:ComponentProperty } ?predicate rdfs:subClassOf* ?np }
     $graph_close } }
-  $graph_open ?s a ?subjectClass . OPTIONAL { ?o a ?objectClass } $graph_close }
+  $graph_open ?s a ?subjectClass . $graph_close
+  OPTIONAL { $graph_open ?o a ?objectClass . $graph_close } }
 GROUP BY ?subjectClass ?predicate ?objectClass
 # REIFY resource_as_predicate reifier-properties
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX qb: <http://purl.org/linked-data/cube#>
 SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?p) AS ?reifiers) WHERE {
   $graph_open ?s ?p ?o . ?p a ?predicate ; ?reifierProperty ?v .
-  FILTER(?predicate NOT IN (rdf:Property, rdfs:ContainerMembershipProperty, rdfs:Resource, owl:Thing, owl:NamedIndividual,
-    owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty, owl:OntologyProperty, owl:DeprecatedProperty,
-    owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
-    owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
-  FILTER NOT EXISTS { ?predicate rdfs:subClassOf+ rdf:Property }
+  FILTER NOT EXISTS { VALUES ?np { rdf:Property rdfs:ContainerMembershipProperty rdfs:Resource owl:Thing owl:NamedIndividual
+      owl:ObjectProperty owl:DatatypeProperty owl:AnnotationProperty owl:OntologyProperty owl:DeprecatedProperty
+      owl:FunctionalProperty owl:InverseFunctionalProperty owl:TransitiveProperty owl:SymmetricProperty
+      owl:AsymmetricProperty owl:ReflexiveProperty owl:IrreflexiveProperty
+      qb:DimensionProperty qb:MeasureProperty qb:AttributeProperty qb:CodedProperty qb:ComponentProperty } ?predicate rdfs:subClassOf* ?np }
   FILTER(?reifierProperty != rdf:type) ?s a ?subjectClass .
   OPTIONAL { ?o a ?objectClass } $graph_close }
 GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
@@ -45,20 +50,21 @@ GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX qb: <http://purl.org/linked-data/cube#>
 SELECT DISTINCT ?term WHERE { $graph_open
   { ?s ?p ?o . ?p a ?t .
-    FILTER(?t NOT IN (rdf:Property, rdfs:ContainerMembershipProperty, rdfs:Resource, owl:Thing, owl:NamedIndividual,
-    owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty, owl:OntologyProperty, owl:DeprecatedProperty,
-    owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
-    owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
-    FILTER NOT EXISTS { ?t rdfs:subClassOf+ rdf:Property }
+    FILTER NOT EXISTS { VALUES ?np { rdf:Property rdfs:ContainerMembershipProperty rdfs:Resource owl:Thing owl:NamedIndividual
+      owl:ObjectProperty owl:DatatypeProperty owl:AnnotationProperty owl:OntologyProperty owl:DeprecatedProperty
+      owl:FunctionalProperty owl:InverseFunctionalProperty owl:TransitiveProperty owl:SymmetricProperty
+      owl:AsymmetricProperty owl:ReflexiveProperty owl:IrreflexiveProperty
+      qb:DimensionProperty qb:MeasureProperty qb:AttributeProperty qb:CodedProperty qb:ComponentProperty } ?t rdfs:subClassOf* ?np }
     BIND(?p AS ?term) }
   UNION { ?s ?p ?o . ?p a ?t .
-    FILTER(?t NOT IN (rdf:Property, rdfs:ContainerMembershipProperty, rdfs:Resource, owl:Thing, owl:NamedIndividual,
-    owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty, owl:OntologyProperty, owl:DeprecatedProperty,
-    owl:FunctionalProperty, owl:InverseFunctionalProperty, owl:TransitiveProperty, owl:SymmetricProperty,
-    owl:AsymmetricProperty, owl:ReflexiveProperty, owl:IrreflexiveProperty))
-    FILTER NOT EXISTS { ?t rdfs:subClassOf+ rdf:Property }
+    FILTER NOT EXISTS { VALUES ?np { rdf:Property rdfs:ContainerMembershipProperty rdfs:Resource owl:Thing owl:NamedIndividual
+      owl:ObjectProperty owl:DatatypeProperty owl:AnnotationProperty owl:OntologyProperty owl:DeprecatedProperty
+      owl:FunctionalProperty owl:InverseFunctionalProperty owl:TransitiveProperty owl:SymmetricProperty
+      owl:AsymmetricProperty owl:ReflexiveProperty owl:IrreflexiveProperty
+      qb:DimensionProperty qb:MeasureProperty qb:AttributeProperty qb:CodedProperty qb:ComponentProperty } ?t rdfs:subClassOf* ?np }
     BIND(?t AS ?term)
           FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?s2 ?x ?o2 } } }
   $graph_close }

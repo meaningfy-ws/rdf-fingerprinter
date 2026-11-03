@@ -49,6 +49,7 @@ REIFIED_PERSON_RELATIONS = (
     ("resource_as_predicate", "http://example.org/Link", "http://example.org/Org", 2,
      (("http://www.w3.org/1999/02/22-rdf-syntax-ns#singletonPropertyOf", 2),
       ("http://www.w3.org/ns/prov#wasAttributedTo", 1))),
+    ("resource_as_predicate", "http://example.org/Procedure", None, 2, ()),
     ("resource_as_predicate", "http://example.org/Procedure", "http://example.org/Org", 1, ()),
     ("owl_axiom", "http://example.org/knows", "http://example.org/Person", 1, SOURCE_REIFIER),
     ("rdf_statement", "http://example.org/knows", "http://example.org/Person", 1, SOURCE_REIFIER),

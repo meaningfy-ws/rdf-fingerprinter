@@ -87,6 +87,7 @@ def test_resource_as_predicate_names_singletons_by_their_type_and_reports_the_ma
     assert run(sample, "resource_as_predicate", "relations") == {
         (EX.Person, EX.Link, EX.Org, Literal(2)),
         (EX.Person, EX.Procedure, EX.Org, Literal(1)),
+        (EX.Person, EX.Procedure, None, Literal(2)),
     }
     assert run(sample, "resource_as_predicate", "reifier-properties") == {
         (EX.Person, EX.Link, EX.Org, SINGLETON, Literal(2)),
@@ -102,7 +103,7 @@ PROV_QUALIFIED = (
 
 HIDDEN = {
     "rdf_statement": {RDF.Statement, RDF.subject, RDF.predicate, RDF.object},
-    "resource_as_predicate": {EX.rel1, EX.rel2, EX.Link, EX.performs1, EX.Procedure},
+    "resource_as_predicate": {EX.rel1, EX.rel2, EX.Link, EX.performs1, EX.performs2, EX.performs3, EX.Procedure},
     "owl_axiom": {OWL.Axiom, OWL.annotatedSource, OWL.annotatedProperty, OWL.annotatedTarget},
     "negative_property_assertion": {
         OWL.NegativePropertyAssertion,
@@ -333,3 +334,111 @@ def test_a_typed_value_node_is_no_structured_value_and_its_class_stays():
     assert run(graph, "structured_value", "probe") is False
     assert run(graph, "structured_value", "relations") == set()
     assert TEMPLATES["structured_value"].hidden is None
+
+
+# --- review fixes: both renderings, untyped objects, owned nodes, property-type vocabularies, claim predicates ---
+
+NAMED = str(EX.reifications)
+
+
+def run_both(turtle, kind, section):
+    """The rows of a section rendered for the default graph and for a named graph (P-16); they must agree."""
+    prefixes = (
+        "@prefix ex: <http://example.org/> . @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . "
+        "@prefix prov: <http://www.w3.org/ns/prov#> . @prefix dcat: <http://www.w3.org/ns/dcat#> . "
+        "@prefix dct: <http://purl.org/dc/terms/> . @prefix qb: <http://purl.org/linked-data/cube#> . "
+        "@prefix wikibase: <http://wikiba.se/ontology#> . @prefix crm: <http://www.cidoc-crm.org/cidoc-crm/> . "
+        "@prefix owl: <http://www.w3.org/2002/07/owl#> . @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . "
+    )
+    default = Dataset()
+    default.parse(data=prefixes + turtle, format="turtle")
+    named = Dataset()
+    named.graph(EX.reifications).parse(data=prefixes + turtle, format="turtle")
+    template = TEMPLATES[kind]
+    answers = []
+    for dataset, graph in ((default, None), (named, NAMED)):
+        result = dataset.query(reification_query(template, section, graph))
+        answers.append(result.askAnswer if section == "probe" else {tuple(row) for row in result})
+    assert answers[0] == answers[1]
+    return answers[0]
+
+
+@pytest.mark.parametrize(
+    ("kind", "section"),
+    [
+        (t.id, s)
+        for t in TEMPLATES.values()
+        for s in ("relations", "reifier-properties", "hidden", "count")
+        if getattr(t, s.replace("-", "_"))
+    ],
+)
+def test_a_section_gives_the_same_rows_in_the_default_graph_and_in_a_named_graph(sample, kind, section):
+    template = TEMPLATES[kind]
+    default = {tuple(r) for r in sample.query(reification_query(template, section, None))}
+    named = {tuple(r) for r in sample.query(reification_query(template, section, NAMED))}
+    assert default == named
+
+
+def test_resource_as_predicate_counts_statements_with_a_literal_or_untyped_object_in_the_sample(sample):
+    named = {tuple(r) for r in sample.query(reification_query(TEMPLATES["resource_as_predicate"], "relations", NAMED))}
+    assert (EX.Person, EX.Procedure, None, Literal(2)) in named
+    assert (EX.Person, EX.Procedure, EX.Org, Literal(1)) in named
+
+
+UNTYPED_OBJECTS = "ex:a a ex:A ; ex:rel1 ex:untyped ; ex:rel2 'text' . ex:rel1 a ex:Link . ex:rel2 a ex:Link ."
+
+
+def test_resource_as_predicate_counts_untyped_and_literal_objects_in_both_renderings():
+    assert run_both(UNTYPED_OBJECTS, "resource_as_predicate", "relations") == {(EX.A, EX.Link, None, Literal(2))}
+    reifiers = run_both(UNTYPED_OBJECTS + " ex:rel1 ex:note 'x' .", "resource_as_predicate", "reifier-properties")
+    assert (EX.A, EX.Link, None, EX.note, Literal(1)) in reifiers
+
+
+UNTYPED_QUALIFIED = "ex:run a ex:Run ; prov:qualifiedAssociation [ prov:agent ex:t ; prov:hadRole ex:r ] ."
+
+
+def test_an_untyped_qualified_node_is_one_relation_of_prov_and_none_of_blank_nary():
+    assert run_both(UNTYPED_QUALIFIED, "prov_qualified", "relations") == {
+        (EX.Run, PROV.qualifiedAssociation, None, Literal(1))
+    }
+    assert run_both(UNTYPED_QUALIFIED, "blank_nary", "probe") is False
+    assert run_both(UNTYPED_QUALIFIED, "blank_nary", "relations") == set()
+
+
+def test_an_untyped_dcat_qualified_node_is_one_relation_of_dcat_and_none_of_blank_nary():
+    turtle = "ex:ds a ex:Dataset ; dcat:qualifiedRelation [ dct:relation ex:ds2 ; dcat:hadRole ex:x ] ."
+    assert run_both(turtle, "dcat_qualified", "relations") == {(EX.Dataset, DCAT.qualifiedRelation, None, Literal(1))}
+    assert run_both(turtle, "blank_nary", "probe") is False
+
+
+def test_a_blank_node_with_the_crm_domain_and_range_is_left_to_cidoc():
+    turtle = "ex:e a ex:Event . ex:e ex:p [ crm:P01_has_domain ex:e ; crm:P02_has_range ex:x ; ex:note 'n' ] ."
+    assert run_both(turtle, "blank_nary", "probe") is False
+
+
+QB = (
+    "ex:refArea a rdf:Property, qb:DimensionProperty . ex:measure a qb:MeasureProperty . "
+    "ex:CustomProperty rdfs:subClassOf owl:ObjectProperty . ex:linked a ex:CustomProperty . "
+    "ex:obs a qb:Observation ; ex:refArea ex:BE ; ex:measure 1 ; ex:linked ex:BE . ex:BE a ex:Area ."
+)
+
+
+@pytest.mark.parametrize("section", ["probe", "relations", "reifier-properties", "hidden"])
+def test_property_types_of_standard_vocabularies_make_no_resource_as_predicate(section):
+    assert run_both(QB, "resource_as_predicate", section) in (False, set())
+
+
+def test_a_type_that_is_not_a_property_type_still_makes_a_resource_as_predicate_next_to_qb_properties():
+    turtle = QB + " ex:a a ex:A ; ex:rel1 ex:BE . ex:rel1 a ex:Link ."
+    assert run_both(turtle, "resource_as_predicate", "relations") == {(EX.A, EX.Link, EX.Area, Literal(1))}
+    assert run_both(turtle, "resource_as_predicate", "hidden") == {(EX.rel1,), (EX.Link,)}
+
+
+CLAIMS = (
+    "ex:i a ex:Item ; ex:claimP1 ex:st ; ex:claimP2 ex:st2 ; ex:claimP2 'plain' . "
+    "ex:st a wikibase:Statement . ex:st2 a wikibase:Statement ."
+)
+
+
+def test_a_claim_predicate_is_hidden_only_when_every_use_points_to_a_statement():
+    assert run_both(CLAIMS, "wikibase_statement", "hidden") == {(EX.claimP1,), (WIKIBASE.Statement,)}

@@ -99,7 +99,8 @@ New planning decisions; EPIC decisions are cited, not restated.
   graph=…, check_id=<kind id>)`, reusing `Failure.check_id` for the kind id (no new slot). A failed probe or capture makes that kind
   "not found" for the filter (its machinery stays ordinary; nothing disappears silently) and is
   recorded as a failure, so the run fails as for any other query (statistics-collection "Failures
-  are recorded and fail the run").
+  are recorded and fail the run"). A kind's hidden terms apply only if its probe, `hidden` and (when it has them)
+  `relations` and `reifier-properties` queries all succeeded; otherwise its machinery stays ordinary.
 - **P-15 The reification sample is collected in memory, not in Oxigraph.** The sample profile
   collects every graph of the shared store and the e2e tests assert exactly three graphs
   (`tests/e2e/test_collection.py`), so a fourth graph would change both. `tests/refresh_sample_data.py`
@@ -325,7 +326,7 @@ sends every rendered section of every packaged template to Oxigraph and asserts 
 | Malformed packaged template | `packaged_templates()` validation at load | Raises at startup; a unit test loads the packaged catalogue, so CI catches it |
 | Probe times out or errors | the query port raises | `run.fail("REIFY", …, check_id=<kind>)`; kind treated as absent; run fails (P-8) |
 | `hidden` fails after the probe found the kind | port raises | failure recorded; the kind's machinery stays ordinary; its relations are still attached if their queries succeeded |
-| `relations` / `reifier-properties` fails | port raises | failure recorded; the kind's relations omitted; hidden terms still applied (the machinery is known) |
+| `relations` / `reifier-properties` fails | port raises | failure recorded; the kind's relations omitted and its machinery stays ordinary (P-8) |
 | Endpoint rejects `rdf:reifies` objects (1.1 store with triple terms) | probe raises | as a failed probe; the docs name `--no-reifications` as the way round |
 | Capture slow on a large graph | duration in the run log | no escalation (P-9); measured at the gate |
 | Reifier with a non-IRI generic predicate (a literal in `rdf:type`; not valid RDF, kept for stores that allow it) | `?predicate` not an IRI | the relation is unnamed (`property` absent) |
@@ -390,6 +391,21 @@ mutmut, the release gate) and the brainframe acceptance run once, at the end of 
 - **P-21 `structured_value` covers `rdf:value` nodes** (blank or IRI): named by the incoming
   predicate, object class absent, the node's other properties (e.g. a unit) as reifier properties;
   untyped nodes only and no hidden terms (P-22 amends the typed case).
+
+### Review fixes
+
+- **P-23 Standard property-type vocabularies are never reifier types.** `resource_as_predicate` ignores a
+  predicate type that is, or is `rdfs:subClassOf*` (as the graph states), `rdf:Property`, an `owl:*Property`,
+  `rdfs:ContainerMembershipProperty` or a Data Cube property type (`qb:DimensionProperty`, `qb:MeasureProperty`,
+  `qb:AttributeProperty`, `qb:CodedProperty`, `qb:ComponentProperty`); such predicates stay ordinary properties.
+- **P-8 clarified.** A kind's hidden terms apply only when its probe, `hidden`, `relations` and
+  `reifier-properties` queries all succeeded; otherwise nothing of that kind is hidden.
+- **`blank_nary` excludes nodes owned by other kinds**: nodes reached through `prov:qualified*`,
+  `dcat:qualifiedRelation` or `dcat:qualifiedAttribution`, and nodes with `crm:P01_has_domain` or
+  `crm:P02_has_range`, so an untyped qualified node is one relation, not two.
+- **`wikibase_statement` hides a claim predicate only when every use of it points to a `wikibase:Statement`** (P-5 style).
+- Unit tests run every section in both renderings (default graph, named graph); a subquery's `OPTIONAL` sits
+  outside the `GRAPH` group that precedes it.
 
 ### Stage kinds (new `ReificationKind` values)
 

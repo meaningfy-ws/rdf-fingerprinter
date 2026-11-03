@@ -40,6 +40,11 @@ ex:npa1 a owl:NegativePropertyAssertion ; owl:sourceIndividual ex:bob ;
 # resource_as_predicate: ex:performs1 is an ex:Procedure (a non-property type) used as a predicate.
 ex:carol ex:performs1 ex:acme .
 ex:performs1 a ex:Procedure .
+# ... also with a literal object and with an object that has no type: the statements still count (no class for them).
+ex:carol ex:performs2 "pending" .
+ex:performs2 a ex:Procedure .
+ex:carol ex:performs3 ex:untyped-thing .
+ex:performs3 a ex:Procedure .
 
 # An ordinary predicate typed only rdf:Property, used once: it must stay an ordinary property.
 ex:acme ex:legacy "old" .

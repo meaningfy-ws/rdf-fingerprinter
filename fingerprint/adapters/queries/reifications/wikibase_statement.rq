@@ -24,7 +24,8 @@ GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty
 # REIFY wikibase_statement hidden
 PREFIX wikibase: <http://wikiba.se/ontology#>
 SELECT DISTINCT ?term WHERE { $graph_open
-  { ?s ?predicate ?st . ?st a wikibase:Statement . BIND(?predicate AS ?term) }
+  { ?s ?predicate ?st . ?st a wikibase:Statement .
+    FILTER NOT EXISTS { ?s3 ?predicate ?o3 FILTER NOT EXISTS { ?o3 a wikibase:Statement } } BIND(?predicate AS ?term) }
   UNION { ?s ?predicate ?st . ?st a wikibase:Statement ; a ?term .
           FILTER NOT EXISTS { ?x a ?term FILTER NOT EXISTS { ?s2 ?claim2 ?x . ?x a wikibase:Statement . } } }
   $graph_close }

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import pytest
 from hypothesis import given
 from hypothesis import strategies as st
 from rdflib import URIRef
@@ -75,6 +76,7 @@ def test_machinery_leaves_classes_properties_and_links_and_the_relations_follow_
     assert not {p.property for p in person.property_partitions} & {EX + "rel1", EX + "rel2"}
     assert [(r.kind, r.property, r.object_class, r.statements) for r in person.reified_relations] == [
         ("resource_as_predicate", EX + "Link", EX + "Org", 2),
+        ("resource_as_predicate", EX + "Procedure", None, 2),
         ("resource_as_predicate", EX + "Procedure", EX + "Org", 1),
         ("owl_axiom", EX + "knows", EX + "Person", 1),
         ("rdf_statement", EX + "knows", EX + "Person", 1),
@@ -115,14 +117,16 @@ def test_a_failed_hidden_query_keeps_the_machinery_but_still_captures_the_relati
     assert ReificationKind.resource_as_predicate in {r.kind for r in found["Person"].reified_relations}
 
 
-def test_a_failed_relations_query_omits_the_relations_but_keeps_the_hiding():
+@pytest.mark.parametrize("section", ["relations", "reifier-properties"])
+def test_a_failed_capture_leaves_the_machinery_ordinary_and_omits_the_relations(section):
     fake = sample()
-    fake.on("REIFY", PermanentError("no"), when=fails_on("resource_as_predicate", "relations"))
-    result = run(fake, depth="classes")
+    fake.on("REIFY", PermanentError("no"), when=fails_on("resource_as_predicate", section))
+    result = run(fake, depth="properties")
     assert [f.check_id for f in result.failures] == ["resource_as_predicate"]
     found = classes(result.graphs[0])
-    assert "Link" not in found
+    assert "Link" in found
     assert ReificationKind.resource_as_predicate not in {r.kind for r in found["Person"].reified_relations}
+    assert EX + "rel1" in {p.property for p in found["Person"].property_partitions}
 
 
 def test_a_failed_count_leaves_that_kind_uncounted():

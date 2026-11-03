@@ -462,7 +462,8 @@ class _Collection:
         label = graph or "default"
         logger.info("graph %s: profiling", label)
         found = stage.found(graph) if stage else []  # first, at every depth (P-3)
-        hidden = stage.hidden(graph, found) if stage else frozenset()
+        captured, uncaptured = stage.relations(graph, found) if stage and self.depth_at_least(Depth.classes) else ([], set())
+        hidden = stage.hidden(graph, found, uncaptured) if stage else frozenset()  # P-8: only for kinds fully read
         result = self.graph_totals(graph) if self.settings.graph_statistics else GraphProfile(graph=graph or None)
         if found and stage:
             result = result.model_copy(
@@ -490,7 +491,7 @@ class _Collection:
             profiles = list(pool.map(lambda pair: self.profile_class(graph, pair[0], pair[1], predicates, hidden), ordered))
         profiled = [p for p in profiles if p]
         if stage:
-            profiled = stage.attach(profiled, stage.relations(graph, found))
+            profiled = stage.attach(profiled, captured)
         return result.model_copy(
             update={
                 "declared_subclass_edges": edges,
@@ -548,9 +549,12 @@ class _Reifications:
         answers = self._each(self.templates, lambda t: self._send(graph, t, "probe"))
         return [t for t, answer in zip(self.templates, answers, strict=True) if answer]
 
-    def hidden(self, graph: str, kinds: Sequence[ReificationTemplate]) -> frozenset[str]:
-        """The classes and predicates that implement the kinds found (P-4); a failed `hidden` hides nothing."""
-        wanted = [t for t in kinds if t.hidden]
+    def hidden(
+        self, graph: str, kinds: Sequence[ReificationTemplate], uncaptured: frozenset[str] | set[str] = frozenset()
+    ) -> frozenset[str]:
+        """The classes and predicates that implement the kinds found (P-4), except those of `uncaptured` kinds, whose
+        machinery stays ordinary (P-8); a failed `hidden` hides nothing."""
+        wanted = [t for t in kinds if t.hidden and t.id not in uncaptured]
         rows = self._each(wanted, lambda t: self._send(graph, t, "hidden") or [])
         return frozenset(_term(r["term"]) for answer in rows for r in answer if r["term"])
 
@@ -563,16 +567,22 @@ class _Reifications:
                 counted.append(ReificationCount(kind=ReificationKind(template.id), count=_int(rows[0]["count"]) or 0))
         return counted
 
-    def relations(self, graph: str, kinds: Sequence[ReificationTemplate]) -> list[tuple[str, ReifiedRelation]]:
-        """(subject class, relation) of every kind found, reifier properties merged in; failed kinds give none."""
-        captured = self._each([t for t in kinds if t.relations], lambda t: self._capture(graph, t))
-        return [pair for pairs in captured for pair in pairs]
+    def relations(
+        self, graph: str, kinds: Sequence[ReificationTemplate]
+    ) -> tuple[list[tuple[str, ReifiedRelation]], set[str]]:
+        """((subject class, relation) of every kind found, reifier properties merged in; the ids of the kinds whose
+        relations or reifier-properties query failed, which give no relation)."""
+        wanted = [t for t in kinds if t.relations]
+        captured = self._each(wanted, lambda t: self._capture(graph, t))
+        failed = {t.id for t, pairs in zip(wanted, captured, strict=True) if pairs is None}
+        return [pair for pairs in captured if pairs for pair in pairs], failed
 
-    def _capture(self, graph: str, template: ReificationTemplate) -> list[tuple[str, ReifiedRelation]]:
+    def _capture(self, graph: str, template: ReificationTemplate) -> list[tuple[str, ReifiedRelation]] | None:
+        """The kind's relations, or None when one of its queries failed."""
         rows = self._send(graph, template, "relations")
-        if rows is None:
-            return []
-        reifiers = (self._send(graph, template, "reifier-properties") or []) if template.reifier_properties else []
+        reifiers = self._send(graph, template, "reifier-properties") if template.reifier_properties else []
+        if rows is None or reifiers is None:
+            return None
         found: list[tuple[str, ReifiedRelation]] = []
         for r in rows:
             subject = _text(r["subjectClass"])
