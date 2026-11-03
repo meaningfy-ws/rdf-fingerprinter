@@ -1,0 +1,20 @@
+# id: structured_value
+# title: Structured value (rdf:value)
+# family: n_ary
+# A subject linked by a property to an untyped node that holds an rdf:value and its qualifications, such as a unit
+# (DEC-13: the relation keeps the linking property's name). A typed value node is an ordinary instance (P-22), so
+# there is no hidden section.
+# REIFY structured_value probe
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+ASK { $graph_open ?s ?p ?n . ?n rdf:value ?v . FILTER NOT EXISTS { ?n a ?t } $graph_close }
+# REIFY structured_value relations
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?subjectClass ?predicate ?objectClass (COUNT(DISTINCT ?n) AS ?statements) WHERE {
+  $graph_open ?s ?predicate ?n . ?n rdf:value ?v . ?s a ?subjectClass . FILTER NOT EXISTS { ?n a ?t } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY structured_value reifier-properties
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?n) AS ?reifiers) WHERE {
+  $graph_open ?s ?predicate ?n . ?n rdf:value ?v ; ?reifierProperty ?w . ?s a ?subjectClass .
+  FILTER(?reifierProperty NOT IN (rdf:value, rdf:type)) FILTER NOT EXISTS { ?n a ?t } $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty

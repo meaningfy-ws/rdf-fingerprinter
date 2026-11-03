@@ -24,9 +24,18 @@ ex:Actor {
 # (:ex:Archive) 1
 ex:Archive {
 }
+# (:ex:Building) 1
+ex:Building {
+  ex:height BNODE ;  # bn
+  # ~> ex:height (:?) 1 statement via structured_value [reifiers: ex:unit 1]
+}
 # (:ex:Dataset) 1
 ex:Dataset {
   # ~> dcat:qualifiedRelation (:ex:Archive) 1 statement via dcat_qualified [reifiers: dcat:hadRole 1]
+}
+# (:ex:Entry) 1
+ex:Entry {
+  ex:code @ex:Notation ;  # (:ex:Notation)
 }
 # (:ex:Event) 1
 ex:Event {
@@ -39,12 +48,27 @@ ex:Firm {
 ex:Item {
   # ~> ex:claimP1 (:ex:Place) 1 statement via wikibase_statement [reifiers: ex:rank 1]
 }
+# (:ex:Notation) 1 via (:ex:Entry)-ex:code
+ex:Notation {
+  rdf:value xsd:string ;  # =A1
+}
+# (:ex:Office) 1
+ex:Office {
+  ex:address BNODE {  # (:ex:Address) bn
+    ex:street xsd:string ;  # ="Main St"
+  } ;
+}
 # (:ex:Org) 1
 ex:Org {
   ex:legacy xsd:string ;  # =old
 }
 # (:ex:Place) 1
 ex:Place {
+}
+# (:ex:Project) 1
+ex:Project {
+  ex:role BNODE ;  # bn
+  # ~> ex:role (:?) 1 statement via blank_nary [reifiers: ex:agent 1, ex:since 1]
 }
 # (:ex:Run) 1
 ex:Run {

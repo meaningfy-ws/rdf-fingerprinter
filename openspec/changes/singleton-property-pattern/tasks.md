@@ -53,8 +53,8 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 - [x] S.1 Gherkin first for the new statistics-collection scenarios (and the reworded "Relation through a blank node"); P-18: `GraphProfile.reification_counts` (`ReificationCount{kind, count}`) replaces `triple_term_reifications` in the model, collection, report note, `REIFIED_*` facts, docs; the triple-term scenario and steps migrated
 - [x] S.2 Stage 2 templates `graph_statement`, `nanopublication` (count-only, P-17) + sample graphs in `reifications-source.ttl` (the reified profile's `selected_graphs` widened to them) + bindings
 - [x] S.3 Stage 3 templates `prov_qualified`, `dcat_qualified`, `schema_role`, `wikibase_statement`, `cidoc_property_of_property`, `skosxl_label` (P-19 tables) + sample + bindings
-- [ ] S.4 Stage 4 templates `blank_nary` (P-20), `structured_value` (P-21) + sample + bindings; the `@stage4` tag and its conftest hook removed
-- [ ] S.5 `make refresh-sample-profile` + `make refresh-golden` (only reified files change); docs kinds table and limits; CHANGELOG; `openspec validate --strict`
+- [x] S.4 Stage 4 templates `blank_nary` (P-20), `structured_value` (P-21) + sample + bindings; the `@stage4` tag and its conftest hook removed
+- [x] S.5 `make refresh-sample-profile` + `make refresh-golden` (only reified files change); docs kinds table and limits; CHANGELOG; `openspec validate --strict`
 
 ## 8. Gate and release
 
@@ -67,7 +67,7 @@ task (`Refs: singleton-property-pattern DEC-…, P-…`).
 
 ## Roadmap
 
-- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 7.1 · [x] R.1 · [x] S.1 · [x] S.2 · [x] S.3 · [ ] S.4 · [ ] S.5 · [ ] 8.0 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
+- [x] 0.1 · [x] 1.1 · [x] 2.1 · [x] 3.1 · [x] 3.2 · [x] 3.3 · [x] 4.1 · [x] 4.2 · [x] 4.3 · [x] 5.1 · [x] 5.2 · [x] 5.3 · [x] 6.1 · [x] 6.2 · [x] 7.1 · [x] R.1 · [x] S.1 · [x] S.2 · [x] S.3 · [x] S.4 · [x] S.5 · [ ] 8.0 · [ ] 8.1 · [ ] 8.2 · [ ] 8.3 · [ ] 8.4 · [ ] 8.5
 
 ## Verification
 

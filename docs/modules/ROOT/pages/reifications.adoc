@@ -76,7 +76,49 @@ reifiers carry `rdf:singletonPropertyOf` (an ordinary reifier property) and one 
 | a node with `np:hasAssertion`
 | — (counted only)
 | `np:Nanopublication`, `np:hasAssertion`, `np:hasProvenance`, `np:hasPublicationInfo`
+
+| `prov_qualified`
+| a subject linked by one of the 14 `prov:qualifiedX` properties to a node
+| the `prov:qualifiedX` property itself (for example `prov:qualifiedAssociation`)
+| the `prov:qualifiedX` properties; classes whose every instance is such a node
+
+| `dcat_qualified`
+| `dcat:qualifiedRelation` or `dcat:qualifiedAttribution` to a node
+| that property
+| the two properties; classes whose every instance is such a node
+
+| `schema_role`
+| a node typed `schema:Role` or a subclass (http or https) that repeats the linking property to the real object
+| the linking property
+| the role classes, when every instance is a role node
+
+| `wikibase_statement`
+| a node typed `wikibase:Statement` linked from a subject
+| the claim predicate the data uses
+| `wikibase:Statement`, when every instance is a statement node
+
+| `cidoc_property_of_property`
+| a node with `crm:P01_has_domain` and `crm:P02_has_range`
+| the node's type (a `crm:PC…` class)
+| the two properties and the `crm:PC…` classes whose every instance is such a node
+
+| `blank_nary`
+| an untyped blank node, the object of exactly one triple, with outgoing triples, that is not a list, an OWL or SHACL construct, an `rdf:Statement` or an `rdf:value` node
+| the linking property
+| — (untyped nodes are not in the ordinary profile)
+
+| `structured_value`
+| an untyped node with `rdf:value` linked by a property (a quantity with its unit)
+| the linking property
+| —
 |===
+
+The relation is named by the predicate the data uses: no mapping table translates `prov:qualifiedX`
+to `prov:wasX`, or a Wikibase claim to its property. SKOS-XL labels are ordinary classes and
+properties, not a reification. `graph_statement` and `nanopublication` are counted only, not related
+to a class. `blank_nary` and `structured_value` cover untyped nodes only: a typed node, such as a
+`[ a ex:Address ]` blank node or an `euvoc:XlNotation` value node, is an ordinary instance and
+class.
 
 A class other than the fixed ones above (`ex:Link` in the example) is hidden only when *every* one of
 its instances is part of the reification. A class with reifiers and ordinary instances stays whole:
@@ -172,6 +214,8 @@ recognise.
   fact.
 * **`patterns-<graph>.csv` and the glossary are unchanged.** They have one row per property and no
   reified relation.
-* **Not yet covered:** n-ary relations through IRI nodes (nothing tells them from ordinary classes),
-  named graphs used as statement ids, qualified-relation vocabularies (PROV-O, DCAT, `schema:Role`,
-  Wikibase), and n-ary relations through blank nodes.
+* **Typed nodes stay ordinary.** `blank_nary` and `structured_value` skip any node with an
+  `rdf:type`, since a typed node is a real class of the data.
+* **Not covered:** n-ary relations through typed IRI nodes (nothing tells them from ordinary
+  classes), and qualified-relation vocabularies other than PROV-O, DCAT, `schema:Role`, Wikibase and
+  CIDOC CRM.

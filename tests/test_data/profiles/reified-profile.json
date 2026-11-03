@@ -25,6 +25,7 @@
     {
       "graph": "http://example.org/reifications",
       "reification_kinds": [
+        "blank_nary",
         "cidoc_property_of_property",
         "dcat_qualified",
         "graph_statement",
@@ -35,6 +36,7 @@
         "rdf_statement",
         "resource_as_predicate",
         "schema_role",
+        "structured_value",
         "triple_term",
         "wikibase_statement"
       ],
@@ -125,12 +127,83 @@
           "property_partitions": []
         },
         {
+          "class_iri": "http://example.org/Address",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://example.org/street",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 7,
+                  "max_length": 7,
+                  "total_length": 7,
+                  "min_value": "Main St",
+                  "max_value": "Main St",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
           "class_iri": "http://example.org/Archive",
           "instances": 1,
           "observed_instances": 1,
           "precision_mode": "exact",
           "co_types": [],
           "property_partitions": []
+        },
+        {
+          "class_iri": "http://example.org/Building",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://example.org/height",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "blank_node"
+                }
+              ]
+            }
+          ],
+          "reified_relations": [
+            {
+              "property": "http://example.org/height",
+              "kind": "structured_value",
+              "statements": 1,
+              "reifier_properties": [
+                {
+                  "property": "http://example.org/unit",
+                  "reifiers": 1
+                }
+              ]
+            }
+          ]
         },
         {
           "class_iri": "http://example.org/Dataset",
@@ -149,6 +222,33 @@
                 {
                   "property": "http://www.w3.org/ns/dcat#hadRole",
                   "reifiers": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://example.org/Entry",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://example.org/code",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://example.org/Notation",
+                  "node_kind": "iri"
                 }
               ]
             }
@@ -207,6 +307,65 @@
           ]
         },
         {
+          "class_iri": "http://example.org/Notation",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "datatype": "http://www.w3.org/2001/XMLSchema#string",
+                  "min_length": 2,
+                  "max_length": 2,
+                  "total_length": 2,
+                  "min_value": "A1",
+                  "max_value": "A1",
+                  "node_kind": "literal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "class_iri": "http://example.org/Office",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://example.org/address",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "object_class": "http://example.org/Address",
+                  "node_kind": "blank_node"
+                }
+              ]
+            }
+          ]
+        },
+        {
           "class_iri": "http://example.org/Org",
           "instances": 1,
           "observed_instances": 1,
@@ -245,6 +404,49 @@
           "precision_mode": "exact",
           "co_types": [],
           "property_partitions": []
+        },
+        {
+          "class_iri": "http://example.org/Project",
+          "instances": 1,
+          "observed_instances": 1,
+          "precision_mode": "exact",
+          "co_types": [],
+          "property_partitions": [
+            {
+              "property": "http://example.org/role",
+              "distinct_objects": 1,
+              "cardinality_histogram": [
+                {
+                  "values_per_subject": 1,
+                  "subjects": 1
+                }
+              ],
+              "value_partitions": [
+                {
+                  "triples": 1,
+                  "distinct_objects": 1,
+                  "node_kind": "blank_node"
+                }
+              ]
+            }
+          ],
+          "reified_relations": [
+            {
+              "property": "http://example.org/role",
+              "kind": "blank_nary",
+              "statements": 1,
+              "reifier_properties": [
+                {
+                  "property": "http://example.org/agent",
+                  "reifiers": 1
+                },
+                {
+                  "property": "http://example.org/since",
+                  "reifiers": 1
+                }
+              ]
+            }
+          ]
         },
         {
           "class_iri": "http://example.org/Run",

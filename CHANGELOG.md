@@ -7,13 +7,18 @@ All notable changes to this project are documented in this file. The format is b
 ## [Unreleased]
 
 The fingerprint recognises reifications (statements about statements) and shows the links they stand
-for as reified relations of their class (OpenSpec change `singleton-property-pattern`, stage 1).
+for as reified relations of their class (OpenSpec change `singleton-property-pattern`).
 
 ### Added
 - **Reification probes.** Every run asks one SPARQL `ASK` per kind: `rdf_statement`,
   `resource_as_predicate` (which also captures singleton properties: `rdf:singletonPropertyOf` is not
   standard, so it is a reifier property and never names a relation), `owl_axiom`, `negative_property_assertion` and
   `triple_term` (RDF 1.2 `rdf:reifies`, counted only). Only the kinds found are captured.
+- **More kinds.** `graph_statement` and `nanopublication` (counted only); `prov_qualified`,
+  `dcat_qualified`, `schema_role`, `wikibase_statement` and `cidoc_property_of_property`, each named by
+  the predicate or type the data uses; `blank_nary` (an untyped blank node carrying the qualifications)
+  and `structured_value` (an untyped `rdf:value` node). Typed blank nodes and value nodes stay ordinary.
+  SKOS-XL labels are not a reification.
 - **Reified relations per class**: kind, property, object class, statements and reifier properties,
   in the report, the pattern schema (`~>` lines), the PlantUML diagram and `profile.json`
   (`reified_relations`, `reification_kinds`, `reification_counts`); ShExC and SHACL note them

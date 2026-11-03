@@ -21,11 +21,47 @@ ex-shape:Actor a sh:NodeShape ;
     fp:precisionMode "exact" ;
 .
 
+ex-shape:Address a sh:NodeShape ;
+    sh:targetClass ex:Address ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property ex-shape:Address-ex-street ;
+.
+
+ex-shape:Address-ex-street a sh:PropertyShape ;
+    sh:path ex:street ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
 ex-shape:Archive a sh:NodeShape ;
     sh:targetClass ex:Archive ;
     fp:instances 1 ;
     fp:observedInstances 1 ;
     fp:precisionMode "exact" ;
+.
+
+ex-shape:Building a sh:NodeShape ;
+    sh:targetClass ex:Building ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    rdfs:comment "Reified relation: ~> ex:height (:?) 1 statement via structured_value [reifiers: ex:unit 1]" ;
+    sh:property ex-shape:Building-ex-height ;
+.
+
+ex-shape:Building-ex-height a sh:PropertyShape ;
+    sh:path ex:height ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:BlankNode ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
 .
 
 ex-shape:Dataset a sh:NodeShape ;
@@ -34,6 +70,24 @@ ex-shape:Dataset a sh:NodeShape ;
     fp:observedInstances 1 ;
     fp:precisionMode "exact" ;
     rdfs:comment "Reified relation: ~> dcat:qualifiedRelation (:ex:Archive) 1 statement via dcat_qualified [reifiers: dcat:hadRole 1]" ;
+.
+
+ex-shape:Entry a sh:NodeShape ;
+    sh:targetClass ex:Entry ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property ex-shape:Entry-ex-code ;
+.
+
+ex-shape:Entry-ex-code a sh:PropertyShape ;
+    sh:path ex:code ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class ex:Notation ;
+    sh:nodeKind sh:IRI ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
 .
 
 ex-shape:Event a sh:NodeShape ;
@@ -57,6 +111,42 @@ ex-shape:Item a sh:NodeShape ;
     fp:observedInstances 1 ;
     fp:precisionMode "exact" ;
     rdfs:comment "Reified relation: ~> ex:claimP1 (:ex:Place) 1 statement via wikibase_statement [reifiers: ex:rank 1]" ;
+.
+
+ex-shape:Notation a sh:NodeShape ;
+    sh:targetClass ex:Notation ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property ex-shape:Notation-rdf-value ;
+.
+
+ex-shape:Notation-rdf-value a sh:PropertyShape ;
+    sh:path rdf:value ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:datatype xsd:string ;
+    sh:nodeKind sh:Literal ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
+.
+
+ex-shape:Office a sh:NodeShape ;
+    sh:targetClass ex:Office ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    sh:property ex-shape:Office-ex-address ;
+.
+
+ex-shape:Office-ex-address a sh:PropertyShape ;
+    sh:path ex:address ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:class ex:Address ;
+    sh:nodeKind sh:BlankNode ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
 .
 
 ex-shape:Org a sh:NodeShape ;
@@ -94,6 +184,24 @@ ex-shape:Place a sh:NodeShape ;
     fp:instances 1 ;
     fp:observedInstances 1 ;
     fp:precisionMode "exact" ;
+.
+
+ex-shape:Project a sh:NodeShape ;
+    sh:targetClass ex:Project ;
+    fp:instances 1 ;
+    fp:observedInstances 1 ;
+    fp:precisionMode "exact" ;
+    rdfs:comment "Reified relation: ~> ex:role (:?) 1 statement via blank_nary [reifiers: ex:agent 1, ex:since 1]" ;
+    sh:property ex-shape:Project-ex-role ;
+.
+
+ex-shape:Project-ex-role a sh:PropertyShape ;
+    sh:path ex:role ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:nodeKind sh:BlankNode ;
+    fp:confidence 1.0 ;
+    fp:labelSupport 1.0 ;
 .
 
 ex-shape:Run a sh:NodeShape ;

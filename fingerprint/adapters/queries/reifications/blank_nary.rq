@@ -1,0 +1,31 @@
+# id: blank_nary
+# title: Relation through an untyped blank node
+# family: n_ary
+# A subject linked by a property to an untyped blank node, referenced once, that carries the qualifications (DEC-13:
+# the relation keeps the linking property's name). Not a list, an OWL or SHACL construct, an rdf:Statement or an
+# rdf:value node. Typed blank nodes stay ordinary instances (P-20), so there is no hidden section.
+# REIFY blank_nary probe
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+ASK { $graph_open ?s ?p ?b . ?b ?bp ?bv . FILTER(isBlank(?b))
+  FILTER NOT EXISTS { ?b a ?t }
+  FILTER NOT EXISTS { ?s2 ?p2 ?b FILTER(?s2 != ?s || ?p2 != ?p) }
+  FILTER NOT EXISTS { ?b ?x ?y FILTER(?x IN (rdf:first, rdf:rest, rdf:subject, rdf:value) || STRSTARTS(STR(?x), "http://www.w3.org/2002/07/owl#") || STRSTARTS(STR(?x), "http://www.w3.org/ns/shacl#")) }
+  $graph_close }
+# REIFY blank_nary relations
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?subjectClass ?predicate ?objectClass (COUNT(DISTINCT ?b) AS ?statements) WHERE {
+  $graph_open ?s ?predicate ?b . ?b ?bp ?bv . FILTER(isBlank(?b)) ?s a ?subjectClass .
+  FILTER NOT EXISTS { ?b a ?t }
+  FILTER NOT EXISTS { ?s2 ?p2 ?b FILTER(?s2 != ?s || ?p2 != ?predicate) }
+  FILTER NOT EXISTS { ?b ?x ?y FILTER(?x IN (rdf:first, rdf:rest, rdf:subject, rdf:value) || STRSTARTS(STR(?x), "http://www.w3.org/2002/07/owl#") || STRSTARTS(STR(?x), "http://www.w3.org/ns/shacl#")) }
+  $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass
+# REIFY blank_nary reifier-properties
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+SELECT ?subjectClass ?predicate ?objectClass ?reifierProperty (COUNT(DISTINCT ?b) AS ?reifiers) WHERE {
+  $graph_open ?s ?predicate ?b . ?b ?reifierProperty ?bv . FILTER(isBlank(?b)) ?s a ?subjectClass .
+  FILTER NOT EXISTS { ?b a ?t }
+  FILTER NOT EXISTS { ?s2 ?p2 ?b FILTER(?s2 != ?s || ?p2 != ?predicate) }
+  FILTER NOT EXISTS { ?b ?x ?y FILTER(?x IN (rdf:first, rdf:rest, rdf:subject, rdf:value) || STRSTARTS(STR(?x), "http://www.w3.org/2002/07/owl#") || STRSTARTS(STR(?x), "http://www.w3.org/ns/shacl#")) }
+  $graph_close }
+GROUP BY ?subjectClass ?predicate ?objectClass ?reifierProperty

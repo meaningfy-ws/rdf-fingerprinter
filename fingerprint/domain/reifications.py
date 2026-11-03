@@ -21,6 +21,8 @@ KIND_LABELS = {
     ReificationKind.schema_role: "schema.org role",
     ReificationKind.wikibase_statement: "Wikibase statement",
     ReificationKind.cidoc_property_of_property: "CIDOC property of property",
+    ReificationKind.blank_nary: "blank n-ary",
+    ReificationKind.structured_value: "structured value",
 }  # dict-ok: module-level lookup table
 UNNAMED = "unnamed"
 

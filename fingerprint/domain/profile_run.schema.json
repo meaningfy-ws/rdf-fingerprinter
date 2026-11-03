@@ -857,7 +857,9 @@
                 "dcat_qualified",
                 "schema_role",
                 "wikibase_statement",
-                "cidoc_property_of_property"
+                "cidoc_property_of_property",
+                "blank_nary",
+                "structured_value"
             ],
             "title": "ReificationKind",
             "type": "string"

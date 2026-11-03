@@ -1,29 +1,34 @@
 @startuml
-title Class diagram inferred by rdf-fingerprinter — ex:reifications — ex
+title Class diagram inferred by rdf-fingerprinter — ex:reifications — ex~3
 hide empty members
 
 class "ex:Actor" as C1 {
 }
-class "ex:Archive" as C2 {
+class "ex:Archive" as C3 {
 }
-class "ex:Dataset" as C3 {
+class "ex:Building" as C4 {
+  ex:height : resource [1]
+  -- reified --
+  ex:height (:?) 1 statement via structured_value [reifiers: ex:unit 1]
+}
+class "ex:Dataset" as C5 {
   -- reified --
   dcat:qualifiedRelation (:ex:Archive) 1 statement via dcat_qualified [reifiers: dcat:hadRole 1]
 }
-class "ex:Event" as C4 {
+class "ex:Event" as C7 {
   -- reified --
   crm:PC14_carried_out_by (:ex:Actor) 1 statement via cidoc_property_of_property [reifiers: ex:note 1]
 }
-class "ex:Firm" as C5 {
+class "ex:Firm" as C8 {
 }
-class "ex:Item" as C6 {
+class "ex:Item" as C9 {
   -- reified --
   ex:claimP1 (:ex:Place) 1 statement via wikibase_statement [reifiers: ex:rank 1]
 }
-class "ex:Org" as C7 {
+class "ex:Org" as C12 {
   ex:legacy : xsd:string [1]
 }
-class "ex:Person" as C8 {
+class "ex:Person" as C13 {
   -- reified --
   ex:Link (:ex:Org) 2 statements via resource_as_predicate [reifiers: rdf:singletonPropertyOf 2, prov:wasAttributedTo 1]
   ex:Procedure (:ex:Org) 1 statement via resource_as_predicate
@@ -31,20 +36,25 @@ class "ex:Person" as C8 {
   ex:knows (:ex:Person) 1 statement via rdf_statement [reifiers: dcterms:source 1]
   ex:worksFor (:ex:Org) 1 statement via negative_property_assertion
 }
-class "ex:Place" as C9 {
+class "ex:Place" as C14 {
 }
-class "ex:Run" as C10 {
+class "ex:Project" as C15 {
+  ex:role : resource [1]
+  -- reified --
+  ex:role (:?) 1 statement via blank_nary [reifiers: ex:agent 1, ex:since 1]
+}
+class "ex:Run" as C16 {
   -- reified --
   prov:qualifiedAssociation (:ex:Team) 1 statement via prov_qualified [reifiers: prov:hadRole 1]
 }
-class "ex:Team" as C11 {
+class "ex:Team" as C17 {
 }
-class "ex:Worker" as C12 {
+class "ex:Worker" as C18 {
   -- reified --
   schema:affiliation (:ex:Firm) 1 statement via schema_role [reifiers: schema:startDate 1]
 }
 
 class "schema:OrganizationRole" as P1 #lightgray
 
-C12 --> "1" P1 : schema:affiliation
+C18 --> "1" P1 : schema:affiliation
 @enduml

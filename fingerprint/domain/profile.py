@@ -285,6 +285,14 @@ class ReificationKind(str, Enum):
     """
     A CIDOC CRM property class instance (P01_has_domain, P02_has_range) standing for a relation; its type names the relation.
     """
+    blank_nary = "blank_nary"
+    """
+    An untyped blank node, referenced once and not a list or an OWL or SHACL construct, that carries the qualifications of a relation; the linking property names the relation (P-20).
+    """
+    structured_value = "structured_value"
+    """
+    A node with an rdf:value (a quantity with its unit) linked by a property; the linking property names the relation (P-21).
+    """
 
 
 class PitfallImportance(str, Enum):

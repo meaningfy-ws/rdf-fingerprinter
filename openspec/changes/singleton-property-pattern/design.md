@@ -383,9 +383,13 @@ mutmut, the release gate) and the brainframe acceptance run once, at the end of 
   relation through a blank node: named by the incoming predicate, its outgoing predicates as reifier
   properties. No hidden terms: untyped nodes are not in the ordinary profile today, so nothing
   ordinary disappears.
+- **P-22 (amends P-21) Typed value nodes stay ordinary.** The EU authority tables type their
+  `rdf:value` nodes (`euvoc:XlNotation`); like typed blank nodes (P-20) they are ordinary instances,
+  so `structured_value` covers untyped value nodes only and has no hidden section. The canonical EU
+  sample is unaffected.
 - **P-21 `structured_value` covers `rdf:value` nodes** (blank or IRI): named by the incoming
   predicate, object class absent, the node's other properties (e.g. a unit) as reifier properties;
-  no hidden terms for untyped nodes; typed value nodes' classes per P-5.
+  untyped nodes only and no hidden terms (P-22 amends the typed case).
 
 ### Stage kinds (new `ReificationKind` values)
 
@@ -393,14 +397,15 @@ mutmut, the release gate) and the brainframe acceptance run once, at the end of 
 |---|---|---|---|---|---|
 | 2 | `graph_statement` | a named graph IRI is the subject of triples in the profiled graph | — (count: distinct described graphs) | — | — |
 | 2 | `nanopublication` | `?np np:hasAssertion ?a` | — (count: distinct `?np`) | — | `np:Nanopublication`, `np:hasAssertion`, `np:hasProvenance`, `np:hasPublicationInfo` |
-| 3 | `prov_qualified` | `?s ?qp ?q` with `?qp` in the 14 `prov:qualifiedX` | the unqualified form (P-19 table) | distinct `?q` | the `prov:qualifiedX` predicates; classes of `?q` per P-5 |
-| 3 | `dcat_qualified` | `dcat:qualifiedRelation` or `dcat:qualifiedAttribution` | `dct:relation` / `prov:wasAttributedTo` | distinct node | `dcat:qualifiedRelation`, `dcat:qualifiedAttribution`; `dcat:Relationship`, `prov:Attribution` per P-5 |
+| 3 | `prov_qualified` | `?s ?qp ?q` with `?qp` in the 14 `prov:qualifiedX` | the `prov:qualifiedX` predicate (DEC-13) | distinct `?q` | the `prov:qualifiedX` predicates; classes of `?q` per P-5 |
+| 3 | `dcat_qualified` | `dcat:qualifiedRelation` or `dcat:qualifiedAttribution` | that predicate | distinct node | the two predicates; `dcat:Relationship` per P-5 |
 | 3 | `schema_role` | `?s ?p ?r . ?r a ?rt ; ?p ?o`, `?rt` a `schema:Role` type (http and https) | `?p` | distinct `?r` | role classes per P-5 |
-| 3 | `wikibase_statement` | `?st a wikibase:Statement` linked from a subject | the property entity of `wikibase:claim`, else the claim predicate | distinct `?st` | `wikibase:Statement` per P-5 |
+| 3 | `wikibase_statement` | `?st a wikibase:Statement` linked from a subject | the claim predicate the data uses | distinct `?st` | `wikibase:Statement` per P-5 |
 | 3 | `cidoc_property_of_property` | `?pc crm:P01_has_domain ?s ; crm:P02_has_range ?o` | the PC class (`?pc`'s type) | distinct `?pc` | `crm:P01_has_domain`, `crm:P02_has_range`; PC classes per P-5 |
-| 3 | `skosxl_label` | `?s skosxl:prefLabel|altLabel|hiddenLabel ?l` | `skos:prefLabel` / `altLabel` / `hiddenLabel` | distinct `?l` | the three `skosxl:` label predicates, `skosxl:literalForm`; `skosxl:Label` per P-5 |
 | 4 | `blank_nary` | P-20 | the incoming predicate | distinct blank node | — |
-| 4 | `structured_value` | `?s ?p ?n . ?n rdf:value ?v` | the incoming predicate | distinct `?n` | classes of `?n` per P-5 |
+| 4 | `structured_value` | `?s ?p ?n . ?n rdf:value ?v`, `?n` untyped (P-22) | the incoming predicate | distinct `?n` | — |
+
+SKOS-XL is not a reification (DEC-13): its labels stay ordinary classes and properties.
 
 Sample data: each kind gets one instance in `reifications-source.ttl` (family B in their own named
 graphs of the in-memory store; the reified profile then covers them through `selected_graphs`).

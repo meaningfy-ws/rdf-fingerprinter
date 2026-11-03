@@ -14,6 +14,8 @@ KINDS = {
     "RDF statement": "rdf_statement",
     "resource as predicate": "resource_as_predicate",
     "PROV qualified": "prov_qualified",
+    "blank n-ary": "blank_nary",
+    "structured value": "structured_value",
 }  # dict-ok: module-level lookup table
 
 
@@ -180,6 +182,47 @@ def mixed_class(ctx, cls):
         ctx["fake"].add(f"ex:old{i}", "a", RDF + "Property")
 
 
+@given(
+    parsers.parse(
+        'subjects of class "{cls}" each pointing with "{p}" to an untyped blank node that carries "{a}" and "{b}", '
+        "the blank node not being a list or an OWL construct"
+    )
+)
+def untyped_blank_nodes(ctx, cls, p, a, b):
+    for i in range(2):
+        ctx["fake"].add(f"ex:s{i}", "a", cls)
+        ctx["fake"].add(f"ex:s{i}", iri(p), f"_:n{i}")
+        ctx["fake"].add(f"_:n{i}", iri(a), "ex:x")
+        ctx["fake"].add(f"_:n{i}", iri(b), "2021")
+
+
+@given(parsers.parse('subjects of class "{cls}" each pointing with "{p}" to a blank node typed "{t}" that carries "{q}"'))
+def typed_blank_nodes(ctx, cls, p, t, q):
+    for i in range(2):
+        ctx["fake"].add(f"ex:s{i}", "a", cls)
+        ctx["fake"].add(f"ex:s{i}", iri(p), f"_:n{i}")
+        ctx["fake"].add(f"_:n{i}", "a", iri(t))
+        ctx["fake"].add(f"_:n{i}", iri(q), "Main St")
+
+
+@given(
+    parsers.parse(
+        'subjects of class "{cls}" each with "{p}" pointing to an untyped node with "{value}" and "{unit}", and '
+        'subjects of class "{cls}" each with "{q}" pointing to a node typed "{t}" with "{value}"'
+    )
+)
+def value_nodes(ctx, cls, p, value, unit, q, t):
+    for i in range(2):
+        ctx["fake"].add(f"ex:s{i}", "a", cls)
+        ctx["fake"].add(f"ex:s{i}", iri(p), f"_:n{i}")
+        ctx["fake"].add(f"_:n{i}", iri(value), "12")
+        ctx["fake"].add(f"_:n{i}", iri(unit), "ex:metre")
+        ctx["fake"].add(f"ex:c{i}", "a", cls)
+        ctx["fake"].add(f"ex:c{i}", iri(q), f"ex:v{i}")
+        ctx["fake"].add(f"ex:v{i}", "a", iri(t))
+        ctx["fake"].add(f"ex:v{i}", iri(value), "A1")
+
+
 # --- whens ---
 
 
@@ -229,6 +272,44 @@ def only_relation(ctx, curie, kind, predicate, target, count):
 @then(parsers.parse('class "{curie}" has one reified relation of kind {kind}, "{p}" to "{target}", {count:d} statements'))
 def one_relation(ctx, curie, kind, p, target, count):
     only_relation(ctx, curie, kind, p, target, count)
+
+
+def untargeted_relation(ctx, curie, kind, p, *reifiers):
+    (relation,) = relations(ctx, curie)
+    assert (relation.kind, relation.property, relation.object_class) == (KINDS[kind], iri(p), None)
+    assert {r.property for r in relation.reifier_properties} == {iri(q) for q in reifiers}
+
+
+@then(parsers.parse('class "{curie}" has one reified relation of kind {kind}, "{p}", with reifier properties "{a}" and "{b}"'))
+def untargeted_relation_two(ctx, curie, kind, p, a, b):
+    untargeted_relation(ctx, curie, kind, p, a, b)
+
+
+@then(parsers.parse('class "{curie}" has one reified relation of kind {kind}, "{p}", with reifier property "{a}"'))
+def untargeted_relation_one(ctx, curie, kind, p, a):
+    untargeted_relation(ctx, curie, kind, p, a)
+
+
+@then(
+    parsers.parse(
+        'class "{curie}" has one reified relation of kind {kind}, "{p}", with reifier property "{a}", '
+        'no relation for "{q}", and class "{cls}" is profiled as before'
+    )
+)
+def untargeted_relation_and_ordinary_class(ctx, curie, kind, p, a, q, cls):
+    untargeted_relation(ctx, curie, kind, p, a)
+    no_relation_for(ctx, curie, q)
+    assert klass(ctx["run"], iri(cls))
+
+
+@then(parsers.parse('class "{curie}" is profiled with property "{p}" as before'))
+def profiled_with_property_as_before(ctx, curie, p):
+    profiled_with_property(ctx, curie, p)
+
+
+@then(parsers.parse('class "{curie}" has no reified relation for "{p}"'))
+def no_relation_for(ctx, curie, p):
+    assert iri(p) not in {r.property for r in relations(ctx, curie)}
 
 
 @then(parsers.parse('class "{curie}" has the ordinary properties "{p}" and "{q}"'))

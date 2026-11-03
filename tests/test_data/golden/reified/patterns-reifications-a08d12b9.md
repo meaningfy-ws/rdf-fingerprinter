@@ -29,11 +29,26 @@ Hidden: 1 classes.
 (:ex:Archive) 1
 ```
 
+## ex:Building
+
+```text
+(:ex:Building) 1
+  -ex:height-> BNODE bn
+~> ex:height (:?) 1 statement via structured_value [reifiers: ex:unit 1]
+```
+
 ## ex:Dataset
 
 ```text
 (:ex:Dataset) 1
 ~> dcat:qualifiedRelation (:ex:Archive) 1 statement via dcat_qualified [reifiers: dcat:hadRole 1]
+```
+
+## ex:Entry
+
+```text
+(:ex:Entry) 1
+  -ex:code-> (:ex:Notation)
 ```
 
 ## ex:Event
@@ -56,6 +71,21 @@ Hidden: 1 classes.
 ~> ex:claimP1 (:ex:Place) 1 statement via wikibase_statement [reifiers: ex:rank 1]
 ```
 
+## ex:Notation
+
+```text
+(:ex:Notation) 1 via (:ex:Entry)-ex:code
+  -rdf:value-> xsd:string =A1
+```
+
+## ex:Office
+
+```text
+(:ex:Office) 1
+  -ex:address-> (:ex:Address) bn
+    -ex:street-> xsd:string ="Main St"
+```
+
 ## ex:Org
 
 ```text
@@ -67,6 +97,14 @@ Hidden: 1 classes.
 
 ```text
 (:ex:Place) 1
+```
+
+## ex:Project
+
+```text
+(:ex:Project) 1
+  -ex:role-> BNODE bn
+~> ex:role (:?) 1 statement via blank_nary [reifiers: ex:agent 1, ex:since 1]
 ```
 
 ## ex:Run

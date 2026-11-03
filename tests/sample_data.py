@@ -69,9 +69,9 @@ REIFIED_HIDDEN_CLASSES = (
     "http://www.cidoc-crm.org/cidoc-crm/PC14_carried_out_by",
 )
 REIFIED_KINDS = (
-    "cidoc_property_of_property", "dcat_qualified", "graph_statement", "nanopublication",
+    "blank_nary", "cidoc_property_of_property", "dcat_qualified", "graph_statement", "nanopublication",
     "negative_property_assertion", "owl_axiom", "prov_qualified", "rdf_statement", "resource_as_predicate",
-    "schema_role", "triple_term", "wikibase_statement",
+    "schema_role", "structured_value", "triple_term", "wikibase_statement",
 )  # fmt: skip
 # The stage 3 relations, one per kind: (subject class, kind, predicate, object class, reifier property).
 _EX, _PROV = "http://example.org/", "http://www.w3.org/ns/prov#"

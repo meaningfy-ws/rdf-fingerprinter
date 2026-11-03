@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import pytest
-from rdflib import RDF, Dataset, Graph, Literal, Namespace, URIRef
+from rdflib import RDF, BNode, Dataset, Graph, Literal, Namespace, URIRef
 from rdflib.namespace import DCTERMS, OWL, PROV
 
 from fingerprint.adapters.queries import reification_query
@@ -117,12 +117,19 @@ HIDDEN = {
     "schema_role": {SCHEMA.OrganizationRole},
     "wikibase_statement": {WIKIBASE.Statement, EX.claimP1},
     "cidoc_property_of_property": {CRM.P01_has_domain, CRM.P02_has_range, CRM.PC14_carried_out_by},
+    "blank_nary": None,
+    "structured_value": None,
 }
 
 
 @pytest.mark.parametrize("kind", list(HIDDEN))
 def test_hidden_terms_of_the_sample(sample, kind):
-    assert terms(sample, kind) == HIDDEN[kind]
+    if (
+        HIDDEN[kind] is None
+    ):  # blank_nary and structured_value hide nothing: untyped nodes are not in the ordinary profile (P-20)
+        assert TEMPLATES[kind].hidden is None
+    else:
+        assert terms(sample, kind) == HIDDEN[kind]
 
 
 def test_a_property_only_predicate_is_hidden_by_no_kind(sample):
@@ -233,3 +240,96 @@ def test_wikibase_statement_without_declarations_is_named_by_its_claim_predicate
     graph.add((EX.i, EX.claimP2, EX.st))
     graph.add((EX.st, RDF.type, WIKIBASE.Statement))
     assert run(graph, "wikibase_statement", "relations") == {(EX.Item, EX.claimP2, None, Literal(1))}
+
+
+def test_blank_nary_and_structured_value_name_the_linking_predicate_and_list_the_node_properties(sample):
+    assert run(sample, "blank_nary", "relations") == {(EX.Project, EX.role, None, Literal(1))}
+    assert run(sample, "blank_nary", "reifier-properties") == {
+        (EX.Project, EX.role, None, EX.agent, Literal(1)),
+        (EX.Project, EX.role, None, EX.since, Literal(1)),
+    }
+    assert run(sample, "structured_value", "relations") == {(EX.Building, EX.height, None, Literal(1))}
+    assert run(sample, "structured_value", "reifier-properties") == {(EX.Building, EX.height, None, EX.unit, Literal(1))}
+
+
+def blank_node_graph(build):
+    """A graph with ex:s a ex:A, and `build(graph, node)` describing the blank node ex:s ex:p points to."""
+    graph = Graph()
+    node = BNode()
+    graph.add((EX.s, RDF.type, EX.A))
+    graph.add((EX.s, EX.p, node))
+    build(graph, node)
+    return graph
+
+
+def untyped(graph, node):
+    graph.add((node, EX.agent, EX.x))
+
+
+def typed(graph, node):
+    graph.add((node, RDF.type, EX.Address))
+    graph.add((node, EX.agent, EX.x))
+
+
+def a_list(graph, node):
+    graph.add((node, RDF.first, EX.x))
+    graph.add((node, RDF.rest, RDF.nil))
+
+
+def owl_restriction(graph, node):
+    graph.add((node, OWL.onProperty, EX.q))
+    graph.add((node, EX.agent, EX.x))
+
+
+def shacl_construct(graph, node):
+    graph.add((node, URIRef("http://www.w3.org/ns/shacl#path"), EX.q))
+
+
+def statement(graph, node):
+    graph.add((node, RDF.subject, EX.a))
+    graph.add((node, EX.agent, EX.x))
+
+
+def value_node(graph, node):
+    graph.add((node, RDF.value, Literal(1)))
+
+
+def twice_referenced(graph, node):
+    untyped(graph, node)
+    graph.add((EX.s, EX.p2, node))
+
+
+def other_subject(graph, node):
+    untyped(graph, node)
+    graph.add((EX.s2, EX.p, node))
+
+
+def no_properties(graph, node):
+    graph.add((EX.s, EX.q, EX.x))  # the blank node stays a bare object; adding nothing about it
+
+
+@pytest.mark.parametrize(
+    "build",
+    [typed, a_list, owl_restriction, shacl_construct, statement, value_node, twice_referenced, other_subject, no_properties],
+)
+def test_blank_nary_leaves_every_other_blank_node_alone(build):
+    graph = blank_node_graph(build)
+    assert run(graph, "blank_nary", "probe") is False
+    assert run(graph, "blank_nary", "relations") == set()
+
+
+def test_blank_nary_matches_an_untyped_node_referenced_once():
+    graph = blank_node_graph(untyped)
+    assert run(graph, "blank_nary", "probe") is True
+    assert run(graph, "blank_nary", "relations") == {(EX.A, EX.p, None, Literal(1))}
+
+
+def test_a_typed_value_node_is_no_structured_value_and_its_class_stays():
+    graph = Graph()
+    graph.add((EX.s, RDF.type, EX.A))
+    graph.add((EX.s, EX.code, EX.n1))
+    graph.add((EX.n1, RDF.value, Literal(1)))
+    graph.add((EX.n1, RDF.type, EX.Notation))
+    assert run(graph, "structured_value", "probe") is False
+    assert run(graph, "structured_value", "relations") == set()
+    assert TEMPLATES["structured_value"].hidden is None

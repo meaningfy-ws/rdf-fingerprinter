@@ -2,10 +2,10 @@
 title Class diagram inferred by rdf-fingerprinter — ex:reifications — skos
 hide empty members
 
-class "skos:Concept" as C13 {
+class "skos:Concept" as C19 {
 }
 
-class "skosxl:Label" as C14 #lightgray
+class "skosxl:Label" as C20 #lightgray
 
-C13 --> "1" C14 : skosxl:prefLabel
+C19 --> "1" C20 : skosxl:prefLabel
 @enduml

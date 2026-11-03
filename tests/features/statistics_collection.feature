@@ -382,24 +382,21 @@ Feature: Collecting raw statistics from a knowledge graph
       Then each stays an ordinary property
       And no reified relation is reported for them
 
-    @stage4
     Scenario: Relation through a blank node
       Given subjects of class "ex:A" each pointing with "ex:role" to an untyped blank node that carries "ex:agent" and "ex:since", the blank node not being a list or an OWL construct
       When the graph is profiled
       Then class "ex:A" has one reified relation of kind blank n-ary, "ex:role", with reifier properties "ex:agent" and "ex:since"
 
-    @stage4
     Scenario: A typed blank node stays ordinary
       Given subjects of class "ex:A" each pointing with "ex:address" to a blank node typed "ex:Address" that carries "ex:street"
       When the graph is profiled
       Then class "ex:Address" is profiled with property "ex:street" as before
       And class "ex:A" has no reified relation for "ex:address"
 
-    @stage4
     Scenario: Structured value
-      Given subjects of class "ex:A" each with "ex:height" pointing to a node with "rdf:value" and "ex:unit"
+      Given subjects of class "ex:A" each with "ex:height" pointing to an untyped node with "rdf:value" and "ex:unit", and subjects of class "ex:A" each with "ex:code" pointing to a node typed "ex:Notation" with "rdf:value"
       When the graph is profiled
-      Then class "ex:A" has one reified relation of kind structured value, "ex:height", with reifier property "ex:unit"
+      Then class "ex:A" has one reified relation of kind structured value, "ex:height", with reifier property "ex:unit", no relation for "ex:code", and class "ex:Notation" is profiled as before
 
     Scenario: PROV qualified association
       Given 4 subjects of class "ex:Run", each with a "prov:qualifiedAssociation" node whose "prov:agent" is of class "ex:Team" and which carries "prov:hadRole"

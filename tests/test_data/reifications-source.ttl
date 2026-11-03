@@ -87,3 +87,16 @@ ex:actor1 a ex:Actor .
 # Ordinary data (DEC-13): a concept with a SKOS-XL preferred label is no reification.
 ex:concept1 a skos:Concept ; skosxl:prefLabel ex:label1 .
 ex:label1 a skosxl:Label ; skosxl:literalForm "thing"@en ; dct:source ex:survey .
+
+# blank_nary: a project with a role through an untyped blank node that is referenced once.
+ex:project1 a ex:Project ; ex:role [ ex:agent ex:person9 ; ex:since "2021" ] .
+
+# structured_value: a building with a height, a node with an rdf:value and a unit.
+ex:building1 a ex:Building ; ex:height [ rdf:value 12 ; ex:unit ex:metre ] .
+
+# Ordinary data: a typed rdf:value node is an instance of its class (P-22).
+ex:item2 a ex:Entry ; ex:code ex:notation1 .
+ex:notation1 a ex:Notation ; rdf:value "A1" .
+
+# Ordinary data: a typed blank node is an instance of its class, no reification.
+ex:office1 a ex:Office ; ex:address [ a ex:Address ; ex:street "Main St" ] .

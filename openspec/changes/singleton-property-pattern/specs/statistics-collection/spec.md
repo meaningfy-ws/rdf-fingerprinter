@@ -70,11 +70,12 @@ vocabulary's term (DEC-13).
   reified relation for `ex:address`
 
 #### Scenario: Structured value
-- **GIVEN** subjects of class A each with `ex:height` pointing to a node with `rdf:value` and
-  `ex:unit`
+- **GIVEN** subjects of class A each with `ex:height` pointing to an untyped node with `rdf:value`
+  and `ex:unit`, and subjects of class A each with `ex:code` pointing to a node typed `ex:Notation`
+  with `rdf:value`
 - **WHEN** the graph is profiled
 - **THEN** class A has one reified relation of kind structured value, `ex:height`, with reifier
-  property `ex:unit`
+  property `ex:unit`, no relation for `ex:code`, and class `ex:Notation` is profiled as before
 
 #### Scenario: PROV qualified association
 - **GIVEN** 4 subjects of class `ex:Run`, each with a `prov:qualifiedAssociation` node whose
