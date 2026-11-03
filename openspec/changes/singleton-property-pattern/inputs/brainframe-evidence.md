@@ -47,3 +47,41 @@ keeps outputs small but loses the links. `brainframe-mcp` then rebuilds a summar
 `profile.json`: one `~> (:Target) n triples` line per class pair, with a hard-coded stem and a
 `STRSTARTS` filter as the only way to query them. Neither tells a reader which relation a link is,
 what metadata a link carries, or that the pattern exists.
+
+## After the EPIC (task 8.4, 2026-11-03)
+
+Store: a throwaway local Oxigraph 0.5.13 (`oxigraph-brainframe`, port 7879) loaded with
+`brainframe-mcp/data/workspace-ce705e50b88704fd413497b9af4ff1cf-meaningfy.rdf` (74,007 triples; the
+Blazegraph count of 77,635 above includes Blazegraph's own additions). Baseline matches the table
+above: 517 predicates with `rdf:singletonPropertyOf`, used in 606 triples, all typed `RelationId`.
+
+```sh
+OUT=temp/brainframe-reifications
+for i in 1 2; do for mode in on off; do flag=""; [ $mode = off ] && flag="--no-reifications"
+  mkdir -p $OUT/$mode-$i
+  poetry run fingerprint -e http://localhost:7879/query -o $OUT/$mode-$i $flag
+done; done
+```
+
+| | reifications on | `--no-reifications` |
+|---|---:|---:|
+| classes | 51 | 51 |
+| ordinary property rows | 1,087 | 1,589 |
+| rows of `RelationId/…` predicates | 117 (the unmarked, `rdf:Property`-only ones; Q5 answer A) | 619 |
+| marked predicates left as ordinary properties | **0** of 517 | 502 |
+| reified relations | 55, all `RelationId` via `resource_as_predicate`, per (subject class, object class) | — |
+| reification kinds found | `resource_as_predicate` | — |
+| `ProfileRun` duration (two runs) | 1.003 s, 0.989 s | 0.832 s, 0.792 s |
+
+Example relations (pattern notation): `Policy ~> RelationId (:Policy) 86 statements via
+resource_as_predicate [reifiers: createdBy 83, singletonPropertyOf 83, label 83, isFactOf 83]`;
+`checkList ~> RelationId (:Policy) 64`; `Action ~> RelationId (:RiskScenario) 38`.
+
+**Outcome criterion: met.** The marked predicates fold into relations named by their own type
+(`RelationId`, DEC-12), carry their metadata as reifier properties, and leave no ordinary row.
+
+**Cost criterion (< 10 %): not met on this graph** — about +0.18 s on a 0.8 s run (≈ +20 %). The
+cost is the fixed set of probes and captures (sequential sum 0.35 s, run concurrently); the largest
+single query is `resource_as_predicate` hidden (0.12 s; a rewrite starting from typed predicates
+gives the same 517 terms in 0.10 s, not adopted). On a graph this small the fixed probe cost
+dominates; `--no-reifications` removes it.

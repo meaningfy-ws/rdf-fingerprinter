@@ -3,10 +3,10 @@
 ## ADDED Requirements
 
 ### Requirement: Reified relations per class
-Every descriptive output that lists properties per class (profile document, pattern view and schema,
-PlantUML diagram) SHALL show the class's reified relations in a separate section after its
-properties, each with kind, generic predicate (or "unnamed"), object class, statement count and
-reifier properties. A class with none SHALL show no section. SHACL and ShExC outputs SHALL note
+A descriptive output SHALL show each class's reified relations in a separate section after its
+properties, when it lists properties per class (profile document, pattern view and schema, PlantUML
+diagram), each with kind, the predicate that names it (or "unnamed"), object class, statement count
+and reifier properties. A class with none SHALL show no section. SHACL and ShExC outputs SHALL note
 each reified relation under the class's shape (an annotation in SHACL, a comment in ShExC) and SHALL
 NOT constrain it.
 
