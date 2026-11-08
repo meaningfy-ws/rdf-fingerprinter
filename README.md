@@ -26,9 +26,24 @@ pip install rdf-fingerprinter
 ```
 Python 3.12 or later is required (tested on 3.12, 3.13 and 3.14).
 
-**Upgrading from 0.3?** 1.0 needs Python 3.12+, runs on eds4jinja2 2 (pandas 3 / numpy 2) and no
-longer configures logging when imported: configure it in your application. See the
-[CHANGELOG](CHANGELOG.md).
+**Upgrading from 0.3 or 1.x?** The library was rewritten in 2.0 and has grown since; read the
+breaking changes per release in the [CHANGELOG](CHANGELOG.md) and the
+[Getting Started](https://meaningfy-ws.github.io/rdf-fingerprinter/rdf-fingerprinter/getting-started.html)
+upgrade notes.
+
+# What it does
+
+- **Profiles any SPARQL 1.1 endpoint, read-only**, class by class with bounded queries, and says how
+  precise every number is (exact, or first N of M when a class is too big).
+- **Writes** an HTML report and a saved `profile.json`, from which SHACL shapes, enriched ShExC,
+  PlantUML diagrams and a pattern schema for language models are generated without querying again.
+- **Scans for modelling pitfalls** (`--pitfalls`, 28 SPARQL checks, most from the OOPS! catalogue)
+  and fails a CI job on them (`--fail-on`).
+- **Recognises reifications** (`rdf:Statement`, singleton properties, `owl:Axiom`, PROV, Wikibase,
+  RDF 1.2 triple terms, …) and shows the relations they stand for.
+
+How it compares with SHACL Play, sheXer, void-generator, QSE and others:
+[Comparison](https://meaningfy-ws.github.io/rdf-fingerprinter/rdf-fingerprinter/comparison.html).
 
 # Usage
 

@@ -57,7 +57,17 @@ class, property, measurement and error. A run with failures still produces its o
 
 [#representation]
 Representation:: A rendering of the analytics in one format: the statistics report (HTML), and from
-2.1 SHACL shapes, a PlantUML class diagram and an application-profile document.
+2.1 SHACL shapes and PlantUML class diagrams; from 3.1 the pitfall TSV; from 3.2 enriched ShExC and
+the pattern schema.
+
+[#pitfall]
+Pitfall:: A modelling defect found by one SPARQL check of the pitfall catalogue (most follow the
+OOPS! catalogue), with an importance: critical, important or minor. See xref:pitfalls.adoc[Pitfalls].
+
+[#reified-relation]
+Reified relation:: A link that the data states through a node of its own (an `rdf:Statement`, a
+singleton property, an `owl:Axiom`, …), shown on the subject's class with its property, object
+class, statement count and the reifier's own properties. See xref:reifications.adoc[Reified Relations].
 
 == Measures
 
@@ -168,4 +178,6 @@ The responsibilities the Blue use cases name as supporting actors, and where eac
 | Profile store | Saves and loads `profile.json` | `fingerprint/adapters/profile_file.py`
 | Generator | Builds one representation's view objects from the analytics | `fingerprint/service_layer/generators/`; views in `fingerprint/domain/views.py`
 | Output check | Refuses a generated text that does not parse | `fingerprint/adapters/template_renderer.py`
+| Pitfall catalogue | Loads and checks the packaged and user pitfall queries before any query runs | `fingerprint/adapters/pitfall_catalogue.py`; levels in `fingerprint/domain/pitfalls.py`
+| Reification catalogue | Loads the reification templates, one per kind | `fingerprint/adapters/reification_catalogue.py`; folding in `fingerprint/domain/reifications.py`
 |===

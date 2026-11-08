@@ -1,21 +1,87 @@
 = Representations
-:description: The report page, SHACL shapes and PlantUML class diagrams, generated from a saved profile without querying again.
+:description: The outputs of a fingerprint, for people, agents and machines, generated from a saved profile without querying again.
 
-A fingerprint is published as the report page and in two more forms. Each is generated from the
-profile alone, so the endpoint is queried once, whatever is generated afterwards
+A fingerprint is published in several forms. Each is generated from the profile alone, so the
+endpoint is queried once, whatever is generated afterwards
 (xref:use-cases/ucw2.adoc[UC-W2]). Every IRI is written as `prefix:local`
 (<<prefixes,Prefixes>>).
 
-[cols="1,2,3"]
-|===
-| Format | Files | Content
+The outputs are grouped by who reads them:
 
-| Report page | `main.html` | the profile as one static page with contents, search and namespace switches
-| SHACL shapes | `shapes-<graph>.ttl`, one per graph with a shown class | a node shape per class with a property shape per property
-| PlantUML diagrams | `diagram-<graph>.puml` (overview) and `diagram-<graph>--<module>.puml` | namespaces and their links; per module the classes, attributes, associations, generalisations — source only
-| Pattern schema | `prefixes-<graph>.md`, `patterns-<graph>.md`, `patterns-<graph>.csv`, `glossary-<graph>.md`, `glossary-<graph>.csv` | a compact, labelled schema for a language model, in five files (xref:llm-schema.adoc[Schemas for LLMs])
-| Enriched ShExC | `shex-<graph>.shex` | the same schema as ShEx shapes with statistics in comments (xref:llm-schema.adoc[Schemas for LLMs])
+[mermaid]
+....
+flowchart LR
+    ep[("SPARQL endpoint<br/><i>any store, read-only</i>")] -- "SELECT / ASK" --> fp["RDF Fingerprinter"]
+    fp --> pj[("profile.json<br/><i>collected once</i>")]
+    pj --> H & A & M
+    subgraph H["👤 For people"]
+        direction TB
+        h1["Fingerprint report<br/><i>(HTML)</i>"]
+        h2["Class diagrams<br/><i>(PlantUML)</i>"]
+        h3["Pitfall findings<br/><i>(in the report, HTML)</i>"]
+    end
+    subgraph A["🤖 For agents"]
+        direction TB
+        a1["Query-writing schema<br/><i>(Markdown)</i>"]
+        a2["Term glossary<br/><i>(Markdown)</i>"]
+        a3["Shapes with statistics<br/><i>(ShExC)</i>"]
+    end
+    subgraph M["⚙️ For machines"]
+        direction TB
+        m1["Raw profile<br/><i>(JSON + JSON Schema)</i>"]
+        m2["Validation shapes<br/><i>(SHACL, Turtle)</i>"]
+        m3["Schema and glossary tables<br/><i>(CSV)</i>"]
+        m4["Pitfall findings<br/><i>(TSV, ROBOT columns)</i>"]
+        m5["Run outcome<br/><i>(exit status)</i>"]
+    end
+    classDef src fill:#e2e8f0,stroke:#475569,color:#0f172a
+    classDef core fill:#ccfbf1,stroke:#0f766e,stroke-width:2px,color:#042f2e
+    classDef people fill:#fef3c7,stroke:#b45309,color:#451a03
+    classDef agents fill:#ede9fe,stroke:#6d28d9,color:#2e1065
+    classDef machines fill:#dbeafe,stroke:#1d4ed8,color:#172554
+    classDef step fill:#f8fafc,stroke:#64748b,color:#0f172a
+    classDef ok fill:#dcfce7,stroke:#15803d,color:#052e16
+    classDef warn fill:#fef3c7,stroke:#b45309,color:#451a03
+    classDef bad fill:#fee2e2,stroke:#b91c1c,color:#450a0a
+    class ep src
+    class fp,pj core
+    class h1,h2,h3 people
+    class a1,a2,a3 agents
+    class m1,m2,m3,m4,m5 machines
+    style H fill:#fffbeb,stroke:#b45309,color:#451a03
+    style A fill:#f5f3ff,stroke:#6d28d9,color:#2e1065
+    style M fill:#eff6ff,stroke:#1d4ed8,color:#172554
+....
+
+How to read it: the endpoint (grey) is queried once, read-only, and the run saves `profile.json`
+(teal). Every output is made from that file, never from the endpoint, so any of them can be
+regenerated offline. The three panels are the readers: people (amber), agents (violet) and machines
+(blue); each box names what the output is for, with its format in brackets.
+
+[cols="1,2,3,3"]
 |===
+| For | What we produce (format) | Files | Content
+
+.3+| *People*
+| <<report-page,Fingerprint report>> (HTML) | `main.html` | the profile as one static page with contents, search and namespace switches
+| <<plantuml-diagrams,Class diagrams>> (PlantUML source) | `diagram-<graph>.puml` (overview) and `diagram-<graph>--<module>.puml` | namespaces and their links; per module the classes, attributes, associations, generalisations
+| xref:pitfalls.adoc#where-the-findings-show[Pitfall findings] (HTML, in the report) | `main.html`, section _Pitfalls_ | the checks with findings by importance, each with its examples, and a badge on every class a check names
+
+.3+| *Agents* (a language model writing SPARQL)
+| xref:llm-schema.adoc#the-pattern-schema[Query-writing schema] (Markdown) | `patterns-<graph>.md`, `prefixes-<graph>.md` | classes, their links and statistics as `(:Class) -property-> (:Target)` lines, and the prefixes they use
+| xref:llm-schema.adoc#labels[Term glossary] (Markdown) | `glossary-<graph>.md` | a label and a definition per class and property
+| xref:llm-schema.adoc#the-enriched-shexc[Shapes with statistics] (ShExC) | `shex-<graph>.shex` | the same schema as ShEx shapes, statistics in comments
+
+.5+| *Machines* (validators, pipelines, CI)
+| Raw profile (JSON, with a JSON Schema) | `profile.json` | the counts every other output is generated from; schema in `fingerprint/domain/profile_run.schema.json`
+| <<shacl-shapes,Validation shapes>> (SHACL in Turtle) | `shapes-<graph>.ttl`, one per graph with a shown class | a node shape per class with a property shape per property, graded by severity
+| xref:llm-schema.adoc#csv[Schema and glossary tables] (CSV) | `patterns-<graph>.csv`, `glossary-<graph>.csv` | one row per block, edge or term, for grep or DuckDB
+| xref:pitfalls.adoc[Pitfall findings] (TSV in ROBOT's columns) | `pitfalls-<graph>.tsv` | one row per example of a failed check
+| Run outcome (exit status) | — | 0 to 5 (xref:getting-started.adoc#exit-status[Exit status])
+|===
+
+Two outputs are read by more than one kind of reader: the enriched ShExC is valid ShEx a validator
+can run, and the CSV files are the way an agent looks up one class without reading the whole schema.
 
 `<graph>` is `default` for the default graph, else a readable name from the graph IRI plus a short
 hash, for example `shapes-continents-214e8f67.ttl`.

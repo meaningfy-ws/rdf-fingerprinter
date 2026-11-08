@@ -1,0 +1,357 @@
+= Comparison
+:description: How rdf-fingerprinter compares with seven open-source tools that profile RDF data or infer shapes from it, feature by feature.
+
+Several open-source tools infer what an RDF dataset holds: its classes, how their properties are
+used, and the shapes the data follows. This page compares rdf-fingerprinter 3.5 with seven of them,
+feature by feature, in groups. Each group opens with what matters and how the tools differ; the
+table under it holds the detail.
+
+How the facts were gathered:: The other tools' source code was read, not run: shallow clones taken
+on 2026-10-31, audited feature by feature on 2026-11-08 against their code, queries and READMEs.
+"No" means a search of the source found nothing, not that the feature was proven absent; a tool may
+have changed since. Corrections are welcome as issues.
+Legend:: ✓ yes · ◐ partly (the cell says how) · ✗ no · ? unknown.
+
+== The tools at a glance
+
+[cols="2,2,2,2,2,2,2,2,2",options="header"]
+|===
+| | rdf-fingerprinter | SHACL Play | sheXer | void-generator | QSE | shaclgen | LODStats | RDF2Graph
+
+| Maintainer | Meaningfy | Sparna | WESO | SIB | Aalborg University | AKSW | AKSW | J. van Dam
+| Language | Python | Java | Python | Java | Java | Python | Python (2, partly ported) | Java
+| Licence | Apache-2.0 | LGPL-3.0 | Apache-2.0 | MIT | MIT | MIT or Unlicense (files disagree) | GPL-3.0 | MIT
+| Last commit | 2026-11 | 2026-10 | 2026-06 | 2026-05 | 2025-11 | 2026-04 | 2026-05 | 2015-07
+| Form | library, CLI | library, CLI, web app | library, CLI, REST service | CLI | CLI (research code) | CLI, small library | CLI, library | CLI and export scripts
+| Main purpose | profile and publish an application profile | generate, document and validate SHACL | infer ShEx / SHACL shapes | VoID and service description | SHACL with support and confidence | SHACL from data or an ontology | dataset statistics as VoID | schema graph of an endpoint
+|===
+
+Loupe has no public code and ABSTAT has not been updated since 2016; neither is compared. Two
+neighbouring tools that do one part of the job are described at the end.
+
+== Two families
+
+Where is the counting done? That one choice decides how a tool behaves on a large graph.
+
+[mermaid]
+....
+flowchart LR
+    ep[("SPARQL endpoint<br/>or dump")]
+    subgraph push["Push: the endpoint counts"]
+        direction TB
+        fp["rdf-fingerprinter"]
+        sp["SHACL Play"]
+        vg["void-generator"]
+        qe["QSE <i>(exact, GraphDB)</i>"]
+        r2g["RDF2Graph"]
+    end
+    subgraph pull["Pull: the client counts"]
+        direction TB
+        sx["sheXer"]
+        qs["QSE <i>(files, sampled)</i>"]
+        ls["LODStats"]
+        sg["shaclgen"]
+    end
+    ep -- "small answers<br/><i>COUNT · GROUP BY · ASK</i>" --> push
+    ep -- "many triples<br/><i>every one, a crawl or a sample</i>" --> pull
+    classDef src fill:#e2e8f0,stroke:#475569,color:#0f172a
+    classDef core fill:#ccfbf1,stroke:#0f766e,stroke-width:2px,color:#042f2e
+    classDef people fill:#fef3c7,stroke:#b45309,color:#451a03
+    classDef agents fill:#ede9fe,stroke:#6d28d9,color:#2e1065
+    classDef machines fill:#dbeafe,stroke:#1d4ed8,color:#172554
+    classDef step fill:#f8fafc,stroke:#64748b,color:#0f172a
+    classDef ok fill:#dcfce7,stroke:#15803d,color:#052e16
+    classDef warn fill:#fef3c7,stroke:#b45309,color:#451a03
+    classDef bad fill:#fee2e2,stroke:#b91c1c,color:#450a0a
+    class ep src
+    class fp core
+    class sp,vg,qe,r2g,sx,qs,ls,sg step
+    style push fill:#f0fdfa,stroke:#0f766e,color:#042f2e
+    style pull fill:#f8fafc,stroke:#64748b,color:#0f172a
+....
+
+How to read it: the endpoint is on the left; the tools in the top panel ask it to count and get
+small answers back, the tools in the bottom panel pull triples across and count them themselves.
+rdf-fingerprinter is teal; QSE appears in both panels because it has a mode of each kind.
+
+Push:: The endpoint aggregates and returns small answers. Little crosses the network, but each
+query must finish within the endpoint's time limit, so these tools differ in how they keep queries
+small. rdf-fingerprinter, SHACL Play, void-generator, QSE and RDF2Graph all bind the class inside the
+pattern (`?s a <C>`), so the store touches only that class's instances
+(xref:decisions.adoc#ad-3[AD-3]).
+Pull:: The client reads triples and counts them itself. Counts are exact and the endpoint does
+little work, but the whole graph, or a crawl or sample of it, crosses the network. sheXer reads an
+endpoint by asking for the triples of each instance; shaclgen and LODStats read files only (LODStats'
+SPARQL mode counts nothing but the total number of triples).
+
+== Input and access
+
+All five endpoint tools send only reads to the data, but they differ in reach. rdf-fingerprinter
+works with any SPARQL 1.1 store, profiles every named graph and accepts HTTP Basic authentication;
+void-generator matches it on named graphs and adds store-specific speed (Virtuoso JDBC, QLever query
+variants); QSE needs GraphDB. Files are where the pull tools are strong: sheXer streams very large
+N-Triples and Turtle files, and rdf-fingerprinter reads none directly.
+
+.Input and access, tool by tool
+[%collapsible]
+====
+[cols="3,2,2,2,2,2,2,2,2",options="header"]
+|===
+| Feature | rdf-fingerprinter | SHACL Play | sheXer | void-generator | QSE | shaclgen | LODStats | RDF2Graph
+
+| Any SPARQL endpoint | ✓ | ✓ | ✓ per-instance crawl | ✓ | ◐ GraphDB only | ✗ | ◐ total count only | ✓
+| Local files or dumps | ✗ load into a store | ✓ in memory | ✓ streamed, compressed | ◐ one test file | ✓ N-Triples, streamed | ✓ in memory | ✓ streamed, compressed | ✗
+| Named graphs | ✓ every graph, or chosen | ✗ default graph | ✗ | ✓ per graph, links between graphs | ✗ | ✗ | ✗ | ◐ one graph
+| Read-only on the data | ✓ SELECT and ASK only | ✓ | ✓ | ◐ can write its VoID back | ✓ | ✓ | ✓ | ✓
+| Store-specific access | ✗ portable SPARQL 1.1 | ✗ | ✗ | ✓ Virtuoso JDBC, QLever | ✓ GraphDB | ✗ | ✗ | ✗
+| Authentication | ✓ HTTP Basic | ✗ | ✗ | ◐ JDBC only | ✗ | ✗ | ✗ | ✓ user:pass
+|===
+====
+
+== Discovery: classes, hierarchy, links
+
+Every tool lists classes; they differ in what they do with the hierarchy. rdf-fingerprinter reads
+the declared `rdfs:subClassOf` statements, finds implied parents from the other types instances
+carry, and marks each property own, inherited or refined. RDF2Graph goes furthest in another
+direction: it lifts shared properties up to the common parent. SHACL Play uses co-occurring classes
+to choose the most precise `sh:class`.
+
+.Discovery, tool by tool
+[%collapsible]
+====
+[cols="3,2,2,2,2,2,2,2,2",options="header"]
+|===
+| Feature | rdf-fingerprinter | SHACL Play | sheXer | void-generator | QSE | shaclgen | LODStats | RDF2Graph
+
+| Classes and instance counts | ✓ | ✓ with statistics on | ✓ | ✓ | ✓ | ◐ classes, no counts | ✓ | ✓
+| Properties per class | ✓ | ✓ | ✓ | ✓ | ✓ | ◐ one shape per property, shared | ✗ global only | ✓
+| Class hierarchy | ✓ declared and implied parents; own, inherited, refined | ◐ counts through `subClassOf*` | ◐ hierarchy tree | ✗ | ✗ | ◐ ontology mode | ◐ depth only | ✓ lifts properties to parents
+| Instances with several types | ✓ co-types | ✓ prunes `sh:class` | ✓ | ✗ | ✓ | ◐ | ✗ | ✓
+| Incoming links | ✓ | ✗ | ✓ inverse paths | ◐ via linksets | ✗ | ✗ | ◐ average in-degree | ◐ reverse multiplicity
+|===
+====
+
+== Statistics per class and property
+
+This is where profilers differ most. Most decide only two facts per property: is it required, and
+is it single-valued. rdf-fingerprinter keeps the whole cardinality histogram, from which it gives
+minimum, maximum and mean values per instance, a cardinality label (`1`, `?`, `+`, `*`) and a
+confidence: "one value for 98 % of instances", not just "optional". sheXer also keeps histograms and
+a conformance ratio; QSE gives support and confidence per constraint. rdf-fingerprinter also records
+language tags, top values and value ranges, which most others leave out.
+
+.Statistics, tool by tool
+[%collapsible]
+====
+[cols="3,2,2,2,2,2,2,2,2",options="header"]
+|===
+| Feature | rdf-fingerprinter | SHACL Play | sheXer | void-generator | QSE | shaclgen | LODStats | RDF2Graph
+
+| Usage count per class and property | ✓ | ✓ with statistics on | ✓ | ✓ triples | ✓ support | ✗ | ✗ global only | ✓
+| Cardinality | ✓ histogram, min/max/mean, label | ◐ 0/1 bounds | ✓ histogram | ✗ | ◐ 0/1 bounds | ✗ data mode | ✗ | ◐ four classes (`1`, `+`, `*`, `?`)
+| Confidence or support | ✓ per label, threshold | ◐ coverage filter | ✓ conformance ratio | ✗ | ✓ support, confidence | ✗ | ✗ | ✗
+| Literal datatypes | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ when unique | ◐ global | ✓
+| Object classes | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ | ✓
+| Node kind (IRI, literal, blank) | ✓ | ✓ | ✓ | ◐ graph totals | ◐ IRI or literal | ✓ when uniform | ◐ global | ◐
+| Language tags | ✓ per language, coverage | ✓ `sh:languageIn` | ◐ `rdf:langString` | ✗ | ◐ `rdf:langString` | ✗ | ◐ global | ◐ `rdf:langString`
+| Top or sample values | ✓ top K | ✓ `sh:in`, value counts | ◐ one example | ◐ named individuals | ◐ examples, file mode | ✗ | ✗ | ✗
+| Value ranges | ✓ min and max | ✗ | ✗ | ✗ | ✗ | ✗ | ◐ string length | ✗
+| Distinct objects | ✓ | ✓ | ✗ | ✓ | ✗ | ✗ | ✓ | ✗
+|===
+====
+
+== Scale and robustness
+
+On a large graph some query will time out. What happens then? rdf-fingerprinter reads the class
+again from its first N instances, labels every number from it "first N of M", and if that fails too,
+records the failure, carries on and exits 1. SHACL Play also falls back to a labelled sample.
+void-generator scales by concurrency and store shortcuts instead, and is the only tool besides
+RDF2Graph that keeps work from an interrupted run.
+
+.Scale and robustness, tool by tool
+[%collapsible]
+====
+[cols="3,2,2,2,2,2,2,2,2",options="header"]
+|===
+| Feature | rdf-fingerprinter | SHACL Play | sheXer | void-generator | QSE | shaclgen | LODStats | RDF2Graph
+
+| Query strategy | discovery, then per class | per class, per property, paginated | instance crawl | per graph, class, property | per class × property, or streaming | local queries per property | streaming pass | per class × property × type
+| Class bound in the pattern | ✓ | ✓ | ◐ instance list only | ✓ | ✓ | ✗ | n/a | ✓
+| Concurrency | ✓ classes in parallel | ✗ | ✗ | ✓ thread pool | ◐ one mode | ✗ | ✗ | ✓ thread pool
+| Per-query timeout | ✓ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ?
+| Retries | ✓ with backoff | ✗ | ✓ with backoff | ◐ QLever only | ✗ | ✗ | ✗ | ?
+| Fallback when a query fails | ✓ first N instances | ✓ sample | ✗ | ◐ last-resort query | ✗ | ✗ | ✗ | ✗
+| Sampled numbers labelled | ✓ | ✓ | ✗ | n/a | ◐ in logs | n/a | ✗ | ✗ silent `LIMIT` caps
+| Failures reported | ✓ in every output, exit codes 0–5 | ◐ comments, logs | ◐ exceptions | ✓ exit code | ✗ stack traces | ✓ in the shapes | ◐ | ◐ console
+| Resume an interrupted run | ✗ | ✗ | ✗ | ◐ periodic VoID writes | ✗ | ✗ | ✗ | ◐ step markers
+|===
+====
+
+== Outputs for people
+
+Only rdf-fingerprinter and SHACL Play produce a document a person reads from start to finish.
+rdf-fingerprinter's report is one static HTML page about the *data*: namespaces, taxonomy, a section
+per class, every failure and pitfall. SHACL Play documents the *shapes*, as HTML or PDF with charts.
+Both draw PlantUML diagrams; RDF2Graph builds a Cytoscape network.
+
+.Outputs for people, tool by tool
+[%collapsible]
+====
+[cols="3,2,2,2,2,2,2,2,2",options="header"]
+|===
+| Feature | rdf-fingerprinter | SHACL Play | sheXer | void-generator | QSE | shaclgen | LODStats | RDF2Graph
+
+| Report or documentation | ✓ HTML report of the data | ✓ HTML or PDF of the shapes | ✗ | ◐ example page | ✗ | ✗ | ◐ console text | ✗
+| Diagrams | ✓ PlantUML, split by namespace | ✓ PlantUML | ✓ UML images | ◐ example vis.js page | ✗ | ✗ | ✗ | ✓ Cytoscape
+| Prefixed, readable names | ✓ prefix.cc, generated prefixes | ◐ input prefixes | ◐ user prefixes | ✗ fixed | ✗ fixed | ✓ built-in list | ✗ | ✗ fixed
+|===
+====
+
+== Outputs for agents
+
+A language model that writes SPARQL needs the schema in its context, compact and labelled. None of
+the other seven writes for that reader. rdf-fingerprinter writes a pattern schema, compact
+`(:Class) -property-> (:Target)` lines with statistics, plus a glossary of labels and definitions
+and enriched ShExC (xref:llm-schema.adoc[Schemas for LLMs]).
+
+.Outputs for agents, tool by tool
+[%collapsible]
+====
+[cols="3,2,2,2,2,2,2,2,2",options="header"]
+|===
+| Feature | rdf-fingerprinter | SHACL Play | sheXer | void-generator | QSE | shaclgen | LODStats | RDF2Graph
+
+| Schema written for a language model | ✓ pattern schema (Markdown) | ✗ | ✗ | ✗ | ✗ | ✗ | ✗ | ✗
+| Labels and definitions | ✓ glossary from data or an ontology | ◐ local names | ◐ Wikidata labels | ✗ | ◐ for examples | ◐ ontology mode | ✗ | ✗
+| Shapes with statistics in comments | ✓ ShExC | ✗ | ✓ ShExC | ✗ | ✗ | ✗ | ✗ | ✗
+|===
+====
+
+== Outputs for machines
+
+Shapes and statistics in standard formats. rdf-fingerprinter writes SHACL graded by severity, so
+validated against the data it came from it reports no violation; QSE prunes by support and
+confidence thresholds instead. VoID is a gap: SHACL Play, void-generator and LODStats write it,
+rdf-fingerprinter does not.
+
+.Outputs for machines, tool by tool
+[%collapsible]
+====
+[cols="3,2,2,2,2,2,2,2,2",options="header"]
+|===
+| Feature | rdf-fingerprinter | SHACL Play | sheXer | void-generator | QSE | shaclgen | LODStats | RDF2Graph
+
+| SHACL | ✓ | ✓ | ✓ | ✗ | ✓ | ✓ | ✗ | ✗
+| Shapes graded by confidence | ✓ severities | ✗ | ✓ threshold | ✗ | ✓ threshold pairs | ✗ | n/a | ✗
+| ShEx | ✓ | ✗ | ✓ | ✗ | ✗ | ✗ | ✗ | ✓
+| VoID | ✗ | ✓ | ✗ | ✓ with service description | ✗ | ✗ | ✓ | ✗
+| OWL | ✗ | ◐ header only | ✗ | ✗ | ✗ | ✗ | ✗ | ✓
+| JSON | ✓ profile with JSON Schema | ✓ JSON-LD, JSON Schema | ✓ profile | ✓ any RDF format | ✗ | ✗ | ✗ | ◐ intermediate
+| CSV or TSV | ✓ schema, glossary, pitfalls | ✗ (Excel) | ✗ | ✗ | ✓ statistics | ✗ | ✗ | ◐ intermediate
+| Open or closed shapes | open | open | open | n/a | open | open | n/a | open
+|===
+====
+
+== Quality and semantics
+
+Profiling shows what the data holds; these features judge it. rdf-fingerprinter runs 28 pitfall
+checks (25 from the OOPS! catalogue) and can fail a CI job on them. RDF2Graph reports three data
+errors (untyped subjects, untyped targets, a class used as a predicate). Reification is the other
+gap in the field: statements about statements show up in most profiles as noise, and only
+rdf-fingerprinter folds them into the relations they stand for (xref:reifications.adoc[Reified
+Relations]); sheXer handles Wikidata qualifiers, RDF2Graph skips `rdf:subject`, `rdf:predicate` and
+`rdf:object`.
+
+.Quality and semantics, tool by tool
+[%collapsible]
+====
+[cols="3,2,2,2,2,2,2,2,2",options="header"]
+|===
+| Feature | rdf-fingerprinter | SHACL Play | sheXer | void-generator | QSE | shaclgen | LODStats | RDF2Graph
+
+| Modelling pitfall checks | ✓ 28 SPARQL checks, `--fail-on` | ✗ (separate validator) | ✗ | ✗ | ◐ validates data against its shapes | ✗ | ◐ indicators | ◐ three data errors
+| Reification handling | ✓ 14 kinds | ✗ | ◐ Wikidata qualifiers | ✗ | ✗ | ✗ | ✗ | ◐ skips `rdf:Statement` terms
+| Namespace filters | ✓ include and exclude, globs, stems, every output | ✓ include and exclude | ◐ exclude predicates | ◐ a SPARQL filter on classes | ◐ a class list | ✗ | ✗ | ◐ fixed list
+|===
+====
+
+== Extensibility
+
+.Extensibility, tool by tool
+[%collapsible]
+====
+[cols="3,2,2,2,2,2,2,2,2",options="header"]
+|===
+| Feature | rdf-fingerprinter | SHACL Play | sheXer | void-generator | QSE | shaclgen | LODStats | RDF2Graph
+
+| Custom output templates | ✓ any format | ◐ bundled XSL | ✗ | ✗ | ✗ | ✗ | ✗ | ◐ edit the templates
+| Custom checks or queries | ✓ your own pitfall `.rq` files | ◐ Java visitors | ◐ ShapeMap selectors | ✗ | ◐ edit query files | ✗ | ✓ statistic classes | ◐ edit query files
+| Programmatic API | ✓ Python | ✓ Java | ✓ Python | ◐ setters | ◐ | ◐ | ✓ Python | ✗
+| Configuration file | ✓ JSON, environment variables | ✗ | ✗ | ✗ | ✓ properties file | ◐ prefixes only | ✗ | ✗
+|===
+====
+
+== What only rdf-fingerprinter does
+
+Among these eight tools, only rdf-fingerprinter:
+
+* writes a schema for a language model (pattern schema, glossary, enriched ShExC);
+* folds reifications into the relations they stand for;
+* runs a catalogue of modelling pitfall checks over the data and fails a build on them;
+* grades generated SHACL by what the profile knows, so the shapes never reject their own data;
+* gives value ranges and per-language coverage per class and property;
+* combines a per-query timeout, retries, a labelled fallback and exit codes that tell a script
+  what happened;
+* saves the raw profile with a published JSON Schema and regenerates every output from it without
+  querying again.
+
+== Where others go further
+
+* *VoID.* SHACL Play, void-generator and LODStats write it; rdf-fingerprinter collects similar counts
+  but does not write them as VoID.
+* *Store speed.* void-generator reads Virtuoso through JDBC and has QLever query variants;
+  rdf-fingerprinter gives that up for portability.
+* *Files.* sheXer and QSE stream very large files; rdf-fingerprinter needs a store.
+* *Resume.* void-generator writes its VoID as it goes and RDF2Graph records finished steps; an
+  interrupted rdf-fingerprinter run starts again.
+* *A whole SHACL toolchain.* SHACL Play also validates, documents shapes, filters them and converts
+  them to JSON Schema, XSD and SPARQL.
+* *Benchmarks.* QSE and sheXer publish experiments; rdf-fingerprinter has no comparative timings yet
+  (the `benchmark-fingerprinter` change is a pitch).
+
+== Neighbouring tools
+
+* *SPARQL-LLM* (SIB, `pip install sparql-llm`) builds ShEx shapes from an endpoint's VoID
+  description and retrieves them, with example queries, to help a model write SPARQL. The pattern
+  schema serves the same purpose from a fingerprint, with statistics and labels.
+* *OOPS!* (OntOlogy Pitfall Scanner) checks an ontology against its pitfall catalogue. The pitfall
+  scan follows that catalogue where SPARQL can express it, and runs data checks against the
+  instances too.
+
+== References
+
+The tools, and the papers that describe them:
+
+* *SHACL Play*, Sparna. https://github.com/sparna-git/shacl-play, https://shacl-play.sparna.fr/
+* *sheXer*: D. Fernández-Álvarez, J. E. Labra-Gayo, D. Gayo-Avello. "Automatic extraction of shapes
+  using sheXer." _Knowledge-Based Systems_ 238, 107975, 2022.
+  https://doi.org/10.1016/j.knosys.2021.107975. Code: https://github.com/weso/shexer
+* *void-generator*, SIB Swiss Institute of Bioinformatics. https://github.com/sib-swiss/void-generator
+* *QSE*: K. Rabbani, M. Lissandrini, K. Hose. "Extraction of Validating Shapes from Very Large
+  Knowledge Graphs." _Proceedings of the VLDB Endowment_ 16(5), 1023–1032, 2023.
+  https://doi.org/10.14778/3579075.3579078. Code: https://github.com/dkw-aau/qse
+* *shaclgen*. https://github.com/AKSW/shaclgen
+* *LODStats*: S. Auer, J. Demter, M. Martin, J. Lehmann. "LODStats: An Extensible Framework for
+  High-Performance Dataset Analytics." _EKAW 2012_, LNCS 7603, 353–362, 2012.
+  https://doi.org/10.1007/978-3-642-33876-2_31. Code: https://github.com/AKSW/LODStats
+* *RDF2Graph*: J. C. J. van Dam, J. J. Koehorst, P. J. Schaap, V. A. P. Martins dos Santos, M.
+  Suarez-Diez. "RDF2Graph a tool to recover, understand and validate the ontology of an RDF
+  resource." _Journal of Biomedical Semantics_ 6, 2015. https://doi.org/10.1186/s13326-015-0038-9.
+  Code: https://github.com/jessevdam/RDF2Graph
+* *SPARQL-LLM*: P. Smeros, V. Emonet, R. Wang, A.-C. Sima, T. Mendes de Farias, et al. "SPARQL-LLM:
+  Real-Time SPARQL Query Generation from Natural Language Questions." 2025.
+  https://arxiv.org/abs/2512.14277
+* *OOPS!*: M. Poveda-Villalón, A. Gómez-Pérez, M. C. Suárez-Figueroa. "OOPS! (OntOlogy Pitfall
+  Scanner!): An On-line Tool for Ontology Evaluation." _International Journal on Semantic Web and
+  Information Systems_ 10(2), 7–34, 2014. https://doi.org/10.4018/ijswis.2014040102
+

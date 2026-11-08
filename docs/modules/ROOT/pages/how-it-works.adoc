@@ -10,7 +10,7 @@ flowchart LR
     ep[("endpoint")] -- "1 collect · SPARQL<br/>service layer + SPARQL adapter" --> run["profile run<br/>(raw counts)"]
     run -- "2 save<br/>Profile store" --> pj[("profile.json")]
     run -- "3 analyse<br/>domain, pure" --> an["analytics<br/>(indicators)"]
-    an -- "4 render<br/>eds4jinja2 templates" --> out["report, SHACL,<br/>diagram, doc"]
+    an -- "4 render<br/>eds4jinja2 templates" --> out["report, SHACL, ShExC,<br/>diagrams, pattern schema,<br/>pitfalls"]
 ....
 
 Terms in _italics_ are defined in the xref:glossary.adoc[Glossary]. The statistics themselves are
@@ -32,7 +32,7 @@ flowchart TB
     ana -- analytics --> gen["Generators<br/>visit hooks → view"]
     ctx --> tr["Template renderer<br/>(eds4jinja2)"]
     gen --> tr
-    tr -- check --> files[("main.html, shapes-*.ttl,<br/>diagram-*.puml")]
+    tr -- check --> files[("main.html, shapes-*.ttl, *.shex,<br/>diagram-*.puml, patterns-*.md,<br/>pitfalls-*.tsv")]
 ....
 
 == A running example
@@ -69,6 +69,17 @@ small questions per class:
   is recorded and the run goes on. Policy `exact` records the timeout as a failure at once; policy
   `first_n` reads every class from its first N directly. How each kind of error is handled is in
   <<failure-classes>>.
+
+Two more passes run in the same collection, both read-only:
+
+* *Reifications* (on by default, `--no-reifications` to skip). Before the classes are profiled, one
+  `ASK` per common reification kind (`rdf:Statement`, resources used as predicates, `owl:Axiom`, …)
+  tells which kinds the graph holds; only those are captured. Their machinery leaves the ordinary
+  classes and properties and comes back as _reified relations_ of the subject's class
+  (xref:reifications.adoc[Reified Relations]).
+* *Pitfalls* (with `--pitfalls`). After a graph is profiled, the catalogue of SPARQL checks runs
+  against it, `concurrency` at a time; counts and the first examples are kept
+  (xref:pitfalls.adoc[Pitfalls]).
 
 The result is a _profile run_: raw counts only, no judgement.
 
@@ -115,6 +126,10 @@ partitions, combined with `sh:or` when the values are of several kinds.
 PlantUML diagrams (`diagram-<graph>.puml` and `diagram-<graph>--<module>.puml`):: an overview of
 the namespaces and their links, then one diagram per namespace module: classes, attributes,
 associations with multiplicities, generalisations (declared solid, implied dashed).
+Enriched ShExC (`*.shex`) and pattern schema (`prefixes-`, `patterns-`, `glossary-<graph>.md` and `.csv`)::
+the same view of each graph as ShEx shapes, or as compact `(:Class) -property-> (:Target)` lines
+with a glossary, sized for a language model's context (xref:llm-schema.adoc[Schemas for LLMs]).
+Pitfalls (`pitfalls-<graph>.tsv`):: the findings of the pitfall scan, one row per example.
 Report page (`main.html`):: the profile as one static page: overview, namespaces, a section per class
 with its property table, collection, caveats; with contents, search and namespace switches.
 
