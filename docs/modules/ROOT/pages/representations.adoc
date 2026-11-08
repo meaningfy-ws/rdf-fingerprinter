@@ -18,6 +18,7 @@ flowchart LR
         direction TB
         h1["Fingerprint report<br/><i>(HTML)</i>"]
         h2["Class diagrams<br/><i>(PlantUML)</i>"]
+        h3["Pitfall findings<br/><i>(in the report, HTML)</i>"]
     end
     subgraph A["🤖 For agents"]
         direction TB
@@ -44,7 +45,7 @@ flowchart LR
     classDef bad fill:#fee2e2,stroke:#b91c1c,color:#450a0a
     class ep src
     class fp,pj core
-    class h1,h2 people
+    class h1,h2,h3 people
     class a1,a2,a3 agents
     class m1,m2,m3,m4,m5 machines
     style H fill:#fffbeb,stroke:#b45309,color:#451a03
@@ -56,9 +57,10 @@ flowchart LR
 |===
 | For | What we produce (format) | Files | Content
 
-.2+| *People*
-| <<report-page,Fingerprint report>> (HTML) | `main.html` | the profile as one static page with contents, search, namespace switches and pitfall findings
+.3+| *People*
+| <<report-page,Fingerprint report>> (HTML) | `main.html` | the profile as one static page with contents, search and namespace switches
 | <<plantuml-diagrams,Class diagrams>> (PlantUML source) | `diagram-<graph>.puml` (overview) and `diagram-<graph>--<module>.puml` | namespaces and their links; per module the classes, attributes, associations, generalisations
+| xref:pitfalls.adoc#where-the-findings-show[Pitfall findings] (HTML, in the report) | `main.html`, section _Pitfalls_ | the checks with findings by importance, each with its examples, and a badge on every class a check names
 
 .3+| *Agents* (a language model writing SPARQL)
 | xref:llm-schema.adoc#the-pattern-schema[Query-writing schema] (Markdown) | `patterns-<graph>.md`, `prefixes-<graph>.md` | classes, their links and statistics as `(:Class) -property-> (:Target)` lines, and the prefixes they use
