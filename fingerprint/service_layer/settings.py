@@ -21,7 +21,7 @@ from fingerprint.adapters.sparql import redact
 from fingerprint.domain.exceptions import IriRefError
 from fingerprint.domain.iri import to_iriref
 from fingerprint.domain.profile import NamespacePrefix, PrefixSource, Settings, SettingsOverride
-from fingerprint.service_layer.exceptions import UsageError
+from fingerprint.service_layer.exceptions import ConfigurationError, UsageError
 
 NAMES = tuple(Settings.model_fields)
 
@@ -53,12 +53,12 @@ def validate_endpoint(url: str) -> None:
 
 
 def validate_config() -> None:
-    """Every `RDF_FINGERPRINTER_*` value read once, before any query or write; a bad one is a usage error."""
+    """Every `RDF_FINGERPRINTER_*` value read once, before any query or write; a bad one is a `ConfigurationError`."""
     try:
         fingerprint_config.validate()
         load_packaged_prefixes(fingerprint_config.packaged_prefixes_file)
     except ConfigError as error:
-        raise UsageError(str(error)) from error
+        raise ConfigurationError(str(error)) from error
 
 
 def load_user_prefixes(path: str | Path | None = None) -> list[NamespacePrefix]:
@@ -90,7 +90,7 @@ def _environment(env: Mapping[str, str] | None) -> SettingsOverride:  # dict-ok:
     try:
         return source.settings_override()
     except ConfigError as error:
-        raise UsageError(str(error)) from error
+        raise ConfigurationError(str(error)) from error
 
 
 def _is_set(value: Any) -> bool:

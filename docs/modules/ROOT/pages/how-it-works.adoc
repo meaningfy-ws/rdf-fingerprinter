@@ -177,13 +177,29 @@ and rdflib reads the answer into typed terms. Every error it meets is put in one
 | Unreachable | HTTP 401, 403, 407. Only the first query can make the endpoint unreachable; on any later query it counts as permanent.
 |===
 
+[#bounded-calls]
+Every attempt is bounded. `timeout_seconds` is its deadline, from the start of the request to the end
+of the answer: when it passes, the attempt raises `QueryTimeout`, which is not retried. An answer
+body longer than `RDF_FINGERPRINTER_MAX_ANSWER_BYTES` (256 MiB by default) raises `AnswerTooLarge`,
+a permanent error, after reading no more than the limit plus 64 KiB. The deadline is checked between
+reads of the answer, and each read waits at most `timeout_seconds`, so once the answer has started an
+attempt ends within twice `timeout_seconds`. The worst case of one query is then
+`(retries + 1) × 2 × timeout_seconds + sum of the backoff seconds`: with the defaults (two retries,
+backoff 1 s and 4 s) and a 60 s timeout, `3 × 120 + 5 = 365` s.
+
+The deadline does not cover connecting and receiving the response headers: there, `timeout_seconds`
+bounds each socket operation only, because urllib has no whole-request limit. An endpoint that sends
+one header line just under every `timeout_seconds` can hold an attempt for as long as it keeps
+sending. A caller that queries endpoints it does not trust and needs a hard bound runs the call
+under its own wall-clock limit (a worker thread or process with a timeout).
+
 What a failed query costs depends on the stage it belongs to:
 
 [cols="2,4"]
 |===
 | Stage | Response
 
-| Listing the named graphs (first query) | Unreachable, or transient after its retries: the run stops, nothing is written, the CLI exits 3. Timeout or permanent: only the default graph is profiled, recorded as a failure — unless graphs were chosen (`--graph`, the `selected_graphs` setting or parameter), in which case those are profiled and only a WARNING is logged.
+| Listing the named graphs (first query) | Unreachable, or transient after its retries: the run stops, nothing is written, the CLI exits 3. Timeout or permanent (also an answer without the `g` variable, or longer than `RDF_FINGERPRINTER_MAX_ANSWER_BYTES`): only the default graph is profiled, recorded as a failure — unless graphs were chosen (`--graph`, the `selected_graphs` setting or parameter), in which case those are profiled and only a WARNING is logged.
 | Other discovery (store-wide subclass statements; per graph: predicates, classes, counts, graph totals) | Each has a fallback or is recorded and skipped: classes not counted in one query are listed and counted one by one; predicates not listed in one query are listed without counts; subclass statements and graph totals not read are recorded as failures.
 | First wave of a class (instance listing, histograms, value partitions, co-types) | Timeout: the class escalates under `auto` (exact → first N); in first-N mode or under `exact`, a failure. Permanent: a failure at once. Either way the class is left out of the profile.
 | Second wave of a class (top values, completeness check, incoming links) | Recorded as a failure; the class is kept, without that measurement.

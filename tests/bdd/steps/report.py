@@ -4,11 +4,13 @@ import io
 import logging
 import re
 import urllib.error
+import urllib.request
 
 from bs4 import BeautifulSoup
 from click.testing import CliRunner
 from pytest_bdd import given, parsers, then, when
 
+from fingerprint.adapters import sparql
 from fingerprint.adapters.exceptions import GeneratedOutputError
 from fingerprint.adapters.profile_file import load_profile
 from fingerprint.adapters.sparql import QueryTimeout, SparqlHttpClient
@@ -369,6 +371,85 @@ def no_graph_listed(ctx):
 @then(parsers.parse('"{name}" is raised'))
 def raised(ctx, name):
     assert type(ctx.get("raised")).__name__ == name, ctx.get("raised")
+
+
+# --- bounded calls and the listing's error contract ---
+
+
+class Clock:
+    """A fake monotonic clock: only a slow read moves it."""
+
+    now = 0.0
+
+    def __call__(self):
+        return self.now
+
+
+class Endless:
+    """An answer body that never ends: each read takes `seconds` on the clock and returns `size` bytes."""
+
+    def __init__(self, clock, seconds, size):
+        self.clock, self.seconds, self.size, self.read_bytes = clock, seconds, size, 0
+
+    def read1(self, amount):
+        self.clock.now += self.seconds
+        chunk = min(self.size, amount)
+        self.read_bytes += chunk
+        return b" " * chunk
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+def serve(monkeypatch, body):
+    monkeypatch.setattr(sparql.urllib.request, "urlopen", lambda request, timeout: body)
+
+
+@given("an endpoint that sends one byte per second")
+def drip_endpoint(ctx, monkeypatch):
+    ctx["clock"] = Clock()
+    serve(monkeypatch, Endless(ctx["clock"], seconds=1, size=1))
+
+
+@given("an endpoint whose answer is larger than the answer size limit")
+def huge_endpoint(ctx, monkeypatch):
+    monkeypatch.setenv("RDF_FINGERPRINTER_MAX_ANSWER_BYTES", "100000")
+    ctx["clock"], ctx["limit"] = Clock(), 100000
+    ctx["body"] = Endless(ctx["clock"], seconds=0, size=sparql.READ_CHUNK)
+    serve(monkeypatch, ctx["body"])
+
+
+@when(parsers.re(r"a query runs( with a timeout of (?P<seconds>\d+) seconds)?"))
+def run_query(ctx, seconds):
+    client = SparqlHttpClient("http://e/sparql", int(seconds or 20), clock=ctx["clock"])
+    try:
+        client.select("# Q1 x\nSELECT * {}")
+    except Exception as error:  # the Then step names the expected type
+        ctx["raised"] = error
+
+
+@then(parsers.parse('"{name}" is raised within {seconds:d} seconds'))
+def raised_within(ctx, name, seconds):
+    assert type(ctx.get("raised")).__name__ == name and ctx["clock"].now <= seconds, ctx.get("raised")
+
+
+@then(parsers.parse('"{name}" is raised and no more than the limit plus one buffer was read'))
+def raised_after_limit(ctx, name):
+    assert type(ctx.get("raised")).__name__ == name, ctx.get("raised")
+    assert ctx["body"].read_bytes <= ctx["limit"] + sparql.READ_CHUNK
+
+
+@given("an endpoint whose graph listing has no graph column")
+def listing_without_g(store):
+    store.on("Q0", [{"x": "1"}])
+
+
+@given(parsers.parse('the setting {name} is "{value}"'))
+def setting_is(monkeypatch, name, value):
+    monkeypatch.setenv(name, value)
 
 
 # --- the saved profile ---

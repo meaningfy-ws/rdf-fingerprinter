@@ -121,3 +121,19 @@ def test_an_error_inside_a_list_names_the_field_and_the_position():
     with pytest.raises(UsageError) as error:
         resolve_settings(env={}, cli={"selected_graphs": [1]})
     assert str(error.value).startswith("selected_graphs.0: ")
+
+
+def test_a_bad_variable_is_a_configuration_error_and_a_bad_url_is_not(monkeypatch):
+    from fingerprint.service_layer.exceptions import ConfigurationError
+    from fingerprint.service_layer.settings import validate_config
+
+    monkeypatch.setenv("RDF_FINGERPRINTER_MAX_ANSWER_BYTES", "big")
+    with pytest.raises(ConfigurationError, match="RDF_FINGERPRINTER_MAX_ANSWER_BYTES"):
+        validate_config()
+    with pytest.raises(ConfigurationError):
+        resolve_settings(env={"RDF_FINGERPRINTER_FIRST_N": "many"})
+    monkeypatch.delenv("RDF_FINGERPRINTER_MAX_ANSWER_BYTES")
+    with pytest.raises(UsageError) as raised:
+        validate_endpoint("ftp://x")
+    assert not isinstance(raised.value, ConfigurationError)
+    assert issubclass(ConfigurationError, UsageError)

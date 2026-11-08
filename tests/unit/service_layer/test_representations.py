@@ -162,3 +162,35 @@ def test_a_size_filter_below_one_is_a_usage_error_even_when_built_around_the_mod
     with pytest.raises(UsageError) as error:
         validate_options(GeneratorOptions.model_construct(**{name: 0}))
     assert str(error.value) == f"--{name.replace('_', '-')} must be at least 1"
+
+
+def test_diagram_descriptions_match_the_files_written_in_order_and_write_nothing(tmp_path):
+    from tests.builders import klass, profile_run
+    from tests.fakes import EX
+
+    run = profile_run(klass(EX + "A", 1), klass("http://xmlns.com/foaf/0.1/Agent", 1), graph="http://example.org/g/one")
+    described = representations.describe_diagrams(run, tmp_path)
+    assert list(tmp_path.iterdir()) == []
+    written = generate_representations(run, tmp_path, ["puml"])
+    assert [Path(d.path) for d in described] == written
+    assert {d.graph for d in described} == {"http://example.org/g/one"}
+    assert [(d.kind, d.module) for d in described] == [("overview", None), ("module", "ex"), ("module", "foaf")]
+
+
+def test_a_default_graph_diagram_is_described_with_no_graph(tmp_path):
+    from tests.builders import klass, profile_run
+    from tests.fakes import EX
+
+    described = representations.describe_diagrams(profile_run(klass(EX + "A", 1)), tmp_path)
+    assert [d.graph for d in described] == [None, None]
+
+
+def test_describing_diagrams_checks_the_threshold_and_the_options_like_generating_them(tmp_path):
+    from tests.builders import klass, profile_run
+    from tests.fakes import EX
+
+    run = profile_run(klass(EX + "A", 1))
+    with pytest.raises(UsageError):
+        representations.describe_diagrams(run, tmp_path, threshold=2)
+    with pytest.raises(UsageError, match="--module-size must be at least 1"):
+        representations.describe_diagrams(run, tmp_path, options=GeneratorOptions.model_construct(module_size=0))

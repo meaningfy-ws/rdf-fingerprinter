@@ -1,0 +1,4 @@
+- https://github.com/meaningfy-ws/rdf-fingerprinter/issues/76 SparqlHttpClient has no overall deadline and no limit on the answer size
+- https://github.com/meaningfy-ws/rdf-fingerprinter/issues/77 list_named_graphs raises KeyError on an answer without ?g, and the same UsageError for a bad setting and a bad URL
+- https://github.com/meaningfy-ws/rdf-fingerprinter/issues/75 Describe each generated diagram file (graph, overview or module) for callers
+- https://github.com/meaningfy-ws/rdf-fingerprinter/issues/69 API reference lists only shacl and puml under formats

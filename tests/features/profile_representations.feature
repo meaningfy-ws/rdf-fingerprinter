@@ -152,6 +152,20 @@ Feature: Publishing a fingerprint as an application profile
       Then the overview has the package "ex" and the package "foaf" marked referenced
       And one arrow from "ex" to "foaf" is labelled 3
 
+    Scenario: Each diagram file is described
+      Given a profile with a class in "ex" and a class in "foaf"
+      When the diagram files are described
+      Then one file is the overview and the other two are the modules "ex" and "foaf", each with the graph and no part
+
+    Scenario: A split module has its part number
+      Given the namespace "ex" holds the classes A to G, with A and B linked twice, B and C, C and D, and E and F once, and G linked to none
+      When the diagram files are described with module size 3
+      Then the module "ex" has parts 1, 2 and 3
+
+    Scenario: The API reference names every format
+      When the API reference is read
+      Then it names shacl, puml, pattern, shex and pitfalls
+
     Scenario: Failures and samples are flagged
       Given a profile with a class read from its first 10 of 50 instances and one recorded failure
       When the document is generated

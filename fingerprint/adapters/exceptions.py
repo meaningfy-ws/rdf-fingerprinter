@@ -25,6 +25,10 @@ class PermanentError(SparqlError):
     """The endpoint rejected the query; retrying cannot help."""
 
 
+class AnswerTooLarge(PermanentError):
+    """An answer longer than `RDF_FINGERPRINTER_MAX_ANSWER_BYTES`; reading stopped there."""
+
+
 class EndpointUnreachable(SparqlError):
     """The endpoint cannot be used at all (no connection, authentication required)."""
 

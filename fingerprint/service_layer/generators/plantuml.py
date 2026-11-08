@@ -24,6 +24,7 @@ from fingerprint.domain.reifications import relation_view
 from fingerprint.domain.views import (
     DiagramBox,
     DiagramClass,
+    DiagramFile,
     DiagramKind,
     DiagramLink,
     DiagramMember,
@@ -32,6 +33,7 @@ from fingerprint.domain.views import (
     DiagramOverview,
     DiagramPackage,
     GeneratorOptions,
+    RepresentationFormat,
 )
 from fingerprint.service_layer.generators.generator import Generator, TemplateRenderer, graph_slug, plain_label
 from fingerprint_report_templates import packaged
@@ -57,6 +59,7 @@ class PlantumlGenerator(Generator):
         self._references = 0
         self._links: list[tuple[str, str]] = []  # (class IRI, target IRI): associations and generalisations
         self._files: list[tuple[str, DiagramModule | DiagramOverview]] = []
+        self._described: list[DiagramFile] = []
 
     # --- hooks ---
 
@@ -118,6 +121,7 @@ class PlantumlGenerator(Generator):
         by_namespace: dict[str, list[DiagramClass]] = {}  # dict-ok: lookup index namespace → its class boxes
         for box in classes:
             by_namespace.setdefault(self.namespace(self._iri_of[box.alias]), []).append(box)
+        described: list[DiagramFile] = []
         modules: list[tuple[str, DiagramModule]] = []
         modules_of: dict[str, list[str]] = {}  # dict-ok: lookup index namespace → module names
         for namespace in sorted(by_namespace, key=self.prefix):
@@ -128,7 +132,7 @@ class PlantumlGenerator(Generator):
             groups = cluster(label_of.values(), inner, self.module_size)
             names = [prefix] if len(groups) == 1 else [f"{prefix}~{n}" for n in range(1, len(groups) + 1)]
             modules_of[namespace] = names
-            for name, group in zip(names, groups, strict=True):
+            for part, (name, group) in enumerate(zip(names, groups, strict=True), 1):
                 members = [b for b in boxes if b.label in group]
                 view = DiagramModule(
                     kind=DiagramKind.module,
@@ -140,9 +144,22 @@ class PlantumlGenerator(Generator):
                     reference_boxes=self.references(members),
                 )
                 modules.append((f"diagram-{slug}--{name}.puml", view))
+                split = part if len(groups) > 1 else None
+                described.append(self.file_of(f"diagram-{slug}--{name}.puml", graph, DiagramKind.module, prefix, split))
         overview = self.overview(title, slug, by_namespace, modules_of).model_copy(update={"excluded_note": note})
         self._files.append((f"diagram-{slug}.puml", overview))
         self._files += modules
+        self._described += [self.file_of(f"diagram-{slug}.puml", graph, DiagramKind.overview), *described]
+
+    def file_of(
+        self, name: str, graph: GraphAnalytics, kind: DiagramKind, module: str | None = None, part: int | None = None
+    ) -> DiagramFile:
+        return DiagramFile(path=name, format=RepresentationFormat.puml, graph=graph.graph, kind=kind, module=module, part=part)
+
+    def describe(self) -> list[DiagramFile]:
+        """What each file of `outputs()` shows, in the same order."""
+        self.outputs()
+        return self._described
 
     # --- diagram parts ---
 
@@ -202,6 +219,7 @@ class PlantumlGenerator(Generator):
     def outputs(self) -> list[tuple[str, BaseModel]]:
         """Per graph with a shown class: the overview, then one file per module, each listing every IRI skipped."""
         self._files = []
+        self._described = []
         self.view()
         skipped = list(self.skipped)
         return [(name, view.model_copy(update={"skipped": skipped})) for name, view in self._files]
