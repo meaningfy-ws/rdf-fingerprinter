@@ -6,6 +6,24 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.6.1] - 2026-11-08
+
+Documentation release; no change to the library's behaviour.
+
+### Added
+- Docs: a **Comparison** page, rdf-fingerprinter against SHACL Play, sheXer, void-generator, QSE,
+  shaclgen, LODStats and RDF2Graph, feature by feature in collapsible groups, with references.
+- Docs: the outputs grouped by who reads them (people, agents, machines) on the Representations
+  page; references for OOPS! and ROBOT on the Pitfalls page.
+- README: a *What it does* section.
+
+### Changed
+- `fingerprint --help` lists exit status 5 (pitfalls at the `--fail-on` level).
+- Docs: Architecture, How It Works, Glossary and the home page describe 3.5 (pitfall scans, schemas
+  for LLMs, ShExC, reified relations); they make clear that LinkML generates only the tool's own
+  model, not the SHACL or diagrams.
+- The `namespace-filter` change is archived and its requirements are merged into the specs.
+
 ## [3.6.0] - 2026-11-08
 
 Two additions for library callers (OpenSpec change `graph-listing-and-typing`).
