@@ -327,3 +327,31 @@ Among these eight tools, only rdf-fingerprinter:
 * *OOPS!* (OntOlogy Pitfall Scanner) checks an ontology against its pitfall catalogue. The pitfall
   scan follows that catalogue where SPARQL can express it, and runs data checks against the
   instances too.
+
+== References
+
+The tools, and the papers that describe them:
+
+* *SHACL Play*, Sparna. https://github.com/sparna-git/shacl-play, https://shacl-play.sparna.fr/
+* *sheXer*: D. Fernández-Álvarez, J. E. Labra-Gayo, D. Gayo-Avello. "Automatic extraction of shapes
+  using sheXer." _Knowledge-Based Systems_ 238, 107975, 2022.
+  https://doi.org/10.1016/j.knosys.2021.107975. Code: https://github.com/weso/shexer
+* *void-generator*, SIB Swiss Institute of Bioinformatics. https://github.com/sib-swiss/void-generator
+* *QSE*: K. Rabbani, M. Lissandrini, K. Hose. "Extraction of Validating Shapes from Very Large
+  Knowledge Graphs." _Proceedings of the VLDB Endowment_ 16(5), 1023–1032, 2023.
+  https://doi.org/10.14778/3579075.3579078. Code: https://github.com/dkw-aau/qse
+* *shaclgen*. https://github.com/AKSW/shaclgen
+* *LODStats*: S. Auer, J. Demter, M. Martin, J. Lehmann. "LODStats: An Extensible Framework for
+  High-Performance Dataset Analytics." _EKAW 2012_, LNCS 7603, 353–362, 2012.
+  https://doi.org/10.1007/978-3-642-33876-2_31. Code: https://github.com/AKSW/LODStats
+* *RDF2Graph*: J. C. J. van Dam, J. J. Koehorst, P. J. Schaap, V. A. P. Martins dos Santos,
+  M. Suarez-Diez. "RDF2Graph a tool to recover, understand and validate the ontology of an RDF
+  resource." _Journal of Biomedical Semantics_ 6, 2015. https://doi.org/10.1186/s13326-015-0038-9.
+  Code: https://github.com/jessevdam/RDF2Graph
+* *SPARQL-LLM*: P. Smeros, V. Emonet, R. Wang, A.-C. Sima, T. Mendes de Farias, et al. "SPARQL-LLM:
+  Real-Time SPARQL Query Generation from Natural Language Questions." 2025.
+  https://arxiv.org/abs/2512.14277
+* *OOPS!*: M. Poveda-Villalón, A. Gómez-Pérez, M. C. Suárez-Figueroa. "OOPS! (OntOlogy Pitfall
+  Scanner!): An On-line Tool for Ontology Evaluation." _International Journal on Semantic Web and
+  Information Systems_ 10(2), 7–34, 2014. https://doi.org/10.4018/ijswis.2014040102
+
