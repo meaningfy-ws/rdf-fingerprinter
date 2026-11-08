@@ -4,11 +4,11 @@
 
 [project]
 name = "rdf-fingerprinter"
-version = "3.7.0"
-description = "Find out kind of data shapes your RDF dataset instantiates."
+version = "3.7.1"
+description = "Profile a SPARQL endpoint and infer the data shapes its RDF data follow: HTML report, SHACL, ShEx, PlantUML and LLM schemas."
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
 authors = [{ name = "Eugeniu Costetchi", email = "costezki.eugen@gmail.com" }]
 maintainers = [{ name = "Eugeniu Costetchi", email = "costezki.eugen@gmail.com" }]
 keywords = ["rdf", "application profile", "data shape", "statistics", "fingerprint", "sparql", "linked-data"]
@@ -20,7 +20,6 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
     "Environment :: Console",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Topic :: Utilities",
     "Topic :: Scientific/Engineering :: Information Analysis",
@@ -41,6 +40,8 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/meaningfy-ws/rdf-fingerprinter"
 Documentation = "https://meaningfy-ws.github.io/rdf-fingerprinter/"
+Changelog = "https://github.com/meaningfy-ws/rdf-fingerprinter/blob/master/CHANGELOG.md"
+Issues = "https://github.com/meaningfy-ws/rdf-fingerprinter/issues"
 
 [project.scripts]
 fingerprint = "fingerprint.entrypoints.cli.main:fingerprint_endpoint"
