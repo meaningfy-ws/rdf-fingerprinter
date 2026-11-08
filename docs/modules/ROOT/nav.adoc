@@ -8,6 +8,7 @@
 * xref:pitfalls.adoc[Pitfalls]
 * xref:statistics.adoc[Statistics and Settings]
 * xref:api-reference.adoc[API Reference]
+* xref:comparison.adoc[Comparison]
 * xref:architecture.adoc[Architecture]
 ** xref:decisions.adoc[Architecture Decisions]
 ** xref:use-cases/index.adoc[Use Cases]

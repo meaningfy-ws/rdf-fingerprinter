@@ -115,7 +115,8 @@ def fingerprint_endpoint(
 ):
     """
     Generate a fingerprint report on a given SPARQL endpoint.
-    Exit status: 0 profiled, 1 report written with failures, 2 usage error, 3 endpoint unreachable, 4 unexpected error.
+    Exit status: 0 profiled, 1 report written with failures, 2 usage error, 3 endpoint unreachable, 4 unexpected error,
+    5 pitfalls at the --fail-on level.
     """
     configure_logging()
     output_location = pathlib.Path(output)
