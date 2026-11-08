@@ -6,6 +6,14 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.7.1] - 2026-11-08
+
+### Changed
+- Docs: the README, which is the PyPI page, is reworked: linked badges, an outputs overview
+  image, who the tool is for, why its results can be trusted, a quick start, and absolute links
+  (the CHANGELOG link was broken on PyPI).
+- Packaging: a clearer description, Changelog and Issues links, and an SPDX license string.
+
 ## [3.7.0] - 2026-11-08
 
 OpenSpec change `consumer-api-gaps` (issues #76, #77, #75, #69).
