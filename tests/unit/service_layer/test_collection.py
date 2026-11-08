@@ -465,3 +465,28 @@ def test_a_class_that_times_out_is_logged_with_the_precision_it_tries_next(caplo
     with caplog.at_level(logging.WARNING, logger=LOGGER):
         collected(last)
     assert f"class {PERSON}: first_n timed out after 60 s; trying nothing" in caplog.messages
+
+
+# --- list_named_graphs (graph-listing-and-typing G-1, G-2) ---
+
+
+def test_listing_an_invalid_url_is_a_usage_error_before_any_query():
+    from fingerprint.service_layer import handlers
+
+    fake = FakeSparql()
+    with pytest.raises(ValueError):
+        handlers.list_named_graphs("file:///etc/passwd", resolve_settings(), sparql=fake)
+    assert fake.queries == []
+
+
+def test_a_rejected_listing_raises_permanent_error_not_an_empty_list():
+    import io
+    import urllib.error
+
+    from fingerprint.service_layer import handlers
+
+    fake = FakeSparql()
+    rejected = urllib.error.HTTPError("http://fake/sparql", 400, "bad request", {}, io.BytesIO(b""))  # type: ignore[arg-type]
+    fake.on("Q0", rejected)
+    with pytest.raises(PermanentError):
+        handlers.list_named_graphs("http://fake/sparql", resolve_settings(), sparql=fake)

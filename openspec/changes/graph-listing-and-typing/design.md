@@ -23,4 +23,5 @@
 | No named graphs | `fingerprint_report.feature` | `store` |
 | Listing an unreachable endpoint | `fingerprint_report.feature` | `FakeSparql.on("Q0", EndpointUnreachable)` |
 | The listing times out | `fingerprint_report.feature` | `FakeSparql.on("Q0", QueryTimeout)` |
+| (UsageError before any query; PermanentError on a rejected listing) | `tests/unit/service_layer/test_collection.py` (review finding) | `FakeSparql` |
 | Both packages are typed | `tests/guards/test_package.py::test_both_packages_are_typed` (allow-listed); `make check-wheel` | the source tree; the built wheel |

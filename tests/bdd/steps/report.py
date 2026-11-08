@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from click.testing import CliRunner
 from pytest_bdd import given, parsers, then, when
 
-from fingerprint.adapters.exceptions import EndpointUnreachable, GeneratedOutputError
+from fingerprint.adapters.exceptions import GeneratedOutputError
 from fingerprint.adapters.profile_file import load_profile
 from fingerprint.adapters.sparql import QueryTimeout, SparqlHttpClient
 from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
@@ -335,12 +335,12 @@ def named_graphs_held(store, first, second):
 
 @given("the endpoint cannot be reached")
 def endpoint_unreachable(store):
-    store.on("Q0", EndpointUnreachable("connection refused"))
+    store.on("Q0", refused())  # through the client's classify and retries, as a real refusal
 
 
 @given("the endpoint's graph listing times out")
 def listing_times_out(store):
-    store.on("Q0", QueryTimeout("Q0 timed out"))
+    store.on("Q0", urllib.error.URLError(TimeoutError("timed out")))  # classified, never retried
 
 
 @when("a caller lists its named graphs")
