@@ -3,6 +3,7 @@
 import json
 import logging
 import re
+from pathlib import Path
 
 from bs4 import BeautifulSoup
 from click.testing import CliRunner
@@ -17,6 +18,7 @@ from fingerprint.domain.prefixes import namespace_of
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.entrypoints.cli import generate
 from fingerprint.service_layer.representations import (
+    describe_diagrams,
     generate_from_profile_file,
     make_generator,
     with_threshold,
@@ -661,3 +663,39 @@ def shapes_do_not_constrain(ctx):
     assert not paths & {EX + "isRelatedTo", EX + "source"}
     constraints = [line for line in ctx["shex"].splitlines() if not line.lstrip().startswith("#")]
     assert not any("isRelatedTo" in line or "source" in line for line in constraints)
+
+
+# --- describing the diagram files ---
+
+
+@given(parsers.parse('a profile with a class in "ex" and a class in "foaf"'))
+def classes_in_two_vocabularies(ctx):
+    ctx["run"] = profile_run(klass(EX + "Person", 2), klass(FOAF + "Agent", 2))
+
+
+@when("the diagram files are described")
+@when(parsers.parse("the diagram files are described with module size {size:d}"))
+def described(ctx, size=None):
+    ctx["described"] = describe_diagrams(ctx["run"], ctx["output"], options=GeneratorOptions(module_size=size))
+
+
+@then('one file is the overview and the other two are the modules "ex" and "foaf", each with the graph and no part')
+def overview_and_modules(ctx):
+    kinds = sorted((str(d.kind), d.module) for d in ctx["described"])
+    assert kinds == [("module", "ex"), ("module", "foaf"), ("overview", None)]
+    assert all(d.graph is None and d.part is None and d.format == "puml" for d in ctx["described"])
+
+
+@then(parsers.parse('the module "{name}" has parts 1, 2 and 3'))
+def module_parts(ctx, name):
+    assert sorted(d.part for d in ctx["described"] if d.module == name) == [1, 2, 3]
+
+
+@when("the API reference is read")
+def api_reference_read(ctx):
+    ctx["reference"] = (Path(__file__).parents[3] / "docs/modules/ROOT/pages/api-reference.adoc").read_text()
+
+
+@then("it names shacl, puml, pattern, shex and pitfalls")
+def reference_names_formats(ctx):
+    assert all(f"`{name}`" in ctx["reference"] for name in ("shacl", "puml", "pattern", "shex", "pitfalls"))

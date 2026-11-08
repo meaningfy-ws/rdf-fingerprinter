@@ -6,6 +6,23 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+OpenSpec change `consumer-api-gaps` (issues #76, #77, #75, #69).
+
+### Added
+- `RDF_FINGERPRINTER_MAX_ANSWER_BYTES` (default 256 MiB) and `AnswerTooLarge` (a `PermanentError`):
+  a query stops reading an answer longer than the limit.
+- `ConfigurationError`, a `UsageError` subclass in `fingerprint.service_layer.exceptions`, raised for
+  an invalid `RDF_FINGERPRINTER_*` setting; an invalid endpoint URL stays a plain `UsageError`.
+- `describe_diagrams` and `DiagramFile`: for each PlantUML file, its graph, overview or module,
+  module name and part number, without parsing the file name.
+- Docs: the API reference lists all five formats with their files, and the worst case of a query.
+
+### Changed
+- `SparqlHttpClient` enforces `timeout_seconds` as a deadline for the whole attempt (checked
+  between reads), not per socket read; a slow answer raises `QueryTimeout`.
+- An answer to the graph listing without `?g` raises `PermanentError` instead of `KeyError`; a run
+  records it as a failure of the listing and profiles the default graph.
+
 ## [3.6.1] - 2026-11-08
 
 Documentation release; no change to the library's behaviour.

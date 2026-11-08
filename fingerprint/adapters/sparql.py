@@ -22,6 +22,7 @@ from rdflib.term import Identifier, Variable
 
 from fingerprint import __version__, config
 from fingerprint.adapters.exceptions import (  # noqa: F401 — also importable from here (2.0)
+    AnswerTooLarge,
     EndpointUnreachable,
     PermanentError,
     QueryTimeout,
@@ -32,6 +33,8 @@ from fingerprint.adapters.exceptions import (  # noqa: F401 — also importable 
 from fingerprint.domain.vocabulary import BLANK_NODE_PREFIX  # noqa: F401 — also importable from here (2.0)
 
 logger = logging.getLogger(__name__)
+
+READ_CHUNK = 64 * 1024  # bytes asked of the socket at a time; the answer-size limit is overshot by at most this
 
 HEADERS = {
     "Content-Type": "application/x-www-form-urlencoded",
@@ -122,12 +125,26 @@ def parse_answer(body: bytes) -> bool | list[ResultRow]:
 
 
 class SparqlHttpClient:
-    """One HTTP request per call, so one client is safe to share between threads."""
+    """One HTTP request per call, so one client is safe to share between threads.
 
-    def __init__(self, endpoint: str, timeout_seconds: int, sleep: Callable[[float], None] = time.sleep):
+    `timeout_seconds` is the deadline of one attempt, from its start to the end of the answer; the connect and
+    header phases are bounded per socket operation only. The deadline is checked between reads, so an attempt
+    ends within `timeout_seconds` plus one blocked read (at most `timeout_seconds` more). A timeout is not
+    retried; a transient failure is retried once per backoff value: the worst case is
+    `(retries + 1) * 2 * timeout_seconds + sum(backoff)` seconds. An answer over `config.max_answer_bytes`
+    raises `AnswerTooLarge`."""
+
+    def __init__(
+        self,
+        endpoint: str,
+        timeout_seconds: int,
+        sleep: Callable[[float], None] = time.sleep,
+        clock: Callable[[], float] = time.monotonic,
+    ):
         self.endpoint = endpoint
         self.timeout_seconds = timeout_seconds
         self._sleep = sleep
+        self._clock = clock
         # urllib does not read user info: send it as Basic authentication, never as part of the URL.
         parts = urllib.parse.urlsplit(endpoint)
         netloc = parts.netloc.rpartition("@")[2]
@@ -169,7 +186,23 @@ class SparqlHttpClient:
 
     def _once(self, query: str) -> bytes:
         """The answer body of one SPARQL 1.1 Protocol POST."""
+        deadline = self._clock() + self.timeout_seconds
         body = urllib.parse.urlencode({"query": query}).encode()  # dict-ok: urllib form encoding
         request = urllib.request.Request(self._url, data=body, headers=self._headers, method="POST")
         with urllib.request.urlopen(request, timeout=self.timeout_seconds) as response:
-            return response.read()
+            return self._read(response, deadline)
+
+    def _read(self, response: Any, deadline: float) -> bytes:
+        """The body, read in chunks so that neither a slow nor an endless answer holds the caller."""
+        limit = config.max_answer_bytes
+        chunks: list[bytes] = []
+        size = 0
+        while self._clock() < deadline:
+            chunk = response.read1(READ_CHUNK)
+            if not chunk:
+                return b"".join(chunks)
+            size += len(chunk)
+            if size > limit:
+                raise AnswerTooLarge(f"the answer is longer than {limit} bytes")
+            chunks.append(chunk)
+        raise QueryTimeout(f"no complete answer within {self.timeout_seconds} s")

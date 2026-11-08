@@ -490,3 +490,14 @@ def test_a_rejected_listing_raises_permanent_error_not_an_empty_list():
     fake.on("Q0", rejected)
     with pytest.raises(PermanentError):
         handlers.list_named_graphs("http://fake/sparql", resolve_settings(), sparql=fake)
+
+
+def test_a_listing_without_the_graph_variable_is_a_permanent_error_for_the_caller_and_a_failure_for_a_run():
+    from fingerprint.service_layer import handlers
+
+    fake = FakeSparql()
+    fake.on("Q0", [{"x": "1"}])
+    with pytest.raises(PermanentError, match=r"no \?g variable"):
+        handlers.list_named_graphs("http://fake/sparql", resolve_settings(), sparql=fake)
+    run = collect("http://fake/sparql", resolve_settings(), fake)
+    assert "no ?g variable" in run.failures[0].message

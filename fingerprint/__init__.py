@@ -66,6 +66,14 @@ class FingerprintConfig:
             raise ValueError("must be at least 1")
         return length
 
+    @env_property(f"{ENV_PREFIX}MAX_ANSWER_BYTES", "268435456")
+    def max_answer_bytes(self, value: str | None) -> int:
+        """The longest answer body a query may read (256 MiB by default); a longer one is a permanent error."""
+        size = int(value or "")
+        if size < 1:
+            raise ValueError("must be at least 1")
+        return size
+
     @env_property(f"{ENV_PREFIX}SHAPES_NAMESPACE")
     def shapes_namespace(self, value: str | None) -> str | None:
         """One namespace for every SHACL shape IRI; unset: each class's own `<namespace>/shape/`."""

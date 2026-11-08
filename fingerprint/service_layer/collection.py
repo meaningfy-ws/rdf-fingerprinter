@@ -180,11 +180,14 @@ class _Collection:
     # --- discovery ---
 
     def listed_graphs(self) -> list[str]:
-        """Q0's named graphs; an unreachable endpoint raises EndpointUnreachable, any other error propagates."""
+        """Q0's named graphs; an unreachable endpoint raises EndpointUnreachable, an answer without `?g`
+        PermanentError, any other error propagates."""
         try:
             return [str(row["g"]) for row in self.select("Q0") if row["g"]]
         except (EndpointUnreachable, RetriesExhausted) as error:
             raise EndpointUnreachable(f"cannot reach endpoint {self.endpoint}: {error}") from error
+        except KeyError as error:
+            raise PermanentError("the endpoint's answer to the graph listing has no ?g variable") from error
 
     def named_graphs(self) -> list[str]:
         selected = bool(self.settings.selected_graphs)

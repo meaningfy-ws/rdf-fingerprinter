@@ -16,10 +16,11 @@ from fingerprint.domain.iri import to_iriref
 from fingerprint.domain.namespace_filter import exclude_terms, namespace_filter, namespaces_with_terms
 from fingerprint.domain.prefixes import PrefixTable
 from fingerprint.domain.profile import NamespacePrefix, ProfileAnalytics, ProfileRun
-from fingerprint.domain.views import FilterOption, GeneratorOptions, NamespaceFilter, RepresentationFormat
+from fingerprint.domain.views import DiagramFile, FilterOption, GeneratorOptions, NamespaceFilter, RepresentationFormat
 from fingerprint.service_layer.exceptions import UsageError
 from fingerprint.service_layer.generators import GENERATORS
 from fingerprint.service_layer.generators.generator import Generator, TemplateRenderer
+from fingerprint.service_layer.generators.plantuml import PlantumlGenerator
 from fingerprint.service_layer.prefixes import resolve_namespaces
 from fingerprint.service_layer.settings import check_acceptance_threshold, validate_config
 
@@ -93,6 +94,27 @@ def make_generator(
         raise UsageError(f"{error.iri!r} cannot be written as an IRI") from error
 
 
+def _filtered_analytics(
+    run: ProfileRun,
+    threshold: float | None,
+    options: GeneratorOptions | None,
+    user_prefixes: Sequence[NamespacePrefix] | None,
+    check_filters: bool,
+) -> ProfileAnalytics:
+    """The run analysed at the threshold, with the ontology and the namespace filters applied."""
+    if run.namespaces is None or user_prefixes:
+        run = resolve_namespaces(run, user_prefixes or ())
+    if threshold is not None:
+        run = with_threshold(run, threshold)
+    analytics = analyse(with_ontology(run, options.ontology if options else None))
+    table = PrefixTable(run.namespaces)
+    filters = namespace_filter(options or GeneratorOptions(), table)
+    analytics = exclude_terms(analytics, filters.excluded or [], table)
+    if check_filters:
+        warn_filters(filters, analytics)
+    return analytics
+
+
 def generate_representations(
     run: ProfileRun,
     output_location: str | Path,
@@ -113,16 +135,7 @@ def generate_representations(
     unknown = [f for f in formats if f not in GENERATORS]
     if unknown:
         raise UsageError(f"unknown formats: {', '.join(unknown)} (known: {', '.join(GENERATORS)})")
-    if run.namespaces is None or user_prefixes:
-        run = resolve_namespaces(run, user_prefixes or ())
-    if threshold is not None:
-        run = with_threshold(run, threshold)
-    analytics = analyse(with_ontology(run, options.ontology if options else None))
-    table = PrefixTable(run.namespaces)
-    filters = namespace_filter(options or GeneratorOptions(), table)
-    analytics = exclude_terms(analytics, filters.excluded or [], table)
-    if check_filters:
-        warn_filters(filters, analytics)
+    analytics = _filtered_analytics(run, threshold, options, user_prefixes, check_filters)
     renderer = renderer or JinjaTemplateRenderer()
     paths: list[Path] = []
     for name in formats:
@@ -132,6 +145,25 @@ def generate_representations(
         except TemplatePackageError as error:
             raise UsageError(str(error)) from error
     return paths
+
+
+def describe_diagrams(
+    run: ProfileRun,
+    output_location: str | Path,
+    *,
+    threshold: float | None = None,
+    options: GeneratorOptions | None = None,
+    user_prefixes: Sequence[NamespacePrefix] | None = None,
+) -> list[DiagramFile]:
+    """What each PlantUML file `generate_representations(run, output_location, ["puml"], ...)` writes shows.
+
+    Same arguments, same files in the same order (the overview of a graph, then its modules); nothing is
+    written, so it also describes the files `fingerprint_report` wrote, given the same `options`."""
+    validate_config()
+    validate_options(options)
+    analytics = _filtered_analytics(run, threshold, options, user_prefixes, check_filters=False)
+    described = PlantumlGenerator(analytics, JinjaTemplateRenderer(), options=options).describe()
+    return [d.model_copy(update={"path": str(Path(output_location) / d.path)}) for d in described]
 
 
 def generate_from_profile_file(
