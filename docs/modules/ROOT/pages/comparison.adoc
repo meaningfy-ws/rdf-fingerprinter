@@ -344,8 +344,8 @@ The tools, and the papers that describe them:
 * *LODStats*: S. Auer, J. Demter, M. Martin, J. Lehmann. "LODStats: An Extensible Framework for
   High-Performance Dataset Analytics." _EKAW 2012_, LNCS 7603, 353–362, 2012.
   https://doi.org/10.1007/978-3-642-33876-2_31. Code: https://github.com/AKSW/LODStats
-* *RDF2Graph*: J. C. J. van Dam, J. J. Koehorst, P. J. Schaap, V. A. P. Martins dos Santos,
-  M. Suarez-Diez. "RDF2Graph a tool to recover, understand and validate the ontology of an RDF
+* *RDF2Graph*: J. C. J. van Dam, J. J. Koehorst, P. J. Schaap, V. A. P. Martins dos Santos, M.
+  Suarez-Diez. "RDF2Graph a tool to recover, understand and validate the ontology of an RDF
   resource." _Journal of Biomedical Semantics_ 6, 2015. https://doi.org/10.1186/s13326-015-0038-9.
   Code: https://github.com/jessevdam/RDF2Graph
 * *SPARQL-LLM*: P. Smeros, V. Emonet, R. Wang, A.-C. Sima, T. Mendes de Farias, et al. "SPARQL-LLM:
