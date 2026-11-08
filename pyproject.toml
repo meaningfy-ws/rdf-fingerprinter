@@ -4,7 +4,7 @@
 
 [project]
 name = "rdf-fingerprinter"
-version = "3.7.0"
+version = "3.7.1"
 description = "Profile a SPARQL endpoint and infer the data shapes its RDF data follow: HTML report, SHACL, ShEx, PlantUML and LLM schemas."
 readme = "README.md"
 requires-python = ">=3.12,<4.0"
