@@ -23,3 +23,8 @@ def test_import_from_another_directory_has_no_logging_side_effects(tmp_path):
 
 def test_the_report_package_is_packaged():
     assert (files(fingerprint_report_templates) / "fingerprint_report" / "config.json").is_file()
+
+
+def test_both_packages_are_typed():
+    assert (files(fingerprint) / "py.typed").is_file()
+    assert (files(fingerprint_report_templates) / "py.typed").is_file()

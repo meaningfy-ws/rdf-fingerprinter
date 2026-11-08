@@ -6,6 +6,14 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+### Added
+- **`list_named_graphs(url, settings, *, sparql=None)`** in `fingerprint.service_layer.handlers`:
+  the endpoint's named graphs, sorted, through the run's own discovery query; errors raise
+  (`EndpointUnreachable`, `QueryTimeout`, `PermanentError`), never an empty list (#63, OpenSpec change
+  `graph-listing-and-typing`).
+- **Typed package.** `fingerprint` and `fingerprint_report_templates` ship `py.typed` (PEP 561), so
+  type checkers read the library's annotations (#64).
+
 ## [3.5.0] - 2026-11-03
 
 The fingerprint recognises reifications (statements about statements) and shows the links they stand

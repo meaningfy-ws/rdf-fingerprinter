@@ -54,6 +54,8 @@ check-wheel: ## Fail when the wheel lacks the report templates, the schema templ
 		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/glossary.md" \
 		"$(TEMPLATES_PACKAGE)/pattern_schema/templates/glossary.csv" \
 		"$(TEMPLATES_PACKAGE)/shex_schema/templates/schema.shex" \
+		"fingerprint/py.typed" \
+		"$(TEMPLATES_PACKAGE)/py.typed" \
 		"fingerprint/adapters/queries/q0_named_graphs.rq" \
 		"fingerprint/adapters/queries/q12_term_annotations.rq"; do \
 		grep -q "$$f" <<< "$$files" || { echo "wheel is missing $$f"; exit 1; }; \
