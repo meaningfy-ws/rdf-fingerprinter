@@ -61,12 +61,20 @@ command.
 cites its EPIC id on the first line; specs cite their capability; commits reference the change. This
 is how any commit traces up to the requirement that justifies it.
 
-## Implementation loop (orchestration)
+## How work runs here — sessions, the team, the stage loop (developer, 2026-11-08)
 
-Before editing a symbol, run gitnexus impact (status → analyze → impact/context); stop and
-report HIGH/CRITICAL risk. Loop: generate (tests first) → verify (run tests) → integrate
-(present, get consent). On a design-level failure, fix the spec, not the code (Rule of
-Divergence). Commit only on explicit developer consent.
+The method (shaping and epic sessions, the team and its briefs, the six-step stage loop scaled by
+appetite, the lead's authority, the question format, verification vs validation, the rule for our
+own and external libraries) is skillery's **epic-delivery** skill (bundle `meaningfy-building`
+>= 3.9.0); shaping is **epic-planning**; subagent dispatch and session hygiene are **guardrails**
+(`meaningfy-core`). Work that way every time. What this repo adds:
+
+- **Gates.** Before a task is handed out, the lead runs gitnexus impact (status → analyze →
+  impact/context; stop and report HIGH/CRITICAL); after it, the lead re-runs `make check-all`
+  and reads the diff. A PLAN passes the clarity gate (>= 9/10) before its first task.
+- **Rule of Divergence.** On a design-level failure, fix the spec, not the code.
+- **Commits.** Only on the developer's consent, unless the developer grants more for one named
+  epic as `epic-delivery` sets out. One PR per stage into `develop`, merged only on green CI.
 
 ## Working conventions
 
@@ -89,7 +97,7 @@ Divergence). Commit only on explicit developer consent.
 - **Subagents** — before spawning one, follow *Subagent dispatch* in the `guardrails` skill: spawn
   only when it pays, brief it fresh, take the base report back, and have finished work checked by a
   second subagent.
-- **Subagents share this checkout and branch.** Implementers run one after another; the leader
+- **Subagents share this checkout and branch.** Implementers run one after another; the lead
   commits after each task. Run writers in parallel only on tasks with disjoint files, and they
   never stage or commit. Read-only agents (reviewers, Explore) may run in parallel freely. Use a
   separate worktree (`isolation: "worktree"`) only for overlapping parallel work or when another
