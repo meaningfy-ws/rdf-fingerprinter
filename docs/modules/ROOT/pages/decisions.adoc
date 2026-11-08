@@ -240,6 +240,10 @@ Pros and cons::
 [#ad-8]
 === AD-8 Generators mirror LinkML's generator architecture
 
+NOTE: "Mirror" means the class design only. No LinkML generator runs on a profile: LinkML's
+`gen-shacl` or `gen-plantuml` turn a LinkML schema into shapes or diagrams, while these generators
+turn the observed statistics into them, through the fingerprinter's own templates.
+
 Context and problem:: 2.1 adds three representations, and more will follow (VoID, LLM schema cards).
 Each needs the same inputs, options and command shape.
 Considered options::

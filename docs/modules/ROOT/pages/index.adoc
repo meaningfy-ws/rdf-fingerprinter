@@ -2,7 +2,10 @@
 
 *Understand the structure of your RDF data at a glance.* RDF Fingerprinter queries a SPARQL
 endpoint and writes an HTML report of the data shapes the dataset instantiates: for each class,
-which properties its instances use, how often, and with what kind of values.
+which properties its instances use, how often, and with what kind of values. From the same saved
+profile it generates SHACL shapes, enriched ShExC, PlantUML diagrams and a schema compact enough for
+a language model; it can scan for modelling pitfalls and folds reifications into the relations they
+stand for.
 
 An https://en.wikipedia.org/wiki/Application_profile[_application profile_] is the set of
 https://www.w3.org/2014/data-shapes/wiki/Main_Page[_data shapes_] designed for a particular
@@ -26,6 +29,19 @@ with https://github.com/meaningfy-ws/eds4jinja2[eds4jinja2] templates that issue
 default template ships with the package and can be replaced by your own
 (xref:api-reference.adoc#custom-templates[custom templates]). xref:how-it-works.adoc[How it works]
 walks through a run.
+
+What it does, and where to read about it:
+
+[cols="1,3"]
+|===
+| Profile an endpoint | Class-scoped SPARQL 1.1 queries, read-only, with first-N escalation on timeouts: xref:how-it-works.adoc[], xref:statistics.adoc[]
+| Read the report | One static HTML page with search, contents and namespace switches: xref:report.adoc[]
+| Publish shapes and diagrams | SHACL, ShExC and PlantUML from `profile.json`, without querying again: xref:representations.adoc[]
+| Give a model the schema | Pattern schema and enriched ShExC: xref:llm-schema.adoc[]
+| Find modelling defects | 28 SPARQL checks, most from OOPS!: xref:pitfalls.adoc[]
+| See through reifications | Statements about statements shown as the links they stand for: xref:reifications.adoc[]
+| Compare with other tools | SHACL Play, sheXer, void-generator, QSE and others: xref:comparison.adoc[]
+|===
 
 NOTE: The https://github.com/meaningfy-ws/rdf-fingerprinter-ws[rdf-fingerprinter-ws] service
 builds an API and UI on top of this library.

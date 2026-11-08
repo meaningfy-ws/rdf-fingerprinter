@@ -2,14 +2,17 @@
 :description: Scope, structure and architecture decisions of rdf-fingerprinter.
 
 This page records the architecture of rdf-fingerprinter: what it is for and how it is
-structured, as of release 2.1. The collection, analytics and report came with 2.0 (OpenSpec change
+structured, as of release 3.5. The collection, analytics and report came with 2.0 (OpenSpec change
 `harden-fingerprinter`), the saved profile and the representations with 2.1 (change
-`profile-representations`); where 1.x differed, a note says so.
+`profile-representations`), readable output with 3.0, pitfall scans with 3.1 (`pitfall-scans`),
+schemas for language models with 3.2 to 3.4 (`llm-schema-tools`, `llm-schema-split`) and reified
+relations with 3.5 (`singleton-property-pattern`); where 1.x differed, a note says so.
+xref:comparison.adoc[Comparison] places it among other profilers.
 
 Reading guide::
 * xref:how-it-works.adoc[How it works] — what a run does, with a worked example.
 * xref:use-cases/index.adoc[Use cases] — the behavioural contract (White) and its realisations (Blue).
-* xref:decisions.adoc[Architecture decisions] — why it is built this way (AD-1 to AD-11).
+* xref:decisions.adoc[Architecture decisions] — why it is built this way (AD-1 to AD-12).
 * xref:glossary.adoc[Glossary] — the terms all of these use.
 * `openspec/specs/` — the normative requirements, with scenarios.
 
@@ -18,14 +21,18 @@ Reading guide::
 rdf-fingerprinter infers the *application profile* a knowledge graph actually follows. It reads
 the data through a SPARQL endpoint, collects statistics per graph, class and property, derives
 indicators from them (cardinalities, confidence, value types, hierarchy), and writes an HTML
-report, the raw profile and, from 2.1, SHACL shapes, a PlantUML diagram and an application-profile
-document. It is a Python library with a console script (`fingerprint`); it is not deployed as a
+report, the raw profile and, from 2.1, SHACL shapes and PlantUML diagrams; from 3.1 it can also scan
+for modelling pitfalls, from 3.2 it writes schemas for language models (a pattern schema and
+enriched ShExC), and from 3.5 it folds reifications into the relations they stand for. It is a Python library with a console script (`fingerprint`); it is not deployed as a
 service.
 
 In scope:: profiling any SPARQL 1.1 endpoint, read-only; the statistics and analytics model;
-the HTML report; the saved profile and the SHACL, PlantUML and document representations.
-Out of scope:: VoID and LLM tooling (`llm-schema-tools`); benchmarking (`benchmark-fingerprinter`);
-batched collection (`batched-collection`); profiling RDF files; writing to the endpoint.
+the HTML report; the saved profile and the SHACL, ShExC, PlantUML, pattern-schema and pitfall
+representations; pitfall scans; reified relations.
+Out of scope:: VoID output; answering questions with a language model (the fingerprinter writes
+the schema, not the prompts); benchmarking (`benchmark-fingerprinter`); batched collection
+(`batched-collection`); profiling RDF files directly (`make scan-files` loads them into a local
+Oxigraph for pitfall scans); writing to the endpoint.
 
 == Architectural drivers
 
@@ -49,7 +56,7 @@ flowchart LR
     app(["Requester: embedding application"])
     fp["<b>rdf-fingerprinter</b>"]
     endpoint[("SPARQL endpoint<br/>(any store)")]
-    out[("Output folder<br/>report, profile.json, shapes,<br/>diagrams, document")]
+    out[("Output folder<br/>report, profile.json, SHACL, ShExC,<br/>diagrams, pattern schema, pitfalls")]
 
     steward -- uses --> fp
     app -- embeds --> fp
@@ -92,25 +99,27 @@ Parses options, configures logging, maps outcomes to exit codes.
 
 | `fingerprint.service_layer`
 | Library entry (`fingerprint_report`); Settings resolver; Collector; Prefix resolver (the
-namespace table); Generators (one per format, building its view; the report page is the document
-generator's) and the Representations service, which the generator commands call.
+namespace table); Collector, with the reification probes and the pitfall scan; Generators (one
+per format, building its view; the report page is the document generator's) and the
+Representations service, which the generator commands call.
 | adapters, domain
 
 | `fingerprint.adapters`
 | SPARQL client (`SparqlPort` and its HTTP implementation, rdflib reading the results) and the
 query templates; Template renderer (eds4jinja2 rendering, Turtle check, file writes, shared by the
 report and the generators), Profile store (`profile.json`), Config resolver (environment, config
-file).
+file), Pitfall catalogue and Reification catalogue (the packaged and user `.rq` checks and
+templates, parsed before any query), Ontology file (labels for the pattern schema).
 | domain
 
 | `fingerprint.domain`
 | Profile and views models (generated from LinkML); Analyser; IRI rules (SPARQL and, from 2.1,
-Turtle). Pure, no I/O.
+Turtle); namespace filters; pattern and ShEx views; pitfall levels; reification folding. Pure, no I/O.
 | nothing above it; not eds4jinja2, jinja2, rdflib or click (enforced)
 
 | `fingerprint_report_templates`
-| Template packages: `fingerprint_report`; `shacl_shapes`, `plantuml_diagram`,
-`profile_document`. Lay out what they are given; issue no queries.
+| Template packages: `fingerprint_report`; `shacl_shapes`, `shex_schema`, `plantuml_diagram`,
+`pattern_schema`, `pitfalls_tsv`. Lay out what they are given; issue no queries.
 | —
 |===
 
@@ -144,13 +153,17 @@ xref:how-it-works.adoc#data-flow[How it works].
 | `TemplateRenderer` | `render(package, outputs, *, conf, autoescape) -> list[RenderedDocument]` (in memory); `make(package, outputs, *, folder, conf, check, autoescape) -> list[Path]`, checking every text before writing any; `outputs` are (file name, view) pairs; `prefixes`. Implemented on eds4jinja2 2.1's `render_documents` / `make_documents`. The port generators and the report render through; declared in the service layer, implemented by the template renderer adapter (`SparqlPort` is declared beside its adapter, a 2.0 choice kept).
 | `Generator` | pre-order `visit_graph` / `visit_class` (return `False` to skip), `visit_property` (a property's view), post-order `end_class` / `end_graph` (the frozen class and graph views); `serialize()` returns `list[RenderedDocument]`; formats keyed by `RepresentationFormat`, options a `GeneratorOptions` (xref:decisions.adoc#ad-8[AD-8]).
 | `FingerprintConfig` | `config.<value>` reads its `RDF_FINGERPRINTER_*` variable on access; `validate()` reads them all and names the first bad one (xref:decisions.adoc#ad-12[AD-12]).
-| Exit codes | 0 clean, 1 failures recorded, 2 usage error, 3 endpoint unreachable at the start, 4 unexpected error.
+| Exit codes | 0 clean, 1 failures recorded, 2 usage error, 3 endpoint unreachable at the start, 4 unexpected error, 5 pitfalls at the `--fail-on` level.
 |===
 
 === Profile model
 
 The model is LinkML, namespace `fp: https://data.meaningfy.ws/fingerprint/`, in three schemas
-under `model/`:
+under `model/`. It describes the fingerprinter's own data (what a run observed, what the analyser
+derives, what the templates receive), not the profiled dataset. LinkML generates only these Python
+classes and the JSON Schema of `profile.json`; the SHACL, ShExC, PlantUML and other outputs are
+written by the fingerprinter's generators and templates (xref:decisions.adoc#ad-8[AD-8]).
+The schemas:
 
 * `fingerprint_stats` — raw observations only: run and settings, graphs, classes with instance
   counts and the precision mode used, cardinality histograms, value partitions, co-types,
