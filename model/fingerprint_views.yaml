@@ -179,6 +179,16 @@ classes:
       packages: { range: DiagramPackage, multivalued: true, inlined_as_list: true }
       links: { range: DiagramLink, multivalued: true, inlined_as_list: true }
 
+  DiagramFile:
+    description: What one PlantUML file written by the diagram generator shows, so a caller needs not parse its name.
+    attributes:
+      path: { required: true, description: "The file, under the output folder." }
+      format: { range: RepresentationFormat, required: true }
+      graph: { description: "The graph's IRI; unset for the default graph." }
+      kind: { range: DiagramKind, required: true }
+      module: { description: "The module's name, a namespace prefix; unset for an overview." }
+      part: { range: integer, description: "The number of a module split into parts (`ex~2` is part 2 of `ex`); unset otherwise." }
+
   DiagramPackage:
     description: A namespace in the overview.
     attributes:

@@ -87,9 +87,11 @@ def list_named_graphs(
 ) -> list[str]:
     """The endpoint's named graph IRIs, sorted, without the default graph (graph-listing-and-typing G-2).
 
-    Uses the run's own discovery query, timeout and retries. Raises a `UsageError` for an invalid URL or setting
-    before any query; `EndpointUnreachable` when the endpoint cannot be reached; `QueryTimeout` when the listing
-    times out; `PermanentError` when the endpoint refuses it. It never answers an empty list for an error.
+    Uses the run's own discovery query, timeout and retries. Raises a `UsageError` for an invalid URL and its
+    subclass `ConfigurationError` for an invalid setting, before any query; `EndpointUnreachable` when the
+    endpoint cannot be reached; `QueryTimeout` when the listing times out; `PermanentError` when the endpoint
+    refuses it, answers without the `g` variable, or answers more than `RDF_FINGERPRINTER_MAX_ANSWER_BYTES`.
+    It never answers an empty list for an error.
     """
     validate_config()
     validate_endpoint(sparql_endpoint_url)

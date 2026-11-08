@@ -219,3 +219,60 @@ def test_an_unusable_url_never_shows_its_text(monkeypatch, caplog):
     with caplog.at_level("INFO"), pytest.raises(PermanentError) as raised:
         client.select("# Q0 x\nSELECT")
     assert "pw" not in str(raised.value) and "pw" not in caplog.text
+
+
+# --- bounded calls (consumer-api-gaps C-1) ---
+
+
+class Drip:
+    """An answer of `chunks`; each read takes `seconds` on `clock`."""
+
+    def __init__(self, clock, seconds, chunks):
+        self.clock, self.seconds, self.chunks = clock, seconds, list(chunks)
+
+    def read1(self, amount):
+        self.clock[0] += self.seconds
+        return self.chunks.pop(0) if self.chunks else b""
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+def drip_client(monkeypatch, seconds, chunks, timeout=5):
+    clock, opened = [0.0], []
+
+    def urlopen(request, timeout):
+        opened.append(request)
+        return Drip(clock, seconds, chunks)
+
+    monkeypatch.setattr(sparql.urllib.request, "urlopen", urlopen)
+    client = SparqlHttpClient("http://e/sparql", timeout_seconds=timeout, clock=lambda: clock[0], sleep=lambda s: None)
+    return client, clock, opened
+
+
+def test_a_slow_answer_is_a_timeout_that_is_not_retried(monkeypatch):
+    client, clock, opened = drip_client(monkeypatch, 1, [b" "] * 100)
+    with pytest.raises(QueryTimeout):
+        client.select("# Q1 x\nSELECT")
+    assert clock[0] == 5 and len(opened) == 1
+
+
+def test_an_answer_that_ends_before_the_deadline_is_read_whole(monkeypatch):
+    body = json.dumps(SELECT_ANSWER).encode()
+    client, _, _ = drip_client(monkeypatch, 1, [body[:10], body[10:]])
+    assert len(client.select("# Q1 x\nSELECT")) == 2
+
+
+def test_an_answer_of_exactly_the_limit_is_read_and_one_more_byte_is_refused(monkeypatch):
+    body = json.dumps(SELECT_ANSWER).encode()
+    monkeypatch.setenv("RDF_FINGERPRINTER_MAX_ANSWER_BYTES", str(len(body)))
+    client, _, _ = drip_client(monkeypatch, 0, [body])
+    assert len(client.select("# Q1 x\nSELECT")) == 2
+    monkeypatch.setenv("RDF_FINGERPRINTER_MAX_ANSWER_BYTES", str(len(body) - 1))
+    client, _, opened = drip_client(monkeypatch, 0, [body])
+    with pytest.raises(sparql.AnswerTooLarge) as raised:
+        client.select("# Q1 x\nSELECT")
+    assert isinstance(raised.value, PermanentError) and len(opened) == 1  # not retried

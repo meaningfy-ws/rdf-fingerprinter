@@ -203,6 +203,28 @@ Feature: The fingerprint report and the command line
       When a caller tries to list its named graphs
       Then "QueryTimeout" is raised
 
+  Rule: Library callers get a bounded call and a mappable error contract
+
+    Scenario: A slow answer times out at the deadline
+      Given an endpoint that sends one byte per second
+      When a query runs with a timeout of 2 seconds
+      Then "QueryTimeout" is raised within 4 seconds
+
+    Scenario: An oversized answer is refused
+      Given an endpoint whose answer is larger than the answer size limit
+      When a query runs
+      Then "AnswerTooLarge" is raised and no more than the limit plus one buffer was read
+
+    Scenario: A listing answer without the graph column is refused
+      Given an endpoint whose graph listing has no graph column
+      When a caller tries to list its named graphs
+      Then "PermanentError" is raised
+
+    Scenario: A bad setting is not a bad URL
+      Given the setting RDF_FINGERPRINTER_ERROR_EXCERPT_LENGTH is "zero"
+      When a caller tries to list its named graphs
+      Then "ConfigurationError" is raised
+
   Rule: The profile is saved with the report
 
     @uc_b1_1

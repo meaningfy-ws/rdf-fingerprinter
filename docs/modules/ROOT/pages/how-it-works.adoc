@@ -177,6 +177,17 @@ and rdflib reads the answer into typed terms. Every error it meets is put in one
 | Unreachable | HTTP 401, 403, 407. Only the first query can make the endpoint unreachable; on any later query it counts as permanent.
 |===
 
+[#bounded-calls]
+Every attempt is bounded. `timeout_seconds` is its deadline, from the start of the request to the end
+of the answer: when it passes, the attempt raises `QueryTimeout`, which is not retried. An answer
+body longer than `RDF_FINGERPRINTER_MAX_ANSWER_BYTES` (256 MiB by default) raises `AnswerTooLarge`,
+a permanent error, after reading no more than the limit plus 64 KiB. The deadline is checked between
+reads, and each read waits at most `timeout_seconds`, so an attempt ends within twice
+`timeout_seconds`. The connect and header phases are bounded per socket operation, not by the
+deadline. The worst case of one query is therefore `(retries + 1) × 2 × timeout_seconds + sum of the
+backoff seconds`: with the defaults (two retries, backoff 1 s and 4 s) and a 60 s timeout,
+`3 × 120 + 5 = 365` s.
+
 What a failed query costs depends on the stage it belongs to:
 
 [cols="2,4"]

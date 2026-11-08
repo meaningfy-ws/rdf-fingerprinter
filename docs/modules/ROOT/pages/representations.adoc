@@ -365,5 +365,9 @@ generate_representations(run, "out/", ["puml"], options=GeneratorOptions(include
 
 A run without a namespace table is resolved first, from the files only.
 
+`describe_diagrams(run, "out/")` tells, for each PlantUML file, its graph, whether it is the overview or a
+module, the module's name and the part number of a split module
+(xref:api-reference.adoc#diagram-files[Describing the diagram files]).
+
 `GeneratorOptions` and the views are in `fingerprint.domain.views`; the formats are the
 `RepresentationFormat` enum (`shacl`, `puml`, `doc`, `pitfalls`, `pattern`, `shex`).

@@ -155,6 +155,7 @@ environment variable when used, with the default below. A value that cannot be r
 | `RDF_FINGERPRINTER_RETRY_BACKOFF_SECONDS` | `1,4` | Seconds before each retry of a transient failure; one retry per number.
 | `RDF_FINGERPRINTER_TIMEOUT_MARKERS` | `timeout,time limit,timed out,estimated execution time` | Texts that make an HTTP 500 answer a timeout.
 | `RDF_FINGERPRINTER_ERROR_EXCERPT_LENGTH` | 200 | Characters of an endpoint's error body kept in a failure message.
+| `RDF_FINGERPRINTER_MAX_ANSWER_BYTES` | 268435456 | The longest answer body a query reads (256 MiB); a longer one raises `AnswerTooLarge`, a permanent error (xref:how-it-works.adoc#bounded-calls[Bounded calls]).
 | `RDF_FINGERPRINTER_SHAPES_NAMESPACE` | unset | One namespace for every shape IRI; unset, each class's shapes go in `<its namespace>/shape/` (`--shapes-namespace` overrides it).
 | `RDF_FINGERPRINTER_DEFAULT_GRAPH_LABEL` | `default graph` | How the representations name the default graph.
 | `RDF_FINGERPRINTER_PREFIXES_FILE` | unset | Your prefix file, over the packaged prefixes (`--prefixes` overrides it); see xref:representations.adoc#prefixes[Prefixes].
