@@ -154,9 +154,7 @@ class PlantumlGenerator(Generator):
     def file_of(
         self, name: str, graph: GraphAnalytics, kind: DiagramKind, module: str | None = None, part: int | None = None
     ) -> DiagramFile:
-        return DiagramFile(
-            path=name, format=RepresentationFormat.puml, graph=graph.graph or None, kind=kind, module=module, part=part
-        )
+        return DiagramFile(path=name, format=RepresentationFormat.puml, graph=graph.graph, kind=kind, module=module, part=part)
 
     def describe(self) -> list[DiagramFile]:
         """What each file of `outputs()` shows, in the same order."""
