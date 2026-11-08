@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.7.0] - 2026-11-08
+
 OpenSpec change `consumer-api-gaps` (issues #76, #77, #75, #69).
 
 ### Added
@@ -22,6 +24,8 @@ OpenSpec change `consumer-api-gaps` (issues #76, #77, #75, #69).
   between reads), not per socket read; a slow answer raises `QueryTimeout`.
 - An answer to the graph listing without `?g` raises `PermanentError` instead of `KeyError`; a run
   records it as a failure of the listing and profiles the default graph.
+- Docs: the worst case of a query holds once the answer has started; connecting and the response
+  headers are bounded per socket operation only.
 
 ## [3.6.1] - 2026-11-08
 
