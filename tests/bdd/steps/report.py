@@ -324,6 +324,53 @@ def page_shows_number(ctx):
     assert page.find("h1").text == "Ours" and page.find(id="graphs").text == str(len(ctx["collected"].graphs))
 
 
+# --- listing named graphs ---
+
+
+@given(parsers.parse('the endpoint also holds triples in the named graphs "{first}" and "{second}"'))
+def named_graphs_held(store, first, second):
+    for graph in (first, second):
+        store.add("ex:s", "ex:p", "ex:o", graph=graph)
+
+
+@given("the endpoint cannot be reached")
+def endpoint_unreachable(store):
+    store.on("Q0", refused())  # through the client's classify and retries, as a real refusal
+
+
+@given("the endpoint's graph listing times out")
+def listing_times_out(store):
+    store.on("Q0", urllib.error.URLError(TimeoutError("timed out")))  # classified, never retried
+
+
+@when("a caller lists its named graphs")
+def list_graphs(ctx, store):
+    ctx["graphs"] = handlers.list_named_graphs(ENDPOINT, Settings())
+
+
+@when("a caller tries to list its named graphs")
+def try_list_graphs(ctx, store):
+    try:
+        ctx["graphs"] = handlers.list_named_graphs(ENDPOINT, Settings())
+    except Exception as error:  # the Then step names the expected type
+        ctx["raised"] = error
+
+
+@then(parsers.parse('the listed graphs are "{graphs}"'))
+def listed_graphs(ctx, graphs):
+    assert ctx["graphs"] == graphs.split(", ")
+
+
+@then("no graph is listed")
+def no_graph_listed(ctx):
+    assert ctx["graphs"] == []
+
+
+@then(parsers.parse('"{name}" is raised'))
+def raised(ctx, name):
+    assert type(ctx.get("raised")).__name__ == name, ctx.get("raised")
+
+
 # --- the saved profile ---
 
 

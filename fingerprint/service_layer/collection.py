@@ -179,12 +179,17 @@ class _Collection:
 
     # --- discovery ---
 
-    def named_graphs(self) -> list[str]:
-        selected = bool(self.settings.selected_graphs)
+    def listed_graphs(self) -> list[str]:
+        """Q0's named graphs; an unreachable endpoint raises EndpointUnreachable, any other error propagates."""
         try:
             return [str(row["g"]) for row in self.select("Q0") if row["g"]]
         except (EndpointUnreachable, RetriesExhausted) as error:
             raise EndpointUnreachable(f"cannot reach endpoint {self.endpoint}: {error}") from error
+
+    def named_graphs(self) -> list[str]:
+        selected = bool(self.settings.selected_graphs)
+        try:
+            return self.listed_graphs()
         except (QueryTimeout, PermanentError) as error:
             reason = "timeout" if isinstance(error, QueryTimeout) else str(error)
             message = f"named graphs not listed ({reason}); profiling the default graph only"
@@ -695,6 +700,11 @@ class _PitfallScan:
             examples=examples,
             seconds=round(time.monotonic() - started, 3),
         )
+
+
+def list_named_graphs(endpoint: str, settings: Settings, sparql: SparqlPort) -> list[str]:
+    """The endpoint's named graphs, sorted (graph-listing-and-typing G-1); errors raise, never an empty list."""
+    return sorted(_Collection(endpoint, settings, sparql).listed_graphs())
 
 
 def collect(
