@@ -23,6 +23,7 @@ from fingerprint.adapters.template_renderer import JinjaTemplateRenderer
 from fingerprint.domain.profile import NamespacePrefix, PitfallCheck, ProfileRun, Settings
 from fingerprint.domain.views import GeneratorOptions
 from fingerprint.service_layer.collection import collect
+from fingerprint.service_layer.collection import list_named_graphs as _list_named_graphs
 from fingerprint.service_layer.generators import DOC
 from fingerprint.service_layer.generators.generator import TemplateRenderer
 from fingerprint.service_layer.prefixes import resolve_namespaces
@@ -76,3 +77,21 @@ def fingerprint_report(
     else:
         logger.info("fingerprint report written to %s", report)
     return report, run
+
+
+def list_named_graphs(
+    sparql_endpoint_url: str,
+    settings: Settings,
+    *,
+    sparql: SparqlPort | None = None,
+) -> list[str]:
+    """The endpoint's named graph IRIs, sorted, without the default graph (graph-listing-and-typing G-2).
+
+    Uses the run's own discovery query, timeout and retries. Raises a `UsageError` for an invalid URL or setting
+    before any query; `EndpointUnreachable` when the endpoint cannot be reached; `QueryTimeout` when the listing
+    times out; `PermanentError` when the endpoint refuses it. It never answers an empty list for an error.
+    """
+    validate_config()
+    validate_endpoint(sparql_endpoint_url)
+    sparql = sparql or SparqlHttpClient(sparql_endpoint_url, settings.timeout_seconds)
+    return _list_named_graphs(sparql_endpoint_url, settings, sparql)

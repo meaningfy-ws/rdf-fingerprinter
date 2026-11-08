@@ -1,6 +1,7 @@
 = API Reference
 
-The library has one entry point, `fingerprint_report`, in `fingerprint.service_layer.handlers`.
+The library's entry points are `fingerprint_report` and `list_named_graphs`, in
+`fingerprint.service_layer.handlers`.
 
 == fingerprint_report
 
@@ -60,6 +61,28 @@ note.
 The steps are also available separately: `collect`, `resolve_namespaces`
 (`fingerprint.service_layer.prefixes`), `save_profile` and `generate_representations`
 (xref:representations.adoc#from-python[From Python]).
+
+[#list-named-graphs]
+== list_named_graphs
+
+[source,python]
+----
+from fingerprint.service_layer.handlers import list_named_graphs
+from fingerprint.service_layer.settings import resolve_settings
+
+graphs = list_named_graphs("https://my.endpoint/sparql", resolve_settings())
+# ["http://example.org/graph/a", "http://example.org/graph/b"]: sorted, without the default graph
+----
+
+It lists the endpoint's named graphs with the query, timeout and retries a run uses to discover
+them, so a caller can offer them as `selected_graphs`. It never answers an empty list for an error:
+
+* an invalid URL or setting raises a `UsageError` (a `ValueError`) before any query;
+* an endpoint that cannot be reached raises `EndpointUnreachable`;
+* a listing that times out raises `QueryTimeout`; a refused one raises `PermanentError`
+  (`fingerprint.adapters.exceptions`).
+
+`sparql` (keyword only) takes any SPARQL port, as for `fingerprint_report`.
 
 === Migrating from 2.x
 
