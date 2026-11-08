@@ -1,8 +1,9 @@
 ## ADDED Requirements
 
 ### Requirement: Bounded endpoint calls
-The SPARQL client SHALL end every attempt within `timeout_seconds` of its start plus one blocked
-socket read, raising `QueryTimeout`, and SHALL refuse an answer larger than
+Once the response headers are received, the SPARQL client SHALL end every attempt within
+`timeout_seconds` of its start plus one blocked socket read, raising `QueryTimeout`; connecting and
+the headers are bounded per socket operation only (issue #81). It SHALL refuse an answer larger than
 `RDF_FINGERPRINTER_MAX_ANSWER_BYTES` (default 268435456) with `AnswerTooLarge`, a `PermanentError`,
 without reading the rest (consumer-api-gaps C-1).
 
