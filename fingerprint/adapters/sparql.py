@@ -127,11 +127,13 @@ def parse_answer(body: bytes) -> bool | list[ResultRow]:
 class SparqlHttpClient:
     """One HTTP request per call, so one client is safe to share between threads.
 
-    `timeout_seconds` is the deadline of one attempt, from its start to the end of the answer; the connect and
-    header phases are bounded per socket operation only. The deadline is checked between reads, so an attempt
-    ends within `timeout_seconds` plus one blocked read (at most `timeout_seconds` more). A timeout is not
-    retried; a transient failure is retried once per backoff value: the worst case is
-    `(retries + 1) * 2 * timeout_seconds + sum(backoff)` seconds. An answer over `config.max_answer_bytes`
+    `timeout_seconds` is the deadline of one attempt, from its start to the end of the answer, checked between
+    reads of the answer: once the answer has started, an attempt ends within `timeout_seconds` plus one blocked
+    read (at most `timeout_seconds` more). A timeout is not retried; a transient failure is retried once per
+    backoff value, so the worst case is `(retries + 1) * 2 * timeout_seconds + sum(backoff)` seconds.
+    shortcut: connecting and the headers are bounded per socket operation only (urllib has no whole-request
+    limit), so an endpoint dripping its headers is unbounded; upgrade to a watchdog that closes the socket at
+    the deadline if a caller needs a hard bound. An answer over `config.max_answer_bytes`
     raises `AnswerTooLarge`."""
 
     def __init__(

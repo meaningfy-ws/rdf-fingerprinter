@@ -175,3 +175,22 @@ def test_diagram_descriptions_match_the_files_written_in_order_and_write_nothing
     assert [Path(d.path) for d in described] == written
     assert {d.graph for d in described} == {"http://example.org/g/one"}
     assert [(d.kind, d.module) for d in described] == [("overview", None), ("module", "ex"), ("module", "foaf")]
+
+
+def test_a_default_graph_diagram_is_described_with_no_graph(tmp_path):
+    from tests.builders import klass, profile_run
+    from tests.fakes import EX
+
+    described = representations.describe_diagrams(profile_run(klass(EX + "A", 1)), tmp_path)
+    assert [d.graph for d in described] == [None, None]
+
+
+def test_describing_diagrams_checks_the_threshold_and_the_options_like_generating_them(tmp_path):
+    from tests.builders import klass, profile_run
+    from tests.fakes import EX
+
+    run = profile_run(klass(EX + "A", 1))
+    with pytest.raises(UsageError):
+        representations.describe_diagrams(run, tmp_path, threshold=2)
+    with pytest.raises(UsageError, match="--module-size must be at least 1"):
+        representations.describe_diagrams(run, tmp_path, options=GeneratorOptions.model_construct(module_size=0))
