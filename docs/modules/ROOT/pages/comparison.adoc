@@ -70,6 +70,10 @@ flowchart LR
     style pull fill:#f8fafc,stroke:#64748b,color:#0f172a
 ....
 
+How to read it: the endpoint is on the left; the tools in the top panel ask it to count and get
+small answers back, the tools in the bottom panel pull triples across and count them themselves.
+rdf-fingerprinter is teal; QSE appears in both panels because it has a mode of each kind.
+
 Push:: The endpoint aggregates and returns small answers. Little crosses the network, but each
 query must finish within the endpoint's time limit, so these tools differ in how they keep queries
 small. rdf-fingerprinter, SHACL Play, void-generator, QSE and RDF2Graph all bind the class inside the

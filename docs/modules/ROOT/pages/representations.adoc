@@ -53,6 +53,11 @@ flowchart LR
     style M fill:#eff6ff,stroke:#1d4ed8,color:#172554
 ....
 
+How to read it: the endpoint (grey) is queried once, read-only, and the run saves `profile.json`
+(teal). Every output is made from that file, never from the endpoint, so any of them can be
+regenerated offline. The three panels are the readers: people (amber), agents (violet) and machines
+(blue); each box names what the output is for, with its format in brackets.
+
 [cols="1,2,3,3"]
 |===
 | For | What we produce (format) | Files | Content
