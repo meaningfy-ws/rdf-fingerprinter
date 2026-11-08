@@ -12,4 +12,4 @@
 
 ## 3. Release
 
-- [ ] 3.1 Version 3.6.0 and the changelog entry; release per AGENTS.md *Release authority*
+- [x] 3.1 Version 3.6.0 and the changelog entry; release per AGENTS.md *Release authority*
