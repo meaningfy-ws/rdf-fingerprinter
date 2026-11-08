@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.6.0] - 2026-11-08
+
+Two additions for library callers (OpenSpec change `graph-listing-and-typing`).
+
 ### Added
 - **`list_named_graphs(url, settings, *, sparql=None)`** in `fingerprint.service_layer.handlers`:
   the endpoint's named graphs, sorted, through the run's own discovery query; errors raise
