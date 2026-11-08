@@ -182,6 +182,27 @@ Feature: The fingerprint report and the command line
       When the report is generated with that package
       Then the page shows that number
 
+  Rule: Library callers can list an endpoint's named graphs
+
+    Scenario: Named graphs are listed
+      Given the endpoint also holds triples in the named graphs "http://example.org/g2" and "http://example.org/g1"
+      When a caller lists its named graphs
+      Then the listed graphs are "http://example.org/g1, http://example.org/g2"
+
+    Scenario: No named graphs
+      When a caller lists its named graphs
+      Then no graph is listed
+
+    Scenario: Listing an unreachable endpoint
+      Given the endpoint cannot be reached
+      When a caller tries to list its named graphs
+      Then "EndpointUnreachable" is raised
+
+    Scenario: The listing times out
+      Given the endpoint's graph listing times out
+      When a caller tries to list its named graphs
+      Then "QueryTimeout" is raised
+
   Rule: The profile is saved with the report
 
     @uc_b1_1
