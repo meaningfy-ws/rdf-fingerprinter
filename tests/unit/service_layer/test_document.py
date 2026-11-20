@@ -30,6 +30,13 @@ def test_iris_are_escaped_and_unwritable_ones_are_listed():
     assert bad in soup.find(id="caveats").get_text(" ")
 
 
+def test_the_header_carries_the_rdf_fingerprinter_mark_inline():
+    mark = document(people()).select_one("header.bar svg.logo-mark")
+    assert mark is not None
+    assert (mark["role"], mark["aria-label"]) == ("img", "RDF Fingerprinter")
+    assert not mark.find_all(attrs={"href": True}) and not mark.find_all(attrs={"src": True})
+
+
 # --- values the first tests left open (lean-test-suite 7.5) ---
 
 OWL = "http://www.w3.org/2002/07/owl#"
