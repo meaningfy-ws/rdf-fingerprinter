@@ -6,6 +6,13 @@ All notable changes to this project are documented in this file. The format is b
 
 ## [Unreleased]
 
+## [3.8.0] - 2026-11-21
+
+### Added
+- The HTML report shows the RDF Fingerprinter mark in its header, inline (the page stays
+  self-contained), navy in light mode and white in dark mode.
+- Docs: the RDF Fingerprinter logo in the README (the PyPI page) and on the docs home page.
+
 ## [3.7.1] - 2026-11-08
 
 ### Changed
