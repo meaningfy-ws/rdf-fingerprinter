@@ -9,12 +9,12 @@
 <title>{% block title %}{{ conf.title }}{% endblock %}</title>
 <style>
 :root {
-  --paper: #f6f7f5; --panel: #ffffff; --ink: #1d2422; --muted: #5c6764; --rule: #d8ddda; --accent: #1f6b73;
+  --paper: #f6f7f5; --panel: #ffffff; --ink: #1d2422; --muted: #5c6764; --rule: #d8ddda; --accent: #1f6b73; --brand: #212c4a;
   --chip-l: 36%; --chip-s: 52%;
   color-scheme: light dark;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --paper: #141a19; --panel: #1b2321; --ink: #e3e9e6; --muted: #98a4a0; --rule: #2d3734; --accent: #74c4cc;
+  :root { --paper: #141a19; --panel: #1b2321; --ink: #e3e9e6; --muted: #98a4a0; --rule: #2d3734; --accent: #74c4cc; --brand: #ffffff;
           --chip-l: 72%; --chip-s: 48%; }
 }
 * { box-sizing: border-box; }
@@ -27,6 +27,7 @@ a:hover { text-decoration: underline; }
 .bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center;
        padding: .7rem 1rem; background: var(--panel); border-bottom: 1px solid var(--rule); }
 .bar h1 { margin: 0; font-size: 1.05rem; font-weight: 650; }
+.bar .logo-mark { flex: none; color: var(--brand); }
 .bar h1 small { font-weight: 400; color: var(--muted); }
 .bar input[type=search] { flex: 1 1 14rem; max-width: 26rem; padding: .4rem .6rem; font: inherit; color: inherit;
        background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; }
