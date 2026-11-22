@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/meaningfy-ws/rdf-fingerprinter/master/docs/modules/ROOT/images/rdf-fingerprinter-logo-horizontal-white.svg">
+  <img src="https://raw.githubusercontent.com/meaningfy-ws/rdf-fingerprinter/master/docs/modules/ROOT/images/rdf-fingerprinter-logo-horizontal-on-light.svg" alt="RDF Fingerprinter" height="64">
+</picture>
+
 # RDF Fingerprinter
 
 [![PyPI version](https://img.shields.io/pypi/v/rdf-fingerprinter?color=teal&label=pypi)](https://pypi.org/project/rdf-fingerprinter/)

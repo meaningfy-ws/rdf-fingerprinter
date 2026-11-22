@@ -6,12 +6,12 @@
 <title>RDF fingerprint</title>
 <style>
 :root {
-  --paper: #f6f7f5; --panel: #ffffff; --ink: #1d2422; --muted: #5c6764; --rule: #d8ddda; --accent: #1f6b73;
+  --paper: #f6f7f5; --panel: #ffffff; --ink: #1d2422; --muted: #5c6764; --rule: #d8ddda; --accent: #1f6b73; --brand: #212c4a;
   --chip-l: 36%; --chip-s: 52%;
   color-scheme: light dark;
 }
 @media (prefers-color-scheme: dark) {
-  :root { --paper: #141a19; --panel: #1b2321; --ink: #e3e9e6; --muted: #98a4a0; --rule: #2d3734; --accent: #74c4cc;
+  :root { --paper: #141a19; --panel: #1b2321; --ink: #e3e9e6; --muted: #98a4a0; --rule: #2d3734; --accent: #74c4cc; --brand: #ffffff;
           --chip-l: 72%; --chip-s: 48%; }
 }
 * { box-sizing: border-box; }
@@ -24,6 +24,7 @@ a:hover { text-decoration: underline; }
 .bar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center;
        padding: .7rem 1rem; background: var(--panel); border-bottom: 1px solid var(--rule); }
 .bar h1 { margin: 0; font-size: 1.05rem; font-weight: 650; }
+.bar .logo-mark { flex: none; color: var(--brand); }
 .bar h1 small { font-weight: 400; color: var(--muted); }
 .bar input[type=search] { flex: 1 1 14rem; max-width: 26rem; padding: .4rem .6rem; font: inherit; color: inherit;
        background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; }
@@ -95,6 +96,7 @@ details.pitfall > summary { cursor: pointer; padding: .5rem .9rem; display: flex
 <body>
 
 <header class="bar">
+  <svg class="logo-mark" viewBox="0 0 100 100" width="28" height="28" role="img" aria-label="RDF Fingerprinter"><g transform="translate(-3.4 -8.4) rotate(-18 50 55)"><g fill="none" stroke="currentColor" stroke-width="5.5" stroke-linecap="round"><path d="M42 72 V48 A8 8 0 0 1 58 48 V64"/><path d="M32 82 V48 A18 18 0 0 1 68 48 V76"/><path d="M22 88 V48 A28 28 0 0 1 78 48 V84"/></g><g fill="currentColor"><circle cx="50" cy="56" r="6"/><circle cx="68" cy="76" r="6"/></g></g></svg>
   <h1>RDF fingerprint <small>http://fake/sparql</small></h1>
   <input id="q" type="search" placeholder="Search classes and properties" aria-label="Search classes and properties" hidden data-js>
   <span class="count" id="count" aria-live="polite">20 classes</span>
